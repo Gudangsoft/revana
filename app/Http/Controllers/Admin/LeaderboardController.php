@@ -37,11 +37,12 @@ class LeaderboardController extends Controller
                 $reviewer->total_points_earned = $reviewer->total_points_earned ?? 0;
                 $reviewer->current_points = $reviewer->available_points ?? 0;
                 
-                // Count rewards by tier
-                $reviewer->platinum_count = $completedRedemptions->where('reward.tier', 'Platinum')->count();
-                $reviewer->gold_count = $completedRedemptions->where('reward.tier', 'Gold')->count();
-                $reviewer->silver_count = $completedRedemptions->where('reward.tier', 'Silver')->count();
-                $reviewer->bronze_count = $completedRedemptions->where('reward.tier', 'Bronze')->count();
+                // Count rewards by tier - using pluck to get nested reward tier
+                $tiers = $completedRedemptions->pluck('reward.tier');
+                $reviewer->platinum_count = $tiers->filter(fn($tier) => $tier === 'Platinum')->count();
+                $reviewer->gold_count = $tiers->filter(fn($tier) => $tier === 'Gold')->count();
+                $reviewer->silver_count = $tiers->filter(fn($tier) => $tier === 'Silver')->count();
+                $reviewer->bronze_count = $tiers->filter(fn($tier) => $tier === 'Bronze')->count();
                 
                 // Calculate tier score for ranking
                 $reviewer->tier_score = 

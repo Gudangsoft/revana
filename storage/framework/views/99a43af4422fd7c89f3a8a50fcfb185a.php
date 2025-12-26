@@ -145,7 +145,7 @@
                             <small class="text-muted"><?php echo e($reviewer->email); ?></small>
                             <div class="d-md-none mt-1">
                                 <span class="badge bg-primary"><?php echo e($reviewer->total_reviews); ?> reviews</span>
-                                <span class="badge bg-info"><?php echo e(number_format($reviewer->current_points)); ?> pts</span>
+                                <span class="badge bg-info"><?php echo e(number_format($reviewer->available_points ?? $reviewer->current_points)); ?> pts</span>
                             </div>
                         </td>
                         <td class="text-center hide-mobile">
@@ -201,7 +201,7 @@
                             <div>
                                 <span class="badge bg-warning text-dark"><?php echo e(number_format($reviewer->current_points)); ?></span>
                             </div>
-                            <small class="text-muted">Earned: <?php echo e(number_format($reviewer->total_points_earned)); ?></small>
+                            <small class="text-muted">Total: <?php echo e(number_format($reviewer->total_points_earned)); ?></small>
                         </td>
                         <td class="hide-mobile">
                             <a href="<?php echo e(route('admin.reviewers.show', $reviewer)); ?>" class="btn btn-sm btn-info">
