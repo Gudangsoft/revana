@@ -13,6 +13,9 @@
     <a href="{{ route('reviewer.rewards.index') }}" class="nav-link">
         <i class="bi bi-gift"></i> Rewards
     </a>
+    <a href="{{ route('reviewer.profile.edit') }}" class="nav-link">
+        <i class="bi bi-person-circle"></i> My Profile
+    </a>
 @endsection
 
 @section('content')

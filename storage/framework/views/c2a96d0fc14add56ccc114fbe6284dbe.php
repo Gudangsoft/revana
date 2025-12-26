@@ -16,6 +16,9 @@
     <a href="<?php echo e(route('admin.reviewers.index')); ?>" class="nav-link">
         <i class="bi bi-people"></i> Reviewers
     </a>
+    <a href="<?php echo e(route('admin.leaderboard.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="<?php echo e(route('admin.redemptions.index')); ?>" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
     </a>
@@ -67,27 +70,30 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="hide-mobile">#</th>
                         <th>Jurnal</th>
-                        <th>Reviewer</th>
+                        <th class="hide-mobile">Reviewer</th>
                         <th>Status</th>
-                        <th>Assigned By</th>
-                        <th>Tanggal</th>
+                        <th class="hide-mobile">Assigned By</th>
+                        <th class="hide-mobile">Tanggal</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php $__currentLoopData = $assignments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $assignment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
-                        <td><?php echo e($assignment->id); ?></td>
+                        <td class="hide-mobile"><?php echo e($assignment->id); ?></td>
                         <td>
-                            <div class="fw-bold"><?php echo e(Str::limit($assignment->journal->title, 50)); ?></div>
-                            <small class="text-muted">
+                            <div class="fw-bold"><?php echo e(Str::limit($assignment->journal->title, 40)); ?></div>
+                            <small class="text-muted d-block d-md-inline">
                                 <span class="badge bg-secondary"><?php echo e($assignment->journal->accreditation); ?></span>
                                 <?php echo e($assignment->journal->points); ?> pts
                             </small>
+                            <div class="d-md-none mt-1">
+                                <small class="text-muted"><i class="bi bi-person"></i> <?php echo e($assignment->reviewer->name); ?></small>
+                            </div>
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             <div><?php echo e($assignment->reviewer->name); ?></div>
                             <small class="text-muted"><?php echo e($assignment->reviewer->email); ?></small>
                         </td>
@@ -114,10 +120,10 @@
                                 </span>
                             <?php endif; ?>
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             <small><?php echo e($assignment->assignedBy->name); ?></small>
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             <small><?php echo e($assignment->created_at->format('d M Y')); ?></small>
                             <br>
                             <small class="text-muted"><?php echo e($assignment->created_at->diffForHumans()); ?></small>

@@ -19,6 +19,18 @@ class User extends Authenticatable
         'total_points',
         'available_points',
         'completed_reviews',
+        'phone',
+        'institution',
+        'position',
+        'education_level',
+        'specialization',
+        'address',
+        'nidn',
+        'google_scholar',
+        'sinta_id',
+        'scopus_id',
+        'bio',
+        'photo',
     ];
 
     protected $hidden = [

@@ -13,6 +13,7 @@ use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
 use App\Http\Controllers\Reviewer\RewardController;
+use App\Http\Controllers\Reviewer\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -92,5 +93,9 @@ Route::middleware('auth')->group(function () {
         // Rewards
         Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
         Route::post('/rewards/{reward}/redeem', [RewardController::class, 'redeem'])->name('rewards.redeem');
+        
+        // Profile
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     });
 });
