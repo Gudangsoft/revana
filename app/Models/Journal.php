@@ -18,6 +18,8 @@ class Journal extends Model
         'publisher',
         'marketing',
         'pic',
+        'author_name',
+        'turnitin_link',
     ];
 
     protected static function boot()

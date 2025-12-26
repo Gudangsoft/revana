@@ -28,6 +28,8 @@ class JournalController extends Controller
             'publisher' => 'nullable|string|max:255',
             'marketing' => 'nullable|string|max:255',
             'pic' => 'nullable|string|max:255',
+            'author_name' => 'nullable|string|max:255',
+            'turnitin_link' => 'nullable|url',
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -52,6 +54,8 @@ class JournalController extends Controller
             'publisher' => 'nullable|string|max:255',
             'marketing' => 'nullable|string|max:255',
             'pic' => 'nullable|string|max:255',
+            'author_name' => 'nullable|string|max:255',
+            'turnitin_link' => 'nullable|url',
         ]);
 
         $journal->update($validated);

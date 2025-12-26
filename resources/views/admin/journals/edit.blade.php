@@ -100,6 +100,26 @@
                         @enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Nama Author</label>
+                        <input type="text" class="form-control @error('author_name') is-invalid @enderror" 
+                               name="author_name" value="{{ old('author_name', $journal->author_name) }}" 
+                               placeholder="Nama penulis jurnal">
+                        @error('author_name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Link Turnitin</label>
+                        <input type="url" class="form-control @error('turnitin_link') is-invalid @enderror" 
+                               name="turnitin_link" value="{{ old('turnitin_link', $journal->turnitin_link) }}" 
+                               placeholder="https://...">
+                        @error('turnitin_link')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Update
