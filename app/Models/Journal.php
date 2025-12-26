@@ -15,6 +15,9 @@ class Journal extends Model
         'accreditation',
         'points',
         'created_by',
+        'publisher',
+        'marketing',
+        'pic',
     ];
 
     protected static function boot()

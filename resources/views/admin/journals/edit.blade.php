@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Jurnal - REVANA')
-@section('page-title', 'Tambah Jurnal Baru')
+@section('title', 'Edit Jurnal - REVANA')
+@section('page-title', 'Edit Jurnal')
 
 @section('sidebar')
     <a href="{{ route('admin.dashboard') }}" class="nav-link">
@@ -26,16 +26,17 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-plus-circle"></i> Form Tambah Jurnal
+                <i class="bi bi-pencil-square"></i> Form Edit Jurnal
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.journals.store') }}" method="POST">
+                <form action="{{ route('admin.journals.update', $journal) }}" method="POST">
                     @csrf
+                    @method('PUT')
 
                     <div class="mb-3">
                         <label class="form-label">Judul Jurnal <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('title') is-invalid @enderror" 
-                               name="title" value="{{ old('title') }}" required>
+                               name="title" value="{{ old('title', $journal->title) }}" required>
                         @error('title')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -44,7 +45,7 @@
                     <div class="mb-3">
                         <label class="form-label">Link Jurnal <span class="text-danger">*</span></label>
                         <input type="url" class="form-control @error('link') is-invalid @enderror" 
-                               name="link" value="{{ old('link') }}" 
+                               name="link" value="{{ old('link', $journal->link) }}" 
                                placeholder="https://..." required>
                         @error('link')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -56,12 +57,12 @@
                         <select class="form-select @error('accreditation') is-invalid @enderror" 
                                 name="accreditation" required>
                             <option value="">Pilih Akreditasi</option>
-                            <option value="SINTA 1" {{ old('accreditation') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1 (100 points)</option>
-                            <option value="SINTA 2" {{ old('accreditation') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2 (80 points)</option>
-                            <option value="SINTA 3" {{ old('accreditation') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3 (60 points)</option>
-                            <option value="SINTA 4" {{ old('accreditation') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4 (40 points)</option>
-                            <option value="SINTA 5" {{ old('accreditation') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5 (20 points)</option>
-                            <option value="SINTA 6" {{ old('accreditation') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6 (10 points)</option>
+                            <option value="SINTA 1" {{ old('accreditation', $journal->accreditation) == 'SINTA 1' ? 'selected' : '' }}>SINTA 1 (100 points)</option>
+                            <option value="SINTA 2" {{ old('accreditation', $journal->accreditation) == 'SINTA 2' ? 'selected' : '' }}>SINTA 2 (80 points)</option>
+                            <option value="SINTA 3" {{ old('accreditation', $journal->accreditation) == 'SINTA 3' ? 'selected' : '' }}>SINTA 3 (60 points)</option>
+                            <option value="SINTA 4" {{ old('accreditation', $journal->accreditation) == 'SINTA 4' ? 'selected' : '' }}>SINTA 4 (40 points)</option>
+                            <option value="SINTA 5" {{ old('accreditation', $journal->accreditation) == 'SINTA 5' ? 'selected' : '' }}>SINTA 5 (20 points)</option>
+                            <option value="SINTA 6" {{ old('accreditation', $journal->accreditation) == 'SINTA 6' ? 'selected' : '' }}>SINTA 6 (10 points)</option>
                         </select>
                         @error('accreditation')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -72,7 +73,7 @@
                     <div class="mb-3">
                         <label class="form-label">Terbitan</label>
                         <input type="text" class="form-control @error('publisher') is-invalid @enderror" 
-                               name="publisher" value="{{ old('publisher') }}" 
+                               name="publisher" value="{{ old('publisher', $journal->publisher) }}" 
                                placeholder="Nama penerbit jurnal">
                         @error('publisher')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -82,7 +83,7 @@
                     <div class="mb-3">
                         <label class="form-label">Marketing</label>
                         <input type="text" class="form-control @error('marketing') is-invalid @enderror" 
-                               name="marketing" value="{{ old('marketing') }}" 
+                               name="marketing" value="{{ old('marketing', $journal->marketing) }}" 
                                placeholder="Nama marketing">
                         @error('marketing')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -92,7 +93,7 @@
                     <div class="mb-3">
                         <label class="form-label">PIC (Person In Charge)</label>
                         <input type="text" class="form-control @error('pic') is-invalid @enderror" 
-                               name="pic" value="{{ old('pic') }}" 
+                               name="pic" value="{{ old('pic', $journal->pic) }}" 
                                placeholder="Nama PIC">
                         @error('pic')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -101,7 +102,7 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i> Simpan
+                            <i class="bi bi-save"></i> Update
                         </button>
                         <a href="{{ route('admin.journals.index') }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal

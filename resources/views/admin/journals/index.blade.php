@@ -40,6 +40,9 @@
                                 <th>Judul</th>
                                 <th>Akreditasi</th>
                                 <th>Points</th>
+                                <th class="hide-mobile">Terbitan</th>
+                                <th class="hide-mobile">Marketing</th>
+                                <th class="hide-mobile">PIC</th>
                                 <th>Dibuat Oleh</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
@@ -58,6 +61,27 @@
                                 </td>
                                 <td><span class="badge bg-info">{{ $journal->accreditation }}</span></td>
                                 <td><span class="badge bg-success">{{ $journal->points }} pts</span></td>
+                                <td class="hide-mobile">
+                                    @if($journal->publisher)
+                                        <small>{{ Str::limit($journal->publisher, 25) }}</small>
+                                    @else
+                                        <small class="text-muted">-</small>
+                                    @endif
+                                </td>
+                                <td class="hide-mobile">
+                                    @if($journal->marketing)
+                                        <small>{{ Str::limit($journal->marketing, 25) }}</small>
+                                    @else
+                                        <small class="text-muted">-</small>
+                                    @endif
+                                </td>
+                                <td class="hide-mobile">
+                                    @if($journal->pic)
+                                        <small>{{ Str::limit($journal->pic, 25) }}</small>
+                                    @else
+                                        <small class="text-muted">-</small>
+                                    @endif
+                                </td>
                                 <td>{{ $journal->creator->name }}</td>
                                 <td>{{ $journal->created_at->format('d M Y') }}</td>
                                 <td>
@@ -75,7 +99,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">Belum ada data jurnal</td>
+                                <td colspan="10" class="text-center text-muted">Belum ada data jurnal</td>
                             </tr>
                             @endforelse
                         </tbody>

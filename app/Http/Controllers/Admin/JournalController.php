@@ -25,6 +25,9 @@ class JournalController extends Controller
             'title' => 'required|string|max:255',
             'link' => 'required|url',
             'accreditation' => 'required|in:SINTA 1,SINTA 2,SINTA 3,SINTA 4,SINTA 5,SINTA 6',
+            'publisher' => 'nullable|string|max:255',
+            'marketing' => 'nullable|string|max:255',
+            'pic' => 'nullable|string|max:255',
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -46,6 +49,9 @@ class JournalController extends Controller
             'title' => 'required|string|max:255',
             'link' => 'required|url',
             'accreditation' => 'required|in:SINTA 1,SINTA 2,SINTA 3,SINTA 4,SINTA 5,SINTA 6',
+            'publisher' => 'nullable|string|max:255',
+            'marketing' => 'nullable|string|max:255',
+            'pic' => 'nullable|string|max:255',
         ]);
 
         $journal->update($validated);
