@@ -8,7 +8,7 @@
         <i class="bi bi-speedometer2"></i> Dashboard
     </a>
     <a href="{{ route('admin.journals.index') }}" class="nav-link">
-        <i class="bi bi-journal-text"></i> Journals
+        <i class="bi bi-journal-text"></i> Jurnal
     </a>
     <a href="{{ route('admin.assignments.index') }}" class="nav-link">
         <i class="bi bi-clipboard-check"></i> Review Assignments
@@ -24,6 +24,15 @@
     </a>
     <a href="{{ route('admin.points.index') }}" class="nav-link">
         <i class="bi bi-coin"></i> Point Management
+    </a>
+    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
+        <i class="bi bi-trophy"></i> Reward Management
+    </a>
+    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
+        <i class="bi bi-megaphone"></i> Marketing
+    </a>
+    <a href="{{ route('admin.pics.index') }}" class="nav-link">
+        <i class="bi bi-person-badge"></i> PIC
     </a>
 @endsection
 
