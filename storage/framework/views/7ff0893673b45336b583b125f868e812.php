@@ -40,6 +40,9 @@
                                 <th>Judul</th>
                                 <th>Akreditasi</th>
                                 <th>Points</th>
+                                <th class="hide-mobile">Terbitan</th>
+                                <th class="hide-mobile">Marketing</th>
+                                <th class="hide-mobile">PIC</th>
                                 <th>Dibuat Oleh</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
@@ -58,6 +61,27 @@
                                 </td>
                                 <td><span class="badge bg-info"><?php echo e($journal->accreditation); ?></span></td>
                                 <td><span class="badge bg-success"><?php echo e($journal->points); ?> pts</span></td>
+                                <td class="hide-mobile">
+                                    <?php if($journal->publisher): ?>
+                                        <small><?php echo e(Str::limit($journal->publisher, 25)); ?></small>
+                                    <?php else: ?>
+                                        <small class="text-muted">-</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="hide-mobile">
+                                    <?php if($journal->marketing): ?>
+                                        <small><?php echo e(Str::limit($journal->marketing, 25)); ?></small>
+                                    <?php else: ?>
+                                        <small class="text-muted">-</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="hide-mobile">
+                                    <?php if($journal->pic): ?>
+                                        <small><?php echo e(Str::limit($journal->pic, 25)); ?></small>
+                                    <?php else: ?>
+                                        <small class="text-muted">-</small>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo e($journal->creator->name); ?></td>
                                 <td><?php echo e($journal->created_at->format('d M Y')); ?></td>
                                 <td>
@@ -75,7 +99,7 @@
                             </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
-                                <td colspan="7" class="text-center text-muted">Belum ada data jurnal</td>
+                                <td colspan="10" class="text-center text-muted">Belum ada data jurnal</td>
                             </tr>
                             <?php endif; ?>
                         </tbody>

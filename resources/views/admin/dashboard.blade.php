@@ -160,6 +160,79 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-earmark-spreadsheet"></i> Laporan Jurnal Selesai Direview</span>
+                <div>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle"></i> Total <strong>{{ $totalCompletedReviews }}</strong> jurnal telah selesai direview dan disetujui.
+                    Menampilkan 20 data terbaru.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>No</th>
+                                <th>Judul Jurnal</th>
+                                <th>Akreditasi</th>
+                                <th>Points</th>
+                                <th class="hide-mobile">Terbitan</th>
+                                <th>Reviewer</th>
+                                <th class="hide-mobile">Institusi</th>
+                                <th>Hasil</th>
+                                <th>Tanggal Selesai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($completedReviews as $review)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    <strong>{{ Str::limit($review->journal->title, 40) }}</strong>
+                                </td>
+                                <td><span class="badge bg-info">{{ $review->journal->accreditation }}</span></td>
+                                <td><span class="badge bg-success">{{ $review->journal->points }} pts</span></td>
+                                <td class="hide-mobile">
+                                    <small>{{ $review->journal->publisher ?? '-' }}</small>
+                                </td>
+                                <td>{{ Str::limit($review->reviewer->name, 25) }}</td>
+                                <td class="hide-mobile">
+                                    <small>{{ Str::limit($review->reviewer->institution ?? '-', 25) }}</small>
+                                </td>
+                                <td>
+                                    @if($review->reviewResult)
+                                        <span class="badge bg-primary">{{ $review->reviewResult->recommendation }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td><small>{{ $review->approved_at ? $review->approved_at->format('d M Y') : '-' }}</small></td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0">Belum ada jurnal yang selesai direview</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Assignment History -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-clock-history"></i> Review Terbaru</span>
                 <a href="{{ route('admin.assignments.index') }}" class="btn btn-sm btn-outline-primary">
                     Lihat Semua
@@ -216,6 +289,57 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="exportModalLabel">
+                    <i class="bi bi-file-earmark-excel"></i> Export Laporan ke Excel
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.export.completed.reviews') }}" method="GET">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Export semua jurnal yang telah selesai direview dan disetujui. Anda bisa filter berdasarkan tanggal atau export semua data.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Mulai (Opsional)</label>
+                        <input type="date" class="form-control" name="start_date">
+                        <small class="text-muted">Kosongkan untuk export semua data</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Akhir (Opsional)</label>
+                        <input type="date" class="form-control" name="end_date">
+                        <small class="text-muted">Kosongkan untuk export semua data</small>
+                    </div>
+
+                    <div class="alert alert-warning mb-0">
+                        <strong>Data yang akan diexport:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Judul Jurnal & Link</li>
+                            <li>Akreditasi & Points</li>
+                            <li>Terbitan, Marketing, PIC</li>
+                            <li>Data Reviewer</li>
+                            <li>Hasil & Komentar Review</li>
+                            <li>Tanggal-tanggal penting</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-download"></i> Download Excel
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

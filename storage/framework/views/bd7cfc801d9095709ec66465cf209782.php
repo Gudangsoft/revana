@@ -1,7 +1,7 @@
 
 
-<?php $__env->startSection('title', 'Tambah Jurnal - REVANA'); ?>
-<?php $__env->startSection('page-title', 'Tambah Jurnal Baru'); ?>
+<?php $__env->startSection('title', 'Edit Jurnal - REVANA'); ?>
+<?php $__env->startSection('page-title', 'Edit Jurnal'); ?>
 
 <?php $__env->startSection('sidebar'); ?>
     <a href="<?php echo e(route('admin.dashboard')); ?>" class="nav-link">
@@ -26,11 +26,12 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-plus-circle"></i> Form Tambah Jurnal
+                <i class="bi bi-pencil-square"></i> Form Edit Jurnal
             </div>
             <div class="card-body">
-                <form action="<?php echo e(route('admin.journals.store')); ?>" method="POST">
+                <form action="<?php echo e(route('admin.journals.update', $journal)); ?>" method="POST">
                     <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
 
                     <div class="mb-3">
                         <label class="form-label">Judul Jurnal <span class="text-danger">*</span></label>
@@ -42,7 +43,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="title" value="<?php echo e(old('title')); ?>" required>
+                               name="title" value="<?php echo e(old('title', $journal->title)); ?>" required>
                         <?php $__errorArgs = ['title'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -65,7 +66,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="link" value="<?php echo e(old('link')); ?>" 
+                               name="link" value="<?php echo e(old('link', $journal->link)); ?>" 
                                placeholder="https://..." required>
                         <?php $__errorArgs = ['link'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -91,12 +92,12 @@ endif;
 unset($__errorArgs, $__bag); ?>" 
                                 name="accreditation" required>
                             <option value="">Pilih Akreditasi</option>
-                            <option value="SINTA 1" <?php echo e(old('accreditation') == 'SINTA 1' ? 'selected' : ''); ?>>SINTA 1 (100 points)</option>
-                            <option value="SINTA 2" <?php echo e(old('accreditation') == 'SINTA 2' ? 'selected' : ''); ?>>SINTA 2 (80 points)</option>
-                            <option value="SINTA 3" <?php echo e(old('accreditation') == 'SINTA 3' ? 'selected' : ''); ?>>SINTA 3 (60 points)</option>
-                            <option value="SINTA 4" <?php echo e(old('accreditation') == 'SINTA 4' ? 'selected' : ''); ?>>SINTA 4 (40 points)</option>
-                            <option value="SINTA 5" <?php echo e(old('accreditation') == 'SINTA 5' ? 'selected' : ''); ?>>SINTA 5 (20 points)</option>
-                            <option value="SINTA 6" <?php echo e(old('accreditation') == 'SINTA 6' ? 'selected' : ''); ?>>SINTA 6 (10 points)</option>
+                            <option value="SINTA 1" <?php echo e(old('accreditation', $journal->accreditation) == 'SINTA 1' ? 'selected' : ''); ?>>SINTA 1 (100 points)</option>
+                            <option value="SINTA 2" <?php echo e(old('accreditation', $journal->accreditation) == 'SINTA 2' ? 'selected' : ''); ?>>SINTA 2 (80 points)</option>
+                            <option value="SINTA 3" <?php echo e(old('accreditation', $journal->accreditation) == 'SINTA 3' ? 'selected' : ''); ?>>SINTA 3 (60 points)</option>
+                            <option value="SINTA 4" <?php echo e(old('accreditation', $journal->accreditation) == 'SINTA 4' ? 'selected' : ''); ?>>SINTA 4 (40 points)</option>
+                            <option value="SINTA 5" <?php echo e(old('accreditation', $journal->accreditation) == 'SINTA 5' ? 'selected' : ''); ?>>SINTA 5 (20 points)</option>
+                            <option value="SINTA 6" <?php echo e(old('accreditation', $journal->accreditation) == 'SINTA 6' ? 'selected' : ''); ?>>SINTA 6 (10 points)</option>
                         </select>
                         <?php $__errorArgs = ['accreditation'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -121,7 +122,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="publisher" value="<?php echo e(old('publisher')); ?>" 
+                               name="publisher" value="<?php echo e(old('publisher', $journal->publisher)); ?>" 
                                placeholder="Nama penerbit jurnal">
                         <?php $__errorArgs = ['publisher'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -145,7 +146,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="marketing" value="<?php echo e(old('marketing')); ?>" 
+                               name="marketing" value="<?php echo e(old('marketing', $journal->marketing)); ?>" 
                                placeholder="Nama marketing">
                         <?php $__errorArgs = ['marketing'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -169,7 +170,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="pic" value="<?php echo e(old('pic')); ?>" 
+                               name="pic" value="<?php echo e(old('pic', $journal->pic)); ?>" 
                                placeholder="Nama PIC">
                         <?php $__errorArgs = ['pic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -185,7 +186,7 @@ unset($__errorArgs, $__bag); ?>
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i> Simpan
+                            <i class="bi bi-save"></i> Update
                         </button>
                         <a href="<?php echo e(route('admin.journals.index')); ?>" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
@@ -221,4 +222,4 @@ unset($__errorArgs, $__bag); ?>
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\LPKD-APJI\REVANA\resources\views/admin/journals/create.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\LPKD-APJI\REVANA\resources\views/admin/journals/edit.blade.php ENDPATH**/ ?>
