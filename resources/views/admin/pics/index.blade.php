@@ -28,10 +28,10 @@
     <a href="{{ route('admin.rewards.index') }}" class="nav-link">
         <i class="bi bi-trophy"></i> Reward Management
     </a>
-    <a href="{{ route('admin.PICs.index') }}" class="nav-link active">
-        <i class="bi bi-person-badge"></i> PIC
+    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
+        <i class="bi bi-megaphone"></i> Marketing
     </a>
-    <a href="{{ route('admin.pics.index') }}" class="nav-link">
+    <a href="{{ route('admin.pics.index') }}" class="nav-link active">
         <i class="bi bi-person-badge"></i> PIC
     </a>
 @endsection

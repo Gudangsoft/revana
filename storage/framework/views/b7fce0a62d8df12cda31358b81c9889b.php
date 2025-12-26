@@ -28,6 +28,12 @@
     <a href="<?php echo e(route('admin.rewards.index')); ?>" class="nav-link">
         <i class="bi bi-trophy"></i> Reward Management
     </a>
+    <a href="<?php echo e(route('admin.marketings.index')); ?>" class="nav-link">
+        <i class="bi bi-megaphone"></i> Marketing
+    </a>
+    <a href="<?php echo e(route('admin.pics.index')); ?>" class="nav-link">
+        <i class="bi bi-person-badge"></i> PIC
+    </a>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -275,5 +281,6 @@ function filterRedemptions(status) {
 </script>
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
+
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\LPKD-APJI\REVANA\resources\views/admin/redemptions/index.blade.php ENDPATH**/ ?>

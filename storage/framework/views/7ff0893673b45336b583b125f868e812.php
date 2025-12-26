@@ -19,6 +19,12 @@
     <a href="<?php echo e(route('admin.redemptions.index')); ?>" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
     </a>
+    <a href="<?php echo e(route('admin.marketings.index')); ?>" class="nav-link">
+        <i class="bi bi-megaphone"></i> Marketing
+    </a>
+    <a href="<?php echo e(route('admin.pics.index')); ?>" class="nav-link">
+        <i class="bi bi-person-badge"></i> PIC
+    </a>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -115,5 +121,6 @@
     </div>
 </div>
 <?php $__env->stopSection(); ?>
+
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\LPKD-APJI\REVANA\resources\views/admin/journals/index.blade.php ENDPATH**/ ?>
