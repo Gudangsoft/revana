@@ -14,6 +14,7 @@ use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
 use App\Http\Controllers\Reviewer\RewardController;
 use App\Http\Controllers\Reviewer\ProfileController;
+use App\Http\Controllers\Reviewer\LeaderboardController as ReviewerLeaderboardController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -97,5 +98,8 @@ Route::middleware('auth')->group(function () {
         // Profile
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        
+        // Leaderboard
+        Route::get('/leaderboard', [ReviewerLeaderboardController::class, 'index'])->name('leaderboard.index');
     });
 });

@@ -13,6 +13,9 @@
     <a href="<?php echo e(route('reviewer.rewards.index')); ?>" class="nav-link active">
         <i class="bi bi-gift"></i> Rewards
     </a>
+    <a href="<?php echo e(route('reviewer.profile.edit')); ?>" class="nav-link">
+        <i class="bi bi-person-circle"></i> My Profile
+    </a>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
