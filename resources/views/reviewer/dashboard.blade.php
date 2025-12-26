@@ -126,6 +126,74 @@
     </div>
 </div>
 
+<!-- Recent Tasks -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history"></i> Tugas Terbaru</span>
+                <a href="{{ route('reviewer.tasks.index') }}" class="btn btn-sm btn-outline-primary">
+                    Lihat Semua
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Jurnal</th>
+                                <th>Akreditasi</th>
+                                <th>Points</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($recentAssignments as $assignment)
+                            <tr>
+                                <td>
+                                    <strong>{{ Str::limit($assignment->journal->title, 50) }}</strong>
+                                </td>
+                                <td>{{ $assignment->journal->accreditation }}</td>
+                                <td><span class="badge bg-info">{{ $assignment->journal->points }} pts</span></td>
+                                <td>
+                                    @php
+                                        $statusColors = [
+                                            'PENDING' => 'warning',
+                                            'ACCEPTED' => 'info',
+                                            'REJECTED' => 'danger',
+                                            'ON_PROGRESS' => 'primary',
+                                            'SUBMITTED' => 'success',
+                                            'APPROVED' => 'success',
+                                            'REVISION' => 'secondary'
+                                        ];
+                                        $color = $statusColors[$assignment->status] ?? 'secondary';
+                                    @endphp
+                                    <span class="badge bg-{{ $color }}">{{ $assignment->status }}</span>
+                                </td>
+                                <td>{{ $assignment->created_at->format('d M Y') }}</td>
+                                <td>
+                                    <a href="{{ route('reviewer.tasks.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Detail
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    <i class="bi bi-inbox"></i> Belum ada tugas
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Charts Section -->
 <div class="row mt-4">
     <!-- Reviews Per Month Chart -->
@@ -198,71 +266,6 @@
 </div>
 @endif
 
-<!-- Recent Tasks -->
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history"></i> Tugas Terbaru</span>
-                <a href="{{ route('reviewer.tasks.index') }}" class="btn btn-sm btn-outline-primary">
-                    Lihat Semua
-                </a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Jurnal</th>
-                                <th>Akreditasi</th>
-                                <th>Points</th>
-                                <th>Status</th>
-                                <th>Tanggal</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentAssignments as $assignment)
-                            <tr>
-                                <td>
-                                    <strong>{{ Str::limit($assignment->journal->title, 50) }}</strong>
-                                </td>
-                                <td>{{ $assignment->journal->accreditation }}</td>
-                                <td><span class="badge bg-info">{{ $assignment->journal->points }} pts</span></td>
-                                <td>
-                                    @php
-                                        $statusColors = [
-                                            'PENDING' => 'warning',
-                                            'ACCEPTED' => 'info',
-                                            'REJECTED' => 'danger',
-                                            'ON_PROGRESS' => 'primary',
-                                            'SUBMITTED' => 'success',
-                                            'APPROVED' => 'success',
-                                            'REVISION' => 'secondary'
-                                        ];
-                                        $color = $statusColors[$assignment->status] ?? 'secondary';
-                                    @endphp
-                                    <span class="badge bg-{{ $color }}">{{ $assignment->status }}</span>
-                                </td>
-                                <td>{{ $assignment->created_at->format('d M Y') }}</td>
-                                <td>
-                                    <a href="{{ route('reviewer.tasks.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> Detail
-                                    </a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">Belum ada tugas</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
