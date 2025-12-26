@@ -101,10 +101,10 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Nama Author</label>
+                        <label class="form-label">User Author</label>
                         <input type="text" class="form-control @error('author_name') is-invalid @enderror" 
                                name="author_name" value="{{ old('author_name', $journal->author_name) }}" 
-                               placeholder="Nama penulis jurnal">
+                               placeholder="User author jurnal">
                         @error('author_name')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
