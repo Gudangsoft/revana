@@ -22,6 +22,9 @@
     <a href="<?php echo e(route('admin.points.index')); ?>" class="nav-link active">
         <i class="bi bi-coin"></i> Point Management
     </a>
+    <a href="<?php echo e(route('admin.rewards.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy"></i> Reward Management
+    </a>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>

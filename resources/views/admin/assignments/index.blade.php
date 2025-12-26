@@ -65,27 +65,30 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="hide-mobile">#</th>
                         <th>Jurnal</th>
-                        <th>Reviewer</th>
+                        <th class="hide-mobile">Reviewer</th>
                         <th>Status</th>
-                        <th>Assigned By</th>
-                        <th>Tanggal</th>
+                        <th class="hide-mobile">Assigned By</th>
+                        <th class="hide-mobile">Tanggal</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($assignments as $assignment)
                     <tr>
-                        <td>{{ $assignment->id }}</td>
+                        <td class="hide-mobile">{{ $assignment->id }}</td>
                         <td>
-                            <div class="fw-bold">{{ Str::limit($assignment->journal->title, 50) }}</div>
-                            <small class="text-muted">
+                            <div class="fw-bold">{{ Str::limit($assignment->journal->title, 40) }}</div>
+                            <small class="text-muted d-block d-md-inline">
                                 <span class="badge bg-secondary">{{ $assignment->journal->accreditation }}</span>
                                 {{ $assignment->journal->points }} pts
                             </small>
+                            <div class="d-md-none mt-1">
+                                <small class="text-muted"><i class="bi bi-person"></i> {{ $assignment->reviewer->name }}</small>
+                            </div>
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             <div>{{ $assignment->reviewer->name }}</div>
                             <small class="text-muted">{{ $assignment->reviewer->email }}</small>
                         </td>
@@ -112,10 +115,10 @@
                                 </span>
                             @endif
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             <small>{{ $assignment->assignedBy->name }}</small>
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             <small>{{ $assignment->created_at->format('d M Y') }}</small>
                             <br>
                             <small class="text-muted">{{ $assignment->created_at->diffForHumans() }}</small>
