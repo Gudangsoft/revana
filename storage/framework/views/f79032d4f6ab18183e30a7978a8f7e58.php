@@ -18,6 +18,7 @@
             --danger-color: #ef4444;
             --warning-color: #f59e0b;
             --info-color: #3b82f6;
+            --sidebar-width: 250px;
         }
 
         body {
@@ -25,6 +26,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* Sidebar Styles */
         .sidebar {
             min-height: 100vh;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -32,9 +34,14 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 250px;
-            z-index: 1000;
-            transition: all 0.3s;
+            width: var(--sidebar-width);
+            z-index: 1040;
+            transition: transform 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .sidebar.hide-mobile {
+            transform: translateX(-100%);
         }
 
         .sidebar .logo {
@@ -50,6 +57,7 @@
             padding: 0.75rem 1.5rem;
             transition: all 0.3s;
             border-left: 3px solid transparent;
+            white-space: nowrap;
         }
 
         .sidebar .nav-link:hover,
@@ -64,15 +72,53 @@
             width: 20px;
         }
 
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1050;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1030;
+        }
+
+        .mobile-overlay.show {
+            display: block;
+        }
+
+        /* Main Content */
         .main-content {
-            margin-left: 250px;
+            margin-left: var(--sidebar-width);
             padding: 2rem;
+            transition: margin-left 0.3s ease-in-out;
         }
 
         .navbar {
             background: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .navbar-brand {
+            font-size: 1.1rem;
         }
 
         .card {
@@ -121,6 +167,11 @@
             font-weight: 500;
         }
 
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
         .table {
             background: white;
         }
@@ -131,12 +182,158 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
+
+        /* Responsive table wrapper */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show-mobile {
+                transform: translateX(0);
+            }
+
+            .mobile-menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 4rem;
+            }
+
+            .navbar {
+                margin-bottom: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 0.95rem;
+            }
+
+            .card-header {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            /* Mobile friendly buttons */
+            .btn-group-sm > .btn,
+            .btn-sm {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            /* Stack action buttons on mobile */
+            .d-flex.gap-2 {
+                flex-wrap: wrap;
+            }
+
+            /* Make stats cards stack better */
+            .col-md-3,
+            .col-md-4,
+            .col-md-6 {
+                margin-bottom: 1rem;
+            }
+
+            /* Reduce table font size on mobile */
+            .table {
+                font-size: 0.85rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem 0.35rem;
+            }
+
+            /* Hide less important columns on mobile */
+            .table .hide-mobile {
+                display: none;
+            }
+
+            /* Compact nav tabs */
+            .nav-tabs .nav-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .nav-tabs .badge {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+                padding-top: 3.5rem;
+            }
+
+            .navbar {
+                padding: 0.5rem;
+            }
+
+            .navbar-brand {
+                font-size: 0.85rem;
+            }
+
+            .card {
+                margin-bottom: 1rem;
+            }
+
+            h1, .h1 {
+                font-size: 1.5rem;
+            }
+
+            h2, .h2 {
+                font-size: 1.3rem;
+            }
+
+            h3, .h3 {
+                font-size: 1.1rem;
+            }
+
+            /* Even more compact tables */
+            .table {
+                font-size: 0.75rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.4rem 0.25rem;
+            }
+
+            /* Single column for forms on mobile */
+            .row.mb-3 .col-md-4,
+            .row.mb-3 .col-md-8 {
+                margin-bottom: 0.5rem;
+            }
+        }
     </style>
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button class="mobile-menu-toggle" id="menuToggle" onclick="toggleMobileMenu()">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="logo">
             <i class="bi bi-journal-check"></i> REVANA
         </div>
@@ -151,15 +348,19 @@
         <nav class="navbar navbar-expand-lg navbar-light rounded">
             <div class="container-fluid">
                 <span class="navbar-brand mb-0 h1"><?php echo $__env->yieldContent('page-title', 'Dashboard'); ?></span>
-                <div class="ms-auto d-flex align-items-center">
-                    <span class="me-3">
+                <div class="ms-auto d-flex align-items-center flex-wrap gap-2">
+                    <span class="me-2 d-none d-md-inline">
                         <i class="bi bi-person-circle"></i> <?php echo e(auth()->user()->name); ?>
+
+                    </span>
+                    <span class="me-2 d-md-none">
+                        <i class="bi bi-person-circle"></i> <?php echo e(Str::limit(auth()->user()->name, 15)); ?>
 
                     </span>
                     <form action="<?php echo e(route('logout')); ?>" method="POST" class="d-inline">
                         <?php echo csrf_field(); ?>
                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-box-arrow-right"></i> Logout
+                            <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
                         </button>
                     </form>
                 </div>
@@ -201,6 +402,38 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Mobile Menu Script -->
+    <script>
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            
+            sidebar.classList.toggle('show-mobile');
+            overlay.classList.toggle('show');
+        }
+
+        // Close menu when clicking on a link
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        toggleMobileMenu();
+                    }
+                });
+            });
+
+            // Close menu when resizing to desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991) {
+                    document.getElementById('sidebar').classList.remove('show-mobile');
+                    document.getElementById('mobileOverlay').classList.remove('show');
+                }
+            });
+        });
+    </script>
+    
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
