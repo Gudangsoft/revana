@@ -141,7 +141,7 @@
                             <small class="text-muted">{{ $reviewer->email }}</small>
                             <div class="d-md-none mt-1">
                                 <span class="badge bg-primary">{{ $reviewer->total_reviews }} reviews</span>
-                                <span class="badge bg-info">{{ number_format($reviewer->current_points) }} pts</span>
+                                <span class="badge bg-info">{{ number_format($reviewer->available_points ?? $reviewer->current_points) }} pts</span>
                             </div>
                         </td>
                         <td class="text-center hide-mobile">
@@ -192,7 +192,7 @@
                             <div>
                                 <span class="badge bg-warning text-dark">{{ number_format($reviewer->current_points) }}</span>
                             </div>
-                            <small class="text-muted">Earned: {{ number_format($reviewer->total_points_earned) }}</small>
+                            <small class="text-muted">Total: {{ number_format($reviewer->total_points_earned) }}</small>
                         </td>
                         <td class="hide-mobile">
                             <a href="{{ route('admin.reviewers.show', $reviewer) }}" class="btn btn-sm btn-info">

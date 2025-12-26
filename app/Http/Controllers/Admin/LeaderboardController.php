@@ -35,7 +35,7 @@ class LeaderboardController extends Controller
                 $reviewer->total_redemptions = $completedRedemptions->count();
                 $reviewer->total_points_spent = $completedRedemptions->sum('points_used');
                 $reviewer->total_points_earned = $reviewer->total_points_earned ?? 0;
-                $reviewer->current_points = $reviewer->points;
+                $reviewer->current_points = $reviewer->available_points ?? 0;
                 
                 // Count rewards by tier
                 $reviewer->platinum_count = $completedRedemptions->where('reward.tier', 'Platinum')->count();
