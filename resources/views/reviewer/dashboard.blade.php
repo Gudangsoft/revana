@@ -126,6 +126,47 @@
     </div>
 </div>
 
+<!-- Charts Section -->
+<div class="row mt-4">
+    <!-- Reviews Per Month Chart -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-bar-chart-line"></i> Grafik Review per Bulan (6 Bulan Terakhir)
+            </div>
+            <div class="card-body">
+                <canvas id="reviewsChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Distribution Chart -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-pie-chart"></i> Distribusi Status Review
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Points Chart -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-graph-up"></i> Grafik Points (6 Bulan Terakhir)
+            </div>
+            <div class="card-body">
+                <canvas id="pointsChart" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Available Rewards -->
 @if($availableRewards->count() > 0)
 <div class="row mt-4">
@@ -223,3 +264,192 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Reviews Per Month Chart
+const reviewsCtx = document.getElementById('reviewsChart').getContext('2d');
+const reviewsChart = new Chart(reviewsCtx, {
+    type: 'line',
+    data: {
+        labels: {!! json_encode($chartLabels) !!},
+        datasets: [{
+            label: 'Reviews Completed',
+            data: {!! json_encode($chartData) !!},
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            borderColor: 'rgba(79, 70, 229, 1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    callback: function(value) {
+                        return value + ' reviews';
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// Status Distribution Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+const statusData = {!! json_encode($statusDistribution) !!};
+
+const statusLabels = statusData.map(item => item.status);
+const statusCounts = statusData.map(item => item.count);
+
+const statusColors = {
+    'PENDING': '#f59e0b',
+    'ACCEPTED': '#3b82f6',
+    'REJECTED': '#ef4444',
+    'ON_PROGRESS': '#8b5cf6',
+    'SUBMITTED': '#06b6d4',
+    'APPROVED': '#10b981',
+    'REVISION': '#6b7280'
+};
+
+const backgroundColors = statusLabels.map(status => statusColors[status] || '#6b7280');
+
+const statusChart = new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: statusLabels,
+        datasets: [{
+            data: statusCounts,
+            backgroundColor: backgroundColors,
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    padding: 15,
+                    font: {
+                        size: 11
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Points Chart
+const pointsCtx = document.getElementById('pointsChart').getContext('2d');
+const pointsChart = new Chart(pointsCtx, {
+    type: 'bar',
+    data: {
+        labels: {!! json_encode($chartLabels) !!},
+        datasets: [
+            {
+                label: 'Points Earned',
+                data: {!! json_encode($pointsEarned) !!},
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Points Spent',
+                data: {!! json_encode($pointsSpent) !!},
+                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': ' + context.parsed.y + ' points';
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value + ' pts';
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+</script>
+@endpush

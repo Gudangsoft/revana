@@ -13,6 +13,9 @@
     <a href="<?php echo e(route('reviewer.rewards.index')); ?>" class="nav-link">
         <i class="bi bi-gift"></i> Rewards
     </a>
+    <a href="<?php echo e(route('reviewer.leaderboard.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="<?php echo e(route('reviewer.profile.edit')); ?>" class="nav-link">
         <i class="bi bi-person-circle"></i> My Profile
     </a>
