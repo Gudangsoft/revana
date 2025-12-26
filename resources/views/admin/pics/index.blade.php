@@ -49,7 +49,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-person-badge"></i> Daftar PIC</span>
-                <a href="{{ route('admin.PICs.create') }}" class="btn btn-primary">
+                <a href="{{ route('admin.pics.create') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Tambah PIC
                 </a>
             </div>
@@ -67,24 +67,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($PICs as $PIC)
+                            @forelse($pics as $pic)
                             <tr>
-                                <td>{{ $loop->iteration + ($PICs->currentPage() - 1) * $PICs->perPage() }}</td>
-                                <td><strong>{{ $PIC->name }}</strong></td>
-                                <td>{{ $PIC->email ?? '-' }}</td>
-                                <td>{{ $PIC->phone ?? '-' }}</td>
+                                <td>{{ $loop->iteration + ($pics->currentPage() - 1) * $pics->perPage() }}</td>
+                                <td><strong>{{ $pic->name }}</strong></td>
+                                <td>{{ $pic->email ?? '-' }}</td>
+                                <td>{{ $pic->phone ?? '-' }}</td>
                                 <td>
-                                    @if($PIC->is_active)
+                                    @if($pic->is_active)
                                         <span class="badge bg-success">Aktif</span>
                                     @else
                                         <span class="badge bg-secondary">Nonaktif</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.PICs.edit', $PIC) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ route('admin.pics.edit', $pic) }}" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ route('admin.PICs.destroy', $PIC) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                    <form action="{{ route('admin.pics.destroy', $pic) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger">
@@ -103,7 +103,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $PICs->links() }}
+                    {{ $pics->links() }}
                 </div>
             </div>
         </div>
