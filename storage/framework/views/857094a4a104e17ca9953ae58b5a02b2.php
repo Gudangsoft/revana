@@ -44,7 +44,7 @@
                 <i class="bi bi-plus-circle"></i> Form Tambah PIC
             </div>
             <div class="card-body">
-                <form action="<?php echo e(route('admin.PICs.store')); ?>" method="POST">
+                <form action="<?php echo e(route('admin.pics.store')); ?>" method="POST">
                     <?php echo csrf_field(); ?>
 
                     <div class="mb-3">
@@ -132,7 +132,7 @@ unset($__errorArgs, $__bag); ?>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Simpan
                         </button>
-                        <a href="<?php echo e(route('admin.PICs.index')); ?>" class="btn btn-secondary">
+                        <a href="<?php echo e(route('admin.pics.index')); ?>" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
                         </a>
                     </div>

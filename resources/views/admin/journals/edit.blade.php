@@ -101,9 +101,15 @@
                                 <i class="bi bi-plus-circle"></i>
                             </button>
                         </label>
-                        <input type="text" class="form-control @error('marketing') is-invalid @enderror" 
-                               name="marketing" value="{{ old('marketing', $journal->marketing) }}" 
-                               placeholder="Nama marketing">
+                        <select class="form-select @error('marketing') is-invalid @enderror" 
+                                name="marketing" id="marketing_select">
+                            <option value="">Pilih Marketing</option>
+                            @foreach($marketings as $marketing)
+                                <option value="{{ $marketing->name }}" {{ old('marketing', $journal->marketing) == $marketing->name ? 'selected' : '' }}>
+                                    {{ $marketing->name }}
+                                </option>
+                            @endforeach
+                        </select>
                         @error('marketing')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -115,9 +121,15 @@
                                 <i class="bi bi-plus-circle"></i>
                             </button>
                         </label>
-                        <input type="text" class="form-control @error('pic') is-invalid @enderror" 
-                               name="pic" value="{{ old('pic', $journal->pic) }}" 
-                               placeholder="Nama PIC">
+                        <select class="form-select @error('pic') is-invalid @enderror" 
+                                name="pic" id="pic_select">
+                            <option value="">Pilih PIC</option>
+                            @foreach($pics as $pic)
+                                <option value="{{ $pic->name }}" {{ old('pic', $journal->pic) == $pic->name ? 'selected' : '' }}>
+                                    {{ $pic->name }}
+                                </option>
+                            @endforeach
+                        </select>
                         @error('pic')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -263,7 +275,10 @@
 document.getElementById('addMarketingForm').addEventListener('submit', function(e) {
     const marketingName = document.getElementById('marketing_name').value;
     if (marketingName) {
-        document.querySelector('input[name="marketing"]').value = marketingName;
+        const selectElement = document.getElementById('marketing_select');
+        // Add new option
+        const newOption = new Option(marketingName, marketingName, true, true);
+        selectElement.add(newOption);
     }
 });
 
@@ -271,7 +286,10 @@ document.getElementById('addMarketingForm').addEventListener('submit', function(
 document.getElementById('addPicForm').addEventListener('submit', function(e) {
     const picName = document.getElementById('pic_name').value;
     if (picName) {
-        document.querySelector('input[name="pic"]').value = picName;
+        const selectElement = document.getElementById('pic_select');
+        // Add new option
+        const newOption = new Option(picName, picName, true, true);
+        selectElement.add(newOption);
     }
 });
 </script>

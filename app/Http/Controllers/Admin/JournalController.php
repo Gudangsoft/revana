@@ -16,7 +16,9 @@ class JournalController extends Controller
 
     public function create()
     {
-        return view('admin.journals.create');
+        $marketings = \App\Models\Marketing::where('is_active', true)->orderBy('name')->get();
+        $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
+        return view('admin.journals.create', compact('marketings', 'pics'));
     }
 
     public function store(Request $request)
@@ -42,7 +44,9 @@ class JournalController extends Controller
 
     public function edit(Journal $journal)
     {
-        return view('admin.journals.edit', compact('journal'));
+        $marketings = \App\Models\Marketing::where('is_active', true)->orderBy('name')->get();
+        $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
+        return view('admin.journals.edit', compact('journal', 'marketings', 'pics'));
     }
 
     public function update(Request $request, Journal $journal)

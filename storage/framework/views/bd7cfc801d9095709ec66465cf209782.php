@@ -16,8 +16,23 @@
     <a href="<?php echo e(route('admin.reviewers.index')); ?>" class="nav-link">
         <i class="bi bi-people"></i> Reviewers
     </a>
+    <a href="<?php echo e(route('admin.leaderboard.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="<?php echo e(route('admin.redemptions.index')); ?>" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
+    </a>
+    <a href="<?php echo e(route('admin.points.index')); ?>" class="nav-link">
+        <i class="bi bi-coin"></i> Point Management
+    </a>
+    <a href="<?php echo e(route('admin.rewards.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy"></i> Reward Management
+    </a>
+    <a href="<?php echo e(route('admin.marketings.index')); ?>" class="nav-link">
+        <i class="bi bi-megaphone"></i> Marketing
+    </a>
+    <a href="<?php echo e(route('admin.pics.index')); ?>" class="nav-link">
+        <i class="bi bi-person-badge"></i> PIC
     </a>
 <?php $__env->stopSection(); ?>
 
@@ -137,7 +152,11 @@ unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Marketing</label>
+                        <label class="form-label">Marketing 
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addMarketingModal">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </label>
                         <input type="text" class="form-control <?php $__errorArgs = ['marketing'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -161,7 +180,11 @@ unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">PIC (Person In Charge)</label>
+                        <label class="form-label">PIC (Person In Charge) 
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPicModal">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </label>
                         <input type="text" class="form-control <?php $__errorArgs = ['pic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -173,6 +196,54 @@ unset($__errorArgs, $__bag); ?>"
                                name="pic" value="<?php echo e(old('pic', $journal->pic)); ?>" 
                                placeholder="Nama PIC">
                         <?php $__errorArgs = ['pic'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">User Author</label>
+                        <input type="text" class="form-control <?php $__errorArgs = ['author_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               name="author_name" value="<?php echo e(old('author_name', $journal->author_name)); ?>" 
+                               placeholder="User author jurnal">
+                        <?php $__errorArgs = ['author_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Link Turnitin</label>
+                        <input type="url" class="form-control <?php $__errorArgs = ['turnitin_link'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               name="turnitin_link" value="<?php echo e(old('turnitin_link', $journal->turnitin_link)); ?>" 
+                               placeholder="https://...">
+                        <?php $__errorArgs = ['turnitin_link'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -220,6 +291,103 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </div>
 </div>
+
+<!-- Modal: Add Marketing -->
+<div class="modal fade" id="addMarketingModal" tabindex="-1" aria-labelledby="addMarketingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMarketingModalLabel">
+                    <i class="bi bi-megaphone"></i> Tambah Marketing Baru
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addMarketingForm" action="<?php echo e(route('admin.marketings.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Marketing <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" id="marketing_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="marketing_email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telepon</label>
+                        <input type="text" class="form-control" name="phone" id="marketing_phone">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" id="marketing_is_active" value="1" checked>
+                        <label class="form-check-label" for="marketing_is_active">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add PIC -->
+<div class="modal fade" id="addPicModal" tabindex="-1" aria-labelledby="addPicModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPicModalLabel">
+                    <i class="bi bi-person-badge"></i> Tambah PIC Baru
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addPicForm" action="<?php echo e(route('admin.pics.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama PIC <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" id="pic_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="pic_email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telepon</label>
+                        <input type="text" class="form-control" name="phone" id="pic_phone">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" id="pic_is_active" value="1" checked>
+                        <label class="form-check-label" for="pic_is_active">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-fill marketing name after adding via modal
+document.getElementById('addMarketingForm').addEventListener('submit', function(e) {
+    const marketingName = document.getElementById('marketing_name').value;
+    if (marketingName) {
+        document.querySelector('input[name="marketing"]').value = marketingName;
+    }
+});
+
+// Auto-fill PIC name after adding via modal
+document.getElementById('addPicForm').addEventListener('submit', function(e) {
+    const picName = document.getElementById('pic_name').value;
+    if (picName) {
+        document.querySelector('input[name="pic"]').value = picName;
+    }
+});
+</script>
 <?php $__env->stopSection(); ?>
+
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\LPKD-APJI\REVANA\resources\views/admin/journals/edit.blade.php ENDPATH**/ ?>
