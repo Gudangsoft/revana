@@ -50,7 +50,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-person-badge"></i> Daftar PIC</span>
-                <a href="<?php echo e(route('admin.PICs.create')); ?>" class="btn btn-primary">
+                <a href="<?php echo e(route('admin.pics.create')); ?>" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Tambah PIC
                 </a>
             </div>
@@ -68,24 +68,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $__empty_1 = true; $__currentLoopData = $PICs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $PIC): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php $__empty_1 = true; $__currentLoopData = $pics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pic): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
-                                <td><?php echo e($loop->iteration + ($PICs->currentPage() - 1) * $PICs->perPage()); ?></td>
-                                <td><strong><?php echo e($PIC->name); ?></strong></td>
-                                <td><?php echo e($PIC->email ?? '-'); ?></td>
-                                <td><?php echo e($PIC->phone ?? '-'); ?></td>
+                                <td><?php echo e($loop->iteration + ($pics->currentPage() - 1) * $pics->perPage()); ?></td>
+                                <td><strong><?php echo e($pic->name); ?></strong></td>
+                                <td><?php echo e($pic->email ?? '-'); ?></td>
+                                <td><?php echo e($pic->phone ?? '-'); ?></td>
                                 <td>
-                                    <?php if($PIC->is_active): ?>
+                                    <?php if($pic->is_active): ?>
                                         <span class="badge bg-success">Aktif</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary">Nonaktif</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="<?php echo e(route('admin.PICs.edit', $PIC)); ?>" class="btn btn-sm btn-warning">
+                                    <a href="<?php echo e(route('admin.pics.edit', $pic)); ?>" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="<?php echo e(route('admin.PICs.destroy', $PIC)); ?>" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                    <form action="<?php echo e(route('admin.pics.destroy', $pic)); ?>" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
                                         <?php echo csrf_field(); ?>
                                         <?php echo method_field('DELETE'); ?>
                                         <button type="submit" class="btn btn-sm btn-danger">
@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <?php echo e($PICs->links()); ?>
+                    <?php echo e($pics->links()); ?>
 
                 </div>
             </div>
