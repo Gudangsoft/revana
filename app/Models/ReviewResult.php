@@ -13,6 +13,7 @@ class ReviewResult extends Model
         'review_assignment_id',
         'file_path',
         'notes',
+        'recommendation',
         'admin_feedback',
     ];
 

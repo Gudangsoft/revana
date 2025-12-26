@@ -90,6 +90,13 @@
                     </a>
                 </div>
 
+                @if($assignment->reviewResult->recommendation)
+                <div class="mb-3">
+                    <strong>Rekomendasi:</strong><br>
+                    <span class="badge bg-info mt-1">{{ $assignment->reviewResult->recommendation }}</span>
+                </div>
+                @endif
+
                 @if($assignment->reviewResult->notes)
                 <div class="mb-3">
                     <strong>Catatan Review:</strong><br>

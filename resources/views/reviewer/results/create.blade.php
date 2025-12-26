@@ -53,6 +53,21 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Rekomendasi <span class="text-danger">*</span></label>
+                        <select class="form-select @error('recommendation') is-invalid @enderror" 
+                                name="recommendation" required>
+                            <option value="">Pilih Rekomendasi</option>
+                            <option value="ACCEPT" {{ old('recommendation') == 'ACCEPT' ? 'selected' : '' }}>Accept (Diterima)</option>
+                            <option value="MINOR REVISION" {{ old('recommendation') == 'MINOR REVISION' ? 'selected' : '' }}>Minor Revision (Revisi Kecil)</option>
+                            <option value="MAJOR REVISION" {{ old('recommendation') == 'MAJOR REVISION' ? 'selected' : '' }}>Major Revision (Revisi Besar)</option>
+                            <option value="REJECT" {{ old('recommendation') == 'REJECT' ? 'selected' : '' }}>Reject (Ditolak)</option>
+                        </select>
+                        @error('recommendation')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Catatan Review (Opsional)</label>
                         <textarea class="form-control @error('notes') is-invalid @enderror" 
                                   name="notes" rows="8"

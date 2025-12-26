@@ -31,6 +31,7 @@ class ReviewResultController extends Controller
 
         $validated = $request->validate([
             'google_drive_link' => 'required|url',
+            'recommendation' => 'required|in:ACCEPT,MINOR REVISION,MAJOR REVISION,REJECT',
             'notes' => 'nullable|string',
         ]);
 
@@ -39,6 +40,7 @@ class ReviewResultController extends Controller
             ['review_assignment_id' => $assignment->id],
             [
                 'file_path' => $validated['google_drive_link'],
+                'recommendation' => $validated['recommendation'],
                 'notes' => $validated['notes'],
             ]
         );

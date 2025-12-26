@@ -157,7 +157,7 @@ unset($__errorArgs, $__bag); ?>
                                 <i class="bi bi-plus-circle"></i>
                             </button>
                         </label>
-                        <input type="text" class="form-control <?php $__errorArgs = ['marketing'];
+                        <select class="form-select <?php $__errorArgs = ['marketing'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -165,8 +165,15 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="marketing" value="<?php echo e(old('marketing', $journal->marketing)); ?>" 
-                               placeholder="Nama marketing">
+                                name="marketing" id="marketing_select">
+                            <option value="">Pilih Marketing</option>
+                            <?php $__currentLoopData = $marketings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $marketing): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($marketing->name); ?>" <?php echo e(old('marketing', $journal->marketing) == $marketing->name ? 'selected' : ''); ?>>
+                                    <?php echo e($marketing->name); ?>
+
+                                </option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
                         <?php $__errorArgs = ['marketing'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -185,7 +192,7 @@ unset($__errorArgs, $__bag); ?>
                                 <i class="bi bi-plus-circle"></i>
                             </button>
                         </label>
-                        <input type="text" class="form-control <?php $__errorArgs = ['pic'];
+                        <select class="form-select <?php $__errorArgs = ['pic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -193,8 +200,15 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                               name="pic" value="<?php echo e(old('pic', $journal->pic)); ?>" 
-                               placeholder="Nama PIC">
+                                name="pic" id="pic_select">
+                            <option value="">Pilih PIC</option>
+                            <?php $__currentLoopData = $pics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pic): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($pic->name); ?>" <?php echo e(old('pic', $journal->pic) == $pic->name ? 'selected' : ''); ?>>
+                                    <?php echo e($pic->name); ?>
+
+                                </option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
                         <?php $__errorArgs = ['pic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -375,7 +389,10 @@ unset($__errorArgs, $__bag); ?>
 document.getElementById('addMarketingForm').addEventListener('submit', function(e) {
     const marketingName = document.getElementById('marketing_name').value;
     if (marketingName) {
-        document.querySelector('input[name="marketing"]').value = marketingName;
+        const selectElement = document.getElementById('marketing_select');
+        // Add new option
+        const newOption = new Option(marketingName, marketingName, true, true);
+        selectElement.add(newOption);
     }
 });
 
@@ -383,7 +400,10 @@ document.getElementById('addMarketingForm').addEventListener('submit', function(
 document.getElementById('addPicForm').addEventListener('submit', function(e) {
     const picName = document.getElementById('pic_name').value;
     if (picName) {
-        document.querySelector('input[name="pic"]').value = picName;
+        const selectElement = document.getElementById('pic_select');
+        // Add new option
+        const newOption = new Option(picName, picName, true, true);
+        selectElement.add(newOption);
     }
 });
 </script>
