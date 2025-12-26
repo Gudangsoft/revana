@@ -16,6 +16,9 @@
     <a href="<?php echo e(route('admin.reviewers.index')); ?>" class="nav-link">
         <i class="bi bi-people"></i> Reviewers
     </a>
+    <a href="<?php echo e(route('admin.leaderboard.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="<?php echo e(route('admin.redemptions.index')); ?>" class="nav-link active">
         <i class="bi bi-gift"></i> Reward Redemptions
     </a>
