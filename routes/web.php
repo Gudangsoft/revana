@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\RewardRedemptionController as AdminRewardRedempti
 use App\Http\Controllers\Admin\PointManagementController;
 use App\Http\Controllers\Admin\RewardController as AdminRewardController;
 use App\Http\Controllers\Admin\LeaderboardController;
+use App\Http\Controllers\Admin\MarketingController;
+use App\Http\Controllers\Admin\PicController;
 use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
@@ -75,6 +77,12 @@ Route::middleware('auth')->group(function () {
         
         // Leaderboard
         Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+        
+        // Marketing Management
+        Route::resource('marketings', MarketingController::class)->except(['show']);
+        
+        // PIC Management
+        Route::resource('pics', PicController::class)->except(['show']);
     });
 
     // Reviewer routes

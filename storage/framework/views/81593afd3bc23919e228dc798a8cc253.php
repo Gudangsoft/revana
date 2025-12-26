@@ -160,6 +160,79 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-earmark-spreadsheet"></i> Laporan Jurnal Selesai Direview</span>
+                <div>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle"></i> Total <strong><?php echo e($totalCompletedReviews); ?></strong> jurnal telah selesai direview dan disetujui.
+                    Menampilkan 20 data terbaru.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>No</th>
+                                <th>Judul Jurnal</th>
+                                <th>Akreditasi</th>
+                                <th>Points</th>
+                                <th class="hide-mobile">Terbitan</th>
+                                <th>Reviewer</th>
+                                <th class="hide-mobile">Institusi</th>
+                                <th>Hasil</th>
+                                <th>Tanggal Selesai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $__empty_1 = true; $__currentLoopData = $completedReviews; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <tr>
+                                <td><?php echo e($loop->iteration); ?></td>
+                                <td>
+                                    <strong><?php echo e(Str::limit($review->journal->title, 40)); ?></strong>
+                                </td>
+                                <td><span class="badge bg-info"><?php echo e($review->journal->accreditation); ?></span></td>
+                                <td><span class="badge bg-success"><?php echo e($review->journal->points); ?> pts</span></td>
+                                <td class="hide-mobile">
+                                    <small><?php echo e($review->journal->publisher ?? '-'); ?></small>
+                                </td>
+                                <td><?php echo e(Str::limit($review->reviewer->name, 25)); ?></td>
+                                <td class="hide-mobile">
+                                    <small><?php echo e(Str::limit($review->reviewer->institution ?? '-', 25)); ?></small>
+                                </td>
+                                <td>
+                                    <?php if($review->reviewResult): ?>
+                                        <span class="badge bg-primary"><?php echo e($review->reviewResult->recommendation); ?></span>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><small><?php echo e($review->approved_at ? $review->approved_at->format('d M Y') : '-'); ?></small></td>
+                            </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0">Belum ada jurnal yang selesai direview</p>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Assignment History -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-clock-history"></i> Review Terbaru</span>
                 <a href="<?php echo e(route('admin.assignments.index')); ?>" class="btn btn-sm btn-outline-primary">
                     Lihat Semua
@@ -216,6 +289,57 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="exportModalLabel">
+                    <i class="bi bi-file-earmark-excel"></i> Export Laporan ke Excel
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<?php echo e(route('admin.export.completed.reviews')); ?>" method="GET">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Export semua jurnal yang telah selesai direview dan disetujui. Anda bisa filter berdasarkan tanggal atau export semua data.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Mulai (Opsional)</label>
+                        <input type="date" class="form-control" name="start_date">
+                        <small class="text-muted">Kosongkan untuk export semua data</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Akhir (Opsional)</label>
+                        <input type="date" class="form-control" name="end_date">
+                        <small class="text-muted">Kosongkan untuk export semua data</small>
+                    </div>
+
+                    <div class="alert alert-warning mb-0">
+                        <strong>Data yang akan diexport:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Judul Jurnal & Link</li>
+                            <li>Akreditasi & Points</li>
+                            <li>Terbitan, Marketing, PIC</li>
+                            <li>Data Reviewer</li>
+                            <li>Hasil & Komentar Review</li>
+                            <li>Tanggal-tanggal penting</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-download"></i> Download Excel
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
