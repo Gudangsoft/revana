@@ -139,3 +139,4 @@ document.getElementById('journalSelect').addEventListener('change', function() {
 </script>
 @endpush
 @endsection
+

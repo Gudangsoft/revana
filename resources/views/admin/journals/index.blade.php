@@ -19,6 +19,12 @@
     <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
     </a>
+    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
+        <i class="bi bi-megaphone"></i> Marketing
+    </a>
+    <a href="{{ route('admin.pics.index') }}" class="nav-link">
+        <i class="bi bi-person-badge"></i> PIC
+    </a>
 @endsection
 
 @section('content')
@@ -114,3 +120,4 @@
     </div>
 </div>
 @endsection
+

@@ -81,7 +81,11 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Marketing</label>
+                        <label class="form-label">Marketing 
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addMarketingModal">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </label>
                         <input type="text" class="form-control @error('marketing') is-invalid @enderror" 
                                name="marketing" value="{{ old('marketing', $journal->marketing) }}" 
                                placeholder="Nama marketing">
@@ -91,7 +95,11 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">PIC (Person In Charge)</label>
+                        <label class="form-label">PIC (Person In Charge) 
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPicModal">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </label>
                         <input type="text" class="form-control @error('pic') is-invalid @enderror" 
                                name="pic" value="{{ old('pic', $journal->pic) }}" 
                                placeholder="Nama PIC">
@@ -156,4 +164,101 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Add Marketing -->
+<div class="modal fade" id="addMarketingModal" tabindex="-1" aria-labelledby="addMarketingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMarketingModalLabel">
+                    <i class="bi bi-megaphone"></i> Tambah Marketing Baru
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addMarketingForm" action="{{ route('admin.marketings.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Marketing <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" id="marketing_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="marketing_email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telepon</label>
+                        <input type="text" class="form-control" name="phone" id="marketing_phone">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" id="marketing_is_active" value="1" checked>
+                        <label class="form-check-label" for="marketing_is_active">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add PIC -->
+<div class="modal fade" id="addPicModal" tabindex="-1" aria-labelledby="addPicModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPicModalLabel">
+                    <i class="bi bi-person-badge"></i> Tambah PIC Baru
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addPicForm" action="{{ route('admin.pics.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama PIC <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" id="pic_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="pic_email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telepon</label>
+                        <input type="text" class="form-control" name="phone" id="pic_phone">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" id="pic_is_active" value="1" checked>
+                        <label class="form-check-label" for="pic_is_active">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-fill marketing name after adding via modal
+document.getElementById('addMarketingForm').addEventListener('submit', function(e) {
+    const marketingName = document.getElementById('marketing_name').value;
+    if (marketingName) {
+        document.querySelector('input[name="marketing"]').value = marketingName;
+    }
+});
+
+// Auto-fill PIC name after adding via modal
+document.getElementById('addPicForm').addEventListener('submit', function(e) {
+    const picName = document.getElementById('pic_name').value;
+    if (picName) {
+        document.querySelector('input[name="pic"]').value = picName;
+    }
+});
+</script>
 @endsection
+
