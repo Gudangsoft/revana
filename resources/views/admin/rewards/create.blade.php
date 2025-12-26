@@ -16,6 +16,9 @@
     <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
         <i class="bi bi-people"></i> Reviewers
     </a>
+    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
     </a>
@@ -73,6 +76,29 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="text-muted">Tipe/kategori reward (Voucher, E-Wallet, Cash, dll)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Peringkat Reward <span class="text-danger">*</span></label>
+                        <select class="form-select @error('tier') is-invalid @enderror" name="tier" required>
+                            <option value="">Pilih Peringkat</option>
+                            <option value="Bronze" {{ old('tier') == 'Bronze' ? 'selected' : '' }}>
+                                🥉 Bronze (Entry Level)
+                            </option>
+                            <option value="Silver" {{ old('tier') == 'Silver' ? 'selected' : '' }}>
+                                🥈 Silver (Standard)
+                            </option>
+                            <option value="Gold" {{ old('tier') == 'Gold' ? 'selected' : '' }}>
+                                🥇 Gold (Premium)
+                            </option>
+                            <option value="Platinum" {{ old('tier') == 'Platinum' ? 'selected' : '' }}>
+                                💎 Platinum (Exclusive)
+                            </option>
+                        </select>
+                        @error('tier')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Tingkat/level reward untuk sistem ranking</small>
                     </div>
 
                     <div class="mb-3">

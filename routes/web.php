@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ReviewerController;
 use App\Http\Controllers\Admin\RewardRedemptionController as AdminRewardRedemptionController;
 use App\Http\Controllers\Admin\PointManagementController;
 use App\Http\Controllers\Admin\RewardController as AdminRewardController;
+use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
@@ -68,6 +69,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/rewards/{reward}', [AdminRewardController::class, 'update'])->name('rewards.update');
         Route::delete('/rewards/{reward}', [AdminRewardController::class, 'destroy'])->name('rewards.destroy');
         Route::post('/rewards/{reward}/toggle', [AdminRewardController::class, 'toggleStatus'])->name('rewards.toggle');
+        
+        // Leaderboard
+        Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
     });
 
     // Reviewer routes

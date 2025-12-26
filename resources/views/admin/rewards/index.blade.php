@@ -16,6 +16,9 @@
     <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
         <i class="bi bi-people"></i> Reviewers
     </a>
+    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
     </a>
@@ -67,8 +70,7 @@
                     <tr>
                         <th>#</th>
                         <th>Nama Reward</th>
-                        <th>Tipe</th>
-                        <th>Points Required</th>
+                        <th>Tipe</th>                        <th>Peringkat</th>                        <th>Points Required</th>
                         <th>Value</th>
                         <th>Total Redeemed</th>
                         <th>Status</th>
@@ -87,6 +89,17 @@
                         </td>
                         <td>
                             <span class="badge bg-secondary">{{ $reward->type }}</span>
+                        </td>
+                        <td>
+                            @if($reward->tier == 'Platinum')
+                                <span class="badge" style="background: linear-gradient(135deg, #b7a1d8, #7c3aed);">💎 Platinum</span>
+                            @elseif($reward->tier == 'Gold')
+                                <span class="badge" style="background: linear-gradient(135deg, #fcd34d, #f59e0b);">🥇 Gold</span>
+                            @elseif($reward->tier == 'Silver')
+                                <span class="badge" style="background: linear-gradient(135deg, #cbd5e1, #64748b);">🥈 Silver</span>
+                            @else
+                                <span class="badge" style="background: linear-gradient(135deg, #d97706, #92400e); color: white;">🥉 Bronze</span>
+                            @endif
                         </td>
                         <td>
                             <span class="badge bg-warning text-dark">

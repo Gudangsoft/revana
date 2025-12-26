@@ -13,6 +13,7 @@ class Reward extends Model
         'name',
         'description',
         'type',
+        'tier',
         'points_required',
         'value',
         'is_active',
