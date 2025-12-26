@@ -66,6 +66,12 @@
                 </div>
                 @endif
                 
+                @if($reviewer->address)
+                <div class="mb-2">
+                    <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ $reviewer->address }}</small>
+                </div>
+                @endif
+                
                 @if($reviewer->education_level)
                 <div class="mb-2">
                     <span class="badge bg-primary">{{ $reviewer->education_level }}</span>
@@ -187,7 +193,7 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="text-warning">Pending</h5>
-                        <h2>{{ $reviewer->reviewAssignments->where('status', 'pending')->count() }}</h2>
+                        <h2>{{ $reviewer->reviewAssignments->where('status', 'PENDING')->count() }}</h2>
                     </div>
                 </div>
             </div>
@@ -195,7 +201,7 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="text-info">In Progress</h5>
-                        <h2>{{ $reviewer->reviewAssignments->whereIn('status', ['accepted', 'submitted'])->count() }}</h2>
+                        <h2>{{ $reviewer->reviewAssignments->whereIn('status', ['ACCEPTED', 'ON_PROGRESS', 'SUBMITTED'])->count() }}</h2>
                     </div>
                 </div>
             </div>
@@ -203,7 +209,7 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="text-success">Completed</h5>
-                        <h2>{{ $reviewer->reviewAssignments->where('status', 'approved')->count() }}</h2>
+                        <h2>{{ $reviewer->reviewAssignments->where('status', 'APPROVED')->count() }}</h2>
                     </div>
                 </div>
             </div>
@@ -211,17 +217,9 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="text-danger">Rejected</h5>
-                        <h2>{{ $reviewer->reviewAssignments->where('status', 'rejected')->count() }}</h2>
+                        <h2>{{ $reviewer->reviewAssignments->where('status', 'REJECTED')->count() }}</h2>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="text-danger">Rejected</h5>
-                <h2>{{ $reviewer->reviewAssignments->where('status', 'rejected')->count() }}</h2>
             </div>
         </div>
     </div>
@@ -261,15 +259,17 @@
                                 <td>
                                     @php
                                         $statusColors = [
-                                            'pending' => 'warning',
-                                            'accepted' => 'info',
-                                            'rejected' => 'danger',
-                                            'submitted' => 'success',
-                                            'approved' => 'success',
+                                            'PENDING' => 'warning',
+                                            'ACCEPTED' => 'info',
+                                            'REJECTED' => 'danger',
+                                            'ON_PROGRESS' => 'primary',
+                                            'SUBMITTED' => 'success',
+                                            'APPROVED' => 'success',
+                                            'REVISION' => 'secondary'
                                         ];
                                         $color = $statusColors[$assignment->status] ?? 'secondary';
                                     @endphp
-                                    <span class="badge bg-{{ $color }}">{{ ucfirst($assignment->status) }}</span>
+                                    <span class="badge bg-{{ $color }}">{{ $assignment->status }}</span>
                                 </td>
                                 <td>{{ $assignment->created_at->format('d M Y H:i') }}</td>
                                 <td>

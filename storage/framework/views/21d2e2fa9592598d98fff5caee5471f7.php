@@ -16,8 +16,14 @@
     <a href="<?php echo e(route('admin.reviewers.index')); ?>" class="nav-link active">
         <i class="bi bi-people"></i> Reviewers
     </a>
+    <a href="<?php echo e(route('admin.leaderboard.index')); ?>" class="nav-link">
+        <i class="bi bi-trophy-fill"></i> Leaderboard
+    </a>
     <a href="<?php echo e(route('admin.redemptions.index')); ?>" class="nav-link">
         <i class="bi bi-gift"></i> Reward Redemptions
+    </a>
+    <a href="<?php echo e(route('admin.points.index')); ?>" class="nav-link">
+        <i class="bi bi-coin"></i> Point Management
     </a>
 <?php $__env->stopSection(); ?>
 
@@ -31,66 +37,185 @@
 
 <!-- Profile Card -->
 <div class="row">
-    <div class="col-md-12">
-        <div class="card" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important; border: none;">
-            <div class="card-body" style="color: white !important;">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h3 style="color: white !important;"><i class="bi bi-person-circle"></i> <?php echo e($reviewer->name); ?></h3>
-                        <p class="mb-2" style="color: rgba(255,255,255,0.9) !important;"><?php echo e($reviewer->email); ?></p>
-                        <div class="d-flex gap-3 mt-3">
-                            <div>
-                                <h4 class="mb-0" style="color: white !important;"><?php echo e($reviewer->total_points); ?></h4>
-                                <small style="color: rgba(255,255,255,0.8) !important;">Total Points</small>
-                            </div>
-                            <div>
-                                <h4 class="mb-0" style="color: white !important;"><?php echo e($reviewer->available_points); ?></h4>
-                                <small style="color: rgba(255,255,255,0.8) !important;">Available Points</small>
-                            </div>
-                            <div>
-                                <h4 class="mb-0" style="color: white !important;"><?php echo e($reviewer->completed_reviews); ?></h4>
-                                <small style="color: rgba(255,255,255,0.8) !important;">Completed Reviews</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <?php $__currentLoopData = $reviewer->badges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $badge): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <span class="badge bg-warning text-dark me-1" style="font-size: 1.2rem;" title="<?php echo e($badge->description); ?>">
-                            <?php echo e($badge->icon); ?> <?php echo e($badge->name); ?>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <?php if($reviewer->photo): ?>
+                    <img src="<?php echo e(asset('storage/' . $reviewer->photo)); ?>" 
+                         alt="Profile Photo" 
+                         class="rounded-circle mb-3"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                <?php else: ?>
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width: 150px; height: 150px; font-size: 3rem;">
+                        <?php echo e(strtoupper(substr($reviewer->name, 0, 1))); ?>
 
-                        </span>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
+                <?php endif; ?>
+                <h4><?php echo e($reviewer->name); ?></h4>
+                <p class="text-muted"><?php echo e($reviewer->email); ?></p>
+                
+                <?php if($reviewer->institution): ?>
+                <div class="mb-2">
+                    <small class="text-muted"><i class="bi bi-building"></i> <?php echo e($reviewer->institution); ?></small>
+                </div>
+                <?php endif; ?>
+                
+                <?php if($reviewer->position): ?>
+                <div class="mb-2">
+                    <small class="text-muted"><i class="bi bi-briefcase"></i> <?php echo e($reviewer->position); ?></small>
+                </div>
+                <?php endif; ?>
+                
+                <?php if($reviewer->education_level): ?>
+                <div class="mb-2">
+                    <span class="badge bg-primary"><?php echo e($reviewer->education_level); ?></span>
+                </div>
+                <?php endif; ?>
+                
+                <?php if($reviewer->phone): ?>
+                <div class="mt-3">
+                    <a href="https://wa.me/<?php echo e(preg_replace('/[^0-9]/', '', $reviewer->phone)); ?>" 
+                       class="btn btn-success btn-sm" target="_blank">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Academic Info -->
+        <?php if($reviewer->nidn || $reviewer->specialization): ?>
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-mortarboard-fill"></i> Informasi Akademik
+            </div>
+            <div class="card-body">
+                <?php if($reviewer->nidn): ?>
+                <div class="mb-2">
+                    <small class="text-muted">NIDN:</small>
+                    <div><strong><?php echo e($reviewer->nidn); ?></strong></div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if($reviewer->specialization): ?>
+                <div class="mb-2">
+                    <small class="text-muted">Spesialisasi:</small>
+                    <div><?php echo e($reviewer->specialization); ?></div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Research Links -->
+        <?php if($reviewer->google_scholar || $reviewer->sinta_id || $reviewer->scopus_id): ?>
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-link-45deg"></i> Profil Riset
+            </div>
+            <div class="card-body">
+                <?php if($reviewer->google_scholar): ?>
+                <div class="mb-2">
+                    <a href="<?php echo e($reviewer->google_scholar); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-google"></i> Google Scholar
+                    </a>
+                </div>
+                <?php endif; ?>
+                
+                <?php if($reviewer->sinta_id): ?>
+                <div class="mb-2">
+                    <small class="text-muted">SINTA ID:</small>
+                    <div><strong><?php echo e($reviewer->sinta_id); ?></strong></div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if($reviewer->scopus_id): ?>
+                <div class="mb-2">
+                    <small class="text-muted">Scopus ID:</small>
+                    <div><strong><?php echo e($reviewer->scopus_id); ?></strong></div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Bio -->
+        <?php if($reviewer->bio): ?>
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="bi bi-file-text"></i> Bio
+            </div>
+            <div class="card-body">
+                <p class="small mb-0"><?php echo e($reviewer->bio); ?></p>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Stats Card -->
+        <div class="card mb-3" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important; border: none;">
+            <div class="card-body" style="color: white !important;">
+                <h5 style="color: white !important;"><i class="bi bi-bar-chart-fill"></i> Statistik Performance</h5>
+                <div class="d-flex gap-3 mt-3 flex-wrap">
+                    <div>
+                        <h4 class="mb-0" style="color: white !important;"><?php echo e($reviewer->total_points); ?></h4>
+                        <small style="color: rgba(255,255,255,0.8) !important;">Total Points</small>
+                    </div>
+                    <div>
+                        <h4 class="mb-0" style="color: white !important;"><?php echo e($reviewer->available_points); ?></h4>
+                        <small style="color: rgba(255,255,255,0.8) !important;">Available Points</small>
+                    </div>
+                    <div>
+                        <h4 class="mb-0" style="color: white !important;"><?php echo e($reviewer->completed_reviews); ?></h4>
+                        <small style="color: rgba(255,255,255,0.8) !important;">Completed Reviews</small>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <?php $__currentLoopData = $reviewer->badges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $badge): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <span class="badge bg-warning text-dark me-1" style="font-size: 1.1rem;" title="<?php echo e($badge->description); ?>">
+                        <?php echo e($badge->icon); ?> <?php echo e($badge->name); ?>
+
+                    </span>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Review Assignments -->
-<div class="row mt-4">
-    <!-- Statistics Cards -->
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="text-warning">Pending</h5>
-                <h2><?php echo e($reviewer->reviewAssignments->where('status', 'pending')->count()); ?></h2>
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-warning">Pending</h5>
+                        <h2><?php echo e($reviewer->reviewAssignments->where('status', 'pending')->count()); ?></h2>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="text-info">In Progress</h5>
-                <h2><?php echo e($reviewer->reviewAssignments->whereIn('status', ['accepted', 'submitted'])->count()); ?></h2>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-info">In Progress</h5>
+                        <h2><?php echo e($reviewer->reviewAssignments->whereIn('status', ['accepted', 'submitted'])->count()); ?></h2>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="text-success">Completed</h5>
-                <h2><?php echo e($reviewer->reviewAssignments->where('status', 'approved')->count()); ?></h2>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-success">Completed</h5>
+                        <h2><?php echo e($reviewer->reviewAssignments->where('status', 'approved')->count()); ?></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-danger">Rejected</h5>
+                        <h2><?php echo e($reviewer->reviewAssignments->where('status', 'rejected')->count()); ?></h2>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
