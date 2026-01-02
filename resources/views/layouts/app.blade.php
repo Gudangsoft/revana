@@ -357,10 +357,20 @@
                 <span class="navbar-brand mb-0 h1">@yield('page-title', 'Dashboard')</span>
                 <div class="ms-auto d-flex align-items-center flex-wrap gap-2">
                     <span class="me-2 d-none d-md-inline">
-                        <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
+                        <i class="bi bi-person-circle"></i> 
+                        @if(auth()->user()->role === 'admin')
+                            Admin {{ $appSettings['app_name'] }}
+                        @else
+                            {{ auth()->user()->name }}
+                        @endif
                     </span>
                     <span class="me-2 d-md-none">
-                        <i class="bi bi-person-circle"></i> {{ Str::limit(auth()->user()->name, 15) }}
+                        <i class="bi bi-person-circle"></i> 
+                        @if(auth()->user()->role === 'admin')
+                            Admin
+                        @else
+                            {{ Str::limit(auth()->user()->name, 15) }}
+                        @endif
                     </span>
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf

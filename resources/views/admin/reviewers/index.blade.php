@@ -62,8 +62,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.reviewers.show', $reviewer) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> Detail
+                                    <a href="{{ route('admin.reviewers.show', $reviewer) }}" class="btn btn-sm btn-info" title="Detail">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
                                     </a>
                                 </td>
                             </tr>

@@ -8,12 +8,22 @@
 @endsection
 
 @section('content')
-<!-- Back Button -->
-<div class="mb-3">
+<!-- Back Button & Actions -->
+<div class="mb-3 d-flex justify-content-between align-items-center">
     <a href="{{ route('admin.reviewers.index') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
+    <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-primary">
+        <i class="bi bi-pencil-square"></i> Edit Data Reviewer
+    </a>
 </div>
+
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
 <!-- Profile Card -->
 <div class="row">
