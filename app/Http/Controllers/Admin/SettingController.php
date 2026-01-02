@@ -14,7 +14,7 @@ class SettingController extends Controller
     {
         // Baca file .env
         $settings = [
-            'app_name' => env('APP_NAME', 'REVANA'),
+            'app_name' => Setting::get('app_name', env('APP_NAME', 'REVANA')),
             'app_url' => env('APP_URL', 'http://localhost'),
             'mail_from_address' => env('MAIL_FROM_ADDRESS', ''),
             'mail_from_name' => env('MAIL_FROM_NAME', ''),
