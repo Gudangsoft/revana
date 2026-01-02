@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
         // Share settings to all views
         View::composer('*', function ($view) {
             $settings = [
-                'app_name' => env('APP_NAME', 'REVANA'),
+                'app_name' => Setting::get('app_name', env('APP_NAME', 'REVANA')),
                 'tagline' => Setting::get('tagline', 'Review Validation & Analytics'),
                 'address' => Setting::get('address', ''),
                 'contact' => Setting::get('contact', ''),

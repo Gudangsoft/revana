@@ -77,7 +77,9 @@ class SettingController extends Controller
         
         File::put($envPath, $envContent);
         
-        // Update database settings
+        // Update database settings (including app_name for real-time update)
+        Setting::set('app_name', $validated['app_name']);
+        
         if (isset($validated['tagline'])) {
             Setting::set('tagline', $validated['tagline']);
         }
