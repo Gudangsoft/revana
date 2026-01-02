@@ -11,6 +11,14 @@ class ReviewAssignment extends Model
 
     protected $fillable = [
         'journal_id',
+        'article_title',
+        'submit_link',
+        'account_username',
+        'account_password',
+        'assignment_letter_link',
+        'certificate_link',
+        'deadline',
+        'language',
         'reviewer_id',
         'assigned_by',
         'status',
@@ -24,6 +32,7 @@ class ReviewAssignment extends Model
         'accepted_at' => 'datetime',
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
+        'deadline' => 'date',
     ];
 
     public function journal()
@@ -42,6 +51,11 @@ class ReviewAssignment extends Model
     }
 
     public function reviewResult()
+    {
+        return $this->hasOne(ReviewResult::class);
+    }
+
+    public function result()
     {
         return $this->hasOne(ReviewResult::class);
     }

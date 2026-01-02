@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +11,16 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        $settings = [
+            'app_name' => env('APP_NAME', 'REVANA'),
+            'tagline' => Setting::get('tagline', 'Review Validation & Analytics'),
+            'address' => Setting::get('address', ''),
+            'contact' => Setting::get('contact', ''),
+            'logo' => Setting::get('logo', ''),
+            'favicon' => Setting::get('favicon', ''),
+        ];
+        
+        return view('auth.login', compact('settings'));
     }
 
     public function login(Request $request)
@@ -25,11 +35,15 @@ class LoginController extends Controller
 
             $user = Auth::user();
             
-            if ($user->isAdmin()) {
+            // Redirect based on user role
+            if ($user->role === 'admin') {
                 return redirect()->intended('/admin/dashboard');
-            } else {
+            } elseif ($user->role === 'reviewer') {
                 return redirect()->intended('/reviewer/dashboard');
             }
+            
+            // Default redirect to monitoring
+            return redirect()->intended('/monitoring');
         }
 
         return back()->withErrors([

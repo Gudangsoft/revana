@@ -30,22 +30,27 @@ class ReviewAssignmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'journal_id' => 'required|exists:journals,id',
+            'article_title' => 'required|string|max:500',
+            'submit_link' => 'required|url',
+            'account_username' => 'required|string|max:255',
+            'account_password' => 'required|string|max:255',
+            'assignment_letter_link' => 'required|url',
+            'certificate_link' => 'required|url',
+            'deadline' => 'required|date|after:today',
+            'language' => 'required|in:Indonesia,Inggris',
             'reviewer_id' => 'required|exists:users,id',
         ]);
 
-        // Check if assignment already exists
-        $exists = ReviewAssignment::where('journal_id', $request->journal_id)
-            ->where('reviewer_id', $request->reviewer_id)
-            ->whereIn('status', ['PENDING', 'ACCEPTED', 'ON_PROGRESS', 'SUBMITTED', 'REVISION'])
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Reviewer sudah ditugaskan untuk jurnal ini');
-        }
-
         ReviewAssignment::create([
-            'journal_id' => $request->journal_id,
+            'article_title' => $request->article_title,
+            'submit_link' => $request->submit_link,
+            'account_username' => $request->account_username,
+            'account_password' => $request->account_password,
+            'assignment_letter_link' => $request->assignment_letter_link,
+            'certificate_link' => $request->certificate_link,
+            'deadline' => $request->deadline,
+            'language' => $request->language,
+            'journal_id' => null, // Tidak menggunakan journal_id lagi
             'reviewer_id' => $request->reviewer_id,
             'assigned_by' => auth()->id(),
             'status' => 'PENDING',

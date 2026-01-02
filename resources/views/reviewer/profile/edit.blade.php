@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Profile - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Edit Profile Saya')
 
 @section('sidebar')

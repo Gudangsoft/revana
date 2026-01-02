@@ -1,39 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Jurnal - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Tambah Jurnal Baru')
 
 @section('sidebar')
-    <a href="{{ route('admin.dashboard') }}" class="nav-link">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('admin.journals.index') }}" class="nav-link active">
-        <i class="bi bi-journal-text"></i> Jurnal
-    </a>
-    <a href="{{ route('admin.assignments.index') }}" class="nav-link">
-        <i class="bi bi-clipboard-check"></i> Review Assignments
-    </a>
-    <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
-        <i class="bi bi-people"></i> Reviewers
-    </a>
-    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Reward Redemptions
-    </a>
-    <a href="{{ route('admin.points.index') }}" class="nav-link">
-        <i class="bi bi-coin"></i> Point Management
-    </a>
-    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
-        <i class="bi bi-trophy"></i> Reward Management
-    </a>
-    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
-        <i class="bi bi-megaphone"></i> Marketing
-    </a>
-    <a href="{{ route('admin.pics.index') }}" class="nav-link">
-        <i class="bi bi-person-badge"></i> PIC
-    </a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
@@ -71,12 +42,11 @@
                         <select class="form-select @error('accreditation') is-invalid @enderror" 
                                 name="accreditation" required>
                             <option value="">Pilih Akreditasi</option>
-                            <option value="SINTA 1" {{ old('accreditation') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1 (100 points)</option>
-                            <option value="SINTA 2" {{ old('accreditation') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2 (80 points)</option>
-                            <option value="SINTA 3" {{ old('accreditation') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3 (60 points)</option>
-                            <option value="SINTA 4" {{ old('accreditation') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4 (40 points)</option>
-                            <option value="SINTA 5" {{ old('accreditation') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5 (20 points)</option>
-                            <option value="SINTA 6" {{ old('accreditation') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6 (10 points)</option>
+                            @foreach($accreditations as $accreditation)
+                                <option value="{{ $accreditation->name }}" {{ old('accreditation') == $accreditation->name ? 'selected' : '' }}>
+                                    {{ $accreditation->name }} ({{ $accreditation->points }} points)
+                                </option>
+                            @endforeach
                         </select>
                         @error('accreditation')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -136,10 +106,20 @@
 
                     <div class="mb-3">
                         <label class="form-label">User Author</label>
-                        <input type="text" class="form-control @error('author_name') is-invalid @enderror" 
-                               name="author_name" value="{{ old('author_name') }}" 
-                               placeholder="User author jurnal">
-                        @error('author_name')
+                        <input type="text" class="form-control @error('author_username') is-invalid @enderror" 
+                               name="author_username" value="{{ old('author_username') }}" 
+                               placeholder="Username author jurnal">
+                        @error('author_username')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password Author</label>
+                        <input type="text" class="form-control @error('author_password') is-invalid @enderror" 
+                               name="author_password" value="{{ old('author_password') }}" 
+                               placeholder="Password author jurnal">
+                        @error('author_password')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

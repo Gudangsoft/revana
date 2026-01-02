@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Tasks - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Tugas Review Saya')
 
 @section('sidebar')
@@ -58,9 +58,9 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Jurnal</th>
-                                <th>Akreditasi</th>
-                                <th>Points</th>
+                                <th>Artikel</th>
+                                <th>Bahasa</th>
+                                <th>Deadline</th>
                                 <th>Status</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
@@ -71,23 +71,31 @@
                             <tr data-status="{{ $assignment->status }}">
                                 <td>{{ $loop->iteration + ($assignments->currentPage() - 1) * $assignments->perPage() }}</td>
                                 <td>
-                                    <strong>{{ Str::limit($assignment->journal->title, 50) }}</strong><br>
+                                    <strong>{{ Str::limit($assignment->article_title ?? 'N/A', 50) }}</strong><br>
                                     <small class="text-muted">
                                         <i class="bi bi-link-45deg"></i>
-                                        <a href="{{ $assignment->journal->link }}" target="_blank">Buka Jurnal</a>
+                                        @if($assignment->submit_link)
+                                            <a href="{{ $assignment->submit_link }}" target="_blank">Buka Link Submit</a>
+                                        @else
+                                            N/A
+                                        @endif
                                     </small>
                                     @if($assignment->status === 'APPROVED')
                                         <br>
                                         <span class="badge bg-success mt-1">
-                                            <i class="bi bi-check-circle-fill"></i> Poin Diterima (+{{ $assignment->journal->points }} pts)
+                                            <i class="bi bi-check-circle-fill"></i> Review Selesai
                                         </span>
                                     @endif
                                 </td>
-                                <td><span class="badge bg-info">{{ $assignment->journal->accreditation }}</span></td>
+                                <td><span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span></td>
                                 <td>
-                                    <span class="badge bg-{{ $assignment->status === 'APPROVED' ? 'success' : 'warning' }}">
-                                        {{ $assignment->journal->points }} pts
-                                    </span>
+                                    @if($assignment->deadline)
+                                        <span class="badge bg-warning text-dark">
+                                            {{ $assignment->deadline->format('d M Y') }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary">N/A</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @php

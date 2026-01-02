@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Reviewer Dashboard - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Dashboard Reviewer')
 
 @section('sidebar')
@@ -141,9 +141,9 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Jurnal</th>
-                                <th>Akreditasi</th>
-                                <th>Points</th>
+                                <th>Artikel</th>
+                                <th>Bahasa</th>
+                                <th>Deadline</th>
                                 <th>Status</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
@@ -153,10 +153,16 @@
                             @forelse($recentAssignments as $assignment)
                             <tr>
                                 <td>
-                                    <strong>{{ Str::limit($assignment->journal->title, 50) }}</strong>
+                                    <strong>{{ Str::limit($assignment->article_title ?? 'N/A', 50) }}</strong>
                                 </td>
-                                <td>{{ $assignment->journal->accreditation }}</td>
-                                <td><span class="badge bg-info">{{ $assignment->journal->points }} pts</span></td>
+                                <td><span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span></td>
+                                <td>
+                                    @if($assignment->deadline)
+                                        <span class="badge bg-warning text-dark">{{ $assignment->deadline->format('d M Y') }}</span>
+                                    @else
+                                        <span class="badge bg-secondary">N/A</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @php
                                         $statusColors = [

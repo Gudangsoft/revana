@@ -10,11 +10,19 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'pic' => [
+            'driver' => 'session',
+            'provider' => 'pics',
+        ],
     ],
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+        'pics' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Pic::class,
         ],
     ],
     'passwords' => [

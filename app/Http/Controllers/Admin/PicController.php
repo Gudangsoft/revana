@@ -23,10 +23,13 @@ class PicController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'role' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
         ]);
+
+        $validated['is_active'] = $request->has('is_active');
 
         Pic::create($validated);
 
@@ -43,10 +46,13 @@ class PicController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'role' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
         ]);
+
+        $validated['is_active'] = $request->has('is_active');
 
         $pic->update($validated);
 

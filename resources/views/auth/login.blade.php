@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - REVANA</title>
+    <title>Login - {{ $settings['app_name'] }}</title>
+    @if($settings['favicon'])
+    <link rel="icon" href="{{ asset('storage/' . $settings['favicon']) }}" type="image/x-icon">
+    @endif
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -66,10 +69,32 @@
                     <div class="row g-0">
                         <div class="col-md-5 login-left">
                             <div class="logo">
-                                <i class="bi bi-journal-check"></i><br>REVANA
+                                @if($settings['logo'])
+                                    <img src="{{ asset('storage/' . $settings['logo']) }}" alt="Logo" style="max-height: 80px; margin-bottom: 1rem;">
+                                @else
+                                    <i class="bi bi-journal-check"></i>
+                                @endif
+                                <br>{{ $settings['app_name'] }}
                             </div>
-                            <h4>Review Validation & Analytics</h4>
-                            <p class="mb-0">Platform monitoring dan manajemen review jurnal ilmiah dengan sistem point, badge, dan reward.</p>
+                            <h4>{{ $settings['tagline'] }}</h4>
+                            <p class="mb-0">Platform monitoring dan manajemen review artikel ilmiah dengan sistem gamifikasi.</p>
+                            
+                            @if($settings['address'] || $settings['contact'])
+                            <hr class="my-4 border-white opacity-25">
+                            @if($settings['address'])
+                            <div class="mb-3">
+                                <h6 class="mb-2"><i class="bi bi-geo-alt-fill"></i> Alamat</h6>
+                                <p class="small mb-0" style="line-height: 1.6;">{{ $settings['address'] }}</p>
+                            </div>
+                            @endif
+                            
+                            @if($settings['contact'])
+                            <div>
+                                <h6 class="mb-2"><i class="bi bi-telephone-fill"></i> Kontak</h6>
+                                <p class="small mb-0" style="line-height: 1.6; white-space: pre-line;">{{ $settings['contact'] }}</p>
+                            </div>
+                            @endif
+                            @endif
                         </div>
                         <div class="col-md-7 login-right">
                             <h3 class="mb-4">Login</h3>
@@ -112,12 +137,14 @@
                                 </button>
                             </form>
 
-                            <div class="mt-4 text-center">
-                                <small class="text-muted">
-                                    <strong>Demo Accounts:</strong><br>
-                                    Admin: admin@revana.com / password<br>
-                                    Reviewer: ahmad@revana.com / password
-                                </small>
+                            <div class="mt-3 text-center">
+                                <hr class="my-3">
+                                <a href="{{ route('reviewer-registration.form') }}" class="btn btn-success w-100 mb-2">
+                                    <i class="bi bi-person-plus-fill"></i> Daftar sebagai Reviewer
+                                </a>
+                                <a href="{{ route('pic.login') }}" class="btn btn-outline-secondary w-100" style="display: none;">
+                                    <i class="bi bi-person-badge"></i> Login sebagai PIC
+                                </a>
                             </div>
                         </div>
                     </div>

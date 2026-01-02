@@ -1,39 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Review Assignments - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Daftar Review Assignment')
 
 @section('sidebar')
-    <a href="{{ route('admin.dashboard') }}" class="nav-link">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('admin.journals.index') }}" class="nav-link">
-        <i class="bi bi-journal-text"></i> Jurnal
-    </a>
-    <a href="{{ route('admin.assignments.index') }}" class="nav-link active">
-        <i class="bi bi-clipboard-check"></i> Review Assignments
-    </a>
-    <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
-        <i class="bi bi-people"></i> Reviewers
-    </a>
-    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Reward Redemptions
-    </a>
-    <a href="{{ route('admin.points.index') }}" class="nav-link">
-        <i class="bi bi-coin"></i> Point Management
-    </a>
-    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
-        <i class="bi bi-trophy"></i> Reward Management
-    </a>
-    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
-        <i class="bi bi-megaphone"></i> Marketing
-    </a>
-    <a href="{{ route('admin.pics.index') }}" class="nav-link">
-        <i class="bi bi-person-badge"></i> PIC
-    </a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
@@ -75,7 +46,7 @@
                 <thead>
                     <tr>
                         <th class="hide-mobile">#</th>
-                        <th>Jurnal</th>
+                        <th>Artikel</th>
                         <th class="hide-mobile">Reviewer</th>
                         <th>Status</th>
                         <th class="hide-mobile">Assigned By</th>
@@ -88,10 +59,12 @@
                     <tr>
                         <td class="hide-mobile">{{ $assignment->id }}</td>
                         <td>
-                            <div class="fw-bold">{{ Str::limit($assignment->journal->title, 40) }}</div>
+                            <div class="fw-bold">{{ Str::limit($assignment->article_title ?? 'N/A', 40) }}</div>
                             <small class="text-muted d-block d-md-inline">
-                                <span class="badge bg-secondary">{{ $assignment->journal->accreditation }}</span>
-                                {{ $assignment->journal->points }} pts
+                                <span class="badge bg-secondary"><i class="bi bi-translate"></i> {{ $assignment->language ?? 'N/A' }}</span>
+                                @if($assignment->deadline)
+                                    <i class="bi bi-calendar-event"></i> {{ $assignment->deadline->format('d M Y') }}
+                                @endif
                             </small>
                             <div class="d-md-none mt-1">
                                 <small class="text-muted"><i class="bi bi-person"></i> {{ $assignment->reviewer->name }}</small>

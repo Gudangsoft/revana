@@ -15,7 +15,15 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect('/dashboard');
+                // Redirect based on guard
+                if ($guard === 'pic') {
+                    $pic = Auth::guard('pic')->user();
+                    if ($pic && $pic->isAuthor()) {
+                        return redirect()->route('pic.author.dashboard');
+                    }
+                    return redirect()->route('pic.author.dashboard');
+                }
+                return redirect('/monitoring');
             }
         }
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Task - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Detail Tugas Review')
 
 @section('sidebar')
@@ -26,29 +26,71 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-journal-text"></i> Informasi Jurnal
+                <i class="bi bi-file-text"></i> Informasi Artikel
             </div>
             <div class="card-body">
-                <h4>{{ $assignment->journal->title }}</h4>
+                <h4>{{ $assignment->article_title ?? 'N/A' }}</h4>
                 <hr>
                 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <strong>Akreditasi:</strong><br>
-                        <span class="badge bg-info mt-1">{{ $assignment->journal->accreditation }}</span>
+                        <strong>Bahasa:</strong><br>
+                        <span class="badge bg-secondary mt-1">{{ $assignment->language ?? 'N/A' }}</span>
                     </div>
                     <div class="col-md-6">
-                        <strong>Points Reward:</strong><br>
-                        <span class="badge bg-success mt-1" style="font-size: 1.2rem;">{{ $assignment->journal->points }} Points</span>
+                        <strong>Deadline:</strong><br>
+                        @if($assignment->deadline)
+                            <span class="badge bg-warning text-dark mt-1" style="font-size: 1.2rem;">{{ $assignment->deadline->format('d M Y') }}</span>
+                        @else
+                            <span class="badge bg-secondary mt-1">N/A</span>
+                        @endif
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <strong>Link Jurnal:</strong><br>
-                    <a href="{{ $assignment->journal->link }}" target="_blank" class="btn btn-sm btn-primary mt-1">
-                        <i class="bi bi-box-arrow-up-right"></i> Buka Jurnal
-                    </a>
+                    <strong>Link Submit:</strong><br>
+                    @if($assignment->submit_link)
+                        <a href="{{ $assignment->submit_link }}" target="_blank" class="btn btn-sm btn-primary mt-1">
+                            <i class="bi bi-box-arrow-up-right"></i> Buka Link Submit
+                        </a>
+                    @else
+                        <span class="text-muted">N/A</span>
+                    @endif
                 </div>
+
+                <div class="mb-3">
+                    <strong>Username Akun:</strong><br>
+                    <code>{{ $assignment->account_username ?? 'N/A' }}</code>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Password Akun:</strong><br>
+                    <code>{{ $assignment->account_password ?? 'N/A' }}</code>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Surat Tugas:</strong><br>
+                    @if($assignment->assignment_letter_link)
+                        <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-sm btn-primary mt-1">
+                            <i class="bi bi-file-earmark-pdf"></i> Lihat Surat Tugas
+                        </a>
+                    @else
+                        <span class="text-muted">N/A</span>
+                    @endif
+                </div>
+
+                @if($assignment->status == 'APPROVED')
+                <div class="mb-3">
+                    <strong>Link Sertifikat:</strong><br>
+                    @if($assignment->certificate_link)
+                        <a href="{{ $assignment->certificate_link }}" target="_blank" class="btn btn-sm btn-success mt-1">
+                            <i class="bi bi-award"></i> Lihat Sertifikat
+                        </a>
+                    @else
+                        <span class="text-muted">Sertifikat belum tersedia</span>
+                    @endif
+                </div>
+                @endif
 
                 <div class="mb-3">
                     <strong>Status:</strong><br>
@@ -152,8 +194,7 @@
 
                 @if($assignment->status == 'APPROVED')
                     <div class="alert alert-success">
-                        <i class="bi bi-check-circle"></i> Review telah disetujui!<br>
-                        <strong>+{{ $assignment->journal->points }} Points</strong>
+                        <i class="bi bi-check-circle"></i> Review telah disetujui!
                     </div>
                 @endif
 

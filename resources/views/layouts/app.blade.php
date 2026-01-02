@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'REVANA - Review Validation & Analytics')</title>
+    <title>@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])</title>
+    @if($appSettings['favicon'])
+    <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">
+    @endif
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -335,7 +338,11 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="logo">
-            <i class="bi bi-journal-check"></i> REVANA
+            @if($appSettings['logo'])
+                <img src="{{ asset('storage/' . $appSettings['logo']) }}" alt="Logo" style="max-height: 40px; max-width: 180px;">
+            @else
+                <i class="bi bi-journal-check"></i> {{ $appSettings['app_name'] }}
+            @endif
         </div>
         <nav class="nav flex-column mt-4">
             @yield('sidebar')

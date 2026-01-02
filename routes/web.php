@@ -11,19 +11,39 @@ use App\Http\Controllers\Admin\RewardController as AdminRewardController;
 use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Admin\MarketingController;
 use App\Http\Controllers\Admin\PicController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
 use App\Http\Controllers\Reviewer\RewardController;
 use App\Http\Controllers\Reviewer\ProfileController;
 use App\Http\Controllers\Reviewer\LeaderboardController as ReviewerLeaderboardController;
+use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
+use App\Http\Controllers\Pic\AuthorController;
+use App\Http\Controllers\ReviewerRegistrationController;
+use App\Http\Controllers\Admin\ReviewerRegistrationController as AdminReviewerRegistrationController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// Root redirect
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect('/monitoring');
+    }
+    return redirect('/login');
+});
+
+// Test route PIC login
+Route::get('/pic-login-test', function () {
+    return view('pic.auth.login');
+});
+
+// Reviewer Registration (public access)
+Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'showForm'])->name('reviewer-registration.form');
+Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store'])->name('reviewer-registration.store');
 
 // Guest routes
 Route::middleware('guest')->group(function () {
-    Route::get('/', function () {
-        return redirect('/login');
-    });
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 });
@@ -32,6 +52,10 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+    // Monitoring routes (accessible by all authenticated users)
+    Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
+    Route::get('/monitoring/{journal}', [MonitoringController::class, 'show'])->name('monitoring.show');
+
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
@@ -39,6 +63,9 @@ Route::middleware('auth')->group(function () {
         
         // Journals
         Route::resource('journals', JournalController::class);
+        
+        // Accreditations
+        Route::resource('accreditations', \App\Http\Controllers\Admin\AccreditationController::class);
         
         // Review Assignments
         Route::get('/assignments', [AdminReviewAssignmentController::class, 'index'])->name('assignments.index');
@@ -83,6 +110,17 @@ Route::middleware('auth')->group(function () {
         
         // PIC Management
         Route::resource('pics', PicController::class)->except(['show']);
+        
+        // Reviewer Registrations Management
+        Route::get('/reviewer-registrations', [AdminReviewerRegistrationController::class, 'index'])->name('reviewer-registrations.index');
+        Route::get('/reviewer-registrations/{registration}', [AdminReviewerRegistrationController::class, 'show'])->name('reviewer-registrations.show');
+        Route::post('/reviewer-registrations/{registration}/approve', [AdminReviewerRegistrationController::class, 'approve'])->name('reviewer-registrations.approve');
+        Route::post('/reviewer-registrations/{registration}/reject', [AdminReviewerRegistrationController::class, 'reject'])->name('reviewer-registrations.reject');
+        Route::delete('/reviewer-registrations/{registration}', [AdminReviewerRegistrationController::class, 'destroy'])->name('reviewer-registrations.destroy');
+        
+        // Settings
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
     });
 
     // Reviewer routes
@@ -110,5 +148,28 @@ Route::middleware('auth')->group(function () {
         
         // Leaderboard
         Route::get('/leaderboard', [ReviewerLeaderboardController::class, 'index'])->name('leaderboard.index');
+    });
+
+});
+
+// PIC Routes - Separate from main auth
+Route::prefix('pic')->group(function () {
+    // PIC Login (guest only)
+    Route::middleware('guest:pic')->group(function () {
+        Route::get('/login', [PicLoginController::class, 'showLoginForm'])->name('pic.login');
+        Route::post('/login', [PicLoginController::class, 'login'])->name('pic.login.submit');
+    });
+    
+    // PIC Authenticated routes
+    Route::middleware('auth:pic')->group(function () {
+        Route::post('/logout', [PicLoginController::class, 'logout'])->name('pic.logout');
+        
+        // PIC Author routes
+        Route::prefix('author')->name('pic.author.')->group(function () {
+            Route::get('/dashboard', [AuthorController::class, 'dashboard'])->name('dashboard');
+            Route::get('/create', [AuthorController::class, 'create'])->name('create');
+            Route::post('/store', [AuthorController::class, 'store'])->name('store');
+            Route::get('/{journal}', [AuthorController::class, 'show'])->name('show');
+        });
     });
 });

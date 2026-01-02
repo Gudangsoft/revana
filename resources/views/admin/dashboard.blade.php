@@ -1,39 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Dashboard - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Dashboard Admin')
 
 @section('sidebar')
-    <a href="{{ route('admin.dashboard') }}" class="nav-link active">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('admin.journals.index') }}" class="nav-link">
-        <i class="bi bi-journal-text"></i> Jurnal
-    </a>
-    <a href="{{ route('admin.assignments.index') }}" class="nav-link">
-        <i class="bi bi-clipboard-check"></i> Review Assignments
-    </a>
-    <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
-        <i class="bi bi-people"></i> Reviewers
-    </a>
-    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Reward Redemptions
-    </a>
-    <a href="{{ route('admin.points.index') }}" class="nav-link">
-        <i class="bi bi-coin"></i> Point Management
-    </a>
-    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
-        <i class="bi bi-trophy"></i> Reward Management
-    </a>
-    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
-        <i class="bi bi-megaphone"></i> Marketing
-    </a>
-    <a href="{{ route('admin.pics.index') }}" class="nav-link">
-        <i class="bi bi-person-badge"></i> PIC
-    </a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
@@ -183,10 +154,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th>No</th>
-                                <th>Judul Jurnal</th>
-                                <th>Akreditasi</th>
-                                <th>Points</th>
-                                <th class="hide-mobile">Terbitan</th>
+                                <th>Judul Artikel</th>
+                                <th>Bahasa</th>
                                 <th>Reviewer</th>
                                 <th class="hide-mobile">Institusi</th>
                                 <th>Hasil</th>
@@ -198,20 +167,18 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
-                                    <strong>{{ Str::limit($review->journal->title, 40) }}</strong>
+                                    <strong>{{ Str::limit($review->article_title ?? 'N/A', 40) }}</strong>
                                 </td>
-                                <td><span class="badge bg-info">{{ $review->journal->accreditation }}</span></td>
-                                <td><span class="badge bg-success">{{ $review->journal->points }} pts</span></td>
-                                <td class="hide-mobile">
-                                    <small>{{ $review->journal->publisher ?? '-' }}</small>
-                                </td>
+                                <td><span class="badge bg-secondary">{{ $review->language ?? 'N/A' }}</span></td>
                                 <td>{{ Str::limit($review->reviewer->name, 25) }}</td>
                                 <td class="hide-mobile">
-                                    <small>{{ Str::limit($review->reviewer->institution ?? '-', 25) }}</small>
+                                    <small>{{ Str::limit($review->reviewer->affiliation ?? '-', 25) }}</small>
                                 </td>
                                 <td>
-                                    @if($review->reviewResult)
-                                        <span class="badge bg-primary">{{ $review->reviewResult->recommendation }}</span>
+                                    @if($review->result && $review->result->google_drive_link)
+                                        <a href="{{ $review->result->google_drive_link }}" target="_blank" class="btn btn-sm btn-success">
+                                            <i class="bi bi-file-earmark-check"></i> Lihat
+                                        </a>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -220,9 +187,9 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="7" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                    <p class="mb-0">Belum ada jurnal yang selesai direview</p>
+                                    <p class="mb-0">Belum ada artikel yang selesai direview</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -249,7 +216,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Jurnal</th>
+                                <th>Artikel</th>
                                 <th>Reviewer</th>
                                 <th>Status</th>
                                 <th>Tanggal</th>
@@ -260,8 +227,13 @@
                             @forelse($recentAssignments as $assignment)
                             <tr>
                                 <td>
-                                    <strong>{{ Str::limit($assignment->journal->title, 50) }}</strong><br>
-                                    <small class="text-muted">{{ $assignment->journal->accreditation }} ({{ $assignment->journal->points }} pts)</small>
+                                    <strong>{{ Str::limit($assignment->article_title ?? 'N/A', 50) }}</strong><br>
+                                    <small class="text-muted">
+                                        <span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span>
+                                        @if($assignment->deadline)
+                                            | Deadline: {{ $assignment->deadline->format('d M Y') }}
+                                        @endif
+                                    </small>
                                 </td>
                                 <td>{{ $assignment->reviewer->name }}</td>
                                 <td>
@@ -330,11 +302,10 @@
                     <div class="alert alert-warning mb-0">
                         <strong>Data yang akan diexport:</strong>
                         <ul class="mb-0 mt-2">
-                            <li>Judul Jurnal & Link</li>
-                            <li>Akreditasi & Points</li>
-                            <li>Terbitan, Marketing, PIC</li>
-                            <li>Data Reviewer</li>
-                            <li>Hasil & Komentar Review</li>
+                            <li>Judul Artikel & Link Submit</li>
+                            <li>Bahasa & Deadline</li>
+                            <li>Data Reviewer & Institusi</li>
+                            <li>Hasil Review (Link Google Drive)</li>
                             <li>Tanggal-tanggal penting</li>
                         </ul>
                     </div>

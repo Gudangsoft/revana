@@ -31,6 +31,7 @@ class User extends Authenticatable
         'scopus_id',
         'bio',
         'photo',
+        'article_languages',
     ];
 
     protected $hidden = [
@@ -44,6 +45,7 @@ class User extends Authenticatable
         'total_points' => 'integer',
         'available_points' => 'integer',
         'completed_reviews' => 'integer',
+        'article_languages' => 'array',
     ];
 
     public function isAdmin()

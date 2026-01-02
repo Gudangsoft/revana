@@ -9,6 +9,11 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
+            // Check if request is for PIC routes
+            if ($request->is('pic/*')) {
+                return route('pic.login');
+            }
+            
             return route('login');
         }
     }

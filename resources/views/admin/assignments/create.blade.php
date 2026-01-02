@@ -1,39 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Assign Reviewer - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Tugaskan Reviewer')
 
 @section('sidebar')
-    <a href="{{ route('admin.dashboard') }}" class="nav-link">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('admin.journals.index') }}" class="nav-link">
-        <i class="bi bi-journal-text"></i> Jurnal
-    </a>
-    <a href="{{ route('admin.assignments.index') }}" class="nav-link active">
-        <i class="bi bi-clipboard-check"></i> Review Assignments
-    </a>
-    <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
-        <i class="bi bi-people"></i> Reviewers
-    </a>
-    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Reward Redemptions
-    </a>
-    <a href="{{ route('admin.points.index') }}" class="nav-link">
-        <i class="bi bi-coin"></i> Point Management
-    </a>
-    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
-        <i class="bi bi-trophy"></i> Reward Management
-    </a>
-    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
-        <i class="bi bi-megaphone"></i> Marketing
-    </a>
-    <a href="{{ route('admin.pics.index') }}" class="nav-link">
-        <i class="bi bi-person-badge"></i> PIC
-    </a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
@@ -48,29 +19,85 @@
                     @csrf
 
                     <div class="mb-3">
-                        <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
-                        <select class="form-select @error('journal_id') is-invalid @enderror" 
-                                name="journal_id" id="journalSelect" required>
-                            <option value="">-- Pilih Jurnal --</option>
-                            @foreach($journals as $journal)
-                            <option value="{{ $journal->id }}" 
-                                    data-title="{{ $journal->title }}"
-                                    data-accreditation="{{ $journal->accreditation }}"
-                                    data-points="{{ $journal->points }}"
-                                    {{ old('journal_id') == $journal->id ? 'selected' : '' }}>
-                                {{ Str::limit($journal->title, 80) }} - {{ $journal->accreditation }}
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('journal_id')
+                        <label class="form-label">Judul Artikel <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('article_title') is-invalid @enderror" 
+                               name="article_title" value="{{ old('article_title') }}" 
+                               placeholder="Masukkan judul artikel" required>
+                        @error('article_title')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div id="journalInfo" class="alert alert-info" style="display: none;">
-                        <strong>Jurnal:</strong> <span id="infoTitle"></span><br>
-                        <strong>Akreditasi:</strong> <span id="infoAccreditation"></span><br>
-                        <strong>Points Reward:</strong> <span id="infoPoints"></span>
+                    <div class="mb-3">
+                        <label class="form-label">Link Submit <span class="text-danger">*</span></label>
+                        <input type="url" class="form-control @error('submit_link') is-invalid @enderror" 
+                               name="submit_link" value="{{ old('submit_link') }}" 
+                               placeholder="https://" required>
+                        @error('submit_link')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">User Akun <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('account_username') is-invalid @enderror" 
+                                   name="account_username" value="{{ old('account_username') }}" 
+                                   placeholder="Username akun" required>
+                            @error('account_username')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Pass Akun <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('account_password') is-invalid @enderror" 
+                                   name="account_password" value="{{ old('account_password') }}" 
+                                   placeholder="Password akun" required>
+                            @error('account_password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Surat Tugas (Link) <span class="text-danger">*</span></label>
+                        <input type="url" class="form-control @error('assignment_letter_link') is-invalid @enderror" 
+                               name="assignment_letter_link" value="{{ old('assignment_letter_link') }}" 
+                               placeholder="https://" required>
+                        @error('assignment_letter_link')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Link Sertifikat <span class="text-danger">*</span></label>
+                        <input type="url" class="form-control @error('certificate_link') is-invalid @enderror" 
+                               name="certificate_link" value="{{ old('certificate_link') }}" 
+                               placeholder="https://" required>
+                        @error('certificate_link')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Deadline <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control @error('deadline') is-invalid @enderror" 
+                               name="deadline" value="{{ old('deadline') }}" required>
+                        @error('deadline')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bahasa <span class="text-danger">*</span></label>
+                        <select class="form-select @error('language') is-invalid @enderror" 
+                                name="language" required>
+                            <option value="Indonesia" {{ old('language') == 'Indonesia' ? 'selected' : '' }}>Indonesia</option>
+                            <option value="Inggris" {{ old('language') == 'Inggris' ? 'selected' : '' }}>Inggris</option>
+                        </select>
+                        @error('language')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
@@ -81,6 +108,9 @@
                             @foreach($reviewers as $reviewer)
                             <option value="{{ $reviewer->id }}" {{ old('reviewer_id') == $reviewer->id ? 'selected' : '' }}>
                                 {{ $reviewer->name }} - {{ $reviewer->email }}
+                                @if($reviewer->article_languages)
+                                    [{{ implode(', ', $reviewer->article_languages) }}]
+                                @endif
                                 ({{ $reviewer->completed_reviews }} reviews, {{ $reviewer->total_points }} pts)
                             </option>
                             @endforeach
@@ -136,22 +166,5 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-document.getElementById('journalSelect').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const infoDiv = document.getElementById('journalInfo');
-    
-    if (this.value) {
-        document.getElementById('infoTitle').textContent = selectedOption.dataset.title;
-        document.getElementById('infoAccreditation').textContent = selectedOption.dataset.accreditation;
-        document.getElementById('infoPoints').textContent = selectedOption.dataset.points + ' Points';
-        infoDiv.style.display = 'block';
-    } else {
-        infoDiv.style.display = 'none';
-    }
-});
-</script>
-@endpush
 @endsection
 

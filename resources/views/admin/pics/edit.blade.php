@@ -1,39 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Edit PIC - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Edit PIC')
 
 @section('sidebar')
-    <a href="{{ route('admin.dashboard') }}" class="nav-link">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('admin.journals.index') }}" class="nav-link">
-        <i class="bi bi-journal-text"></i> Jurnal
-    </a>
-    <a href="{{ route('admin.assignments.index') }}" class="nav-link">
-        <i class="bi bi-clipboard-check"></i> Review Assignments
-    </a>
-    <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
-        <i class="bi bi-people"></i> Reviewers
-    </a>
-    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Reward Redemptions
-    </a>
-    <a href="{{ route('admin.points.index') }}" class="nav-link">
-        <i class="bi bi-coin"></i> Point Management
-    </a>
-    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
-        <i class="bi bi-trophy"></i> Reward Management
-    </a>
-    <a href="{{ route('admin.marketings.index') }}" class="nav-link">
-        <i class="bi bi-megaphone"></i> Marketing
-    </a>
-    <a href="{{ route('admin.pics.index') }}" class="nav-link active">
-        <i class="bi bi-person-badge"></i> PIC
-    </a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
@@ -53,6 +24,22 @@
                         <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                name="name" value="{{ old('name', $pic->name) }}" required>
                         @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select @error('role') is-invalid @enderror" name="role">
+                            <option value="">Pilih Role</option>
+                            <option value="AUTOR 1" {{ old('role', $pic->role) == 'AUTOR 1' ? 'selected' : '' }}>AUTOR 1</option>
+                            <option value="EDITOR 1" {{ old('role', $pic->role) == 'EDITOR 1' ? 'selected' : '' }}>EDITOR 1</option>
+                            <option value="REVIEWER 1" {{ old('role', $pic->role) == 'REVIEWER 1' ? 'selected' : '' }}>REVIEWER 1</option>
+                            <option value="REVIEWER 2" {{ old('role', $pic->role) == 'REVIEWER 2' ? 'selected' : '' }}>REVIEWER 2</option>
+                            <option value="AUTOR 2" {{ old('role', $pic->role) == 'AUTOR 2' ? 'selected' : '' }}>AUTOR 2</option>
+                            <option value="COPY EDITING + PRODUCTION + PUBLISH" {{ old('role', $pic->role) == 'COPY EDITING + PRODUCTION + PUBLISH' ? 'selected' : '' }}>COPY EDITING + PRODUCTION + PUBLISH</option>
+                        </select>
+                        @error('role')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

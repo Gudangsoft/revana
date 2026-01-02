@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rewards - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Tukar Points dengan Rewards')
 
 @section('sidebar')

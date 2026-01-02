@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Upload Hasil Review - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Upload Hasil Review')
 
 @section('sidebar')
@@ -30,8 +30,14 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <strong>Jurnal:</strong> {{ $assignment->journal->title }}<br>
-                    <strong>Reward:</strong> <span class="badge bg-success">{{ $assignment->journal->points }} Points</span>
+                    <strong>Artikel:</strong> {{ $assignment->article_title ?? 'N/A' }}<br>
+                    <strong>Bahasa:</strong> <span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span>
+                    <strong>Deadline:</strong> 
+                    @if($assignment->deadline)
+                        <span class="badge bg-warning text-dark">{{ $assignment->deadline->format('d M Y') }}</span>
+                    @else
+                        <span class="badge bg-secondary">N/A</span>
+                    @endif
                 </div>
 
                 <form action="{{ route('reviewer.results.store', $assignment) }}" method="POST">
@@ -125,21 +131,11 @@
                 </ul>
                 <hr>
                 <small class="text-muted">
-                    Setelah submit, admin akan validasi. Jika disetujui, dapat 
-                    <strong>{{ $assignment->journal->points }} points</strong>.
+                    Setelah submit, admin akan validasi hasil review Anda.
                 </small>
             </div>
         </div>
 
-        <div class="card mt-3">
-            <div class="card-header bg-success text-white">
-                <i class="bi bi-trophy"></i> Reward
-            </div>
-            <div class="card-body text-center">
-                <h2 class="text-success">{{ $assignment->journal->points }}</h2>
-                <p class="mb-0">Points akan didapat jika disetujui</p>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

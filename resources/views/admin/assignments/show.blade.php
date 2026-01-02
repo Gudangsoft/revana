@@ -1,33 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Assignment - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', 'Detail Review Assignment')
 
 @section('sidebar')
-    <a href="{{ route('admin.dashboard') }}" class="nav-link">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('admin.journals.index') }}" class="nav-link">
-        <i class="bi bi-journal-text"></i> Jurnal
-    </a>
-    <a href="{{ route('admin.assignments.index') }}" class="nav-link active">
-        <i class="bi bi-clipboard-check"></i> Review Assignments
-    </a>
-    <a href="{{ route('admin.reviewers.index') }}" class="nav-link">
-        <i class="bi bi-people"></i> Reviewers
-    </a>
-    <a href="{{ route('admin.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('admin.redemptions.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Reward Redemptions
-    </a>
-    <a href="{{ route('admin.points.index') }}" class="nav-link">
-        <i class="bi bi-coin"></i> Point Management
-    </a>
-    <a href="{{ route('admin.rewards.index') }}" class="nav-link">
-        <i class="bi bi-trophy"></i> Reward Management
-    </a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
@@ -153,42 +130,90 @@
         <!-- Journal Info -->
         <div class="card mb-3">
             <div class="card-header bg-info text-white">
-                <i class="bi bi-journal-text"></i> Informasi Jurnal
+                <i class="bi bi-file-text"></i> Informasi Artikel
             </div>
             <div class="card-body">
-                <h5 class="mb-3">{{ $assignment->journal->title }}</h5>
+                <h5 class="mb-3">{{ $assignment->article_title ?? 'N/A' }}</h5>
                 <div class="row mb-2">
                     <div class="col-md-4">
-                        <strong>Authors:</strong>
+                        <strong>Bahasa:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ $assignment->journal->authors }}
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <strong>Akreditasi:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        <span class="badge bg-secondary">{{ $assignment->journal->accreditation }}</span>
+                        <span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span>
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-4">
-                        <strong>Points Reward:</strong>
+                        <strong>Link Submit:</strong>
                     </div>
                     <div class="col-md-8">
-                        <span class="badge bg-warning text-dark">{{ $assignment->journal->points }} Points</span>
+                        @if($assignment->submit_link)
+                            <a href="{{ $assignment->submit_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-link-45deg"></i> Buka Link
+                            </a>
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
                     </div>
                 </div>
-                @if($assignment->journal->abstract)
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <strong>Abstract:</strong>
-                        <p class="mt-2">{{ $assignment->journal->abstract }}</p>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Username Akun:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        <code>{{ $assignment->account_username ?? 'N/A' }}</code>
                     </div>
                 </div>
-                @endif
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Password Akun:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        <code>{{ $assignment->account_password ?? 'N/A' }}</code>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Surat Tugas:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        @if($assignment->assignment_letter_link)
+                            <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-pdf"></i> Lihat Surat
+                            </a>
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Link Sertifikat:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        @if($assignment->certificate_link)
+                            <a href="{{ $assignment->certificate_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-award"></i> Lihat Sertifikat
+                            </a>
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Deadline:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        @if($assignment->deadline)
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-calendar-event"></i> {{ $assignment->deadline->format('d M Y') }}
+                            </span>
+                        @else
+                            <span class="badge bg-secondary">N/A</span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
 

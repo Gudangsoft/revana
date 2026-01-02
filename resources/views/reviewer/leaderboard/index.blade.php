@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Leaderboard - REVANA')
+@section('title', ' - ' . $appSettings['app_name'])
 @section('page-title', '🏆 Leaderboard Reviewer')
 
 @section('sidebar')
