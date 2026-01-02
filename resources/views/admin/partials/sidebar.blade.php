@@ -12,25 +12,25 @@
     <i class="bi bi-award"></i> Akreditasi
 </a> --}}
 <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.assignments') ? 'active' : '' }}">
-    <i class="bi bi-clipboard-check"></i> Review Assignments
+    <i class="bi bi-clipboard-check"></i> Penugasan Review
 </a>
 <a href="{{ route('admin.reviewers.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewers') ? 'active' : '' }}">
-    <i class="bi bi-people"></i> Reviewers
+    <i class="bi bi-people"></i> Daftar Reviewer
 </a>
 <a href="{{ route('admin.reviewer-registrations.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewer-registrations') ? 'active' : '' }}">
     <i class="bi bi-person-plus-fill"></i> Pendaftaran Reviewer
 </a>
 <a href="{{ route('admin.leaderboard.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.leaderboard') ? 'active' : '' }}">
-    <i class="bi bi-trophy-fill"></i> Leaderboard
+    <i class="bi bi-trophy-fill"></i> Papan Peringkat
 </a>
 <a href="{{ route('admin.redemptions.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.redemptions') ? 'active' : '' }}">
-    <i class="bi bi-gift"></i> Reward Redemptions
+    <i class="bi bi-gift"></i> Penukaran Reward
 </a>
 <a href="{{ route('admin.points.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.points') ? 'active' : '' }}">
-    <i class="bi bi-coin"></i> Point Management
+    <i class="bi bi-coin"></i> Manajemen Poin
 </a>
 <a href="{{ route('admin.rewards.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.rewards') ? 'active' : '' }}">
-    <i class="bi bi-trophy"></i> Reward Management
+    <i class="bi bi-trophy"></i> Manajemen Reward
 </a>
 <a href="{{ route('admin.marketings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.marketings') ? 'active' : '' }}">
     <i class="bi bi-megaphone"></i> Marketing
