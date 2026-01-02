@@ -190,6 +190,25 @@
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+        }
+
+        /* Better responsive tables */
+        @media (max-width: 768px) {
+            .table-responsive table {
+                min-width: 600px;
+            }
+        }
+
+        /* Form responsive */
+        .form-control,
+        .form-select {
+            font-size: 1rem;
+        }
+
+        /* Alert responsive */
+        .alert {
+            font-size: 0.95rem;
         }
 
         /* Mobile Responsive */
@@ -241,13 +260,31 @@
             /* Stack action buttons on mobile */
             .d-flex.gap-2 {
                 flex-wrap: wrap;
+                gap: 0.5rem !important;
+            }
+
+            /* Compact button groups */
+            .btn-group {
+                flex-wrap: wrap;
             }
 
             /* Make stats cards stack better */
             .col-md-3,
             .col-md-4,
-            .col-md-6 {
+            .col-md-6,
+            .col-md-8 {
                 margin-bottom: 1rem;
+            }
+
+            /* Better spacing for mobile */
+            .row {
+                margin-left: -0.5rem;
+                margin-right: -0.5rem;
+            }
+
+            .row > * {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
             }
 
             /* Reduce table font size on mobile */
@@ -258,6 +295,23 @@
             .table th,
             .table td {
                 padding: 0.5rem 0.35rem;
+                white-space: nowrap;
+            }
+
+            /* Badge size adjustment */
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            /* Card adjustments */
+            .card-title {
+                font-size: 1rem;
+            }
+
+            /* Modal adjustments */
+            .modal-dialog {
+                margin: 0.5rem;
             }
 
             /* Hide less important columns on mobile */
@@ -295,6 +349,10 @@
                 margin-bottom: 1rem;
             }
 
+            .card-body {
+                padding: 0.75rem;
+            }
+
             h1, .h1 {
                 font-size: 1.5rem;
             }
@@ -307,6 +365,10 @@
                 font-size: 1.1rem;
             }
 
+            h4, .h4 {
+                font-size: 1rem;
+            }
+
             /* Even more compact tables */
             .table {
                 font-size: 0.75rem;
@@ -317,10 +379,37 @@
                 padding: 0.4rem 0.25rem;
             }
 
+            /* Compact buttons */
+            .btn {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+
             /* Single column for forms on mobile */
             .row.mb-3 .col-md-4,
+            .row.mb-3 .col-md-6,
             .row.mb-3 .col-md-8 {
                 margin-bottom: 0.5rem;
+            }
+
+            /* Compact alerts */
+            .alert {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            /* Compact pagination */
+            .pagination {
+                font-size: 0.85rem;
+            }
+
+            .page-link {
+                padding: 0.375rem 0.75rem;
             }
         }
     </style>
