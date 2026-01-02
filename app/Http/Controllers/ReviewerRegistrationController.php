@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ReviewerRegistration;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Setting;
 
 class ReviewerRegistrationController extends Controller
 {
@@ -35,7 +36,7 @@ class ReviewerRegistrationController extends Controller
                 ->withInput();
         }
 
-        ReviewerRegistration::create([
+        $registration = ReviewerRegistration::create([
             'full_name' => $request->full_name,
             'affiliation' => $request->affiliation,
             'email' => $request->email,
@@ -47,6 +48,33 @@ class ReviewerRegistrationController extends Controller
             'article_languages' => $request->article_languages,
             'status' => 'pending',
         ]);
+
+        // Get admin contact from settings
+        $adminContact = Setting::get('contact');
+        $appName = Setting::get('app_name', 'System');
+        
+        if ($adminContact) {
+            // Clean phone number
+            $cleanPhone = preg_replace('/[^0-9]/', '', $adminContact);
+            
+            // Prepare WhatsApp message
+            $languages = implode(', ', $request->article_languages);
+            $message = "Halo Admin {$appName},%0A%0A"
+                     . "Saya baru saja mendaftar sebagai reviewer dengan data:%0A%0A"
+                     . "Nama: {$request->full_name}%0A"
+                     . "Email: {$request->email}%0A"
+                     . "Institusi: {$request->affiliation}%0A"
+                     . "Bidang Ilmu: {$request->field_of_study}%0A"
+                     . "Bahasa: {$languages}%0A"
+                     . "SINTA ID: {$request->sinta_id}%0A%0A"
+                     . "Mohon untuk memproses pendaftaran saya.%0A%0A"
+                     . "Terima kasih.";
+            
+            // Redirect to WhatsApp with success message
+            return redirect()->back()
+                ->with('success', 'Pendaftaran reviewer berhasil!')
+                ->with('whatsapp_url', "https://wa.me/{$cleanPhone}?text={$message}");
+        }
 
         return redirect()->back()->with('success', 'Pendaftaran reviewer berhasil! Kami akan menghubungi Anda segera.');
     }

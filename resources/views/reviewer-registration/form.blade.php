@@ -139,6 +139,22 @@
                         {{ session('success') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    
+                    @if(session('whatsapp_url'))
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="bi bi-whatsapp me-2"></i>
+                            <strong>Konfirmasi Pendaftaran</strong><br>
+                            Silakan klik tombol di bawah untuk mengirim konfirmasi pendaftaran melalui WhatsApp.
+                            <div class="mt-3">
+                                <a href="{{ session('whatsapp_url') }}" 
+                                   target="_blank" 
+                                   class="btn btn-success">
+                                    <i class="bi bi-whatsapp"></i> Konfirmasi via WhatsApp
+                                </a>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
                 @endif
 
                 @if($errors->any())
