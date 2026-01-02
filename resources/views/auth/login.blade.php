@@ -76,8 +76,8 @@
                                 @endif
                                 <br>{{ $settings['app_name'] }}
                             </div>
-                            <h4>{{ $settings['tagline'] }}</h4>
-                            <p class="mb-0">Platform monitoring dan manajemen review artikel ilmiah dengan sistem gamifikasi.</p>
+                            <h4>{{ $settings['full_name'] ?: $settings['tagline'] }}</h4>
+                            <p class="mb-0">{{ $settings['tagline'] }}</p>
                             
                             @if($settings['address'] || $settings['contact'])
                             <hr class="my-4 border-white opacity-25">

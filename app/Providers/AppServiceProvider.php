@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $settings = [
                 'app_name' => Setting::get('app_name', env('APP_NAME', 'SIPERA')),
+                'full_name' => Setting::get('full_name', 'Sistem Informasi Peer Review Artikel'),
                 'tagline' => Setting::get('tagline', 'Sistem Informasi Peer Review Artikel'),
                 'address' => Setting::get('address', ''),
                 'contact' => Setting::get('contact', ''),

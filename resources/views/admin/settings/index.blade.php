@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ' - ' . $appSettings['app_name'])
+@section('title', ' - Setting Web')
 @section('page-title', 'Setting Web')
 
 @section('sidebar')
@@ -41,17 +41,28 @@
                         <div class="mb-3">
                             <label class="form-label">Nama Aplikasi <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('app_name') is-invalid @enderror" 
-                                   name="app_name" value="{{ old('app_name', $settings['app_name']) }}" required>
+                                   name="app_name" value="{{ old('app_name', $settings['app_name'] ?? 'SIPERA') }}" required>
                             @error('app_name')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted">Nama aplikasi yang akan ditampilkan di header dan title</small>
+                            <small class="text-muted">Nama singkat aplikasi (contoh: SIPERA)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Kepanjangan Nama Aplikasi</label>
+                            <input type="text" class="form-control @error('full_name') is-invalid @enderror" 
+                                   name="full_name" value="{{ old('full_name', $settings['full_name'] ?? '') }}" 
+                                   placeholder="Sistem Informasi Peer Review Artikel">
+                            @error('full_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Kepanjangan lengkap dari nama aplikasi</small>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Tagline</label>
                             <input type="text" class="form-control @error('tagline') is-invalid @enderror" 
-                                   name="tagline" value="{{ old('tagline', $settings['tagline']) }}" 
+                                   name="tagline" value="{{ old('tagline', $settings['tagline'] ?? '') }}" 
                                    placeholder="Sistem Manajemen Review Jurnal">
                             @error('tagline')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -62,7 +73,7 @@
                         <div class="mb-3">
                             <label class="form-label">URL Aplikasi <span class="text-danger">*</span></label>
                             <input type="url" class="form-control @error('app_url') is-invalid @enderror" 
-                                   name="app_url" value="{{ old('app_url', $settings['app_url']) }}" 
+                                   name="app_url" value="{{ old('app_url', $settings['app_url'] ?? 'http://localhost') }}" 
                                    placeholder="http://example.com" required>
                             @error('app_url')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -116,7 +127,7 @@
                             <label class="form-label">Alamat</label>
                             <textarea class="form-control @error('address') is-invalid @enderror" 
                                       name="address" rows="3" 
-                                      placeholder="Jl. Contoh No. 123, Kota">{{ old('address', $settings['address']) }}</textarea>
+                                      placeholder="Jl. Contoh No. 123, Kota">{{ old('address', $settings['address'] ?? '') }}</textarea>
                             @error('address')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -127,7 +138,7 @@
                             <label class="form-label">Kontak</label>
                             <textarea class="form-control @error('contact') is-invalid @enderror" 
                                       name="contact" rows="3" 
-                                      placeholder="Telepon: +62 xxx&#10;Email: info@example.com&#10;WhatsApp: +62 xxx">{{ old('contact', $settings['contact']) }}</textarea>
+                                      placeholder="Telepon: +62 xxx&#10;Email: info@example.com&#10;WhatsApp: +62 xxx">{{ old('contact', $settings['contact'] ?? '') }}</textarea>
                             @error('contact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -143,7 +154,7 @@
                         <div class="mb-3">
                             <label class="form-label">Email Pengirim</label>
                             <input type="email" class="form-control @error('mail_from_address') is-invalid @enderror" 
-                                   name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address']) }}"
+                                   name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address'] ?? '') }}"
                                    placeholder="noreply@example.com">
                             @error('mail_from_address')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -154,8 +165,8 @@
                         <div class="mb-3">
                             <label class="form-label">Nama Pengirim</label>
                             <input type="text" class="form-control @error('mail_from_name') is-invalid @enderror" 
-                                   name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name']) }}"
-                                   placeholder="REVANA System">
+                                   name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name'] ?? '') }}"
+                                   placeholder="SIPERA System">
                             @error('mail_from_name')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

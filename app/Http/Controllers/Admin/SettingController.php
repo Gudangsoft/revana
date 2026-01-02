@@ -15,6 +15,7 @@ class SettingController extends Controller
         // Baca file .env
         $settings = [
             'app_name' => Setting::get('app_name', env('APP_NAME', 'REVANA')),
+            'full_name' => Setting::get('full_name', ''),
             'app_url' => env('APP_URL', 'http://localhost'),
             'mail_from_address' => env('MAIL_FROM_ADDRESS', ''),
             'mail_from_name' => env('MAIL_FROM_NAME', ''),
@@ -33,6 +34,7 @@ class SettingController extends Controller
     {
         $validated = $request->validate([
             'app_name' => 'required|string|max:255',
+            'full_name' => 'nullable|string|max:500',
             'app_url' => 'required|url',
             'mail_from_address' => 'nullable|email',
             'mail_from_name' => 'nullable|string|max:255',
@@ -79,6 +81,10 @@ class SettingController extends Controller
         
         // Update database settings (including app_name for real-time update)
         Setting::set('app_name', $validated['app_name']);
+        
+        if (isset($validated['full_name'])) {
+            Setting::set('full_name', $validated['full_name']);
+        }
         
         if (isset($validated['tagline'])) {
             Setting::set('tagline', $validated['tagline']);
