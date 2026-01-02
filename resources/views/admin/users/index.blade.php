@@ -1,0 +1,90 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Pengelolaan Pengguna</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Pengelolaan Pengguna</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Daftar Pengguna</h5>
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Tambah Pengguna
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($users as $user)
+                        <tr>
+                            <td>{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>
+                                @if($user->role === 'admin')
+                                    <span class="badge bg-danger">Admin</span>
+                                @elseif($user->role === 'reviewer')
+                                    <span class="badge bg-primary">Reviewer</span>
+                                @else
+                                    <span class="badge bg-info">{{ ucfirst($user->role) }}</span>
+                                @endif
+                            </td>
+                            <td>{{ $user->created_at->format('d M Y') }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center">Tidak ada data pengguna</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $users->links() }}
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

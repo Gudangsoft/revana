@@ -123,6 +123,9 @@ Route::middleware('auth')->group(function () {
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        
+        // Users
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     });
 
     // Reviewer routes

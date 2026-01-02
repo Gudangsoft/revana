@@ -38,6 +38,9 @@
 <a href="{{ route('admin.pics.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics') ? 'active' : '' }}">
     <i class="bi bi-person-badge"></i> PIC
 </a>
+<a href="{{ route('admin.users.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.users') ? 'active' : '' }}">
+    <i class="bi bi-person-gear"></i> Pengelolaan Pengguna
+</a>
 <hr>
 
 <a href="{{ route('admin.settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.settings') ? 'active' : '' }}">
