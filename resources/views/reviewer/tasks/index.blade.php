@@ -85,21 +85,16 @@
                                         <i class="bi bi-person-badge"></i> 
                                         @if($assignment->reviewer_id == auth()->id())
                                             Sebagai <strong>Reviewer 1</strong>
+                                            @if($assignment->reviewer2)
+                                                | <i class="bi bi-people"></i> Rekan: <strong>{{ $assignment->reviewer2->name }}</strong> (Reviewer 2)
+                                            @endif
                                         @elseif($assignment->reviewer2_id == auth()->id())
                                             Sebagai <strong>Reviewer 2</strong>
+                                            @if($assignment->reviewer)
+                                                | <i class="bi bi-people"></i> Rekan: <strong>{{ $assignment->reviewer->name }}</strong> (Reviewer 1)
+                                            @endif
                                         @endif
                                     </small>
-                                    @if($assignment->reviewer2 && $assignment->reviewer2_id != auth()->id())
-                                        <br>
-                                        <small class="text-info">
-                                            <i class="bi bi-people"></i> Dengan: {{ $assignment->reviewer2->name }} (Reviewer 2)
-                                        </small>
-                                    @elseif($assignment->reviewer_id != auth()->id() && $assignment->reviewer)
-                                        <br>
-                                        <small class="text-info">
-                                            <i class="bi bi-people"></i> Dengan: {{ $assignment->reviewer->name }} (Reviewer 1)
-                                        </small>
-                                    @endif
                                     @if($assignment->status === 'APPROVED')
                                         <br>
                                         <span class="badge bg-success mt-1">
