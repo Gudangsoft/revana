@@ -133,7 +133,15 @@
             </div>
             @if($reviewers->hasPages())
             <div class="card-footer">
-                {{ $reviewers->links() }}
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        @foreach(range(1, $reviewers->lastPage()) as $page)
+                            <li class="page-item {{ $page == $reviewers->currentPage() ? 'active' : '' }}">
+                                <a class="page-link" href="{{ $reviewers->url($page) }}">{{ $page }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </nav>
             </div>
             @endif
         </div>
