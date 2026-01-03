@@ -206,13 +206,28 @@
         .pagination .page-item:first-child,
         .pagination .page-item:last-child,
         .pagination li:first-child,
-        .pagination li:last-child {
+        .pagination li:last-child,
+        .page-item:first-child .page-link,
+        .page-item:last-child .page-link,
+        nav[role="navigation"] ul.pagination li:first-child,
+        nav[role="navigation"] ul.pagination li:last-child {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
             width: 0 !important;
             height: 0 !important;
             overflow: hidden !important;
+            position: absolute !important;
+            left: -9999px !important;
+        }
+
+        /* Additional pagination arrow hiding */
+        .pagination .page-link[rel="prev"],
+        .pagination .page-link[rel="next"],
+        a[rel="prev"],
+        a[rel="next"] {
+            display: none !important;
+            visibility: hidden !important;
         }
 
         /* Form responsive */

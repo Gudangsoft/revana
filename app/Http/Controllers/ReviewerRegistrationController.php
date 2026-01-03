@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ReviewerRegistration;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Setting;
@@ -36,47 +37,44 @@ class ReviewerRegistrationController extends Controller
                 ->withInput();
         }
 
+        // Hash password
+        $hashedPassword = Hash::make($request->password);
+
+        // Create user account immediately (auto-approve)
+        $user = User::create([
+            'name' => $request->full_name,
+            'email' => $request->email,
+            'password' => $hashedPassword,
+            'role' => 'reviewer',
+            'phone' => $request->whatsapp,
+            'institution' => $request->affiliation,
+            'specialization' => $request->field_of_study,
+            'sinta_id' => $request->sinta_id,
+            'scopus_id' => $request->scopus_id,
+            'article_languages' => $request->article_languages,
+            'total_points' => 0,
+            'available_points' => 0,
+            'completed_reviews' => 0,
+        ]);
+
+        // Save registration record with auto-approved status
         $registration = ReviewerRegistration::create([
             'full_name' => $request->full_name,
             'affiliation' => $request->affiliation,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $hashedPassword,
             'scopus_id' => $request->scopus_id,
             'sinta_id' => $request->sinta_id,
             'whatsapp' => $request->whatsapp,
             'field_of_study' => $request->field_of_study,
             'article_languages' => $request->article_languages,
-            'status' => 'pending',
+            'status' => 'approved',
+            'notes' => 'Otomatis disetujui - Akun reviewer telah dibuat.',
         ]);
 
-        // Get admin contact from settings
-        $adminContact = Setting::get('contact');
-        $appName = Setting::get('app_name', 'System');
-        
-        if ($adminContact) {
-            // Clean phone number
-            $cleanPhone = preg_replace('/[^0-9]/', '', $adminContact);
-            
-            // Prepare WhatsApp message
-            $languages = implode(', ', $request->article_languages);
-            $message = "Halo Admin {$appName},%0A%0A"
-                     . "Saya baru saja mendaftar sebagai reviewer dengan data:%0A%0A"
-                     . "Nama: {$request->full_name}%0A"
-                     . "Email: {$request->email}%0A"
-                     . "Institusi: {$request->affiliation}%0A"
-                     . "Bidang Ilmu: {$request->field_of_study}%0A"
-                     . "Bahasa: {$languages}%0A"
-                     . "SINTA ID: {$request->sinta_id}%0A%0A"
-                     . "Mohon untuk memproses pendaftaran saya.%0A%0A"
-                     . "Terima kasih.";
-            
-            // Redirect to WhatsApp with success message
-            return redirect()->back()
-                ->with('success', 'Pendaftaran reviewer berhasil!')
-                ->with('whatsapp_url', "https://wa.me/{$cleanPhone}?text={$message}");
-        }
-
-        return redirect()->back()->with('success', 'Pendaftaran reviewer berhasil! Kami akan menghubungi Anda segera.');
+        // Redirect to login page with success message
+        return redirect()->route('login')
+            ->with('success', 'Pendaftaran berhasil! Akun reviewer Anda sudah aktif. Silakan login dengan email dan password yang telah Anda daftarkan.');
     }
 
     public function thankYou()
