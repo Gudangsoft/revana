@@ -80,15 +80,24 @@
                                             N/A
                                         @endif
                                     </small>
+                                    <br>
+                                    <small class="text-primary">
+                                        <i class="bi bi-person-badge"></i> 
+                                        @if($assignment->reviewer_id == auth()->id())
+                                            Sebagai <strong>Reviewer 1</strong>
+                                        @elseif($assignment->reviewer2_id == auth()->id())
+                                            Sebagai <strong>Reviewer 2</strong>
+                                        @endif
+                                    </small>
                                     @if($assignment->reviewer2 && $assignment->reviewer2_id != auth()->id())
                                         <br>
                                         <small class="text-info">
-                                            <i class="bi bi-people"></i> Dengan: {{ $assignment->reviewer2->name }}
+                                            <i class="bi bi-people"></i> Dengan: {{ $assignment->reviewer2->name }} (Reviewer 2)
                                         </small>
                                     @elseif($assignment->reviewer_id != auth()->id() && $assignment->reviewer)
                                         <br>
                                         <small class="text-info">
-                                            <i class="bi bi-people"></i> Dengan: {{ $assignment->reviewer->name }}
+                                            <i class="bi bi-people"></i> Dengan: {{ $assignment->reviewer->name }} (Reviewer 1)
                                         </small>
                                     @endif
                                     @if($assignment->status === 'APPROVED')
