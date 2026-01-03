@@ -89,6 +89,8 @@
             width: 45px;
             height: 45px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            visibility: hidden;
+            opacity: 0;
         }
 
         .mobile-overlay {
@@ -222,9 +224,11 @@
             }
 
             .mobile-menu-toggle {
-                display: flex;
+                display: none;
                 align-items: center;
                 justify-content: center;
+                visibility: hidden;
+                opacity: 0;
             }
 
             .main-content {

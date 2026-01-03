@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ReviewAssignment;
 use App\Models\Reward;
 use App\Models\PointHistory;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -101,9 +100,6 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        // Get WhatsApp group link from settings
-        $whatsappGroupLink = Setting::get('whatsapp_group_link', '');
-
         return view('reviewer.dashboard', compact(
             'user',
             'pendingTasks',
@@ -115,8 +111,7 @@ class DashboardController extends Controller
             'chartData',
             'pointsEarned',
             'pointsSpent',
-            'statusDistribution',
-            'whatsappGroupLink'
+            'statusDistribution'
         ));
     }
 }

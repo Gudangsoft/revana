@@ -156,18 +156,6 @@
                             @enderror
                             <small class="text-muted">Nomor WhatsApp yang digunakan untuk mengirim konfirmasi kepada member yang baru selesai registrasi</small>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Link Group WhatsApp Member</label>
-                            <input type="url" class="form-control @error('whatsapp_group_link') is-invalid @enderror" 
-                                   name="whatsapp_group_link" 
-                                   value="{{ old('whatsapp_group_link', $settings['whatsapp_group_link'] ?? '') }}"
-                                   placeholder="https://chat.whatsapp.com/xxxxx">
-                            @error('whatsapp_group_link')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Link grup WhatsApp yang akan ditampilkan di dashboard member untuk join grup</small>
-                        </div>
                     </div>
 
                     <div class="mb-4">

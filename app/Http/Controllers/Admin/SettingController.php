@@ -24,7 +24,6 @@ class SettingController extends Controller
             'address' => Setting::get('address', ''),
             'contact' => Setting::get('contact', ''),
             'whatsapp_confirmation_number' => Setting::get('whatsapp_confirmation_number', ''),
-            'whatsapp_group_link' => Setting::get('whatsapp_group_link', ''),
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
         ];
@@ -44,7 +43,6 @@ class SettingController extends Controller
             'address' => 'nullable|string|max:1000',
             'contact' => 'nullable|string|max:500',
             'whatsapp_confirmation_number' => 'nullable|string|max:20',
-            'whatsapp_group_link' => 'nullable|url|max:500',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,png,jpg,svg,ico|max:512',
         ]);
@@ -105,10 +103,6 @@ class SettingController extends Controller
         // Simpan nomor WhatsApp konfirmasi (simpan juga jika kosong)
         $whatsappNumber = $request->input('whatsapp_confirmation_number', '');
         Setting::set('whatsapp_confirmation_number', $whatsappNumber);
-        
-        // Simpan link WhatsApp group
-        $whatsappGroupLink = $request->input('whatsapp_group_link', '');
-        Setting::set('whatsapp_group_link', $whatsappGroupLink);
         
         // Handle logo upload
         if ($request->hasFile('logo')) {

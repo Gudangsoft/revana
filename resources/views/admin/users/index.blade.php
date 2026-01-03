@@ -1,19 +1,14 @@
 @extends('layouts.app')
 
+@section('title', ' - Pengelolaan Pengguna')
+@section('page-title', 'Pengelolaan Pengguna')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
+
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2>Pengelolaan Pengguna</h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Pengelolaan Pengguna</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}

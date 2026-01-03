@@ -1,20 +1,14 @@
 @extends('layouts.app')
 
+@section('title', ' - Edit Pengguna')
+@section('page-title', 'Edit Pengguna')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
+
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2>Edit Pengguna</h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">Pengelolaan Pengguna</a></li>
-                    <li class="breadcrumb-item active">Edit</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-md-8">
             <div class="card">
