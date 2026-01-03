@@ -27,11 +27,28 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
+                <form action="{{ route('admin.reviewer-registrations.bulk-approve') }}" method="POST" id="bulkApproveForm">
+                    @csrf
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <button type="submit" class="btn btn-success" id="bulkApproveBtn" disabled>
+                                <i class="bi bi-check-circle"></i> Approve Terpilih (<span id="selectedCount">0</span>)
+                            </button>
+                        </div>
+                        <div>
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input" id="selectAll"> Pilih Semua Pending
+                            </label>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="30">
+                                        <input type="checkbox" class="form-check-input" id="selectAllHeader">
+                                    </th>
+                                    <th>Tanggal</th>
                                 <th>Nama Lengkap</th>
                                 <th>Email</th>
                                 <th>Afiliasi</th>
@@ -44,6 +61,11 @@
                         <tbody>
                             @forelse($registrations as $registration)
                             <tr>
+                                <td>
+                                    @if($registration->status === 'pending')
+                                        <input type="checkbox" name="registration_ids[]" value="{{ $registration->id }}" class="form-check-input registration-checkbox">
+                                    @endif
+                                </td>
                                 <td>{{ $registration->created_at->format('d M Y') }}</td>
                                 <td><strong>{{ $registration->full_name }}</strong></td>
                                 <td>{{ $registration->email }}</td>
@@ -136,7 +158,7 @@
                             </div>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">
+                                <td colspan="9" class="text-center py-4">
                                     <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
                                     <p class="text-muted mt-2">Belum ada pendaftaran reviewer</p>
                                 </td>
@@ -144,6 +166,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                </form>
                 </div>
 
                 <div class="mt-3">
@@ -153,4 +176,67 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllTop = document.getElementById('selectAll');
+    const selectAllHeader = document.getElementById('selectAllHeader');
+    const checkboxes = document.querySelectorAll('.registration-checkbox');
+    const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const bulkApproveForm = document.getElementById('bulkApproveForm');
+
+    function updateSelectedCount() {
+        const checkedBoxes = document.querySelectorAll('.registration-checkbox:checked');
+        const count = checkedBoxes.length;
+        selectedCountSpan.textContent = count;
+        bulkApproveBtn.disabled = count === 0;
+    }
+
+    // Sync both select all checkboxes
+    function syncSelectAll() {
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        selectAllTop.checked = allChecked;
+        selectAllHeader.checked = allChecked;
+    }
+
+    // Select all functionality
+    [selectAllTop, selectAllHeader].forEach(selectAll => {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            syncSelectAll();
+            updateSelectedCount();
+        });
+    });
+
+    // Individual checkbox change
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            syncSelectAll();
+            updateSelectedCount();
+        });
+    });
+
+    // Form submission confirmation
+    bulkApproveForm.addEventListener('submit', function(e) {
+        const checkedCount = document.querySelectorAll('.registration-checkbox:checked').length;
+        if (checkedCount === 0) {
+            e.preventDefault();
+            alert('Pilih minimal 1 pendaftaran untuk di-approve');
+            return false;
+        }
+        
+        if (!confirm(`Approve ${checkedCount} pendaftaran reviewer dan buat akun mereka?`)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    updateSelectedCount();
+});
+</script>
+@endpush
 @endsection

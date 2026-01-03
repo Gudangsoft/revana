@@ -116,6 +116,7 @@ Route::middleware('auth')->group(function () {
         // Reviewer Registrations Management
         Route::get('/reviewer-registrations', [AdminReviewerRegistrationController::class, 'index'])->name('reviewer-registrations.index');
         Route::get('/reviewer-registrations/{registration}', [AdminReviewerRegistrationController::class, 'show'])->name('reviewer-registrations.show');
+        Route::post('/reviewer-registrations/bulk-approve', [AdminReviewerRegistrationController::class, 'bulkApprove'])->name('reviewer-registrations.bulk-approve');
         Route::post('/reviewer-registrations/{registration}/approve', [AdminReviewerRegistrationController::class, 'approve'])->name('reviewer-registrations.approve');
         Route::post('/reviewer-registrations/{registration}/reject', [AdminReviewerRegistrationController::class, 'reject'])->name('reviewer-registrations.reject');
         Route::delete('/reviewer-registrations/{registration}', [AdminReviewerRegistrationController::class, 'destroy'])->name('reviewer-registrations.destroy');
