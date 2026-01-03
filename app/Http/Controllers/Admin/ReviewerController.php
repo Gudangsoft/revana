@@ -8,15 +8,26 @@ use Illuminate\Http\Request;
 
 class ReviewerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->get('search');
+        
         $reviewers = User::where('role', 'reviewer')
+            ->when($search, function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('institution', 'like', "%{$search}%")
+                      ->orWhere('field_of_study', 'like', "%{$search}%");
+                });
+            })
             ->with('badges')
             ->withCount('reviewAssignments')
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->appends(['search' => $search]);
 
-        return view('admin.reviewers.index', compact('reviewers'));
+        return view('admin.reviewers.index', compact('reviewers', 'search'));
     }
 
     public function show(User $reviewer)
