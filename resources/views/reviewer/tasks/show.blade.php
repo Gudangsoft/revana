@@ -205,6 +205,62 @@
             </div>
         </div>
 
+        <!-- Informasi Reviewer -->
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-people"></i> Informasi Reviewer
+            </div>
+            <div class="card-body">
+                @if($assignment->reviewer)
+                <div class="mb-3 pb-3 border-bottom">
+                    <h6 class="mb-2"><i class="bi bi-person-badge"></i> Reviewer 1</h6>
+                    <p class="mb-1">
+                        <strong>Nama:</strong><br>
+                        <a href="{{ route('admin.reviewers.show', $assignment->reviewer) }}" class="text-decoration-none">
+                            {{ $assignment->reviewer->name }}
+                        </a>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Email:</strong><br>
+                        {{ $assignment->reviewer->email }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Total Reviews:</strong><br>
+                        {{ $assignment->reviewer->completed_reviews ?? 0 }} completed
+                    </p>
+                    <p class="mb-0">
+                        <strong>Total Points:</strong><br>
+                        <span class="badge bg-warning text-dark">{{ $assignment->reviewer->total_points ?? 0 }} Points</span>
+                    </p>
+                </div>
+                @endif
+
+                @if($assignment->reviewer2)
+                <div>
+                    <h6 class="mb-2"><i class="bi bi-person-badge"></i> Reviewer 2</h6>
+                    <p class="mb-1">
+                        <strong>Nama:</strong><br>
+                        <a href="{{ route('admin.reviewers.show', $assignment->reviewer2) }}" class="text-decoration-none">
+                            {{ $assignment->reviewer2->name }}
+                        </a>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Email:</strong><br>
+                        {{ $assignment->reviewer2->email }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Total Reviews:</strong><br>
+                        {{ $assignment->reviewer2->completed_reviews ?? 0 }} completed
+                    </p>
+                    <p class="mb-0">
+                        <strong>Total Points:</strong><br>
+                        <span class="badge bg-warning text-dark">{{ $assignment->reviewer2->total_points ?? 0 }} Points</span>
+                    </p>
+                </div>
+                @endif
+            </div>
+        </div>
+
         <div class="card mt-3">
             <div class="card-header bg-info text-white">
                 <i class="bi bi-clock-history"></i> Timeline
