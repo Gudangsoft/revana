@@ -110,8 +110,9 @@ class ReviewAssignment extends Model
             'approved_at' => now(),
         ]);
 
-        // Award points to reviewer
-        $points = $this->journal->points;
+        // Get points per review from settings (default 5)
+        $points = (int) Setting::get('points_per_review', 5);
+        
         $this->reviewer->increment('total_points', $points);
         $this->reviewer->increment('available_points', $points);
         $this->reviewer->increment('completed_reviews');
@@ -122,7 +123,7 @@ class ReviewAssignment extends Model
             'review_assignment_id' => $this->id,
             'points' => $points,
             'type' => 'EARNED',
-            'description' => "Review jurnal: {$this->journal->title}",
+            'description' => "Review artikel: {$this->article_title}",
         ]);
 
         // Check and award badges

@@ -43,6 +43,12 @@
                                 <small style="color: rgba(255,255,255,0.8) !important;">Available Points</small>
                             </div>
                         </div>
+                        <div class="mt-3">
+                            <small style="color: rgba(255,255,255,0.9) !important;">
+                                <i class="bi bi-info-circle"></i> 
+                                1 Point = Rp {{ number_format(\App\Models\Setting::get('point_value', 1000), 0, ',', '.') }}
+                            </small>
+                        </div>
                     </div>
                     <div class="col-md-4 text-end">
                         <i class="bi bi-coin" style="font-size: 5rem; opacity: 0.5; color: white !important;"></i>

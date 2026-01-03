@@ -165,7 +165,7 @@
                         
                         <div class="mb-3">
                             <label class="form-label">Upload Template Sertifikat</label>
-                            @if($settings['certificate_template'])
+                            @if(!empty($settings['certificate_template']))
                                 <div class="mb-2">
                                     <img src="{{ asset('storage/' . $settings['certificate_template']) }}" alt="Certificate Template" style="max-width: 300px;" class="img-thumbnail">
                                     <div class="mt-2">

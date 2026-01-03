@@ -119,6 +119,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
         
+        // Point Settings
+        Route::get('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'index'])->name('point-settings.index');
+        Route::put('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'update'])->name('point-settings.update');
+        
         // Users
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     });

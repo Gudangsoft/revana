@@ -43,6 +43,9 @@
 </a>
 <hr>
 
+<a href="{{ route('admin.point-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}">
+    <i class="bi bi-cash-coin"></i> Pengaturan Point
+</a>
 <a href="{{ route('admin.settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.settings') ? 'active' : '' }}">
     <i class="bi bi-gear-fill"></i> Setting Web
 </a>
