@@ -31,11 +31,12 @@ class ReviewAssignmentController extends Controller
     {
         $validated = $request->validate([
             'article_title' => 'required|string|max:500',
+            'article_number' => 'required|string|max:255',
             'submit_link' => 'required|url',
             'account_username' => 'required|string|max:255',
             'account_password' => 'required|string|max:255',
-            'assignment_letter_link' => 'required|url',
-            'certificate_link' => 'required|url',
+            'reviewer_username' => 'required|string|max:255',
+            'reviewer_password' => 'required|string|max:255',
             'deadline' => 'required|date|after:today',
             'language' => 'required|in:Indonesia,Inggris',
             'reviewer_id' => 'required|exists:users,id',
@@ -44,11 +45,14 @@ class ReviewAssignmentController extends Controller
 
         ReviewAssignment::create([
             'article_title' => $request->article_title,
+            'article_number' => $request->article_number,
             'submit_link' => $request->submit_link,
             'account_username' => $request->account_username,
             'account_password' => $request->account_password,
-            'assignment_letter_link' => $request->assignment_letter_link,
-            'certificate_link' => $request->certificate_link,
+            'reviewer_username' => $request->reviewer_username,
+            'reviewer_password' => $request->reviewer_password,
+            'assignment_letter_link' => null,
+            'certificate_link' => null,
             'deadline' => $request->deadline,
             'language' => $request->language,
             'journal_id' => null, // Tidak menggunakan journal_id lagi

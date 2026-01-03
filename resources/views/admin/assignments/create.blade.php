@@ -29,6 +29,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Nomor Artikel <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('article_number') is-invalid @enderror" 
+                               name="article_number" value="{{ old('article_number') }}" 
+                               placeholder="Contoh: ART-2026-001" required>
+                        @error('article_number')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Link Submit <span class="text-danger">*</span></label>
                         <input type="url" class="form-control @error('submit_link') is-invalid @enderror" 
                                name="submit_link" value="{{ old('submit_link') }}" 
@@ -59,24 +69,25 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Surat Tugas (Link) <span class="text-danger">*</span></label>
-                        <input type="url" class="form-control @error('assignment_letter_link') is-invalid @enderror" 
-                               name="assignment_letter_link" value="{{ old('assignment_letter_link') }}" 
-                               placeholder="https://" required>
-                        @error('assignment_letter_link')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Link Sertifikat <span class="text-danger">*</span></label>
-                        <input type="url" class="form-control @error('certificate_link') is-invalid @enderror" 
-                               name="certificate_link" value="{{ old('certificate_link') }}" 
-                               placeholder="https://" required>
-                        @error('certificate_link')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username Reviewer <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('reviewer_username') is-invalid @enderror" 
+                                   name="reviewer_username" value="{{ old('reviewer_username') }}" 
+                                   placeholder="Username untuk reviewer" required>
+                            @error('reviewer_username')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Password Reviewer <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('reviewer_password') is-invalid @enderror" 
+                                   name="reviewer_password" value="{{ old('reviewer_password') }}" 
+                                   placeholder="Password untuk reviewer" required>
+                            @error('reviewer_password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="mb-3">

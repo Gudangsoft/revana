@@ -34,17 +34,22 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-6">
+                        <strong>Nomor Artikel:</strong><br>
+                        <span class="badge bg-primary mt-1">{{ $assignment->article_number ?? 'N/A' }}</span>
+                    </div>
+                    <div class="col-md-6">
                         <strong>Bahasa:</strong><br>
                         <span class="badge bg-secondary mt-1">{{ $assignment->language ?? 'N/A' }}</span>
                     </div>
-                    <div class="col-md-6">
-                        <strong>Deadline:</strong><br>
-                        @if($assignment->deadline)
-                            <span class="badge bg-warning text-dark mt-1" style="font-size: 1.2rem;">{{ $assignment->deadline->format('d M Y') }}</span>
-                        @else
-                            <span class="badge bg-secondary mt-1">N/A</span>
-                        @endif
-                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Deadline:</strong><br>
+                    @if($assignment->deadline)
+                        <span class="badge bg-warning text-dark mt-1" style="font-size: 1.2rem;">{{ $assignment->deadline->format('d M Y') }}</span>
+                    @else
+                        <span class="badge bg-secondary mt-1">N/A</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
@@ -58,39 +63,27 @@
                     @endif
                 </div>
 
-                <div class="mb-3">
-                    <strong>Username Akun:</strong><br>
-                    <code>{{ $assignment->account_username ?? 'N/A' }}</code>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Username Akun:</strong><br>
+                        <code>{{ $assignment->account_username ?? 'N/A' }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Password Akun:</strong><br>
+                        <code>{{ $assignment->account_password ?? 'N/A' }}</code>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <strong>Password Akun:</strong><br>
-                    <code>{{ $assignment->account_password ?? 'N/A' }}</code>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Username Reviewer:</strong><br>
+                        <code>{{ $assignment->reviewer_username ?? 'N/A' }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Password Reviewer:</strong><br>
+                        <code>{{ $assignment->reviewer_password ?? 'N/A' }}</code>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <strong>Surat Tugas:</strong><br>
-                    @if($assignment->assignment_letter_link)
-                        <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-sm btn-primary mt-1">
-                            <i class="bi bi-file-earmark-pdf"></i> Lihat Surat Tugas
-                        </a>
-                    @else
-                        <span class="text-muted">N/A</span>
-                    @endif
-                </div>
-
-                @if($assignment->status == 'APPROVED')
-                <div class="mb-3">
-                    <strong>Link Sertifikat:</strong><br>
-                    @if($assignment->certificate_link)
-                        <a href="{{ $assignment->certificate_link }}" target="_blank" class="btn btn-sm btn-success mt-1">
-                            <i class="bi bi-award"></i> Lihat Sertifikat
-                        </a>
-                    @else
-                        <span class="text-muted">Sertifikat belum tersedia</span>
-                    @endif
-                </div>
-                @endif
 
                 <div class="mb-3">
                     <strong>Status:</strong><br>

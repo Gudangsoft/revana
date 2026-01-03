@@ -12,9 +12,12 @@ class ReviewAssignment extends Model
     protected $fillable = [
         'journal_id',
         'article_title',
+        'article_number',
         'submit_link',
         'account_username',
         'account_password',
+        'reviewer_username',
+        'reviewer_password',
         'assignment_letter_link',
         'certificate_link',
         'deadline',
