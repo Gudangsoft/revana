@@ -57,6 +57,12 @@
                                     <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin mereset password pengguna ini?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-info">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+                                    </form>
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
                                         @csrf
                                         @method('DELETE')

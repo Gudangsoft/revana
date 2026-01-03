@@ -71,4 +71,17 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'Pengguna berhasil dihapus');
     }
+
+    public function resetPassword(User $user)
+    {
+        // Generate random password
+        $newPassword = 'Password123!';
+        
+        // Update user password
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Password untuk {$user->name} berhasil direset menjadi: {$newPassword}");
+    }
 }
