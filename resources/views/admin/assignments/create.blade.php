@@ -102,11 +102,13 @@
 
                     <div class="mb-3">
                         <label class="form-label">Pilih Reviewer 1 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control mb-2" id="searchReviewer1" placeholder="🔍 Cari reviewer (nama atau email)...">
                         <select class="form-select @error('reviewer_id') is-invalid @enderror" 
-                                name="reviewer_id" id="reviewer1" required>
+                                name="reviewer_id" id="reviewer1" size="5" required style="height: 200px;">
                             <option value="">-- Pilih Reviewer 1 --</option>
                             @foreach($reviewers as $reviewer)
-                            <option value="{{ $reviewer->id }}" {{ old('reviewer_id') == $reviewer->id ? 'selected' : '' }}>
+                            <option value="{{ $reviewer->id }}" {{ old('reviewer_id') == $reviewer->id ? 'selected' : '' }}
+                                    data-search="{{ strtolower($reviewer->name . ' ' . $reviewer->email) }}">
                                 {{ $reviewer->name }} - {{ $reviewer->email }}
                                 @if($reviewer->article_languages)
                                     [{{ implode(', ', $reviewer->article_languages) }}]
@@ -122,11 +124,13 @@
 
                     <div class="mb-3">
                         <label class="form-label">Pilih Reviewer 2 <span class="text-muted">(Opsional)</span></label>
+                        <input type="text" class="form-control mb-2" id="searchReviewer2" placeholder="🔍 Cari reviewer (nama atau email)...">
                         <select class="form-select @error('reviewer_2_id') is-invalid @enderror" 
-                                name="reviewer_2_id" id="reviewer2">
+                                name="reviewer_2_id" id="reviewer2" size="5" style="height: 200px;">
                             <option value="">-- Pilih Reviewer 2 --</option>
                             @foreach($reviewers as $reviewer)
-                            <option value="{{ $reviewer->id }}" {{ old('reviewer_2_id') == $reviewer->id ? 'selected' : '' }}>
+                            <option value="{{ $reviewer->id }}" {{ old('reviewer_2_id') == $reviewer->id ? 'selected' : '' }}
+                                    data-search="{{ strtolower($reviewer->name . ' ' . $reviewer->email) }}">
                                 {{ $reviewer->name }} - {{ $reviewer->email }}
                                 @if($reviewer->article_languages)
                                     [{{ implode(', ', $reviewer->article_languages) }}]
@@ -192,6 +196,48 @@
 document.addEventListener('DOMContentLoaded', function() {
     const reviewer1 = document.getElementById('reviewer1');
     const reviewer2 = document.getElementById('reviewer2');
+    const searchReviewer1 = document.getElementById('searchReviewer1');
+    const searchReviewer2 = document.getElementById('searchReviewer2');
+    
+    // Search functionality for Reviewer 1
+    searchReviewer1.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const options = reviewer1.querySelectorAll('option');
+        
+        options.forEach(option => {
+            if (option.value === '') {
+                option.style.display = 'block';
+                return;
+            }
+            
+            const searchData = option.getAttribute('data-search') || '';
+            if (searchData.includes(searchTerm)) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
+    
+    // Search functionality for Reviewer 2
+    searchReviewer2.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const options = reviewer2.querySelectorAll('option');
+        
+        options.forEach(option => {
+            if (option.value === '') {
+                option.style.display = 'block';
+                return;
+            }
+            
+            const searchData = option.getAttribute('data-search') || '';
+            if (searchData.includes(searchTerm)) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
     
     // Prevent selecting same reviewer
     reviewer1.addEventListener('change', function() {
