@@ -8,12 +8,14 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Setting;
+use App\Models\FieldOfStudy;
 
 class ReviewerRegistrationController extends Controller
 {
     public function showForm()
     {
-        return view('reviewer-registration.form');
+        $fieldOfStudies = FieldOfStudy::active()->ordered()->get();
+        return view('reviewer-registration.form', compact('fieldOfStudies'));
     }
 
     public function store(Request $request)
@@ -26,7 +28,7 @@ class ReviewerRegistrationController extends Controller
             'scopus_id' => 'nullable|string|max:100',
             'sinta_id' => 'required|string|max:100',
             'whatsapp' => 'required|string|max:20',
-            'field_of_study' => 'required|string|max:255',
+            'field_of_study_id' => 'required|exists:field_of_studies,id',
             'article_languages' => 'required|array|min:1',
             'article_languages.*' => 'in:Indonesia,English',
         ]);
@@ -40,6 +42,9 @@ class ReviewerRegistrationController extends Controller
         // Hash password
         $hashedPassword = Hash::make($request->password);
 
+        // Get field of study name for specialization
+        $fieldOfStudy = FieldOfStudy::findOrFail($request->field_of_study_id);
+
         // Create user account immediately (auto-approve)
         $user = User::create([
             'name' => $request->full_name,
@@ -48,7 +53,8 @@ class ReviewerRegistrationController extends Controller
             'role' => 'reviewer',
             'phone' => $request->whatsapp,
             'institution' => $request->affiliation,
-            'specialization' => $request->field_of_study,
+            'specialization' => $fieldOfStudy->name,
+            'field_of_study_id' => $request->field_of_study_id,
             'sinta_id' => $request->sinta_id,
             'scopus_id' => $request->scopus_id,
             'article_languages' => $request->article_languages,
@@ -66,7 +72,8 @@ class ReviewerRegistrationController extends Controller
             'scopus_id' => $request->scopus_id,
             'sinta_id' => $request->sinta_id,
             'whatsapp' => $request->whatsapp,
-            'field_of_study' => $request->field_of_study,
+            'field_of_study' => $fieldOfStudy->name,
+            'field_of_study_id' => $request->field_of_study_id,
             'article_languages' => $request->article_languages,
             'status' => 'approved',
             'notes' => 'Otomatis disetujui - Akun reviewer telah dibuat.',

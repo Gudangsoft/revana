@@ -116,6 +116,12 @@ Route::middleware('auth')->group(function () {
         // PIC Management
         Route::resource('pics', PicController::class)->except(['show']);
         
+        // Field of Study Management
+        Route::resource('field-of-studies', \App\Http\Controllers\Admin\FieldOfStudyController::class)->except(['show']);
+        Route::post('/field-of-studies/{fieldOfStudy}/toggle', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'toggleStatus'])->name('field-of-studies.toggle');
+        Route::post('/field-of-studies-import', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'import'])->name('field-of-studies.import');
+        Route::get('/field-of-studies-template', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'downloadTemplate'])->name('field-of-studies.template');
+        
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');

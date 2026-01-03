@@ -18,6 +18,7 @@ class ReviewerRegistration extends Model
         'sinta_id',
         'whatsapp',
         'field_of_study',
+        'field_of_study_id',
         'article_languages',
         'status',
         'notes',
@@ -32,4 +33,12 @@ class ReviewerRegistration extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Get the field of study for this registration
+     */
+    public function fieldOfStudy()
+    {
+        return $this->belongsTo(FieldOfStudy::class, 'field_of_study_id');
+    }
 }

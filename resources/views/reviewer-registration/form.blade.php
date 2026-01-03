@@ -298,17 +298,21 @@
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label for="field_of_study" class="form-label">
+                            <label for="field_of_study_id" class="form-label">
                                 Bidang Ilmu/Keahlian <span class="required-mark">*</span>
                             </label>
-                            <input type="text" 
-                                   class="form-control @error('field_of_study') is-invalid @enderror" 
-                                   id="field_of_study" 
-                                   name="field_of_study" 
-                                   value="{{ old('field_of_study', 'Pendidikan Agama Islam') }}"
-                                   placeholder="Pendidikan Agama Islam"
-                                   required>
-                            @error('field_of_study')
+                            <select class="form-select @error('field_of_study_id') is-invalid @enderror" 
+                                    id="field_of_study_id" 
+                                    name="field_of_study_id" 
+                                    required>
+                                <option value="">-- Pilih Bidang Ilmu --</option>
+                                @foreach($fieldOfStudies as $field)
+                                    <option value="{{ $field->id }}" {{ old('field_of_study_id') == $field->id ? 'selected' : '' }}>
+                                        {{ $field->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('field_of_study_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

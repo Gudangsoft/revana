@@ -58,6 +58,9 @@
 <a href="{{ route('admin.pics.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics') ? 'active' : '' }}">
     <i class="bi bi-person-badge"></i> PIC
 </a>
+<a href="{{ route('admin.field-of-studies.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.field-of-studies') ? 'active' : '' }}">
+    <i class="bi bi-book-fill"></i> Bidang Ilmu
+</a>
 <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.certificates') ? 'active' : '' }}">
     <i class="bi bi-award-fill"></i> Kelola Sertifikat
 </a>

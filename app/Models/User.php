@@ -24,6 +24,7 @@ class User extends Authenticatable
         'position',
         'education_level',
         'specialization',
+        'field_of_study_id',
         'address',
         'nidn',
         'google_scholar',
@@ -89,6 +90,11 @@ class User extends Authenticatable
     public function rewardRedemptions()
     {
         return $this->hasMany(RewardRedemption::class);
+    }
+
+    public function fieldOfStudy()
+    {
+        return $this->belongsTo(FieldOfStudy::class, 'field_of_study_id');
     }
 
     public function checkAndAwardBadges()
