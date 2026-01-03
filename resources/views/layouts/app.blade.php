@@ -202,6 +202,18 @@
             }
         }
 
+        /* Hide pagination navigation arrows completely */
+        .pagination .page-item:first-child,
+        .pagination .page-item:last-child,
+        .pagination li:first-child,
+        .pagination li:last-child {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
 
         /* Form responsive */
         .form-control,
