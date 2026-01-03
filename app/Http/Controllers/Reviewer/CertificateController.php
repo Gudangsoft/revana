@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ReviewAssignment;
 use App\Models\Certificate;
 use Illuminate\Http\Request;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class CertificateController extends Controller
 {
@@ -41,30 +43,91 @@ class CertificateController extends Controller
             return back()->with('error', 'Sertifikat hanya tersedia untuk review yang sudah disetujui');
         }
 
-        // Jika ada certificate_link yang diupload khusus, download itu
-        if ($assignment->certificate_link) {
-            $filePath = storage_path('app/public/' . $assignment->certificate_link);
-            if (file_exists($filePath)) {
-                return response()->download($filePath);
-            }
-        }
-
-        // Jika tidak ada, ambil template aktif pertama
+        // Get active certificate template
         $template = Certificate::where('is_active', true)->first();
         
         if (!$template) {
             return back()->with('error', 'Template sertifikat belum tersedia');
         }
 
-        $filePath = storage_path('app/public/' . $template->file_path);
+        $templatePath = storage_path('app/public/' . $template->file_path);
         
-        if (!file_exists($filePath)) {
-            return back()->with('error', 'File sertifikat tidak ditemukan');
+        if (!file_exists($templatePath)) {
+            return back()->with('error', 'File template tidak ditemukan');
         }
 
         $reviewer = auth()->user();
+        
+        // Create image manager
+        $manager = new ImageManager(new Driver());
+        
+        // Load template image
+        $image = $manager->read($templatePath);
+        
+        // Get image dimensions
+        $width = $image->width();
+        $height = $image->height();
+        
+        // Prepare text data
+        $year = $assignment->approved_at->format('Y');
+        $date = $assignment->approved_at->format('d');
+        $month = $assignment->approved_at->locale('id')->translatedFormat('F');
+        $reviewerName = strtoupper($reviewer->name);
+        $articleTitle = $assignment->article_title;
+        
+        // Wrap long article title
+        $wrappedTitle = wordwrap($articleTitle, 100, "\n");
+        
+        // Template size: 2560x1811px
+        // Positions calculated based on template layout
+        
+        // Add year (top right) - "2026"
+        $image->text($year, $width - 340, 230, function($font) {
+            $font->filename(public_path('fonts/arial.ttf'));
+            $font->size(165);
+            $font->color('#C9A961');
+            $font->align('right');
+        });
+        
+        // Add date (below year) - "03 Januari"
+        $image->text("$date $month", $width - 465, 375, function($font) {
+            $font->filename(public_path('fonts/arial.ttf'));
+            $font->size(55);
+            $font->color('#C9A961');
+            $font->align('right');
+        });
+        
+        // Add reviewer name (center) - "EKO SISWANTO, M.KOM"
+        $image->text($reviewerName, $width / 2, 770, function($font) {
+            $font->filename(public_path('fonts/arial.ttf'));
+            $font->size(95);
+            $font->color('#C9A961');
+            $font->align('center');
+        });
+        
+        // Add article title (center, below name) - Judul artikel
+        $image->text($wrappedTitle, $width / 2, 1045, function($font) {
+            $font->filename(public_path('fonts/arial.ttf'));
+            $font->size(48);
+            $font->color('#C9A961');
+            $font->align('center');
+        });
+        
+        // Save to temporary file
+        $tempFilename = 'certificate_' . time() . '_' . $assignment->id . '.jpg';
+        $tempPath = storage_path('app/public/temp/' . $tempFilename);
+        
+        // Create temp directory if not exists
+        if (!file_exists(storage_path('app/public/temp'))) {
+            mkdir(storage_path('app/public/temp'), 0755, true);
+        }
+        
+        // Encode and save
+        $image->toJpeg(95)->save($tempPath);
+        
+        // Download file
         $filename = 'Sertifikat_' . str_replace(' ', '_', $reviewer->name) . '_' . $assignment->article_number . '.jpg';
         
-        return response()->download($filePath, $filename);
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
     }
 }
