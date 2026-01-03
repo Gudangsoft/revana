@@ -170,6 +170,89 @@
                             </div>
                         </div>
 
+                        <!-- Kriteria Point Tambahan (Opsional) -->
+                        <div class="card border-info mt-3">
+                            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-plus-circle"></i> Kriteria Point Tambahan (Opsional)
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-light" onclick="addCriteria()">
+                                    <i class="bi bi-plus-lg"></i> Tambah Kriteria
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="additionalCriteria">
+                                    @if(isset($settings['points_bonus_fast']) && $settings['points_bonus_fast'] > 0)
+                                    <div class="criteria-item mb-3 p-3 bg-light rounded">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control" name="criteria_name[]" value="Bonus Review Cepat" placeholder="Nama kriteria">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" name="criteria_points[]" value="{{ $settings['points_bonus_fast'] }}" placeholder="Point" min="1">
+                                                    <span class="input-group-text">Point</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeCriteria(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
+                                    
+                                    @if(isset($settings['points_bonus_quality']) && $settings['points_bonus_quality'] > 0)
+                                    <div class="criteria-item mb-3 p-3 bg-light rounded">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control" name="criteria_name[]" value="Bonus Review Berkualitas" placeholder="Nama kriteria">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" name="criteria_points[]" value="{{ $settings['points_bonus_quality'] }}" placeholder="Point" min="1">
+                                                    <span class="input-group-text">Point</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeCriteria(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    @if(isset($settings['additional_criteria']) && is_array($settings['additional_criteria']))
+                                        @foreach($settings['additional_criteria'] as $criteria)
+                                        <div class="criteria-item mb-3 p-3 bg-light rounded">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control" name="criteria_name[]" value="{{ $criteria['name'] }}" placeholder="Nama kriteria">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" name="criteria_points[]" value="{{ $criteria['points'] }}" placeholder="Point" min="1">
+                                                        <span class="input-group-text">Point</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeCriteria(this)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                                <div class="text-muted small mt-2">
+                                    <i class="bi bi-info-circle"></i> Kriteria tambahan bersifat opsional. Contoh: Bonus artikel internasional, Bonus review kompleks, dll.
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Hidden fields for bonus (keep default values) -->
                         <input type="hidden" name="points_bonus_fast" value="{{ $settings['points_bonus_fast'] ?? 0 }}">
                         <input type="hidden" name="points_bonus_quality" value="{{ $settings['points_bonus_quality'] ?? 0 }}">
@@ -270,4 +353,46 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+let criteriaCount = {{ isset($settings['points_bonus_fast']) && $settings['points_bonus_fast'] > 0 ? 1 : 0 }} + {{ isset($settings['points_bonus_quality']) && $settings['points_bonus_quality'] > 0 ? 1 : 0 }};
+
+function addCriteria() {
+    criteriaCount++;
+    
+    const criteriaHtml = `
+        <div class="criteria-item mb-3 p-3 bg-light rounded">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="criteria_name[]" placeholder="Contoh: Bonus Artikel Internasional" required>
+                    <small class="text-muted">Nama kriteria bonus point</small>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="criteria_points[]" placeholder="Point" min="1" required>
+                        <span class="input-group-text">Point</span>
+                    </div>
+                    <small class="text-muted">Jumlah point bonus</small>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeCriteria(this)" title="Hapus kriteria">
+                        <i class="bi bi-trash"></i> Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('additionalCriteria').insertAdjacentHTML('beforeend', criteriaHtml);
+}
+
+function removeCriteria(button) {
+    if (confirm('Hapus kriteria ini?')) {
+        button.closest('.criteria-item').remove();
+        criteriaCount--;
+    }
+}
+</script>
+@endpush
 @endsection
