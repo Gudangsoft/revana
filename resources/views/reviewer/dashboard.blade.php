@@ -38,6 +38,24 @@
 </div>
 @endif
 
+<!-- WhatsApp Group Link Alert -->
+@if(!empty($whatsappGroupLink))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-whatsapp me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <strong>Bergabung dengan Grup WhatsApp Kami!</strong>
+            <br>
+            Dapatkan update terbaru dan diskusi dengan reviewer lainnya.
+            <a href="{{ $whatsappGroupLink }}" target="_blank" class="alert-link">
+                <i class="bi bi-box-arrow-up-right"></i> Join Grup WhatsApp
+            </a>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <!-- Profile Card -->
 <div class="row">
     <div class="col-md-12">
