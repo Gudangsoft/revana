@@ -210,7 +210,13 @@
         .page-item:first-child .page-link,
         .page-item:last-child .page-link,
         nav[role="navigation"] ul.pagination li:first-child,
-        nav[role="navigation"] ul.pagination li:last-child {
+        nav[role="navigation"] ul.pagination li:last-child,
+        nav ul.pagination li:first-child,
+        nav ul.pagination li:last-child,
+        .pagination > li:first-child,
+        .pagination > li:last-child,
+        .pagination > .page-item:first-child,
+        .pagination > .page-item:last-child {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
@@ -219,13 +225,31 @@
             overflow: hidden !important;
             position: absolute !important;
             left: -9999px !important;
+            pointer-events: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         /* Additional pagination arrow hiding */
         .pagination .page-link[rel="prev"],
         .pagination .page-link[rel="next"],
         a[rel="prev"],
-        a[rel="next"] {
+        a[rel="next"],
+        .page-link[aria-label*="Previous"],
+        .page-link[aria-label*="Next"],
+        .page-link[aria-label*="previous"],
+        .page-link[aria-label*="next"] {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+        
+        /* Hide by content */
+        .page-link:has(svg),
+        .page-link:has(.bi-chevron-left),
+        .page-link:has(.bi-chevron-right),
+        .page-link:has(.bi-arrow-left),
+        .page-link:has(.bi-arrow-right) {
             display: none !important;
             visibility: hidden !important;
         }

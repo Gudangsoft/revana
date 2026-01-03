@@ -17,9 +17,6 @@
 <a href="{{ route('admin.reviewers.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewers') ? 'active' : '' }}">
     <i class="bi bi-people"></i> Daftar Reviewer
 </a>
-<a href="{{ route('admin.reviewer-registrations.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewer-registrations') ? 'active' : '' }}">
-    <i class="bi bi-person-plus-fill"></i> Pendaftaran Reviewer
-</a>
 <a href="{{ route('admin.leaderboard.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.leaderboard') ? 'active' : '' }}">
     <i class="bi bi-trophy-fill"></i> Papan Peringkat
 </a>
