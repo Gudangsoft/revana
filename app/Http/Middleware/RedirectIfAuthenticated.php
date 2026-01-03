@@ -23,7 +23,12 @@ class RedirectIfAuthenticated
                     }
                     return redirect()->route('pic.author.dashboard');
                 }
-                return redirect('/monitoring');
+                if ($request->user()->role === 'admin') {
+                    return redirect('/admin/dashboard');
+                } elseif ($request->user()->role === 'reviewer') {
+                    return redirect('/reviewer/dashboard');
+                }
+                return redirect('/login');
             }
         }
 

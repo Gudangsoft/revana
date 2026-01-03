@@ -11,7 +11,6 @@ use App\Http\Controllers\Admin\RewardController as AdminRewardController;
 use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Admin\MarketingController;
 use App\Http\Controllers\Admin\PicController;
-use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
@@ -28,7 +27,12 @@ use Illuminate\Support\Facades\Auth;
 // Root redirect
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect('/monitoring');
+        if (Auth::user()->role === 'admin') {
+            return redirect('/admin/dashboard');
+        } elseif (Auth::user()->role === 'reviewer') {
+            return redirect('/reviewer/dashboard');
+        }
+        return redirect('/login');
     }
     return redirect('/login');
 });
@@ -51,10 +55,6 @@ Route::middleware('guest')->group(function () {
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-    // Monitoring routes (accessible by all authenticated users)
-    Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
-    Route::get('/monitoring/{journal}', [MonitoringController::class, 'show'])->name('monitoring.show');
 
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {

@@ -42,8 +42,13 @@ class LoginController extends Controller
                 return redirect()->intended('/reviewer/dashboard');
             }
             
-            // Default redirect to monitoring
-            return redirect()->intended('/monitoring');
+            // Default redirect based on role
+            if ($user->role === 'admin') {
+                return redirect()->intended('/admin/dashboard');
+            } elseif ($user->role === 'reviewer') {
+                return redirect()->intended('/reviewer/dashboard');
+            }
+            return redirect()->intended('/login');
         }
 
         return back()->withErrors([
