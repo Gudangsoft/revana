@@ -13,9 +13,14 @@
     <a href="{{ route('admin.reviewers.index') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
-    <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-primary">
-        <i class="bi bi-pencil-square"></i> Edit Data Reviewer
-    </a>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+            <i class="bi bi-key"></i> Reset Password
+        </button>
+        <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-primary">
+            <i class="bi bi-pencil-square"></i> Edit Data Reviewer
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
@@ -337,6 +342,46 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Reset Password -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('admin.reviewers.reset-password', $reviewer) }}" method="POST">
+                @csrf
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">
+                        <i class="bi bi-key"></i> Reset Password Reviewer
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Anda akan mereset password untuk <strong>{{ $reviewer->name }}</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password Baru <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="new_password" required minlength="8">
+                        <small class="text-muted">Minimal 8 karakter</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="new_password_confirmation" required minlength="8">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Reset Password
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

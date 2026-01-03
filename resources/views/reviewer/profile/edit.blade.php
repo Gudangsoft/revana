@@ -326,6 +326,51 @@
                 </ul>
             </div>
         </div>
+
+        <!-- Change Password Card -->
+        <div class="card mt-3">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-key"></i> Ubah Password
+            </div>
+            <div class="card-body">
+                <form action="{{ route('reviewer.profile.password.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    @if($errors->has('current_password') || $errors->has('new_password'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @if($errors->has('current_password'))
+                                {{ $errors->first('current_password') }}
+                            @endif
+                            @if($errors->has('new_password'))
+                                {{ $errors->first('new_password') }}
+                            @endif
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label class="form-label">Password Saat Ini <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="current_password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password Baru <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="new_password" required minlength="8">
+                        <small class="text-muted">Minimal 8 karakter</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Konfirmasi Password Baru <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="new_password_confirmation" required minlength="8">
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="bi bi-check-circle"></i> Ubah Password
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

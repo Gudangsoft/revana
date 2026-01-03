@@ -64,4 +64,25 @@ class ProfileController extends Controller
         return redirect()->route('reviewer.profile.edit')
             ->with('success', 'Profile berhasil diupdate');
     }
+
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        // Check current password
+        if (!\Hash::check($validated['current_password'], $user->password)) {
+            return back()->withErrors(['current_password' => 'Password saat ini tidak sesuai.']);
+        }
+
+        $user->password = bcrypt($validated['new_password']);
+        $user->save();
+
+        return redirect()->route('reviewer.profile.edit')
+            ->with('success', 'Password berhasil diubah.');
+    }
 }

@@ -75,6 +75,38 @@
             width: 20px;
         }
 
+        /* Accordion di Sidebar */
+        .sidebar .accordion-button {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0.75rem 1.5rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar .accordion-button:not(.collapsed) {
+            background: rgba(255,255,255,0.1);
+            border-left-color: white;
+            color: white;
+        }
+
+        .sidebar .accordion-button::after {
+            filter: brightness(0) invert(1);
+            margin-left: auto;
+        }
+
+        .sidebar .accordion-button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar .accordion-button:focus {
+            box-shadow: none;
+        }
+
+        .sidebar .accordion-body .nav-link {
+            font-size: 0.9rem;
+        }
+
         /* Mobile Menu Toggle */
         .mobile-menu-toggle {
             display: none;

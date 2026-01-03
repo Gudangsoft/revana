@@ -95,4 +95,21 @@ class ReviewerController extends Controller
         return redirect()->route('admin.reviewers.show', $reviewer)
             ->with('success', 'Data reviewer berhasil diupdate.');
     }
+
+    public function resetPassword(Request $request, User $reviewer)
+    {
+        if (!$reviewer->isReviewer()) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $reviewer->password = bcrypt($validated['new_password']);
+        $reviewer->save();
+
+        return redirect()->route('admin.reviewers.show', $reviewer)
+            ->with('success', 'Password reviewer berhasil direset.');
+    }
 }

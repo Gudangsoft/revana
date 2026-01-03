@@ -10,6 +10,14 @@ class PointSettingController extends Controller
 {
     public function index()
     {
+        // Pastikan setting ada, jika tidak buat default
+        if (!Setting::where('key', 'point_value')->exists()) {
+            Setting::set('point_value', 1000);
+        }
+        if (!Setting::where('key', 'points_per_review')->exists()) {
+            Setting::set('points_per_review', 5);
+        }
+        
         $settings = [
             'point_value' => (int) Setting::get('point_value', 1000),
             'points_per_review' => (int) Setting::get('points_per_review', 5),

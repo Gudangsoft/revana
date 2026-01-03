@@ -1,6 +1,10 @@
-@extends('admin.layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Pengaturan Point & Reward')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
 
 @section('content')
 <div class="container-fluid">
@@ -48,7 +52,7 @@
                                 <span class="input-group-text bg-light">Rp</span>
                                 <input type="number" class="form-control @error('point_value') is-invalid @enderror" 
                                        name="point_value" 
-                                       value="{{ old('point_value', $settings['point_value']) }}"
+                                       value="{{ old('point_value', $settings['point_value'] ?? 1000) }}"
                                        placeholder="1000" min="100" step="100" required>
                                 @error('point_value')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -67,7 +71,7 @@
                             <div class="input-group input-group-lg">
                                 <input type="number" class="form-control @error('points_per_review') is-invalid @enderror" 
                                        name="points_per_review" 
-                                       value="{{ old('points_per_review', $settings['points_per_review']) }}"
+                                       value="{{ old('points_per_review', $settings['points_per_review'] ?? 5) }}"
                                        placeholder="5" min="1" required>
                                 <span class="input-group-text bg-light">Point</span>
                                 @error('points_per_review')
@@ -86,11 +90,11 @@
                             </h6>
                             <hr>
                             <ul class="mb-0">
-                                <li><strong>1 Point</strong> = Rp {{ number_format($settings['point_value'], 0, ',', '.') }}</li>
-                                <li><strong>1 Review</strong> = {{ $settings['points_per_review'] }} Point</li>
+                                <li><strong>1 Point</strong> = Rp {{ number_format($settings['point_value'] ?? 1000, 0, ',', '.') }}</li>
+                                <li><strong>1 Review</strong> = {{ $settings['points_per_review'] ?? 5 }} Point</li>
                                 <li class="text-primary fw-bold mt-2">
                                     <i class="bi bi-arrow-right"></i> 
-                                    Maka 1 Review = Rp {{ number_format($settings['point_value'] * $settings['points_per_review'], 0, ',', '.') }}
+                                    Maka 1 Review = Rp {{ number_format(($settings['point_value'] ?? 1000) * ($settings['points_per_review'] ?? 5), 0, ',', '.') }}
                                 </li>
                             </ul>
                         </div>

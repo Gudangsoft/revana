@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
         // Certificates
         Route::resource('certificates', \App\Http\Controllers\Admin\CertificateController::class);        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');
         Route::put('/reviewers/{reviewer}', [ReviewerController::class, 'update'])->name('reviewers.update');
+        Route::post('/reviewers/{reviewer}/reset-password', [ReviewerController::class, 'resetPassword'])->name('reviewers.reset-password');
         
         // Reward Redemptions
         Route::get('/redemptions', [AdminRewardRedemptionController::class, 'index'])->name('redemptions.index');
@@ -150,6 +151,7 @@ Route::middleware('auth')->group(function () {
         // Profile
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
         
         // Leaderboard
         Route::get('/leaderboard', [ReviewerLeaderboardController::class, 'index'])->name('leaderboard.index');
