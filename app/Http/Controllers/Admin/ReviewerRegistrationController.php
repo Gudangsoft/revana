@@ -12,7 +12,11 @@ class ReviewerRegistrationController extends Controller
 {
     public function index()
     {
-        $registrations = ReviewerRegistration::orderBy('created_at', 'desc')->paginate(15);
+        // Only show pending and rejected registrations
+        // Approved ones should be viewed in reviewers page
+        $registrations = ReviewerRegistration::whereIn('status', ['pending', 'rejected'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
         return view('admin.reviewer-registrations.index', compact('registrations'));
     }
 

@@ -22,7 +22,6 @@
                 <span><i class="bi bi-person-plus"></i> Daftar Pendaftaran Reviewer</span>
                 <div>
                     <span class="badge bg-warning text-dark">Pending: {{ $registrations->where('status', 'pending')->count() }}</span>
-                    <span class="badge bg-success">Approved: {{ $registrations->where('status', 'approved')->count() }}</span>
                     <span class="badge bg-danger">Rejected: {{ $registrations->where('status', 'rejected')->count() }}</span>
                 </div>
             </div>
