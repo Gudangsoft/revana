@@ -220,9 +220,10 @@
         <!-- Reviewer Info -->
         <div class="card mb-3">
             <div class="card-header bg-success text-white">
-                <i class="bi bi-person"></i> Informasi Reviewer
+                <i class="bi bi-people"></i> Informasi Reviewer
             </div>
             <div class="card-body">
+                <h6 class="mb-3"><i class="bi bi-person-badge"></i> Reviewer 1</h6>
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <strong>Nama:</strong>
@@ -257,6 +258,45 @@
                         <span class="badge bg-warning text-dark">{{ $assignment->reviewer->total_points }} Points</span>
                     </div>
                 </div>
+                
+                @if($assignment->reviewer2)
+                    <hr>
+                    <h6 class="mb-3 mt-3"><i class="bi bi-person-badge"></i> Reviewer 2</h6>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Nama:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <a href="{{ route('admin.reviewers.show', $assignment->reviewer2) }}">
+                                {{ $assignment->reviewer2->name }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Email:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ $assignment->reviewer2->email }}
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Total Reviews:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ $assignment->reviewer2->completed_reviews }} completed
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Total Points:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <span class="badge bg-warning text-dark">{{ $assignment->reviewer2->total_points }} Points</span>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 

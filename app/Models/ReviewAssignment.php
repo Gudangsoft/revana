@@ -20,6 +20,7 @@ class ReviewAssignment extends Model
         'deadline',
         'language',
         'reviewer_id',
+        'reviewer_2_id',
         'assigned_by',
         'status',
         'rejection_reason',
@@ -43,6 +44,11 @@ class ReviewAssignment extends Model
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewer_id');
+    }
+
+    public function reviewer2()
+    {
+        return $this->belongsTo(User::class, 'reviewer_2_id');
     }
 
     public function assignedBy()

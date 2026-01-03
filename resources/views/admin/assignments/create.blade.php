@@ -101,10 +101,10 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Pilih Reviewer <span class="text-danger">*</span></label>
+                        <label class="form-label">Pilih Reviewer 1 <span class="text-danger">*</span></label>
                         <select class="form-select @error('reviewer_id') is-invalid @enderror" 
-                                name="reviewer_id" required>
-                            <option value="">-- Pilih Reviewer --</option>
+                                name="reviewer_id" id="reviewer1" required>
+                            <option value="">-- Pilih Reviewer 1 --</option>
                             @foreach($reviewers as $reviewer)
                             <option value="{{ $reviewer->id }}" {{ old('reviewer_id') == $reviewer->id ? 'selected' : '' }}>
                                 {{ $reviewer->name }} - {{ $reviewer->email }}
@@ -118,6 +118,27 @@
                         @error('reviewer_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Reviewer 2 <span class="text-muted">(Opsional)</span></label>
+                        <select class="form-select @error('reviewer_2_id') is-invalid @enderror" 
+                                name="reviewer_2_id" id="reviewer2">
+                            <option value="">-- Pilih Reviewer 2 --</option>
+                            @foreach($reviewers as $reviewer)
+                            <option value="{{ $reviewer->id }}" {{ old('reviewer_2_id') == $reviewer->id ? 'selected' : '' }}>
+                                {{ $reviewer->name }} - {{ $reviewer->email }}
+                                @if($reviewer->article_languages)
+                                    [{{ implode(', ', $reviewer->article_languages) }}]
+                                @endif
+                                ({{ $reviewer->completed_reviews }} reviews, {{ $reviewer->total_points }} pts)
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('reviewer_2_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Reviewer 2 akan menerima tugas yang sama untuk review bersama</small>
                     </div>
 
                     <div class="d-flex gap-2">
@@ -165,6 +186,30 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewer1 = document.getElementById('reviewer1');
+    const reviewer2 = document.getElementById('reviewer2');
+    
+    // Prevent selecting same reviewer
+    reviewer1.addEventListener('change', function() {
+        if (this.value && this.value === reviewer2.value) {
+            alert('Reviewer 1 dan Reviewer 2 tidak boleh sama!');
+            reviewer2.value = '';
+        }
+    });
+    
+    reviewer2.addEventListener('change', function() {
+        if (this.value && this.value === reviewer1.value) {
+            alert('Reviewer 2 dan Reviewer 1 tidak boleh sama!');
+            this.value = '';
+        }
+    });
+});
+</script>
+@endpush
 
 @endsection
 

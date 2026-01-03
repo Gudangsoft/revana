@@ -67,12 +67,21 @@
                                 @endif
                             </small>
                             <div class="d-md-none mt-1">
-                                <small class="text-muted"><i class="bi bi-person"></i> {{ $assignment->reviewer->name }}</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> {{ $assignment->reviewer->name }}
+                                    @if($assignment->reviewer2)
+                                        + {{ $assignment->reviewer2->name }}
+                                    @endif
+                                </small>
                             </div>
                         </td>
                         <td class="hide-mobile">
-                            <div>{{ $assignment->reviewer->name }}</div>
+                            <div><strong>Reviewer 1:</strong> {{ $assignment->reviewer->name }}</div>
                             <small class="text-muted">{{ $assignment->reviewer->email }}</small>
+                            @if($assignment->reviewer2)
+                                <div class="mt-1"><strong>Reviewer 2:</strong> {{ $assignment->reviewer2->name }}</div>
+                                <small class="text-muted">{{ $assignment->reviewer2->email }}</small>
+                            @endif
                         </td>
                         <td>
                             @if($assignment->status === 'pending')

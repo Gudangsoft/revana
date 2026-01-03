@@ -16,20 +16,33 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        $pendingTasks = ReviewAssignment::where('reviewer_id', $user->id)
+        // Count tasks where user is reviewer 1 or reviewer 2
+        $pendingTasks = ReviewAssignment::where(function($query) use ($user) {
+                $query->where('reviewer_id', $user->id)
+                      ->orWhere('reviewer_2_id', $user->id);
+            })
             ->where('status', 'PENDING')
             ->count();
 
-        $activeTasks = ReviewAssignment::where('reviewer_id', $user->id)
+        $activeTasks = ReviewAssignment::where(function($query) use ($user) {
+                $query->where('reviewer_id', $user->id)
+                      ->orWhere('reviewer_2_id', $user->id);
+            })
             ->whereIn('status', ['ACCEPTED', 'ON_PROGRESS', 'REVISION'])
             ->count();
 
-        $completedTasks = ReviewAssignment::where('reviewer_id', $user->id)
+        $completedTasks = ReviewAssignment::where(function($query) use ($user) {
+                $query->where('reviewer_id', $user->id)
+                      ->orWhere('reviewer_2_id', $user->id);
+            })
             ->where('status', 'APPROVED')
             ->count();
 
-        $recentAssignments = ReviewAssignment::where('reviewer_id', $user->id)
-            ->with('journal')
+        $recentAssignments = ReviewAssignment::where(function($query) use ($user) {
+                $query->where('reviewer_id', $user->id)
+                      ->orWhere('reviewer_2_id', $user->id);
+            })
+            ->with(['journal', 'reviewer', 'reviewer2'])
             ->latest()
             ->take(10)
             ->get();

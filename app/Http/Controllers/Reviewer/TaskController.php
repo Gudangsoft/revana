@@ -12,8 +12,12 @@ class TaskController extends Controller
     {
         $user = auth()->user();
         
-        $assignments = ReviewAssignment::where('reviewer_id', $user->id)
-            ->with('journal')
+        // Get assignments where user is reviewer 1 or reviewer 2
+        $assignments = ReviewAssignment::where(function($query) use ($user) {
+                $query->where('reviewer_id', $user->id)
+                      ->orWhere('reviewer_2_id', $user->id);
+            })
+            ->with(['journal', 'reviewer', 'reviewer2'])
             ->latest()
             ->paginate(20);
 
@@ -22,19 +26,20 @@ class TaskController extends Controller
 
     public function show(ReviewAssignment $assignment)
     {
-        // Check if user owns this assignment
-        if ($assignment->reviewer_id !== auth()->id()) {
+        // Check if user owns this assignment (as reviewer 1 or 2)
+        if ($assignment->reviewer_id !== auth()->id() && $assignment->reviewer_2_id !== auth()->id()) {
             abort(403);
         }
 
-        $assignment->load(['journal', 'reviewResult']);
+        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewResult']);
         
         return view('reviewer.tasks.show', compact('assignment'));
     }
 
     public function accept(ReviewAssignment $assignment)
     {
-        if ($assignment->reviewer_id !== auth()->id()) {
+        // Check if user owns this assignment
+        if ($assignment->reviewer_id !== auth()->id() && $assignment->reviewer_2_id !== auth()->id()) {
             abort(403);
         }
 
@@ -49,7 +54,7 @@ class TaskController extends Controller
 
     public function reject(Request $request, ReviewAssignment $assignment)
     {
-        if ($assignment->reviewer_id !== auth()->id()) {
+        if ($assignment->reviewer_id !== auth()->id() && $assignment->reviewer_2_id !== auth()->id()) {
             abort(403);
         }
 
@@ -69,7 +74,7 @@ class TaskController extends Controller
 
     public function startProgress(ReviewAssignment $assignment)
     {
-        if ($assignment->reviewer_id !== auth()->id()) {
+        if ($assignment->reviewer_id !== auth()->id() && $assignment->reviewer_2_id !== auth()->id()) {
             abort(403);
         }
 

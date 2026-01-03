@@ -12,7 +12,7 @@ class ReviewAssignmentController extends Controller
 {
     public function index()
     {
-        $assignments = ReviewAssignment::with(['journal', 'reviewer', 'assignedBy'])
+        $assignments = ReviewAssignment::with(['journal', 'reviewer', 'reviewer2', 'assignedBy'])
             ->latest()
             ->paginate(20);
 
@@ -39,6 +39,7 @@ class ReviewAssignmentController extends Controller
             'deadline' => 'required|date|after:today',
             'language' => 'required|in:Indonesia,Inggris',
             'reviewer_id' => 'required|exists:users,id',
+            'reviewer_2_id' => 'nullable|exists:users,id|different:reviewer_id',
         ]);
 
         ReviewAssignment::create([
@@ -52,6 +53,7 @@ class ReviewAssignmentController extends Controller
             'language' => $request->language,
             'journal_id' => null, // Tidak menggunakan journal_id lagi
             'reviewer_id' => $request->reviewer_id,
+            'reviewer_2_id' => $request->reviewer_2_id,
             'assigned_by' => auth()->id(),
             'status' => 'PENDING',
         ]);
@@ -62,7 +64,7 @@ class ReviewAssignmentController extends Controller
 
     public function show(ReviewAssignment $assignment)
     {
-        $assignment->load(['journal', 'reviewer', 'assignedBy', 'reviewResult']);
+        $assignment->load(['journal', 'reviewer', 'reviewer2', 'assignedBy', 'reviewResult']);
         return view('admin.assignments.show', compact('assignment'));
     }
 
