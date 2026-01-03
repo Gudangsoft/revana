@@ -7,6 +7,7 @@ use App\Models\ReviewAssignment;
 use App\Models\ReviewResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReviewResultController extends Controller
 {
@@ -90,5 +91,41 @@ class ReviewResultController extends Controller
 
         return redirect()->route('reviewer.tasks.show', $assignment)
             ->with('success', 'Formulir review berhasil disubmit');
+    }
+
+    public function downloadPdf(ReviewAssignment $assignment)
+    {
+        // Check authorization
+        if ($assignment->reviewer_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Check if assignment has been approved
+        if ($assignment->status !== 'APPROVED') {
+            return back()->with('error', 'Review belum disetujui oleh admin');
+        }
+
+        // Get review result
+        $result = $assignment->reviewResult;
+        if (!$result) {
+            return back()->with('error', 'Data review tidak ditemukan');
+        }
+
+        // Get reviewer data for signature
+        $reviewer = $assignment->reviewer;
+
+        // Generate PDF
+        $pdf = Pdf::loadView('reviewer.results.pdf', [
+            'result' => $result,
+            'reviewer' => $reviewer,
+            'assignment' => $assignment
+        ]);
+
+        // Set paper size and orientation
+        $pdf->setPaper('A4', 'portrait');
+
+        // Download PDF
+        $filename = 'Review_' . $result->article_code . '_' . date('YmdHis') . '.pdf';
+        return $pdf->download($filename);
     }
 }

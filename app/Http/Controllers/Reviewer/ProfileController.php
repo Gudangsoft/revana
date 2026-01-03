@@ -34,6 +34,7 @@ class ProfileController extends Controller
             'scopus_id' => 'nullable|string|max:50',
             'bio' => 'nullable|string|max:1000',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg|max:1024',
         ]);
 
         // Handle photo upload
@@ -45,6 +46,17 @@ class ProfileController extends Controller
 
             $photoPath = $request->file('photo')->store('profile-photos', 'public');
             $validated['photo'] = $photoPath;
+        }
+
+        // Handle signature upload
+        if ($request->hasFile('signature')) {
+            // Delete old signature if exists
+            if ($user->signature) {
+                Storage::disk('public')->delete($user->signature);
+            }
+
+            $signaturePath = $request->file('signature')->store('signatures', 'public');
+            $validated['signature'] = $signaturePath;
         }
 
         $user->update($validated);

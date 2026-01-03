@@ -31,6 +31,7 @@ class User extends Authenticatable
         'scopus_id',
         'bio',
         'photo',
+        'signature',
         'article_languages',
     ];
 

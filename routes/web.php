@@ -137,6 +137,7 @@ Route::middleware('auth')->group(function () {
         // Review Results
         Route::get('/tasks/{assignment}/submit', [ReviewResultController::class, 'create'])->name('results.create');
         Route::post('/tasks/{assignment}/submit', [ReviewResultController::class, 'store'])->name('results.store');
+        Route::get('/tasks/{assignment}/download-pdf', [ReviewResultController::class, 'downloadPdf'])->name('results.downloadPdf');
         
         // Rewards
         Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');

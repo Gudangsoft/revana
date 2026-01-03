@@ -303,42 +303,196 @@
         <!-- Review Result -->
         @if($assignment->reviewResult)
         <div class="card mb-3">
-            <div class="card-header bg-warning">
-                <i class="bi bi-file-text"></i> Hasil Review
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-file-text"></i> Hasil Review - Formulir Review Artikel Ilmiah
             </div>
             <div class="card-body">
-                @if($assignment->reviewResult->file_path)
-                <div class="mb-3">
-                    <strong>Link Google Drive:</strong>
-                    <div class="mt-2">
-                        <a href="{{ $assignment->reviewResult->file_path }}" 
-                           class="btn btn-primary btn-sm" 
-                           target="_blank">
-                            <i class="bi bi-box-arrow-up-right"></i> Buka File Review di Google Drive
-                        </a>
-                    </div>
-                    <div class="mt-2">
-                        <input type="text" class="form-control form-control-sm" 
-                               value="{{ $assignment->reviewResult->file_path }}" 
-                               readonly onclick="this.select()">
-                        <small class="text-muted">Klik untuk copy link</small>
+                <!-- Basic Information -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">Informasi Dasar</h6>
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <th width="30%">Nama Jurnal</th>
+                            <td>{{ $assignment->reviewResult->journal_name ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Kode Artikel</th>
+                            <td>{{ $assignment->reviewResult->article_code ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Judul Artikel</th>
+                            <td>{{ $assignment->reviewResult->article_title ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Nama Reviewer</th>
+                            <td>{{ $assignment->reviewResult->reviewer_name ?? $assignment->reviewer->name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Review</th>
+                            <td>{{ $assignment->reviewResult->review_date ? \Carbon\Carbon::parse($assignment->reviewResult->review_date)->format('d F Y') : '-' }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Section I: Penilaian Substansi -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">I. Penilaian Substansi Artikel</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">No</th>
+                                <th width="35%">Aspek Penilaian</th>
+                                <th width="10%">Skor</th>
+                                <th width="50%">Komentar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                            $aspects = [
+                                1 => 'Kebaruan dan relevansi topik penelitian',
+                                2 => 'Kesesuaian judul dengan isi artikel',
+                                3 => 'Kejelasan latar belakang dan rumusan masalah',
+                                4 => 'Kejelasan tujuan dan kontribusi penelitian',
+                                5 => 'Ketepatan metode dan pendekatan penelitian',
+                                6 => 'Kualitas analisis dan pembahasan',
+                                7 => 'Kualitas hasil penelitian',
+                                8 => 'Kejelasan simpulan dan implikasi penelitian'
+                            ];
+                            $totalScore = 0;
+                            @endphp
+
+                            @foreach($aspects as $num => $aspect)
+                            @php
+                                $score = $assignment->reviewResult->{'score_'.$num} ?? 0;
+                                $totalScore += $score;
+                            @endphp
+                            <tr>
+                                <td class="text-center">{{ $num }}</td>
+                                <td>{{ $aspect }}</td>
+                                <td class="text-center"><strong>{{ $score }}</strong></td>
+                                <td>{{ $assignment->reviewResult->{'comment_'.$num} ?? '-' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="2" class="text-end">Total Skor:</th>
+                                <th class="text-center">{{ $totalScore }}/40</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Section II: Penilaian Teknis -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">II. Penilaian Teknis Penulisan</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">No</th>
+                                <th width="75%">Kriteria Teknis</th>
+                                <th width="20%" class="text-center">Ya / Tidak</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">1</td>
+                                <td>Artikel mengikuti format dan sistematika jurnal</td>
+                                <td class="text-center">
+                                    @if($assignment->reviewResult->technical_1)
+                                        <span class="badge bg-success">✓ Ya</span>
+                                    @else
+                                        <span class="badge bg-secondary">Tidak</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">2</td>
+                                <td>Bahasa dan tata tulis sesuai kaidah ilmiah</td>
+                                <td class="text-center">
+                                    @if($assignment->reviewResult->technical_2)
+                                        <span class="badge bg-success">✓ Ya</span>
+                                    @else
+                                        <span class="badge bg-secondary">Tidak</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">3</td>
+                                <td>Referensi memadai dan terkini</td>
+                                <td class="text-center">
+                                    @if($assignment->reviewResult->technical_3)
+                                        <span class="badge bg-success">✓ Ya</span>
+                                    @else
+                                        <span class="badge bg-secondary">Tidak</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section III: Saran Perbaikan -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">III. Saran Perbaikan untuk Penulis</h6>
+                    <div class="p-3 bg-light rounded border">
+                        <p style="white-space: pre-wrap;">{{ $assignment->reviewResult->improvement_suggestions ?? '-' }}</p>
                     </div>
                 </div>
-                @endif
-                
-                @if($assignment->reviewResult->notes)
+
+                <!-- Section IV: Rekomendasi -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">IV. Rekomendasi Reviewer</h6>
+                    @php
+                    $recommendations = [
+                        'ACCEPT' => 'Diterima tanpa revisi',
+                        'MINOR_REVISION' => 'Diterima dengan revisi minor',
+                        'MAJOR_REVISION' => 'Diterima dengan revisi mayor',
+                        'REJECT' => 'Ditolak'
+                    ];
+                    $recValue = $assignment->reviewResult->recommendation ?? 'ACCEPT';
+                    @endphp
+
+                    @foreach($recommendations as $value => $label)
+                    <div class="mb-2">
+                        @if($recValue == $value)
+                            <i class="bi bi-check-square-fill text-success"></i> <strong>{{ $label }}</strong>
+                        @else
+                            <i class="bi bi-square"></i> {{ $label }}
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+
+                <!-- Section V: Pernyataan -->
                 <div class="mb-3">
-                    <strong>Catatan Review:</strong>
-                    <div class="mt-2 p-3 bg-light rounded border">
-                        {!! nl2br(e($assignment->reviewResult->notes)) !!}
+                    <h6 class="fw-bold text-primary mb-3">V. Pernyataan Reviewer</h6>
+                    <div class="alert alert-info">
+                        <p class="mb-2">Saya menyatakan bahwa penilaian ini dilakukan secara objektif berdasarkan keilmuan, tanpa konflik kepentingan, dan sesuai dengan etika akademik.</p>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>Nama:</strong> {{ $assignment->reviewResult->reviewer_signature ?? $assignment->reviewer->name }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Tanggal:</strong> {{ $assignment->reviewResult->statement_date ? \Carbon\Carbon::parse($assignment->reviewResult->statement_date)->format('d F Y') : '-' }}
+                            </div>
+                        </div>
+                        @if($assignment->reviewer->signature)
+                        <div class="mt-3">
+                            <strong>Tanda Tangan:</strong><br>
+                            <img src="{{ asset('storage/' . $assignment->reviewer->signature) }}" 
+                                 alt="Signature" 
+                                 style="max-width: 200px; max-height: 80px; margin-top: 10px;">
+                        </div>
+                        @endif
                     </div>
                 </div>
-                @endif
                 
                 @if($assignment->reviewResult->admin_feedback)
                 <div class="mb-3">
-                    <strong>Admin Feedback:</strong>
-                    <div class="alert alert-info mt-2">
+                    <h6 class="fw-bold text-danger mb-3">Admin Feedback</h6>
+                    <div class="alert alert-warning">
                         {!! nl2br(e($assignment->reviewResult->admin_feedback)) !!}
                     </div>
                 </div>

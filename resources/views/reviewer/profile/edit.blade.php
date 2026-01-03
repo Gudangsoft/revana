@@ -237,6 +237,30 @@
                         <small class="text-muted">Maksimal 1000 karakter</small>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Tanda Tangan Digital</label>
+                        <div class="mb-2">
+                            @if($user->signature)
+                                <img src="{{ asset('storage/' . $user->signature) }}" 
+                                     alt="Signature" 
+                                     class="border rounded p-2 bg-white"
+                                     style="max-width: 300px; max-height: 100px;">
+                            @else
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> Belum ada tanda tangan digital
+                                </div>
+                            @endif
+                        </div>
+                        <input type="file" 
+                               class="form-control @error('signature') is-invalid @enderror" 
+                               name="signature" 
+                               accept="image/*">
+                        @error('signature')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Format: PNG (background transparan direkomendasikan), Max: 1MB</small>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Simpan Profile

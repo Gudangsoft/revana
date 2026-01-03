@@ -249,8 +249,8 @@
                     <!-- Section V: Pernyataan Reviewer -->
                     <h5 class="mb-3 text-primary"><i class="bi bi-person-check"></i> V. PERNYATAAN REVIEWER</h5>
                     <div class="alert alert-info">
-                        <p class="mb-2">Saya menyatakan bahwa penilaian ini dilakukan secara objektif berdasarkan keilmuan, tanpa konflik kepentingan, dan sesuai dengan etika akademik.</p>
-                        <div class="row">
+                        <p class="mb-3">Saya menyatakan bahwa penilaian ini dilakukan secara objektif berdasarkan keilmuan, tanpa konflik kepentingan, dan sesuai dengan etika akademik.</p>
+                        <div class="row align-items-center">
                             <div class="col-md-6">
                                 <strong>Nama Lengkap:</strong> {{ auth()->user()->name }}
                             </div>
@@ -258,6 +258,23 @@
                                 <strong>Tanggal:</strong> <span id="current-date">{{ date('d F Y') }}</span>
                             </div>
                         </div>
+                        @if(auth()->user()->signature)
+                        <div class="mt-3">
+                            <strong>Tanda Tangan:</strong><br>
+                            <img src="{{ asset('storage/' . auth()->user()->signature) }}" 
+                                 alt="Signature" 
+                                 class="mt-2"
+                                 style="max-width: 200px; max-height: 80px;">
+                        </div>
+                        @else
+                        <div class="mt-3">
+                            <div class="alert alert-warning mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> 
+                                <strong>Perhatian:</strong> Anda belum mengupload tanda tangan digital. 
+                                Silakan upload di <a href="{{ route('reviewer.profile.edit') }}" target="_blank">halaman profil</a>.
+                            </div>
+                        </div>
+                        @endif
                     </div>
 
                     <hr class="my-4">
@@ -282,6 +299,4 @@
     vertical-align: middle;
 }
 </style>
-@endsection
-</div>
 @endsection
