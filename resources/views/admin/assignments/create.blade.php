@@ -15,7 +15,7 @@
                 <i class="bi bi-person-plus"></i> Form Assign Reviewer
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.assignments.store') }}" method="POST">
+                <form action="{{ route('admin.assignments.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="mb-3">

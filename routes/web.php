@@ -79,8 +79,9 @@ Route::middleware('auth')->group(function () {
         
         // Reviewers
         Route::get('/reviewers', [ReviewerController::class, 'index'])->name('reviewers.index');
-        Route::get('/reviewers/{reviewer}', [ReviewerController::class, 'show'])->name('reviewers.show');
-        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');
+        Route::get('/reviewers/{reviewer}', [ReviewerController::class, 'show'])->name('reviewers.show');        
+        // Certificates
+        Route::resource('certificates', \App\Http\Controllers\Admin\CertificateController::class);        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');
         Route::put('/reviewers/{reviewer}', [ReviewerController::class, 'update'])->name('reviewers.update');
         
         // Reward Redemptions
@@ -148,8 +149,9 @@ Route::middleware('auth')->group(function () {
         // Leaderboard
         Route::get('/leaderboard', [ReviewerLeaderboardController::class, 'index'])->name('leaderboard.index');
         
-        // Certificate
-        Route::get('/certificate/{assignment}', [CertificateController::class, 'download'])->name('certificate.download');
+        // Certificates
+        Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+        Route::get('/certificates/{assignment}/download', [CertificateController::class, 'download'])->name('certificates.download');
     });
 
 });

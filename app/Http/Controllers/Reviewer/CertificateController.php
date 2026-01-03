@@ -4,13 +4,31 @@ namespace App\Http\Controllers\Reviewer;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReviewAssignment;
-use App\Models\Setting;
+use App\Models\Certificate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 
 class CertificateController extends Controller
 {
+    public function index()
+    {
+        $user = auth()->user();
+        
+        // Get all approved assignments for this reviewer
+        $assignments = ReviewAssignment::where(function($query) use ($user) {
+                $query->where('reviewer_id', $user->id)
+                      ->orWhere('reviewer_2_id', $user->id);
+            })
+            ->where('status', 'APPROVED')
+            ->with(['reviewer', 'reviewer2'])
+            ->latest()
+            ->get();
+        
+        // Get active certificate templates
+        $templates = Certificate::where('is_active', true)->get();
+        
+        return view('reviewer.certificates.index', compact('assignments', 'templates'));
+    }
+
     public function download(ReviewAssignment $assignment)
     {
         // Cek apakah user adalah reviewer dari assignment ini
@@ -23,58 +41,30 @@ class CertificateController extends Controller
             return back()->with('error', 'Sertifikat hanya tersedia untuk review yang sudah disetujui');
         }
 
-        // Ambil template sertifikat
-        $templatePath = Setting::get('certificate_template');
+        // Jika ada certificate_link yang diupload khusus, download itu
+        if ($assignment->certificate_link) {
+            $filePath = storage_path('app/public/' . $assignment->certificate_link);
+            if (file_exists($filePath)) {
+                return response()->download($filePath);
+            }
+        }
+
+        // Jika tidak ada, ambil template aktif pertama
+        $template = Certificate::where('is_active', true)->first();
         
-        if (!$templatePath || !Storage::disk('public')->exists($templatePath)) {
+        if (!$template) {
             return back()->with('error', 'Template sertifikat belum tersedia');
         }
 
-        $fullPath = Storage::disk('public')->path($templatePath);
+        $filePath = storage_path('app/public/' . $template->file_path);
         
-        // Ambil data reviewer
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File sertifikat tidak ditemukan');
+        }
+
         $reviewer = auth()->user();
-        $reviewerName = $reviewer->name;
-        $articleTitle = $assignment->article_title;
-        $completedDate = $assignment->approved_at ? $assignment->approved_at->format('d F Y') : now()->format('d F Y');
+        $filename = 'Sertifikat_' . str_replace(' ', '_', $reviewer->name) . '_' . $assignment->article_number . '.jpg';
         
-        // Load image
-        $img = Image::make($fullPath);
-        
-        // Tambahkan teks pada gambar (sesuaikan koordinat dan font)
-        // Nama Reviewer
-        $img->text($reviewerName, $img->width() / 2, $img->height() / 2 - 100, function($font) {
-            $font->file(public_path('fonts/Arial-Bold.ttf'));
-            $font->size(48);
-            $font->color('#000000');
-            $font->align('center');
-            $font->valign('middle');
-        });
-        
-        // Judul Artikel
-        $img->text('Review: ' . \Illuminate\Support\Str::limit($articleTitle, 60), $img->width() / 2, $img->height() / 2, function($font) {
-            $font->file(public_path('fonts/Arial.ttf'));
-            $font->size(24);
-            $font->color('#333333');
-            $font->align('center');
-            $font->valign('middle');
-        });
-        
-        // Tanggal
-        $img->text($completedDate, $img->width() / 2, $img->height() / 2 + 100, function($font) {
-            $font->file(public_path('fonts/Arial.ttf'));
-            $font->size(20);
-            $font->color('#666666');
-            $font->align('center');
-            $font->valign('middle');
-        });
-        
-        // Generate filename
-        $filename = 'Certificate_' . str_replace(' ', '_', $reviewerName) . '_' . $assignment->id . '.jpg';
-        
-        // Return as download
-        return $img->response('jpg', 90, [
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
-        ]);
+        return response()->download($filePath, $filename);
     }
 }
