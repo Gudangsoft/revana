@@ -415,6 +415,12 @@
             .page-link {
                 padding: 0.375rem 0.75rem;
             }
+            
+            /* Hide pagination arrows */
+            .pagination .page-item:first-child,
+            .pagination .page-item:last-child {
+                display: none;
+            }
         }
     </style>
     @stack('styles')
