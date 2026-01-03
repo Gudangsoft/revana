@@ -8,6 +8,58 @@
 @endsection
 
 @section('content')
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stats-card primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Reviewer</h6>
+                        <h2 class="mb-0">{{ $reviewers->total() }}</h2>
+                    </div>
+                    <div class="text-primary" style="font-size: 2.5rem;">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stats-card success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Reviews</h6>
+                        <h2 class="mb-0">{{ $reviewers->sum('completed_reviews') }}</h2>
+                    </div>
+                    <div class="text-success" style="font-size: 2.5rem;">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stats-card warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Points</h6>
+                        <h2 class="mb-0">{{ $reviewers->sum('total_points') }}</h2>
+                    </div>
+                    <div class="text-warning" style="font-size: 2.5rem;">
+                        <i class="bi bi-coin"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviewer List -->
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">
@@ -84,57 +136,6 @@
                 {{ $reviewers->links() }}
             </div>
             @endif
-        </div>
-    </div>
-</div>
-
-<!-- Statistics -->
-<div class="row">
-    <div class="col-md-4">
-        <div class="card stats-card primary">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">Total Reviewer</h6>
-                        <h2 class="mb-0">{{ $reviewers->total() }}</h2>
-                    </div>
-                    <div class="text-primary" style="font-size: 2.5rem;">
-                        <i class="bi bi-people"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card stats-card success">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">Total Reviews</h6>
-                        <h2 class="mb-0">{{ $reviewers->sum('completed_reviews') }}</h2>
-                    </div>
-                    <div class="text-success" style="font-size: 2.5rem;">
-                        <i class="bi bi-check-circle"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card stats-card warning">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">Total Points</h6>
-                        <h2 class="mb-0">{{ $reviewers->sum('total_points') }}</h2>
-                    </div>
-                    <div class="text-warning" style="font-size: 2.5rem;">
-                        <i class="bi bi-coin"></i>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
