@@ -26,6 +26,7 @@ class SettingController extends Controller
             'whatsapp_confirmation_number' => Setting::get('whatsapp_confirmation_number', ''),
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
+            'certificate_template' => Setting::get('certificate_template', ''),
         ];
         
         return view('admin.settings.index', compact('settings'));
@@ -45,6 +46,7 @@ class SettingController extends Controller
             'whatsapp_confirmation_number' => 'nullable|string|max:20',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,png,jpg,svg,ico|max:512',
+            'certificate_template' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
         
         // Update .env settings
@@ -124,6 +126,17 @@ class SettingController extends Controller
             
             $faviconPath = $request->file('favicon')->store('settings', 'public');
             Setting::set('favicon', $faviconPath);
+        }
+        
+        // Handle certificate template upload
+        if ($request->hasFile('certificate_template')) {
+            $oldTemplate = Setting::get('certificate_template');
+            if ($oldTemplate && Storage::disk('public')->exists($oldTemplate)) {
+                Storage::disk('public')->delete($oldTemplate);
+            }
+            
+            $templatePath = $request->file('certificate_template')->store('settings', 'public');
+            Setting::set('certificate_template', $templatePath);
         }
         
         return redirect()->route('admin.settings.index')

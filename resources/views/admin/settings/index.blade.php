@@ -160,6 +160,32 @@
 
                     <div class="mb-4">
                         <h5 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-award"></i> Template Sertifikat
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Upload Template Sertifikat</label>
+                            @if($settings['certificate_template'])
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $settings['certificate_template']) }}" alt="Certificate Template" style="max-width: 300px;" class="img-thumbnail">
+                                    <div class="mt-2">
+                                        <a href="{{ asset('storage/' . $settings['certificate_template']) }}" target="_blank" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i> Lihat Template
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control @error('certificate_template') is-invalid @enderror" 
+                                   name="certificate_template" accept="image/jpeg,image/png,image/jpg">
+                            @error('certificate_template')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Format: JPG, PNG. Maksimal 5MB. Template ini akan digunakan untuk semua sertifikat reviewer.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">
                             <i class="bi bi-envelope"></i> Pengaturan Email
                         </h5>
                         

@@ -186,9 +186,12 @@
                 @endif
 
                 @if($assignment->status == 'APPROVED')
-                    <div class="alert alert-success">
+                    <div class="alert alert-success mb-2">
                         <i class="bi bi-check-circle"></i> Review telah disetujui!
                     </div>
+                    <a href="{{ route('reviewer.certificate.download', $assignment) }}" class="btn btn-success w-100 mb-2">
+                        <i class="bi bi-download"></i> Download Sertifikat
+                    </a>
                 @endif
 
                 <hr>

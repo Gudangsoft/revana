@@ -17,6 +17,7 @@ use App\Http\Controllers\Reviewer\ReviewResultController;
 use App\Http\Controllers\Reviewer\RewardController;
 use App\Http\Controllers\Reviewer\ProfileController;
 use App\Http\Controllers\Reviewer\LeaderboardController as ReviewerLeaderboardController;
+use App\Http\Controllers\Reviewer\CertificateController;
 use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
 use App\Http\Controllers\Pic\AuthorController;
 use App\Http\Controllers\ReviewerRegistrationController;
@@ -146,6 +147,9 @@ Route::middleware('auth')->group(function () {
         
         // Leaderboard
         Route::get('/leaderboard', [ReviewerLeaderboardController::class, 'index'])->name('leaderboard.index');
+        
+        // Certificate
+        Route::get('/certificate/{assignment}', [CertificateController::class, 'download'])->name('certificate.download');
     });
 
 });
