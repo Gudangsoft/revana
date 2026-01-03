@@ -69,17 +69,6 @@
                             @enderror
                             <small class="text-muted">Tagline atau slogan aplikasi</small>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">URL Aplikasi <span class="text-danger">*</span></label>
-                            <input type="url" class="form-control @error('app_url') is-invalid @enderror" 
-                                   name="app_url" value="{{ old('app_url', $settings['app_url'] ?? 'http://localhost') }}" 
-                                   placeholder="http://example.com" required>
-                            @error('app_url')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">URL lengkap aplikasi (contoh: http://127.0.0.1:8000)</small>
-                        </div>
                     </div>
 
                     <div class="mb-4">
@@ -144,72 +133,6 @@
                             @enderror
                             <small class="text-muted">Informasi kontak (telepon, email, WhatsApp, dll)</small>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Nomor WhatsApp Konfirmasi Member</label>
-                            <input type="text" class="form-control @error('whatsapp_confirmation_number') is-invalid @enderror" 
-                                   name="whatsapp_confirmation_number" 
-                                   value="{{ old('whatsapp_confirmation_number', $settings['whatsapp_confirmation_number'] ?? '') }}"
-                                   placeholder="+62812XXXXXXXX atau 08123XXXXXXX">
-                            @error('whatsapp_confirmation_number')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Nomor WhatsApp yang digunakan untuk mengirim konfirmasi kepada member yang baru selesai registrasi</small>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="border-bottom pb-2 mb-3">
-                            <i class="bi bi-award"></i> Template Sertifikat
-                        </h5>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Upload Template Sertifikat</label>
-                            @if(!empty($settings['certificate_template']))
-                                <div class="mb-2">
-                                    <img src="{{ asset('storage/' . $settings['certificate_template']) }}" alt="Certificate Template" style="max-width: 300px;" class="img-thumbnail">
-                                    <div class="mt-2">
-                                        <a href="{{ asset('storage/' . $settings['certificate_template']) }}" target="_blank" class="btn btn-sm btn-info">
-                                            <i class="bi bi-eye"></i> Lihat Template
-                                        </a>
-                                    </div>
-                                </div>
-                            @endif
-                            <input type="file" class="form-control @error('certificate_template') is-invalid @enderror" 
-                                   name="certificate_template" accept="image/jpeg,image/png,image/jpg">
-                            @error('certificate_template')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Format: JPG, PNG. Maksimal 5MB. Template ini akan digunakan untuk semua sertifikat reviewer.</small>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="border-bottom pb-2 mb-3">
-                            <i class="bi bi-envelope"></i> Pengaturan Email
-                        </h5>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Email Pengirim</label>
-                            <input type="email" class="form-control @error('mail_from_address') is-invalid @enderror" 
-                                   name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address'] ?? '') }}"
-                                   placeholder="noreply@example.com">
-                            @error('mail_from_address')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Email yang akan muncul sebagai pengirim</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Nama Pengirim</label>
-                            <input type="text" class="form-control @error('mail_from_name') is-invalid @enderror" 
-                                   name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name'] ?? '') }}"
-                                   placeholder="SIPERA System">
-                            @error('mail_from_name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Nama yang akan muncul sebagai pengirim email</small>
-                        </div>
                     </div>
 
                     <div class="d-flex gap-2">
@@ -254,9 +177,6 @@
                 <h6><i class="bi bi-gear"></i> Pengaturan Environment</h6>
                 <ul class="small text-muted">
                     <li>APP_NAME: Nama aplikasi</li>
-                    <li>APP_URL: URL aplikasi</li>
-                    <li>MAIL_FROM_ADDRESS: Email pengirim</li>
-                    <li>MAIL_FROM_NAME: Nama pengirim</li>
                 </ul>
             </div>
         </div>
