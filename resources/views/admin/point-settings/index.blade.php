@@ -11,9 +11,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-0">
-                <i class="bi bi-coin"></i> Pengaturan Point & Reward
+                <i class="bi bi-coin"></i> Pengaturan Point Review
             </h1>
-            <p class="text-muted">Kelola nilai point dan reward untuk reviewer</p>
+            <p class="text-muted">Atur berapa point yang didapat reviewer per review</p>
         </div>
     </div>
 
@@ -24,19 +24,49 @@
     </div>
     @endif
 
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle"></i> {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <!-- Statistik Simple -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="mb-0">{{ number_format($stats['total_points_earned']) }}</h2>
+                    <small>Total Point Diberikan</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h2 class="mb-0">{{ $stats['active_reviewers'] }}</h2>
+                    <small>Reviewer Aktif</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h2 class="mb-0">{{ number_format($stats['total_points_spent']) }}</h2>
+                    <small>Point Sudah Ditukar</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h2 class="mb-0">{{ number_format($stats['total_points_earned'] - $stats['total_points_spent']) }}</h2>
+                    <small>Point Sisa Reviewer</small>
+                </div>
+            </div>
+        </div>
     </div>
-    @endif
 
     <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
+        <!-- Form Pengaturan -->
+        <div class="col-md-7">
+            <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-gear"></i> Konfigurasi Point
+                        <i class="bi bi-sliders"></i> Pengaturan Utama
                     </h5>
                 </div>
                 <div class="card-body">
@@ -44,62 +74,107 @@
                         @csrf
                         @method('PUT')
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-currency-dollar"></i> Nilai 1 Point (dalam Rupiah)
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-light">Rp</span>
-                                <input type="number" class="form-control @error('point_value') is-invalid @enderror" 
-                                       name="point_value" 
-                                       value="{{ old('point_value', $settings['point_value'] ?? 1000) }}"
-                                       placeholder="1000" min="100" step="100" required>
-                                @error('point_value')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <!-- Setting 1: Nilai Point -->
+                        <div class="card mb-3 border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-primary mb-3">
+                                    <i class="bi bi-1-circle-fill"></i> Nilai 1 Point = Berapa Rupiah?
+                                </h6>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" 
+                                           class="form-control @error('point_value') is-invalid @enderror" 
+                                           name="point_value" 
+                                           value="{{ old('point_value', $settings['point_value'] ?? 1000) }}"
+                                           min="100" step="100" required>
+                                    @error('point_value')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="alert alert-info mt-3 mb-0">
+                                    <small>
+                                        <strong>Contoh:</strong> Jika diisi <code>1000</code>, artinya:<br>
+                                        → 1 point = Rp 1.000<br>
+                                        → 10 point = Rp 10.000<br>
+                                        → 50 point = Rp 50.000
+                                    </small>
+                                </div>
                             </div>
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i> 
-                                Berapa rupiah nilai dari 1 point? (Contoh: 1000 = 1 point = Rp 1.000)
-                            </small>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-star"></i> Jumlah Point per Review Artikel
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <input type="number" class="form-control @error('points_per_review') is-invalid @enderror" 
-                                       name="points_per_review" 
-                                       value="{{ old('points_per_review', $settings['points_per_review'] ?? 5) }}"
-                                       placeholder="5" min="1" required>
-                                <span class="input-group-text bg-light">Point</span>
-                                @error('points_per_review')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <!-- Setting 2: Point per Review -->
+                        <div class="card mb-3 border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success mb-3">
+                                    <i class="bi bi-2-circle-fill"></i> Berapa Point per 1 Review Artikel?
+                                </h6>
+                                <div class="input-group input-group-lg">
+                                    <input type="number" 
+                                           class="form-control @error('points_per_review') is-invalid @enderror" 
+                                           name="points_per_review" 
+                                           value="{{ old('points_per_review', $settings['points_per_review'] ?? 5) }}"
+                                           min="1" required>
+                                    <span class="input-group-text">Point</span>
+                                    @error('points_per_review')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="alert alert-success mt-3 mb-0">
+                                    <small>
+                                        <strong>Contoh:</strong> Jika diisi <code>5</code>, artinya:<br>
+                                        → Reviewer selesai 1 review = dapat <strong>5 point</strong><br>
+                                        → Selesai 2 review = dapat <strong>10 point</strong><br>
+                                        → Selesai 10 review = dapat <strong>50 point</strong>
+                                    </small>
+                                </div>
                             </div>
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i> 
-                                Berapa point yang didapat reviewer setelah menyelesaikan 1 artikel review?
-                            </small>
                         </div>
 
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-calculator"></i> Contoh Perhitungan
-                            </h6>
-                            <hr>
-                            <ul class="mb-0">
-                                <li><strong>1 Point</strong> = Rp {{ number_format($settings['point_value'] ?? 1000, 0, ',', '.') }}</li>
-                                <li><strong>1 Review</strong> = {{ $settings['points_per_review'] ?? 5 }} Point</li>
-                                <li class="text-primary fw-bold mt-2">
-                                    <i class="bi bi-arrow-right"></i> 
-                                    Maka 1 Review = Rp {{ number_format(($settings['point_value'] ?? 1000) * ($settings['points_per_review'] ?? 5), 0, ',', '.') }}
-                                </li>
-                            </ul>
+                        <!-- Hasil Perhitungan -->
+                        <div class="card border-warning bg-warning bg-opacity-10">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-calculator-fill text-warning"></i> Hasil Perhitungan
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded">
+                                            <div>
+                                                <strong>1 Review Selesai</strong>
+                                            </div>
+                                            <div class="text-end">
+                                                <h4 class="mb-0 text-primary">
+                                                    {{ $settings['points_per_review'] ?? 5 }} Point
+                                                </h4>
+                                                <small class="text-success fw-bold">
+                                                    = Rp {{ number_format(($settings['point_value'] ?? 1000) * ($settings['points_per_review'] ?? 5), 0, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-center p-3 bg-white rounded">
+                                            <small class="text-muted d-block">5 Review</small>
+                                            <strong class="text-primary">{{ ($settings['points_per_review'] ?? 5) * 5 }} Point</strong><br>
+                                            <small class="text-success">Rp {{ number_format(($settings['point_value'] ?? 1000) * ($settings['points_per_review'] ?? 5) * 5, 0, ',', '.') }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-center p-3 bg-white rounded">
+                                            <small class="text-muted d-block">10 Review</small>
+                                            <strong class="text-primary">{{ ($settings['points_per_review'] ?? 5) * 10 }} Point</strong><br>
+                                            <small class="text-success">Rp {{ number_format(($settings['point_value'] ?? 1000) * ($settings['points_per_review'] ?? 5) * 10, 0, ',', '.') }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <!-- Hidden fields for bonus (keep default values) -->
+                        <input type="hidden" name="points_bonus_fast" value="{{ $settings['points_bonus_fast'] ?? 0 }}">
+                        <input type="hidden" name="points_bonus_quality" value="{{ $settings['points_bonus_quality'] ?? 0 }}">
+
+                        <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="bi bi-save"></i> Simpan Pengaturan
                             </button>
@@ -109,43 +184,87 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-info">
+        <!-- Panel Info -->
+        <div class="col-md-5">
+            <!-- Cara Kerja -->
+            <div class="card shadow mb-3">
                 <div class="card-header bg-info text-white">
                     <h6 class="mb-0">
-                        <i class="bi bi-lightbulb"></i> Panduan
+                        <i class="bi bi-info-circle-fill"></i> Cara Kerja Point
                     </h6>
                 </div>
                 <div class="card-body">
-                    <h6 class="fw-bold">Cara Kerja Point:</h6>
-                    <ol class="small">
-                        <li class="mb-2">Reviewer mendapatkan point setelah menyelesaikan review artikel</li>
-                        <li class="mb-2">Point dapat ditukar dengan reward yang tersedia</li>
-                        <li class="mb-2">Nilai point dalam rupiah menentukan nilai tukar reward</li>
+                    <ol class="mb-0">
+                        <li class="mb-2">
+                            <strong>Admin</strong> tugaskan review ke reviewer
+                        </li>
+                        <li class="mb-2">
+                            <strong>Reviewer</strong> kerjakan dan submit hasil review
+                        </li>
+                        <li class="mb-2">
+                            <strong>Admin</strong> klik tombol "Review Selesai" untuk approve
+                        </li>
+                        <li class="mb-2">
+                            <strong>Sistem</strong> otomatis berikan point ke reviewer
+                        </li>
+                        <li class="mb-0">
+                            <strong>Reviewer</strong> bisa tukar point dengan reward
+                        </li>
                     </ol>
-                    
-                    <hr>
-                    
-                    <h6 class="fw-bold">Tips Pengaturan:</h6>
-                    <ul class="small mb-0">
-                        <li class="mb-2">Set nilai point minimal Rp 100</li>
-                        <li class="mb-2">Sesuaikan jumlah point per review dengan tingkat kesulitan</li>
-                        <li class="mb-2">Review nilai secara berkala untuk memotivasi reviewer</li>
-                    </ul>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-warning mt-3">
+            <!-- Aktivitas Terbaru -->
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Aktivitas Terbaru
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @forelse($stats['recent_activities']->take(5) as $activity)
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="text-primary">{{ $activity->user->name ?? 'N/A' }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ Str::limit($activity->description, 30) }}</small>
+                                    <br>
+                                    <small class="text-muted">{{ $activity->created_at->diffForHumans() }}</small>
+                                </div>
+                                <div class="text-end">
+                                    @if($activity->type === 'EARNED')
+                                        <h5 class="mb-0 text-success">+{{ $activity->points }}</h5>
+                                    @else
+                                        <h5 class="mb-0 text-danger">-{{ $activity->points }}</h5>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="list-group-item text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mb-0 mt-2">Belum ada aktivitas</p>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card shadow mt-3 border-warning">
                 <div class="card-header bg-warning">
                     <h6 class="mb-0">
-                        <i class="bi bi-exclamation-triangle"></i> Perhatian
+                        <i class="bi bi-lightbulb-fill"></i> Tips
                     </h6>
                 </div>
                 <div class="card-body">
-                    <p class="small mb-0">
-                        Perubahan pengaturan point akan mempengaruhi perhitungan reward untuk review yang akan datang. 
-                        Point yang sudah diberikan sebelumnya tidak akan berubah.
-                    </p>
+                    <ul class="small mb-0">
+                        <li class="mb-2">Sesuaikan nilai point dengan budget yang tersedia</li>
+                        <li class="mb-2">Point yang sudah diberikan tidak akan berubah jika setting diubah</li>
+                        <li class="mb-0">Evaluasi berkala untuk menjaga motivasi reviewer</li>
+                    </ul>
                 </div>
             </div>
         </div>

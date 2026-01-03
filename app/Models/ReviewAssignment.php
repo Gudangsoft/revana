@@ -111,7 +111,7 @@ class ReviewAssignment extends Model
         ]);
 
         // Get points per review from settings (default 5)
-        $points = (int) Setting::get('points_per_review', 5);
+        $points = (int) \App\Models\Setting::get('points_per_review', 5);
         
         $this->reviewer->increment('total_points', $points);
         $this->reviewer->increment('available_points', $points);

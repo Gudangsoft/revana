@@ -25,6 +25,35 @@
 @endsection
 
 @section('content')
+<!-- Point Info Banner -->
+<div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h5 class="alert-heading mb-2">
+                <i class="bi bi-info-circle-fill"></i> Sistem Poin Review
+            </h5>
+            <p class="mb-0">
+                Setiap review yang <strong>selesai dan disetujui</strong> admin akan mendapat 
+                <span class="badge bg-warning text-dark">{{ \App\Models\Setting::get('points_per_review', 5) }} Point</span>
+                (senilai Rp {{ number_format(\App\Models\Setting::get('point_value', 1000) * \App\Models\Setting::get('points_per_review', 5), 0, ',', '.') }})
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="d-flex justify-content-end gap-3">
+                <div>
+                    <small class="text-muted d-block">Total Point Anda</small>
+                    <h4 class="mb-0 text-primary">{{ auth()->user()->total_points }}</h4>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Review Selesai</small>
+                    <h4 class="mb-0 text-success">{{ auth()->user()->completed_reviews }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card">
@@ -65,6 +94,7 @@
                                 <th>Bahasa</th>
                                 <th>Deadline</th>
                                 <th>Status</th>
+                                <th>Point</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
                             </tr>
@@ -103,6 +133,9 @@
                                         <span class="badge bg-success mt-1">
                                             <i class="bi bi-check-circle-fill"></i> Review Selesai
                                         </span>
+                                        <span class="badge bg-warning text-dark mt-1">
+                                            <i class="bi bi-coin"></i> +{{ \App\Models\Setting::get('points_per_review', 5) }} Point
+                                        </span>
                                     @endif
                                 </td>
                                 <td><span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span></td>
@@ -130,6 +163,15 @@
                                     @endphp
                                     <span class="badge bg-{{ $color }}">{{ $assignment->status }}</span>
                                 </td>
+                                <td>
+                                    @if($assignment->status === 'APPROVED')
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-coin"></i> +{{ \App\Models\Setting::get('points_per_review', 5) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td>{{ $assignment->created_at->format('d M Y') }}</td>
                                 <td>
                                     <a href="{{ route('reviewer.tasks.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
@@ -139,7 +181,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 3rem;"></i>
                                     <p class="mt-2">Belum ada tugas</p>
                                 </td>
