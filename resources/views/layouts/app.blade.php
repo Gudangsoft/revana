@@ -28,10 +28,19 @@
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        * {
+            scrollbar-width: thin;
+        }
 
         /* Sidebar Styles */
         .sidebar {
-            min-height: 100vh;
+            height: 100vh;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             position: fixed;
@@ -41,6 +50,35 @@
             z-index: 1040;
             transition: transform 0.3s ease-in-out;
             overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Custom Scrollbar untuk Sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Firefox Scrollbar */
+        .sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
         }
 
         .sidebar.hide-mobile {
@@ -53,14 +91,76 @@
             font-weight: bold;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0 2rem 0;
+            position: relative;
+        }
+        
+        /* Scroll Indicator Shadow */
+        .sidebar-nav::before {
+            content: '';
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: linear-gradient(to bottom, rgba(79, 70, 229, 0.3), transparent);
+            pointer-events: none;
+            z-index: 5;
+            display: block;
+            margin-bottom: -15px;
+        }
+        
+        .sidebar-nav::after {
+            content: '';
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: linear-gradient(to top, rgba(79, 70, 229, 0.3), transparent);
+            pointer-events: none;
+            z-index: 5;
+            display: block;
+            margin-top: -15px;
         }
 
         .sidebar .nav-link {
             color: rgba(255,255,255,0.8);
             padding: 0.75rem 1.5rem;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             border-left: 3px solid transparent;
             white-space: nowrap;
+            display: block;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: rgba(255, 255, 255, 0.05);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .sidebar .nav-link:hover::before,
+        .sidebar .nav-link.active::before {
+            width: 100%;
         }
 
         .sidebar .nav-link:hover,
@@ -68,11 +168,24 @@
             color: white;
             background: rgba(255,255,255,0.1);
             border-left-color: white;
+            transform: translateX(2px);
         }
 
         .sidebar .nav-link i {
             margin-right: 0.5rem;
             width: 20px;
+            display: inline-block;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
+        .sidebar hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 0.5rem 1rem;
         }
 
         /* Accordion di Sidebar */
@@ -82,6 +195,7 @@
             box-shadow: none;
             padding: 0.75rem 1.5rem;
             border-left: 3px solid transparent;
+            transition: all 0.3s;
         }
 
         .sidebar .accordion-button:not(.collapsed) {
@@ -97,6 +211,7 @@
 
         .sidebar .accordion-button:hover {
             background: rgba(255,255,255,0.1);
+            transform: translateX(2px);
         }
 
         .sidebar .accordion-button:focus {
@@ -105,6 +220,20 @@
 
         .sidebar .accordion-body .nav-link {
             font-size: 0.9rem;
+            padding-left: 3rem;
+        }
+        
+        .sidebar .accordion-body {
+            padding: 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .accordion-item {
+            background: transparent;
+        }
+        
+        .sidebar .accordion-collapse {
+            border: none;
         }
 
         /* Mobile Menu Toggle */
@@ -249,6 +378,7 @@
         @media (max-width: 991px) {
             .sidebar {
                 transform: translateX(-100%);
+                box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
             }
 
             .sidebar.show-mobile {
@@ -469,7 +599,7 @@
                 <i class="bi bi-journal-check"></i> {{ $appSettings['app_name'] }}
             @endif
         </div>
-        <nav class="nav flex-column mt-4">
+        <nav class="nav flex-column sidebar-nav">
             @yield('sidebar')
         </nav>
     </div>

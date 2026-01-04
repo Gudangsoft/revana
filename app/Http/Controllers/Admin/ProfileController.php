@@ -29,12 +29,21 @@ class ProfileController extends Controller
 
         // Handle photo upload
         if ($request->hasFile('photo')) {
+            // Validate file more strictly
+            $file = $request->file('photo');
+            if (!in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
+                return back()->withErrors(['photo' => 'Format file tidak valid. Hanya JPG, JPEG, PNG yang diperbolehkan.']);
+            }
+
             // Delete old photo if exists
             if ($user->photo) {
                 Storage::disk('public')->delete($user->photo);
             }
 
-            $photoPath = $request->file('photo')->store('profile-photos', 'public');
+            // Generate random filename
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'photo_admin_' . $user->id . '_' . time() . '_' . uniqid() . '.' . $extension;
+            $photoPath = $file->storeAs('profile-photos', $filename, 'public');
             $validated['photo'] = $photoPath;
         }
 
@@ -50,7 +59,15 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
+            'new_password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/' // At least 1 lowercase, 1 uppercase, 1 number
+            ],
+        ], [
+            'new_password.regex' => 'Password harus mengandung minimal 1 huruf kecil, 1 huruf besar, dan 1 angka.'
         ]);
 
         // Check current password

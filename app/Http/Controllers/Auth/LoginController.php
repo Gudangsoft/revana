@@ -27,7 +27,7 @@ class LoginController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string|min:8',
         ]);
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
@@ -50,6 +50,13 @@ class LoginController extends Controller
             }
             return redirect()->intended('/login');
         }
+
+        // Log failed login attempt
+        \Log::warning('Failed login attempt', [
+            'email' => $request->email,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
 
         return back()->withErrors([
             'email' => 'Email atau password salah.',
