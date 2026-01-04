@@ -111,16 +111,12 @@
                                 <td>{{ $reviewer->email }}</td>
                                 <td>
                                     @if($reviewer->phone)
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="text-nowrap">{{ $reviewer->phone }}</span>
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $reviewer->phone) }}?text=Halo%20{{ urlencode($reviewer->name) }},%20" 
-                                               target="_blank" 
-                                               class="btn btn-sm btn-success wa-button" 
-                                               title="Chat WhatsApp dengan {{ $reviewer->name }}"
-                                               style="padding: 0.25rem 0.5rem;">
-                                                <i class="bi bi-whatsapp"></i> Chat
-                                            </a>
-                                        </div>
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $reviewer->phone) }}?text=Halo%20{{ urlencode($reviewer->name) }},%20" 
+                                           target="_blank" 
+                                           class="btn btn-sm wa-button-compact" 
+                                           title="Chat WhatsApp dengan {{ $reviewer->name }}">
+                                            <i class="bi bi-whatsapp"></i> {{ $reviewer->phone }}
+                                        </a>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -183,36 +179,35 @@
 </div>
 
 <style>
-    .wa-button {
+    .wa-button-compact {
         background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
         border: none;
-        color: white;
+        color: white !important;
         font-weight: 500;
         transition: all 0.3s ease;
+        padding: 0.4rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        white-space: nowrap;
     }
     
-    .wa-button:hover {
-        transform: scale(1.05) translateY(-2px);
+    .wa-button-compact:hover {
+        transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
         background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
-        color: white;
+        color: white !important;
     }
     
-    .wa-button i {
-        font-size: 1rem;
+    .wa-button-compact i {
+        font-size: 1.1rem;
     }
     
     .table td {
         vertical-align: middle;
-    }
-    
-    .gap-2 {
-        gap: 0.5rem !important;
-    }
-    
-    .text-nowrap {
-        font-size: 0.9rem;
-        color: #495057;
     }
 </style>
 @endsection
