@@ -93,6 +93,7 @@
                             <tr>
                                 <th>Nama</th>
                                 <th>Email</th>
+                                <th>No. HP / WhatsApp</th>
                                 <th>Total Points</th>
                                 <th>Available Points</th>
                                 <th>Completed Reviews</th>
@@ -108,6 +109,22 @@
                                     <strong>{{ $reviewer->name }}</strong>
                                 </td>
                                 <td>{{ $reviewer->email }}</td>
+                                <td>
+                                    @if($reviewer->phone)
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-nowrap">{{ $reviewer->phone }}</span>
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $reviewer->phone) }}?text=Halo%20{{ urlencode($reviewer->name) }},%20" 
+                                               target="_blank" 
+                                               class="btn btn-sm btn-success wa-button" 
+                                               title="Chat WhatsApp dengan {{ $reviewer->name }}"
+                                               style="padding: 0.25rem 0.5rem;">
+                                                <i class="bi bi-whatsapp"></i> Chat
+                                            </a>
+                                        </div>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge bg-info">{{ $reviewer->total_points }} pts</span>
                                 </td>
@@ -141,7 +158,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">Belum ada data reviewer</td>
+                                <td colspan="9" class="text-center text-muted py-4">Belum ada data reviewer</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -164,5 +181,39 @@
         </div>
     </div>
 </div>
+
+<style>
+    .wa-button {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .wa-button:hover {
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+        background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
+        color: white;
+    }
+    
+    .wa-button i {
+        font-size: 1rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    .text-nowrap {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+</style>
 @endsection
 
