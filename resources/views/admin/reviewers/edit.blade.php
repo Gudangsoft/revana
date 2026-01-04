@@ -73,12 +73,23 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">No. Telepon/HP</label>
+                            <label class="form-label">
+                                <i class="bi bi-whatsapp text-success"></i> No. WhatsApp
+                            </label>
                             <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                                   name="phone" value="{{ old('phone', $reviewer->phone) }}">
+                                   name="phone" 
+                                   value="{{ old('phone', $reviewer->phone) }}"
+                                   placeholder="08123456789 atau 628123456789"
+                                   id="phoneInput">
                             @error('phone')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="alert alert-info mt-2 p-2" style="font-size: 0.85rem;">
+                                <i class="bi bi-info-circle"></i> <strong>Format Nomor WhatsApp:</strong><br>
+                                • Mulai dengan <code>08</code> (08xxx) atau <code>628</code> (628xxx)<br>
+                                • Contoh: <code>081234567890</code> atau <code>6281234567890</code><br>
+                                • Nomor akan dikonversi otomatis untuk WhatsApp
+                            </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -225,4 +236,31 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phoneInput');
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            
+            // Real-time validation feedback
+            if (value.length > 0) {
+                if (value.startsWith('0') && value.length >= 10) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                } else if (value.startsWith('62') && value.length >= 11) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                } else {
+                    e.target.classList.remove('is-valid');
+                }
+            } else {
+                e.target.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    }
+});
+</script>
 @endsection

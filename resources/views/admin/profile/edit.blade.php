@@ -77,12 +77,16 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Nomor Telepon</label>
+                            <label for="phone" class="form-label">
+                                <i class="bi bi-whatsapp text-success"></i> Nomor WhatsApp
+                            </label>
                             <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                                   id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
+                                   id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
+                                   placeholder="08123456789 atau 6281234567890">
                             @error('phone')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted">Format: 08xxx atau 628xxx</small>
                         </div>
 
                         <div class="col-md-6 mb-3">

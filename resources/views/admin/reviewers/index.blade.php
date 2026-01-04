@@ -111,7 +111,19 @@
                                 <td>{{ $reviewer->email }}</td>
                                 <td>
                                     @if($reviewer->phone)
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $reviewer->phone) }}?text=Halo%20{{ urlencode($reviewer->name) }},%20" 
+                                        @php
+                                            // Konversi nomor ke format internasional
+                                            $phoneNumber = preg_replace('/[^0-9]/', '', $reviewer->phone);
+                                            // Jika diawali 0, ganti dengan 62
+                                            if (substr($phoneNumber, 0, 1) === '0') {
+                                                $phoneNumber = '62' . substr($phoneNumber, 1);
+                                            }
+                                            // Jika belum ada kode negara, tambahkan 62
+                                            if (substr($phoneNumber, 0, 2) !== '62') {
+                                                $phoneNumber = '62' . $phoneNumber;
+                                            }
+                                        @endphp
+                                        <a href="https://wa.me/{{ $phoneNumber }}?text=Halo%20{{ urlencode($reviewer->name) }},%20" 
                                            target="_blank" 
                                            class="btn btn-sm wa-button-compact" 
                                            title="Chat WhatsApp dengan {{ $reviewer->name }}">

@@ -91,15 +91,24 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">No. Telepon/WhatsApp</label>
+                        <label class="form-label">
+                            <i class="bi bi-whatsapp text-success"></i> No. Telepon/WhatsApp
+                        </label>
                         <input type="text" 
                                class="form-control @error('phone') is-invalid @enderror" 
                                name="phone" 
                                value="{{ old('phone', $user->phone) }}"
-                               placeholder="Contoh: 08123456789">
+                               placeholder="08123456789 atau 6281234567890"
+                               id="phoneInput">
                         @error('phone')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <div class="alert alert-warning mt-2 p-2" style="font-size: 0.875rem;">
+                            <i class="bi bi-exclamation-triangle"></i> <strong>Penting!</strong><br>
+                            Masukkan nomor WhatsApp aktif untuk komunikasi dengan admin.<br>
+                            <strong>Format:</strong> <code>08xxx</code> atau <code>628xxx</code><br>
+                            <strong>Contoh:</strong> <code>081234567890</code>
+                        </div>
                     </div>
 
                     <hr>
@@ -373,4 +382,47 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phoneInput');
+    
+    if (phoneInput) {
+        // Show notification on page load if phone is empty or invalid
+        if (!phoneInput.value || phoneInput.value.trim() === '') {
+            showPhoneNotification();
+        }
+        
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            
+            // Real-time validation feedback
+            if (value.length > 0) {
+                if (value.startsWith('0') && value.length >= 10) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                } else if (value.startsWith('62') && value.length >= 11) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                } else if (value.length >= 8) {
+                    e.target.classList.add('is-invalid');
+                    e.target.classList.remove('is-valid');
+                } else {
+                    e.target.classList.remove('is-valid', 'is-invalid');
+                }
+            } else {
+                e.target.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    }
+    
+    function showPhoneNotification() {
+        // Scroll to phone input
+        setTimeout(() => {
+            phoneInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            phoneInput.focus();
+        }, 500);
+    }
+});
+</script>
 @endsection

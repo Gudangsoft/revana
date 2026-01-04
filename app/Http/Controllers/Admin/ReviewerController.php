@@ -64,7 +64,7 @@ class ReviewerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $reviewer->id,
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^(0|62)[0-9]{9,13}$/'],
             'institution' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:100',
             'education_level' => 'nullable|string|max:100',
@@ -78,6 +78,8 @@ class ReviewerController extends Controller
             'article_languages' => 'nullable|array',
             'article_languages.*' => 'in:Indonesia,English',
             'password' => 'nullable|min:8|confirmed',
+        ], [
+            'phone.regex' => 'Format nomor tidak valid. Gunakan format 08xxx atau 628xxx (contoh: 081234567890)'
         ]);
 
         // Update data

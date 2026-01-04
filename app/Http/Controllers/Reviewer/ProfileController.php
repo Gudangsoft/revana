@@ -22,7 +22,7 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^(0|62)[0-9]{9,13}$/'],
             'institution' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
             'education_level' => 'nullable|in:S1,S2,S3',
@@ -35,6 +35,8 @@ class ProfileController extends Controller
             'bio' => 'nullable|string|max:1000',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'signature' => 'nullable|image|mimes:jpeg,png,jpg|max:1024',
+        ], [
+            'phone.regex' => 'Format nomor WhatsApp tidak valid. Gunakan format 08xxx atau 628xxx (contoh: 081234567890)'
         ]);
 
         // Handle photo upload
