@@ -68,6 +68,9 @@
     <i class="bi bi-person-gear"></i> Pengelolaan Pengguna
 </a>
 <hr>
+<a href="{{ route('admin.profile.edit') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.profile') ? 'active' : '' }}">
+    <i class="bi bi-person-circle"></i> Edit Profile
+</a>
 <a href="{{ route('admin.settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.settings') ? 'active' : '' }}">
     <i class="bi bi-gear-fill"></i> Setting Web
 </a>
