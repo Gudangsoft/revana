@@ -578,6 +578,27 @@
                 padding: 0.375rem 0.75rem;
             }
         }
+        
+        /* Profile Link Hover Effect */
+        .profile-link {
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .profile-link:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color) !important;
+            transform: translateY(-2px);
+        }
+        
+        .profile-link i {
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-link:hover i {
+            transform: scale(1.2);
+        }
     </style>
     @stack('styles')
 </head>
@@ -611,22 +632,24 @@
             <div class="container-fluid">
                 <span class="navbar-brand mb-0 h1">@yield('page-title', 'Dashboard')</span>
                 <div class="ms-auto d-flex align-items-center flex-wrap gap-2">
-                    <span class="me-2 d-none d-md-inline">
+                    <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif" 
+                       class="text-decoration-none text-dark me-2 d-none d-md-inline profile-link">
                         <i class="bi bi-person-circle"></i> 
                         @if(auth()->user()->role === 'admin')
                             Admin {{ $appSettings['app_name'] }}
                         @else
                             {{ auth()->user()->name }}
                         @endif
-                    </span>
-                    <span class="me-2 d-md-none">
+                    </a>
+                    <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif" 
+                       class="text-decoration-none text-dark me-2 d-md-none profile-link">
                         <i class="bi bi-person-circle"></i> 
                         @if(auth()->user()->role === 'admin')
                             Admin
                         @else
                             {{ Str::limit(auth()->user()->name, 15) }}
                         @endif
-                    </span>
+                    </a>
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-outline-danger">
