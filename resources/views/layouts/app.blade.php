@@ -599,6 +599,16 @@
         .profile-link:hover i {
             transform: scale(1.2);
         }
+        
+        /* Profile Photo Hover Effect */
+        .profile-photo {
+            transition: all 0.3s ease;
+        }
+        
+        .profile-link:hover .profile-photo {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
     </style>
     @stack('styles')
 </head>
@@ -633,22 +643,50 @@
                 <span class="navbar-brand mb-0 h1">@yield('page-title', 'Dashboard')</span>
                 <div class="ms-auto d-flex align-items-center flex-wrap gap-2">
                     <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif" 
-                       class="text-decoration-none text-dark me-2 d-none d-md-inline profile-link">
-                        <i class="bi bi-person-circle"></i> 
-                        @if(auth()->user()->role === 'admin')
-                            Admin {{ $appSettings['app_name'] }}
+                       class="text-decoration-none text-dark me-2 d-none d-md-flex align-items-center profile-link">
+                        @if(auth()->user()->photo)
+                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
+                                 alt="Profile Photo" 
+                                 class="rounded-circle me-2 profile-photo" 
+                                 width="35" 
+                                 height="35" 
+                                 style="object-fit: cover; border: 2px solid #4f46e5;">
                         @else
-                            {{ auth()->user()->name }}
+                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center me-2" 
+                                 style="width: 35px; height: 35px; border: 2px solid #4f46e5;">
+                                <i class="bi bi-person-fill text-white" style="font-size: 1.2rem;"></i>
+                            </div>
                         @endif
+                        <span>
+                            @if(auth()->user()->role === 'admin')
+                                Admin {{ $appSettings['app_name'] }}
+                            @else
+                                {{ auth()->user()->name }}
+                            @endif
+                        </span>
                     </a>
                     <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif" 
-                       class="text-decoration-none text-dark me-2 d-md-none profile-link">
-                        <i class="bi bi-person-circle"></i> 
-                        @if(auth()->user()->role === 'admin')
-                            Admin
+                       class="text-decoration-none text-dark me-2 d-md-none d-flex align-items-center profile-link">
+                        @if(auth()->user()->photo)
+                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
+                                 alt="Profile Photo" 
+                                 class="rounded-circle me-2 profile-photo" 
+                                 width="32" 
+                                 height="32" 
+                                 style="object-fit: cover; border: 2px solid #4f46e5;">
                         @else
-                            {{ Str::limit(auth()->user()->name, 15) }}
+                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center me-2" 
+                                 style="width: 32px; height: 32px; border: 2px solid #4f46e5;">
+                                <i class="bi bi-person-fill text-white" style="font-size: 1rem;"></i>
+                            </div>
                         @endif
+                        <span>
+                            @if(auth()->user()->role === 'admin')
+                                Admin
+                            @else
+                                {{ Str::limit(auth()->user()->name, 15) }}
+                            @endif
+                        </span>
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
