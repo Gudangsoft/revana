@@ -4,24 +4,7 @@
 @section('page-title', 'Sertifikat Saya')
 
 @section('sidebar')
-    <a href="{{ route('reviewer.dashboard') }}" class="nav-link">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('reviewer.tasks.index') }}" class="nav-link">
-        <i class="bi bi-clipboard-check"></i> My Tasks
-    </a>
-    <a href="{{ route('reviewer.certificates.index') }}" class="nav-link active">
-        <i class="bi bi-award-fill"></i> Sertifikat
-    </a>
-    <a href="{{ route('reviewer.rewards.index') }}" class="nav-link">
-        <i class="bi bi-gift"></i> Rewards
-    </a>
-    <a href="{{ route('reviewer.leaderboard.index') }}" class="nav-link">
-        <i class="bi bi-trophy-fill"></i> Leaderboard
-    </a>
-    <a href="{{ route('reviewer.profile.edit') }}" class="nav-link">
-        <i class="bi bi-person-circle"></i> My Profile
-    </a>
+    @include('reviewer.partials.sidebar')
 @endsection
 
 @section('content')

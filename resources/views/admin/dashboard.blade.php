@@ -40,6 +40,22 @@
 </div>
 @endif
 
+<!-- Notification Alert for Pending Review Requests -->
+@if($pendingReviewRequests > 0)
+<div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-file-earmark-text-fill me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <strong>Permintaan Review Baru!</strong>
+            <br>
+            Ada <strong>{{ $pendingReviewRequests }}</strong> permintaan review dari reviewer yang menunggu persetujuan Anda.
+            <a href="{{ route('admin.review-requests.index', ['status' => 'pending']) }}" class="alert-link">Lihat Permintaan</a>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <!-- Stats Cards -->
 <div class="row">
     <div class="col-md-3">

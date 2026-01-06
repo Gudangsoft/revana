@@ -17,6 +17,12 @@
 <a href="{{ route('admin.reviewers.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewers') ? 'active' : '' }}">
     <i class="bi bi-people"></i> Daftar Reviewer
 </a>
+<a href="{{ route('admin.review-requests.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.review-requests') ? 'active' : '' }}">
+    <i class="bi bi-file-earmark-text"></i> Permintaan Review
+    @if(isset($pendingReviewRequests) && $pendingReviewRequests > 0)
+        <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingReviewRequests }}</span>
+    @endif
+</a>
 <a href="{{ route('admin.leaderboard.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.leaderboard') ? 'active' : '' }}">
     <i class="bi bi-trophy-fill"></i> Papan Peringkat
 </a>

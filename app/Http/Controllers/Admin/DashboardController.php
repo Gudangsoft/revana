@@ -7,6 +7,7 @@ use App\Models\Journal;
 use App\Models\ReviewAssignment;
 use App\Models\User;
 use App\Models\RewardRedemption;
+use App\Models\ReviewRequest;
 use App\Exports\CompletedReviewsExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,6 +22,7 @@ class DashboardController extends Controller
         $pendingReviews = ReviewAssignment::where('status', 'PENDING')->count();
         $submittedReviews = ReviewAssignment::where('status', 'SUBMITTED')->count();
         $pendingRedemptions = RewardRedemption::where('status', 'PENDING')->count();
+        $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count();
 
         $recentAssignments = ReviewAssignment::with(['journal', 'reviewer'])
             ->latest()
@@ -43,6 +45,7 @@ class DashboardController extends Controller
             'pendingReviews',
             'submittedReviews',
             'pendingRedemptions',
+            'pendingReviewRequests',
             'recentAssignments',
             'completedReviews',
             'totalCompletedReviews'

@@ -23,6 +23,7 @@ use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
 use App\Http\Controllers\Pic\AuthorController;
 use App\Http\Controllers\ReviewerRegistrationController;
 use App\Http\Controllers\Admin\ReviewerRegistrationController as AdminReviewerRegistrationController;
+use App\Http\Controllers\ReviewRequestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -139,6 +140,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
+        
+        // Review Requests Management (Admin)
+        Route::get('/review-requests', [ReviewRequestController::class, 'index'])->name('review-requests.index');
+        Route::get('/review-requests/{reviewRequest}', [ReviewRequestController::class, 'show'])->name('review-requests.show');
+        Route::post('/review-requests/{reviewRequest}/approve', [ReviewRequestController::class, 'approve'])->name('review-requests.approve');
+        Route::post('/review-requests/{reviewRequest}/reject', [ReviewRequestController::class, 'reject'])->name('review-requests.reject');
     });
 
     // Reviewer routes
@@ -172,6 +179,11 @@ Route::middleware('auth')->group(function () {
         // Certificates
         Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
         Route::get('/certificates/{assignment}/download', [CertificateController::class, 'download'])->name('certificates.download');
+        
+        // Review Requests (Reviewer)
+        Route::get('/review-requests', [ReviewRequestController::class, 'myRequests'])->name('review-requests.my-requests');
+        Route::get('/review-requests/create', [ReviewRequestController::class, 'create'])->name('review-requests.create');
+        Route::post('/review-requests', [ReviewRequestController::class, 'store'])->name('review-requests.store');
     });
 
 });
