@@ -31,7 +31,6 @@ class RewardController extends Controller
             'tier' => 'required|in:Bronze,Silver,Gold,Platinum',
             'points_required' => 'required|integer|min:1',
             'value' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
@@ -56,7 +55,6 @@ class RewardController extends Controller
             'tier' => 'required|in:Bronze,Silver,Gold,Platinum',
             'points_required' => 'required|integer|min:1',
             'value' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
