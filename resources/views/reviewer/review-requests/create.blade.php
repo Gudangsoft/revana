@@ -50,7 +50,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="number_of_days" class="form-label">Lama Hari (Per Jurnal) <span class="text-danger">*</span></label>
+                        <label for="number_of_days" class="form-label">Lama Hari <span class="text-danger">*</span></label>
                         <input type="number" 
                                class="form-control @error('number_of_days') is-invalid @enderror" 
                                id="number_of_days" 
@@ -60,7 +60,7 @@
                                max="5"
                                style="max-width: 200px;" 
                                required>
-                        <small class="form-text text-muted">Estimasi waktu untuk menyelesaikan review per jurnal (maksimal 5 hari)</small>
+                        <small class="form-text text-muted">Estimasi waktu untuk menyelesaikan review (maksimal 5 hari)</small>
                         @error('number_of_days')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

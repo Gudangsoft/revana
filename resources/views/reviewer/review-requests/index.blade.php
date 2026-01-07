@@ -44,7 +44,7 @@
                                     <span class="badge bg-info">{{ $request->number_of_journals }} jurnal</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary">{{ $request->number_of_days }} hari/jurnal</span>
+                                    <span class="badge bg-secondary">{{ $request->number_of_days }} hari</span>
                                 </td>
                                 <td>
                                     @if($request->status === 'pending')

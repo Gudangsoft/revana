@@ -37,6 +37,7 @@ class ReviewAssignment extends Model
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'deadline' => 'date',
+        'created_at' => 'datetime',
     ];
 
     public function journal()
@@ -110,20 +111,33 @@ class ReviewAssignment extends Model
             'approved_at' => now(),
         ]);
 
-        // Get points per review from settings (default 5)
-        $points = (int) \App\Models\Setting::get('points_per_review', 5);
+        // Hitung lama hari review (dari created_at sampai approved_at)
+        $daysToComplete = $this->created_at->diffInDays(now());
+        
+        // Jika 0 hari (selesai di hari yang sama), hitung sebagai 1 hari
+        if ($daysToComplete == 0) {
+            $daysToComplete = 1;
+        }
+        
+        // Maksimal 5 hari untuk perhitungan poin
+        if ($daysToComplete > 5) {
+            $daysToComplete = 5;
+        }
+
+        // Get points berdasarkan lama hari dari tabel point_day_settings
+        $points = \App\Models\PointDaySetting::getPointsByDays($daysToComplete);
         
         $this->reviewer->increment('total_points', $points);
         $this->reviewer->increment('available_points', $points);
         $this->reviewer->increment('completed_reviews');
 
-        // Create point history
+        // Create point history dengan keterangan lama hari
         PointHistory::create([
             'user_id' => $this->reviewer_id,
             'review_assignment_id' => $this->id,
             'points' => $points,
             'type' => 'EARNED',
-            'description' => "Review artikel: {$this->article_title}",
+            'description' => "Review artikel: {$this->article_title} (selesai dalam {$daysToComplete} hari)",
         ]);
 
         // Check and award badges

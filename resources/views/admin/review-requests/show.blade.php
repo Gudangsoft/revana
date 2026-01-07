@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-4"><strong>Lama Hari (per jurnal):</strong></div>
+                    <div class="col-md-4"><strong>Lama Hari:</strong></div>
                     <div class="col-md-8">
                         <span class="badge bg-secondary">{{ $reviewRequest->number_of_days }} hari</span>
                     </div>
