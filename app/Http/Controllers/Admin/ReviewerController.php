@@ -18,7 +18,9 @@ class ReviewerController extends Controller
                     $q->where('name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%")
                       ->orWhere('institution', 'like', "%{$search}%")
-                      ->orWhere('field_of_study', 'like', "%{$search}%");
+                      ->orWhereHas('fieldOfStudy', function($q) use ($search) {
+                          $q->where('name', 'like', "%{$search}%");
+                      });
                 });
             })
             ->with('badges')
