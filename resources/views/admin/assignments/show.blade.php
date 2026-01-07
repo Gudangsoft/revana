@@ -174,34 +174,6 @@
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-4">
-                        <strong>Surat Tugas:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        @if($assignment->assignment_letter_link)
-                            <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-file-earmark-pdf"></i> Lihat Surat
-                            </a>
-                        @else
-                            <span class="text-muted">N/A</span>
-                        @endif
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <strong>Link Sertifikat:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        @if($assignment->certificate_link)
-                            <a href="{{ $assignment->certificate_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-award"></i> Lihat Sertifikat
-                            </a>
-                        @else
-                            <span class="text-muted">N/A</span>
-                        @endif
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4">
                         <strong>Deadline:</strong>
                     </div>
                     <div class="col-md-8">
