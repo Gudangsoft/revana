@@ -28,13 +28,18 @@ class CertificateController extends Controller
         // Get active certificate templates
         $templates = Certificate::where('is_active', true)->get();
         
-        return view('reviewer.certificates.index', compact('assignments', 'templates'));
+        // Get app settings
+        $appSettings = [
+            'app_name' => \App\Models\Setting::get('app_name', 'APJI Review System'),
+        ];
+        
+        return view('reviewer.certificates.index', compact('assignments', 'templates', 'appSettings'));
     }
 
-    public function download(ReviewAssignment $assignment)
+    public function view(ReviewAssignment $assignment)
     {
         // Cek apakah user adalah reviewer dari assignment ini
-        if ($assignment->reviewer_id != auth()->id() && $assignment->reviewer2_id != auth()->id()) {
+        if ($assignment->reviewer_id != auth()->id() && $assignment->reviewer_2_id != auth()->id()) {
             abort(403, 'Unauthorized access');
         }
 
@@ -43,17 +48,54 @@ class CertificateController extends Controller
             return back()->with('error', 'Sertifikat hanya tersedia untuk review yang sudah disetujui');
         }
 
+        // Generate certificate preview
+        $certificatePath = $this->generateCertificate($assignment, true);
+        
+        if (!$certificatePath) {
+            return back()->with('error', 'Gagal generate preview sertifikat');
+        }
+
+        return view('reviewer.certificates.view', compact('assignment', 'certificatePath'));
+    }
+
+    public function download(ReviewAssignment $assignment)
+    {
+        // Cek apakah user adalah reviewer dari assignment ini
+        if ($assignment->reviewer_id != auth()->id() && $assignment->reviewer_2_id != auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Cek apakah review sudah approved
+        if ($assignment->status !== 'APPROVED') {
+            return back()->with('error', 'Sertifikat hanya tersedia untuk review yang sudah disetujui');
+        }
+
+        // Generate certificate
+        $tempPath = $this->generateCertificate($assignment, false);
+        
+        if (!$tempPath) {
+            return back()->with('error', 'Gagal generate sertifikat');
+        }
+
+        $reviewer = auth()->user();
+        $filename = 'Sertifikat_' . str_replace(' ', '_', $reviewer->name) . '_' . $assignment->article_number . '.jpg';
+        
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    private function generateCertificate(ReviewAssignment $assignment, $forPreview = false)
+    {
         // Get active certificate template
         $template = Certificate::where('is_active', true)->first();
         
         if (!$template) {
-            return back()->with('error', 'Template sertifikat belum tersedia');
+            return false;
         }
 
         $templatePath = storage_path('app/public/' . $template->file_path);
         
         if (!file_exists($templatePath)) {
-            return back()->with('error', 'File template tidak ditemukan');
+            return false;
         }
 
         $reviewer = auth()->user();
@@ -74,60 +116,90 @@ class CertificateController extends Controller
         $month = $assignment->approved_at->locale('id')->translatedFormat('F');
         $reviewerName = strtoupper($reviewer->name);
         $articleTitle = $assignment->article_title;
+        $articleNumber = $assignment->article_number;
         
-        // Wrap long article title
-        $wrappedTitle = wordwrap($articleTitle, 100, "\n");
+        // Get reviewer position
+        $position = ($assignment->reviewer_id == auth()->id()) ? 'REVIEWER 1' : 'REVIEWER 2';
         
-        // Template size: 2560x1811px
-        // Positions calculated based on template layout
+        // Wrap long article title (max 80 characters per line)
+        $wrappedTitle = wordwrap($articleTitle, 80, "\n");
+        $titleLines = explode("\n", $wrappedTitle);
         
-        // Add year (top right) - "2026"
-        $image->text($year, $width - 340, 230, function($font) {
-            $font->filename(public_path('fonts/arial.ttf'));
-            $font->size(165);
-            $font->color('#C9A961');
-            $font->align('right');
-        });
+        // Font paths
+        $fontBold = public_path('fonts/arial-bold.ttf');
+        $fontRegular = public_path('fonts/arial.ttf');
         
-        // Add date (below year) - "03 Januari"
-        $image->text("$date $month", $width - 465, 375, function($font) {
-            $font->filename(public_path('fonts/arial.ttf'));
-            $font->size(55);
-            $font->color('#C9A961');
-            $font->align('right');
-        });
-        
-        // Add reviewer name (center) - "EKO SISWANTO, M.KOM"
-        $image->text($reviewerName, $width / 2, 770, function($font) {
-            $font->filename(public_path('fonts/arial.ttf'));
-            $font->size(95);
-            $font->color('#C9A961');
-            $font->align('center');
-        });
-        
-        // Add article title (center, below name) - Judul artikel
-        $image->text($wrappedTitle, $width / 2, 1045, function($font) {
-            $font->filename(public_path('fonts/arial.ttf'));
-            $font->size(48);
-            $font->color('#C9A961');
-            $font->align('center');
-        });
-        
-        // Save to temporary file
-        $tempFilename = 'certificate_' . time() . '_' . $assignment->id . '.jpg';
-        $tempPath = storage_path('app/public/temp/' . $tempFilename);
-        
-        // Create temp directory if not exists
-        if (!file_exists(storage_path('app/public/temp'))) {
-            mkdir(storage_path('app/public/temp'), 0755, true);
+        // Fallback to arial.ttf if bold not found
+        if (!file_exists($fontBold)) {
+            $fontBold = $fontRegular;
         }
         
-        // Encode and save
-        $image->toJpeg(95)->save($tempPath);
+        // Template positions (untuk template 2560x1811px atau proporsional)
+        // Sesuaikan dengan desain template terbaru
         
-        // Download file
-        $filename = 'Sertifikat_' . str_replace(' ', '_', $reviewer->name) . '_' . $assignment->article_number . '.jpg';
+        // Reviewer Name (center, posisi setelah "This certificate is awarded to :")
+        $image->text($reviewerName, $width / 2, 1120, function($font) use ($fontBold) {
+            $font->filename($fontBold);
+            $font->size(80);
+            $font->color('#C9A961');
+            $font->align('center');
+            $font->valign('middle');
+        });
         
-        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+        // Article Title (center, posisi setelah "Manuscript Entitled :")
+        // Wrap long article title (max 100 characters per line for better fit)
+        $wrappedArticleTitle = wordwrap($articleTitle, 100, "\n");
+        $articleLines = explode("\n", $wrappedArticleTitle);
+        
+        $yArticlePosition = 1500;
+        foreach ($articleLines as $index => $articleLine) {
+            $image->text(trim($articleLine), $width / 2, $yArticlePosition, function($font) use ($fontBold) {
+                $font->filename($fontBold);
+                $font->size(60);
+                $font->color('#C9A961');
+                $font->align('center');
+                $font->valign('middle');
+            });
+            $yArticlePosition += 70; // Line spacing
+        }
+        
+        // Tanggal di center (sesuai kotak merah di bawah)
+        $dateText = "$date $month $year";
+        $image->text($dateText, $width / 2, $height - 180, function($font) use ($fontBold) {
+            $font->filename($fontBold);
+            $font->size(55);
+            $font->color('#C9A961');
+            $font->align('center');
+            $font->valign('middle');
+        });
+        
+        // Save file
+        if ($forPreview) {
+            // Save to public/temp for preview
+            $tempFilename = 'preview_certificate_' . time() . '_' . $assignment->id . '.jpg';
+            $tempPath = public_path('temp/' . $tempFilename);
+            
+            // Create temp directory if not exists
+            if (!file_exists(public_path('temp'))) {
+                mkdir(public_path('temp'), 0755, true);
+            }
+            
+            $image->toJpeg(90)->save($tempPath);
+            
+            return 'temp/' . $tempFilename;
+        } else {
+            // Save to storage/temp for download
+            $tempFilename = 'certificate_' . time() . '_' . $assignment->id . '.jpg';
+            $tempPath = storage_path('app/public/temp/' . $tempFilename);
+            
+            // Create temp directory if not exists
+            if (!file_exists(storage_path('app/public/temp'))) {
+                mkdir(storage_path('app/public/temp'), 0755, true);
+            }
+            
+            $image->toJpeg(95)->save($tempPath);
+            
+            return $tempPath;
+        }
     }
 }

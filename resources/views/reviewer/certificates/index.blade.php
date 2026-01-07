@@ -69,9 +69,18 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('reviewer.certificates.download', $assignment) }}" class="btn btn-success btn-sm">
-                                            <i class="bi bi-download"></i> Download
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('reviewer.certificates.view', $assignment) }}" 
+                                               class="btn btn-primary btn-sm"
+                                               title="Lihat Preview">
+                                                <i class="bi bi-eye"></i> Lihat
+                                            </a>
+                                            <a href="{{ route('reviewer.certificates.download', $assignment) }}" 
+                                               class="btn btn-success btn-sm"
+                                               title="Download Sertifikat">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach

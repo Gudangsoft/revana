@@ -178,6 +178,7 @@ Route::middleware('auth')->group(function () {
         
         // Certificates
         Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+        Route::get('/certificates/{assignment}/view', [CertificateController::class, 'view'])->name('certificates.view');
         Route::get('/certificates/{assignment}/download', [CertificateController::class, 'download'])->name('certificates.download');
         
         // Review Requests (Reviewer)
