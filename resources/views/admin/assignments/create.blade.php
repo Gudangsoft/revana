@@ -130,11 +130,6 @@
                             </option>
                             @endforeach
                         </select>
-                        <input type="hidden" name="reviewer_id_hidden" id="reviewer1Hidden">
-                        <div id="reviewer1Selected" class="alert alert-info mt-2" style="display: none;">
-                            <strong>Reviewer 1 Terpilih:</strong> <span id="reviewer1SelectedText"></span>
-                            <button type="button" class="btn btn-sm btn-outline-secondary float-end" onclick="clearReviewer1()">Ubah</button>
-                        </div>
                         @error('reviewer_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -159,10 +154,6 @@
                             </option>
                             @endforeach
                         </select>
-                        <div id="reviewer2Selected" class="alert alert-info mt-2" style="display: none;">
-                            <strong>Reviewer 2 Terpilih:</strong> <span id="reviewer2SelectedText"></span>
-                            <button type="button" class="btn btn-sm btn-outline-secondary float-end" onclick="clearReviewer2()">Ubah</button>
-                        </div>
                         @error('reviewer_2_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -318,19 +309,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = selectedOption.getAttribute('data-name');
             const email = selectedOption.getAttribute('data-email');
             
-            // Show selected reviewer info
-            document.getElementById('reviewer1SelectedText').textContent = name + ' - ' + email;
-            document.getElementById('reviewer1Selected').style.display = 'block';
+            // Put selected reviewer name in search box
+            searchReviewer1.value = name + ' - ' + email;
             
-            // Hide select and clear search
+            // Hide select
             this.style.display = 'none';
-            searchReviewer1.value = '';
-            searchReviewer1.style.display = 'none';
             
             // Check if same as reviewer 2
             if (this.value === reviewer2.value) {
                 alert('Reviewer 1 dan Reviewer 2 tidak boleh sama!');
-                clearReviewer1();
+                searchReviewer1.value = '';
+                this.value = '';
             }
         }
     });
@@ -342,49 +331,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = selectedOption.getAttribute('data-name');
             const email = selectedOption.getAttribute('data-email');
             
-            // Show selected reviewer info
-            document.getElementById('reviewer2SelectedText').textContent = name + ' - ' + email;
-            document.getElementById('reviewer2Selected').style.display = 'block';
+            // Put selected reviewer name in search box
+            searchReviewer2.value = name + ' - ' + email;
             
-            // Hide select and clear search
+            // Hide select
             this.style.display = 'none';
-            searchReviewer2.value = '';
-            searchReviewer2.style.display = 'none';
             
             // Check if same as reviewer 1
             if (this.value === reviewer1.value) {
                 alert('Reviewer 2 dan Reviewer 1 tidak boleh sama!');
-                clearReviewer2();
+                searchReviewer2.value = '';
+                this.value = '';
             }
         }
     });
+    
+    // Clear search box when user starts typing again (to select different reviewer)
+    searchReviewer1.addEventListener('keydown', function() {
+        if (reviewer1.value) {
+            reviewer1.value = '';
+        }
+    });
+    
+    searchReviewer2.addEventListener('keydown', function() {
+        if (reviewer2.value) {
+            reviewer2.value = '';
+        }
+    });
 });
-
-// Clear reviewer 1 selection
-function clearReviewer1() {
-    const reviewer1 = document.getElementById('reviewer1');
-    const searchReviewer1 = document.getElementById('searchReviewer1');
-    
-    reviewer1.value = '';
-    reviewer1.style.display = 'none';
-    searchReviewer1.value = '';
-    searchReviewer1.style.display = 'block';
-    document.getElementById('reviewer1Selected').style.display = 'none';
-    searchReviewer1.focus();
-}
-
-// Clear reviewer 2 selection
-function clearReviewer2() {
-    const reviewer2 = document.getElementById('reviewer2');
-    const searchReviewer2 = document.getElementById('searchReviewer2');
-    
-    reviewer2.value = '';
-    reviewer2.style.display = 'none';
-    searchReviewer2.value = '';
-    searchReviewer2.style.display = 'block';
-    document.getElementById('reviewer2Selected').style.display = 'none';
-    searchReviewer2.focus();
-}
 </script>
 @endpush
 
