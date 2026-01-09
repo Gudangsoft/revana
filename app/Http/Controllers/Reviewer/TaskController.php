@@ -94,19 +94,19 @@ class TaskController extends Controller
 
         $assignment->reject($validated['rejection_reason']);
 
+        return redirect()->route('reviewer.tasks.index')
+            ->with('success', 'Task berhasil ditolak');
+    }
+
+    public function startProgress(ReviewAssignment $assignment)
+    {
         $isReviewer = $assignment->reviewer_id === auth()->id() 
                    || $assignment->reviewer_2_id === auth()->id()
                    || $assignment->reviewer_3_id === auth()->id()
                    || $assignment->reviewer_4_id === auth()->id()
                    || $assignment->reviewer_5_id === auth()->id();
                    
-        if (!$isReviewer
-            ->with('success', 'Task berhasil ditolak');
-    }
-
-    public function startProgress(ReviewAssignment $assignment)
-    {
-        if ($assignment->reviewer_id !== auth()->id() && $assignment->reviewer_2_id !== auth()->id()) {
+        if (!$isReviewer) {
             abort(403);
         }
 
