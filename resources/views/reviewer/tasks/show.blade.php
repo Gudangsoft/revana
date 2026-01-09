@@ -270,7 +270,14 @@
             </div>
         </div>
     </div>
-isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-gear"></i> Aksi
+            </div>
+            <div class="card-body">
+                @if($assignment->isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
                     <div class="alert alert-danger">
                         <i class="bi bi-lock-fill"></i> Task sudah expired dan tidak dapat dikerjakan
                     </div>
