@@ -326,14 +326,7 @@
                            class="btn btn-primary w-100 mb-2" target="_blank">
                             <i class="bi bi-file-pdf"></i> Download PDF Review
                         </a>
-                        @endif<i class="bi bi-check-circle"></i> Review telah disetujui!
-                    </div>
-                    
-                    @if($assignment->reviewResult)
-                    <a href="{{ route('reviewer.results.downloadPdf', $assignment) }}" 
-                       class="btn btn-primary w-100 mb-2" target="_blank">
-                        <i class="bi bi-file-pdf"></i> Download PDF Review
-                    </a>
+                        @endif
                     @endif
                 @endif
 
