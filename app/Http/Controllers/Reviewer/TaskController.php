@@ -68,19 +68,19 @@ class TaskController extends Controller
         }
 
         $assignment->accept();
-$isReviewer = $assignment->reviewer_id === auth()->id() 
-                   || $assignment->reviewer_2_id === auth()->id()
-                   || $assignment->reviewer_3_id === auth()->id()
-                   || $assignment->reviewer_4_id === auth()->id()
-                   || $assignment->reviewer_5_id === auth()->id();
-                   
-        if (!$isReviewer
+
         return back()->with('success', 'Task berhasil diterima');
     }
 
     public function reject(Request $request, ReviewAssignment $assignment)
     {
-        if ($assignment->reviewer_id !== auth()->id() && $assignment->reviewer_2_id !== auth()->id()) {
+        $isReviewer = $assignment->reviewer_id === auth()->id() 
+                   || $assignment->reviewer_2_id === auth()->id()
+                   || $assignment->reviewer_3_id === auth()->id()
+                   || $assignment->reviewer_4_id === auth()->id()
+                   || $assignment->reviewer_5_id === auth()->id();
+                   
+        if (!$isReviewer) {
             abort(403);
         }
 
