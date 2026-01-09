@@ -18,6 +18,9 @@ class RewardRedemption extends Model
         'admin_notes',
         'approved_at',
         'completed_at',
+        'proof_file',
+        'proof_url',
+        'proof_description',
     ];
 
     protected $casts = [

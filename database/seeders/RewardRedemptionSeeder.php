@@ -5,132 +5,92 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Reward;
 use App\Models\RewardRedemption;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class RewardRedemptionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Clear existing redemptions first
-        RewardRedemption::truncate();
-        
-        // Get all reviewers and rewards
-        $reviewers = User::where('role', 'reviewer')->get();
+        // Get sample users and rewards
+        $reviewers = User::where('role', 'reviewer')->take(3)->get();
         $rewards = Reward::all();
 
         if ($reviewers->isEmpty() || $rewards->isEmpty()) {
-            $this->command->warn('No reviewers or rewards found. Please run UserSeeder and RewardSeeder first.');
+            $this->command->warn('No reviewers or rewards found. Skipping RewardRedemptionSeeder.');
             return;
         }
 
-        // Get rewards by tier
-        $platinumRewards = $rewards->where('tier', 'Platinum');
-        $goldRewards = $rewards->where('tier', 'Gold');
-        $silverRewards = $rewards->where('tier', 'Silver');
-        $bronzeRewards = $rewards->where('tier', 'Bronze');
+        $rewardUang100k = $rewards->where('type', 'UANG')->where('points_required', 100)->first();
+        $rewardUang250k = $rewards->where('type', 'UANG')->where('points_required', 250)->first();
+        $rewardGratisSubmit = $rewards->where('type', 'GRATIS_SUBMIT')->where('points_required', 200)->first();
 
-        // Reviewer 1 (Dr. Ahmad) - Top Performer with ALL tier levels
-        $ahmad = $reviewers->first();
-        if ($ahmad) {
-            // 2 Platinum rewards
-            if ($platinumRewards->count() >= 2) {
-                $this->createRedemption($ahmad, $platinumRewards->skip(0)->first(), 'COMPLETED');
-                $this->createRedemption($ahmad, $platinumRewards->skip(1)->first(), 'COMPLETED');
-            } elseif ($platinumRewards->count() == 1) {
-                $this->createRedemption($ahmad, $platinumRewards->first(), 'COMPLETED');
-                $this->createRedemption($ahmad, $platinumRewards->first(), 'COMPLETED');
-            }
-            
-            // 3 Gold rewards
-            if ($goldRewards->isNotEmpty()) {
-                $this->createRedemption($ahmad, $goldRewards->first(), 'COMPLETED');
-                $this->createRedemption($ahmad, $goldRewards->first(), 'COMPLETED');
-                $this->createRedemption($ahmad, $goldRewards->first(), 'COMPLETED');
-            }
-            
-            // 2 Silver rewards
-            if ($silverRewards->isNotEmpty()) {
-                $this->createRedemption($ahmad, $silverRewards->first(), 'COMPLETED');
-                $this->createRedemption($ahmad, $silverRewards->first(), 'COMPLETED');
-            }
-            
-            // 1 Bronze reward
-            if ($bronzeRewards->isNotEmpty()) {
-                $this->createRedemption($ahmad, $bronzeRewards->first(), 'COMPLETED');
-            }
+        // Reviewer 1 - Redemption COMPLETED dengan bukti transfer
+        if ($reviewers->count() > 0 && $rewardUang100k) {
+            RewardRedemption::create([
+                'user_id' => $reviewers[0]->id,
+                'reward_id' => $rewardUang100k->id,
+                'points_used' => $rewardUang100k->points_required,
+                'status' => 'COMPLETED',
+                'notes' => 'Rekening BCA: 1234567890 a/n ' . $reviewers[0]->name,
+                'admin_notes' => 'Transfer telah dilakukan',
+                'approved_at' => now()->subDays(5),
+                'completed_at' => now()->subDays(3),
+                'proof_url' => 'https://example.com/bukti-transfer/TRX001.jpg',
+                'proof_description' => 'Transfer telah dilakukan melalui BCA Mobile ke rekening 1234567890 atas nama ' . $reviewers[0]->name . ' sebesar Rp 100.000 pada tanggal ' . now()->subDays(3)->format('d M Y'),
+            ]);
         }
 
-        // Reviewer 2 (Dr. Siti) - High Performer (Gold, Silver, Bronze)
-        if ($reviewers->count() > 1) {
-            $siti = $reviewers->skip(1)->first();
-            if ($siti) {
-                // 2 Gold rewards
-                if ($goldRewards->isNotEmpty()) {
-                    $this->createRedemption($siti, $goldRewards->first(), 'COMPLETED');
-                    $this->createRedemption($siti, $goldRewards->first(), 'COMPLETED');
-                }
-                
-                // 3 Silver rewards
-                if ($silverRewards->isNotEmpty()) {
-                    $this->createRedemption($siti, $silverRewards->first(), 'COMPLETED');
-                    $this->createRedemption($siti, $silverRewards->first(), 'COMPLETED');
-                    $this->createRedemption($siti, $silverRewards->first(), 'COMPLETED');
-                }
-                
-                // 2 Bronze rewards
-                if ($bronzeRewards->isNotEmpty()) {
-                    $this->createRedemption($siti, $bronzeRewards->first(), 'COMPLETED');
-                    $this->createRedemption($siti, $bronzeRewards->first(), 'COMPLETED');
-                }
-            }
+        // Reviewer 2 - Redemption COMPLETED dengan bukti jurnal terbit
+        if ($reviewers->count() > 1 && $rewardGratisSubmit) {
+            RewardRedemption::create([
+                'user_id' => $reviewers[1]->id,
+                'reward_id' => $rewardGratisSubmit->id,
+                'points_used' => $rewardGratisSubmit->points_required,
+                'status' => 'COMPLETED',
+                'notes' => 'Artikel tentang "Machine Learning in Healthcare" untuk Jurnal Teknik Informatika',
+                'admin_notes' => 'Artikel telah terbit',
+                'approved_at' => now()->subDays(10),
+                'completed_at' => now()->subDays(2),
+                'proof_url' => 'https://journal-example.com/volume5/issue2/article-ml-healthcare',
+                'proof_description' => 'Artikel telah terbit di Jurnal Teknik Informatika Vol. 5 No. 2 tahun 2026. Link artikel: https://journal-example.com/volume5/issue2/article-ml-healthcare',
+            ]);
         }
 
-        // Reviewer 3 (Dr. Budi) - Medium Performer (Silver and Bronze)
-        if ($reviewers->count() > 2) {
-            $budi = $reviewers->skip(2)->first();
-            if ($budi) {
-                // 1 Silver reward
-                if ($silverRewards->isNotEmpty()) {
-                    $this->createRedemption($budi, $silverRewards->first(), 'COMPLETED');
-                }
-                
-                // 4 Bronze rewards
-                if ($bronzeRewards->isNotEmpty()) {
-                    $this->createRedemption($budi, $bronzeRewards->first(), 'COMPLETED');
-                    $this->createRedemption($budi, $bronzeRewards->first(), 'COMPLETED');
-                    $this->createRedemption($budi, $bronzeRewards->first(), 'COMPLETED');
-                    $this->createRedemption($budi, $bronzeRewards->first(), 'COMPLETED');
-                }
-                
-                // 1 Pending redemption
-                if ($bronzeRewards->isNotEmpty()) {
-                    $this->createRedemption($budi, $bronzeRewards->first(), 'PENDING');
-                }
-            }
+        // Reviewer 3 - Redemption APPROVED (belum selesai, menunggu bukti)
+        if ($reviewers->count() > 2 && $rewardUang250k) {
+            RewardRedemption::create([
+                'user_id' => $reviewers[2]->id,
+                'reward_id' => $rewardUang250k->id,
+                'points_used' => $rewardUang250k->points_required,
+                'status' => 'APPROVED',
+                'notes' => 'Rekening Mandiri: 9876543210 a/n ' . $reviewers[2]->name,
+                'approved_at' => now()->subDays(1),
+            ]);
         }
 
-        $this->command->info('Sample reward redemptions with ALL tier levels created successfully!');
-        $this->command->info('- Dr. Ahmad: 2 Platinum, 3 Gold, 2 Silver, 1 Bronze (Tier Score: 2,320)');
-        $this->command->info('- Dr. Siti: 2 Gold, 3 Silver, 2 Bronze (Tier Score: 232)');
-        $this->command->info('- Dr. Budi: 1 Silver, 4 Bronze (Tier Score: 14)');
-    }
+        // Reviewer 1 - Redemption PENDING (baru diajukan)
+        if ($reviewers->count() > 0 && $rewardUang250k) {
+            RewardRedemption::create([
+                'user_id' => $reviewers[0]->id,
+                'reward_id' => $rewardUang250k->id,
+                'points_used' => $rewardUang250k->points_required,
+                'status' => 'PENDING',
+                'notes' => 'Rekening BRI: 5555666677778888 a/n ' . $reviewers[0]->name,
+            ]);
+        }
 
-    private function createRedemption($user, $reward, $status)
-    {
-        if (!$reward) return;
+        // Reviewer 2 - Redemption REJECTED (ditolak dengan alasan)
+        if ($reviewers->count() > 1 && $rewardUang100k) {
+            RewardRedemption::create([
+                'user_id' => $reviewers[1]->id,
+                'reward_id' => $rewardUang100k->id,
+                'points_used' => $rewardUang100k->points_required,
+                'status' => 'REJECTED',
+                'notes' => 'Rekening BNI: 1111222233334444 a/n John Doe',
+                'admin_notes' => 'Nomor rekening tidak sesuai dengan nama reviewer. Mohon kirimkan ulang dengan rekening atas nama sendiri.',
+            ]);
+        }
 
-        RewardRedemption::create([
-            'user_id' => $user->id,
-            'reward_id' => $reward->id,
-            'points_used' => $reward->points_required,
-            'status' => $status,
-            'notes' => 'Sample redemption for testing leaderboard',
-            'approved_at' => $status !== 'PENDING' ? now()->subDays(rand(1, 30)) : null,
-            'completed_at' => $status === 'COMPLETED' ? now()->subDays(rand(1, 20)) : null,
-        ]);
+        $this->command->info('RewardRedemption dummy data created successfully!');
     }
 }

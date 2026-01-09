@@ -169,14 +169,18 @@
                                 <th>Reward</th>
                                 <th>Points</th>
                                 <th>Status</th>
-                                <th>Catatan Admin</th>
+                                <th>Bukti</th>
+                                <th>Catatan</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($myRedemptions as $redemption)
                             <tr>
                                 <td>{{ $redemption->created_at->format('d M Y') }}</td>
-                                <td>{{ $redemption->reward->name }}</td>
+                                <td>
+                                    <strong>{{ $redemption->reward->name }}</strong>
+                                    <br><small class="text-muted">{{ $redemption->reward->type }}</small>
+                                </td>
                                 <td><span class="badge bg-danger">-{{ $redemption->points_used }} pts</span></td>
                                 <td>
                                     @php
@@ -189,10 +193,34 @@
                                         $color = $statusColors[$redemption->status] ?? 'secondary';
                                     @endphp
                                     <span class="badge bg-{{ $color }}">{{ $redemption->status }}</span>
+                                    @if($redemption->status === 'COMPLETED')
+                                        <br><small class="text-success">{{ $redemption->completed_at->format('d M Y') }}</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($redemption->status === 'COMPLETED' && ($redemption->proof_url || $redemption->proof_file))
+                                        @if($redemption->proof_url)
+                                            <a href="{{ $redemption->proof_url }}" target="_blank" class="btn btn-sm btn-primary mb-1">
+                                                <i class="bi bi-link-45deg"></i> Link
+                                            </a>
+                                        @endif
+                                        @if($redemption->proof_file)
+                                            <a href="{{ asset('storage/' . $redemption->proof_file) }}" target="_blank" class="btn btn-sm btn-success mb-1">
+                                                <i class="bi bi-file-earmark"></i> File
+                                            </a>
+                                        @endif
+                                        @if($redemption->proof_description)
+                                            <br><small class="text-muted">{{ Str::limit($redemption->proof_description, 50) }}</small>
+                                        @endif
+                                    @else
+                                        <small class="text-muted">-</small>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($redemption->admin_notes)
                                         <small class="text-muted">{{ $redemption->admin_notes }}</small>
+                                    @elseif($redemption->notes)
+                                        <small class="text-muted">{{ Str::limit($redemption->notes, 50) }}</small>
                                     @else
                                         <small class="text-muted">-</small>
                                     @endif

@@ -212,6 +212,42 @@
                 @endif
             </div>
         </div>
+
+        <!-- Proof Section -->
+        @if($redemption->status === 'COMPLETED' && ($redemption->proof_file || $redemption->proof_url || $redemption->proof_description))
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-file-earmark-check"></i> Bukti Penyelesaian
+            </div>
+            <div class="card-body">
+                @if($redemption->proof_description)
+                <div class="mb-3">
+                    <strong>Deskripsi Bukti:</strong>
+                    <p class="mt-2">{{ $redemption->proof_description }}</p>
+                </div>
+                @endif
+                
+                @if($redemption->proof_url)
+                <div class="mb-3">
+                    <strong>Link Bukti:</strong><br>
+                    <a href="{{ $redemption->proof_url }}" target="_blank" class="btn btn-sm btn-primary mt-1">
+                        <i class="bi bi-link-45deg"></i> Buka Link
+                    </a>
+                    <br><small class="text-muted">{{ $redemption->proof_url }}</small>
+                </div>
+                @endif
+
+                @if($redemption->proof_file)
+                <div class="mb-3">
+                    <strong>File Bukti:</strong><br>
+                    <a href="{{ asset('storage/' . $redemption->proof_file) }}" target="_blank" class="btn btn-sm btn-success mt-1">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Download File
+                    </a>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 
     <div class="col-md-4">
@@ -235,12 +271,10 @@
                 @endif
 
                 @if($redemption->status === 'APPROVED')
-                    <form action="{{ route('admin.redemptions.complete', $redemption) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Tandai sebagai selesai?')">
-                            <i class="bi bi-check2-all"></i> Mark as Completed
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#completeModal">
+                        <i class="bi bi-check2-all"></i> Mark as Completed
+                    </button>
+                    <small class="text-muted">Upload bukti untuk menyelesaikan</small>
                 @endif
 
                 @if($redemption->status === 'COMPLETED')
@@ -320,6 +354,74 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-danger">Reject Redemption</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Modal -->
+<div class="modal fade" id="completeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-check2-all"></i> Selesaikan Redemption dengan Bukti</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.redemptions.complete', $redemption) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong><i class="bi bi-info-circle"></i> Wajib Upload Bukti</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Untuk <strong>UANG</strong>: Upload bukti transfer atau masukkan link</li>
+                            <li>Untuk <strong>GRATIS_SUBMIT</strong>: Masukkan link jurnal yang telah terbit</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi Bukti <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="proof_description" rows="3" required 
+                                  placeholder="Contoh: Transfer telah dilakukan ke rekening BCA 1234567890 atas nama {{ $redemption->user->name }}">{{ old('proof_description') }}</textarea>
+                        <small class="text-muted">Minimal 10 karakter</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Upload File Bukti (Opsional)</label>
+                        <input type="file" class="form-control" name="proof_file" accept=".jpg,.jpeg,.png,.pdf">
+                        <small class="text-muted">Format: JPG, PNG, atau PDF. Maksimal 2MB</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Link Bukti (Opsional)
+                            @if($redemption->reward->type === 'GRATIS_SUBMIT')
+                                <span class="text-danger">*Direkomendasikan untuk GRATIS_SUBMIT</span>
+                            @endif
+                        </label>
+                        <input type="url" class="form-control" name="proof_url" 
+                               placeholder="https://example.com/jurnal/artikel-published" 
+                               value="{{ old('proof_url') }}">
+                        <small class="text-muted">Link ke jurnal yang terbit, bukti transfer online, dll</small>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body bg-light">
+                            <strong>Ringkasan:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Reviewer: <strong>{{ $redemption->user->name }}</strong></li>
+                                <li>Reward: <strong>{{ $redemption->reward->name }}</strong></li>
+                                <li>Type: <span class="badge bg-secondary">{{ $redemption->reward->type }}</span></li>
+                                <li>Points: <strong>{{ $redemption->points_used }} pts</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Selesaikan dengan Bukti
+                    </button>
                 </div>
             </form>
         </div>
