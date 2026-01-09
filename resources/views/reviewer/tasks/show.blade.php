@@ -33,6 +33,9 @@
                     <strong>Deadline:</strong><br>
                     @if($assignment->deadline)
                         <span class="badge bg-warning text-dark mt-1" style="font-size: 1.2rem;">{{ $assignment->deadline->format('d M Y') }}</span>
+                        @if($assignment->isExpired())
+                            <br><span class="badge bg-danger mt-2"><i class="bi bi-clock-history"></i> EXPIRED</span>
+                        @endif
                     @else
                         <span class="badge bg-secondary mt-1">N/A</span>
                     @endif
@@ -49,27 +52,47 @@
                     @endif
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Username Akun:</strong><br>
-                        <code>{{ $assignment->account_username ?? 'N/A' }}</code>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Password Akun:</strong><br>
-                        <code>{{ $assignment->account_password ?? 'N/A' }}</code>
-                    </div>
-                </div>
+                @php
+                    // Determine which reviewer number this user is
+                    $reviewerNumber = null;
+                    $myUsername = null;
+                    $myPassword = null;
+                    
+                    if ($assignment->reviewer_id == auth()->id()) {
+                        $reviewerNumber = 1;
+                        $myUsername = $assignment->reviewer_1_username;
+                        $myPassword = $assignment->reviewer_1_password;
+                    } elseif ($assignment->reviewer_2_id == auth()->id()) {
+                        $reviewerNumber = 2;
+                        $myUsername = $assignment->reviewer_2_username;
+                        $myPassword = $assignment->reviewer_2_password;
+                    } elseif ($assignment->reviewer_3_id == auth()->id()) {
+                        $reviewerNumber = 3;
+                        $myUsername = $assignment->reviewer_3_username;
+                        $myPassword = $assignment->reviewer_3_password;
+                    } elseif ($assignment->reviewer_4_id == auth()->id()) {
+                        $reviewerNumber = 4;
+                        $myUsername = $assignment->reviewer_4_username;
+                        $myPassword = $assignment->reviewer_4_password;
+                    } elseif ($assignment->reviewer_5_id == auth()->id()) {
+                        $reviewerNumber = 5;
+                        $myUsername = $assignment->reviewer_5_username;
+                        $myPassword = $assignment->reviewer_5_password;
+                    }
+                @endphp
 
+                @if($reviewerNumber)
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <strong>Username Reviewer:</strong><br>
-                        <code>{{ $assignment->reviewer_username ?? 'N/A' }}</code>
+                        <strong>Username Reviewer {{ $reviewerNumber }}:</strong><br>
+                        <code>{{ $myUsername ?? 'N/A' }}</code>
                     </div>
                     <div class="col-md-6">
-                        <strong>Password Reviewer:</strong><br>
-                        <code>{{ $assignment->reviewer_password ?? 'N/A' }}</code>
+                        <strong>Password Reviewer {{ $reviewerNumber }}:</strong><br>
+                        <code>{{ $myPassword ?? 'N/A' }}</code>
                     </div>
                 </div>
+                @endif
 
                 <div class="mb-3">
                     <strong>Status:</strong><br>
@@ -91,6 +114,13 @@
                 @if($assignment->status == 'PENDING')
                 <div class="alert alert-warning">
                     <i class="bi bi-exclamation-triangle"></i> Tugas ini menunggu respon Anda. Silakan terima atau tolak tugas ini.
+                </div>
+                @endif
+                
+                @if($assignment->isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon"></i> <strong>TASK EXPIRED!</strong><br>
+                    Tugas ini sudah melewati deadline ({{ $assignment->deadline->format('d M Y') }}) dan tidak dapat dikerjakan lagi.
                 </div>
                 @endif
 
@@ -240,50 +270,56 @@
             </div>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <i class="bi bi-gear"></i> Aksi
-            </div>
-            <div class="card-body">
-                @if($assignment->status == 'PENDING')
-                    <form action="{{ route('reviewer.tasks.accept', $assignment) }}" method="POST" class="mb-2">
-                        @csrf
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-check-circle"></i> Terima Tugas
-                        </button>
-                    </form>
-
-                    <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                        <i class="bi bi-x-circle"></i> Tolak Tugas
-                    </button>
-                @endif
-
-                @if($assignment->status == 'ACCEPTED')
-                    <form action="{{ route('reviewer.tasks.start', $assignment) }}" method="POST" class="mb-2">
-                        @csrf
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-play-circle"></i> Mulai Review
-                        </button>
-                    </form>
-                @endif
-
-                @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']))
-                    <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100">
-                        <i class="bi bi-upload"></i> Upload Hasil Review
-                    </a>
-                @endif
-
-                @if($assignment->status == 'SUBMITTED')
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Menunggu validasi admin
+isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
+                    <div class="alert alert-danger">
+                        <i class="bi bi-lock-fill"></i> Task sudah expired dan tidak dapat dikerjakan
                     </div>
-                @endif
+                @else
+                    @if($assignment->status == 'PENDING')
+                        <form action="{{ route('reviewer.tasks.accept', $assignment) }}" method="POST" class="mb-2">
+                            @csrf
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-check-circle"></i> Terima Tugas
+                            </button>
+                        </form>
 
-                @if($assignment->status == 'APPROVED')
-                    <div class="alert alert-success mb-2">
-                        <i class="bi bi-check-circle"></i> Review telah disetujui!
+                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="bi bi-x-circle"></i> Tolak Tugas
+                        </button>
+                    @endif
+
+                    @if($assignment->status == 'ACCEPTED')
+                        <form action="{{ route('reviewer.tasks.start', $assignment) }}" method="POST" class="mb-2">
+                            @csrf
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-play-circle"></i> Mulai Review
+                            </button>
+                        </form>
+                    @endif
+
+                    @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']))
+                        <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100">
+                            <i class="bi bi-upload"></i> Upload Hasil Review
+                        </a>
+                    @endif
+
+                    @if($assignment->status == 'SUBMITTED')
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Menunggu validasi admin
+                        </div>
+                    @endif
+
+                    @if($assignment->status == 'APPROVED')
+                        <div class="alert alert-success mb-2">
+                            <i class="bi bi-check-circle"></i> Review telah disetujui!
+                        </div>
+                        
+                        @if($assignment->reviewResult)
+                        <a href="{{ route('reviewer.results.downloadPdf', $assignment) }}" 
+                           class="btn btn-primary w-100 mb-2" target="_blank">
+                            <i class="bi bi-file-pdf"></i> Download PDF Review
+                        </a>
+                        @endif<i class="bi bi-check-circle"></i> Review telah disetujui!
                     </div>
                     
                     @if($assignment->reviewResult)

@@ -13,12 +13,23 @@ class ReviewResultController extends Controller
 {
     public function create(ReviewAssignment $assignment)
     {
-        if ($assignment->reviewer_id !== auth()->id()) {
+        $isReviewer = $assignment->reviewer_id === auth()->id() 
+                   || $assignment->reviewer_2_id === auth()->id()
+                   || $assignment->reviewer_3_id === auth()->id()
+                   || $assignment->reviewer_4_id === auth()->id()
+                   || $assignment->reviewer_5_id === auth()->id();
+                   
+        if (!$isReviewer) {
             abort(403);
         }
 
         if (!in_array($assignment->status, ['ON_PROGRESS', 'REVISION'])) {
             return back()->with('error', 'Review belum dimulai');
+        }
+        
+        // Check if expired
+        if ($assignment->isExpired()) {
+            return back()->with('error', 'Task sudah melewati deadline dan tidak dapat dikerjakan lagi');
         }
 
         return view('reviewer.results.create', compact('assignment'));
@@ -26,8 +37,19 @@ class ReviewResultController extends Controller
 
     public function store(Request $request, ReviewAssignment $assignment)
     {
-        if ($assignment->reviewer_id !== auth()->id()) {
+        $isReviewer = $assignment->reviewer_id === auth()->id() 
+                   || $assignment->reviewer_2_id === auth()->id()
+                   || $assignment->reviewer_3_id === auth()->id()
+                   || $assignment->reviewer_4_id === auth()->id()
+                   || $assignment->reviewer_5_id === auth()->id();
+                   
+        if (!$isReviewer) {
             abort(403);
+        }
+        
+        // Check if expired
+        if ($assignment->isExpired()) {
+            return back()->with('error', 'Task sudah melewati deadline dan tidak dapat disubmit lagi');
         }
 
         $validated = $request->validate([
@@ -96,7 +118,13 @@ class ReviewResultController extends Controller
     public function downloadPdf(ReviewAssignment $assignment)
     {
         // Check authorization
-        if ($assignment->reviewer_id !== auth()->id()) {
+        $isReviewer = $assignment->reviewer_id === auth()->id() 
+                   || $assignment->reviewer_2_id === auth()->id()
+                   || $assignment->reviewer_3_id === auth()->id()
+                   || $assignment->reviewer_4_id === auth()->id()
+                   || $assignment->reviewer_5_id === auth()->id();
+                   
+        if (!$isReviewer) {
             abort(403);
         }
 

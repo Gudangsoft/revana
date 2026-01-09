@@ -127,6 +127,9 @@
                                         <span class="badge bg-warning text-dark">
                                             {{ $assignment->deadline->format('d M Y') }}
                                         </span>
+                                        @if($assignment->isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
+                                            <br><span class="badge bg-danger mt-1"><i class="bi bi-lock"></i> EXPIRED</span>
+                                        @endif
                                     @else
                                         <span class="badge bg-secondary">N/A</span>
                                     @endif

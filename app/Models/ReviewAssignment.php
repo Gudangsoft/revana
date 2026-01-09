@@ -195,4 +195,35 @@ class ReviewAssignment extends Model
     {
         $this->update(['status' => 'REVISION']);
     }
+    
+    // Check if assignment is expired (past deadline)
+    public function isExpired()
+    {
+        if (!$this->deadline) {
+            return false;
+        }
+        
+        return now()->isAfter($this->deadline);
+    }
+    
+    // Check if reviewer can still work on this assignment
+    public function canBeWorkedOn()
+    {
+        // Cannot work if expired
+        if ($this->isExpired()) {
+            return false;
+        }
+        
+        // Cannot work if already approved
+        if ($this->status === 'APPROVED') {
+            return false;
+        }
+        
+        // Cannot work if rejected
+        if ($this->status === 'REJECTED') {
+            return false;
+        }
+        
+        return true;
+    }
 }
