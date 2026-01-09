@@ -48,48 +48,6 @@
                         @enderror
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">User Akun <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('account_username') is-invalid @enderror" 
-                                   name="account_username" value="{{ old('account_username') }}" 
-                                   placeholder="Username akun" required>
-                            @error('account_username')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Pass Akun <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('account_password') is-invalid @enderror" 
-                                   name="account_password" value="{{ old('account_password') }}" 
-                                   placeholder="Password akun" required>
-                            @error('account_password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Username Reviewer <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('reviewer_username') is-invalid @enderror" 
-                                   name="reviewer_username" value="{{ old('reviewer_username') }}" 
-                                   placeholder="Username untuk reviewer" required>
-                            @error('reviewer_username')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Password Reviewer <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('reviewer_password') is-invalid @enderror" 
-                                   name="reviewer_password" value="{{ old('reviewer_password') }}" 
-                                   placeholder="Password untuk reviewer" required>
-                            @error('reviewer_password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
                     <div class="mb-3">
                         <label class="form-label">Deadline <span class="text-danger">*</span></label>
                         <input type="date" class="form-control @error('deadline') is-invalid @enderror" 
