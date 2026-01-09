@@ -23,7 +23,20 @@ class ReviewAssignment extends Model
         'deadline',
         'language',
         'reviewer_id',
+        'reviewer_1_username',
+        'reviewer_1_password',
         'reviewer_2_id',
+        'reviewer_2_username',
+        'reviewer_2_password',
+        'reviewer_3_id',
+        'reviewer_3_username',
+        'reviewer_3_password',
+        'reviewer_4_id',
+        'reviewer_4_username',
+        'reviewer_4_password',
+        'reviewer_5_id',
+        'reviewer_5_username',
+        'reviewer_5_password',
         'assigned_by',
         'status',
         'rejection_reason',
@@ -55,9 +68,43 @@ class ReviewAssignment extends Model
         return $this->belongsTo(User::class, 'reviewer_2_id');
     }
 
+    public function reviewer3()
+    {
+        return $this->belongsTo(User::class, 'reviewer_3_id');
+    }
+
+    public function reviewer4()
+    {
+        return $this->belongsTo(User::class, 'reviewer_4_id');
+    }
+
+    public function reviewer5()
+    {
+        return $this->belongsTo(User::class, 'reviewer_5_id');
+    }
+
     public function assignedBy()
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+    
+    // Get all reviewers for this assignment
+    public function getAllReviewers()
+    {
+        $reviewers = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $reviewerIdField = $i == 1 ? 'reviewer_id' : "reviewer_{$i}_id";
+            if ($this->$reviewerIdField) {
+                $reviewerRelation = $i == 1 ? 'reviewer' : "reviewer{$i}";
+                $reviewers[] = [
+                    'number' => $i,
+                    'user' => $this->$reviewerRelation,
+                    'username' => $this->{"reviewer_{$i}_username"},
+                    'password' => $this->{"reviewer_{$i}_password"},
+                ];
+            }
+        }
+        return $reviewers;
     }
 
     public function reviewResult()

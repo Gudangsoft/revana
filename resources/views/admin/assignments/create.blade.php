@@ -133,31 +133,37 @@
                         @error('reviewer_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        
+                        <!-- Username & Password for Reviewer 1 -->
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control @error('reviewer_1_username') is-invalid @enderror" 
+                                       name="reviewer_1_username" value="{{ old('reviewer_1_username') }}" 
+                                       placeholder="Username untuk Reviewer 1" required>
+                                @error('reviewer_1_username')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control @error('reviewer_1_password') is-invalid @enderror" 
+                                       name="reviewer_1_password" value="{{ old('reviewer_1_password') }}" 
+                                       placeholder="Password untuk Reviewer 1" required>
+                                @error('reviewer_1_password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Container for additional reviewers -->
+                    <div id="additionalReviewers"></div>
+
+                    <!-- Button to add more reviewers -->
                     <div class="mb-3">
-                        <label class="form-label">Pilih Reviewer 2 <span class="text-muted">(Opsional)</span></label>
-                        <input type="text" class="form-control mb-2" id="searchReviewer2" placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
-                        <select class="form-select @error('reviewer_2_id') is-invalid @enderror" 
-                                name="reviewer_2_id" id="reviewer2" size="5" style="height: 200px; display: none;">
-                            <option value="">-- Pilih Reviewer 2 --</option>
-                            @foreach($reviewers as $reviewer)
-                            <option value="{{ $reviewer->id }}" {{ old('reviewer_2_id') == $reviewer->id ? 'selected' : '' }}
-                                    data-search="{{ strtolower($reviewer->name . ' ' . $reviewer->email) }}"
-                                    data-name="{{ $reviewer->name }}"
-                                    data-email="{{ $reviewer->email }}">
-                                {{ $reviewer->name }} - {{ $reviewer->email }}
-                                @if($reviewer->article_languages)
-                                    [{{ implode(', ', $reviewer->article_languages) }}]
-                                @endif
-                                ({{ $reviewer->completed_reviews }} reviews, {{ $reviewer->total_points }} pts)
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('reviewer_2_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted">Reviewer 2 akan menerima tugas yang sama untuk review bersama</small>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="addReviewerBtn">
+                            <i class="bi bi-plus-circle"></i> Tambah Reviewer
+                        </button>
+                        <small class="text-muted d-block mt-1">Maksimal 5 reviewer per assignment</small>
                     </div>
 
                     <div class="d-flex gap-2">
@@ -209,24 +215,150 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const reviewer1 = document.getElementById('reviewer1');
-    const reviewer2 = document.getElementById('reviewer2');
-    const searchReviewer1 = document.getElementById('searchReviewer1');
-    const searchReviewer2 = document.getElementById('searchReviewer2');
+    let reviewerCount = 1;
+    const maxReviewers = 5;
+    const reviewersData = @json($reviewers);
     
-    // Function to show/hide select based on search input
-    function handleSearchDisplay(searchInput, selectElement) {
+    const reviewer1 = document.getElementById('reviewer1');
+    const searchReviewer1 = document.getElementById('searchReviewer1');
+    
+    // Dynamic reviewer management
+    const addReviewerBtn = document.getElementById('addReviewerBtn');
+    const additionalReviewersContainer = document.getElementById('additionalReviewers');
+    
+    addReviewerBtn.addEventListener('click', function() {
+        if (reviewerCount >= maxReviewers) {
+            alert('Maksimal 5 reviewer per assignment');
+            return;
+        }
+        
+        reviewerCount++;
+        addReviewerField(reviewerCount);
+        
+        if (reviewerCount >= maxReviewers) {
+            addReviewerBtn.disabled = true;
+            addReviewerBtn.classList.add('disabled');
+        }
+    });
+    
+    function addReviewerField(num) {
+        const isRequired = num === 1 ? 'required' : '';
+        const label = num === 1 ? '<span class="text-danger">*</span>' : '<span class="text-muted">(Opsional)</span>';
+        
+        const reviewerHtml = `
+            <div class="mb-3 reviewer-field" id="reviewerField${num}" data-reviewer-num="${num}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label class="form-label">Pilih Reviewer ${num} ${label}</label>
+                    ${num > 1 ? `<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeReviewer(${num})">
+                        <i class="bi bi-trash"></i> Hapus
+                    </button>` : ''}
+                </div>
+                <input type="text" class="form-control mb-2" id="searchReviewer${num}" 
+                       placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
+                <select class="form-select" name="reviewer_${num}_id" id="reviewer${num}" 
+                        size="5" ${isRequired} style="height: 200px; display: none;">
+                    <option value="">-- Pilih Reviewer ${num} --</option>
+                    ${reviewersData.map(reviewer => `
+                        <option value="${reviewer.id}" 
+                                data-search="${(reviewer.name + ' ' + reviewer.email).toLowerCase()}"
+                                data-name="${reviewer.name}"
+                                data-email="${reviewer.email}">
+                            ${reviewer.name} - ${reviewer.email}
+                            ${reviewer.article_languages ? '[' + reviewer.article_languages.join(', ') + ']' : ''}
+                            (${reviewer.completed_reviews} reviews, ${reviewer.total_points} pts)
+                        </option>
+                    `).join('')}
+                </select>
+                
+                <!-- Username & Password for this reviewer -->
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" 
+                               name="reviewer_${num}_username" 
+                               placeholder="Username untuk Reviewer ${num}" ${isRequired}>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" 
+                               name="reviewer_${num}_password" 
+                               placeholder="Password untuk Reviewer ${num}" ${isRequired}>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        additionalReviewersContainer.insertAdjacentHTML('beforeend', reviewerHtml);
+        
+        // Initialize search for new reviewer field
+        const searchInput = document.getElementById(`searchReviewer${num}`);
+        const selectElement = document.getElementById(`reviewer${num}`);
+        initializeReviewerSearch(searchInput, selectElement, num);
+    }
+    
+    window.removeReviewer = function(num) {
+        const field = document.getElementById(`reviewerField${num}`);
+        if (field) {
+            field.remove();
+            reviewerCount--;
+            addReviewerBtn.disabled = false;
+            addReviewerBtn.classList.remove('disabled');
+        }
+    };
+    
+    function initializeReviewerSearch(searchInput, selectElement, num) {
+        // Focus handler
         searchInput.addEventListener('focus', function() {
             if (this.value.length > 0) {
                 selectElement.style.display = 'block';
             }
         });
         
+        // Input handler for search and filter
         searchInput.addEventListener('input', function() {
-            if (this.value.length > 0) {
+            const searchTerm = this.value.toLowerCase();
+            const options = selectElement.querySelectorAll('option');
+            let visibleCount = 0;
+            
+            options.forEach(option => {
+                if (option.value === '') {
+                    option.style.display = 'none';
+                    return;
+                }
+                
+                const searchData = option.getAttribute('data-search') || '';
+                if (searchData.includes(searchTerm)) {
+                    option.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            if (visibleCount > 0 && searchTerm.length > 0) {
                 selectElement.style.display = 'block';
-            } else {
+            } else if (searchTerm.length === 0) {
                 selectElement.style.display = 'none';
+            }
+        });
+        
+        // Selection handler
+        selectElement.addEventListener('change', function() {
+            if (this.value) {
+                const selectedOption = this.options[this.selectedIndex];
+                const name = selectedOption.getAttribute('data-name');
+                const email = selectedOption.getAttribute('data-email');
+                
+                searchInput.value = name + ' - ' + email;
+                this.style.display = 'none';
+                
+                // Check for duplicate reviewers
+                checkDuplicateReviewers(num);
+            }
+        });
+        
+        // Clear selection when typing again
+        searchInput.addEventListener('keydown', function() {
+            if (selectElement.value) {
+                selectElement.value = '';
             }
         });
         
@@ -240,124 +372,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Apply to both reviewers
-    handleSearchDisplay(searchReviewer1, reviewer1);
-    handleSearchDisplay(searchReviewer2, reviewer2);
-    
-    // Search functionality for Reviewer 1
-    searchReviewer1.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const options = reviewer1.querySelectorAll('option');
-        let visibleCount = 0;
+    function checkDuplicateReviewers(currentNum) {
+        const allSelects = document.querySelectorAll('select[id^="reviewer"]');
+        const selectedValues = [];
         
-        options.forEach(option => {
-            if (option.value === '') {
-                option.style.display = 'none';
-                return;
-            }
-            
-            const searchData = option.getAttribute('data-search') || '';
-            if (searchData.includes(searchTerm)) {
-                option.style.display = 'block';
-                visibleCount++;
-            } else {
-                option.style.display = 'none';
+        allSelects.forEach((select, index) => {
+            if (select.value) {
+                selectedValues.push({
+                    num: index + 1,
+                    value: select.value,
+                    select: select,
+                    search: document.getElementById(`searchReviewer${index + 1}`)
+                });
             }
         });
         
-        // Show select only if there are visible options and search term exists
-        if (visibleCount > 0 && searchTerm.length > 0) {
-            reviewer1.style.display = 'block';
-        } else if (searchTerm.length === 0) {
-            reviewer1.style.display = 'none';
-        }
-    });
-    
-    // Search functionality for Reviewer 2
-    searchReviewer2.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const options = reviewer2.querySelectorAll('option');
-        let visibleCount = 0;
-        
-        options.forEach(option => {
-            if (option.value === '') {
-                option.style.display = 'none';
-                return;
-            }
-            
-            const searchData = option.getAttribute('data-search') || '';
-            if (searchData.includes(searchTerm)) {
-                option.style.display = 'block';
-                visibleCount++;
+        // Check for duplicates
+        const valueMap = {};
+        selectedValues.forEach(item => {
+            if (valueMap[item.value]) {
+                alert(`Reviewer ${item.num} sama dengan Reviewer ${valueMap[item.value].num}. Silakan pilih reviewer yang berbeda.`);
+                item.select.value = '';
+                item.search.value = '';
             } else {
-                option.style.display = 'none';
+                valueMap[item.value] = item;
             }
         });
-        
-        // Show select only if there are visible options and search term exists
-        if (visibleCount > 0 && searchTerm.length > 0) {
-            reviewer2.style.display = 'block';
-        } else if (searchTerm.length === 0) {
-            reviewer2.style.display = 'none';
-        }
-    });
+    }
     
-    // When reviewer 1 is selected
-    reviewer1.addEventListener('change', function() {
-        if (this.value) {
-            const selectedOption = this.options[this.selectedIndex];
-            const name = selectedOption.getAttribute('data-name');
-            const email = selectedOption.getAttribute('data-email');
-            
-            // Put selected reviewer name in search box
-            searchReviewer1.value = name + ' - ' + email;
-            
-            // Hide select
-            this.style.display = 'none';
-            
-            // Check if same as reviewer 2
-            if (this.value === reviewer2.value) {
-                alert('Reviewer 1 dan Reviewer 2 tidak boleh sama!');
-                searchReviewer1.value = '';
-                this.value = '';
-            }
-        }
-    });
-    
-    // When reviewer 2 is selected
-    reviewer2.addEventListener('change', function() {
-        if (this.value) {
-            const selectedOption = this.options[this.selectedIndex];
-            const name = selectedOption.getAttribute('data-name');
-            const email = selectedOption.getAttribute('data-email');
-            
-            // Put selected reviewer name in search box
-            searchReviewer2.value = name + ' - ' + email;
-            
-            // Hide select
-            this.style.display = 'none';
-            
-            // Check if same as reviewer 1
-            if (this.value === reviewer1.value) {
-                alert('Reviewer 2 dan Reviewer 1 tidak boleh sama!');
-                searchReviewer2.value = '';
-                this.value = '';
-            }
-        }
-    });
-    
-    // Clear search box when user starts typing again (to select different reviewer)
-    searchReviewer1.addEventListener('keydown', function() {
-        if (reviewer1.value) {
-            reviewer1.value = '';
-        }
-    });
-    
-    searchReviewer2.addEventListener('keydown', function() {
-        if (reviewer2.value) {
-            reviewer2.value = '';
-        }
-    });
+    // Initialize reviewer 1
+    initializeReviewerSearch(searchReviewer1, reviewer1, 1);
 });
 </script>
 @endpush

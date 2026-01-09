@@ -195,52 +195,23 @@
                 <i class="bi bi-people"></i> Informasi Reviewer
             </div>
             <div class="card-body">
-                <h6 class="mb-3"><i class="bi bi-person-badge"></i> Reviewer 1</h6>
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <strong>Nama:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        <a href="{{ route('admin.reviewers.show', $assignment->reviewer) }}">
-                            {{ $assignment->reviewer->name }}
-                        </a>
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <strong>Email:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        {{ $assignment->reviewer->email }}
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <strong>Total Reviews:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        {{ $assignment->reviewer->completed_reviews }} completed
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <strong>Total Points:</strong>
-                    </div>
-                    <div class="col-md-8">
-                        <span class="badge bg-warning text-dark">{{ $assignment->reviewer->total_points }} Points</span>
-                    </div>
-                </div>
+                @php
+                    $allReviewers = $assignment->getAllReviewers();
+                @endphp
                 
-                @if($assignment->reviewer2)
-                    <hr>
-                    <h6 class="mb-3 mt-3"><i class="bi bi-person-badge"></i> Reviewer 2</h6>
+                @foreach($allReviewers as $index => $reviewerData)
+                    @if($index > 0)
+                        <hr class="my-4">
+                    @endif
+                    
+                    <h6 class="mb-3"><i class="bi bi-person-badge"></i> Reviewer {{ $reviewerData['number'] }}</h6>
                     <div class="row mb-2">
                         <div class="col-md-4">
                             <strong>Nama:</strong>
                         </div>
                         <div class="col-md-8">
-                            <a href="{{ route('admin.reviewers.show', $assignment->reviewer2) }}">
-                                {{ $assignment->reviewer2->name }}
+                            <a href="{{ route('admin.reviewers.show', $reviewerData['user']) }}">
+                                {{ $reviewerData['user']->name }}
                             </a>
                         </div>
                     </div>
@@ -249,7 +220,23 @@
                             <strong>Email:</strong>
                         </div>
                         <div class="col-md-8">
-                            {{ $assignment->reviewer2->email }}
+                            {{ $reviewerData['user']->email }}
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Username:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <code>{{ $reviewerData['username'] ?? '-' }}</code>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <strong>Password:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <code>{{ $reviewerData['password'] ?? '-' }}</code>
                         </div>
                     </div>
                     <div class="row mb-2">
@@ -257,7 +244,7 @@
                             <strong>Total Reviews:</strong>
                         </div>
                         <div class="col-md-8">
-                            {{ $assignment->reviewer2->completed_reviews }} completed
+                            {{ $reviewerData['user']->completed_reviews }} completed
                         </div>
                     </div>
                     <div class="row mb-2">
@@ -265,10 +252,10 @@
                             <strong>Total Points:</strong>
                         </div>
                         <div class="col-md-8">
-                            <span class="badge bg-warning text-dark">{{ $assignment->reviewer2->total_points }} Points</span>
+                            <span class="badge bg-warning text-dark">{{ $reviewerData['user']->total_points }} Points</span>
                         </div>
                     </div>
-                @endif
+                @endforeach
             </div>
         </div>
 

@@ -12,7 +12,7 @@ class ReviewAssignmentController extends Controller
 {
     public function index()
     {
-        $assignments = ReviewAssignment::with(['journal', 'reviewer', 'reviewer2', 'assignedBy'])
+        $assignments = ReviewAssignment::with(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy'])
             ->latest()
             ->paginate(20);
 
@@ -40,8 +40,34 @@ class ReviewAssignmentController extends Controller
             'deadline' => 'required|date|after:today',
             'language' => 'required|in:Indonesia,Inggris',
             'reviewer_id' => 'required|exists:users,id',
+            'reviewer_1_username' => 'required|string|max:255',
+            'reviewer_1_password' => 'required|string|max:255',
             'reviewer_2_id' => 'nullable|exists:users,id|different:reviewer_id',
+            'reviewer_2_username' => 'nullable|string|max:255',
+            'reviewer_2_password' => 'nullable|string|max:255',
+            'reviewer_3_id' => 'nullable|exists:users,id',
+            'reviewer_3_username' => 'nullable|string|max:255',
+            'reviewer_3_password' => 'nullable|string|max:255',
+            'reviewer_4_id' => 'nullable|exists:users,id',
+            'reviewer_4_username' => 'nullable|string|max:255',
+            'reviewer_4_password' => 'nullable|string|max:255',
+            'reviewer_5_id' => 'nullable|exists:users,id',
+            'reviewer_5_username' => 'nullable|string|max:255',
+            'reviewer_5_password' => 'nullable|string|max:255',
         ]);
+
+        // Validate no duplicate reviewers
+        $reviewerIds = array_filter([
+            $request->reviewer_id,
+            $request->reviewer_2_id,
+            $request->reviewer_3_id,
+            $request->reviewer_4_id,
+            $request->reviewer_5_id,
+        ]);
+        
+        if (count($reviewerIds) !== count(array_unique($reviewerIds))) {
+            return back()->withErrors(['reviewer_id' => 'Tidak boleh memilih reviewer yang sama.'])->withInput();
+        }
 
         ReviewAssignment::create([
             'article_title' => $request->article_title,
@@ -55,9 +81,22 @@ class ReviewAssignmentController extends Controller
             'certificate_link' => null,
             'deadline' => $request->deadline,
             'language' => $request->language,
-            'journal_id' => null, // Tidak menggunakan journal_id lagi
+            'journal_id' => null,
             'reviewer_id' => $request->reviewer_id,
+            'reviewer_1_username' => $request->reviewer_1_username,
+            'reviewer_1_password' => $request->reviewer_1_password,
             'reviewer_2_id' => $request->reviewer_2_id,
+            'reviewer_2_username' => $request->reviewer_2_username,
+            'reviewer_2_password' => $request->reviewer_2_password,
+            'reviewer_3_id' => $request->reviewer_3_id,
+            'reviewer_3_username' => $request->reviewer_3_username,
+            'reviewer_3_password' => $request->reviewer_3_password,
+            'reviewer_4_id' => $request->reviewer_4_id,
+            'reviewer_4_username' => $request->reviewer_4_username,
+            'reviewer_4_password' => $request->reviewer_4_password,
+            'reviewer_5_id' => $request->reviewer_5_id,
+            'reviewer_5_username' => $request->reviewer_5_username,
+            'reviewer_5_password' => $request->reviewer_5_password,
             'assigned_by' => auth()->id(),
             'status' => 'PENDING',
         ]);
@@ -68,7 +107,7 @@ class ReviewAssignmentController extends Controller
 
     public function show(ReviewAssignment $assignment)
     {
-        $assignment->load(['journal', 'reviewer', 'reviewer2', 'assignedBy', 'reviewResult']);
+        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResult']);
         return view('admin.assignments.show', compact('assignment'));
     }
 
