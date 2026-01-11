@@ -306,7 +306,7 @@
 
                     @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']))
                         <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100">
-                            <i class="bi bi-upload"></i> Upload Hasil Review
+                            <i class="bi bi-file-text"></i> ISI FORMULIR REVIEW ARTIKEL
                         </a>
                     @endif
 

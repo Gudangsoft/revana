@@ -53,54 +53,76 @@ class ReviewResultController extends Controller
         }
 
         $validated = $request->validate([
-            // Basic Information
-            'journal_name' => 'required|string|max:255',
-            'article_code' => 'required|string|max:255',
-            'article_title' => 'required|string',
+            // A. Informasi Naskah
+            'manuscript_id' => 'required|string|max:255',
+            'manuscript_title' => 'required|string',
+            'article_type' => 'required|in:Research Article,Review',
+            'field_section_topic' => 'required|string|max:255',
             'review_date' => 'required|date',
             
-            // Section I: Penilaian Substansi (8 aspek with scores 1-5)
-            'score_1' => 'required|integer|min:1|max:5',
-            'comment_1' => 'required|string',
-            'score_2' => 'required|integer|min:1|max:5',
-            'comment_2' => 'required|string',
-            'score_3' => 'required|integer|min:1|max:5',
-            'comment_3' => 'required|string',
-            'score_4' => 'required|integer|min:1|max:5',
-            'comment_4' => 'required|string',
-            'score_5' => 'required|integer|min:1|max:5',
-            'comment_5' => 'required|string',
-            'score_6' => 'required|integer|min:1|max:5',
-            'comment_6' => 'required|string',
-            'score_7' => 'required|integer|min:1|max:5',
-            'comment_7' => 'required|string',
-            'score_8' => 'required|integer|min:1|max:5',
-            'comment_8' => 'required|string',
+            // B. Pernyataan Konflik Kepentingan & Etika
+            'conflict_of_interest' => 'required|boolean',
+            'conflict_explanation' => 'nullable|string',
+            'plagiarism_detected' => 'required|boolean',
+            'plagiarism_explanation' => 'nullable|string',
+            'excessive_self_citation' => 'required|boolean',
+            'self_citation_explanation' => 'nullable|string',
+            'other_ethical_issues' => 'required|boolean',
+            'ethical_issues_explanation' => 'nullable|string',
+            'ai_usage_statement' => 'required|boolean',
             
-            // Section II: Penilaian Teknis (3 kriteria boolean)
-            'technical_1' => 'nullable|boolean',
-            'technical_2' => 'nullable|boolean',
-            'technical_3' => 'nullable|boolean',
+            // C. Penilaian Cepat (Rating Umum) - 10 aspek
+            'rating_scope' => 'required|integer|min:1|max:5',
+            'rating_scope_note' => 'nullable|string',
+            'rating_novelty' => 'required|integer|min:1|max:5',
+            'rating_novelty_note' => 'nullable|string',
+            'rating_significance' => 'required|integer|min:1|max:5',
+            'rating_significance_note' => 'nullable|string',
+            'rating_soundness' => 'required|integer|min:1|max:5',
+            'rating_soundness_note' => 'nullable|string',
+            'rating_methodology' => 'required|integer|min:1|max:5',
+            'rating_methodology_note' => 'nullable|string',
+            'rating_analysis' => 'required|integer|min:1|max:5',
+            'rating_analysis_note' => 'nullable|string',
+            'rating_presentation' => 'required|integer|min:1|max:5',
+            'rating_presentation_note' => 'nullable|string',
+            'rating_figures' => 'required|integer|min:1|max:5',
+            'rating_figures_note' => 'nullable|string',
+            'rating_references' => 'required|integer|min:1|max:5',
+            'rating_references_note' => 'nullable|string',
+            'rating_language' => 'required|integer|min:1|max:5',
+            'rating_language_note' => 'nullable|string',
             
-            // Section III: Saran Perbaikan
-            'improvement_suggestions' => 'required|string',
+            // D. Checklist Evaluasi Detail - 10 pertanyaan
+            'checklist_abstract' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_intro' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_novelty' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_literature' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_method' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_design' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_results' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_discussion' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_conclusion' => 'required|in:Ya,Tidak,Perlu Perbaikan',
+            'checklist_data_availability' => 'required|in:Ya,Tidak,Perlu Perbaikan',
             
-            // Section IV: Rekomendasi
-            'recommendation' => 'required|in:ACCEPT,MINOR_REVISION,MAJOR_REVISION,REJECT',
+            // E. Evaluasi Referensi
+            'references_adequate' => 'required|boolean',
+            'references_manipulation' => 'required|boolean',
+            'irrelevant_references' => 'nullable|string',
+            'suggested_references' => 'nullable|string',
+            
+            // F. Rekomendasi Akhir Reviewer
+            'recommendation' => 'required|in:ACCEPT,MINOR_REVISION,MAJOR_REVISION,REJECT_RESUBMIT,REJECT',
+            'recommendation_reason' => 'required|string',
         ]);
 
         // Auto-fill reviewer name from authenticated user
         $validated['reviewer_name'] = auth()->user()->name;
         $validated['reviewer_signature'] = auth()->user()->name;
         $validated['statement_date'] = $validated['review_date'];
-        
-        // Handle boolean checkboxes (if not checked, set to false)
-        $validated['technical_1'] = $request->has('technical_1');
-        $validated['technical_2'] = $request->has('technical_2');
-        $validated['technical_3'] = $request->has('technical_3');
 
         // Keep old file_path for backward compatibility (empty or placeholder)
-        $validated['file_path'] = 'formulir-review-filled';
+        $validated['file_path'] = 'formulir-review-sipera';
 
         // Create or update review result
         ReviewResult::updateOrCreate(
