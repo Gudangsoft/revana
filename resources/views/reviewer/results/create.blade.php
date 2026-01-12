@@ -309,31 +309,28 @@
                                     <td class="text-center">{{ $index + 1 }}</td>
                                     <td>{{ $checklist['label'] }}</td>
                                     <td class="text-center">
-                                        <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input" type="radio" 
-                                                   name="checklist_{{ $checklist['field'] }}" 
-                                                   id="checklist_{{ $checklist['field'] }}_yes" 
-                                                   value="Ya" 
-                                                   {{ old('checklist_'.$checklist['field']) == 'Ya' ? 'checked' : '' }} required>
-                                        </div>
+                                        <input class="form-check-input" type="radio" 
+                                               name="checklist_{{ $checklist['field'] }}" 
+                                               id="checklist_{{ $checklist['field'] }}_yes" 
+                                               value="Ya" 
+                                               style="width: 20px; height: 20px; cursor: pointer;"
+                                               {{ old('checklist_'.$checklist['field']) == 'Ya' ? 'checked' : '' }} required>
                                     </td>
                                     <td class="text-center">
-                                        <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input" type="radio" 
-                                                   name="checklist_{{ $checklist['field'] }}" 
-                                                   id="checklist_{{ $checklist['field'] }}_no" 
-                                                   value="Tidak" 
-                                                   {{ old('checklist_'.$checklist['field']) == 'Tidak' ? 'checked' : '' }} required>
-                                        </div>
+                                        <input class="form-check-input" type="radio" 
+                                               name="checklist_{{ $checklist['field'] }}" 
+                                               id="checklist_{{ $checklist['field'] }}_no" 
+                                               value="Tidak" 
+                                               style="width: 20px; height: 20px; cursor: pointer;"
+                                               {{ old('checklist_'.$checklist['field']) == 'Tidak' ? 'checked' : '' }} required>
                                     </td>
                                     <td class="text-center">
-                                        <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input" type="radio" 
-                                                   name="checklist_{{ $checklist['field'] }}" 
-                                                   id="checklist_{{ $checklist['field'] }}_improvement" 
-                                                   value="Perlu Perbaikan" 
-                                                   {{ old('checklist_'.$checklist['field']) == 'Perlu Perbaikan' ? 'checked' : '' }} required>
-                                        </div>
+                                        <input class="form-check-input" type="radio" 
+                                               name="checklist_{{ $checklist['field'] }}" 
+                                               id="checklist_{{ $checklist['field'] }}_improvement" 
+                                               value="Perlu Perbaikan" 
+                                               style="width: 20px; height: 20px; cursor: pointer;"
+                                               {{ old('checklist_'.$checklist['field']) == 'Perlu Perbaikan' ? 'checked' : '' }} required>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -491,11 +488,48 @@
 .table td, .table th {
     vertical-align: middle;
 }
-.form-check-input {
+
+/* Radio button styling - make them more visible */
+input[type="radio"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #6c757d;
+    border-radius: 50%;
+    outline: none;
     cursor: pointer;
+    position: relative;
+    background-color: white;
+    margin: 0;
 }
+
+input[type="radio"]:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+}
+
+input[type="radio"]:checked {
+    border-color: #0d6efd;
+    background-color: #0d6efd;
+}
+
+input[type="radio"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: white;
+}
+
 .form-check-label {
     cursor: pointer;
+    margin-left: 8px;
 }
 </style>
 
