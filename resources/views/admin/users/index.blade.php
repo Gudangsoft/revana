@@ -101,7 +101,15 @@
 
             @if($users->hasPages())
             <div class="mt-3">
-                {{ $users->links() }}
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        @for($i = 1; $i <= $users->lastPage(); $i++)
+                            <li class="page-item {{ $i == $users->currentPage() ? 'active' : '' }}">
+                                <a class="page-link" href="{{ $users->url($i) }}">{{ $i }}</a>
+                            </li>
+                        @endfor
+                    </ul>
+                </nav>
             </div>
             @endif
         </div>
