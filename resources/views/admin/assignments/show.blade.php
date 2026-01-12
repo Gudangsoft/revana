@@ -565,13 +565,13 @@
                         <p class="mb-2">Saya menyatakan bahwa penilaian ini dilakukan secara objektif berdasarkan keilmuan, tanpa konflik kepentingan, dan sesuai dengan etika akademik.</p>
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <strong>Nama:</strong> {{ $reviewResult->reviewer->name }}
+                                <strong>Nama:</strong> {{ $reviewResult->reviewer ? $reviewResult->reviewer->name : 'N/A' }}
                             </div>
                             <div class="col-md-6">
                                 <strong>Tanggal:</strong> {{ $reviewResult->review_date ? \Carbon\Carbon::parse($reviewResult->review_date)->format('d F Y') : '-' }}
                             </div>
                         </div>
-                        @if($reviewResult->reviewer->signature)
+                        @if($reviewResult->reviewer && $reviewResult->reviewer->signature)
                         <div class="mt-3">
                             <strong>Tanda Tangan:</strong><br>
                             <img src="{{ asset('storage/' . $reviewResult->reviewer->signature) }}" 
