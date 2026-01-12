@@ -1,5 +1,12 @@
 @extends('layouts.app')
 
+@section('title', ' - Monitoring Review')
+@section('page-title', 'Monitoring Review')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
