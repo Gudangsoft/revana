@@ -11,6 +11,7 @@ class ReviewResult extends Model
 
     protected $fillable = [
         'review_assignment_id',
+        'reviewer_id',
         'file_path',
         'notes',
         'recommendation',
@@ -100,5 +101,10 @@ class ReviewResult extends Model
     public function reviewAssignment()
     {
         return $this->belongsTo(ReviewAssignment::class);
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewer_id');
     }
 }

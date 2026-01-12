@@ -41,7 +41,11 @@ class TaskController extends Controller
             abort(403);
         }
 
-        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'reviewResult']);
+        // Load reviewResult yang sesuai dengan reviewer yang login
+        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5']);
+        $assignment->load(['reviewResult' => function($query) {
+            $query->where('reviewer_id', auth()->id());
+        }]);
         
         return view('reviewer.tasks.show', compact('assignment'));
     }

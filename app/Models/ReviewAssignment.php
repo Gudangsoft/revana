@@ -113,6 +113,11 @@ class ReviewAssignment extends Model
         return $this->hasOne(ReviewResult::class);
     }
 
+    public function reviewResults()
+    {
+        return $this->hasMany(ReviewResult::class);
+    }
+
     public function result()
     {
         return $this->hasOne(ReviewResult::class);

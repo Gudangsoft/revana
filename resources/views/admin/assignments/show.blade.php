@@ -267,11 +267,13 @@
             </div>
         </div>
 
-        <!-- Review Result -->
-        @if($assignment->reviewResult)
+        <!-- Review Results -->
+        @if($assignment->reviewResults->count() > 0)
+        @foreach($assignment->reviewResults as $index => $reviewResult)
         <div class="card mb-3">
             <div class="card-header bg-success text-white">
-                <i class="bi bi-file-text"></i> Hasil Review - Formulir Review Artikel Ilmiah SIPERA
+                <i class="bi bi-file-text"></i> Hasil Review - Formulir Review Artikel Ilmiah SIPERA 
+                <span class="badge bg-light text-dark">Reviewer {{ $index + 1 }}: {{ $reviewResult->reviewer->name }}</span>
             </div>
             <div class="card-body">
                 <!-- A. Informasi Naskah -->
@@ -280,23 +282,23 @@
                     <table class="table table-sm table-bordered">
                         <tr>
                             <th width="30%">ID Manuskrip</th>
-                            <td>{{ $assignment->reviewResult->manuscript_id ?? '-' }}</td>
+                            <td>{{ $reviewResult->manuscript_id ?? '-' }}</td>
                         </tr>
                         <tr>
                             <th>Judul Manuskrip</th>
-                            <td>{{ $assignment->reviewResult->manuscript_title ?? '-' }}</td>
+                            <td>{{ $reviewResult->manuscript_title ?? '-' }}</td>
                         </tr>
                         <tr>
                             <th>Jenis Artikel</th>
-                            <td><span class="badge bg-info">{{ $assignment->reviewResult->article_type ?? '-' }}</span></td>
+                            <td><span class="badge bg-info">{{ $reviewResult->article_type ?? '-' }}</span></td>
                         </tr>
                         <tr>
                             <th>Bidang/Section/Topik</th>
-                            <td>{{ $assignment->reviewResult->field_section_topic ?? '-' }}</td>
+                            <td>{{ $reviewResult->field_section_topic ?? '-' }}</td>
                         </tr>
                         <tr>
                             <th>Tanggal Review</th>
-                            <td>{{ $assignment->reviewResult->review_date ? \Carbon\Carbon::parse($assignment->reviewResult->review_date)->format('d F Y') : '-' }}</td>
+                            <td>{{ $reviewResult->review_date ? \Carbon\Carbon::parse($reviewResult->review_date)->format('d F Y') : '-' }}</td>
                         </tr>
                     </table>
                 </div>
@@ -308,9 +310,9 @@
                         <tr>
                             <th width="50%">Konflik Kepentingan</th>
                             <td>
-                                @if($assignment->reviewResult->conflict_of_interest)
+                                @if($reviewResult->conflict_of_interest)
                                     <span class="badge bg-warning">Ya</span>
-                                    <br><small class="text-muted">{{ $assignment->reviewResult->conflict_explanation }}</small>
+                                    <br><small class="text-muted">{{ $reviewResult->conflict_explanation }}</small>
                                 @else
                                     <span class="badge bg-success">Tidak</span>
                                 @endif
@@ -319,9 +321,9 @@
                         <tr>
                             <th>Plagiarisme Terdeteksi</th>
                             <td>
-                                @if($assignment->reviewResult->plagiarism_detected)
+                                @if($reviewResult->plagiarism_detected)
                                     <span class="badge bg-danger">Ya</span>
-                                    <br><small class="text-muted">{{ $assignment->reviewResult->plagiarism_explanation }}</small>
+                                    <br><small class="text-muted">{{ $reviewResult->plagiarism_explanation }}</small>
                                 @else
                                     <span class="badge bg-success">Tidak</span>
                                 @endif
@@ -330,9 +332,9 @@
                         <tr>
                             <th>Self-Citation Berlebihan</th>
                             <td>
-                                @if($assignment->reviewResult->excessive_self_citation)
+                                @if($reviewResult->excessive_self_citation)
                                     <span class="badge bg-warning">Ya</span>
-                                    <br><small class="text-muted">{{ $assignment->reviewResult->self_citation_explanation }}</small>
+                                    <br><small class="text-muted">{{ $reviewResult->self_citation_explanation }}</small>
                                 @else
                                     <span class="badge bg-success">Tidak</span>
                                 @endif
@@ -341,9 +343,9 @@
                         <tr>
                             <th>Masalah Etik Lain</th>
                             <td>
-                                @if($assignment->reviewResult->other_ethical_issues)
+                                @if($reviewResult->other_ethical_issues)
                                     <span class="badge bg-danger">Ya</span>
-                                    <br><small class="text-muted">{{ $assignment->reviewResult->ethical_issues_explanation }}</small>
+                                    <br><small class="text-muted">{{ $reviewResult->ethical_issues_explanation }}</small>
                                 @else
                                     <span class="badge bg-success">Tidak</span>
                                 @endif
@@ -352,7 +354,7 @@
                         <tr>
                             <th>Penggunaan AI</th>
                             <td>
-                                @if($assignment->reviewResult->ai_usage_statement)
+                                @if($reviewResult->ai_usage_statement)
                                     <span class="badge bg-info">Menggunakan AI</span>
                                 @else
                                     <span class="badge bg-secondary">Tidak Menggunakan AI</span>
@@ -392,7 +394,7 @@
                             @endphp
                             @foreach($ratings as $index => $rating)
                             @php
-                                $score = $assignment->reviewResult->{'rating_'.$rating['field']} ?? 0;
+                                $score = $reviewResult->{'rating_'.$rating['field']} ?? 0;
                                 $totalRating += $score;
                             @endphp
                             <tr>
@@ -401,7 +403,7 @@
                                 <td class="text-center">
                                     <span class="badge bg-primary">{{ $score }}</span>
                                 </td>
-                                <td><small>{{ $assignment->reviewResult->{'rating_'.$rating['field'].'_note'} ?? '-' }}</small></td>
+                                <td><small>{{ $reviewResult->{'rating_'.$rating['field'].'_note'} ?? '-' }}</small></td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -443,7 +445,7 @@
                             @endphp
                             @foreach($checklists as $index => $checklist)
                             @php
-                                $answer = $assignment->reviewResult->{'checklist_'.$checklist['field']} ?? '-';
+                                $answer = $reviewResult->{'checklist_'.$checklist['field']} ?? '-';
                                 $badgeClass = $answer == 'Ya' ? 'success' : ($answer == 'Tidak' ? 'danger' : 'warning');
                             @endphp
                             <tr>
@@ -463,7 +465,7 @@
                         <tr>
                             <th width="40%">Referensi Relevan & Mencukupi</th>
                             <td>
-                                @if($assignment->reviewResult->references_adequate)
+                                @if($reviewResult->references_adequate)
                                     <span class="badge bg-success">Ya</span>
                                 @else
                                     <span class="badge bg-danger">Tidak</span>
@@ -473,7 +475,7 @@
                         <tr>
                             <th>Ada Manipulasi Referensi</th>
                             <td>
-                                @if($assignment->reviewResult->references_manipulation)
+                                @if($reviewResult->references_manipulation)
                                     <span class="badge bg-danger">Ya</span>
                                 @else
                                     <span class="badge bg-success">Tidak</span>
@@ -482,20 +484,20 @@
                         </tr>
                     </table>
                     
-                    @if($assignment->reviewResult->irrelevant_references)
+                    @if($reviewResult->irrelevant_references)
                     <div class="mt-3">
                         <strong>Referensi Tidak Relevan:</strong>
                         <div class="p-2 bg-light rounded border mt-2">
-                            <small style="white-space: pre-wrap;">{{ $assignment->reviewResult->irrelevant_references }}</small>
+                            <small style="white-space: pre-wrap;">{{ $reviewResult->irrelevant_references }}</small>
                         </div>
                     </div>
                     @endif
                     
-                    @if($assignment->reviewResult->suggested_references)
+                    @if($reviewResult->suggested_references)
                     <div class="mt-3">
                         <strong>Saran Referensi Tambahan:</strong>
                         <div class="p-2 bg-light rounded border mt-2">
-                            <small style="white-space: pre-wrap;">{{ $assignment->reviewResult->suggested_references }}</small>
+                            <small style="white-space: pre-wrap;">{{ $reviewResult->suggested_references }}</small>
                         </div>
                     </div>
                     @endif
@@ -512,7 +514,7 @@
                         'REJECT_RESUBMIT' => 'Tolak – dapat submit ulang jika diperbaiki (Reject but resubmission possible)',
                         'REJECT' => 'Tolak – tidak disarankan submit ulang (Reject – serious flaws)'
                     ];
-                    $recValue = $assignment->reviewResult->recommendation ?? 'ACCEPT';
+                    $recValue = $reviewResult->recommendation ?? 'ACCEPT';
                     @endphp
 
                     <div class="mb-3">
@@ -526,32 +528,32 @@
                         @endforeach
                     </div>
 
-                    @if($assignment->reviewResult->recommendation_reason)
+                    @if($reviewResult->recommendation_reason)
                     <div class="mt-3">
                         <strong>Alasan Rekomendasi:</strong>
                         <div class="p-3 bg-light rounded border mt-2">
-                            <p style="white-space: pre-wrap;">{{ $assignment->reviewResult->recommendation_reason }}</p>
+                            <p style="white-space: pre-wrap;">{{ $reviewResult->recommendation_reason }}</p>
                         </div>
                     </div>
                     @endif
                 </div>
 
                 <!-- Komentar Umum untuk Penulis -->
-                @if($assignment->reviewResult->general_comments)
+                @if($reviewResult->general_comments)
                 <div class="mb-4">
                     <h6 class="fw-bold text-primary mb-3"><i class="bi bi-chat-left-text"></i> G. Komentar Umum untuk Penulis</h6>
                     <div class="p-3 bg-light rounded border">
-                        <p style="white-space: pre-wrap;">{{ $assignment->reviewResult->general_comments }}</p>
+                        <p style="white-space: pre-wrap;">{{ $reviewResult->general_comments }}</p>
                     </div>
                 </div>
                 @endif
 
                 <!-- Komentar Rahasia untuk Editor -->
-                @if($assignment->reviewResult->confidential_comments)
+                @if($reviewResult->confidential_comments)
                 <div class="mb-4">
                     <h6 class="fw-bold text-primary mb-3"><i class="bi bi-lock"></i> H. Komentar Rahasia untuk Editor</h6>
                     <div class="p-3 bg-warning bg-opacity-10 rounded border border-warning">
-                        <p style="white-space: pre-wrap;">{{ $assignment->reviewResult->confidential_comments }}</p>
+                        <p style="white-space: pre-wrap;">{{ $reviewResult->confidential_comments }}</p>
                     </div>
                 </div>
                 @endif
@@ -563,16 +565,16 @@
                         <p class="mb-2">Saya menyatakan bahwa penilaian ini dilakukan secara objektif berdasarkan keilmuan, tanpa konflik kepentingan, dan sesuai dengan etika akademik.</p>
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <strong>Nama:</strong> {{ $assignment->reviewer->name }}
+                                <strong>Nama:</strong> {{ $reviewResult->reviewer->name }}
                             </div>
                             <div class="col-md-6">
-                                <strong>Tanggal:</strong> {{ $assignment->reviewResult->review_date ? \Carbon\Carbon::parse($assignment->reviewResult->review_date)->format('d F Y') : '-' }}
+                                <strong>Tanggal:</strong> {{ $reviewResult->review_date ? \Carbon\Carbon::parse($reviewResult->review_date)->format('d F Y') : '-' }}
                             </div>
                         </div>
-                        @if($assignment->reviewer->signature)
+                        @if($reviewResult->reviewer->signature)
                         <div class="mt-3">
                             <strong>Tanda Tangan:</strong><br>
-                            <img src="{{ asset('storage/' . $assignment->reviewer->signature) }}" 
+                            <img src="{{ asset('storage/' . $reviewResult->reviewer->signature) }}" 
                                  alt="Signature" 
                                  style="max-width: 200px; max-height: 80px; margin-top: 10px;">
                         </div>
@@ -580,22 +582,23 @@
                     </div>
                 </div>
                 
-                @if($assignment->reviewResult->admin_feedback)
+                @if($reviewResult->admin_feedback)
                 <div class="mb-3">
                     <h6 class="fw-bold text-danger mb-3">Admin Feedback</h6>
                     <div class="alert alert-warning">
-                        {!! nl2br(e($assignment->reviewResult->admin_feedback)) !!}
+                        {!! nl2br(e($reviewResult->admin_feedback)) !!}
                     </div>
                 </div>
                 @endif
 
                 <div class="mt-3">
                     <small class="text-muted">
-                        <i class="bi bi-clock"></i> Submitted: {{ $assignment->reviewResult->created_at->format('d M Y H:i') }}
+                        <i class="bi bi-clock"></i> Submitted: {{ $reviewResult->created_at->format('d M Y H:i') }}
                     </small>
                 </div>
             </div>
         </div>
+        @endforeach
         @else
         <div class="card mb-3">
             <div class="card-header bg-secondary text-white">
@@ -603,7 +606,7 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle"></i> Reviewer belum mengirimkan hasil review.
+                    <i class="bi bi-info-circle"></i> Belum ada reviewer yang mengirimkan hasil review.
                 </div>
             </div>
         </div>

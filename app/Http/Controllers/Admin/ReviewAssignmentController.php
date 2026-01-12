@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\ReviewAssignment;
 use App\Models\User;
+use App\Notifications\ReviewAssignmentNotification;
+use App\Notifications\ReviewApprovedNotification;
+use App\Notifications\ReviewRevisionNotification;
 use Illuminate\Http\Request;
 
 class ReviewAssignmentController extends Controller
@@ -65,7 +68,7 @@ class ReviewAssignmentController extends Controller
             return back()->withErrors(['reviewer_id' => 'Tidak boleh memilih reviewer yang sama.'])->withInput();
         }
 
-        ReviewAssignment::create([
+        $assignment = ReviewAssignment::create([
             'article_title' => $request->article_title,
             'article_number' => $request->article_number,
             'submit_link' => $request->submit_link,
@@ -97,13 +100,37 @@ class ReviewAssignmentController extends Controller
             'status' => 'PENDING',
         ]);
 
+        // Send email notification to all assigned reviewers
+        $reviewers = [];
+        if ($request->reviewer_id) {
+            $reviewers[] = User::find($request->reviewer_id);
+        }
+        if ($request->reviewer_2_id) {
+            $reviewers[] = User::find($request->reviewer_2_id);
+        }
+        if ($request->reviewer_3_id) {
+            $reviewers[] = User::find($request->reviewer_3_id);
+        }
+        if ($request->reviewer_4_id) {
+            $reviewers[] = User::find($request->reviewer_4_id);
+        }
+        if ($request->reviewer_5_id) {
+            $reviewers[] = User::find($request->reviewer_5_id);
+        }
+
+        foreach ($reviewers as $reviewer) {
+            if ($reviewer && $reviewer->email) {
+                $reviewer->notify(new ReviewAssignmentNotification($assignment));
+            }
+        }
+
         return redirect()->route('admin.assignments.index')
             ->with('success', 'Review berhasil ditugaskan');
     }
 
     public function show(ReviewAssignment $assignment)
     {
-        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResult']);
+        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResults.reviewer']);
         return view('admin.assignments.show', compact('assignment'));
     }
 
@@ -114,6 +141,15 @@ class ReviewAssignmentController extends Controller
         }
 
         $assignment->approve();
+
+        // Send notification to all reviewers who submitted
+        $reviewResults = $assignment->reviewResults;
+        foreach ($reviewResults as $result) {
+            if ($result->reviewer && $result->reviewer->email) {
+                $points = $assignment->journal ? $assignment->journal->points : 0;
+                $result->reviewer->notify(new ReviewApprovedNotification($assignment, $points));
+            }
+        }
 
         return back()->with('success', 'Review berhasil disetujui dan point telah diberikan');
     }
@@ -126,10 +162,16 @@ class ReviewAssignmentController extends Controller
 
         $assignment->requestRevision();
         
-        if ($assignment->reviewResult) {
-            $assignment->reviewResult->update([
+        // Update admin feedback for all review results and send notification
+        $reviewResults = $assignment->reviewResults;
+        foreach ($reviewResults as $result) {
+            $result->update([
                 'admin_feedback' => $validated['admin_feedback'],
             ]);
+            
+            if ($result->reviewer && $result->reviewer->email) {
+                $result->reviewer->notify(new ReviewRevisionNotification($assignment, $validated['admin_feedback']));
+            }
         }
 
         return back()->with('success', 'Permintaan revisi telah dikirim');

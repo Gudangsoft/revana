@@ -124,9 +124,15 @@ class ReviewResultController extends Controller
         // Keep old file_path for backward compatibility (empty or placeholder)
         $validated['file_path'] = 'formulir-review-sipera';
 
-        // Create or update review result
+        // Add reviewer_id
+        $validated['reviewer_id'] = auth()->id();
+
+        // Create or update review result for this specific reviewer
         ReviewResult::updateOrCreate(
-            ['review_assignment_id' => $assignment->id],
+            [
+                'review_assignment_id' => $assignment->id,
+                'reviewer_id' => auth()->id()
+            ],
             $validated
         );
 
@@ -155,14 +161,14 @@ class ReviewResultController extends Controller
             return back()->with('error', 'Review belum disetujui oleh admin');
         }
 
-        // Get review result
-        $result = $assignment->reviewResult;
+        // Get review result for current reviewer
+        $result = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
         if (!$result) {
             return back()->with('error', 'Data review tidak ditemukan');
         }
 
         // Get reviewer data for signature
-        $reviewer = $assignment->reviewer;
+        $reviewer = auth()->user();
 
         // Generate PDF
         $pdf = Pdf::loadView('reviewer.results.pdf', [
