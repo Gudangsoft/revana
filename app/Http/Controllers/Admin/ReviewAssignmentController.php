@@ -158,12 +158,14 @@ class ReviewAssignmentController extends Controller
     {
         $validated = $request->validate([
             'admin_feedback' => 'required|string',
+            'reviewer_ids' => 'required|array',
+            'reviewer_ids.*' => 'exists:users,id',
         ]);
 
         $assignment->requestRevision();
         
-        // Update admin feedback for all review results and send notification
-        $reviewResults = $assignment->reviewResults;
+        // Update admin feedback for selected reviewers only and send notification
+        $reviewResults = $assignment->reviewResults()->whereIn('reviewer_id', $validated['reviewer_ids'])->get();
         foreach ($reviewResults as $result) {
             $result->update([
                 'admin_feedback' => $validated['admin_feedback'],
@@ -174,7 +176,7 @@ class ReviewAssignmentController extends Controller
             }
         }
 
-        return back()->with('success', 'Permintaan revisi telah dikirim');
+        return back()->with('success', 'Permintaan revisi telah dikirim ke ' . count($reviewResults) . ' reviewer');
     }
 
     public function download(ReviewAssignment $assignment)

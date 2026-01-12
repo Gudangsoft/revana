@@ -714,6 +714,19 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label class="form-label">Ditujukan Kepada <span class="text-danger">*</span></label>
+                        <select class="form-select" name="reviewer_ids[]" multiple required size="5">
+                            @foreach($assignment->reviewResults as $index => $reviewResult)
+                                @if($reviewResult->reviewer)
+                                    <option value="{{ $reviewResult->reviewer_id }}" selected>
+                                        Reviewer {{ $index + 1 }}: {{ $reviewResult->reviewer->name }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Tahan Ctrl untuk memilih beberapa reviewer</small>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Admin Feedback <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="admin_feedback" rows="5" required placeholder="Jelaskan revisi yang diperlukan..."></textarea>
                     </div>
