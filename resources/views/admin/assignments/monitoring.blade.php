@@ -47,7 +47,7 @@
                         @forelse($assignments as $index => $assignment)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td><strong>{{ $assignment->article_code }}</strong></td>
+                            <td><strong>{{ $assignment->article_number }}</strong></td>
                             <td>
                                 <div class="text-truncate" style="max-width: 250px;" title="{{ $assignment->article_title }}">
                                     {{ $assignment->article_title }}
