@@ -181,11 +181,34 @@
             <div class="card-footer">
                 <nav>
                     <ul class="pagination justify-content-center mb-0">
+                        <!-- Previous Button -->
+                        @if($reviewers->onFirstPage())
+                            <li class="page-item disabled">
+                                <span class="page-link">Kembali</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $reviewers->previousPageUrl() }}">Kembali</a>
+                            </li>
+                        @endif
+
+                        <!-- Page Numbers -->
                         @foreach(range(1, $reviewers->lastPage()) as $page)
                             <li class="page-item {{ $page == $reviewers->currentPage() ? 'active' : '' }}">
                                 <a class="page-link" href="{{ $reviewers->url($page) }}">{{ $page }}</a>
                             </li>
                         @endforeach
+
+                        <!-- Next Button -->
+                        @if($reviewers->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $reviewers->nextPageUrl() }}">Lanjut</a>
+                            </li>
+                        @else
+                            <li class="page-item disabled">
+                                <span class="page-link">Lanjut</span>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
             </div>

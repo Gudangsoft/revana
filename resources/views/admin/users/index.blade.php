@@ -103,11 +103,34 @@
             <div class="mt-3">
                 <nav>
                     <ul class="pagination justify-content-center">
+                        <!-- Previous Button -->
+                        @if($users->onFirstPage())
+                            <li class="page-item disabled">
+                                <span class="page-link">Kembali</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $users->previousPageUrl() }}">Kembali</a>
+                            </li>
+                        @endif
+
+                        <!-- Page Numbers -->
                         @for($i = 1; $i <= $users->lastPage(); $i++)
                             <li class="page-item {{ $i == $users->currentPage() ? 'active' : '' }}">
                                 <a class="page-link" href="{{ $users->url($i) }}">{{ $i }}</a>
                             </li>
                         @endfor
+
+                        <!-- Next Button -->
+                        @if($users->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $users->nextPageUrl() }}">Lanjut</a>
+                            </li>
+                        @else
+                            <li class="page-item disabled">
+                                <span class="page-link">Lanjut</span>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
             </div>
