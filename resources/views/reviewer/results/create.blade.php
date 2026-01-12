@@ -65,12 +65,12 @@
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="article_type" id="type_research" 
                                                value="Research Article" {{ old('article_type') == 'Research Article' ? 'checked' : '' }} required>
-                                        <label class="form-check-label" for="type_research">☐ Research Article</label>
+                                        <label class="form-check-label" for="type_research">Research Article</label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="article_type" id="type_review" 
                                                value="Review" {{ old('article_type') == 'Review' ? 'checked' : '' }} required>
-                                        <label class="form-check-label" for="type_review">☐ Review</label>
+                                        <label class="form-check-label" for="type_review">Review</label>
                                     </div>
                                 </div>
                                 @error('article_type')
@@ -351,12 +351,12 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="references_adequate" id="ref_adequate_yes" 
                                    value="1" {{ old('references_adequate') === '1' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="ref_adequate_yes">☐ Ya</label>
+                            <label class="form-check-label" for="ref_adequate_yes">Ya</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="references_adequate" id="ref_adequate_no" 
                                    value="0" {{ old('references_adequate') === '0' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="ref_adequate_no">☐ Tidak</label>
+                            <label class="form-check-label" for="ref_adequate_no">Tidak</label>
                         </div>
                         @error('references_adequate')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -368,12 +368,12 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="references_manipulation" id="ref_manip_no" 
                                    value="0" {{ old('references_manipulation') === '0' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="ref_manip_no">☐ Tidak</label>
+                            <label class="form-check-label" for="ref_manip_no">Tidak</label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="references_manipulation" id="ref_manip_yes" 
                                    value="1" {{ old('references_manipulation') === '1' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="ref_manip_yes">☐ Ya</label>
+                            <label class="form-check-label" for="ref_manip_yes">Ya</label>
                         </div>
                         <label class="form-label">Jelaskan referensi yang tidak relevan:</label>
                         <textarea class="form-control @error('irrelevant_references') is-invalid @enderror" 
@@ -418,7 +418,7 @@
                                    type="radio" name="recommendation" id="rec_{{ $value }}" 
                                    value="{{ $value }}" {{ old('recommendation') == $value ? 'checked' : '' }} required>
                             <label class="form-check-label" for="rec_{{ $value }}">
-                                ☐ <strong>{{ $label }}</strong>
+                                <strong>{{ $label }}</strong>
                             </label>
                         </div>
                         @endforeach
