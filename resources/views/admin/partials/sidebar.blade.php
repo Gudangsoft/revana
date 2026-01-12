@@ -5,6 +5,9 @@
 <a href="{{ route('admin.dashboard') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'active' : '' }}">
     <i class="bi bi-speedometer2"></i> Dashboard
 </a>
+<a href="{{ route('admin.monitoring') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.monitoring') ? 'active' : '' }}">
+    <i class="bi bi-graph-up"></i> Monitoring Review
+</a>
 {{-- <a href="{{ route('admin.journals.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.journals') ? 'active' : '' }}">
     <i class="bi bi-journal-text"></i> Jurnal
 </a> --}}

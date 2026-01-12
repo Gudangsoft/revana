@@ -13,6 +13,20 @@ use Illuminate\Http\Request;
 
 class ReviewAssignmentController extends Controller
 {
+    public function monitoring()
+    {
+        $assignments = ReviewAssignment::with([
+            'journal', 
+            'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5',
+            'reviewResults.reviewer',
+            'assignedBy'
+        ])
+            ->latest()
+            ->get();
+
+        return view('admin.assignments.monitoring', compact('assignments'));
+    }
+
     public function index()
     {
         $assignments = ReviewAssignment::with(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy'])
@@ -120,12 +134,17 @@ class ReviewAssignmentController extends Controller
 
         foreach ($reviewers as $reviewer) {
             if ($reviewer && $reviewer->email) {
-                $reviewer->notify(new ReviewAssignmentNotification($assignment));
+                try {
+                    $reviewer->notify(new ReviewAssignmentNotification($assignment));
+                    \Log::info('Review assignment notification sent to: ' . $reviewer->email);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send review assignment notification to ' . $reviewer->email . ': ' . $e->getMessage());
+                }
             }
         }
 
         return redirect()->route('admin.assignments.index')
-            ->with('success', 'Review berhasil ditugaskan');
+            ->with('success', 'Review berhasil ditugaskan dan notifikasi email telah dikirim ke reviewer');
     }
 
     public function show(ReviewAssignment $assignment)

@@ -64,6 +64,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/export-completed-reviews', [AdminDashboard::class, 'exportCompletedReviews'])->name('export.completed.reviews');
         
+        // Monitoring
+        Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
+        
         // Journals
         Route::resource('journals', JournalController::class);
         
