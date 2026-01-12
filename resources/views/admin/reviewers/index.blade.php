@@ -193,11 +193,38 @@
                         @endif
 
                         <!-- Page Numbers -->
-                        @foreach(range(1, $reviewers->lastPage()) as $page)
-                            <li class="page-item {{ $page == $reviewers->currentPage() ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $reviewers->url($page) }}">{{ $page }}</a>
+                        @php
+                            $currentPage = $reviewers->currentPage();
+                            $lastPage = $reviewers->lastPage();
+                            $range = 2; // Show 2 pages on each side of current page
+                        @endphp
+
+                        <!-- First Page -->
+                        @if($currentPage > $range + 1)
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $reviewers->url(1) }}">1</a>
                             </li>
-                        @endforeach
+                            @if($currentPage > $range + 2)
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            @endif
+                        @endif
+
+                        <!-- Pages around current page -->
+                        @for($i = max(1, $currentPage - $range); $i <= min($lastPage, $currentPage + $range); $i++)
+                            <li class="page-item {{ $i == $currentPage ? 'active' : '' }}">
+                                <a class="page-link" href="{{ $reviewers->url($i) }}">{{ $i }}</a>
+                            </li>
+                        @endfor
+
+                        <!-- Last Page -->
+                        @if($currentPage < $lastPage - $range)
+                            @if($currentPage < $lastPage - $range - 1)
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            @endif
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $reviewers->url($lastPage) }}">{{ $lastPage }}</a>
+                            </li>
+                        @endif
 
                         <!-- Next Button -->
                         @if($reviewers->hasMorePages())
