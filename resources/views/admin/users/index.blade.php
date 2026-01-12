@@ -172,7 +172,7 @@
         resultDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Sedang mengirim email...</div>';
         
         // Send broadcast email
-        fetch('{{ route("admin.users.broadcast-email") }}', {
+        fetch('/admin/users/broadcast-email', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
