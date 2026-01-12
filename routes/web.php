@@ -142,9 +142,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'update'])->name('point-settings.update');
         
         // Users
-        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('/users/broadcast-email', [\App\Http\Controllers\Admin\UserController::class, 'broadcastEmail'])->name('users.broadcast-email');
+        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         
         // Profile
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
