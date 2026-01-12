@@ -131,6 +131,7 @@ Route::middleware('auth')->group(function () {
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/test-email', [\App\Http\Controllers\Admin\SettingController::class, 'testEmail'])->name('settings.test-email');
         
         // Point Settings
         Route::get('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'index'])->name('point-settings.index');
