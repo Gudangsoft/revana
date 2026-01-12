@@ -89,6 +89,7 @@ class EmailSettingController extends Controller
         
         // Clear config cache
         \Artisan::call('config:clear');
+        \Artisan::call('cache:clear');
         
         return redirect()->route('admin.email-settings.index')
             ->with('success', 'Pengaturan email berhasil diperbarui!');

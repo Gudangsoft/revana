@@ -4,11 +4,10 @@ namespace App\Notifications;
 
 use App\Models\ReviewAssignment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ReviewAssignmentNotification extends Notification implements ShouldQueue
+class ReviewAssignmentNotification extends Notification
 {
     use Queueable;
 
