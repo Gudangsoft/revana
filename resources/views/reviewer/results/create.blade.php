@@ -501,7 +501,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-show explanation fields based on radio selection
+    // Toggle visibility of explanation fields based on radio selection
     const radioGroups = {
         'conflict_of_interest': 'conflict_explanation',
         'plagiarism_detected': 'plagiarism_explanation',
@@ -513,13 +513,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const radios = document.querySelectorAll(`input[name="${radioName}"]`);
         const explanationField = document.getElementById(radioGroups[radioName]);
         
-        radios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === '1') {
-                    explanationField.focus();
-                }
+        if (explanationField) {
+            // Initial state - hide if "Tidak" is selected
+            const selectedRadio = document.querySelector(`input[name="${radioName}"]:checked`);
+            if (selectedRadio && selectedRadio.value === '0') {
+                explanationField.style.display = 'none';
+                explanationField.value = '';
+                explanationField.removeAttribute('required');
+            }
+            
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === '1') {
+                        // Show explanation field when "Ya" is selected
+                        explanationField.style.display = 'block';
+                        explanationField.focus();
+                    } else {
+                        // Hide explanation field when "Tidak" is selected
+                        explanationField.style.display = 'none';
+                        explanationField.value = '';
+                        explanationField.removeAttribute('required');
+                    }
+                });
             });
-        });
+        }
     });
 });
 </script>
