@@ -101,12 +101,12 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="conflict_of_interest" id="conflict_no" 
                                        value="0" {{ old('conflict_of_interest') === '0' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="conflict_no">☐ Tidak</label>
+                                <label class="form-check-label" for="conflict_no">Tidak</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="conflict_of_interest" id="conflict_yes" 
                                        value="1" {{ old('conflict_of_interest') === '1' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="conflict_yes">☐ Ya (jelaskan):</label>
+                                <label class="form-check-label" for="conflict_yes">Ya (jelaskan):</label>
                             </div>
                         </div>
                         <input type="text" class="form-control mt-2 @error('conflict_explanation') is-invalid @enderror" 
@@ -123,12 +123,12 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="plagiarism_detected" id="plagiarism_no" 
                                        value="0" {{ old('plagiarism_detected') === '0' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="plagiarism_no">☐ Tidak</label>
+                                <label class="form-check-label" for="plagiarism_no">Tidak</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="plagiarism_detected" id="plagiarism_yes" 
                                        value="1" {{ old('plagiarism_detected') === '1' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="plagiarism_yes">☐ Ya (jelaskan bagian/indikasi):</label>
+                                <label class="form-check-label" for="plagiarism_yes">Ya (jelaskan bagian/indikasi):</label>
                             </div>
                         </div>
                         <textarea class="form-control mt-2 @error('plagiarism_explanation') is-invalid @enderror" 
@@ -145,12 +145,12 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="excessive_self_citation" id="self_citation_no" 
                                        value="0" {{ old('excessive_self_citation') === '0' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="self_citation_no">☐ Tidak</label>
+                                <label class="form-check-label" for="self_citation_no">Tidak</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="excessive_self_citation" id="self_citation_yes" 
                                        value="1" {{ old('excessive_self_citation') === '1' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="self_citation_yes">☐ Ya (jelaskan):</label>
+                                <label class="form-check-label" for="self_citation_yes">Ya (jelaskan):</label>
                             </div>
                         </div>
                         <textarea class="form-control mt-2 @error('self_citation_explanation') is-invalid @enderror" 
@@ -167,12 +167,12 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="other_ethical_issues" id="ethical_no" 
                                        value="0" {{ old('other_ethical_issues') === '0' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="ethical_no">☐ Tidak</label>
+                                <label class="form-check-label" for="ethical_no">Tidak</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="other_ethical_issues" id="ethical_yes" 
                                        value="1" {{ old('other_ethical_issues') === '1' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="ethical_yes">☐ Ya (jelaskan):</label>
+                                <label class="form-check-label" for="ethical_yes">Ya (jelaskan):</label>
                             </div>
                         </div>
                         <textarea class="form-control mt-2 @error('ethical_issues_explanation') is-invalid @enderror" 
@@ -189,14 +189,14 @@
                             <input class="form-check-input" type="radio" name="ai_usage_statement" id="ai_no" 
                                    value="0" {{ old('ai_usage_statement') === '0' ? 'checked' : '' }} required>
                             <label class="form-check-label" for="ai_no">
-                                ☐ Saya menegaskan bahwa saya <strong>tidak menggunakan AI generatif/AI-assisted</strong> untuk menulis laporan review ini.
+                                Saya menegaskan bahwa saya <strong>tidak menggunakan AI generatif/AI-assisted</strong> untuk menulis laporan review ini.
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="ai_usage_statement" id="ai_yes" 
                                    value="1" {{ old('ai_usage_statement') === '1' ? 'checked' : '' }} required>
                             <label class="form-check-label" for="ai_yes">
-                                ☐ Saya <strong>menggunakan AI-assisted</strong> untuk membantu bahasa/penyusunan
+                                Saya <strong>menggunakan AI-assisted</strong> untuk membantu bahasa/penyusunan
                             </label>
                         </div>
                         @error('ai_usage_statement')
