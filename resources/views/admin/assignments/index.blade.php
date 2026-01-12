@@ -84,25 +84,29 @@
                             @endif
                         </td>
                         <td>
-                            @if($assignment->status === 'pending')
-                                <span class="badge bg-warning">
+                            @if($assignment->status === 'PENDING')
+                                <span class="badge bg-secondary">
                                     <i class="bi bi-clock"></i> Pending
                                 </span>
-                            @elseif($assignment->status === 'accepted')
+                            @elseif($assignment->status === 'ON_PROGRESS')
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-hourglass-split"></i> On Progress
+                                </span>
+                            @elseif($assignment->status === 'SUBMITTED')
                                 <span class="badge bg-info">
-                                    <i class="bi bi-check"></i> Accepted
-                                </span>
-                            @elseif($assignment->status === 'rejected')
-                                <span class="badge bg-danger">
-                                    <i class="bi bi-x-circle"></i> Rejected
-                                </span>
-                            @elseif($assignment->status === 'submitted')
-                                <span class="badge bg-primary">
                                     <i class="bi bi-send"></i> Submitted
                                 </span>
-                            @elseif($assignment->status === 'approved')
+                            @elseif($assignment->status === 'REVISION')
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-arrow-repeat"></i> Revision
+                                </span>
+                            @elseif($assignment->status === 'APPROVED')
                                 <span class="badge bg-success">
                                     <i class="bi bi-check-circle"></i> Approved
+                                </span>
+                            @else
+                                <span class="badge bg-secondary">
+                                    {{ $assignment->status }}
                                 </span>
                             @endif
                         </td>
@@ -120,7 +124,7 @@
                                    class="btn btn-info" title="Detail">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                @if($assignment->status === 'pending')
+                                @if($assignment->status === 'PENDING')
                                 <form action="{{ route('admin.assignments.destroy', $assignment) }}" 
                                       method="POST" 
                                       class="d-inline"

@@ -216,7 +216,7 @@ class ReviewAssignmentController extends Controller
 
     public function destroy(ReviewAssignment $assignment)
     {
-        if ($assignment->status !== 'pending') {
+        if ($assignment->status !== 'PENDING') {
             return back()->with('error', 'Hanya assignment dengan status pending yang bisa dihapus');
         }
 
@@ -224,4 +224,4 @@ class ReviewAssignmentController extends Controller
 
         return redirect()->route('admin.assignments.index')
             ->with('success', 'Assignment berhasil dihapus');
-    }}
+    }
