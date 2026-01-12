@@ -244,13 +244,13 @@
                             @forelse($reviewer->reviewAssignments as $assignment)
                             <tr>
                                 <td>
-                                    <strong>{{ Str::limit($assignment->journal->title, 50) }}</strong>
+                                    <strong>{{ $assignment->journal ? Str::limit($assignment->journal->title, 50) : 'N/A' }}</strong>
                                     @if($assignment->reviewResult)
                                         <br><small class="text-muted"><i class="bi bi-file-text"></i> Review submitted</small>
                                     @endif
                                 </td>
-                                <td>{{ $assignment->journal->accreditation }}</td>
-                                <td><span class="badge bg-info">{{ $assignment->journal->points }} pts</span></td>
+                                <td>{{ $assignment->journal ? $assignment->journal->accreditation : 'N/A' }}</td>
+                                <td><span class="badge bg-info">{{ $assignment->journal ? $assignment->journal->points : 0 }} pts</span></td>
                                 <td>
                                     @php
                                         $statusColors = [
