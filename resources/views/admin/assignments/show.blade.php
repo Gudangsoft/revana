@@ -69,6 +69,14 @@
                             <span class="badge bg-success">
                                 <i class="bi bi-check-circle"></i> Approved
                             </span>
+                        @elseif(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']))
+                            <span class="badge bg-warning">
+                                <i class="bi bi-hourglass-split"></i> {{ $assignment->status === 'ON_PROGRESS' ? 'On Progress' : 'Revision' }}
+                            </span>
+                            <br>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> Menunggu reviewer menyelesaikan review
+                            </small>
                         @endif
                     </div>
                 </div>
