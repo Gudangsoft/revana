@@ -1,6 +1,11 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('title', 'Pengaturan Email')
+@section('title', ' - Pengaturan Email')
+@section('page-title', 'Pengaturan Email')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
 
 @section('content')
 <div class="container-fluid">
