@@ -106,17 +106,7 @@
 
             @if($users->hasPages())
             <div class="mt-3">
-                <nav>
-                    <ul class="pagination justify-content-center">
-                        @foreach(range(1, $users->lastPage()) as $page)
-                            @if($page == $users->currentPage())
-                                <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
-                            @else
-                                <li class="page-item"><a class="page-link" href="{{ $users->url($page) }}">{{ $page }}</a></li>
-                            @endif
-                        @endforeach
-                    </ul>
-                </nav>
+                {{ $users->links() }}
             </div>
             @endif
         </div>
