@@ -33,9 +33,8 @@
                         <tr>
                             <th width="3%">No</th>
                             <th width="8%">Kode</th>
-                            <th width="20%">Judul Artikel</th>
-                            <th width="10%">Jurnal</th>
-                            <th width="15%">Reviewers</th>
+                            <th width="25%">Judul Artikel</th>
+                            <th width="20%">Reviewers</th>
                             <th width="12%">Progress Review</th>
                             <th width="10%">Status</th>
                             <th width="8%">Deadline</th>
@@ -52,13 +51,6 @@
                                 <div class="text-truncate" style="max-width: 250px;" title="{{ $assignment->article_title }}">
                                     {{ $assignment->article_title }}
                                 </div>
-                            </td>
-                            <td>
-                                @if($assignment->journal)
-                                    <span class="badge bg-info">{{ $assignment->journal->name }}</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
                             </td>
                             <td>
                                 @php

@@ -70,25 +70,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Jurnal <span class="text-danger">*</span></label>
-                        <select class="form-select @error('journal_id') is-invalid @enderror" 
-                                name="journal_id" required>
-                            <option value="">-- Pilih Jurnal --</option>
-                            @foreach($journals as $journal)
-                            <option value="{{ $journal->id }}" {{ old('journal_id') == $journal->id ? 'selected' : '' }}>
-                                {{ $journal->name }} 
-                                @if($journal->accreditation)
-                                    - {{ $journal->accreditation->name }} ({{ $journal->points }} pts)
-                                @endif
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('journal_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
                         <label class="form-label">Pilih Reviewer 1 <span class="text-danger">*</span></label>
                         <input type="text" class="form-control mb-2" id="searchReviewer1" placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
                         <select class="form-select @error('reviewer_id') is-invalid @enderror" 
@@ -164,7 +145,7 @@
             <div class="card-body">
                 <h6>Tips Assign Reviewer:</h6>
                 <ul class="small">
-                    <li>Pilih reviewer yang sesuai dengan bidang jurnal</li>
+                    <li>Pilih reviewer yang sesuai dengan bidang artikel</li>
                     <li>Perhatikan beban kerja reviewer saat ini</li>
                     <li>Reviewer akan menerima notifikasi tugas baru</li>
                     <li>Reviewer bisa menerima atau menolak tugas</li>
@@ -172,7 +153,7 @@
                 <hr>
                 <p class="mb-0 small text-muted">
                     Setelah reviewer menyelesaikan dan hasil review disetujui, 
-                    reviewer akan mendapatkan point sesuai akreditasi jurnal.
+                    reviewer akan mendapatkan point.
                 </p>
             </div>
         </div>
@@ -182,8 +163,7 @@
                 <i class="bi bi-people"></i> Statistik Reviewer
             </div>
             <div class="card-body">
-                <p class="mb-1"><strong>Total Reviewer:</strong> {{ $reviewers->count() }}</p>
-                <p class="mb-0"><strong>Jurnal Tersedia:</strong> {{ $journals->count() }}</p>
+                <p class="mb-0"><strong>Total Reviewer:</strong> {{ $reviewers->count() }}</p>
             </div>
         </div>
     </div>

@@ -16,7 +16,6 @@ class ReviewAssignmentController extends Controller
     public function monitoring()
     {
         $assignments = ReviewAssignment::with([
-            'journal', 
             'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5',
             'reviewResults.reviewer',
             'assignedBy'
@@ -29,7 +28,7 @@ class ReviewAssignmentController extends Controller
 
     public function index()
     {
-        $assignments = ReviewAssignment::with(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy'])
+        $assignments = ReviewAssignment::with(['reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy'])
             ->latest()
             ->paginate(20);
 
@@ -38,10 +37,9 @@ class ReviewAssignmentController extends Controller
 
     public function create()
     {
-        $journals = Journal::all();
         $reviewers = User::where('role', 'reviewer')->get();
 
-        return view('admin.assignments.create', compact('journals', 'reviewers'));
+        return view('admin.assignments.create', compact('reviewers'));
     }
 
     public function store(Request $request)
@@ -52,7 +50,6 @@ class ReviewAssignmentController extends Controller
             'submit_link' => 'required|url',
             'deadline' => 'required|date|after:today',
             'language' => 'required|in:Indonesia,Inggris',
-            'journal_id' => 'required|exists:journals,id',
             'reviewer_id' => 'required|exists:users,id',
             'reviewer_1_username' => 'required|string|max:255',
             'reviewer_1_password' => 'required|string|max:255',
@@ -95,7 +92,7 @@ class ReviewAssignmentController extends Controller
             'certificate_link' => null,
             'deadline' => $request->deadline,
             'language' => $request->language,
-            'journal_id' => $request->journal_id,
+            'journal_id' => null,
             'reviewer_id' => $request->reviewer_id,
             'reviewer_1_username' => $request->reviewer_1_username,
             'reviewer_1_password' => $request->reviewer_1_password,
@@ -150,7 +147,7 @@ class ReviewAssignmentController extends Controller
 
     public function show(ReviewAssignment $assignment)
     {
-        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResults.reviewer']);
+        $assignment->load(['reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResults.reviewer']);
         return view('admin.assignments.show', compact('assignment'));
     }
 
