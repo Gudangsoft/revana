@@ -95,4 +95,34 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', "Password untuk {$user->name} berhasil direset menjadi: {$newPassword}");
     }
+    
+    public function broadcastEmail(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+        
+        $users = User::whereNotNull('email')->get();
+        $successCount = 0;
+        $failedCount = 0;
+        
+        foreach ($users as $user) {
+            try {
+                \Mail::raw($request->message, function($mail) use ($user, $request) {
+                    $mail->to($user->email)
+                         ->subject($request->subject);
+                });
+                $successCount++;
+            } catch (\Exception $e) {
+                $failedCount++;
+                \Log::error('Failed to send broadcast email to ' . $user->email . ': ' . $e->getMessage());
+            }
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Email berhasil dikirim ke {$successCount} pengguna" . ($failedCount > 0 ? ", {$failedCount} gagal" : "")
+        ]);
+    }
 }

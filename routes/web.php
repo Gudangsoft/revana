@@ -144,6 +144,7 @@ Route::middleware('auth')->group(function () {
         // Users
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::post('/users/broadcast-email', [\App\Http\Controllers\Admin\UserController::class, 'broadcastEmail'])->name('users.broadcast-email');
         
         // Profile
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
