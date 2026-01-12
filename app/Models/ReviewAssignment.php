@@ -39,6 +39,7 @@ class ReviewAssignment extends Model
         'reviewer_5_password',
         'assigned_by',
         'status',
+        'revision_file',
         'rejection_reason',
         'accepted_at',
         'submitted_at',

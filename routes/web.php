@@ -159,6 +159,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/tasks/{assignment}/accept', [TaskController::class, 'accept'])->name('tasks.accept');
         Route::post('/tasks/{assignment}/reject', [TaskController::class, 'reject'])->name('tasks.reject');
         Route::post('/tasks/{assignment}/start', [TaskController::class, 'startProgress'])->name('tasks.start');
+        Route::post('/tasks/{assignment}/upload-revision', [TaskController::class, 'uploadRevision'])->name('tasks.uploadRevision');
         
         // Review Results
         Route::get('/tasks/{assignment}/submit', [ReviewResultController::class, 'create'])->name('results.create');

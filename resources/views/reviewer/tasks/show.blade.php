@@ -305,9 +305,23 @@
                     @endif
 
                     @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']))
-                        <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100">
+                        <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100 mb-2">
                             <i class="bi bi-file-text"></i> ISI FORMULIR REVIEW ARTIKEL
                         </a>
+
+                        <button type="button" class="btn btn-info w-100 mb-2" data-bs-toggle="modal" data-bs-target="#uploadRevisionModal">
+                            <i class="bi bi-upload"></i> Upload File Revisi
+                        </button>
+
+                        @if($assignment->revision_file)
+                        <div class="alert alert-success p-2 mb-2">
+                            <small><i class="bi bi-file-earmark-check"></i> File revisi sudah diupload</small>
+                            <br>
+                            <a href="{{ Storage::url($assignment->revision_file) }}" target="_blank" class="btn btn-sm btn-outline-success mt-1">
+                                <i class="bi bi-download"></i> Lihat File
+                            </a>
+                        </div>
+                        @endif
                     @endif
 
                     @if($assignment->status == 'SUBMITTED')
@@ -395,6 +409,40 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-danger">Tolak Tugas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Revision Modal -->
+<div class="modal fade" id="uploadRevisionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload File Revisi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('reviewer.tasks.uploadRevision', $assignment) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">File Revisi <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" name="revision_file" required 
+                               accept=".pdf,.doc,.docx,.zip,.rar">
+                        <small class="text-muted">Format: PDF, DOC, DOCX, ZIP, RAR. Maksimal 10MB</small>
+                    </div>
+                    @if($assignment->revision_file)
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> File sebelumnya akan diganti dengan file baru
+                    </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Upload
+                    </button>
                 </div>
             </form>
         </div>
