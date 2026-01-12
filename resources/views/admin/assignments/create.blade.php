@@ -70,6 +70,25 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Jurnal <span class="text-danger">*</span></label>
+                        <select class="form-select @error('journal_id') is-invalid @enderror" 
+                                name="journal_id" required>
+                            <option value="">-- Pilih Jurnal --</option>
+                            @foreach($journals as $journal)
+                            <option value="{{ $journal->id }}" {{ old('journal_id') == $journal->id ? 'selected' : '' }}>
+                                {{ $journal->name }} 
+                                @if($journal->accreditation)
+                                    - {{ $journal->accreditation->name }} ({{ $journal->points }} pts)
+                                @endif
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('journal_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Pilih Reviewer 1 <span class="text-danger">*</span></label>
                         <input type="text" class="form-control mb-2" id="searchReviewer1" placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
                         <select class="form-select @error('reviewer_id') is-invalid @enderror" 
