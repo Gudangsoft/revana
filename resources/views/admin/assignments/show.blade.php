@@ -278,7 +278,7 @@
             <div class="card-body">
                 <!-- A. Informasi Naskah -->
                 <div class="mb-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-file-text"></i> A. Informasi Naskah</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> A. Informasi Naskah</h6>
                     <table class="table table-sm table-bordered">
                         <tr>
                             <th width="30%">ID Manuskrip</th>
@@ -305,7 +305,7 @@
 
                 <!-- B. Pernyataan Konflik Kepentingan & Etika -->
                 <div class="mb-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-shield-check"></i> B. Pernyataan Konflik Kepentingan & Etika</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> B. Pernyataan Konflik Kepentingan & Etika</h6>
                     <table class="table table-sm table-bordered">
                         <tr>
                             <th width="50%">Konflik Kepentingan</th>
@@ -366,7 +366,7 @@
 
                 <!-- C. Penilaian Cepat (Rating Umum) -->
                 <div class="mb-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-star"></i> C. Penilaian Cepat (Rating Umum)</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> C. Penilaian Cepat (Rating Umum)</h6>
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
                             <tr>
@@ -419,7 +419,7 @@
 
                 <!-- D. Checklist Evaluasi Detail -->
                 <div class="mb-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-list-check"></i> D. Checklist Evaluasi Detail</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> D. Checklist Evaluasi Detail</h6>
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
                             <tr>
@@ -460,7 +460,7 @@
 
                 <!-- E. Evaluasi Referensi -->
                 <div class="mb-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-book"></i> E. Evaluasi Referensi</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> E. Evaluasi Referensi</h6>
                     <table class="table table-sm table-bordered">
                         <tr>
                             <th width="40%">Referensi Relevan & Mencukupi</th>
@@ -505,7 +505,7 @@
 
                 <!-- F. Rekomendasi Akhir Reviewer -->
                 <div class="mb-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-check-circle"></i> F. Rekomendasi Akhir Reviewer</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> F. Rekomendasi Akhir Reviewer</h6>
                     @php
                     $recommendations = [
                         'ACCEPT' => 'Terima tanpa revisi (Accept in present form)',
@@ -560,7 +560,7 @@
 
                 <!-- Pernyataan Reviewer -->
                 <div class="mb-3">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-check"></i> Pernyataan Reviewer</h6>
+                    <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> Pernyataan Reviewer</h6>
                     <div class="alert alert-info">
                         <p class="mb-2">Saya menyatakan bahwa penilaian ini dilakukan secara objektif berdasarkan keilmuan, tanpa konflik kepentingan, dan sesuai dengan etika akademik.</p>
                         <div class="row mt-3">
