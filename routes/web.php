@@ -131,7 +131,11 @@ Route::middleware('auth')->group(function () {
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-        Route::post('/settings/test-email', [\App\Http\Controllers\Admin\SettingController::class, 'testEmail'])->name('settings.test-email');
+        
+        // Email Settings
+        Route::get('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'index'])->name('email-settings.index');
+        Route::put('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'update'])->name('email-settings.update');
+        Route::post('/email-settings/test-email', [\App\Http\Controllers\Admin\EmailSettingController::class, 'testEmail'])->name('email-settings.test-email');
         
         // Point Settings
         Route::get('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'index'])->name('point-settings.index');
