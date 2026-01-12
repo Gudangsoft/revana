@@ -76,7 +76,7 @@
             font-weight: bold;
         }
         .checkbox.checked::before {
-            content: "✓";
+            content: "V";
         }
         .signature-box {
             margin-top: 20px;
