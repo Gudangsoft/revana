@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Exports\ReviewersExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReviewerController extends Controller
 {
@@ -126,5 +128,13 @@ class ReviewerController extends Controller
 
         return redirect()->route('admin.reviewers.show', $reviewer)
             ->with('success', 'Password reviewer berhasil direset.');
+    }
+
+    public function export(Request $request)
+    {
+        $search = $request->get('search');
+        $filename = 'Data_Reviewer_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new ReviewersExport($search), $filename);
     }
 }

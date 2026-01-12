@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
         
         // Reviewers
         Route::get('/reviewers', [ReviewerController::class, 'index'])->name('reviewers.index');
+        Route::get('/reviewers/export', [ReviewerController::class, 'export'])->name('reviewers.export');
         Route::get('/reviewers/{reviewer}', [ReviewerController::class, 'show'])->name('reviewers.show');        
         // Certificates
         Route::resource('certificates', \App\Http\Controllers\Admin\CertificateController::class);        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');

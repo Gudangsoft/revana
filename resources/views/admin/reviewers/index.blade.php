@@ -65,7 +65,11 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-people"></i> Daftar Reviewer</span>
-                <div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.reviewers.export', ['search' => $search ?? '']) }}" 
+                       class="btn btn-success btn-sm">
+                        <i class="bi bi-file-earmark-excel"></i> Download Excel
+                    </a>
                     <span class="badge bg-primary">Total: {{ $reviewers->total() }} Reviewer</span>
                 </div>
             </div>
