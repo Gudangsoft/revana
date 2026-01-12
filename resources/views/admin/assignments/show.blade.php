@@ -273,7 +273,7 @@
         <div class="card mb-3">
             <div class="card-header bg-success text-white">
                 <i class="bi bi-file-text"></i> Hasil Review - Formulir Review Artikel Ilmiah SIPERA 
-                <span class="badge bg-light text-dark">Reviewer {{ $index + 1 }}: {{ $reviewResult->reviewer->name }}</span>
+                <span class="badge bg-light text-dark">Reviewer {{ $index + 1 }}: {{ $reviewResult->reviewer ? $reviewResult->reviewer->name : 'N/A' }}</span>
             </div>
             <div class="card-body">
                 <!-- A. Informasi Naskah -->
