@@ -321,7 +321,7 @@
                                 <i class="bi bi-file-pdf"></i> Download PDF Review
                             </a>
 
-                            @if($assignment->status == 'SUBMITTED')
+                            @if($assignment->status == 'SUBMITTED' && Route::has('reviewer.results.uploadRevision'))
                                 <button type="button" class="btn btn-info w-100 mb-2" data-bs-toggle="modal" data-bs-target="#uploadRevisionModal">
                                     <i class="bi bi-upload"></i> Upload File Revisi Jurnal
                                 </button>
@@ -420,6 +420,7 @@
 </div>
 
 <!-- Upload Revision Modal -->
+@if(Route::has('reviewer.results.uploadRevision'))
 <div class="modal fade" id="uploadRevisionModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -455,4 +456,5 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
