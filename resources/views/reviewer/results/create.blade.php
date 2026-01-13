@@ -81,17 +81,19 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Bidang/Section/Topik <span class="text-danger">*</span></label>
-                                @if($assignment->fieldOfStudy)
-                                    <input type="text" class="form-control" 
+                                @if(isset($assignment->fieldOfStudy) && $assignment->fieldOfStudy)
+                                    <input type="text" class="form-control bg-light" 
                                            value="{{ $assignment->fieldOfStudy->name }}" 
-                                           readonly disabled>
+                                           readonly>
                                     <input type="hidden" name="field_section_topic" value="{{ $assignment->fieldOfStudy->name }}">
-                                    <small class="text-muted">Bidang ditentukan saat penugasan</small>
+                                    <small class="text-success"><i class="bi bi-check-circle"></i> Bidang ditentukan saat penugasan</small>
                                 @else
                                     <input type="text" class="form-control @error('field_section_topic') is-invalid @enderror" 
-                                           name="field_section_topic" value="{{ old('field_section_topic') }}" 
-                                           placeholder="Masukkan bidang/section/topik artikel" required>
-                                    <small class="text-muted">Assignment lama - silakan isi manual</small>
+                                           name="field_section_topic" 
+                                           value="{{ old('field_section_topic') }}" 
+                                           placeholder="Contoh: Teknik Elektro, Kedokteran, dll" 
+                                           required>
+                                    <small class="text-warning"><i class="bi bi-pencil"></i> Assignment lama - silakan isi manual</small>
                                     @error('field_section_topic')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
