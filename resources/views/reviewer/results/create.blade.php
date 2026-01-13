@@ -81,7 +81,11 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Bidang/Section/Topik <span class="text-danger">*</span></label>
-                                @if(isset($assignment->fieldOfStudy) && $assignment->fieldOfStudy)
+                                @php
+                                    $hasFieldOfStudy = !empty($assignment->field_of_study_id) && $assignment->fieldOfStudy;
+                                @endphp
+                                
+                                @if($hasFieldOfStudy)
                                     <input type="text" class="form-control bg-light" 
                                            value="{{ $assignment->fieldOfStudy->name }}" 
                                            readonly>
@@ -91,9 +95,9 @@
                                     <input type="text" class="form-control @error('field_section_topic') is-invalid @enderror" 
                                            name="field_section_topic" 
                                            value="{{ old('field_section_topic') }}" 
-                                           placeholder="Contoh: Teknik Elektro, Kedokteran, dll" 
+                                           placeholder="Contoh: Teknik Informatika, Kedokteran, Ekonomi, dll" 
                                            required>
-                                    <small class="text-warning"><i class="bi bi-pencil"></i> Assignment lama - silakan isi manual</small>
+                                    <small class="text-muted"><i class="bi bi-pencil"></i> Silakan isi bidang artikel secara manual</small>
                                     @error('field_section_topic')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
