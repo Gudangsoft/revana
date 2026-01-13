@@ -70,6 +70,23 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Bidang/Section/Topik <span class="text-danger">*</span></label>
+                        <select class="form-select @error('field_of_study_id') is-invalid @enderror" 
+                                name="field_of_study_id" required>
+                            <option value="">-- Pilih Bidang Ilmu --</option>
+                            @foreach($fieldOfStudies as $field)
+                            <option value="{{ $field->id }}" {{ old('field_of_study_id') == $field->id ? 'selected' : '' }}>
+                                {{ $field->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('field_of_study_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Bidang ini akan muncul otomatis di form reviewer & PDF</small>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Pilih Reviewer 1 <span class="text-danger">*</span></label>
                         <input type="text" class="form-control mb-2" id="searchReviewer1" placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
                         <select class="form-select @error('reviewer_id') is-invalid @enderror" 

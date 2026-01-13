@@ -22,6 +22,7 @@ class ReviewAssignment extends Model
         'certificate_link',
         'deadline',
         'language',
+        'field_of_study_id',
         'reviewer_id',
         'reviewer_1_username',
         'reviewer_1_password',
@@ -57,6 +58,11 @@ class ReviewAssignment extends Model
     public function journal()
     {
         return $this->belongsTo(Journal::class);
+    }
+
+    public function fieldOfStudy()
+    {
+        return $this->belongsTo(FieldOfStudy::class, 'field_of_study_id');
     }
 
     public function reviewer()

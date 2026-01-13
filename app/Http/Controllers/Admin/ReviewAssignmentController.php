@@ -38,8 +38,9 @@ class ReviewAssignmentController extends Controller
     public function create()
     {
         $reviewers = User::where('role', 'reviewer')->get();
+        $fieldOfStudies = \App\Models\FieldOfStudy::active()->ordered()->get();
 
-        return view('admin.assignments.create', compact('reviewers'));
+        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies'));
     }
 
     public function store(Request $request)
@@ -50,6 +51,7 @@ class ReviewAssignmentController extends Controller
             'submit_link' => 'required|url',
             'deadline' => 'required|date|after:today',
             'language' => 'required|in:Indonesia,Inggris',
+            'field_of_study_id' => 'required|exists:field_of_studies,id',
             'reviewer_id' => 'required|exists:users,id',
             'reviewer_1_username' => 'required|string|max:255',
             'reviewer_1_password' => 'required|string|max:255',
@@ -92,6 +94,7 @@ class ReviewAssignmentController extends Controller
             'certificate_link' => null,
             'deadline' => $request->deadline,
             'language' => $request->language,
+            'field_of_study_id' => $request->field_of_study_id,
             'journal_id' => null,
             'reviewer_id' => $request->reviewer_id,
             'reviewer_1_username' => $request->reviewer_1_username,

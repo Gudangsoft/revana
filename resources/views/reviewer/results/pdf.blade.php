@@ -118,14 +118,11 @@
             </tr>
             <tr>
                 <td>Jenis Artikel</td>
-                <td>: 
-                    <span class="checkbox {{ $result->article_type == 'Research Article' ? 'checked' : '' }}"></span> Research Article
-                    <span class="checkbox {{ $result->article_type == 'Review' ? 'checked' : '' }}"></span> Review
-                </td>
+                <td>: {{ $result->article_type }}</td>
             </tr>
             <tr>
                 <td>Bidang/Section/Topik</td>
-                <td>: {{ $result->field_section_topic }}</td>
+                <td>: {{ $result->assignment->fieldOfStudy->name ?? $result->field_section_topic ?? '-' }}</td>
             </tr>
             <tr>
                 <td>Tanggal Review</td>
