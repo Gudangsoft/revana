@@ -308,38 +308,42 @@
                         <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100 mb-2">
                             <i class="bi bi-file-text"></i> ISI FORMULIR REVIEW ARTIKEL
                         </a>
-
-                        <button type="button" class="btn btn-info w-100 mb-2" data-bs-toggle="modal" data-bs-target="#uploadRevisionModal">
-                            <i class="bi bi-upload"></i> Upload File Revisi
-                        </button>
-
-                        @if($assignment->revision_file)
-                        <div class="alert alert-success p-2 mb-2">
-                            <small><i class="bi bi-file-earmark-check"></i> File revisi sudah diupload</small>
-                            <br>
-                            <a href="{{ Storage::url($assignment->revision_file) }}" target="_blank" class="btn btn-sm btn-outline-success mt-1">
-                                <i class="bi bi-download"></i> Lihat File
-                            </a>
-                        </div>
-                        @endif
                     @endif
 
-                    @if($assignment->status == 'SUBMITTED')
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Menunggu validasi admin
-                        </div>
-                    @endif
-
-                    @if($assignment->status == 'APPROVED')
-                        <div class="alert alert-success mb-2">
-                            <i class="bi bi-check-circle"></i> Review telah disetujui!
-                        </div>
+                    @if(in_array($assignment->status, ['SUBMITTED', 'APPROVED']))
+                        @php
+                            $myReviewResult = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
+                        @endphp
                         
-                        @if($assignment->reviewResult)
-                        <a href="{{ route('reviewer.results.downloadPdf', $assignment) }}" 
-                           class="btn btn-primary w-100 mb-2" target="_blank">
-                            <i class="bi bi-file-pdf"></i> Download PDF Review
-                        </a>
+                        @if($myReviewResult)
+                            <a href="{{ route('reviewer.results.downloadPdf', $assignment) }}" 
+                               class="btn btn-primary w-100 mb-2" target="_blank">
+                                <i class="bi bi-file-pdf"></i> Download PDF Review
+                            </a>
+
+                            @if($assignment->status == 'SUBMITTED')
+                                <button type="button" class="btn btn-info w-100 mb-2" data-bs-toggle="modal" data-bs-target="#uploadRevisionModal">
+                                    <i class="bi bi-upload"></i> Upload File Revisi Jurnal
+                                </button>
+
+                                @if($myReviewResult->revision_file)
+                                <div class="alert alert-success p-2 mb-2">
+                                    <small><i class="bi bi-file-earmark-check"></i> File revisi sudah diupload</small>
+                                    <br>
+                                    <a href="{{ Storage::url($myReviewResult->revision_file) }}" target="_blank" class="btn btn-sm btn-outline-success mt-1">
+                                        <i class="bi bi-download"></i> Lihat File
+                                    </a>
+                                </div>
+                                @else
+                                <div class="alert alert-warning p-2 mb-2">
+                                    <small><i class="bi bi-exclamation-triangle"></i> Silakan upload file revisi jurnal untuk validasi admin</small>
+                                </div>
+                                @endif
+
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> Menunggu validasi admin setelah file revisi diupload
+                                </div>
+                            @endif
                         @endif
                     @endif
                 @endif
@@ -423,16 +427,19 @@
                 <h5 class="modal-title">Upload File Revisi</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('reviewer.tasks.uploadRevision', $assignment) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('reviewer.results.uploadRevision', $assignment) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">File Revisi <span class="text-danger">*</span></label>
+                        <label class="form-label">File Revisi Jurnal <span class="text-danger">*</span></label>
                         <input type="file" class="form-control" name="revision_file" required 
                                accept=".pdf,.doc,.docx,.zip,.rar">
                         <small class="text-muted">Format: PDF, DOC, DOCX, ZIP, RAR. Maksimal 10MB</small>
                     </div>
-                    @if($assignment->revision_file)
+                    @php
+                        $myReviewResult = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
+                    @endphp
+                    @if($myReviewResult && $myReviewResult->revision_file)
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle"></i> File sebelumnya akan diganti dengan file baru
                     </div>

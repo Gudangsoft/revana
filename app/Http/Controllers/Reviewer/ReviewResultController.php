@@ -107,8 +107,6 @@ class ReviewResultController extends Controller
             
             // E. Evaluasi Referensi
             'references_adequate' => 'required|boolean',
-            'references_manipulation' => 'required|boolean',
-            'irrelevant_references' => 'nullable|string',
             'suggested_references' => 'nullable|string',
             
             // F. Rekomendasi Akhir Reviewer
@@ -139,8 +137,9 @@ class ReviewResultController extends Controller
         // Update assignment status
         $assignment->submit();
 
-        return redirect()->route('reviewer.tasks.show', $assignment)
-            ->with('success', 'Formulir review berhasil disubmit');
+        // Redirect to download PDF directly
+        return redirect()->route('reviewer.results.downloadPdf', $assignment)
+            ->with('success', 'Formulir review berhasil disubmit! File PDF akan otomatis terdownload.');
     }
 
     public function downloadPdf(ReviewAssignment $assignment)
@@ -156,15 +155,10 @@ class ReviewResultController extends Controller
             abort(403);
         }
 
-        // Check if assignment has been approved
-        if ($assignment->status !== 'APPROVED') {
-            return back()->with('error', 'Review belum disetujui oleh admin');
-        }
-
         // Get review result for current reviewer
         $result = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
         if (!$result) {
-            return back()->with('error', 'Data review tidak ditemukan');
+            return back()->with('error', 'Data review tidak ditemukan. Silakan isi formulir review terlebih dahulu.');
         }
 
         // Get reviewer data for signature
@@ -183,5 +177,46 @@ class ReviewResultController extends Controller
         // Download PDF
         $filename = 'Review_' . $result->article_code . '_' . date('YmdHis') . '.pdf';
         return $pdf->download($filename);
+    }
+
+    public function uploadRevision(Request $request, ReviewAssignment $assignment)
+    {
+        // Check authorization
+        $isReviewer = $assignment->reviewer_id === auth()->id() 
+                   || $assignment->reviewer_2_id === auth()->id()
+                   || $assignment->reviewer_3_id === auth()->id()
+                   || $assignment->reviewer_4_id === auth()->id()
+                   || $assignment->reviewer_5_id === auth()->id();
+                   
+        if (!$isReviewer) {
+            abort(403);
+        }
+
+        // Validate file
+        $request->validate([
+            'revision_file' => 'required|file|mimes:pdf,doc,docx|max:10240', // Max 10MB
+        ]);
+
+        // Get review result for current reviewer
+        $result = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
+        if (!$result) {
+            return back()->with('error', 'Anda harus mengisi formulir review terlebih dahulu');
+        }
+
+        // Delete old file if exists
+        if ($result->revision_file) {
+            Storage::delete($result->revision_file);
+        }
+
+        // Store new file
+        $path = $request->file('revision_file')->store('review-revisions', 'public');
+        
+        // Update review result
+        $result->update([
+            'revision_file' => $path
+        ]);
+
+        return redirect()->route('reviewer.tasks.show', $assignment)
+            ->with('success', 'File revisi jurnal berhasil diupload! Menunggu validasi admin.');
     }
 }

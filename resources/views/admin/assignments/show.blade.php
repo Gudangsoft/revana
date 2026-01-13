@@ -484,6 +484,20 @@
                     @endif
                 </div>
 
+                <!-- File Revisi Jurnal -->
+                @if($reviewResult->revision_file)
+                <div class="mb-4">
+                    <h6 class="fw-bold text-success mb-3"><strong>✓</strong> File Revisi Jurnal</h6>
+                    <div class="alert alert-success">
+                        <i class="bi bi-file-earmark-check-fill"></i> File revisi jurnal telah diupload
+                        <br><br>
+                        <a href="{{ Storage::url($reviewResult->revision_file) }}" target="_blank" class="btn btn-sm btn-success">
+                            <i class="bi bi-download"></i> Download File Revisi
+                        </a>
+                    </div>
+                </div>
+                @endif
+
                 <!-- F. Rekomendasi Akhir Reviewer -->
                 <div class="mb-4">
                     <h6 class="fw-bold text-primary mb-3"><strong>✓</strong> F. Rekomendasi Akhir Reviewer</h6>
