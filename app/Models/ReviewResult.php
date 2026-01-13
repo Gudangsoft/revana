@@ -14,6 +14,8 @@ class ReviewResult extends Model
         'reviewer_id',
         'file_path',
         'revision_file',
+        'revision_files',  // JSON array for multiple revision files
+        'merged_revision_file',  // Path for merged PDF
         'notes',
         'recommendation',
         'admin_feedback',
@@ -97,6 +99,7 @@ class ReviewResult extends Model
         'ai_usage_statement' => 'boolean',
         'references_adequate' => 'boolean',
         'references_manipulation' => 'boolean',
+        'revision_files' => 'array',  // Cast JSON to array
     ];
 
     public function reviewAssignment()

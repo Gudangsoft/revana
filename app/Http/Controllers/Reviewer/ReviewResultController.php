@@ -192,9 +192,15 @@ class ReviewResultController extends Controller
             abort(403);
         }
 
-        // Validate file
+        // Validate files - support multiple PDFs
         $request->validate([
-            'revision_file' => 'required|file|mimes:pdf,doc,docx|max:10240', // Max 10MB
+            'revision_files' => 'required|array|min:1|max:10',
+            'revision_files.*' => 'required|file|mimes:pdf|max:10240', // Max 10MB per file, only PDF
+        ], [
+            'revision_files.required' => 'Minimal upload 1 file PDF',
+            'revision_files.*.mimes' => 'Semua file harus berformat PDF',
+            'revision_files.*.max' => 'Ukuran file maksimal 10MB per file',
+            'revision_files.max' => 'Maksimal upload 10 file sekaligus',
         ]);
 
         // Get review result for current reviewer
@@ -203,20 +209,49 @@ class ReviewResultController extends Controller
             return back()->with('error', 'Anda harus mengisi formulir review terlebih dahulu');
         }
 
-        // Delete old file if exists
-        if ($result->revision_file) {
-            Storage::delete($result->revision_file);
+        // Delete old files if exists
+        if ($result->revision_files) {
+            foreach ($result->revision_files as $oldFile) {
+                Storage::disk('public')->delete($oldFile);
+            }
+        }
+        if ($result->merged_revision_file) {
+            Storage::disk('public')->delete($result->merged_revision_file);
         }
 
-        // Store new file
-        $path = $request->file('revision_file')->store('review-revisions', 'public');
+        // Store all uploaded files
+        $uploadedFiles = [];
+        foreach ($request->file('revision_files') as $index => $file) {
+            $filename = 'revision_' . time() . '_' . ($index + 1) . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('review-revisions/' . $assignment->id, $filename, 'public');
+            $uploadedFiles[] = $path;
+        }
+
+        // Merge PDFs using PdfMergerService
+        $pdfMerger = app(\App\Services\PdfMergerService::class);
+        $mergedFilename = 'merged_revision_' . $assignment->id . '_' . auth()->id() . '_' . time() . '.pdf';
+        $mergedPath = 'review-revisions/' . $assignment->id . '/' . $mergedFilename;
+        
+        $merged = $pdfMerger->mergePdfs($uploadedFiles, $mergedPath);
+        
+        if (!$merged) {
+            // If merge fails, rollback uploaded files
+            foreach ($uploadedFiles as $file) {
+                Storage::disk('public')->delete($file);
+            }
+            return back()->with('error', 'Gagal menggabungkan file PDF. Pastikan semua file adalah PDF yang valid.');
+        }
         
         // Update review result
         $result->update([
-            'revision_file' => $path
+            'revision_files' => $uploadedFiles,
+            'merged_revision_file' => $merged
         ]);
 
+        $fileCount = count($uploadedFiles);
         return redirect()->route('reviewer.tasks.show', $assignment)
-            ->with('success', 'File revisi jurnal berhasil diupload! Menunggu validasi admin.');
+            ->with('success', "{$fileCount} file PDF berhasil diupload dan digabungkan! Menunggu validasi admin.");
     }
 }
+
+```

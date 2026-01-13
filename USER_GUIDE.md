@@ -126,6 +126,24 @@ Di dashboard, Anda akan melihat:
 3. Tambahkan catatan jika perlu
 4. Klik **Submit Review**
 
+#### Upload File Revisi Jurnal (Multiple PDFs)
+1. Setelah submit review, Anda bisa upload file revisi jurnal
+2. **Fitur Baru:** Upload **1-10 file PDF sekaligus**
+3. System akan **otomatis menggabungkan** semua PDF jadi 1 file
+4. Langkah:
+   - Klik **Upload File Revisi Jurnal**
+   - Pilih multiple PDF files (Ctrl+Click untuk pilih banyak)
+   - Preview file akan muncul
+   - Klik **Upload & Gabungkan PDF**
+   - File akan otomatis digabung dan siap di-review admin
+
+**Tips Upload Multi-PDF:**
+- ✅ Format: Hanya PDF
+- ✅ Ukuran: Max 10MB per file
+- ✅ Jumlah: 1-10 files
+- ✅ File akan digabung sesuai urutan yang dipilih
+- ✅ Admin akan download 1 PDF gabungan
+
 #### Jika Diminta Revisi
 - Admin akan memberi feedback
 - Lihat feedback di detail tugas

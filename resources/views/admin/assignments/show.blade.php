@@ -485,15 +485,43 @@
                 </div>
 
                 <!-- File Revisi Jurnal -->
-                @if($reviewResult->revision_file)
+                @if($reviewResult->merged_revision_file || $reviewResult->revision_files || $reviewResult->revision_file)
                 <div class="mb-4">
                     <h6 class="fw-bold text-success mb-3"><strong>✓</strong> File Revisi Jurnal</h6>
                     <div class="alert alert-success">
                         <i class="bi bi-file-earmark-check-fill"></i> File revisi jurnal telah diupload
                         <br><br>
-                        <a href="{{ Storage::url($reviewResult->revision_file) }}" target="_blank" class="btn btn-sm btn-success">
-                            <i class="bi bi-download"></i> Download File Revisi
-                        </a>
+                        
+                        @if($reviewResult->merged_revision_file)
+                            <!-- Download Merged PDF (MAIN DOWNLOAD) -->
+                            <a href="{{ Storage::url($reviewResult->merged_revision_file) }}" 
+                               target="_blank" 
+                               class="btn btn-success mb-2">
+                                <i class="bi bi-download"></i> Download PDF Gabungan (Merged) - RECOMMENDED
+                            </a>
+                            
+                            @if($reviewResult->revision_files && count($reviewResult->revision_files) > 0)
+                            <hr>
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-files"></i> File individual ({{ count($reviewResult->revision_files) }} file):
+                            </small>
+                            @foreach($reviewResult->revision_files as $index => $file)
+                            <a href="{{ Storage::url($file) }}" 
+                               target="_blank" 
+                               class="btn btn-sm btn-outline-primary me-1 mb-1">
+                                <i class="bi bi-file-pdf"></i> File {{ $index + 1 }}
+                            </a>
+                            @endforeach
+                            @endif
+                            
+                        @elseif($reviewResult->revision_file)
+                            <!-- Legacy single file -->
+                            <a href="{{ Storage::url($reviewResult->revision_file) }}" 
+                               target="_blank" 
+                               class="btn btn-sm btn-success">
+                                <i class="bi bi-download"></i> Download File Revisi
+                            </a>
+                        @endif
                     </div>
                 </div>
                 @endif

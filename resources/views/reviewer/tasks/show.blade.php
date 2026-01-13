@@ -459,13 +459,42 @@
                                     <i class="bi bi-upload"></i> Upload File Revisi Jurnal
                                 </button>
 
-                                @if($myReviewResult->revision_file)
+                                @if($myReviewResult->merged_revision_file || $myReviewResult->revision_files)
                                 <div class="alert alert-success p-2 mb-2">
                                     <small><i class="bi bi-file-earmark-check"></i> File revisi sudah diupload</small>
                                     <br>
-                                    <a href="{{ Storage::url($myReviewResult->revision_file) }}" target="_blank" class="btn btn-sm btn-outline-success mt-1">
-                                        <i class="bi bi-download"></i> Lihat File
-                                    </a>
+                                    
+                                    @if($myReviewResult->merged_revision_file)
+                                        <!-- Download Merged PDF -->
+                                        <a href="{{ Storage::url($myReviewResult->merged_revision_file) }}" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-success mt-2 w-100">
+                                            <i class="bi bi-download"></i> Download PDF Gabungan (Merged)
+                                        </a>
+                                        
+                                        @if($myReviewResult->revision_files && count($myReviewResult->revision_files) > 0)
+                                        <hr class="my-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-files"></i> {{ count($myReviewResult->revision_files) }} file individual:
+                                        </small>
+                                        <div class="mt-1">
+                                            @foreach($myReviewResult->revision_files as $index => $file)
+                                            <a href="{{ Storage::url($file) }}" 
+                                               target="_blank" 
+                                               class="btn btn-sm btn-outline-primary mt-1 w-100 text-start">
+                                                <i class="bi bi-file-pdf"></i> File {{ $index + 1 }}: {{ basename($file) }}
+                                            </a>
+                                            @endforeach
+                                        </div>
+                                        @endif
+                                    @elseif($myReviewResult->revision_file)
+                                        <!-- Legacy: single file -->
+                                        <a href="{{ Storage::url($myReviewResult->revision_file) }}" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-success mt-1">
+                                            <i class="bi bi-download"></i> Lihat File
+                                        </a>
+                                    @endif
                                 </div>
                                 @else
                                 <div class="alert alert-warning p-2 mb-2">
@@ -555,40 +584,147 @@
 <!-- Upload Revision Modal -->
 @if(Route::has('reviewer.results.uploadRevision'))
 <div class="modal fade" id="uploadRevisionModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Upload File Revisi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-upload"></i> Upload File Revisi Jurnal (Multiple PDFs)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('reviewer.results.uploadRevision', $assignment) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('reviewer.results.uploadRevision', $assignment) }}" method="POST" enctype="multipart/form-data" id="revisionUploadForm">
                 @csrf
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">File Revisi Jurnal <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" name="revision_file" required 
-                               accept=".pdf,.doc,.docx,.zip,.rar">
-                        <small class="text-muted">Format: PDF, DOC, DOCX, ZIP, RAR. Maksimal 10MB</small>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Upload Multiple PDFs:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Anda dapat upload <strong>1-10 file PDF</strong> sekaligus</li>
+                            <li>Semua file akan <strong>otomatis digabung</strong> menjadi 1 PDF</li>
+                            <li>Format: <strong>PDF only</strong></li>
+                            <li>Maksimal ukuran: <strong>10MB per file</strong></li>
+                        </ul>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Pilih File PDF <span class="text-danger">*</span>
+                            <small class="text-muted">(Dapat pilih lebih dari 1 file)</small>
+                        </label>
+                        <input type="file" 
+                               class="form-control @error('revision_files.*') is-invalid @enderror" 
+                               name="revision_files[]" 
+                               id="revisionFilesInput"
+                               multiple 
+                               accept=".pdf"
+                               required>
+                        @error('revision_files.*')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        @error('revision_files')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- File Preview List -->
+                    <div id="filePreviewList" class="mt-3" style="display: none;">
+                        <label class="form-label fw-bold">File yang akan diupload:</label>
+                        <ul id="selectedFilesList" class="list-group">
+                        </ul>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-arrow-down-up"></i> File akan digabung sesuai urutan di atas
+                        </small>
+                    </div>
+
                     @php
                         $myReviewResult = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
                     @endphp
-                    @if($myReviewResult && $myReviewResult->revision_file)
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> File sebelumnya akan diganti dengan file baru
+                    @if($myReviewResult && ($myReviewResult->revision_files || $myReviewResult->merged_revision_file))
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> File sebelumnya akan diganti dengan file baru
                     </div>
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-upload"></i> Upload
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-upload"></i> Upload & Gabungkan PDF
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('revisionFilesInput');
+    const filePreviewList = document.getElementById('filePreviewList');
+    const selectedFilesList = document.getElementById('selectedFilesList');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            if (files.length === 0) {
+                filePreviewList.style.display = 'none';
+                return;
+            }
+            
+            // Validate file count
+            if (files.length > 10) {
+                alert('Maksimal 10 file sekaligus!');
+                fileInput.value = '';
+                filePreviewList.style.display = 'none';
+                return;
+            }
+            
+            // Clear previous list
+            selectedFilesList.innerHTML = '';
+            
+            // Show preview
+            filePreviewList.style.display = 'block';
+            
+            // Add each file to list
+            files.forEach((file, index) => {
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                
+                let iconClass = 'bi-file-pdf text-danger';
+                let statusBadge = `<span class="badge bg-success">PDF</span>`;
+                
+                // Validate PDF
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    iconClass = 'bi-file-x text-warning';
+                    statusBadge = `<span class="badge bg-danger">BUKAN PDF!</span>`;
+                }
+                
+                // Validate size
+                if (file.size > 10 * 1024 * 1024) {
+                    statusBadge += ` <span class="badge bg-warning">Terlalu besar!</span>`;
+                }
+                
+                li.innerHTML = `
+                    <div>
+                        <i class="bi ${iconClass} me-2"></i>
+                        <strong>${index + 1}.</strong> ${file.name}
+                        <small class="text-muted">(${fileSize} MB)</small>
+                    </div>
+                    <div>
+                        ${statusBadge}
+                    </div>
+                `;
+                selectedFilesList.appendChild(li);
+            });
+            
+            // Update submit button text
+            submitBtn.innerHTML = `<i class="bi bi-upload"></i> Upload & Gabungkan ${files.length} PDF`;
+        });
+    }
+});
+</script>
 @endif
 @endsection
 @push('styles')
