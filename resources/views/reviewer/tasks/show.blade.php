@@ -135,39 +135,240 @@
                     $myReviewResult = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
                 @endphp
 
-                @if($myReviewResult)
-                <!-- Hasil Review yang sudah disubmit -->
-                <div class="card mt-3">
-                    <div class="card-header bg-success text-white">
-                        <i class="bi bi-file-text-fill"></i> Formulir Review yang Telah Disubmit
+                <!-- Form Input Review (untuk status ON_PROGRESS dan REVISION) -->
+                @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']) && !$assignment->isExpired())
+                <div class="card mt-3 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> FORMULIR REVIEW ARTIKEL ILMIAH SIPERA</h5>
+                        <small>(Untuk Reviewer/Mitra Bestari – Bahasa Indonesia)</small>
                     </div>
                     <div class="card-body">
-                        <!-- Basic Information -->
-                        <div class="mb-3">
-                            <h6 class="fw-bold text-primary">Informasi Dasar</h6>
-                            <table class="table table-sm table-bordered">
-                                <tr>
-                                    <th width="30%">Manuscript ID</th>
-                                    <td>{{ $myReviewResult->manuscript_id ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Judul Artikel</th>
-                                    <td>{{ $myReviewResult->manuscript_title ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Tipe Artikel</th>
-                                    <td>{{ $myReviewResult->article_type ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Tanggal Review</th>
-                                    <td>{{ $myReviewResult->review_date ? \Carbon\Carbon::parse($myReviewResult->review_date)->format('d F Y') : '-' }}</td>
-                                </tr>
-                            </table>
-                        </div>
+                        @include('reviewer.results._form', ['assignment' => $assignment])
+                    </div>
+                </div>
+                @endif
 
-                        <!-- Rekomendasi -->
+                @if($myReviewResult)
+                <!-- Form Review yang Telah Disubmit - FULL DISPLAY -->
+                <div class="card mt-3 border-success">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-file-text-fill"></i> <strong>FORMULIR REVIEW ARTIKEL ILMIAH SIPERA</strong>
+                            <br><small>(Yang Telah Disubmit)</small>
+                        </div>
+                        <a href="{{ route('reviewer.results.downloadPdf', $assignment) }}" 
+                           class="btn btn-light btn-sm" target="_blank">
+                            <i class="bi bi-download"></i> Download PDF
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <!-- A. INFORMASI NASKAH -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-file-text"></i> A. Informasi Naskah
+                        </h6>
+                        <table class="table table-sm table-bordered mb-4">
+                            <tr>
+                                <th width="30%">ID Manuskrip</th>
+                                <td>{{ $myReviewResult->manuscript_id ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Judul Manuskrip</th>
+                                <td>{{ $myReviewResult->manuscript_title ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Jenis Artikel</th>
+                                <td>{{ $myReviewResult->article_type ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Bidang/Section/Topik</th>
+                                <td>{{ $myReviewResult->field_section_topic ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Tanggal Review</th>
+                                <td>{{ $myReviewResult->review_date ? \Carbon\Carbon::parse($myReviewResult->review_date)->format('d F Y') : '-' }}</td>
+                            </tr>
+                        </table>
+
+                        <!-- B. PERNYATAAN KONFLIK KEPENTINGAN & ETIKA -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-shield-check"></i> B. Pernyataan Konflik Kepentingan & Etika
+                        </h6>
+                        <table class="table table-sm table-bordered mb-4">
+                            <tr>
+                                <th width="60%">Konflik Kepentingan</th>
+                                <td>
+                                    <span class="badge {{ $myReviewResult->conflict_of_interest ? 'bg-warning' : 'bg-success' }}">
+                                        {{ $myReviewResult->conflict_of_interest ? 'Ya' : 'Tidak' }}
+                                    </span>
+                                    @if($myReviewResult->conflict_of_interest && $myReviewResult->conflict_explanation)
+                                        <br><small class="text-muted">{{ $myReviewResult->conflict_explanation }}</small>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Plagiarisme Terdeteksi</th>
+                                <td>
+                                    <span class="badge {{ $myReviewResult->plagiarism_detected ? 'bg-danger' : 'bg-success' }}">
+                                        {{ $myReviewResult->plagiarism_detected ? 'Ya' : 'Tidak' }}
+                                    </span>
+                                    @if($myReviewResult->plagiarism_detected && $myReviewResult->plagiarism_explanation)
+                                        <br><small class="text-muted">{{ $myReviewResult->plagiarism_explanation }}</small>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Self-Citation Berlebihan</th>
+                                <td>
+                                    <span class="badge {{ $myReviewResult->excessive_self_citation ? 'bg-warning' : 'bg-success' }}">
+                                        {{ $myReviewResult->excessive_self_citation ? 'Ya' : 'Tidak' }}
+                                    </span>
+                                    @if($myReviewResult->excessive_self_citation && $myReviewResult->self_citation_explanation)
+                                        <br><small class="text-muted">{{ $myReviewResult->self_citation_explanation }}</small>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Masalah Etik Lain</th>
+                                <td>
+                                    <span class="badge {{ $myReviewResult->other_ethical_issues ? 'bg-warning' : 'bg-success' }}">
+                                        {{ $myReviewResult->other_ethical_issues ? 'Ya' : 'Tidak' }}
+                                    </span>
+                                    @if($myReviewResult->other_ethical_issues && $myReviewResult->ethical_issues_explanation)
+                                        <br><small class="text-muted">{{ $myReviewResult->ethical_issues_explanation }}</small>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Penggunaan AI</th>
+                                <td>
+                                    <span class="badge {{ $myReviewResult->ai_usage_statement ? 'bg-info' : 'bg-secondary' }}">
+                                        {{ $myReviewResult->ai_usage_statement ? 'Menggunakan AI-assisted' : 'Tidak menggunakan AI' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- C. PENILAIAN CEPAT -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-star"></i> C. Penilaian Cepat (Rating 1-5)
+                        </h6>
+                        <table class="table table-sm table-bordered mb-4">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="40%">Aspek</th>
+                                    <th width="15%" class="text-center">Skor</th>
+                                    <th width="45%">Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                $ratingFields = [
+                                    'scope' => 'Kesesuaian scope jurnal',
+                                    'novelty' => 'Kebaruan/Originalitas',
+                                    'significance' => 'Signifikansi kontribusi',
+                                    'soundness' => 'Scientific soundness',
+                                    'methodology' => 'Desain & metodologi',
+                                    'analysis' => 'Kualitas analisis',
+                                    'presentation' => 'Kualitas presentasi',
+                                    'figures' => 'Kualitas gambar/tabel',
+                                    'references' => 'Kualitas referensi',
+                                    'language' => 'Kualitas bahasa',
+                                ];
+                                @endphp
+                                @foreach($ratingFields as $field => $label)
+                                <tr>
+                                    <td>{{ $label }}</td>
+                                    <td class="text-center">
+                                        @php
+                                        $score = $myReviewResult->{'rating_'.$field} ?? '-';
+                                        $colorClass = match((int)$score) {
+                                            5 => 'success',
+                                            4 => 'info',
+                                            3 => 'warning',
+                                            2 => 'orange',
+                                            1 => 'danger',
+                                            default => 'secondary'
+                                        };
+                                        @endphp
+                                        <span class="badge bg-{{ $colorClass }}" style="font-size: 1.1rem;">{{ $score }}</span>
+                                    </td>
+                                    <td><small>{{ $myReviewResult->{'rating_'.$field.'_note'} ?? '-' }}</small></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                        <!-- D. CHECKLIST EVALUASI DETAIL -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-list-check"></i> D. Checklist Evaluasi Detail
+                        </h6>
+                        <table class="table table-sm table-bordered mb-4">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="60%">Pertanyaan</th>
+                                    <th width="40%" class="text-center">Jawaban</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                $checklistFields = [
+                                    'abstract' => 'Abstrak jelas & sesuai isi',
+                                    'intro' => 'Pendahuluan memberi latar belakang cukup',
+                                    'novelty' => 'Novelty dinyatakan jelas',
+                                    'literature' => 'Tinjauan pustaka relevan & mutakhir',
+                                    'method' => 'Metode dijelaskan rinci & dapat direplikasi',
+                                    'design' => 'Desain eksperimen/penelitian tepat',
+                                    'results' => 'Hasil disajikan jelas (grafik/tabel tepat)',
+                                    'discussion' => 'Diskusi membandingkan dengan studi sebelumnya',
+                                    'conclusion' => 'Kesimpulan didukung data/hasil',
+                                    'data_availability' => 'Data/kode tersedia atau dijelaskan aksesnya',
+                                ];
+                                @endphp
+                                @foreach($checklistFields as $field => $label)
+                                <tr>
+                                    <td>{{ $label }}</td>
+                                    <td class="text-center">
+                                        @php
+                                        $value = $myReviewResult->{'checklist_'.$field} ?? '-';
+                                        $badgeClass = match($value) {
+                                            'Ya' => 'success',
+                                            'Tidak' => 'danger',
+                                            'Perlu Perbaikan' => 'warning',
+                                            default => 'secondary'
+                                        };
+                                        @endphp
+                                        <span class="badge bg-{{ $badgeClass }}">{{ $value }}</span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                        <!-- E. EVALUASI REFERENSI -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-book"></i> E. Evaluasi Referensi
+                        </h6>
                         <div class="mb-3">
-                            <h6 class="fw-bold text-primary">Rekomendasi</h6>
+                            <strong>Referensi Mencukupi:</strong>
+                            <span class="badge {{ $myReviewResult->references_adequate ? 'bg-success' : 'bg-danger' }}">
+                                {{ $myReviewResult->references_adequate ? 'Ya' : 'Tidak' }}
+                            </span>
+                        </div>
+                        @if($myReviewResult->suggested_references)
+                        <div class="mb-4">
+                            <strong>Saran Referensi Tambahan:</strong>
+                            <div class="p-3 bg-light rounded border mt-2">
+                                <small style="white-space: pre-wrap;">{{ $myReviewResult->suggested_references }}</small>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- F. REKOMENDASI AKHIR -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-check-circle"></i> F. Rekomendasi Akhir Reviewer
+                        </h6>
+                        <div class="mb-3">
+                            <strong>Rekomendasi:</strong><br>
                             @php
                             $recommendations = [
                                 'ACCEPT' => 'Terima tanpa revisi',
@@ -177,18 +378,31 @@
                                 'REJECT' => 'Tolak – tidak disarankan submit ulang'
                             ];
                             $recValue = $myReviewResult->recommendation ?? 'ACCEPT';
+                            $recBadgeClass = match($recValue) {
+                                'ACCEPT' => 'success',
+                                'MINOR_REVISION' => 'info',
+                                'MAJOR_REVISION' => 'warning',
+                                'REJECT_RESUBMIT' => 'orange',
+                                'REJECT' => 'danger',
+                                default => 'secondary'
+                            };
                             @endphp
-                            <span class="badge bg-info">{{ $recommendations[$recValue] ?? $recValue }}</span>
+                            <span class="badge bg-{{ $recBadgeClass }}" style="font-size: 1.1rem;">
+                                {{ $recommendations[$recValue] ?? $recValue }}
+                            </span>
                         </div>
-
-                        @if($myReviewResult->recommendation_reason)
                         <div class="mb-3">
-                            <h6 class="fw-bold text-primary">Alasan Rekomendasi</h6>
-                            <div class="p-2 bg-light rounded border">
-                                <small style="white-space: pre-wrap;">{{ $myReviewResult->recommendation_reason }}</small>
+                            <strong>Alasan Rekomendasi:</strong>
+                            <div class="p-3 bg-light rounded border mt-2">
+                                <small style="white-space: pre-wrap;">{{ $myReviewResult->recommendation_reason ?? '-' }}</small>
                             </div>
                         </div>
-                        @endif
+
+                        <!-- Pernyataan -->
+                        <div class="alert alert-info mt-4">
+                            <strong>Disubmit oleh:</strong> {{ auth()->user()->name }}<br>
+                            <strong>Tanggal Submit:</strong> {{ $myReviewResult->created_at ? $myReviewResult->created_at->format('d F Y, H:i') : '-' }}
+                        </div>
                     </div>
                 </div>
                 @endif
@@ -227,12 +441,6 @@
                                 <i class="bi bi-play-circle"></i> Mulai Review
                             </button>
                         </form>
-                    @endif
-
-                    @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']))
-                        <a href="{{ route('reviewer.results.create', $assignment) }}" class="btn btn-success w-100 mb-2">
-                            <i class="bi bi-file-text"></i> ISI FORMULIR REVIEW ARTIKEL
-                        </a>
                     @endif
 
                     @if(in_array($assignment->status, ['SUBMITTED', 'APPROVED']))
@@ -383,3 +591,14 @@
 </div>
 @endif
 @endsection
+@push('styles')
+<style>
+.bg-orange {
+    background-color: #fd7e14 !important;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+</style>
+@endpush
