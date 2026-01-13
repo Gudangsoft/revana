@@ -218,9 +218,7 @@
                     <td style="text-align: center;">{{ $index + 1 }}</td>
                     <td>{{ $rating['label'] }}</td>
                     <td style="text-align: center;">
-                        @for($i = 1; $i <= 5; $i++)
-                            <span class="checkbox {{ $result->{'rating_'.$rating['field']} == $i ? 'checked' : '' }}"></span>{{ $i }} 
-                        @endfor
+                        <strong style="font-size: 12pt;">{{ $result->{'rating_'.$rating['field']} ?? '-' }}</strong>
                     </td>
                     <td>{{ $result->{'rating_'.$rating['field'].'_note'} ?? '-' }}</td>
                 </tr>
@@ -238,10 +236,8 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    <th width="60%">Pertanyaan</th>
-                    <th width="10%">Ya</th>
-                    <th width="12%">Tidak</th>
-                    <th width="13%">Perlu Perbaikan</th>
+                    <th width="75%">Pertanyaan</th>
+                    <th width="20%">Hasil</th>
                 </tr>
             </thead>
             <tbody>
@@ -264,14 +260,8 @@
                 <tr>
                     <td style="text-align: center;">{{ $index + 1 }}</td>
                     <td>{{ $checklist['label'] }}</td>
-                    <td style="text-align: center;">
-                        <span class="checkbox {{ $result->{'checklist_'.$checklist['field']} == 'Ya' ? 'checked' : '' }}"></span>
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="checkbox {{ $result->{'checklist_'.$checklist['field']} == 'Tidak' ? 'checked' : '' }}"></span>
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="checkbox {{ $result->{'checklist_'.$checklist['field']} == 'Perlu Perbaikan' ? 'checked' : '' }}"></span>
+                    <td colspan="3" style="text-align: center;">
+                        <strong>{{ $result->{'checklist_'.$checklist['field']} ?? '-' }}</strong>
                     </td>
                 </tr>
                 @endforeach
@@ -285,8 +275,7 @@
         <div class="ethics-section">
             <p><strong>1. Referensi sudah relevan & mencukupi?</strong></p>
             <p>
-                <span class="checkbox {{ $result->references_adequate ? 'checked' : '' }}"></span> Ya &nbsp;&nbsp;
-                <span class="checkbox {{ !$result->references_adequate ? 'checked' : '' }}"></span> Tidak
+                <strong>{{ $result->references_adequate ? 'Ya' : 'Tidak' }}</strong>
             </p>
 
             <p><strong>2. Saran referensi tambahan (Wajib tulis lengkap + DOI bila ada):</strong></p>
@@ -302,7 +291,6 @@
     <div class="section">
         <h2>F. Rekomendasi Akhir Reviewer</h2>
         <div class="ethics-section">
-            <p><strong>Pilih satu:</strong></p>
             @php
             $recommendations = [
                 'ACCEPT' => 'Terima tanpa revisi (Accept in present form)',
@@ -313,11 +301,8 @@
             ];
             @endphp
 
-            @foreach($recommendations as $value => $label)
-            <p>
-                <span class="checkbox {{ $result->recommendation == $value ? 'checked' : '' }}"></span> {{ $label }}
-            </p>
-            @endforeach
+            <p><strong>Rekomendasi:</strong></p>
+            <p style="margin-left: 20px;"><strong>{{ $recommendations[$result->recommendation] ?? '-' }}</strong></p>
 
             <p><strong>Alasan singkat rekomendasi:</strong></p>
             <p style="margin-left: 20px; text-align: justify; white-space: pre-wrap;">{{ $result->recommendation_reason }}</p>
