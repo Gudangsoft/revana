@@ -137,9 +137,9 @@ class ReviewResultController extends Controller
         // Update assignment status
         $assignment->submit();
 
-        // Redirect to download PDF directly
-        return redirect()->route('reviewer.results.downloadPdf', $assignment)
-            ->with('success', 'Formulir review berhasil disubmit! File PDF akan otomatis terdownload.');
+        // Redirect back to task detail page with success message
+        return redirect()->route('reviewer.tasks.show', $assignment)
+            ->with('success', 'Formulir review berhasil disubmit! Silakan download PDF dan upload file revisi jurnal.');
     }
 
     public function downloadPdf(ReviewAssignment $assignment)
