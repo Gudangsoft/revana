@@ -81,11 +81,21 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Bidang/Section/Topik <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" 
-                                       value="{{ $assignment->fieldOfStudy->name ?? '-' }}" 
-                                       readonly disabled>
-                                <input type="hidden" name="field_section_topic" value="{{ $assignment->fieldOfStudy->name ?? '' }}">
-                                <small class="text-muted">Bidang ditentukan saat penugasan</small>
+                                @if($assignment->fieldOfStudy)
+                                    <input type="text" class="form-control" 
+                                           value="{{ $assignment->fieldOfStudy->name }}" 
+                                           readonly disabled>
+                                    <input type="hidden" name="field_section_topic" value="{{ $assignment->fieldOfStudy->name }}">
+                                    <small class="text-muted">Bidang ditentukan saat penugasan</small>
+                                @else
+                                    <input type="text" class="form-control @error('field_section_topic') is-invalid @enderror" 
+                                           name="field_section_topic" value="{{ old('field_section_topic') }}" 
+                                           placeholder="Masukkan bidang/section/topik artikel" required>
+                                    <small class="text-muted">Assignment lama - silakan isi manual</small>
+                                    @error('field_section_topic')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                @endif
                             </div>
                         </div>
                     </div>

@@ -13,6 +13,9 @@ class ReviewResultController extends Controller
 {
     public function create(ReviewAssignment $assignment)
     {
+        // Eager load fieldOfStudy relationship
+        $assignment->load('fieldOfStudy');
+        
         $isReviewer = $assignment->reviewer_id === auth()->id() 
                    || $assignment->reviewer_2_id === auth()->id()
                    || $assignment->reviewer_3_id === auth()->id()
