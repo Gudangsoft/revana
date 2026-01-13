@@ -472,26 +472,7 @@
                                 @endif
                             </td>
                         </tr>
-                        <tr>
-                            <th>Ada Manipulasi Referensi</th>
-                            <td>
-                                @if($reviewResult->references_manipulation)
-                                    <span class="badge bg-danger">Ya</span>
-                                @else
-                                    <span class="badge bg-success">Tidak</span>
-                                @endif
-                            </td>
-                        </tr>
                     </table>
-                    
-                    @if($reviewResult->irrelevant_references)
-                    <div class="mt-3">
-                        <strong>Referensi Tidak Relevan:</strong>
-                        <div class="p-2 bg-light rounded border mt-2">
-                            <small style="white-space: pre-wrap;">{{ $reviewResult->irrelevant_references }}</small>
-                        </div>
-                    </div>
-                    @endif
                     
                     @if($reviewResult->suggested_references)
                     <div class="mt-3">

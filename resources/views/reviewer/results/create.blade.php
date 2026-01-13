@@ -361,28 +361,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">2. Ada referensi tidak relevan / indikasi manipulasi sitasi? <span class="text-danger">*</span></label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="references_manipulation" id="ref_manip_no" 
-                                   value="0" {{ old('references_manipulation') === '0' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="ref_manip_no">Tidak</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="references_manipulation" id="ref_manip_yes" 
-                                   value="1" {{ old('references_manipulation') === '1' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="ref_manip_yes">Ya</label>
-                        </div>
-                        <label class="form-label">Jelaskan referensi yang tidak relevan:</label>
-                        <textarea class="form-control @error('irrelevant_references') is-invalid @enderror" 
-                                  name="irrelevant_references" rows="3"
-                                  placeholder="Tuliskan referensi yang tidak relevan atau indikasi manipulasi sitasi...">{{ old('irrelevant_references') }}</textarea>
-                        @error('irrelevant_references')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">3. Saran referensi tambahan <span class="text-muted">(Wajib tulis lengkap + DOI bila ada)</span></label>
+                        <label class="form-label fw-bold">2. Saran referensi tambahan <span class="text-muted">(Wajib tulis lengkap + DOI bila ada)</span></label>
                         <textarea class="form-control @error('suggested_references') is-invalid @enderror" 
                                   name="suggested_references" rows="6"
                                   placeholder="Tuliskan saran referensi tambahan dengan format lengkap:&#10;1) Nama Penulis (Tahun). Judul. Jurnal/Penerbit. DOI: ...&#10;2) ...&#10;3) ...">{{ old('suggested_references') }}</textarea>

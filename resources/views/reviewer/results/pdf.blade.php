@@ -289,17 +289,7 @@
                 <span class="checkbox {{ !$result->references_adequate ? 'checked' : '' }}"></span> Tidak
             </p>
 
-            <p><strong>2. Ada referensi tidak relevan / indikasi manipulasi sitasi?</strong></p>
-            <p>
-                <span class="checkbox {{ !$result->references_manipulation ? 'checked' : '' }}"></span> Tidak &nbsp;&nbsp;
-                <span class="checkbox {{ $result->references_manipulation ? 'checked' : '' }}"></span> Ya
-            </p>
-            @if($result->irrelevant_references)
-            <p><strong>Jelaskan referensi yang tidak relevan:</strong></p>
-            <p style="margin-left: 20px; text-align: justify; white-space: pre-wrap;">{{ $result->irrelevant_references }}</p>
-            @endif
-
-            <p><strong>3. Saran referensi tambahan (Wajib tulis lengkap + DOI bila ada):</strong></p>
+            <p><strong>2. Saran referensi tambahan (Wajib tulis lengkap + DOI bila ada):</strong></p>
             @if($result->suggested_references)
             <p style="margin-left: 20px; text-align: justify; white-space: pre-wrap;">{{ $result->suggested_references }}</p>
             @else
