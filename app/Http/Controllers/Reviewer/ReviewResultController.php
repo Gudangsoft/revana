@@ -254,4 +254,3 @@ class ReviewResultController extends Controller
     }
 }
 
-```
