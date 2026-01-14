@@ -189,15 +189,25 @@ class FieldOfStudyController extends Controller
      */
     public function bulkDelete(Request $request)
     {
+        // Filter out empty values and get only valid IDs
+        $ids = array_filter($request->input('ids', []), function($value) {
+            return !empty($value) && is_numeric($value);
+        });
+
+        // Validate
+        if (empty($ids)) {
+            return redirect()
+                ->route('admin.field-of-studies.index')
+                ->with('error', 'Tidak ada bidang ilmu yang dipilih');
+        }
+
+        $request->merge(['ids' => $ids]);
+
         $request->validate([
             'ids' => 'required|array|min:1',
-            'ids.*' => 'exists:field_of_studies,id'
-        ], [
-            'ids.required' => 'Tidak ada bidang ilmu yang dipilih',
-            'ids.min' => 'Minimal pilih 1 bidang ilmu',
+            'ids.*' => 'integer|exists:field_of_studies,id'
         ]);
 
-        $ids = $request->ids;
         $successCount = 0;
         $errorMessages = [];
 

@@ -334,6 +334,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // When modal is shown, populate the list
     document.getElementById('bulkDeleteModal').addEventListener('show.bs.modal', function() {
         const selectedCheckboxes = document.querySelectorAll('.field-checkbox:checked');
+        
+        // Prevent modal from showing if no checkbox is selected
+        if (selectedCheckboxes.length === 0) {
+            alert('Silakan pilih minimal 1 bidang ilmu untuk dihapus');
+            return false;
+        }
+        
         const ids = [];
         let listHtml = '<ul class="mb-0">';
         
@@ -362,6 +369,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset confirmation checkbox
         confirmDelete.checked = false;
         confirmDeleteBtn.disabled = true;
+    });
+
+    // Form submit validation
+    bulkDeleteForm.addEventListener('submit', function(e) {
+        const selectedIds = bulkDeleteForm.querySelectorAll('input[name="ids[]"]');
+        
+        if (selectedIds.length === 0) {
+            e.preventDefault();
+            alert('Tidak ada bidang ilmu yang dipilih');
+            return false;
+        }
+        
+        if (!confirmDelete.checked) {
+            e.preventDefault();
+            alert('Silakan centang konfirmasi untuk melanjutkan');
+            return false;
+        }
+        
+        return true;
     });
 
     // Enable/disable delete button based on confirmation
