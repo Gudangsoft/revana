@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $pics->links() }}
+                    @include('components.simple-pagination', ['paginator' => $pics])
                 </div>
             </div>
         </div>

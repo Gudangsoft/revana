@@ -107,7 +107,7 @@
 
         <!-- Pagination -->
         <div class="mt-3">
-            {{ $pointHistories->links() }}
+            @include('components.simple-pagination', ['paginator' => $pointHistories])
         </div>
         @endif
     </div>

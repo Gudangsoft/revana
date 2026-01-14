@@ -89,7 +89,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $certificates->links() }}
+                    @include('components.simple-pagination', ['paginator' => $certificates])
                 </div>
             </div>
         </div>

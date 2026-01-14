@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $marketings->links() }}
+                    @include('components.simple-pagination', ['paginator' => $marketings])
                 </div>
             </div>
         </div>

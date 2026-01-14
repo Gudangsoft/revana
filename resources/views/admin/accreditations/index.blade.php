@@ -97,7 +97,7 @@
 
         @if($accreditations->hasPages())
         <div class="mt-3">
-            {{ $accreditations->links() }}
+            @include('components.simple-pagination', ['paginator' => $accreditations])
         </div>
         @endif
     </div>

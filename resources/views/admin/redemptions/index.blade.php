@@ -164,7 +164,7 @@
 
         <!-- Pagination -->
         <div class="mt-3">
-            {{ $redemptions->links() }}
+            @include('components.simple-pagination', ['paginator' => $redemptions])
         </div>
         @endif
     </div>

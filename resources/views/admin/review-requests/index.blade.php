@@ -148,9 +148,11 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $reviewRequests->links() }}
-            </div>
+            @if($reviewRequests->hasPages())
+                <div class="mt-3">
+                    @include('components.simple-pagination', ['paginator' => $reviewRequests])
+                </div>
+            @endif
         @else
             <div class="text-center py-5">
                 <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>

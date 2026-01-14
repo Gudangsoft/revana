@@ -91,7 +91,7 @@
             </div>
 
             <div class="mt-3">
-                {{ $reviewRequests->links() }}
+                @include('components.simple-pagination', ['paginator' => $reviewRequests])
             </div>
         @else
             <div class="text-center py-5">

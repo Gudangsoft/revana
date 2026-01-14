@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $registrations->links() }}
+                    @include('components.simple-pagination', ['paginator' => $registrations])
                 </div>
             </div>
         </div>

@@ -141,7 +141,7 @@
 
         <!-- Pagination -->
         <div class="mt-3">
-            {{ $rewards->links() }}
+            @include('components.simple-pagination', ['paginator' => $rewards])
         </div>
         @endif
     </div>

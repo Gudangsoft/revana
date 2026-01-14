@@ -198,7 +198,7 @@
             </div>
             @if($assignments->hasPages())
             <div class="card-footer bg-white border-0">
-                {{ $assignments->links() }}
+                @include('components.simple-pagination', ['paginator' => $assignments])
             </div>
             @endif
         </div>
