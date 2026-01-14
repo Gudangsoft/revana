@@ -138,9 +138,12 @@ class ReviewRequestController extends Controller
             'admin_notes' => $request->admin_notes,
         ]);
 
-        // Redirect to assignment create page with pre-filled reviewer
-        return redirect()->route('admin.assignments.create', ['reviewer_id' => $reviewRequest->reviewer_id])
-            ->with('success', 'Permintaan review disetujui! Silakan lengkapi form penugasan.');
+        // Redirect to assignment create page with pre-filled reviewer and journal count
+        return redirect()->route('admin.assignments.create', [
+            'reviewer_id' => $reviewRequest->reviewer_id,
+            'review_request_id' => $reviewRequest->id,
+            'journal_count' => $reviewRequest->number_of_journals
+        ])->with('success', 'Permintaan review disetujui! Silakan lengkapi form penugasan untuk ' . $reviewRequest->number_of_journals . ' jurnal.');
     }
 
     /**

@@ -43,14 +43,17 @@ class ReviewAssignmentController extends Controller
         // Get pre-selected reviewer if coming from review request approval
         $preselectedReviewerId = $request->get('reviewer_id');
         $preselectedReviewer = null;
+        $journalCount = $request->get('journal_count', 1); // Default 1 jurnal
+        $reviewRequestId = $request->get('review_request_id');
         
         if ($preselectedReviewerId) {
             $preselectedReviewer = User::where('role', 'reviewer')
                 ->where('id', $preselectedReviewerId)
+                ->with('fieldOfStudy')
                 ->first();
         }
 
-        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies', 'preselectedReviewer'));
+        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies', 'preselectedReviewer', 'journalCount', 'reviewRequestId'));
     }
 
     public function store(Request $request)
@@ -156,6 +159,91 @@ class ReviewAssignmentController extends Controller
 
         return redirect()->route('admin.assignments.index')
             ->with('success', 'Review berhasil ditugaskan dan notifikasi email telah dikirim ke reviewer');
+    }
+
+    /**
+     * Store multiple assignments at once (batch)
+     */
+    public function storeBatch(Request $request)
+    {
+        // Validate the batch data
+        $validated = $request->validate([
+            'reviewer_id' => 'required|exists:users,id',
+            'review_request_id' => 'nullable|exists:review_requests,id',
+            'journals' => 'required|array|min:1',
+            'journals.*.article_title' => 'required|string|max:500',
+            'journals.*.article_number' => 'required|string|max:255',
+            'journals.*.submit_link' => 'required|url',
+            'journals.*.deadline' => 'required|date|after:today',
+            'journals.*.language' => 'required|in:Indonesia,Inggris',
+            'journals.*.field_of_study_id' => 'required|exists:field_of_studies,id',
+            'journals.*.reviewer_1_username' => 'required|string|max:255',
+            'journals.*.reviewer_1_password' => 'required|string|max:255',
+        ]);
+
+        $successCount = 0;
+        $assignments = [];
+
+        foreach ($request->journals as $index => $journalData) {
+            try {
+                $assignment = ReviewAssignment::create([
+                    'article_title' => $journalData['article_title'],
+                    'article_number' => $journalData['article_number'],
+                    'submit_link' => $journalData['submit_link'],
+                    'deadline' => $journalData['deadline'],
+                    'language' => $journalData['language'],
+                    'field_of_study_id' => $journalData['field_of_study_id'],
+                    'reviewer_id' => $request->reviewer_id,
+                    'reviewer_1_username' => $journalData['reviewer_1_username'],
+                    'reviewer_1_password' => $journalData['reviewer_1_password'],
+                    'assigned_by' => auth()->id(),
+                    'status' => 'PENDING',
+                    'account_username' => null,
+                    'account_password' => null,
+                    'reviewer_username' => null,
+                    'reviewer_password' => null,
+                    'assignment_letter_link' => null,
+                    'certificate_link' => null,
+                    'journal_id' => null,
+                    'reviewer_2_id' => null,
+                    'reviewer_3_id' => null,
+                    'reviewer_4_id' => null,
+                    'reviewer_5_id' => null,
+                ]);
+
+                $assignments[] = $assignment;
+                $successCount++;
+            } catch (\Exception $e) {
+                \Log::error('Failed to create assignment ' . ($index + 1) . ': ' . $e->getMessage());
+            }
+        }
+
+        // Send notification to reviewer
+        $reviewer = User::find($request->reviewer_id);
+        if ($reviewer && $reviewer->email && count($assignments) > 0) {
+            try {
+                // Send notification for first assignment (or you can loop for each)
+                $reviewer->notify(new ReviewAssignmentNotification($assignments[0]));
+                \Log::info('Review assignment notification sent to: ' . $reviewer->email);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send review assignment notification: ' . $e->getMessage());
+            }
+        }
+
+        // Update review request status if linked
+        if ($request->review_request_id) {
+            try {
+                $reviewRequest = \App\Models\ReviewRequest::find($request->review_request_id);
+                if ($reviewRequest) {
+                    $reviewRequest->update(['is_assigned' => true]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to update review request: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('admin.assignments.index')
+            ->with('success', "Berhasil menugaskan {$successCount} review kepada {$reviewer->name}. Notifikasi email telah dikirim.");
     }
 
     public function show(ReviewAssignment $assignment)

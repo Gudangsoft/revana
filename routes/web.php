@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/assignments', [AdminReviewAssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/assignments/create', [AdminReviewAssignmentController::class, 'create'])->name('assignments.create');
         Route::post('/assignments', [AdminReviewAssignmentController::class, 'store'])->name('assignments.store');
+        Route::post('/assignments/batch', [AdminReviewAssignmentController::class, 'storeBatch'])->name('assignments.store-batch');
         Route::get('/assignments/{assignment}', [AdminReviewAssignmentController::class, 'show'])->name('assignments.show');
         Route::post('/assignments/{assignment}/approve', [AdminReviewAssignmentController::class, 'approve'])->name('assignments.approve');
         Route::post('/assignments/{assignment}/revision', [AdminReviewAssignmentController::class, 'revision'])->name('assignments.revision');
