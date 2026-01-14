@@ -9,6 +9,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Manajemen Bidang Ilmu</h1>
         <div class="btn-group">
+            <button type="button" class="btn btn-danger" id="bulkDeleteBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal">
+                <i class="fas fa-trash"></i> Hapus Massal (<span id="selectedCount">0</span>)
+            </button>
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fas fa-file-excel"></i> Import Excel
             </button>
@@ -28,6 +31,13 @@
         </div>
     @endif
 
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
@@ -41,6 +51,9 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" class="form-check-input" id="selectAll">
+                            </th>
                             <th style="width: 50px;">#</th>
                             <th>Nama Bidang Ilmu</th>
                             <th style="width: 120px;">Urutan</th>
@@ -53,6 +66,9 @@
                     <tbody>
                         @forelse($fields as $field)
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input field-checkbox" value="{{ $field->id }}" data-name="{{ $field->name }}">
+                                </td>
                                 <td>{{ ($fields->currentPage() - 1) * $fields->perPage() + $loop->iteration }}</td>
                                 <td>
                                     <strong>{{ $field->name }}</strong>
@@ -151,7 +167,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                                     <p class="text-muted">Belum ada data bidang ilmu.</p>
                                 </td>
@@ -224,5 +240,134 @@
             </div>
         </div>
     </div>
+
+    <!-- Bulk Delete Modal -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle"></i> Konfirmasi Hapus Massal Permanen
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="bulkDeleteForm" action="{{ route('admin.field-of-studies.bulk-delete') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>PERINGATAN:</strong> Tindakan ini tidak dapat dibatalkan!
+                        </div>
+                        <p>Anda akan menghapus <strong><span id="deleteCount">0</span></strong> bidang ilmu secara permanen:</p>
+                        <div id="selectedList" class="alert alert-warning" style="max-height: 200px; overflow-y: auto;">
+                            <!-- List will be populated by JavaScript -->
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                            <label class="form-check-label text-danger" for="confirmDelete">
+                                <strong>Saya yakin ingin menghapus data ini secara permanen</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                            <i class="fas fa-trash"></i> Hapus Permanen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.field-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const selectedCount = document.getElementById('selectedCount');
+    const deleteCount = document.getElementById('deleteCount');
+    const selectedList = document.getElementById('selectedList');
+    const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+    const confirmDelete = document.getElementById('confirmDelete');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+    // Select All functionality
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkDeleteButton();
+    });
+
+    // Individual checkbox change
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateBulkDeleteButton();
+            updateSelectAllCheckbox();
+        });
+    });
+
+    // Update Select All checkbox state
+    function updateSelectAllCheckbox() {
+        const totalCheckboxes = checkboxes.length;
+        const checkedCheckboxes = document.querySelectorAll('.field-checkbox:checked').length;
+        selectAll.checked = totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0;
+        selectAll.indeterminate = checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes;
+    }
+
+    // Update bulk delete button visibility and count
+    function updateBulkDeleteButton() {
+        const selectedCheckboxes = document.querySelectorAll('.field-checkbox:checked');
+        const count = selectedCheckboxes.length;
+        
+        if (count > 0) {
+            bulkDeleteBtn.style.display = 'inline-block';
+            selectedCount.textContent = count;
+        } else {
+            bulkDeleteBtn.style.display = 'none';
+        }
+    }
+
+    // When modal is shown, populate the list
+    document.getElementById('bulkDeleteModal').addEventListener('show.bs.modal', function() {
+        const selectedCheckboxes = document.querySelectorAll('.field-checkbox:checked');
+        const ids = [];
+        let listHtml = '<ul class="mb-0">';
+        
+        selectedCheckboxes.forEach(checkbox => {
+            ids.push(checkbox.value);
+            listHtml += '<li>' + checkbox.dataset.name + '</li>';
+        });
+        
+        listHtml += '</ul>';
+        
+        deleteCount.textContent = ids.length;
+        selectedList.innerHTML = listHtml;
+        
+        // Clear existing hidden inputs
+        bulkDeleteForm.querySelectorAll('input[name="ids[]"]').forEach(input => input.remove());
+        
+        // Add hidden inputs for selected IDs
+        ids.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = id;
+            bulkDeleteForm.appendChild(input);
+        });
+        
+        // Reset confirmation checkbox
+        confirmDelete.checked = false;
+        confirmDeleteBtn.disabled = true;
+    });
+
+    // Enable/disable delete button based on confirmation
+    confirmDelete.addEventListener('change', function() {
+        confirmDeleteBtn.disabled = !this.checked;
+    });
+});
+</script>
 @endsection

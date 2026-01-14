@@ -183,4 +183,68 @@ class FieldOfStudyController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Bulk delete field of studies
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:field_of_studies,id'
+        ], [
+            'ids.required' => 'Tidak ada bidang ilmu yang dipilih',
+            'ids.min' => 'Minimal pilih 1 bidang ilmu',
+        ]);
+
+        $ids = $request->ids;
+        $successCount = 0;
+        $errorMessages = [];
+
+        foreach ($ids as $id) {
+            $field = FieldOfStudy::find($id);
+            
+            if (!$field) {
+                continue;
+            }
+
+            // Check if field is being used
+            $usageCount = $field->users()->count() + $field->reviewerRegistrations()->count();
+            
+            if ($usageCount > 0) {
+                $errorMessages[] = "\"{$field->name}\" sedang digunakan oleh {$usageCount} data";
+                continue;
+            }
+
+            try {
+                $field->delete();
+                $successCount++;
+            } catch (\Exception $e) {
+                $errorMessages[] = "\"{$field->name}\" gagal dihapus: " . $e->getMessage();
+            }
+        }
+
+        // Prepare response message
+        $message = '';
+        if ($successCount > 0) {
+            $message = "Berhasil menghapus {$successCount} bidang ilmu.";
+        }
+
+        if (count($errorMessages) > 0) {
+            $errorMessage = implode(', ', $errorMessages);
+            if ($successCount > 0) {
+                return redirect()
+                    ->route('admin.field-of-studies.index')
+                    ->with('warning', $message . ' Namun beberapa gagal: ' . $errorMessage);
+            } else {
+                return redirect()
+                    ->route('admin.field-of-studies.index')
+                    ->with('error', 'Gagal menghapus: ' . $errorMessage);
+            }
+        }
+
+        return redirect()
+            ->route('admin.field-of-studies.index')
+            ->with('success', $message);
+    }
 }

@@ -127,6 +127,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/field-of-studies/{fieldOfStudy}/toggle', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'toggleStatus'])->name('field-of-studies.toggle');
         Route::post('/field-of-studies-import', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'import'])->name('field-of-studies.import');
         Route::get('/field-of-studies-template', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'downloadTemplate'])->name('field-of-studies.template');
+        Route::delete('/field-of-studies-bulk-delete', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'bulkDelete'])->name('field-of-studies.bulk-delete');
         
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
