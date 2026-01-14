@@ -153,8 +153,8 @@
                         <label for="admin_notes_approve" class="form-label">Catatan (Opsional)</label>
                         <textarea class="form-control" id="admin_notes_approve" name="admin_notes" rows="3" placeholder="Tambahkan catatan untuk reviewer..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-success w-100" onclick="return confirm('Apakah Anda yakin ingin menyetujui permintaan ini?')">
-                        <i class="bi bi-check-circle"></i> Setujui
+                    <button type="submit" class="btn btn-success w-100" onclick="return confirm('Apakah Anda yakin ingin menyetujui dan menugaskan reviewer ini?')">
+                        <i class="bi bi-check-circle"></i> Setujui dan Tugaskan
                     </button>
                 </form>
             </div>

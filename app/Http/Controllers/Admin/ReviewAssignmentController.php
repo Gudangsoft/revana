@@ -35,12 +35,22 @@ class ReviewAssignmentController extends Controller
         return view('admin.assignments.index', compact('assignments'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $reviewers = User::where('role', 'reviewer')->get();
         $fieldOfStudies = \App\Models\FieldOfStudy::active()->ordered()->get();
+        
+        // Get pre-selected reviewer if coming from review request approval
+        $preselectedReviewerId = $request->get('reviewer_id');
+        $preselectedReviewer = null;
+        
+        if ($preselectedReviewerId) {
+            $preselectedReviewer = User::where('role', 'reviewer')
+                ->where('id', $preselectedReviewerId)
+                ->first();
+        }
 
-        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies'));
+        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies', 'preselectedReviewer'));
     }
 
     public function store(Request $request)

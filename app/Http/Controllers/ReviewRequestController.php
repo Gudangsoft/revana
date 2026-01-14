@@ -104,14 +104,15 @@ class ReviewRequestController extends Controller
         ]);
 
         $reviewRequest->update([
-            'status' => 'pending',
+            'status' => 'approved',
             'approved_at' => now(),
             'approved_by' => Auth::id(),
             'admin_notes' => $request->admin_notes,
         ]);
 
-        return redirect()->back()
-            ->with('success', 'Permintaan review berhasil disetujui dan status dikembalikan ke menunggu!');
+        // Redirect to assignment create page with pre-filled reviewer
+        return redirect()->route('admin.assignments.create', ['reviewer_id' => $reviewRequest->reviewer_id])
+            ->with('success', 'Permintaan review disetujui! Silakan lengkapi form penugasan.');
     }
 
     /**

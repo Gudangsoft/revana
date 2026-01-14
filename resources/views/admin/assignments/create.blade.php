@@ -8,6 +8,20 @@
 @endsection
 
 @section('content')
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(isset($preselectedReviewer))
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle"></i> Reviewer <strong>{{ $preselectedReviewer->name }}</strong> telah dipilih secara otomatis. Silakan lengkapi form penugasan di bawah.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <div class="row">
     <div class="col-md-8">
         <div class="card">
@@ -88,26 +102,36 @@
 
                     <div class="mb-3">
                         <label class="form-label">Pilih Reviewer 1 <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control mb-2" id="searchReviewer1" placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
-                        <select class="form-select @error('reviewer_id') is-invalid @enderror" 
-                                name="reviewer_id" id="reviewer1" size="5" required style="height: 200px; display: none;">
-                            <option value="">-- Pilih Reviewer 1 --</option>
-                            @foreach($reviewers as $reviewer)
-                            <option value="{{ $reviewer->id }}" {{ old('reviewer_id') == $reviewer->id ? 'selected' : '' }}
-                                    data-search="{{ strtolower($reviewer->name . ' ' . $reviewer->email) }}"
-                                    data-name="{{ $reviewer->name }}"
-                                    data-email="{{ $reviewer->email }}">
-                                {{ $reviewer->name }} - {{ $reviewer->email }}
-                                @if($reviewer->article_languages)
-                                    [{{ implode(', ', $reviewer->article_languages) }}]
+                        @if(isset($preselectedReviewer))
+                            <div class="alert alert-success mb-2">
+                                <i class="bi bi-person-check"></i> <strong>{{ $preselectedReviewer->name }}</strong> - {{ $preselectedReviewer->email }}
+                                @if($preselectedReviewer->institution)
+                                    <br><small class="text-muted">{{ $preselectedReviewer->institution }}</small>
                                 @endif
-                                ({{ $reviewer->completed_reviews }} reviews, {{ $reviewer->total_points }} pts)
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('reviewer_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                            </div>
+                            <input type="hidden" name="reviewer_id" value="{{ $preselectedReviewer->id }}">
+                        @else
+                            <input type="text" class="form-control mb-2" id="searchReviewer1" placeholder="🔍 Ketik untuk mencari reviewer (nama atau email)..." autocomplete="off">
+                            <select class="form-select @error('reviewer_id') is-invalid @enderror" 
+                                    name="reviewer_id" id="reviewer1" size="5" required style="height: 200px; display: none;">
+                                <option value="">-- Pilih Reviewer 1 --</option>
+                                @foreach($reviewers as $reviewer)
+                                <option value="{{ $reviewer->id }}" {{ old('reviewer_id') == $reviewer->id ? 'selected' : '' }}
+                                        data-search="{{ strtolower($reviewer->name . ' ' . $reviewer->email) }}"
+                                        data-name="{{ $reviewer->name }}"
+                                        data-email="{{ $reviewer->email }}">
+                                    {{ $reviewer->name }} - {{ $reviewer->email }}
+                                    @if($reviewer->article_languages)
+                                        [{{ implode(', ', $reviewer->article_languages) }}]
+                                    @endif
+                                    ({{ $reviewer->completed_reviews }} reviews, {{ $reviewer->total_points }} pts)
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('reviewer_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        @endif
                         
                         <!-- Username & Password for Reviewer 1 -->
                         <div class="row mt-2">
