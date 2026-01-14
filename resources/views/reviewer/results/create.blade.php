@@ -82,22 +82,35 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Bidang/Section/Topik <span class="text-danger">*</span></label>
                                 @php
-                                    $hasFieldOfStudy = !empty($assignment->field_of_study_id) && $assignment->fieldOfStudy;
+                                    // Cek apakah assignment punya field_of_study_id
+                                    $fieldOfStudyId = $assignment->field_of_study_id ?? null;
+                                    $fieldOfStudyName = null;
+                                    
+                                    if ($fieldOfStudyId) {
+                                        try {
+                                            $fieldOfStudy = \App\Models\FieldOfStudy::find($fieldOfStudyId);
+                                            $fieldOfStudyName = $fieldOfStudy ? $fieldOfStudy->name : null;
+                                        } catch (\Exception $e) {
+                                            $fieldOfStudyName = null;
+                                        }
+                                    }
                                 @endphp
                                 
-                                @if($hasFieldOfStudy)
+                                @if($fieldOfStudyName)
+                                    {{-- Bidang dari assignment (readonly) --}}
                                     <input type="text" class="form-control bg-light" 
-                                           value="{{ $assignment->fieldOfStudy->name }}" 
+                                           value="{{ $fieldOfStudyName }}" 
                                            readonly>
-                                    <input type="hidden" name="field_section_topic" value="{{ $assignment->fieldOfStudy->name }}">
+                                    <input type="hidden" name="field_section_topic" value="{{ $fieldOfStudyName }}">
                                     <small class="text-success"><i class="bi bi-check-circle"></i> Bidang ditentukan saat penugasan</small>
                                 @else
+                                    {{-- Input manual untuk assignment lama --}}
                                     <input type="text" class="form-control @error('field_section_topic') is-invalid @enderror" 
                                            name="field_section_topic" 
                                            value="{{ old('field_section_topic') }}" 
                                            placeholder="Contoh: Teknik Informatika, Kedokteran, Ekonomi, dll" 
                                            required>
-                                    <small class="text-muted"><i class="bi bi-pencil"></i> Silakan isi bidang artikel secara manual</small>
+                                    <small class="text-warning"><i class="bi bi-pencil"></i> Silakan isi bidang artikel (assignment belum punya field_of_study_id: {{ $fieldOfStudyId ?? 'NULL' }})</small>
                                     @error('field_section_topic')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

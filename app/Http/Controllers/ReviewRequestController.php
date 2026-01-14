@@ -104,14 +104,14 @@ class ReviewRequestController extends Controller
         ]);
 
         $reviewRequest->update([
-            'status' => 'approved',
+            'status' => 'pending',
             'approved_at' => now(),
             'approved_by' => Auth::id(),
             'admin_notes' => $request->admin_notes,
         ]);
 
         return redirect()->back()
-            ->with('success', 'Permintaan review berhasil disetujui!');
+            ->with('success', 'Permintaan review berhasil disetujui dan status dikembalikan ke menunggu!');
     }
 
     /**
