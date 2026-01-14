@@ -179,15 +179,22 @@
 
             @if($fields->hasPages())
                 <div class="mt-3">
-                    {{ $fields->onEachSide(1)->links() }}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            @foreach(range(1, $fields->lastPage()) as $page)
+                                @if($page == $fields->currentPage())
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ $page }}</span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $fields->url($page) }}">{{ $page }}</a>
+                                    </li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    </nav>
                 </div>
-                <style>
-                    /* Hide pagination arrows */
-                    .pagination .page-item:first-child,
-                    .pagination .page-item:last-child {
-                        display: none;
-                    }
-                </style>
             @endif
         </div>
     </div>
