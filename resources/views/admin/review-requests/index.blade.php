@@ -17,22 +17,58 @@
 
 <div class="card">
     <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Daftar Permintaan Review dari Reviewer</h5>
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Daftar Permintaan Review dari Reviewer</h5>
+            <a href="{{ route('admin.review-requests.export', request()->query()) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel"></i> Export Excel
+            </a>
+        </div>
     </div>
     <div class="card-body">
+        <!-- Search Form -->
+        <form method="GET" action="{{ route('admin.review-requests.index') }}" class="mb-3">
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               placeholder="Cari berdasarkan nama, email, atau institusi reviewer..." 
+                               value="{{ request('search') }}">
+                        @if(request('status'))
+                            <input type="hidden" name="status" value="{{ request('status') }}">
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
+                        @if(request('search') || request('status'))
+                            <a href="{{ route('admin.review-requests.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Reset
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
+
         <!-- Filter Status -->
         <div class="mb-3">
             <div class="btn-group" role="group">
-                <a href="{{ route('admin.review-requests.index') }}" class="btn btn-sm {{ !request('status') ? 'btn-primary' : 'btn-outline-primary' }}">
+                <a href="{{ route('admin.review-requests.index', array_merge(request()->query(), ['status' => null])) }}" class="btn btn-sm {{ !request('status') ? 'btn-primary' : 'btn-outline-primary' }}">
                     Semua
                 </a>
-                <a href="{{ route('admin.review-requests.index', ['status' => 'pending']) }}" class="btn btn-sm {{ request('status') == 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
+                <a href="{{ route('admin.review-requests.index', array_merge(request()->query(), ['status' => 'pending'])) }}" class="btn btn-sm {{ request('status') == 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
                     Menunggu
                 </a>
-                <a href="{{ route('admin.review-requests.index', ['status' => 'approved']) }}" class="btn btn-sm {{ request('status') == 'approved' ? 'btn-success' : 'btn-outline-success' }}">
+                <a href="{{ route('admin.review-requests.index', array_merge(request()->query(), ['status' => 'approved'])) }}" class="btn btn-sm {{ request('status') == 'approved' ? 'btn-success' : 'btn-outline-success' }}">
                     Disetujui
                 </a>
-                <a href="{{ route('admin.review-requests.index', ['status' => 'rejected']) }}" class="btn btn-sm {{ request('status') == 'rejected' ? 'btn-danger' : 'btn-outline-danger' }}">
+                <a href="{{ route('admin.review-requests.index', array_merge(request()->query(), ['status' => 'rejected'])) }}" class="btn btn-sm {{ request('status') == 'rejected' ? 'btn-danger' : 'btn-outline-danger' }}">
                     Ditolak
                 </a>
             </div>

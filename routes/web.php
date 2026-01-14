@@ -154,6 +154,7 @@ Route::middleware('auth')->group(function () {
         
         // Review Requests Management (Admin)
         Route::get('/review-requests', [ReviewRequestController::class, 'index'])->name('review-requests.index');
+        Route::get('/review-requests/export/excel', [ReviewRequestController::class, 'export'])->name('review-requests.export');
         Route::get('/review-requests/{reviewRequest}', [ReviewRequestController::class, 'show'])->name('review-requests.show');
         Route::post('/review-requests/{reviewRequest}/approve', [ReviewRequestController::class, 'approve'])->name('review-requests.approve');
         Route::post('/review-requests/{reviewRequest}/reject', [ReviewRequestController::class, 'reject'])->name('review-requests.reject');

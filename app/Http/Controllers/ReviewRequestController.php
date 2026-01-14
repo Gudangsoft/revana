@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\ReviewRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Exports\ReviewRequestsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReviewRequestController extends Controller
 {
@@ -22,9 +24,35 @@ class ReviewRequestController extends Controller
             $query->where('status', $request->status);
         }
 
-        $reviewRequests = $query->paginate(20);
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->whereHas('reviewer', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('institution', 'like', '%' . $search . '%');
+            });
+        }
+
+        $reviewRequests = $query->paginate(20)->withQueryString();
 
         return view('admin.review-requests.index', compact('reviewRequests'));
+    }
+
+    /**
+     * Export review requests to Excel
+     */
+    public function export(Request $request)
+    {
+        $status = $request->get('status');
+        $search = $request->get('search');
+        
+        $filename = 'review_requests_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(
+            new ReviewRequestsExport($status, $search), 
+            $filename
+        );
     }
 
     /**
