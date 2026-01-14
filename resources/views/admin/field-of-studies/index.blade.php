@@ -179,8 +179,15 @@
 
             @if($fields->hasPages())
                 <div class="mt-3">
-                    {{ $fields->links() }}
+                    {{ $fields->onEachSide(1)->links() }}
                 </div>
+                <style>
+                    /* Hide pagination arrows */
+                    .pagination .page-item:first-child,
+                    .pagination .page-item:last-child {
+                        display: none;
+                    }
+                </style>
             @endif
         </div>
     </div>
