@@ -18,6 +18,42 @@
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+                <div class="card-body text-white">
+                    <h1 class="display-4 fw-bold mb-2">{{ $stats['pending'] }}</h1>
+                    <p class="mb-0 fs-5">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px;">
+                <div class="card-body text-white">
+                    <h1 class="display-4 fw-bold mb-2">{{ $stats['on_progress'] }}</h1>
+                    <p class="mb-0 fs-5">On Progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 12px;">
+                <div class="card-body text-white">
+                    <h1 class="display-4 fw-bold mb-2">{{ $stats['submitted'] }}</h1>
+                    <p class="mb-0 fs-5">Submitted</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 12px;">
+                <div class="card-body text-white">
+                    <h1 class="display-4 fw-bold mb-2">{{ $stats['approved'] }}</h1>
+                    <p class="mb-0 fs-5">Approved</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show">
         <i class="bi bi-check-circle"></i> {{ session('success') }}

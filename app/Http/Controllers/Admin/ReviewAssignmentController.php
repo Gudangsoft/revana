@@ -23,7 +23,15 @@ class ReviewAssignmentController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.assignments.monitoring', compact('assignments'));
+        // Calculate statistics
+        $stats = [
+            'pending' => $assignments->where('status', 'pending')->count(),
+            'on_progress' => $assignments->where('status', 'on_progress')->count(),
+            'submitted' => $assignments->where('status', 'submitted')->count(),
+            'approved' => $assignments->where('status', 'approved')->count(),
+        ];
+
+        return view('admin.assignments.monitoring', compact('assignments', 'stats'));
     }
 
     public function index()
