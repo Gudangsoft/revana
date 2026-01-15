@@ -59,12 +59,14 @@ class JournalController extends Controller
 
     public function store(Request $request)
     {
+        $accreditations = \App\Models\Accreditation::where('is_active', true)->pluck('name')->toArray();
+        
         $validated = $request->validate([
             'slot' => 'required|integer|min:1',
             'volume' => 'required|string|max:100',
             'title' => 'required|string|max:255',
             'link' => 'required|url',
-            'accreditation' => 'required|in:SINTA 1,SINTA 2,SINTA 3,SINTA 4,SINTA 5,SINTA 6',
+            'accreditation' => ['required', 'string', \Illuminate\Validation\Rule::in($accreditations)],
             'publisher' => 'nullable|string|max:255',
             'marketing' => 'nullable|string|max:255',
             'pic' => 'nullable|string|max:255',
@@ -92,12 +94,14 @@ class JournalController extends Controller
 
     public function update(Request $request, Journal $journal)
     {
+        $accreditations = \App\Models\Accreditation::where('is_active', true)->pluck('name')->toArray();
+        
         $validated = $request->validate([
             'slot' => 'required|integer|min:1',
             'volume' => 'required|string|max:100',
             'title' => 'required|string|max:255',
             'link' => 'required|url',
-            'accreditation' => 'required|in:SINTA 1,SINTA 2,SINTA 3,SINTA 4,SINTA 5,SINTA 6',
+            'accreditation' => ['required', 'string', \Illuminate\Validation\Rule::in($accreditations)],
             'publisher' => 'nullable|string|max:255',
             'marketing' => 'nullable|string|max:255',
             'pic' => 'nullable|string|max:255',
