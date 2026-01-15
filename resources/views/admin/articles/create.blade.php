@@ -97,8 +97,13 @@
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Marketing</label>
-                                <input type="text" class="form-control @error('marketing') is-invalid @enderror" 
-                                       name="marketing" value="{{ old('marketing') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control @error('marketing') is-invalid @enderror" 
+                                           name="marketing" id="marketingInput" value="{{ old('marketing') }}">
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#marketingModal">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
                                 @error('marketing')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -147,8 +152,13 @@
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">PIC</label>
-                                <input type="text" class="form-control @error('pic') is-invalid @enderror" 
-                                       name="pic" value="{{ old('pic') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control @error('pic') is-invalid @enderror" 
+                                           name="pic" id="picInput" value="{{ old('pic') }}">
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picModal">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
                                 @error('pic')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -166,7 +176,12 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">PIC Editor 1</label>
-                                <input type="text" class="form-control" name="pic_editor1" value="{{ old('pic_editor1') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="pic_editor1" id="picEditor1Input" value="{{ old('pic_editor1') }}">
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picEditor1Modal">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="col-md-12 mb-3"><hr><h6 class="text-primary">Author 1</h6></div>
@@ -176,7 +191,12 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">PIC Author 1</label>
-                                <input type="text" class="form-control" name="pic_author1" value="{{ old('pic_author1') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="pic_author1" id="picAuthor1Input" value="{{ old('pic_author1') }}">
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picAuthor1Modal">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="col-md-12 mb-3"><hr><h6 class="text-primary">Editor 2</h6></div>
@@ -186,7 +206,12 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">PIC Editor 2</label>
-                                <input type="text" class="form-control" name="pic_editor2" value="{{ old('pic_editor2') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="pic_editor2" id="picEditor2Input" value="{{ old('pic_editor2') }}">
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picEditor2Modal">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="col-md-12 mb-3"><hr><h6 class="text-primary">Reviewers</h6></div>
@@ -306,4 +331,161 @@
         </div>
     </div>
 </div>
+
+<!-- Marketing Quick Add Modal -->
+<div class="modal fade" id="marketingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Marketing Cepat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nama Marketing</label>
+                    <input type="text" class="form-control" id="quickMarketingName">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="addQuickMarketing()">Tambah</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PIC Quick Add Modal -->
+<div class="modal fade" id="picModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah PIC Cepat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nama PIC</label>
+                    <input type="text" class="form-control" id="quickPicName">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="addQuickPic()">Tambah</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PIC Editor 1 Quick Add Modal -->
+<div class="modal fade" id="picEditor1Modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah PIC Editor 1 Cepat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nama PIC Editor 1</label>
+                    <input type="text" class="form-control" id="quickPicEditor1Name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="addQuickPicEditor1()">Tambah</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PIC Author 1 Quick Add Modal -->
+<div class="modal fade" id="picAuthor1Modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah PIC Author 1 Cepat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nama PIC Author 1</label>
+                    <input type="text" class="form-control" id="quickPicAuthor1Name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="addQuickPicAuthor1()">Tambah</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PIC Editor 2 Quick Add Modal -->
+<div class="modal fade" id="picEditor2Modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah PIC Editor 2 Cepat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nama PIC Editor 2</label>
+                    <input type="text" class="form-control" id="quickPicEditor2Name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="addQuickPicEditor2()">Tambah</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addQuickMarketing() {
+    const name = document.getElementById('quickMarketingName').value.trim();
+    if (name) {
+        document.getElementById('marketingInput').value = name;
+        bootstrap.Modal.getInstance(document.getElementById('marketingModal')).hide();
+        document.getElementById('quickMarketingName').value = '';
+    }
+}
+
+function addQuickPic() {
+    const name = document.getElementById('quickPicName').value.trim();
+    if (name) {
+        document.getElementById('picInput').value = name;
+        bootstrap.Modal.getInstance(document.getElementById('picModal')).hide();
+        document.getElementById('quickPicName').value = '';
+    }
+}
+
+function addQuickPicEditor1() {
+    const name = document.getElementById('quickPicEditor1Name').value.trim();
+    if (name) {
+        document.getElementById('picEditor1Input').value = name;
+        bootstrap.Modal.getInstance(document.getElementById('picEditor1Modal')).hide();
+        document.getElementById('quickPicEditor1Name').value = '';
+    }
+}
+
+function addQuickPicAuthor1() {
+    const name = document.getElementById('quickPicAuthor1Name').value.trim();
+    if (name) {
+        document.getElementById('picAuthor1Input').value = name;
+        bootstrap.Modal.getInstance(document.getElementById('picAuthor1Modal')).hide();
+        document.getElementById('quickPicAuthor1Name').value = '';
+    }
+}
+
+function addQuickPicEditor2() {
+    const name = document.getElementById('quickPicEditor2Name').value.trim();
+    if (name) {
+        document.getElementById('picEditor2Input').value = name;
+        bootstrap.Modal.getInstance(document.getElementById('picEditor2Modal')).hide();
+        document.getElementById('quickPicEditor2Name').value = '';
+    }
+}
+</script>
 @endsection
