@@ -13,21 +13,24 @@
 <div class="accordion accordion-flush" id="accordionJournal">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journals') ? 'active' : '' }}" 
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'active' : '' }}" 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapseJournal" 
-                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journals') ? 'true' : 'false' }}">
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'true' : 'false' }}">
                 <i class="bi bi-journal-text"></i> Kelola Jurnal
             </button>
         </h2>
-        <div id="collapseJournal" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journals') ? 'show' : '' }}" data-bs-parent="#accordionJournal">
+        <div id="collapseJournal" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'show' : '' }}" data-bs-parent="#accordionJournal">
             <div class="accordion-body p-0">
                 <a href="{{ route('admin.journals.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.index' || $currentRoute == 'admin.journals.create' || $currentRoute == 'admin.journals.edit' ? 'active' : '' }}">
                     <i class="bi bi-list"></i> Daftar Jurnal
                 </a>
                 <a href="{{ route('admin.journals.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.monitoring' ? 'active' : '' }}">
                     <i class="bi bi-bar-chart"></i> Pemantauan Slot
+                </a>
+                <a href="{{ route('admin.articles.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.articles') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text-fill"></i> Kelola Artikel
                 </a>
             </div>
         </div>
