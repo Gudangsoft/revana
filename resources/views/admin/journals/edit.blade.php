@@ -63,9 +63,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Akreditasi <span class="text-danger">*</span></label>
+                        <label class="form-label">Akreditasi <span class="text-danger">*</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAccreditationModal">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </label>
                         <select class="form-select @error('accreditation') is-invalid @enderror" 
-                                name="accreditation" required>
+                                name="accreditation" id="accreditation_select" required>
                             <option value="">Pilih Akreditasi</option>
                             @foreach($accreditations as $accreditation)
                                 <option value="{{ $accreditation->name }}" {{ old('accreditation', $journal->accreditation) == $accreditation->name ? 'selected' : '' }}>
@@ -159,6 +163,17 @@
                         @enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Link LOA (Letter of Acceptance)</label>
+                        <input type="url" class="form-control @error('loa_link') is-invalid @enderror" 
+                               name="loa_link" value="{{ old('loa_link', $journal->loa_link) }}" 
+                               placeholder="https://...">
+                        @error('loa_link')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Link surat penerimaan artikel (LOA)</small>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Update
@@ -192,6 +207,47 @@
                     Point akan otomatis diberikan ke reviewer setelah hasil review disetujui.
                 </small>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Accreditation -->
+<div class="modal fade" id="addAccreditationModal" tabindex="-1" aria-labelledby="addAccreditationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAccreditationModalLabel">
+                    <i class="bi bi-award"></i> Tambah Akreditasi Baru
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addAccreditationForm" action="{{ route('admin.accreditations.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Akreditasi <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" id="accreditation_name" placeholder="Contoh: SINTA 1" required>
+                        <small class="text-muted">Format: SINTA 1, SINTA 2, dll.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Points <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="points" id="accreditation_points" min="0" placeholder="Contoh: 100" required>
+                        <small class="text-muted">Jumlah poin yang akan diberikan</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" name="description" id="accreditation_description" rows="3" placeholder="Deskripsi akreditasi"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" id="accreditation_is_active" value="1" checked>
+                        <label class="form-check-label" for="accreditation_is_active">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -275,6 +331,18 @@
 </div>
 
 <script>
+// Auto-fill accreditation name after adding via modal
+document.getElementById('addAccreditationForm').addEventListener('submit', function(e) {
+    const accreditationName = document.getElementById('accreditation_name').value;
+    const accreditationPoints = document.getElementById('accreditation_points').value;
+    if (accreditationName) {
+        const selectElement = document.getElementById('accreditation_select');
+        // Add new option
+        const newOption = new Option(accreditationName + ' (' + accreditationPoints + ' points)', accreditationName, true, true);
+        selectElement.add(newOption);
+    }
+});
+
 // Auto-fill marketing name after adding via modal
 document.getElementById('addMarketingForm').addEventListener('submit', function(e) {
     const marketingName = document.getElementById('marketing_name').value;

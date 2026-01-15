@@ -71,6 +71,7 @@ class JournalController extends Controller
             'author_username' => 'nullable|string|max:255',
             'author_password' => 'nullable|string|max:255',
             'turnitin_link' => 'nullable|url',
+            'loa_link' => 'nullable|url',
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -103,6 +104,7 @@ class JournalController extends Controller
             'author_username' => 'nullable|string|max:255',
             'author_password' => 'nullable|string|max:255',
             'turnitin_link' => 'nullable|url',
+            'loa_link' => 'nullable|url',
         ]);
 
         $journal->update($validated);

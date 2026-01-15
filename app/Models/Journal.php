@@ -27,6 +27,7 @@ class Journal extends Model
         'author_username',
         'author_password',
         'turnitin_link',
+        'loa_link',
     ];
 
     protected static function boot()
