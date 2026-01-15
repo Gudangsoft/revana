@@ -8,9 +8,31 @@
 <a href="{{ route('admin.monitoring') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.monitoring') ? 'active' : '' }}">
     <i class="bi bi-graph-up"></i> Monitoring Review
 </a>
-{{-- <a href="{{ route('admin.journals.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.journals') ? 'active' : '' }}">
-    <i class="bi bi-journal-text"></i> Jurnal
-</a> --}}
+
+{{-- Menu Jurnal dengan Accordion --}}
+<div class="accordion accordion-flush" id="accordionJournal">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journals') ? 'active' : '' }}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapseJournal" 
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journals') ? 'true' : 'false' }}">
+                <i class="bi bi-journal-text"></i> Kelola Jurnal
+            </button>
+        </h2>
+        <div id="collapseJournal" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journals') ? 'show' : '' }}" data-bs-parent="#accordionJournal">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.journals.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.index' || $currentRoute == 'admin.journals.create' || $currentRoute == 'admin.journals.edit' ? 'active' : '' }}">
+                    <i class="bi bi-list"></i> Daftar Jurnal
+                </a>
+                <a href="{{ route('admin.journals.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart"></i> Pemantauan Slot
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {{-- <a href="{{ route('admin.accreditations.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.accreditations') ? 'active' : '' }}">
     <i class="bi bi-award"></i> Akreditasi
 </a> --}}

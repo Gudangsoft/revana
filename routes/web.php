@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
         
         // Journals
+        Route::get('/journals/monitoring', [JournalController::class, 'monitoringSlots'])->name('journals.monitoring');
         Route::resource('journals', JournalController::class);
         
         // Accreditations

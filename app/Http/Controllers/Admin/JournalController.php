@@ -8,6 +8,41 @@ use Illuminate\Http\Request;
 
 class JournalController extends Controller
 {
+    public function monitoringSlots()
+    {
+        $journals = Journal::with(['assignments', 'creator'])
+            ->latest()
+            ->get();
+
+        // Calculate statistics
+        $totalAssignments = \App\Models\ReviewAssignment::count();
+        $stats = [
+            'total_journals' => $journals->count(),
+            'total_slots' => $journals->sum('slot') ?? 0,
+            'slots_used' => $totalAssignments,
+            'slots_available' => ($journals->sum('slot') ?? 0) - $totalAssignments,
+        ];
+
+        // Calculate per journal
+        $journalStats = $journals->map(function($journal) {
+            $totalSlots = $journal->slot ?? 0;
+            $usedSlots = $journal->assignments->count();
+            $availableSlots = $totalSlots - $usedSlots;
+            $percentage = $totalSlots > 0 ? ($usedSlots / $totalSlots) * 100 : 0;
+            
+            return [
+                'journal' => $journal,
+                'total_slots' => $totalSlots,
+                'used_slots' => $usedSlots,
+                'available_slots' => $availableSlots,
+                'percentage' => round($percentage, 1),
+                'status' => $percentage >= 90 ? 'danger' : ($percentage >= 70 ? 'warning' : 'success')
+            ];
+        })->sortByDesc('percentage');
+
+        return view('admin.journals.monitoring', compact('stats', 'journalStats'));
+    }
+
     public function index()
     {
         $journals = Journal::with('creator')->latest()->paginate(20);
@@ -25,6 +60,8 @@ class JournalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'slot' => 'required|integer|min:1',
+            'volume' => 'required|string|max:100',
             'title' => 'required|string|max:255',
             'link' => 'required|url',
             'accreditation' => 'required|in:SINTA 1,SINTA 2,SINTA 3,SINTA 4,SINTA 5,SINTA 6',
@@ -55,6 +92,8 @@ class JournalController extends Controller
     public function update(Request $request, Journal $journal)
     {
         $validated = $request->validate([
+            'slot' => 'required|integer|min:1',
+            'volume' => 'required|string|max:100',
             'title' => 'required|string|max:255',
             'link' => 'required|url',
             'accreditation' => 'required|in:SINTA 1,SINTA 2,SINTA 3,SINTA 4,SINTA 5,SINTA 6',

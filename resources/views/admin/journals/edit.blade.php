@@ -19,6 +19,30 @@
                     @csrf
                     @method('PUT')
 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Volume Terbitan <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('volume') is-invalid @enderror" 
+                                   name="volume" value="{{ old('volume', $journal->volume) }}" 
+                                   placeholder="Contoh: Vol 5 No 1 (2026)" required>
+                            @error('volume')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Format: Volume, nomor, dan tahun</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Jumlah Slot Artikel <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('slot') is-invalid @enderror" 
+                                   name="slot" value="{{ old('slot', $journal->slot) }}" 
+                                   min="1" placeholder="Contoh: 50" required>
+                            @error('slot')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Jumlah artikel maksimal yang dapat ditampung</small>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Judul Jurnal <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('title') is-invalid @enderror" 
