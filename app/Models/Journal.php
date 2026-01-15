@@ -86,6 +86,11 @@ class Journal extends Model
         return $this->hasMany(ReviewAssignment::class);
     }
 
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
+    }
+
     public function picAuthor()
     {
         return $this->belongsTo(Pic::class, 'pic_author_id');

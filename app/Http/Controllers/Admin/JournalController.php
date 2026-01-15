@@ -10,23 +10,23 @@ class JournalController extends Controller
 {
     public function monitoringSlots()
     {
-        $journals = Journal::with(['assignments', 'creator'])
+        $journals = Journal::with(['assignments', 'articles', 'creator'])
             ->latest()
             ->get();
 
         // Calculate statistics
-        $totalAssignments = \App\Models\ReviewAssignment::count();
+        $totalArticles = \App\Models\Article::count();
         $stats = [
             'total_journals' => $journals->count(),
             'total_slots' => $journals->sum('slot') ?? 0,
-            'slots_used' => $totalAssignments,
-            'slots_available' => ($journals->sum('slot') ?? 0) - $totalAssignments,
+            'slots_used' => $totalArticles,
+            'slots_available' => ($journals->sum('slot') ?? 0) - $totalArticles,
         ];
 
         // Calculate per journal
         $journalStats = $journals->map(function($journal) {
             $totalSlots = $journal->slot ?? 0;
-            $usedSlots = $journal->assignments->count();
+            $usedSlots = $journal->articles->count(); // Changed from assignments to articles
             $availableSlots = $totalSlots - $usedSlots;
             $percentage = $totalSlots > 0 ? ($usedSlots / $totalSlots) * 100 : 0;
             
