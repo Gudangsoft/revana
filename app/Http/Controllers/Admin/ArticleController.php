@@ -133,4 +133,115 @@ class ArticleController extends Controller
         return redirect()->route('admin.articles.index')
             ->with('success', 'Artikel berhasil dihapus');
     }
+
+    // Workflow Stage Methods
+    public function updateSubmission(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'submission_date' => 'nullable|date',
+            'submit_link' => 'nullable|url',
+            'submission_completed' => 'boolean',
+            'submission_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Submission stage berhasil disimpan');
+    }
+
+    public function updateReview(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'reviewer1' => 'nullable|string|max:255',
+            'pic_reviewer1' => 'nullable|string|max:255',
+            'reviewer2' => 'nullable|string|max:255',
+            'pic_reviewer2' => 'nullable|string|max:255',
+            'review_start_date' => 'nullable|date',
+            'review_end_date' => 'nullable|date',
+            'review_completed' => 'boolean',
+            'review_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Review stage berhasil disimpan');
+    }
+
+    public function updateRevision(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'editor1' => 'nullable|string|max:255',
+            'pic_editor1' => 'nullable|string|max:255',
+            'revision_start_date' => 'nullable|date',
+            'revision_end_date' => 'nullable|date',
+            'revision_completed' => 'boolean',
+            'revision_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Revision stage berhasil disimpan');
+    }
+
+    public function updateAcceptance(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'acceptance_date' => 'nullable|date',
+            'loa_link' => 'nullable|url',
+            'acceptance_completed' => 'boolean',
+            'acceptance_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Acceptance stage berhasil disimpan');
+    }
+
+    public function updateCopyediting(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'editor2' => 'nullable|string|max:255',
+            'pic_editor2' => 'nullable|string|max:255',
+            'author1' => 'nullable|string|max:255',
+            'pic_author1' => 'nullable|string|max:255',
+            'copyediting_start_date' => 'nullable|date',
+            'copyediting_end_date' => 'nullable|date',
+            'copyediting_link' => 'nullable|url',
+            'copyediting_completed' => 'boolean',
+            'copyediting_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Copyediting stage berhasil disimpan');
+    }
+
+    public function updateProduction(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'turnitin_link' => 'nullable|url',
+            'production_start_date' => 'nullable|date',
+            'production_end_date' => 'nullable|date',
+            'production_completed' => 'boolean',
+            'production_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Production stage berhasil disimpan');
+    }
+
+    public function updatePublication(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'publication_date' => 'nullable|date',
+            'publication_link' => 'nullable|url',
+            'publication_completed' => 'boolean',
+            'publication_comment' => 'nullable|string',
+        ]);
+
+        $article->update($validated);
+
+        return back()->with('success', 'Publication stage berhasil disimpan');
+    }
 }

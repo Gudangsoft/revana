@@ -73,6 +73,13 @@ Route::middleware('auth')->group(function () {
         
         // Articles
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+        Route::put('/articles/{article}/submission', [\App\Http\Controllers\Admin\ArticleController::class, 'updateSubmission'])->name('articles.update-submission');
+        Route::put('/articles/{article}/review', [\App\Http\Controllers\Admin\ArticleController::class, 'updateReview'])->name('articles.update-review');
+        Route::put('/articles/{article}/revision', [\App\Http\Controllers\Admin\ArticleController::class, 'updateRevision'])->name('articles.update-revision');
+        Route::put('/articles/{article}/acceptance', [\App\Http\Controllers\Admin\ArticleController::class, 'updateAcceptance'])->name('articles.update-acceptance');
+        Route::put('/articles/{article}/copyediting', [\App\Http\Controllers\Admin\ArticleController::class, 'updateCopyediting'])->name('articles.update-copyediting');
+        Route::put('/articles/{article}/production', [\App\Http\Controllers\Admin\ArticleController::class, 'updateProduction'])->name('articles.update-production');
+        Route::put('/articles/{article}/publication', [\App\Http\Controllers\Admin\ArticleController::class, 'updatePublication'])->name('articles.update-publication');
         
         // Accreditations
         Route::resource('accreditations', \App\Http\Controllers\Admin\AccreditationController::class);
