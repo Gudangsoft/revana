@@ -252,27 +252,47 @@
                     <form action="{{ route('admin.articles.update-review', $article) }}" method="POST">
                         @csrf
                         @method('PUT')
+                        
+                        <!-- Reviewer 1 Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">Reviewer 1</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Reviewer 1</label>
+                                        <input type="text" class="form-control" name="reviewer1" 
+                                               value="{{ old('reviewer1', $article->reviewer1) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PIC Reviewer 1</label>
+                                        <input type="text" class="form-control" name="pic_reviewer1" 
+                                               value="{{ old('pic_reviewer1', $article->pic_reviewer1) }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviewer 2 Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">Reviewer 2</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Reviewer 2</label>
+                                        <input type="text" class="form-control" name="reviewer2" 
+                                               value="{{ old('reviewer2', $article->reviewer2) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PIC Reviewer 2</label>
+                                        <input type="text" class="form-control" name="pic_reviewer2" 
+                                               value="{{ old('pic_reviewer2', $article->pic_reviewer2) }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Review Overall -->
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Reviewer 1</label>
-                                <input type="text" class="form-control" name="reviewer1" 
-                                       value="{{ old('reviewer1', $article->reviewer1) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">PIC Reviewer 1</label>
-                                <input type="text" class="form-control" name="pic_reviewer1" 
-                                       value="{{ old('pic_reviewer1', $article->pic_reviewer1) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Reviewer 2</label>
-                                <input type="text" class="form-control" name="reviewer2" 
-                                       value="{{ old('reviewer2', $article->reviewer2) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">PIC Reviewer 2</label>
-                                <input type="text" class="form-control" name="pic_reviewer2" 
-                                       value="{{ old('pic_reviewer2', $article->pic_reviewer2) }}">
-                            </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Tanggal Mulai Review</label>
                                 <input type="date" class="form-control" name="review_start_date" 
@@ -285,7 +305,7 @@
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Komentar Review</label>
-                                <textarea class="form-control" name="review_comment" rows="3">{{ old('review_comment', $article->review_comment) }}</textarea>
+                                <textarea class="form-control" name="review_comment" rows="2" placeholder="Status: Selesai / Revisi / Pending, dll">{{ old('review_comment', $article->review_comment) }}</textarea>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <div class="form-check">
@@ -297,6 +317,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-save"></i> Simpan Review
                         </button>
@@ -320,41 +341,54 @@
                     <form action="{{ route('admin.articles.update-revision', $article) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Editor 1</label>
-                                <input type="text" class="form-control" name="editor1" 
-                                       value="{{ old('editor1', $article->editor1) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">PIC Editor 1</label>
-                                <input type="text" class="form-control" name="pic_editor1" 
-                                       value="{{ old('pic_editor1', $article->pic_editor1) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Mulai Revisi</label>
-                                <input type="date" class="form-control" name="revision_start_date" 
-                                       value="{{ old('revision_start_date', $article->revision_start_date?->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Selesai Revisi</label>
-                                <input type="date" class="form-control" name="revision_end_date" 
-                                       value="{{ old('revision_end_date', $article->revision_end_date?->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Komentar Revisi</label>
-                                <textarea class="form-control" name="revision_comment" rows="3">{{ old('revision_comment', $article->revision_comment) }}</textarea>
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="revision_completed" value="1" 
-                                           {{ old('revision_completed', $article->revision_completed) ? 'checked' : '' }}>
-                                    <label class="form-check-label">
-                                        <strong>Revisi Selesai</strong>
-                                    </label>
+                        
+                        <!-- Editor 1 Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">Editor 1</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Editor 1</label>
+                                        <input type="text" class="form-control" name="editor1" 
+                                               value="{{ old('editor1', $article->editor1) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PIC Editor 1</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="pic_editor1" id="picEditor1InputEdit"
+                                                   value="{{ old('pic_editor1', $article->pic_editor1) }}">
+                                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picEditor1EditModal">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Mulai</label>
+                                        <input type="date" class="form-control" name="revision_start_date" 
+                                               value="{{ old('revision_start_date', $article->revision_start_date?->format('Y-m-d')) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Selesai</label>
+                                        <input type="date" class="form-control" name="revision_end_date" 
+                                               value="{{ old('revision_end_date', $article->revision_end_date?->format('Y-m-d')) }}">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Komentar</label>
+                                        <textarea class="form-control" name="revision_comment" rows="2">{{ old('revision_comment', $article->revision_comment) }}</textarea>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="revision_completed" value="1" 
+                                                   {{ old('revision_completed', $article->revision_completed) ? 'checked' : '' }}>
+                                            <label class="form-check-label">
+                                                <strong>Editor 1 - Selesai</strong>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-save"></i> Simpan Revision
                         </button>
@@ -426,56 +460,120 @@
                     <form action="{{ route('admin.articles.update-copyediting', $article) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Editor 2</label>
-                                <input type="text" class="form-control" name="editor2" 
-                                       value="{{ old('editor2', $article->editor2) }}">
+                        
+                        <!-- Editor 2 Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">Editor 2</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Editor 2</label>
+                                        <input type="text" class="form-control" name="editor2" 
+                                               value="{{ old('editor2', $article->editor2) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PIC Editor 2</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="pic_editor2" id="picEditor2InputEdit"
+                                                   value="{{ old('pic_editor2', $article->pic_editor2) }}">
+                                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picEditor2EditModal">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Mulai</label>
+                                        <input type="date" class="form-control" name="copyediting_start_date" 
+                                               value="{{ old('copyediting_start_date', $article->copyediting_start_date?->format('Y-m-d')) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Selesai</label>
+                                        <input type="date" class="form-control" name="copyediting_end_date" 
+                                               value="{{ old('copyediting_end_date', $article->copyediting_end_date?->format('Y-m-d')) }}">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Komentar</label>
+                                        <textarea class="form-control" rows="2" placeholder="Status: Selesai / Revisi / Pending, dll"></textarea>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="1">
+                                            <label class="form-check-label">
+                                                <strong>Editor 2 - Selesai</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">PIC Editor 2</label>
-                                <input type="text" class="form-control" name="pic_editor2" 
-                                       value="{{ old('pic_editor2', $article->pic_editor2) }}">
+                        </div>
+
+                        <!-- Author 1 Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">Author 1</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Author 1</label>
+                                        <input type="text" class="form-control" name="author1" 
+                                               value="{{ old('author1', $article->author1) }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PIC Author 1</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="pic_author1" id="picAuthor1InputEdit"
+                                                   value="{{ old('pic_author1', $article->pic_author1) }}">
+                                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#picAuthor1EditModal">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Mulai</label>
+                                        <input type="date" class="form-control">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Selesai</label>
+                                        <input type="date" class="form-control">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Komentar</label>
+                                        <textarea class="form-control" rows="2" placeholder="Status: Selesai / Revisi / Pending, dll"></textarea>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="1">
+                                            <label class="form-check-label">
+                                                <strong>Author 1 - Selesai</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Author 1</label>
-                                <input type="text" class="form-control" name="author1" 
-                                       value="{{ old('author1', $article->author1) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">PIC Author 1</label>
-                                <input type="text" class="form-control" name="pic_author1" 
-                                       value="{{ old('pic_author1', $article->pic_author1) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Mulai Copyediting</label>
-                                <input type="date" class="form-control" name="copyediting_start_date" 
-                                       value="{{ old('copyediting_start_date', $article->copyediting_start_date?->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Selesai Copyediting</label>
-                                <input type="date" class="form-control" name="copyediting_end_date" 
-                                       value="{{ old('copyediting_end_date', $article->copyediting_end_date?->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-12 mb-3">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
                                 <label class="form-label">Link Copyediting</label>
                                 <input type="url" class="form-control" name="copyediting_link" 
                                        value="{{ old('copyediting_link', $article->copyediting_link) }}" placeholder="https://...">
                             </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Komentar Copyediting</label>
-                                <textarea class="form-control" name="copyediting_comment" rows="3">{{ old('copyediting_comment', $article->copyediting_comment) }}</textarea>
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="copyediting_completed" value="1" 
-                                           {{ old('copyediting_completed', $article->copyediting_completed) ? 'checked' : '' }}>
-                                    <label class="form-check-label">
-                                        <strong>Copyediting Selesai</strong>
-                                    </label>
-                                </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Komentar Umum Copyediting</label>
+                                <textarea class="form-control" name="copyediting_comment" rows="2">{{ old('copyediting_comment', $article->copyediting_comment) }}</textarea>
                             </div>
                         </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="copyediting_completed" value="1" 
+                                   {{ old('copyediting_completed', $article->copyediting_completed) ? 'checked' : '' }}>
+                            <label class="form-check-label">
+                                <strong>Tahap Copyediting Selesai Semua</strong>
+                            </label>
+                        </div>
+
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-save"></i> Simpan Copyediting
                         </button>
