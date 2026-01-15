@@ -152,27 +152,6 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Link Turnitin</label>
-                        <input type="url" class="form-control @error('turnitin_link') is-invalid @enderror" 
-                               name="turnitin_link" value="{{ old('turnitin_link') }}" 
-                               placeholder="https://...">
-                        @error('turnitin_link')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Link LOA (Letter of Acceptance)</label>
-                        <input type="url" class="form-control @error('loa_link') is-invalid @enderror" 
-                               name="loa_link" value="{{ old('loa_link') }}" 
-                               placeholder="https://...">
-                        @error('loa_link')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted">Link surat penerimaan artikel (LOA)</small>
-                    </div>
-
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Simpan
