@@ -29,8 +29,11 @@
                 <a href="{{ route('admin.journals.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.monitoring' ? 'active' : '' }}">
                     <i class="bi bi-bar-chart"></i> Pemantauan Slot
                 </a>
-                <a href="{{ route('admin.articles.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.articles') ? 'active' : '' }}">
+                <a href="{{ route('admin.articles.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.articles.index' || $currentRoute == 'admin.articles.create' || $currentRoute == 'admin.articles.edit' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text-fill"></i> Kelola Artikel
+                </a>
+                <a href="{{ route('admin.articles.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.articles.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Artikel
                 </a>
             </div>
         </div>

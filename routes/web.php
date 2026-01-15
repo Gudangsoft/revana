@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('journals', JournalController::class);
         
         // Articles
+        Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
         Route::put('/articles/{article}/submission', [\App\Http\Controllers\Admin\ArticleController::class, 'updateSubmission'])->name('articles.update-submission');
         Route::put('/articles/{article}/review', [\App\Http\Controllers\Admin\ArticleController::class, 'updateReview'])->name('articles.update-review');

@@ -18,6 +18,15 @@ class ArticleController extends Controller
         return view('admin.articles.index', compact('articles'));
     }
 
+    public function monitoring()
+    {
+        $articles = Article::with(['journal', 'creator'])
+            ->latest()
+            ->get();
+        
+        return view('admin.articles.monitoring', compact('articles'));
+    }
+
     public function create()
     {
         $journals = Journal::orderBy('title')->get();
