@@ -21,34 +21,34 @@
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
-                <div class="card-body text-white">
-                    <h1 class="display-4 fw-bold mb-2">{{ $stats['pending'] }}</h1>
-                    <p class="mb-0 fs-5">Pending</p>
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border-radius: 15px;">
+                <div class="card-body text-white py-4">
+                    <h1 class="display-3 fw-bold mb-2">{{ $stats['pending'] }}</h1>
+                    <p class="mb-0 fs-5 fw-normal">Pending</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px;">
-                <div class="card-body text-white">
-                    <h1 class="display-4 fw-bold mb-2">{{ $stats['on_progress'] }}</h1>
-                    <p class="mb-0 fs-5">On Progress</p>
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 15px;">
+                <div class="card-body text-white py-4">
+                    <h1 class="display-3 fw-bold mb-2">{{ $stats['on_progress'] }}</h1>
+                    <p class="mb-0 fs-5 fw-normal">On Progress</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 12px;">
-                <div class="card-body text-white">
-                    <h1 class="display-4 fw-bold mb-2">{{ $stats['submitted'] }}</h1>
-                    <p class="mb-0 fs-5">Submitted</p>
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); border-radius: 15px;">
+                <div class="card-body text-white py-4">
+                    <h1 class="display-3 fw-bold mb-2">{{ $stats['submitted'] }}</h1>
+                    <p class="mb-0 fs-5 fw-normal">Submitted</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 12px;">
-                <div class="card-body text-white">
-                    <h1 class="display-4 fw-bold mb-2">{{ $stats['approved'] }}</h1>
-                    <p class="mb-0 fs-5">Approved</p>
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius: 15px;">
+                <div class="card-body text-white py-4">
+                    <h1 class="display-3 fw-bold mb-2">{{ $stats['approved'] }}</h1>
+                    <p class="mb-0 fs-5 fw-normal">Approved</p>
                 </div>
             </div>
         </div>
@@ -206,41 +206,6 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>{{ $assignments->where('status', 'PENDING')->count() }}</h5>
-                    <small>Pending</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5>{{ $assignments->where('status', 'ON_PROGRESS')->count() }}</h5>
-                    <small>On Progress</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5>{{ $assignments->where('status', 'SUBMITTED')->count() }}</h5>
-                    <small>Submitted</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>{{ $assignments->where('status', 'APPROVED')->count() }}</h5>
-                    <small>Approved</small>
-                </div>
             </div>
         </div>
     </div>
