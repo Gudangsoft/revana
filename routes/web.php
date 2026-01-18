@@ -3,6 +3,9 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\JournalController;
+use App\Http\Controllers\Admin\JournalMasterController;
+use App\Http\Controllers\Admin\JournalSlotController;
+use App\Http\Controllers\Admin\SubmissionController;
 use App\Http\Controllers\Admin\ReviewAssignmentController as AdminReviewAssignmentController;
 use App\Http\Controllers\Admin\ReviewerController;
 use App\Http\Controllers\Admin\RewardRedemptionController as AdminRewardRedemptionController;
@@ -70,6 +73,24 @@ Route::middleware('auth')->group(function () {
         // Journals
         Route::get('/journals/monitoring', [JournalController::class, 'monitoringSlots'])->name('journals.monitoring');
         Route::resource('journals', JournalController::class);
+        
+        // Journal Masters (Data Jurnal)
+        Route::patch('/journal-masters/{journalMaster}/toggle-active', [JournalMasterController::class, 'toggleActive'])->name('journal-masters.toggle-active');
+        Route::resource('journal-masters', JournalMasterController::class);
+        
+        // Journal Slots (Data Slot)
+        Route::get('/journal-slots/monitoring', [JournalSlotController::class, 'monitoring'])->name('journal-slots.monitoring');
+        Route::get('/journal-slots/get-by-journal', [JournalSlotController::class, 'getByJournal'])->name('journal-slots.get-by-journal');
+        Route::patch('/journal-slots/{journalSlot}/toggle-active', [JournalSlotController::class, 'toggleActive'])->name('journal-slots.toggle-active');
+        Route::resource('journal-slots', JournalSlotController::class);
+        
+        // Submissions (Data Submit & Proses Workflow)
+        Route::get('/submissions/monitoring', [SubmissionController::class, 'monitoring'])->name('submissions.monitoring');
+        Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
+        Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');
+        Route::post('/submissions/{submission}/validate-step', [SubmissionController::class, 'validateStep'])->name('submissions.validate-step');
+        Route::post('/submissions/{submission}/update-reviewer-notes', [SubmissionController::class, 'updateReviewerNotes'])->name('submissions.update-reviewer-notes');
+        Route::resource('submissions', SubmissionController::class);
         
         // Articles
         Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');

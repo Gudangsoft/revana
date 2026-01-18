@@ -18,7 +18,7 @@
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapseJournal" 
                     aria-expanded="{{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'true' : 'false' }}">
-                <i class="bi bi-journal-text"></i> Kelola Jurnal
+                <i class="bi bi-journal-text"></i> Kelola Jurnal (Lama)
             </button>
         </h2>
         <div id="collapseJournal" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'show' : '' }}" data-bs-parent="#accordionJournal">
@@ -34,6 +34,40 @@
                 </a>
                 <a href="{{ route('admin.articles.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.articles.monitoring' ? 'active' : '' }}">
                     <i class="bi bi-graph-up"></i> Monitoring Artikel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Menu Pengelolaan Jurnal Baru --}}
+<div class="accordion accordion-flush" id="accordionJournalNew">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') ? 'active' : '' }}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapseJournalNew" 
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') ? 'true' : 'false' }}">
+                <i class="bi bi-journal-bookmark-fill"></i> Pengelolaan Jurnal
+            </button>
+        </h2>
+        <div id="collapseJournalNew" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') ? 'show' : '' }}" data-bs-parent="#accordionJournalNew">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
+                    <i class="bi bi-journal-text"></i> Data Jurnal
+                </a>
+                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.index' || $currentRoute == 'admin.journal-slots.create' || $currentRoute == 'admin.journal-slots.edit' || $currentRoute == 'admin.journal-slots.show' ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot
+                </a>
+                <a href="{{ route('admin.journal-slots.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart"></i> Monitoring Slot
+                </a>
+                <a href="{{ route('admin.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.index' || $currentRoute == 'admin.submissions.create' || $currentRoute == 'admin.submissions.edit' || $currentRoute == 'admin.submissions.show' || $currentRoute == 'admin.submissions.process' ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-plus"></i> Data Submit
+                </a>
+                <a href="{{ route('admin.submissions.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Proses
                 </a>
             </div>
         </div>

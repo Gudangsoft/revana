@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\JournalSlot;
+use App\Models\JournalMaster;
+use Illuminate\Http\Request;
+
+class JournalSlotController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = JournalSlot::with(['journalMaster', 'creator', 'submissions']);
+        
+        // Filter by journal
+        if ($request->filled('journal_master_id')) {
+            $query->where('journal_master_id', $request->journal_master_id);
+        }
+        
+        // Filter by year
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+        
+        // Filter by month
+        if ($request->filled('bulan')) {
+            $query->where('bulan', $request->bulan);
+        }
+        
+        $slots = $query->latest()->paginate(20);
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $bulanOptions = JournalSlot::getBulanOptions();
+        
+        return view('admin.journal-slots.index', compact('slots', 'journals', 'bulanOptions'));
+    }
+
+    public function create()
+    {
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $bulanOptions = JournalSlot::getBulanOptions();
+        return view('admin.journal-slots.create', compact('journals', 'bulanOptions'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'kode_slot' => 'nullable|string|max:50|unique:journal_slots',
+            'journal_master_id' => 'required|exists:journal_masters,id',
+            'volume' => 'required|string|max:50',
+            'nomor' => 'required|string|max:50',
+            'bulan' => 'required|string|max:20',
+            'tahun' => 'required|integer|min:2000|max:2100',
+            'jumlah_slot' => 'required|integer|min:1',
+        ]);
+
+        $validated['created_by'] = auth()->id();
+        $validated['slot_terpakai'] = 0;
+        $validated['is_active'] = true;
+
+        JournalSlot::create($validated);
+
+        return redirect()->route('admin.journal-slots.index')
+            ->with('success', 'Data Slot berhasil ditambahkan');
+    }
+
+    public function show(JournalSlot $journalSlot)
+    {
+        $journalSlot->load(['journalMaster', 'creator', 'submissions.petugasSubmit']);
+        return view('admin.journal-slots.show', compact('journalSlot'));
+    }
+
+    public function edit(JournalSlot $journalSlot)
+    {
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $bulanOptions = JournalSlot::getBulanOptions();
+        return view('admin.journal-slots.edit', compact('journalSlot', 'journals', 'bulanOptions'));
+    }
+
+    public function update(Request $request, JournalSlot $journalSlot)
+    {
+        $validated = $request->validate([
+            'kode_slot' => 'required|string|max:50|unique:journal_slots,kode_slot,' . $journalSlot->id,
+            'journal_master_id' => 'required|exists:journal_masters,id',
+            'volume' => 'required|string|max:50',
+            'nomor' => 'required|string|max:50',
+            'bulan' => 'required|string|max:20',
+            'tahun' => 'required|integer|min:2000|max:2100',
+            'jumlah_slot' => 'required|integer|min:' . $journalSlot->slot_terpakai,
+            'is_active' => 'boolean',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active');
+
+        $journalSlot->update($validated);
+
+        return redirect()->route('admin.journal-slots.index')
+            ->with('success', 'Data Slot berhasil diperbarui');
+    }
+
+    public function destroy(JournalSlot $journalSlot)
+    {
+        // Check if slot has submissions
+        if ($journalSlot->submissions()->count() > 0) {
+            return back()->with('error', 'Slot tidak dapat dihapus karena masih memiliki submissions');
+        }
+
+        $journalSlot->delete();
+
+        return redirect()->route('admin.journal-slots.index')
+            ->with('success', 'Data Slot berhasil dihapus');
+    }
+
+    public function toggleActive(JournalSlot $journalSlot)
+    {
+        $journalSlot->update(['is_active' => !$journalSlot->is_active]);
+        
+        $status = $journalSlot->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Slot berhasil {$status}");
+    }
+
+    // Monitoring view
+    public function monitoring(Request $request)
+    {
+        $query = JournalSlot::with(['journalMaster', 'submissions']);
+        
+        // Filter by journal
+        if ($request->filled('journal_master_id')) {
+            $query->where('journal_master_id', $request->journal_master_id);
+        }
+        
+        // Filter by year
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+        
+        $slots = $query->where('is_active', true)->get();
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        // Calculate statistics
+        $stats = [
+            'total_slots' => $slots->sum('jumlah_slot'),
+            'slots_terpakai' => $slots->sum('slot_terpakai'),
+            'slots_tersedia' => $slots->sum('jumlah_slot') - $slots->sum('slot_terpakai'),
+        ];
+        
+        // Calculate per slot
+        $slotStats = $slots->map(function($slot) {
+            $percentage = $slot->jumlah_slot > 0 ? ($slot->slot_terpakai / $slot->jumlah_slot) * 100 : 0;
+            
+            return [
+                'slot' => $slot,
+                'total_slots' => $slot->jumlah_slot,
+                'used_slots' => $slot->slot_terpakai,
+                'available_slots' => $slot->slot_tersedia,
+                'percentage' => round($percentage, 1),
+                'status' => $percentage >= 90 ? 'danger' : ($percentage >= 70 ? 'warning' : 'success')
+            ];
+        })->sortByDesc('percentage');
+        
+        return view('admin.journal-slots.monitoring', compact('stats', 'slotStats', 'journals'));
+    }
+
+    // Get slots by journal (for AJAX)
+    public function getByJournal(Request $request)
+    {
+        $slots = JournalSlot::where('journal_master_id', $request->journal_master_id)
+            ->where('is_active', true)
+            ->whereRaw('jumlah_slot > slot_terpakai')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('nomor', 'desc')
+            ->get()
+            ->map(function($slot) {
+                return [
+                    'id' => $slot->id,
+                    'text' => $slot->display_name . ' (Tersedia: ' . $slot->slot_tersedia . ')',
+                    'kode_slot' => $slot->kode_slot,
+                ];
+            });
+            
+        return response()->json($slots);
+    }
+}
