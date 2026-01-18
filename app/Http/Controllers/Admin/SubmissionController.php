@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
+use App\Models\SubmissionHistory;
 use App\Models\JournalSlot;
 use App\Models\JournalMaster;
 use App\Models\User;
@@ -89,7 +90,13 @@ class SubmissionController extends Controller
         $validated['tanggal_submit'] = now()->toDateString();
         $validated['status'] = 'SUBMITTED';
 
-        Submission::create($validated);
+        $submission = Submission::create($validated);
+        
+        // Log history
+        $submission->logHistory('submit', 'submitted', 'Artikel baru disubmit', [
+            'judul_artikel' => $submission->judul_artikel,
+            'nama_penulis' => $submission->nama_penulis,
+        ]);
 
         return redirect()->route('admin.submissions.index')
             ->with('success', 'Data Submit berhasil ditambahkan');
@@ -211,12 +218,16 @@ class SubmissionController extends Controller
             'petugasEditor3',
             'petugasAuthor2',
             'petugasProduction',
-            'creator'
+            'creator',
+            'histories.user'
         ]);
         
         $users = User::orderBy('name')->get();
         
-        return view('admin.submissions.process', compact('submission', 'users'));
+        // Group histories by step
+        $historiesByStep = $submission->histories->sortBy('created_at')->groupBy('step');
+        
+        return view('admin.submissions.process', compact('submission', 'users', 'historiesByStep'));
     }
 
     // Update process step
@@ -232,6 +243,13 @@ class SubmissionController extends Controller
                     'password_editor' => 'required|string|max:255',
                 ]);
                 $submission->update(array_merge($validated, ['status' => 'EDITOR1_PROCESS']));
+                
+                $petugas = User::find($validated['petugas_editor1_id']);
+                $submission->logHistory('editor1', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_editor1_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
+                $submission->logHistory('editor1', 'credential_added', 'Kredensial editor ditambahkan');
                 break;
                 
             case 'author1':
@@ -239,6 +257,12 @@ class SubmissionController extends Controller
                     'petugas_author1_id' => 'required|exists:users,id',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_author1_id']);
+                $submission->logHistory('author1', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_author1_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
                 break;
                 
             case 'editor2':
@@ -246,6 +270,12 @@ class SubmissionController extends Controller
                     'petugas_editor2_id' => 'required|exists:users,id',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_editor2_id']);
+                $submission->logHistory('editor2', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_editor2_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
                 break;
                 
             case 'reviewer1':
@@ -255,6 +285,13 @@ class SubmissionController extends Controller
                     'password_reviewer1' => 'required|string|max:255',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_reviewer1_id']);
+                $submission->logHistory('reviewer1', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_reviewer1_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
+                $submission->logHistory('reviewer1', 'credential_added', 'Kredensial reviewer 1 ditambahkan');
                 break;
                 
             case 'reviewer2':
@@ -264,6 +301,13 @@ class SubmissionController extends Controller
                     'password_reviewer2' => 'required|string|max:255',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_reviewer2_id']);
+                $submission->logHistory('reviewer2', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_reviewer2_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
+                $submission->logHistory('reviewer2', 'credential_added', 'Kredensial reviewer 2 ditambahkan');
                 break;
                 
             case 'editor3':
@@ -271,6 +315,12 @@ class SubmissionController extends Controller
                     'petugas_editor3_id' => 'required|exists:users,id',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_editor3_id']);
+                $submission->logHistory('editor3', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_editor3_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
                 break;
                 
             case 'author2':
@@ -278,6 +328,12 @@ class SubmissionController extends Controller
                     'petugas_author2_id' => 'required|exists:users,id',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_author2_id']);
+                $submission->logHistory('author2', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_author2_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
                 break;
                 
             case 'production':
@@ -286,6 +342,12 @@ class SubmissionController extends Controller
                     'link_publish' => 'nullable|url',
                 ]);
                 $submission->update($validated);
+                
+                $petugas = User::find($validated['petugas_production_id']);
+                $submission->logHistory('production', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_production_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
                 break;
         }
         
@@ -296,35 +358,80 @@ class SubmissionController extends Controller
     public function validateStep(Request $request, Submission $submission)
     {
         $step = $request->input('step');
+        $notes = $request->input('notes', '');
         
         switch ($step) {
             case 'editor1':
                 $submission->validateEditor1();
+                $submission->logHistory('editor1', 'approved', $notes ?: 'Editor 1 divalidasi');
                 break;
             case 'author1':
                 $submission->validateAuthor1();
+                $submission->logHistory('author1', 'approved', $notes ?: 'Author 1 divalidasi');
                 break;
             case 'editor2':
                 $submission->validateEditor2();
+                $submission->logHistory('editor2', 'approved', $notes ?: 'Editor 2 divalidasi');
                 break;
             case 'reviewer1':
                 $submission->validateReviewer1();
+                $submission->logHistory('reviewer1', 'approved', $notes ?: 'Reviewer 1 divalidasi');
                 break;
             case 'reviewer2':
                 $submission->validateReviewer2();
+                $submission->logHistory('reviewer2', 'approved', $notes ?: 'Reviewer 2 divalidasi');
                 break;
             case 'editor3':
                 $submission->validateEditor3();
+                $submission->logHistory('editor3', 'approved', $notes ?: 'Editor 3 divalidasi');
                 break;
             case 'author2':
                 $submission->validateAuthor2();
+                $submission->logHistory('author2', 'approved', $notes ?: 'Author 2 divalidasi');
                 break;
             case 'production':
                 $submission->validateProduction();
+                $submission->logHistory('production', 'approved', $notes ?: 'Production divalidasi - Artikel Published', [
+                    'link_publish' => $submission->link_publish
+                ]);
                 break;
         }
         
         return back()->with('success', 'Langkah berhasil divalidasi');
+    }
+
+    // Request revision for a step
+    public function requestRevision(Request $request, Submission $submission)
+    {
+        $validated = $request->validate([
+            'step' => 'required|string',
+            'notes' => 'required|string|max:1000',
+        ]);
+        
+        $step = $validated['step'];
+        $notes = $validated['notes'];
+        
+        // Log revision request
+        $submission->logHistory($step, 'revision_request', $notes);
+        
+        return back()->with('success', 'Permintaan revisi berhasil dicatat');
+    }
+
+    // Submit revision for a step
+    public function submitRevision(Request $request, Submission $submission)
+    {
+        $validated = $request->validate([
+            'step' => 'required|string',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+        
+        $step = $validated['step'];
+        $notes = $validated['notes'] ?? 'Revisi telah dikerjakan';
+        
+        // Log revision submit
+        $submission->logHistory($step, 'revision_submit', $notes);
+        
+        return back()->with('success', 'Revisi berhasil dikirim');
     }
 
     // Update reviewer notes
@@ -335,9 +442,28 @@ class SubmissionController extends Controller
             'catatan_reviewer2' => 'nullable|string',
         ]);
         
+        // Log note changes
+        if (!empty($validated['catatan_reviewer1']) && $validated['catatan_reviewer1'] !== $submission->catatan_reviewer1) {
+            $submission->logHistory('reviewer1', 'note_added', $validated['catatan_reviewer1']);
+        }
+        if (!empty($validated['catatan_reviewer2']) && $validated['catatan_reviewer2'] !== $submission->catatan_reviewer2) {
+            $submission->logHistory('reviewer2', 'note_added', $validated['catatan_reviewer2']);
+        }
+        
         $submission->update($validated);
         
         return back()->with('success', 'Catatan reviewer berhasil diperbarui');
+    }
+
+    // Show history for a submission
+    public function history(Submission $submission)
+    {
+        $submission->load(['histories.user', 'journalSlot.journalMaster']);
+        
+        // Group histories by step
+        $historiesByStep = $submission->histories->sortBy('created_at')->groupBy('step');
+        
+        return view('admin.submissions.history', compact('submission', 'historiesByStep'));
     }
 
     // Monitoring view with filter by date

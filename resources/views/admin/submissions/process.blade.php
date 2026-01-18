@@ -16,12 +16,22 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         @endif
+        
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-x-circle"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
 
         <!-- Header Info -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-gear"></i> Proses Submit: <code>{{ $submission->kode_submit }}</code></span>
                 <div>
+                    <a href="{{ route('admin.submissions.history', $submission) }}" class="btn btn-outline-info">
+                        <i class="bi bi-clock-history"></i> Lihat Histori
+                    </a>
                     <a href="{{ route('admin.submissions.show', $submission) }}" class="btn btn-info">
                         <i class="bi bi-eye"></i> Detail
                     </a>
@@ -62,503 +72,336 @@
 
         <!-- Workflow Steps -->
         <div class="row">
-            <!-- Step 1: Editor 1 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->editor1_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->editor1_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->editor1_valid ? 'bi-check-circle-fill' : 'bi-1-circle' }}"></i>
-                            Petugas Editor 1
-                        </span>
-                        @if($submission->editor1_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Input user & password editor dan tanya jawab ke penulis</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="editor1">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Editor 1</label>
-                                <select class="form-select form-select-sm" name="petugas_editor1_id" {{ $submission->editor1_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_editor1_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label class="form-label">Username Editor</label>
-                                    <input type="text" class="form-control form-control-sm" name="username_editor" value="{{ $submission->username_editor }}" {{ $submission->editor1_valid ? 'disabled' : '' }}>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Password Editor</label>
-                                    <input type="text" class="form-control form-control-sm" name="password_editor" value="{{ $submission->password_editor }}" {{ $submission->editor1_valid ? 'disabled' : '' }}>
-                                </div>
-                            </div>
-                            @if(!$submission->editor1_valid)
-                            <div class="mt-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-save"></i> Simpan
-                                </button>
-                            </div>
-                            @endif
-                        </form>
-                        
-                        @if(!$submission->editor1_valid && $submission->petugas_editor1_id && $submission->username_editor && $submission->password_editor)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="editor1">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->editor1_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->editor1_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
+            @php
+                $stepsConfig = [
+                    'editor1' => [
+                        'title' => 'Editor 1',
+                        'icon' => '1',
+                        'desc' => 'Input user & password editor dan tanya jawab ke penulis',
+                        'valid_field' => 'editor1_valid',
+                        'validated_at_field' => 'editor1_validated_at',
+                        'petugas_rel' => 'petugasEditor1',
+                        'petugas_id_field' => 'petugas_editor1_id',
+                        'has_credentials' => true,
+                        'credential_fields' => ['username_editor', 'password_editor'],
+                        'prev_step_valid' => true,
+                    ],
+                    'author1' => [
+                        'title' => 'Author 1',
+                        'icon' => '2',
+                        'desc' => 'Menjawab pertanyaan dari Editor 1',
+                        'valid_field' => 'author1_valid',
+                        'validated_at_field' => 'author1_validated_at',
+                        'petugas_rel' => 'petugasAuthor1',
+                        'petugas_id_field' => 'petugas_author1_id',
+                        'has_credentials' => false,
+                        'prev_step_valid' => $submission->editor1_valid,
+                    ],
+                    'editor2' => [
+                        'title' => 'Editor 2',
+                        'icon' => '3',
+                        'desc' => 'Input user Reviewer 1 & 2 (penugasan reviewer)',
+                        'valid_field' => 'editor2_valid',
+                        'validated_at_field' => 'editor2_validated_at',
+                        'petugas_rel' => 'petugasEditor2',
+                        'petugas_id_field' => 'petugas_editor2_id',
+                        'has_credentials' => false,
+                        'prev_step_valid' => $submission->author1_valid,
+                    ],
+                    'reviewer1' => [
+                        'title' => 'Reviewer 1',
+                        'icon' => '4',
+                        'desc' => 'Menyelesaikan review (catatan dan form review)',
+                        'valid_field' => 'reviewer1_valid',
+                        'validated_at_field' => 'reviewer1_validated_at',
+                        'petugas_rel' => 'petugasReviewer1',
+                        'petugas_id_field' => 'petugas_reviewer1_id',
+                        'has_credentials' => true,
+                        'credential_fields' => ['username_reviewer1', 'password_reviewer1'],
+                        'has_notes' => true,
+                        'notes_field' => 'catatan_reviewer1',
+                        'prev_step_valid' => $submission->editor2_valid,
+                    ],
+                    'reviewer2' => [
+                        'title' => 'Reviewer 2',
+                        'icon' => '5',
+                        'desc' => 'Menyelesaikan review (catatan dan form review)',
+                        'valid_field' => 'reviewer2_valid',
+                        'validated_at_field' => 'reviewer2_validated_at',
+                        'petugas_rel' => 'petugasReviewer2',
+                        'petugas_id_field' => 'petugas_reviewer2_id',
+                        'has_credentials' => true,
+                        'credential_fields' => ['username_reviewer2', 'password_reviewer2'],
+                        'has_notes' => true,
+                        'notes_field' => 'catatan_reviewer2',
+                        'prev_step_valid' => $submission->reviewer1_valid,
+                    ],
+                    'editor3' => [
+                        'title' => 'Editor 3',
+                        'icon' => '6',
+                        'desc' => 'Mengirimkan ke penulis revisi',
+                        'valid_field' => 'editor3_valid',
+                        'validated_at_field' => 'editor3_validated_at',
+                        'petugas_rel' => 'petugasEditor3',
+                        'petugas_id_field' => 'petugas_editor3_id',
+                        'has_credentials' => false,
+                        'prev_step_valid' => $submission->reviewer2_valid,
+                    ],
+                    'author2' => [
+                        'title' => 'Author 2',
+                        'icon' => '7',
+                        'desc' => 'Mengirimkan hasil revisi ke OJS',
+                        'valid_field' => 'author2_valid',
+                        'validated_at_field' => 'author2_validated_at',
+                        'petugas_rel' => 'petugasAuthor2',
+                        'petugas_id_field' => 'petugas_author2_id',
+                        'has_credentials' => false,
+                        'prev_step_valid' => $submission->editor3_valid,
+                    ],
+                    'production' => [
+                        'title' => 'Production',
+                        'icon' => '8',
+                        'desc' => 'Editing dan publish',
+                        'valid_field' => 'production_valid',
+                        'validated_at_field' => 'production_validated_at',
+                        'petugas_rel' => 'petugasProduction',
+                        'petugas_id_field' => 'petugas_production_id',
+                        'has_credentials' => false,
+                        'has_link_publish' => true,
+                        'prev_step_valid' => $submission->author2_valid,
+                    ],
+                ];
+            @endphp
 
-            <!-- Step 2: Author 1 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->author1_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->author1_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->author1_valid ? 'bi-check-circle-fill' : 'bi-2-circle' }}"></i>
-                            Petugas Author 1
-                        </span>
-                        @if($submission->author1_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Menjawab pertanyaan dari Editor 1</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="author1">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Author 1</label>
-                                <select class="form-select form-select-sm" name="petugas_author1_id" {{ $submission->author1_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_author1_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @if(!$submission->author1_valid)
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        @if(!$submission->author1_valid && $submission->petugas_author1_id && $submission->editor1_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="author1">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->author1_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->author1_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Editor 2 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->editor2_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->editor2_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->editor2_valid ? 'bi-check-circle-fill' : 'bi-3-circle' }}"></i>
-                            Petugas Editor 2
-                        </span>
-                        @if($submission->editor2_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Input user Reviewer 1 & 2 (penugasan reviewer)</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="editor2">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Editor 2</label>
-                                <select class="form-select form-select-sm" name="petugas_editor2_id" {{ $submission->editor2_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_editor2_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @if(!$submission->editor2_valid)
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        @if(!$submission->editor2_valid && $submission->petugas_editor2_id && $submission->author1_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="editor2">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->editor2_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->editor2_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 4: Reviewer 1 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->reviewer1_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->reviewer1_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-4-circle' }}"></i>
-                            Petugas Reviewer 1
-                        </span>
-                        @if($submission->reviewer1_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Menyelesaikan review (catatan dan form review)</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="reviewer1">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Reviewer 1</label>
-                                <select class="form-select form-select-sm" name="petugas_reviewer1_id" {{ $submission->reviewer1_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_reviewer1_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label class="form-label">Username</label>
-                                    <input type="text" class="form-control form-control-sm" name="username_reviewer1" value="{{ $submission->username_reviewer1 }}" {{ $submission->reviewer1_valid ? 'disabled' : '' }}>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Password</label>
-                                    <input type="text" class="form-control form-control-sm" name="password_reviewer1" value="{{ $submission->password_reviewer1 }}" {{ $submission->reviewer1_valid ? 'disabled' : '' }}>
-                                </div>
-                            </div>
-                            @if(!$submission->reviewer1_valid)
-                            <button type="submit" class="btn btn-sm btn-primary mt-2">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        <!-- Catatan Reviewer 1 -->
-                        <form action="{{ route('admin.submissions.update-reviewer-notes', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <label class="form-label">Catatan Review</label>
-                            <textarea class="form-control form-control-sm" name="catatan_reviewer1" rows="2">{{ $submission->catatan_reviewer1 }}</textarea>
-                            <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
-                                <i class="bi bi-save"></i> Simpan Catatan
-                            </button>
-                        </form>
-                        
-                        @if(!$submission->reviewer1_valid && $submission->petugas_reviewer1_id && $submission->username_reviewer1 && $submission->editor2_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="reviewer1">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->reviewer1_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->reviewer1_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 5: Reviewer 2 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->reviewer2_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->reviewer2_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-5-circle' }}"></i>
-                            Petugas Reviewer 2
-                        </span>
-                        @if($submission->reviewer2_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Menyelesaikan review (catatan dan form review)</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="reviewer2">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Reviewer 2</label>
-                                <select class="form-select form-select-sm" name="petugas_reviewer2_id" {{ $submission->reviewer2_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_reviewer2_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label class="form-label">Username</label>
-                                    <input type="text" class="form-control form-control-sm" name="username_reviewer2" value="{{ $submission->username_reviewer2 }}" {{ $submission->reviewer2_valid ? 'disabled' : '' }}>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Password</label>
-                                    <input type="text" class="form-control form-control-sm" name="password_reviewer2" value="{{ $submission->password_reviewer2 }}" {{ $submission->reviewer2_valid ? 'disabled' : '' }}>
-                                </div>
-                            </div>
-                            @if(!$submission->reviewer2_valid)
-                            <button type="submit" class="btn btn-sm btn-primary mt-2">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        <!-- Catatan Reviewer 2 -->
-                        <form action="{{ route('admin.submissions.update-reviewer-notes', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <label class="form-label">Catatan Review</label>
-                            <textarea class="form-control form-control-sm" name="catatan_reviewer2" rows="2">{{ $submission->catatan_reviewer2 }}</textarea>
-                            <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
-                                <i class="bi bi-save"></i> Simpan Catatan
-                            </button>
-                        </form>
-                        
-                        @if(!$submission->reviewer2_valid && $submission->petugas_reviewer2_id && $submission->username_reviewer2 && $submission->reviewer1_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="reviewer2">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->reviewer2_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->reviewer2_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 6: Editor 3 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->editor3_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->editor3_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->editor3_valid ? 'bi-check-circle-fill' : 'bi-6-circle' }}"></i>
-                            Petugas Editor 3
-                        </span>
-                        @if($submission->editor3_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Mengirimkan ke penulis revisi</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="editor3">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Editor 3</label>
-                                <select class="form-select form-select-sm" name="petugas_editor3_id" {{ $submission->editor3_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_editor3_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @if(!$submission->editor3_valid)
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        @if(!$submission->editor3_valid && $submission->petugas_editor3_id && $submission->reviewer2_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="editor3">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->editor3_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->editor3_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 7: Author 2 -->
-            <div class="col-md-6 mb-4">
-                <div class="card {{ $submission->author2_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->author2_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->author2_valid ? 'bi-check-circle-fill' : 'bi-7-circle' }}"></i>
-                            Petugas Author 2
-                        </span>
-                        @if($submission->author2_valid)
-                            <span class="badge bg-light text-success">Valid</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Mengirimkan hasil revisi ke OJS</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="author2">
-                            
-                            <div class="mb-2">
-                                <label class="form-label">Petugas Author 2</label>
-                                <select class="form-select form-select-sm" name="petugas_author2_id" {{ $submission->author2_valid ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Petugas --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $submission->petugas_author2_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @if(!$submission->author2_valid)
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        @if(!$submission->author2_valid && $submission->petugas_author2_id && $submission->editor3_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="author2">
-                            <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Validasi langkah ini?')">
-                                <i class="bi bi-check-lg"></i> Validasi
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->author2_validated_at)
-                        <small class="text-success mt-2 d-block">
-                            <i class="bi bi-clock"></i> Divalidasi: {{ $submission->author2_validated_at->format('d/m/Y H:i') }}
-                        </small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 8: Production -->
-            <div class="col-md-12 mb-4">
-                <div class="card {{ $submission->production_valid ? 'border-success' : '' }}">
-                    <div class="card-header d-flex justify-content-between align-items-center {{ $submission->production_valid ? 'bg-success text-white' : '' }}">
-                        <span>
-                            <i class="bi {{ $submission->production_valid ? 'bi-check-circle-fill' : 'bi-8-circle' }}"></i>
-                            Petugas Production
-                        </span>
-                        @if($submission->production_valid)
-                            <span class="badge bg-light text-success">Valid - PUBLISHED</span>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <small class="text-muted d-block mb-2">Bertugas: Editing dan publish</small>
-                        
-                        <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="production">
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-2">
-                                        <label class="form-label">Petugas Production</label>
-                                        <select class="form-select form-select-sm" name="petugas_production_id" {{ $submission->production_valid ? 'disabled' : '' }}>
-                                            <option value="">-- Pilih Petugas --</option>
-                                            @foreach($users as $user)
-                                                <option value="{{ $user->id }}" {{ $submission->petugas_production_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-2">
-                                        <label class="form-label">Link Publish</label>
-                                        <input type="url" class="form-control form-control-sm" name="link_publish" value="{{ $submission->link_publish }}" placeholder="https://" {{ $submission->production_valid ? 'disabled' : '' }}>
-                                    </div>
-                                </div>
-                            </div>
-                            @if(!$submission->production_valid)
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                            @endif
-                        </form>
-                        
-                        @if(!$submission->production_valid && $submission->petugas_production_id && $submission->author2_valid)
-                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="mt-2">
-                            @csrf
-                            <input type="hidden" name="step" value="production">
-                            <button type="submit" class="btn btn-success" onclick="return confirm('Validasi langkah ini? Artikel akan berubah status menjadi PUBLISHED.')">
-                                <i class="bi bi-check-lg"></i> Validasi & Publish
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if($submission->production_validated_at)
-                        <div class="alert alert-success mt-3 mb-0">
-                            <i class="bi bi-check-circle-fill"></i> <strong>PUBLISHED!</strong><br>
-                            Divalidasi: {{ $submission->production_validated_at->format('d/m/Y H:i') }}
-                            @if($submission->link_publish)
-                            <br><a href="{{ $submission->link_publish }}" target="_blank" class="text-success">{{ $submission->link_publish }} <i class="bi bi-box-arrow-up-right"></i></a>
+            @foreach($stepsConfig as $stepKey => $stepCfg)
+                @php
+                    $isValid = $submission->{$stepCfg['valid_field']};
+                    $validatedAt = $submission->{$stepCfg['validated_at_field']};
+                    $petugasId = $submission->{$stepCfg['petugas_id_field']};
+                    $petugas = $submission->{$stepCfg['petugas_rel']};
+                    
+                    $stepHistories = $historiesByStep[$stepKey] ?? collect();
+                    $revisionCount = $stepHistories->where('action', 'revision_request')->count();
+                    $lastRevision = $stepHistories->where('action', 'revision_request')->sortByDesc('created_at')->first();
+                    $lastRevisionSubmit = $stepHistories->where('action', 'revision_submit')->sortByDesc('created_at')->first();
+                    $hasActiveRevision = $lastRevision && (!$lastRevisionSubmit || $lastRevision->created_at > $lastRevisionSubmit->created_at);
+                    
+                    // Credential check
+                    $hasRequiredCredentials = true;
+                    if (isset($stepCfg['has_credentials']) && $stepCfg['has_credentials']) {
+                        $hasRequiredCredentials = !empty($submission->{$stepCfg['credential_fields'][0]});
+                    }
+                    
+                    $canValidate = $petugasId && $hasRequiredCredentials && $stepCfg['prev_step_valid'];
+                @endphp
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card {{ $isValid ? 'border-success' : ($hasActiveRevision ? 'border-warning' : '') }}">
+                        <div class="card-header d-flex justify-content-between align-items-center {{ $isValid ? 'bg-success text-white' : ($hasActiveRevision ? 'bg-warning' : '') }}">
+                            <span>
+                                <i class="bi {{ $isValid ? 'bi-check-circle-fill' : 'bi-'.$stepCfg['icon'].'-circle' }}"></i>
+                                Petugas {{ $stepCfg['title'] }}
+                                @if($revisionCount > 0)
+                                    <span class="badge bg-warning text-dark ms-1">{{ $revisionCount }} Revisi</span>
+                                @endif
+                            </span>
+                            @if($isValid)
+                                <span class="badge bg-light text-success">Valid</span>
+                            @elseif($hasActiveRevision)
+                                <span class="badge bg-light text-warning">Menunggu Revisi</span>
                             @endif
                         </div>
-                        @endif
+                        <div class="card-body">
+                            <small class="text-muted d-block mb-2">Bertugas: {{ $stepCfg['desc'] }}</small>
+                            
+                            <!-- Form Penugasan -->
+                            <form action="{{ route('admin.submissions.update-process', $submission) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="step" value="{{ $stepKey }}">
+                                
+                                <div class="mb-2">
+                                    <label class="form-label">Petugas {{ $stepCfg['title'] }}</label>
+                                    <select class="form-select form-select-sm" name="petugas_{{ $stepKey }}_id" {{ $isValid ? 'disabled' : '' }}>
+                                        <option value="">-- Pilih Petugas --</option>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}" {{ $petugasId == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                @if(isset($stepCfg['has_credentials']) && $stepCfg['has_credentials'])
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label">Username</label>
+                                            <input type="text" class="form-control form-control-sm" name="{{ $stepCfg['credential_fields'][0] }}" value="{{ $submission->{$stepCfg['credential_fields'][0]} }}" {{ $isValid ? 'disabled' : '' }}>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Password</label>
+                                            <input type="text" class="form-control form-control-sm" name="{{ $stepCfg['credential_fields'][1] }}" value="{{ $submission->{$stepCfg['credential_fields'][1]} }}" {{ $isValid ? 'disabled' : '' }}>
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                @if(isset($stepCfg['has_link_publish']) && $stepCfg['has_link_publish'])
+                                    <div class="mb-2">
+                                        <label class="form-label">Link Publish</label>
+                                        <input type="url" class="form-control form-control-sm" name="link_publish" value="{{ $submission->link_publish }}" placeholder="https://" {{ $isValid ? 'disabled' : '' }}>
+                                    </div>
+                                @endif
+                                
+                                @if(!$isValid)
+                                <button type="submit" class="btn btn-sm btn-primary mt-2">
+                                    <i class="bi bi-save"></i> Simpan
+                                </button>
+                                @endif
+                            </form>
+                            
+                            @if(isset($stepCfg['has_notes']) && $stepCfg['has_notes'])
+                                <!-- Catatan Reviewer -->
+                                <form action="{{ route('admin.submissions.update-reviewer-notes', $submission) }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <label class="form-label">Catatan Review</label>
+                                    <textarea class="form-control form-control-sm" name="{{ $stepCfg['notes_field'] }}" rows="2">{{ $submission->{$stepCfg['notes_field']} }}</textarea>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
+                                        <i class="bi bi-save"></i> Simpan Catatan
+                                    </button>
+                                </form>
+                            @endif
+                            
+                            <!-- Tombol Aksi Revisi & Validasi -->
+                            @if(!$isValid && $petugasId)
+                                <div class="mt-3 d-flex gap-2 flex-wrap">
+                                    <!-- Tombol Minta Revisi -->
+                                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#revisionModal{{ $stepKey }}">
+                                        <i class="bi bi-arrow-return-left"></i> Minta Revisi
+                                    </button>
+                                    
+                                    <!-- Tombol Kirim Revisi (jika ada revisi aktif) -->
+                                    @if($hasActiveRevision)
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#submitRevisionModal{{ $stepKey }}">
+                                            <i class="bi bi-arrow-return-right"></i> Kirim Revisi
+                                        </button>
+                                    @endif
+                                    
+                                    <!-- Tombol Validasi -->
+                                    @if($canValidate)
+                                        <form action="{{ route('admin.submissions.validate-step', $submission) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="step" value="{{ $stepKey }}">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Validasi langkah ini?')">
+                                                <i class="bi bi-check-lg"></i> Validasi
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @endif
+                            
+                            @if($validatedAt)
+                            <small class="text-success mt-2 d-block">
+                                <i class="bi bi-clock"></i> Divalidasi: {{ $validatedAt->format('d/m/Y H:i') }}
+                            </small>
+                            @endif
+                            
+                            <!-- Histori Step (Collapsed) -->
+                            @if($stepHistories->count() > 0)
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#history{{ $stepKey }}">
+                                    <i class="bi bi-clock-history"></i> Lihat Histori ({{ $stepHistories->count() }})
+                                </button>
+                                <div class="collapse" id="history{{ $stepKey }}">
+                                    <div class="mt-2">
+                                        <div class="list-group list-group-flush small">
+                                            @foreach($stepHistories->sortByDesc('created_at')->take(5) as $h)
+                                            <div class="list-group-item px-0 py-1 border-0">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>
+                                                        <span class="badge {{ $h->action_badge_class }} badge-sm">{{ $h->action_label }}@if($h->revision_number > 0) #{{ $h->revision_number }}@endif</span>
+                                                        <small class="text-muted">{{ $h->user->name ?? 'System' }}</small>
+                                                    </span>
+                                                    <small class="text-muted">{{ $h->created_at->format('d/m H:i') }}</small>
+                                                </div>
+                                                @if($h->notes)
+                                                <small class="text-muted fst-italic">{{ Str::limit($h->notes, 50) }}</small>
+                                                @endif
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            </div>
+                
+                <!-- Modal Minta Revisi -->
+                <div class="modal fade" id="revisionModal{{ $stepKey }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{{ route('admin.submissions.request-revision', $submission) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="step" value="{{ $stepKey }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Minta Revisi - {{ $stepCfg['title'] }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Catatan Revisi <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" name="notes" rows="4" required placeholder="Jelaskan apa yang perlu direvisi..."></textarea>
+                                    </div>
+                                    @if($revisionCount > 0)
+                                    <div class="alert alert-info mb-0">
+                                        <small><i class="bi bi-info-circle"></i> Ini akan menjadi revisi ke-{{ $revisionCount + 1 }}</small>
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-arrow-return-left"></i> Kirim Permintaan Revisi
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal Kirim Revisi -->
+                <div class="modal fade" id="submitRevisionModal{{ $stepKey }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{{ route('admin.submissions.submit-revision', $submission) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="step" value="{{ $stepKey }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Kirim Revisi - {{ $stepCfg['title'] }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    @if($lastRevision)
+                                    <div class="alert alert-warning">
+                                        <strong>Permintaan Revisi:</strong><br>
+                                        <small class="text-muted">{{ $lastRevision->created_at->format('d/m/Y H:i') }} oleh {{ $lastRevision->user->name ?? 'System' }}</small><br>
+                                        {{ $lastRevision->notes }}
+                                    </div>
+                                    @endif
+                                    <div class="mb-3">
+                                        <label class="form-label">Catatan Hasil Revisi</label>
+                                        <textarea class="form-control" name="notes" rows="3" placeholder="Jelaskan revisi yang telah dilakukan (opsional)..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-arrow-return-right"></i> Kirim Revisi
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 </div>

@@ -87,8 +87,11 @@ Route::middleware('auth')->group(function () {
         // Submissions (Data Submit & Proses Workflow)
         Route::get('/submissions/monitoring', [SubmissionController::class, 'monitoring'])->name('submissions.monitoring');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
+        Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');
         Route::post('/submissions/{submission}/validate-step', [SubmissionController::class, 'validateStep'])->name('submissions.validate-step');
+        Route::post('/submissions/{submission}/request-revision', [SubmissionController::class, 'requestRevision'])->name('submissions.request-revision');
+        Route::post('/submissions/{submission}/submit-revision', [SubmissionController::class, 'submitRevision'])->name('submissions.submit-revision');
         Route::post('/submissions/{submission}/update-reviewer-notes', [SubmissionController::class, 'updateReviewerNotes'])->name('submissions.update-reviewer-notes');
         Route::resource('submissions', SubmissionController::class);
         

@@ -127,7 +127,7 @@
             </div>
 
             <div class="mt-3">
-                {{ $articles->links() }}
+                @include('components.simple-pagination', ['paginator' => $articles])
             </div>
         </div>
     </div>

@@ -203,6 +203,49 @@ class Submission extends Model
         return $this->belongsTo(User::class, 'petugas_production_id');
     }
 
+    // Histories relationship
+    public function histories()
+    {
+        return $this->hasMany(SubmissionHistory::class)->orderBy('created_at', 'desc');
+    }
+
+    // Get histories for specific step
+    public function getStepHistories($step)
+    {
+        return $this->histories()->where('step', $step)->orderBy('created_at', 'asc')->get();
+    }
+
+    // Count revisions for specific step
+    public function getRevisionCount($step)
+    {
+        return $this->histories()
+            ->where('step', $step)
+            ->where('action', 'revision_request')
+            ->count();
+    }
+
+    // Log history
+    public function logHistory($step, $action, $notes = null, $data = null, $userId = null)
+    {
+        $revisionNumber = 0;
+        
+        // Calculate revision number if action is revision_request
+        if ($action === 'revision_request') {
+            $revisionNumber = $this->getRevisionCount($step) + 1;
+        } elseif ($action === 'revision_submit') {
+            $revisionNumber = $this->getRevisionCount($step);
+        }
+
+        return $this->histories()->create([
+            'step' => $step,
+            'action' => $action,
+            'user_id' => $userId ?? auth()->id(),
+            'notes' => $notes,
+            'data' => $data,
+            'revision_number' => $revisionNumber,
+        ]);
+    }
+
     // Status helpers
     public static function getStatusOptions()
     {

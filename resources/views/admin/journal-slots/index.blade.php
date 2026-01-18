@@ -164,7 +164,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $slots->withQueryString()->links() }}
+                    @include('components.simple-pagination', ['paginator' => $slots->withQueryString()])
                 </div>
             </div>
         </div>
