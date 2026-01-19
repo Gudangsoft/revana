@@ -194,6 +194,20 @@
                         @endif
                     </div>
                 </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>File Artikel:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        @if($assignment->article_file)
+                            <a href="{{ asset('storage/' . $assignment->article_file) }}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="bi bi-download"></i> {{ $assignment->article_file_original_name ?? 'Download File' }}
+                            </a>
+                        @else
+                            <span class="text-muted">Tidak ada file artikel</span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -271,9 +285,25 @@
         @if($assignment->reviewResults->count() > 0)
         @foreach($assignment->reviewResults as $index => $reviewResult)
         <div class="card mb-3">
-            <div class="card-header bg-success text-white">
-                <i class="bi bi-file-text"></i> Hasil Review - Formulir Review Artikel Ilmiah SIPERA 
-                <span class="badge bg-light text-dark">Reviewer {{ $index + 1 }}: {{ $reviewResult->reviewer ? $reviewResult->reviewer->name : 'N/A' }}</span>
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-file-text"></i> Hasil Review - Formulir Review Artikel Ilmiah SIPERA 
+                    <span class="badge bg-light text-dark">Reviewer {{ $index + 1 }}: {{ $reviewResult->reviewer ? $reviewResult->reviewer->name : 'N/A' }}</span>
+                </div>
+                <div>
+                    <a href="{{ route('admin.assignments.download-pdf', [$assignment, $reviewResult]) }}" class="btn btn-sm btn-light" target="_blank">
+                        <i class="bi bi-file-pdf"></i> Download PDF Formulir
+                    </a>
+                    @if($reviewResult->merged_revision_file)
+                        <a href="{{ Storage::url($reviewResult->merged_revision_file) }}" class="btn btn-sm btn-warning" target="_blank">
+                            <i class="bi bi-download"></i> Download Hasil Review
+                        </a>
+                    @elseif($reviewResult->revision_file)
+                        <a href="{{ Storage::url($reviewResult->revision_file) }}" class="btn btn-sm btn-warning" target="_blank">
+                            <i class="bi bi-download"></i> Download Hasil Review
+                        </a>
+                    @endif
+                </div>
             </div>
             <div class="card-body">
                 <!-- A. Informasi Naskah -->

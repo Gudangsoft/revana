@@ -52,6 +52,17 @@
                     @endif
                 </div>
 
+                <div class="mb-3">
+                    <strong>File Artikel:</strong><br>
+                    @if($assignment->article_file)
+                        <a href="{{ asset('storage/' . $assignment->article_file) }}" target="_blank" class="btn btn-sm btn-success mt-1">
+                            <i class="bi bi-file-earmark-word"></i> Download Artikel ({{ $assignment->article_file_original_name ?? 'File' }})
+                        </a>
+                    @else
+                        <span class="text-muted">Tidak ada file artikel</span>
+                    @endif
+                </div>
+
                 @php
                     // Determine which reviewer number this user is
                     $reviewerNumber = null;
@@ -416,6 +427,14 @@
                 <i class="bi bi-gear"></i> Aksi
             </div>
             <div class="card-body">
+                {{-- Download Artikel Button - Always visible if file exists --}}
+                @if($assignment->article_file)
+                    <a href="{{ asset('storage/' . $assignment->article_file) }}" target="_blank" class="btn btn-success w-100 mb-2">
+                        <i class="bi bi-download"></i> Download Artikel untuk Review
+                    </a>
+                    <hr>
+                @endif
+
                 @if($assignment->isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
                     <div class="alert alert-danger">
                         <i class="bi bi-lock-fill"></i> Task sudah expired dan tidak dapat dikerjakan

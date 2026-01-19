@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\ReviewAssignment;
+use App\Models\ReviewResult;
 use App\Models\User;
 use App\Notifications\ReviewAssignmentNotification;
 use App\Notifications\ReviewApprovedNotification;
 use App\Notifications\ReviewRevisionNotification;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReviewAssignmentController extends Controller
 {
@@ -70,6 +72,7 @@ class ReviewAssignmentController extends Controller
             'article_title' => 'required|string|max:500',
             'article_number' => 'required|string|max:255',
             'submit_link' => 'required|url',
+            'article_file' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // Max 10MB
             'deadline' => 'required|date|after:today',
             'language' => 'required|in:Indonesia,Inggris',
             'field_of_study_id' => 'required|exists:field_of_studies,id',
@@ -103,10 +106,23 @@ class ReviewAssignmentController extends Controller
             return back()->withErrors(['reviewer_id' => 'Tidak boleh memilih reviewer yang sama.'])->withInput();
         }
 
+        // Handle article file upload
+        $articleFilePath = null;
+        $articleFileOriginalName = null;
+        if ($request->hasFile('article_file')) {
+            $file = $request->file('article_file');
+            $articleFileOriginalName = $file->getClientOriginalName();
+            $filename = time() . '_' . $articleFileOriginalName;
+            $file->storeAs('assignments/articles', $filename, 'public');
+            $articleFilePath = 'assignments/articles/' . $filename;
+        }
+
         $assignment = ReviewAssignment::create([
             'article_title' => $request->article_title,
             'article_number' => $request->article_number,
             'submit_link' => $request->submit_link,
+            'article_file' => $articleFilePath,
+            'article_file_original_name' => $articleFileOriginalName,
             'account_username' => null,
             'account_password' => null,
             'reviewer_username' => null,
@@ -318,6 +334,34 @@ class ReviewAssignmentController extends Controller
         }
 
         return response()->download($filePath);
+    }
+
+    /**
+     * Download PDF hasil formulir review
+     */
+    public function downloadPdf(ReviewAssignment $assignment, ReviewResult $reviewResult)
+    {
+        // Verify the review result belongs to this assignment
+        if ($reviewResult->review_assignment_id !== $assignment->id) {
+            return back()->with('error', 'Data review tidak valid');
+        }
+
+        // Get reviewer data for signature
+        $reviewer = $reviewResult->reviewer;
+
+        // Generate PDF using the same view as reviewer
+        $pdf = Pdf::loadView('reviewer.results.pdf', [
+            'result' => $reviewResult,
+            'reviewer' => $reviewer,
+            'assignment' => $assignment
+        ]);
+
+        // Set paper size and orientation
+        $pdf->setPaper('A4', 'portrait');
+
+        // Download PDF
+        $filename = 'Review_' . ($reviewResult->article_code ?? $assignment->article_number) . '_' . ($reviewer ? $reviewer->name : 'reviewer') . '_' . date('YmdHis') . '.pdf';
+        return $pdf->download($filename);
     }
 
     public function destroy(ReviewAssignment $assignment)

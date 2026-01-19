@@ -14,6 +14,8 @@ class ReviewAssignment extends Model
         'article_title',
         'article_number',
         'submit_link',
+        'article_file',
+        'article_file_original_name',
         'account_username',
         'account_password',
         'reviewer_username',

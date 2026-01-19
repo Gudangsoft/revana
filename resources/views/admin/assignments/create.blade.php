@@ -276,6 +276,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Upload File Artikel (Word/PDF)</label>
+                        <input type="file" class="form-control @error('article_file') is-invalid @enderror" 
+                               name="article_file" accept=".doc,.docx,.pdf">
+                        @error('article_file')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">File artikel yang akan direview. Format: DOC, DOCX, PDF. Maksimal 10MB.</small>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Deadline <span class="text-danger">*</span></label>
                         <input type="date" class="form-control @error('deadline') is-invalid @enderror" 
                                name="deadline" value="{{ old('deadline') }}" required>
