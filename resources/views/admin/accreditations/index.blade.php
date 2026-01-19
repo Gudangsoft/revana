@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ' - ' . $appSettings['app_name'])
+@section('title', 'Kelola Akreditasi - ' . $appSettings['app_name'])
 @section('page-title', 'Kelola Akreditasi')
 
 @section('sidebar')
@@ -11,9 +11,20 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="bi bi-award"></i> Daftar Akreditasi</h5>
-        <a href="{{ route('admin.accreditations.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Tambah Akreditasi
-        </a>
+        <div class="btn-group">
+            <a href="{{ route('admin.accreditations.template') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark-arrow-down"></i> Template
+            </a>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bi bi-upload"></i> Import Excel
+            </button>
+            <a href="{{ route('admin.accreditations.export', request()->query()) }}" class="btn btn-info">
+                <i class="bi bi-download"></i> Export Excel
+            </a>
+            <a href="{{ route('admin.accreditations.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Tambah Akreditasi
+            </a>
+        </div>
     </div>
     <div class="card-body">
         @if(session('success'))
@@ -29,6 +40,25 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         @endif
+
+        <!-- Search Form -->
+        <form action="{{ route('admin.accreditations.index') }}" method="GET" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Cari akreditasi..." value="{{ request('search') }}">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
+                        @if(request('search'))
+                        <a href="{{ route('admin.accreditations.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
 
         <div class="table-responsive">
             <table class="table table-hover">
@@ -100,6 +130,50 @@
             @include('components.simple-pagination', ['paginator' => $accreditations])
         </div>
         @endif
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="bi bi-upload"></i> Import Data Akreditasi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.accreditations.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Pilih File Excel <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+                        <small class="text-muted">Format yang didukung: .xlsx, .xls, .csv (Max: 5MB)</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Petunjuk Import</h6>
+                        <ul class="mb-0 small">
+                            <li>Download template terlebih dahulu untuk format yang benar</li>
+                            <li>Kolom wajib: <strong>nama</strong>, <strong>points</strong></li>
+                            <li>Kolom opsional: <strong>deskripsi</strong>, <strong>status</strong></li>
+                            <li>Jika nama akreditasi sudah ada, data akan diperbarui</li>
+                            <li>Status: "Aktif", "Ya", "Yes", "1" = Aktif. Lainnya = Nonaktif</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ route('admin.accreditations.template') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Download Template
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

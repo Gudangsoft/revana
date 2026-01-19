@@ -107,6 +107,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/articles/{article}/publication', [\App\Http\Controllers\Admin\ArticleController::class, 'updatePublication'])->name('articles.update-publication');
         
         // Accreditations
+        Route::get('/accreditations/export', [\App\Http\Controllers\Admin\AccreditationController::class, 'export'])->name('accreditations.export');
+        Route::post('/accreditations/import', [\App\Http\Controllers\Admin\AccreditationController::class, 'import'])->name('accreditations.import');
+        Route::get('/accreditations/template', [\App\Http\Controllers\Admin\AccreditationController::class, 'downloadTemplate'])->name('accreditations.template');
         Route::resource('accreditations', \App\Http\Controllers\Admin\AccreditationController::class);
         
         // Review Assignments
