@@ -50,6 +50,12 @@ class ReviewAssignmentController extends Controller
         $reviewers = User::where('role', 'reviewer')->get();
         $fieldOfStudies = \App\Models\FieldOfStudy::active()->ordered()->get();
         
+        // Get submissions data for dropdown (from journal management)
+        $submissions = \App\Models\Submission::with(['journalSlot.journalMaster'])
+            ->whereNotNull('id_artikel')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
         // Get pre-selected reviewer if coming from review request approval
         $preselectedReviewerId = $request->get('reviewer_id');
         $preselectedReviewer = null;
@@ -63,7 +69,7 @@ class ReviewAssignmentController extends Controller
                 ->first();
         }
 
-        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies', 'preselectedReviewer', 'journalCount', 'reviewRequestId'));
+        return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies', 'preselectedReviewer', 'journalCount', 'reviewRequestId', 'submissions'));
     }
 
     public function store(Request $request)

@@ -92,6 +92,10 @@ Route::middleware('auth')->group(function () {
         
         // Submissions (Data Submit & Proses Workflow)
         Route::get('/submissions/monitoring', [SubmissionController::class, 'monitoring'])->name('submissions.monitoring');
+        Route::get('/submissions/export', [SubmissionController::class, 'export'])->name('submissions.export');
+        Route::get('/submissions/import', [SubmissionController::class, 'importForm'])->name('submissions.import.form');
+        Route::post('/submissions/import', [SubmissionController::class, 'import'])->name('submissions.import');
+        Route::get('/submissions/template', [SubmissionController::class, 'downloadTemplate'])->name('submissions.template');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');

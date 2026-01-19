@@ -184,10 +184,23 @@
                 <span><i class="bi bi-file-earmark-text"></i> Data Submit</span>
                 <div>
                     <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-info">
-                        <i class="bi bi-bar-chart"></i> Monitoring Proses
+                        <i class="bi bi-bar-chart"></i> Monitoring
                     </a>
+                    <div class="btn-group">
+                        <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-success">
+                            <i class="bi bi-download"></i> Export
+                        </a>
+                        <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('admin.submissions.export', request()->query()) }}"><i class="bi bi-file-earmark-excel"></i> Export Data</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal"><i class="bi bi-upload"></i> Import Data</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.submissions.template') }}"><i class="bi bi-file-earmark-arrow-down"></i> Download Template</a></li>
+                        </ul>
+                    </div>
                     <a href="{{ route('admin.submissions.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Tambah Submit
+                        <i class="bi bi-plus-circle"></i> Tambah
                     </a>
                 </div>
             </div>
@@ -195,6 +208,13 @@
                 @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     <i class="bi bi-check-circle"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+                
+                @if(session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show">
+                    <i class="bi bi-exclamation-triangle"></i> {{ session('warning') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
                 @endif
@@ -401,4 +421,52 @@ document.addEventListener('DOMContentLoaded', function() {
     updateScrollProgress();
 });
 </script>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="bi bi-upload"></i> Import Data Submissions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.submissions.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Petunjuk Import:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Download template terlebih dahulu</li>
+                            <li>Isi data sesuai format template</li>
+                            <li>Kolom wajib: id_artikel, judul_artikel, nama_penulis</li>
+                            <li>Format file: Excel (.xlsx, .xls) atau CSV</li>
+                            <li>Maksimal ukuran file: 10MB</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Pilih File <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="importFile" name="file" 
+                               accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{{ route('admin.submissions.template') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-file-earmark-arrow-down"></i> Download Template
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

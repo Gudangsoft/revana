@@ -8,6 +8,9 @@ use App\Models\SubmissionHistory;
 use App\Models\JournalSlot;
 use App\Models\JournalMaster;
 use App\Models\User;
+use App\Exports\SubmissionsExport;
+use App\Imports\SubmissionsImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class SubmissionController extends Controller
@@ -546,5 +549,118 @@ class SubmissionController extends Controller
         ];
         
         return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats'));
+    }
+
+    /**
+     * Export submissions to Excel
+     */
+    public function export(Request $request)
+    {
+        $filters = [
+            'tanggal_dari' => $request->tanggal_dari,
+            'tanggal_sampai' => $request->tanggal_sampai,
+            'journal_master_id' => $request->journal_master_id,
+            'status' => $request->status,
+        ];
+
+        $filename = 'submissions_' . date('Ymd_His') . '.xlsx';
+
+        return Excel::download(new SubmissionsExport($filters), $filename);
+    }
+
+    /**
+     * Show import form
+     */
+    public function importForm()
+    {
+        return view('admin.submissions.import');
+    }
+
+    /**
+     * Import submissions from Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $import = new SubmissionsImport(auth()->id());
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $updated = $import->getUpdatedCount();
+            $failures = $import->failures();
+            $errors = $import->errors();
+
+            $message = "Import selesai! ";
+            if ($imported > 0) {
+                $message .= "{$imported} data baru ditambahkan. ";
+            }
+            if ($updated > 0) {
+                $message .= "{$updated} data diperbarui. ";
+            }
+            if (count($failures) > 0) {
+                $message .= count($failures) . " baris gagal validasi. ";
+            }
+            if (count($errors) > 0) {
+                $message .= count($errors) . " error ditemukan.";
+            }
+
+            if ($imported > 0 || $updated > 0) {
+                return redirect()->route('admin.submissions.index')
+                    ->with('success', $message);
+            } else {
+                return redirect()->route('admin.submissions.index')
+                    ->with('warning', 'Tidak ada data yang diimport. Pastikan format file sesuai template.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->route('admin.submissions.index')
+                ->with('error', 'Error saat import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download import template
+     */
+    public function downloadTemplate()
+    {
+        $headers = [
+            'id_artikel',
+            'judul_artikel',
+            'link_artikel',
+            'nama_penulis',
+            'no_hp_penulis',
+            'username_author',
+            'password_author',
+            'pic_marketing',
+            'kode_slot',
+            'tanggal_submit',
+        ];
+
+        $callback = function() use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            // Add sample row
+            fputcsv($file, [
+                'ART-2026-001',
+                'Judul Artikel Contoh',
+                'https://link-artikel.com',
+                'Nama Penulis',
+                '08123456789',
+                'username_author',
+                'password123',
+                'PIC Marketing',
+                'SLT20260001',
+                date('Y-m-d'),
+            ]);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_submissions.csv"',
+        ]);
     }
 }

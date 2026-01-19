@@ -245,10 +245,37 @@
                     <form action="{{ route('admin.assignments.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
+                    {{-- Data dari Pengelolaan Jurnal --}}
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="mb-3"><i class="bi bi-database"></i> Ambil Data dari Pengelolaan Jurnal</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Pilih Submission <small class="text-muted">(Opsional - pilih untuk mengisi otomatis)</small></label>
+                                <input type="text" class="form-control mb-2" id="searchSubmission" placeholder="🔍 Cari kode artikel atau judul..." autocomplete="off">
+                                <select class="form-select" id="submissionSelect" size="5" style="height: auto;">
+                                    <option value="">-- Pilih Submission atau Input Manual --</option>
+                                    @if(isset($submissions))
+                                    @foreach($submissions as $sub)
+                                        <option value="{{ $sub->id }}" 
+                                                data-article-id="{{ $sub->id_artikel }}"
+                                                data-article-title="{{ $sub->judul_artikel }}"
+                                                data-article-link="{{ $sub->link_artikel }}"
+                                                data-journal-name="{{ $sub->journalSlot?->journalMaster?->nama_jurnal ?? '' }}"
+                                                data-search="{{ strtolower($sub->id_artikel . ' ' . $sub->judul_artikel . ' ' . ($sub->journalSlot?->journalMaster?->nama_jurnal ?? '')) }}">
+                                            [{{ $sub->id_artikel }}] {{ Str::limit($sub->judul_artikel, 50) }} - {{ $sub->journalSlot?->journalMaster?->nama_jurnal ?? 'N/A' }}
+                                        </option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                                <small class="text-muted">Memilih submission akan mengisi otomatis Nomor Artikel, Judul Artikel, dan Link Submit</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Judul Artikel <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('article_title') is-invalid @enderror" 
-                               name="article_title" value="{{ old('article_title') }}" 
+                               name="article_title" id="article_title" value="{{ old('article_title') }}" 
                                placeholder="Masukkan judul artikel" required>
                         @error('article_title')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -258,7 +285,7 @@
                     <div class="mb-3">
                         <label class="form-label">Nomor Artikel <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('article_number') is-invalid @enderror" 
-                               name="article_number" value="{{ old('article_number') }}" 
+                               name="article_number" id="article_number" value="{{ old('article_number') }}" 
                                placeholder="Contoh: ART-2026-001" required>
                         @error('article_number')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -268,7 +295,7 @@
                     <div class="mb-3">
                         <label class="form-label">Link Submit <span class="text-danger">*</span></label>
                         <input type="url" class="form-control @error('submit_link') is-invalid @enderror" 
-                               name="submit_link" value="{{ old('submit_link') }}" 
+                               name="submit_link" id="submit_link" value="{{ old('submit_link') }}" 
                                placeholder="https://" required>
                         @error('submit_link')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -694,6 +721,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize reviewer 1 if exists
     if (searchReviewer1 && reviewer1) {
         initializeReviewerSearch(searchReviewer1, reviewer1, 1);
+    }
+    
+    // Submission search and auto-fill functionality
+    const searchSubmission = document.getElementById('searchSubmission');
+    const submissionSelect = document.getElementById('submissionSelect');
+    const articleTitle = document.getElementById('article_title');
+    const articleNumber = document.getElementById('article_number');
+    const submitLink = document.getElementById('submit_link');
+    
+    if (searchSubmission && submissionSelect) {
+        // Search filter
+        searchSubmission.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const options = submissionSelect.querySelectorAll('option');
+            
+            options.forEach(option => {
+                if (option.value === '') {
+                    option.style.display = '';
+                    return;
+                }
+                
+                const searchData = option.getAttribute('data-search') || '';
+                option.style.display = searchData.includes(searchTerm) ? '' : 'none';
+            });
+        });
+        
+        // Auto-fill when submission selected
+        submissionSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (this.value) {
+                const articleId = selectedOption.getAttribute('data-article-id');
+                const title = selectedOption.getAttribute('data-article-title');
+                const link = selectedOption.getAttribute('data-article-link');
+                
+                if (articleNumber) articleNumber.value = articleId || '';
+                if (articleTitle) articleTitle.value = title || '';
+                if (submitLink && link) submitLink.value = link;
+                
+                // Show confirmation
+                searchSubmission.value = '[' + articleId + '] ' + (title ? title.substring(0, 50) : '');
+            }
+        });
     }
 });
 </script>
