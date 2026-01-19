@@ -26,12 +26,21 @@ class PicController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'nullable|string|max:255',
+            'password' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+        
+        // Hash password if provided
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
         Pic::create($validated);
 
@@ -48,12 +57,21 @@ class PicController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'nullable|string|max:255',
+            'password' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+        
+        // Hash password if provided, otherwise remove from update
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
         $pic->update($validated);
 
@@ -98,10 +116,10 @@ class PicController extends Controller
 
     public function downloadTemplate()
     {
-        $headers = ['Nama', 'Email', 'Telepon', 'Status'];
+        $headers = ['Nama', 'Username', 'Email', 'Telepon', 'Status'];
         $sample = [
-            ['John Doe', 'john@example.com', '081234567890', 'Aktif'],
-            ['Jane Smith', 'jane@example.com', '089876543210', 'Nonaktif'],
+            ['John Doe', 'john_doe', 'john@example.com', '081234567890', 'Aktif'],
+            ['Jane Smith', 'jane_smith', 'jane@example.com', '089876543210', 'Nonaktif'],
         ];
 
         $callback = function() use ($headers, $sample) {

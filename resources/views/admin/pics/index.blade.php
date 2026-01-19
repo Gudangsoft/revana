@@ -48,6 +48,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Nama</th>
+                                <th>Username</th>
                                 <th>Email</th>
                                 <th>Telepon</th>
                                 <th>Status</th>
@@ -59,6 +60,7 @@
                             <tr>
                                 <td>{{ $loop->iteration + ($pics->currentPage() - 1) * $pics->perPage() }}</td>
                                 <td><strong>{{ $pic->name }}</strong></td>
+                                <td><code>{{ $pic->username ?? '-' }}</code></td>
                                 <td>{{ $pic->email ?? '-' }}</td>
                                 <td>{{ $pic->phone ?? '-' }}</td>
                                 <td>
@@ -83,7 +85,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">Belum ada data PIC</td>
+                                <td colspan="7" class="text-center text-muted">Belum ada data PIC</td>
                             </tr>
                             @endforelse
                         </tbody>

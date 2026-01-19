@@ -20,6 +20,7 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
 
         // Normalize column names (support various formats)
         $name = $row['nama'] ?? $row['name'] ?? $row['Nama'] ?? $row['Name'] ?? null;
+        $username = $row['username'] ?? $row['Username'] ?? $row['user'] ?? $row['User'] ?? null;
         $email = $row['email'] ?? $row['Email'] ?? null;
         $phone = $row['telepon'] ?? $row['phone'] ?? $row['Telepon'] ?? $row['Phone'] ?? $row['no_hp'] ?? $row['No HP'] ?? null;
         $status = $row['status'] ?? $row['Status'] ?? $row['is_active'] ?? null;
@@ -39,9 +40,12 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
             }
         }
 
-        // Check if PIC exists by email or name
+        // Check if PIC exists by username, email or name
         $existingPic = null;
-        if (!empty($email)) {
+        if (!empty($username)) {
+            $existingPic = Pic::where('username', $username)->first();
+        }
+        if (!$existingPic && !empty($email)) {
             $existingPic = Pic::where('email', $email)->first();
         }
         if (!$existingPic && !empty($name)) {
@@ -52,6 +56,7 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
             // Update existing
             $existingPic->update([
                 'name' => $name,
+                'username' => $username,
                 'email' => $email,
                 'phone' => $phone,
                 'is_active' => $isActive,
@@ -64,6 +69,7 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
         $this->createdCount++;
         return new Pic([
             'name' => $name,
+            'username' => $username,
             'email' => $email,
             'phone' => $phone,
             'is_active' => $isActive,
@@ -75,6 +81,7 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
         return [
             '*.nama' => 'nullable|string|max:255',
             '*.name' => 'nullable|string|max:255',
+            '*.username' => 'nullable|string|max:255',
             '*.email' => 'nullable|email|max:255',
             '*.telepon' => 'nullable|string|max:20',
             '*.phone' => 'nullable|string|max:20',

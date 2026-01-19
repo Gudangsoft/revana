@@ -22,6 +22,7 @@ class PicsExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         return [
             'ID',
             'Nama',
+            'Username',
             'Email',
             'Telepon',
             'Status',
@@ -34,6 +35,7 @@ class PicsExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         return [
             $pic->id,
             $pic->name,
+            $pic->username ?? '',
             $pic->email ?? '',
             $pic->phone ?? '',
             $pic->is_active ? 'Aktif' : 'Nonaktif',
@@ -59,10 +61,11 @@ class PicsExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         return [
             'A' => 8,
             'B' => 30,
-            'C' => 30,
-            'D' => 18,
-            'E' => 12,
-            'F' => 20,
+            'C' => 20,
+            'D' => 30,
+            'E' => 18,
+            'F' => 12,
+            'G' => 20,
         ];
     }
 }

@@ -12,6 +12,7 @@ class Pic extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'role',
         'email',
         'password',
