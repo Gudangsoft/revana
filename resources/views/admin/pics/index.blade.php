@@ -17,12 +17,29 @@
         </div>
         @endif
 
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-person-badge"></i> Daftar PIC</span>
-                <a href="{{ route('admin.pics.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Tambah PIC
-                </a>
+                <div class="d-flex gap-2">
+                    <div class="btn-group">
+                        <a href="{{ route('admin.pics.export') }}" class="btn btn-success">
+                            <i class="bi bi-download"></i> Export
+                        </a>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="bi bi-upload"></i> Import
+                        </button>
+                    </div>
+                    <a href="{{ route('admin.pics.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Tambah PIC
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -31,7 +48,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Nama</th>
-                                <th>Role</th>
                                 <th>Email</th>
                                 <th>Telepon</th>
                                 <th>Status</th>
@@ -43,13 +59,6 @@
                             <tr>
                                 <td>{{ $loop->iteration + ($pics->currentPage() - 1) * $pics->perPage() }}</td>
                                 <td><strong>{{ $pic->name }}</strong></td>
-                                <td>
-                                    @if($pic->role)
-                                        <span class="badge bg-info">{{ $pic->role }}</span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
                                 <td>{{ $pic->email ?? '-' }}</td>
                                 <td>{{ $pic->phone ?? '-' }}</td>
                                 <td>
@@ -85,6 +94,44 @@
                     @include('components.simple-pagination', ['paginator' => $pics])
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-upload"></i> Import Data PIC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.pics.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>Format File:</strong><br>
+                        - Excel (.xlsx, .xls) atau CSV<br>
+                        - Kolom: Nama, Email, Telepon, Status<br>
+                        - Status: Aktif/Nonaktif atau 1/0
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pilih File</label>
+                        <input type="file" class="form-control" name="file" accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    <div class="mb-3">
+                        <a href="{{ route('admin.pics.template') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-download"></i> Download Template
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

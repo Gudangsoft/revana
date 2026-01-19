@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pic;
+use App\Exports\PicsExport;
+use App\Imports\PicsImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class PicController extends Controller
@@ -23,7 +26,6 @@ class PicController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
@@ -46,7 +48,6 @@ class PicController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
@@ -66,5 +67,55 @@ class PicController extends Controller
 
         return redirect()->route('admin.pics.index')
             ->with('success', 'PIC berhasil dihapus');
+    }
+
+    public function export()
+    {
+        $filename = 'pics_' . date('Y-m-d_His') . '.xlsx';
+        return Excel::download(new PicsExport, $filename);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        try {
+            $import = new PicsImport;
+            Excel::import($import, $request->file('file'));
+
+            $created = $import->getCreatedCount();
+            $updated = $import->getUpdatedCount();
+            
+            return redirect()->route('admin.pics.index')
+                ->with('success', "Import berhasil! {$created} PIC baru ditambahkan, {$updated} PIC diupdate.");
+        } catch (\Exception $e) {
+            return redirect()->route('admin.pics.index')
+                ->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = ['Nama', 'Email', 'Telepon', 'Status'];
+        $sample = [
+            ['John Doe', 'john@example.com', '081234567890', 'Aktif'],
+            ['Jane Smith', 'jane@example.com', '089876543210', 'Nonaktif'],
+        ];
+
+        $callback = function() use ($headers, $sample) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            foreach ($sample as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_pics.csv"',
+        ]);
     }
 }

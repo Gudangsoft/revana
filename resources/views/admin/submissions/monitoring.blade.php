@@ -53,7 +53,7 @@
     top: 0;
     z-index: 3;
     background: #212529 !important;
-    color: white;
+    color: white !important;
     border: 1px solid #343a40;
     white-space: nowrap;
     padding: 6px 8px;
@@ -61,6 +61,20 @@
 
 .table-monitoring thead tr:nth-child(2) th {
     top: 38px;
+    background: #343a40 !important;
+    color: white !important;
+}
+
+/* Override Bootstrap bg-* classes in header to ensure white text */
+.table-monitoring thead th.bg-info,
+.table-monitoring thead th.bg-warning,
+.table-monitoring thead th.bg-primary,
+.table-monitoring thead th.bg-success {
+    color: white !important;
+}
+
+.table-monitoring thead th.text-dark {
+    color: white !important;
 }
 
 /* Sticky first column (Kode Submit) */
@@ -306,6 +320,34 @@
                     </div>
                 </form>
 
+                <!-- Bulk Assignment Controls -->
+                <div class="card bg-light mb-3">
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                    <label class="form-check-label" for="selectAll">
+                                        <strong>Pilih Semua</strong>
+                                    </label>
+                                </div>
+                                <span class="text-muted" id="selectedCount">0 dipilih</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-info btn-sm" id="bulkEditorBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkEditorModal">
+                                    <i class="bi bi-people"></i> Tugaskan Editor
+                                </button>
+                                <button type="button" class="btn btn-warning btn-sm" id="bulkAuthorBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkAuthorModal">
+                                    <i class="bi bi-person-check"></i> Tugaskan Author
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" id="bulkReviewerBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkReviewerModal">
+                                    <i class="bi bi-journal-check"></i> Tugaskan Reviewer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Scroll Controls -->
                 <div class="scroll-controls">
                     <div class="d-flex align-items-center gap-3">
@@ -347,6 +389,9 @@
                     <table class="table table-monitoring table-bordered">
                         <thead class="table-dark">
                             <tr>
+                                <th rowspan="2" class="align-middle text-center" style="width: 40px; min-width: 40px;">
+                                    <input type="checkbox" class="form-check-input" id="selectAllTable">
+                                </th>
                                 <th rowspan="2" class="align-middle sticky-first">Kode Submit</th>
                                 <th rowspan="2" class="align-middle sticky-second">ID Artikel</th>
                                 <th rowspan="2" class="align-middle">Judul</th>
@@ -366,35 +411,47 @@
                                 <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
                             </tr>
                             <tr>
-                                <th>Username</th>
-                                <th>Password</th>
-                                <th>Petugas</th>
-                                <th>User/Pass</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>User/Pass</th>
-                                <th>Catatan</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>User/Pass</th>
-                                <th>Catatan</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Link Publish</th>
-                                <th>Valid</th>
+                                <!-- Author Access sub-headers -->
+                                <th class="bg-dark">Username</th>
+                                <th class="bg-dark">Password</th>
+                                <!-- Editor 1 sub-headers (3 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">User/Pass</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Author 1 sub-headers (2 cols) -->
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
+                                <!-- Editor 2 sub-headers (2 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Reviewer 1 sub-headers (4 cols) -->
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
+                                <!-- Reviewer 2 sub-headers (4 cols) -->
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
+                                <!-- Editor 3 sub-headers (2 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Author 2 sub-headers (2 cols) -->
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
+                                <!-- Production sub-headers (3 cols) -->
+                                <th class="bg-success">Petugas</th>
+                                <th class="bg-success">Link Publish</th>
+                                <th class="bg-success">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($submissions as $s)
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}">
+                                </td>
                                 <td class="sticky-first">
                                     <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
@@ -573,6 +630,256 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial state
     updateScrollPosition();
+    
+    // ========== BULK ASSIGNMENT FUNCTIONALITY ==========
+    const selectAll = document.getElementById('selectAll');
+    const selectAllTable = document.getElementById('selectAllTable');
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    const selectedCount = document.getElementById('selectedCount');
+    const bulkEditorBtn = document.getElementById('bulkEditorBtn');
+    const bulkAuthorBtn = document.getElementById('bulkAuthorBtn');
+    const bulkReviewerBtn = document.getElementById('bulkReviewerBtn');
+    
+    function updateSelectedCount() {
+        const checked = document.querySelectorAll('.submission-checkbox:checked');
+        const count = checked.length;
+        selectedCount.textContent = count + ' dipilih';
+        
+        // Enable/disable bulk buttons
+        bulkEditorBtn.disabled = count === 0;
+        bulkAuthorBtn.disabled = count === 0;
+        bulkReviewerBtn.disabled = count === 0;
+        
+        // Update select all checkboxes
+        selectAll.checked = count === checkboxes.length && count > 0;
+        selectAllTable.checked = count === checkboxes.length && count > 0;
+        
+        // Update hidden inputs in modals
+        updateModalSubmissionIds();
+    }
+    
+    function updateModalSubmissionIds() {
+        const checked = document.querySelectorAll('.submission-checkbox:checked');
+        const ids = Array.from(checked).map(cb => cb.value);
+        
+        document.querySelectorAll('.bulk-submission-ids').forEach(input => {
+            input.value = JSON.stringify(ids);
+        });
+        
+        // Update selected list preview
+        const kodes = Array.from(checked).map(cb => cb.dataset.kode);
+        document.querySelectorAll('.selected-submissions-preview').forEach(el => {
+            if (kodes.length > 0) {
+                el.innerHTML = kodes.map(k => '<span class="badge bg-secondary me-1">' + k + '</span>').join('');
+            } else {
+                el.innerHTML = '<span class="text-muted">Tidak ada yang dipilih</span>';
+            }
+        });
+    }
+    
+    // Select All (top card)
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        selectAllTable.checked = this.checked;
+        updateSelectedCount();
+    });
+    
+    // Select All (table header)
+    selectAllTable.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        selectAll.checked = this.checked;
+        updateSelectedCount();
+    });
+    
+    // Individual checkboxes
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+});
+</script>
+
+<!-- Bulk Editor Assignment Modal -->
+<div class="modal fade" id="bulkEditorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-people"></i> Penugasan Massal Editor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
+                @csrf
+                <input type="hidden" name="submission_ids" class="bulk-submission-ids">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Submissions yang dipilih:</label>
+                        <div class="selected-submissions-preview border rounded p-2" style="max-height: 100px; overflow-y: auto;">
+                            <span class="text-muted">Tidak ada yang dipilih</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipe Penugasan <span class="text-danger">*</span></label>
+                        <select class="form-select" name="assignment_type" required>
+                            <option value="">-- Pilih Tipe --</option>
+                            <option value="editor1">Editor 1</option>
+                            <option value="editor2">Editor 2</option>
+                            <option value="editor3">Editor 3</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
+                        <select class="form-select" name="petugas_id" required>
+                            <option value="">-- Pilih Petugas --</option>
+                            @foreach(\App\Models\User::where('role', 'admin')->orderBy('name')->get() as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="row" id="editorCredentials" style="display: none;">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Username Editor</label>
+                                <input type="text" class="form-control" name="username_editor" placeholder="Username (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Password Editor</label>
+                                <input type="text" class="form-control" name="password_editor" placeholder="Password (opsional)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-check-circle"></i> Tugaskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Author Assignment Modal -->
+<div class="modal fade" id="bulkAuthorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="bi bi-person-check"></i> Penugasan Massal Author</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
+                @csrf
+                <input type="hidden" name="submission_ids" class="bulk-submission-ids">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Submissions yang dipilih:</label>
+                        <div class="selected-submissions-preview border rounded p-2" style="max-height: 100px; overflow-y: auto;">
+                            <span class="text-muted">Tidak ada yang dipilih</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipe Penugasan <span class="text-danger">*</span></label>
+                        <select class="form-select" name="assignment_type" required>
+                            <option value="">-- Pilih Tipe --</option>
+                            <option value="author1">Author 1</option>
+                            <option value="author2">Author 2</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
+                        <select class="form-select" name="petugas_id" required>
+                            <option value="">-- Pilih Petugas --</option>
+                            @foreach(\App\Models\User::where('role', 'admin')->orderBy('name')->get() as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Tugaskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Reviewer Assignment Modal -->
+<div class="modal fade" id="bulkReviewerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-journal-check"></i> Penugasan Massal Reviewer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
+                @csrf
+                <input type="hidden" name="submission_ids" class="bulk-submission-ids">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Submissions yang dipilih:</label>
+                        <div class="selected-submissions-preview border rounded p-2" style="max-height: 100px; overflow-y: auto;">
+                            <span class="text-muted">Tidak ada yang dipilih</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipe Penugasan <span class="text-danger">*</span></label>
+                        <select class="form-select" name="assignment_type" required>
+                            <option value="">-- Pilih Tipe --</option>
+                            <option value="reviewer1">Reviewer 1</option>
+                            <option value="reviewer2">Reviewer 2</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
+                        <select class="form-select" name="petugas_id" required>
+                            <option value="">-- Pilih Petugas --</option>
+                            @foreach(\App\Models\User::where('role', 'admin')->orderBy('name')->get() as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Username Reviewer</label>
+                                <input type="text" class="form-control" name="username_reviewer" placeholder="Username (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Password Reviewer</label>
+                                <input type="text" class="form-control" name="password_reviewer" placeholder="Password (opsional)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Tugaskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show editor credentials for Editor 1
+document.querySelector('#bulkEditorModal select[name="assignment_type"]').addEventListener('change', function() {
+    document.getElementById('editorCredentials').style.display = this.value === 'editor1' ? 'flex' : 'none';
 });
 </script>
 @endsection

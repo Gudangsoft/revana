@@ -663,4 +663,116 @@ class SubmissionController extends Controller
             'Content-Disposition' => 'attachment; filename="template_submissions.csv"',
         ]);
     }
+
+    /**
+     * Bulk assign petugas to multiple submissions
+     */
+    public function bulkAssign(Request $request)
+    {
+        $request->validate([
+            'submission_ids' => 'required|string',
+            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'petugas_id' => 'required|exists:users,id',
+        ]);
+
+        $submissionIds = json_decode($request->submission_ids, true);
+        
+        if (empty($submissionIds) || !is_array($submissionIds)) {
+            return back()->with('error', 'Tidak ada submission yang dipilih');
+        }
+
+        $assignmentType = $request->assignment_type;
+        $petugasId = $request->petugas_id;
+        $petugas = User::find($petugasId);
+        
+        $updated = 0;
+        $submissions = Submission::whereIn('id', $submissionIds)->get();
+
+        foreach ($submissions as $submission) {
+            $updateData = [];
+            $logStep = $assignmentType;
+            
+            switch ($assignmentType) {
+                case 'editor1':
+                    $updateData['petugas_editor1_id'] = $petugasId;
+                    if ($request->filled('username_editor')) {
+                        $updateData['username_editor'] = $request->username_editor;
+                    }
+                    if ($request->filled('password_editor')) {
+                        $updateData['password_editor'] = $request->password_editor;
+                    }
+                    // Update status if still SUBMITTED
+                    if ($submission->status === 'SUBMITTED') {
+                        $updateData['status'] = 'EDITOR1_PROCESS';
+                    }
+                    break;
+                    
+                case 'editor2':
+                    $updateData['petugas_editor2_id'] = $petugasId;
+                    break;
+                    
+                case 'editor3':
+                    $updateData['petugas_editor3_id'] = $petugasId;
+                    break;
+                    
+                case 'author1':
+                    $updateData['petugas_author1_id'] = $petugasId;
+                    break;
+                    
+                case 'author2':
+                    $updateData['petugas_author2_id'] = $petugasId;
+                    break;
+                    
+                case 'reviewer1':
+                    $updateData['petugas_reviewer1_id'] = $petugasId;
+                    if ($request->filled('username_reviewer')) {
+                        $updateData['username_reviewer1'] = $request->username_reviewer;
+                    }
+                    if ($request->filled('password_reviewer')) {
+                        $updateData['password_reviewer1'] = $request->password_reviewer;
+                    }
+                    break;
+                    
+                case 'reviewer2':
+                    $updateData['petugas_reviewer2_id'] = $petugasId;
+                    if ($request->filled('username_reviewer')) {
+                        $updateData['username_reviewer2'] = $request->username_reviewer;
+                    }
+                    if ($request->filled('password_reviewer')) {
+                        $updateData['password_reviewer2'] = $request->password_reviewer;
+                    }
+                    break;
+                    
+                case 'production':
+                    $updateData['petugas_production_id'] = $petugasId;
+                    break;
+            }
+
+            if (!empty($updateData)) {
+                $submission->update($updateData);
+                
+                // Log history
+                $submission->logHistory($logStep, 'assigned', "Ditugaskan ke {$petugas->name} (Bulk Assignment)", [
+                    'petugas_id' => $petugasId,
+                    'petugas_name' => $petugas->name,
+                    'bulk_assignment' => true,
+                ]);
+                
+                $updated++;
+            }
+        }
+
+        $typeLabels = [
+            'editor1' => 'Editor 1',
+            'editor2' => 'Editor 2', 
+            'editor3' => 'Editor 3',
+            'author1' => 'Author 1',
+            'author2' => 'Author 2',
+            'reviewer1' => 'Reviewer 1',
+            'reviewer2' => 'Reviewer 2',
+            'production' => 'Production',
+        ];
+
+        return back()->with('success', "{$updated} submission berhasil ditugaskan ke {$petugas->name} sebagai {$typeLabels[$assignmentType]}");
+    }
 }

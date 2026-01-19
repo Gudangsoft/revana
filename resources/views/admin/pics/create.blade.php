@@ -28,22 +28,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Role</label>
-                        <select class="form-select @error('role') is-invalid @enderror" name="role">
-                            <option value="">Pilih Role</option>
-                            <option value="AUTOR 1" {{ old('role') == 'AUTOR 1' ? 'selected' : '' }}>AUTOR 1</option>
-                            <option value="EDITOR 1" {{ old('role') == 'EDITOR 1' ? 'selected' : '' }}>EDITOR 1</option>
-                            <option value="REVIEWER 1" {{ old('role') == 'REVIEWER 1' ? 'selected' : '' }}>REVIEWER 1</option>
-                            <option value="REVIEWER 2" {{ old('role') == 'REVIEWER 2' ? 'selected' : '' }}>REVIEWER 2</option>
-                            <option value="AUTOR 2" {{ old('role') == 'AUTOR 2' ? 'selected' : '' }}>AUTOR 2</option>
-                            <option value="COPY EDITING + PRODUCTION + PUBLISH" {{ old('role') == 'COPY EDITING + PRODUCTION + PUBLISH' ? 'selected' : '' }}>COPY EDITING + PRODUCTION + PUBLISH</option>
-                        </select>
-                        @error('role')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" 
                                name="email" value="{{ old('email') }}" 
