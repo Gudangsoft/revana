@@ -393,28 +393,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>User/Pass</th>
-                                <th>Catatan</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>User/Pass</th>
-                                <th>Catatan</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Valid</th>
-                                <th>Petugas</th>
-                                <th>Link Publish</th>
-                                <th>Valid</th>
-                            </tr>
-                        </thead>
-                        <tbody>
                             @forelse($submissions as $s)
                             <tr>
-                                <td class="sticky-first"><code class="text-primary">{{ $s->kode_submit }}</code></td>
+                                <td class="sticky-first">
+                                    <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
+                                        <code class="text-primary">{{ $s->kode_submit }}</code>
+                                    </a>
+                                </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>
                                 <td class="text-center">
