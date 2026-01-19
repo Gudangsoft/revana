@@ -359,8 +359,10 @@ class ReviewAssignmentController extends Controller
         // Set paper size and orientation
         $pdf->setPaper('A4', 'portrait');
 
-        // Download PDF
-        $filename = 'Review_' . ($reviewResult->article_code ?? $assignment->article_number) . '_' . ($reviewer ? $reviewer->name : 'reviewer') . '_' . date('YmdHis') . '.pdf';
+        // Download PDF - sanitize filename to remove invalid characters
+        $articleCode = preg_replace('/[\/\\\\]/', '_', $reviewResult->article_code ?? $assignment->article_number ?? 'article');
+        $reviewerName = preg_replace('/[\/\\\\]/', '_', $reviewer ? $reviewer->name : 'reviewer');
+        $filename = 'Review_' . $articleCode . '_' . $reviewerName . '_' . date('YmdHis') . '.pdf';
         return $pdf->download($filename);
     }
 
