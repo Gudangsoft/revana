@@ -25,6 +25,11 @@
                 <form action="{{ route('admin.submissions.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-info-circle"></i> <strong>Kode Submit</strong> dan <strong>Kode LOA</strong> akan otomatis ter-generate setelah data disimpan.
+                        <br><small class="text-muted">Format: Kode Submit = SUB[tahun][bulan][nomor urut], Kode LOA = [Kode Submit]SIPERA</small>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
