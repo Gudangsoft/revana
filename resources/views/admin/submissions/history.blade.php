@@ -39,7 +39,7 @@
                         </div>
                         <div class="col-md-3">
                             <small class="text-muted">Jurnal</small>
-                            <p class="mb-0">{{ $submission->journalSlot->journalMaster->nama_jurnal ?? '-' }}</p>
+                            <p class="mb-0">{{ $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</p>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">Judul Artikel</small>

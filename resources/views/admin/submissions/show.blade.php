@@ -119,21 +119,29 @@
                             <tr>
                                 <th width="150">Jurnal</th>
                                 <td>
+                                    @if($submission->journalSlot?->journalMaster)
                                     <a href="{{ route('admin.journal-masters.show', $submission->journalSlot->journalMaster) }}">
                                         {{ $submission->journalSlot->journalMaster->nama_jurnal }}
                                     </a>
+                                    @else
+                                    <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                             </tr>
                             <tr>
                                 <th>Publisher</th>
-                                <td>{{ $submission->journalSlot->journalMaster->publisher }}</td>
+                                <td>{{ $submission->journalSlot?->journalMaster?->publisher ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <th>Slot</th>
                                 <td>
+                                    @if($submission->journalSlot)
                                     <a href="{{ route('admin.journal-slots.show', $submission->journalSlot) }}">
                                         Vol. {{ $submission->journalSlot->volume }} No. {{ $submission->journalSlot->nomor }} - {{ $submission->journalSlot->bulan }} {{ $submission->journalSlot->tahun }}
                                     </a>
+                                    @else
+                                    <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                             </tr>
                         </table>
