@@ -34,14 +34,16 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="journal_master_id" class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
-                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" required>
+                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
+                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" required size="6" style="height: auto;">
                                     <option value="">-- Pilih Jurnal --</option>
                                     @foreach($journals as $journal)
-                                        <option value="{{ $journal->id }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
+                                        <option value="{{ $journal->id }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
                                             {{ $journal->nama_jurnal }} ({{ $journal->publisher }})
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari.</small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -206,6 +208,43 @@
 
 @push('scripts')
 <script>
+// Journal search functionality
+const searchInput = document.getElementById('search_journal');
+const journalSelect = document.getElementById('journal_master_id');
+const options = journalSelect.querySelectorAll('option');
+
+searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    let visibleCount = 0;
+    let lastVisibleOption = null;
+    
+    options.forEach(option => {
+        if (option.value === '') {
+            option.style.display = searchTerm ? 'none' : '';
+            return;
+        }
+        
+        const searchData = option.getAttribute('data-search') || '';
+        if (searchData.includes(searchTerm)) {
+            option.style.display = '';
+            visibleCount++;
+            lastVisibleOption = option;
+        } else {
+            option.style.display = 'none';
+        }
+    });
+    
+    // Auto-select if only one result
+    if (visibleCount === 1 && lastVisibleOption) {
+        lastVisibleOption.selected = true;
+        journalSelect.dispatchEvent(new Event('change'));
+    }
+});
+
+// Focus search on page load
+searchInput.focus();
+
+// Slot loading functionality
 document.getElementById('journal_master_id').addEventListener('change', function() {
     const journalId = this.value;
     const slotSelect = document.getElementById('journal_slot_id');

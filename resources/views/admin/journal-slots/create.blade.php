@@ -19,11 +19,14 @@
                     @csrf
 
                     <div class="mb-3">
-                        <label for="journal_master_id" class="form-label">Nama Jurnal <span class="text-danger">*</span></label>
-                        <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" required>
+                        <label for="journal_search" class="form-label">Nama Jurnal <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control mb-2" id="journal_search" placeholder="🔍 Ketik untuk mencari jurnal..." autocomplete="off">
+                        <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" size="6" required style="height: auto;">
                             <option value="">-- Pilih Jurnal --</option>
                             @foreach($journals as $journal)
-                                <option value="{{ $journal->id }}" {{ old('journal_master_id', request('journal_master_id')) == $journal->id ? 'selected' : '' }}>
+                                <option value="{{ $journal->id }}" 
+                                        data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher . ' ' . $journal->kode_jurnal) }}"
+                                        {{ old('journal_master_id', request('journal_master_id')) == $journal->id ? 'selected' : '' }}>
                                     {{ $journal->nama_jurnal }} ({{ $journal->publisher }})
                                 </option>
                             @endforeach
@@ -31,6 +34,7 @@
                         @error('journal_master_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <small class="text-muted">Menampilkan {{ $journals->count() }} jurnal aktif</small>
                     </div>
 
                     <div class="mb-3">
@@ -114,4 +118,48 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('journal_search');
+    const selectEl = document.getElementById('journal_master_id');
+    const options = selectEl.querySelectorAll('option');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        options.forEach(function(option) {
+            if (option.value === '') {
+                // Always show placeholder
+                option.style.display = searchTerm ? 'none' : '';
+                return;
+            }
+            
+            const searchData = option.getAttribute('data-search') || option.textContent.toLowerCase();
+            
+            if (searchData.includes(searchTerm)) {
+                option.style.display = '';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        // If only one result, auto-select it
+        if (visibleCount === 1 && searchTerm) {
+            options.forEach(function(option) {
+                if (option.style.display !== 'none' && option.value !== '') {
+                    option.selected = true;
+                }
+            });
+        }
+    });
+    
+    // Focus search on page load
+    searchInput.focus();
+});
+</script>
+@endpush
 @endsection
