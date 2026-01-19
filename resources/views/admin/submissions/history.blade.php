@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Histori Proses - ' . $submission->kode_submit)
+@section('page-title', 'Histori Proses')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
 
 @section('content')
 <div class="container-fluid">
