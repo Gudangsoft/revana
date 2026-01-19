@@ -5,17 +5,42 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\JournalMaster;
 use App\Models\Accreditation;
+use App\Exports\JournalMastersExport;
+use App\Imports\JournalMastersImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class JournalMasterController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $journals = JournalMaster::with(['creator', 'slots'])
-            ->latest()
-            ->paginate(20);
+        $query = JournalMaster::with(['creator', 'slots']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_jurnal', 'like', "%{$search}%")
+                  ->orWhere('nama_jurnal', 'like', "%{$search}%")
+                  ->orWhere('publisher', 'like', "%{$search}%")
+                  ->orWhere('accreditation', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by accreditation
+        if ($request->filled('accreditation')) {
+            $query->where('accreditation', $request->accreditation);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status == 'active');
+        }
+
+        $journals = $query->latest()->paginate(20);
+        $accreditations = Accreditation::where('is_active', true)->orderBy('points', 'desc')->get();
             
-        return view('admin.journal-masters.index', compact('journals'));
+        return view('admin.journal-masters.index', compact('journals', 'accreditations'));
     }
 
     public function create()
@@ -93,5 +118,84 @@ class JournalMasterController extends Controller
         
         $status = $journalMaster->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "Jurnal berhasil {$status}");
+    }
+
+    /**
+     * Export journal masters to Excel
+     */
+    public function export(Request $request)
+    {
+        $search = $request->search;
+        $filename = 'data_jurnal_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new JournalMastersExport($search), $filename);
+    }
+
+    /**
+     * Import journal masters from Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120', // Max 5MB
+        ], [
+            'file.required' => 'File Excel wajib diunggah',
+            'file.mimes' => 'File harus berformat Excel (xlsx, xls) atau CSV',
+            'file.max' => 'Ukuran file maksimal 5MB',
+        ]);
+
+        try {
+            $import = new JournalMastersImport(auth()->id());
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $updated = $import->getUpdatedCount();
+
+            $message = "Import berhasil! ";
+            if ($imported > 0) {
+                $message .= "{$imported} data jurnal baru ditambahkan. ";
+            }
+            if ($updated > 0) {
+                $message .= "{$updated} data jurnal diperbarui.";
+            }
+            if ($imported == 0 && $updated == 0) {
+                $message = "Tidak ada data yang diimport atau diperbarui.";
+            }
+
+            return redirect()->route('admin.journal-masters.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-masters.index')
+                ->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template for import
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings, \Maatwebsite\Excel\Concerns\WithStyles {
+            public function array(): array
+            {
+                return [
+                    ['', 'Jurnal Contoh 1', 'Publisher Contoh', 'https://contoh.jurnal.com', 'SINTA 1', 'Aktif'],
+                    ['', 'Jurnal Contoh 2', 'Publisher Lain', 'https://contoh2.jurnal.com', 'SINTA 2', 'Aktif'],
+                ];
+            }
+
+            public function headings(): array
+            {
+                return ['kode_jurnal', 'nama_jurnal', 'publisher', 'link_jurnal', 'akreditasi', 'status'];
+            }
+
+            public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
+            {
+                return [
+                    1 => ['font' => ['bold' => true]],
+                ];
+            }
+        }, 'template_jurnal.xlsx');
     }
 }
