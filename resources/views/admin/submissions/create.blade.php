@@ -22,7 +22,7 @@
                 </div>
                 @endif
 
-                <form action="{{ route('admin.submissions.store') }}" method="POST">
+                <form action="{{ route('admin.submissions.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="row">
@@ -75,6 +75,19 @@
                                 @error('link_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="file_artikel" class="form-label">Upload File Artikel (Word/PDF)</label>
+                                <input type="file" class="form-control @error('file_artikel') is-invalid @enderror" id="file_artikel" name="file_artikel" accept=".doc,.docx,.pdf">
+                                @error('file_artikel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
                             </div>
                         </div>
                     </div>

@@ -22,7 +22,7 @@
                 </div>
                 @endif
 
-                <form action="{{ route('admin.submissions.update', $submission) }}" method="POST">
+                <form action="{{ route('admin.submissions.update', $submission) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -70,6 +70,27 @@
                                 @error('link_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="file_artikel" class="form-label">Upload File Artikel (Word/PDF)</label>
+                                <input type="file" class="form-control @error('file_artikel') is-invalid @enderror" id="file_artikel" name="file_artikel" accept=".doc,.docx,.pdf">
+                                @error('file_artikel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
+                                @if($submission->file_artikel)
+                                <div class="mt-2">
+                                    <span class="badge bg-success"><i class="bi bi-file-earmark-check"></i> File sudah ada:</span>
+                                    <a href="{{ asset('storage/' . $submission->file_artikel) }}" target="_blank" class="ms-1">
+                                        {{ $submission->file_artikel_original_name ?? 'Download File' }}
+                                    </a>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>

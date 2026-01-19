@@ -16,6 +16,8 @@ class Submission extends Model
         'id_artikel',
         'judul_artikel',
         'link_artikel',
+        'file_artikel',
+        'file_artikel_original_name',
         'nama_penulis',
         'no_hp_penulis',
         'username_author',

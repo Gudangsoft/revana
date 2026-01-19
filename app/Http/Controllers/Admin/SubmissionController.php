@@ -71,6 +71,7 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
+            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // Max 10MB
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
@@ -83,6 +84,16 @@ class SubmissionController extends Controller
         $slot = JournalSlot::findOrFail($validated['journal_slot_id']);
         if ($slot->is_full) {
             return back()->with('error', 'Slot sudah penuh');
+        }
+
+        // Handle file upload
+        if ($request->hasFile('file_artikel')) {
+            $file = $request->file('file_artikel');
+            $originalName = $file->getClientOriginalName();
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('submissions/articles', $filename, 'public');
+            $validated['file_artikel'] = 'submissions/articles/' . $filename;
+            $validated['file_artikel_original_name'] = $originalName;
         }
 
         $validated['created_by'] = auth()->id();
@@ -140,6 +151,7 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
+            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // Max 10MB
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
@@ -175,6 +187,21 @@ class SubmissionController extends Controller
             'link_publish' => 'nullable|url',
             'status' => 'nullable|string',
         ]);
+
+        // Handle file upload
+        if ($request->hasFile('file_artikel')) {
+            // Delete old file if exists
+            if ($submission->file_artikel && \Storage::disk('public')->exists($submission->file_artikel)) {
+                \Storage::disk('public')->delete($submission->file_artikel);
+            }
+            
+            $file = $request->file('file_artikel');
+            $originalName = $file->getClientOriginalName();
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('submissions/articles', $filename, 'public');
+            $validated['file_artikel'] = 'submissions/articles/' . $filename;
+            $validated['file_artikel_original_name'] = $originalName;
+        }
 
         // Handle slot change
         if ($validated['journal_slot_id'] != $submission->journal_slot_id) {

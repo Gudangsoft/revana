@@ -68,6 +68,18 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>File Artikel</th>
+                                <td>
+                                    @if($submission->file_artikel)
+                                        <a href="{{ asset('storage/' . $submission->file_artikel) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-file-earmark-word"></i> {{ $submission->file_artikel_original_name ?? 'Download File' }}
+                                        </a>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Tanggal Submit</th>
                                 <td>{{ $submission->tanggal_submit?->format('d M Y') }}</td>
                             </tr>
