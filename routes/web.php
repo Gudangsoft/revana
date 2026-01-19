@@ -82,6 +82,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('journal-masters', JournalMasterController::class);
         
         // Journal Slots (Data Slot)
+        Route::get('/journal-slots/export', [JournalSlotController::class, 'export'])->name('journal-slots.export');
+        Route::post('/journal-slots/import', [JournalSlotController::class, 'import'])->name('journal-slots.import');
+        Route::get('/journal-slots/template', [JournalSlotController::class, 'downloadTemplate'])->name('journal-slots.template');
         Route::get('/journal-slots/monitoring', [JournalSlotController::class, 'monitoring'])->name('journal-slots.monitoring');
         Route::get('/journal-slots/get-by-journal', [JournalSlotController::class, 'getByJournal'])->name('journal-slots.get-by-journal');
         Route::patch('/journal-slots/{journalSlot}/toggle-active', [JournalSlotController::class, 'toggleActive'])->name('journal-slots.toggle-active');

@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\JournalSlot;
 use App\Models\JournalMaster;
+use App\Exports\JournalSlotsExport;
+use App\Imports\JournalSlotsImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class JournalSlotController extends Controller
@@ -179,5 +182,90 @@ class JournalSlotController extends Controller
             });
             
         return response()->json($slots);
+    }
+
+    /**
+     * Export journal slots to Excel
+     */
+    public function export(Request $request)
+    {
+        $filters = [
+            'journal_master_id' => $request->journal_master_id,
+            'tahun' => $request->tahun,
+            'bulan' => $request->bulan,
+        ];
+        
+        $filename = 'data_slot_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new JournalSlotsExport($filters), $filename);
+    }
+
+    /**
+     * Import journal slots from Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'file.required' => 'File Excel wajib diunggah',
+            'file.mimes' => 'File harus berformat Excel (xlsx, xls) atau CSV',
+            'file.max' => 'Ukuran file maksimal 5MB',
+        ]);
+
+        try {
+            $import = new JournalSlotsImport(auth()->id());
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $updated = $import->getUpdatedCount();
+
+            $message = "Import berhasil! ";
+            if ($imported > 0) {
+                $message .= "{$imported} data slot baru ditambahkan. ";
+            }
+            if ($updated > 0) {
+                $message .= "{$updated} data slot diperbarui.";
+            }
+            if ($imported == 0 && $updated == 0) {
+                $message = "Tidak ada data yang diimport atau diperbarui. Pastikan nama jurnal sudah ada di database.";
+            }
+
+            return redirect()->route('admin.journal-slots.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-slots.index')
+                ->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template for import
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings, \Maatwebsite\Excel\Concerns\WithStyles {
+            public function array(): array
+            {
+                return [
+                    ['', 'Nama Jurnal Contoh', '1', '1', 'Januari', date('Y'), 10, 'Aktif'],
+                    ['', 'Nama Jurnal Contoh', '1', '2', 'Februari', date('Y'), 10, 'Aktif'],
+                    ['', 'Nama Jurnal Lain', '2', '1', 'Maret', date('Y'), 15, 'Aktif'],
+                ];
+            }
+
+            public function headings(): array
+            {
+                return ['kode_slot', 'nama_jurnal', 'volume', 'nomor', 'bulan', 'tahun', 'jumlah_slot', 'status'];
+            }
+
+            public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
+            {
+                return [
+                    1 => ['font' => ['bold' => true]],
+                ];
+            }
+        }, 'template_slot.xlsx');
     }
 }

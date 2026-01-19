@@ -13,12 +13,21 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-calendar3"></i> Data Slot</span>
-                <div>
-                    <a href="{{ route('admin.journal-slots.monitoring') }}" class="btn btn-info">
-                        <i class="bi bi-bar-chart"></i> Monitoring Slot
+                <div class="btn-group">
+                    <a href="{{ route('admin.journal-slots.template') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Template
+                    </a>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                    <a href="{{ route('admin.journal-slots.export', request()->query()) }}" class="btn btn-info">
+                        <i class="bi bi-download"></i> Export
+                    </a>
+                    <a href="{{ route('admin.journal-slots.monitoring') }}" class="btn btn-warning">
+                        <i class="bi bi-bar-chart"></i> Monitoring
                     </a>
                     <a href="{{ route('admin.journal-slots.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Tambah Slot
+                        <i class="bi bi-plus-circle"></i> Tambah
                     </a>
                 </div>
             </div>
@@ -167,6 +176,44 @@
                     @include('components.simple-pagination', ['paginator' => $slots->withQueryString()])
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel"><i class="bi bi-upload"></i> Import Data Slot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.journal-slots.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">File Excel <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+                        <small class="text-muted">Format: xlsx, xls, csv. Maksimal 5MB</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Petunjuk Import:</h6>
+                        <ul class="mb-0 small">
+                            <li>Download template terlebih dahulu untuk format yang benar</li>
+                            <li>Kolom wajib: <strong>nama_jurnal</strong>, <strong>volume</strong>, <strong>nomor</strong>, <strong>bulan</strong></li>
+                            <li>Kolom opsional: kode_slot, tahun, jumlah_slot, status</li>
+                            <li><strong>Nama jurnal harus sudah ada di database!</strong></li>
+                            <li>Jika slot sudah ada (volume, nomor, tahun sama), data akan diperbarui</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
