@@ -48,6 +48,10 @@
                                 <td><code>{{ $submission->kode_submit }}</code></td>
                             </tr>
                             <tr>
+                                <th>Kode LOA</th>
+                                <td><code class="bg-success text-white px-2 py-1 rounded">{{ $submission->kode_loa }}</code></td>
+                            </tr>
+                            <tr>
                                 <th>ID Artikel</th>
                                 <td>{{ $submission->id_artikel }}</td>
                             </tr>

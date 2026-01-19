@@ -12,6 +12,7 @@ class Submission extends Model
     protected $fillable = [
         // Data Submit
         'kode_submit',
+        'kode_loa',
         'journal_slot_id',
         'id_artikel',
         'judul_artikel',
@@ -109,6 +110,11 @@ class Submission extends Model
             // Auto generate kode_submit if not set
             if (empty($submission->kode_submit)) {
                 $submission->kode_submit = self::generateKodeSubmit();
+            }
+            
+            // Auto generate kode_loa: kode_submit + SIPERA
+            if (empty($submission->kode_loa)) {
+                $submission->kode_loa = $submission->kode_submit . 'SIPERA';
             }
             
             // Set tanggal_submit to today if not set

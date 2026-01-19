@@ -77,6 +77,7 @@ class SubmissionController extends Controller
             'username_author' => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
             'pic_marketing' => 'nullable|string|max:255',
+            'petugas_submit_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
         ]);
 
@@ -97,7 +98,8 @@ class SubmissionController extends Controller
         }
 
         $validated['created_by'] = auth()->id();
-        $validated['petugas_submit_id'] = auth()->id(); // Otomatis saat login
+        // Use selected petugas_submit_id or default to current user
+        $validated['petugas_submit_id'] = $validated['petugas_submit_id'] ?? auth()->id();
         $validated['tanggal_submit'] = now()->toDateString();
         $validated['status'] = 'SUBMITTED';
 
@@ -157,6 +159,7 @@ class SubmissionController extends Controller
             'username_author' => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
             'pic_marketing' => 'nullable|string|max:255',
+            'petugas_submit_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
             
             // Workflow fields

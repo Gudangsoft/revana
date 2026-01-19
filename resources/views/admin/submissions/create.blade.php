@@ -148,16 +148,33 @@
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-people"></i> PIC & Petugas</h6>
 
-                    <div class="mb-3">
-                        <label for="pic_marketing" class="form-label">PIC Marketing</label>
-                        <input type="text" class="form-control @error('pic_marketing') is-invalid @enderror" id="pic_marketing" name="pic_marketing" value="{{ old('pic_marketing') }}" placeholder="Isi manual">
-                        @error('pic_marketing')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Petugas Submit akan terisi otomatis dengan user yang sedang login.
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="pic_marketing" class="form-label">PIC Marketing</label>
+                                <input type="text" class="form-control @error('pic_marketing') is-invalid @enderror" id="pic_marketing" name="pic_marketing" value="{{ old('pic_marketing') }}" placeholder="Nama PIC Marketing">
+                                @error('pic_marketing')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="petugas_submit_id" class="form-label">PIC Submit</label>
+                                <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
+                                    <option value="">-- Otomatis User Login --</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('petugas_submit_id', auth()->id()) == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('petugas_submit_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Petugas yang melakukan submit. Default: user yang login.</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-3">

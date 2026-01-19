@@ -27,13 +27,19 @@
                     @method('PUT')
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label class="form-label">Kode Submit</label>
                                 <input type="text" class="form-control" value="{{ $submission->kode_submit }}" readonly>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Kode LOA</label>
+                                <input type="text" class="form-control bg-success text-white fw-bold" value="{{ $submission->kode_loa }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="journal_slot_id" class="form-label">Slot <span class="text-danger">*</span></label>
                                 <select class="form-select @error('journal_slot_id') is-invalid @enderror" id="journal_slot_id" name="journal_slot_id" required>
@@ -152,7 +158,7 @@
                     <h6 class="text-muted mb-3"><i class="bi bi-people"></i> PIC & Status</h6>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="pic_marketing" class="form-label">PIC Marketing</label>
                                 <input type="text" class="form-control @error('pic_marketing') is-invalid @enderror" id="pic_marketing" name="pic_marketing" value="{{ old('pic_marketing', $submission->pic_marketing) }}">
@@ -161,7 +167,23 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="petugas_submit_id" class="form-label">PIC Submit</label>
+                                <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
+                                    <option value="">-- Pilih PIC Submit --</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('petugas_submit_id', $submission->petugas_submit_id) == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('petugas_submit_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
