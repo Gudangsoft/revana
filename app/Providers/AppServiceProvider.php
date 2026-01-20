@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,6 +16,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Use Bootstrap pagination style (numbers instead of arrows)
+        Paginator::useBootstrapFive();
+        
         // Share settings to all views
         View::composer('*', function ($view) {
             $settings = [

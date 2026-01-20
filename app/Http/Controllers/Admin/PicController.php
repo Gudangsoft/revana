@@ -8,6 +8,7 @@ use App\Exports\PicsExport;
 use App\Imports\PicsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PicController extends Controller
 {
@@ -135,5 +136,25 @@ class PicController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_pics.csv"',
         ]);
+    }
+
+    /**
+     * Login as a PIC (Admin impersonation)
+     */
+    public function loginAs(Pic $pic)
+    {
+        if (!$pic->is_active) {
+            return redirect()->route('admin.pics.index')
+                ->with('error', 'PIC tidak aktif, tidak dapat login sebagai PIC ini.');
+        }
+
+        // Store original admin user ID in session for potential return
+        session(['admin_impersonating' => Auth::id()]);
+        
+        // Logout from admin (web guard) and login as PIC (pic guard)
+        Auth::guard('pic')->login($pic);
+        
+        return redirect()->route('pic.dashboard')
+            ->with('success', 'Anda sekarang login sebagai ' . $pic->name);
     }
 }

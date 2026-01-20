@@ -24,6 +24,7 @@ use App\Http\Controllers\Reviewer\LeaderboardController as ReviewerLeaderboardCo
 use App\Http\Controllers\Reviewer\CertificateController;
 use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
 use App\Http\Controllers\Pic\AuthorController;
+use App\Http\Controllers\Pic\JournalManagementController as PicJournalController;
 use App\Http\Controllers\ReviewerRegistrationController;
 use App\Http\Controllers\Admin\ReviewerRegistrationController as AdminReviewerRegistrationController;
 use App\Http\Controllers\ReviewRequestController;
@@ -142,6 +143,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('certificates', \App\Http\Controllers\Admin\CertificateController::class);        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');
         Route::put('/reviewers/{reviewer}', [ReviewerController::class, 'update'])->name('reviewers.update');
         Route::post('/reviewers/{reviewer}/reset-password', [ReviewerController::class, 'resetPassword'])->name('reviewers.reset-password');
+        Route::post('/reviewers/{reviewer}/login-as', [ReviewerController::class, 'loginAs'])->name('reviewers.login-as');
         
         // Reward Redemptions
         Route::get('/redemptions', [AdminRewardRedemptionController::class, 'index'])->name('redemptions.index');
@@ -176,6 +178,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pics-export', [PicController::class, 'export'])->name('pics.export');
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
+        Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
         
         // Field of Study Management
         Route::resource('field-of-studies', \App\Http\Controllers\Admin\FieldOfStudyController::class)->except(['show']);
@@ -269,6 +272,9 @@ Route::prefix('pic')->group(function () {
     Route::middleware('auth:pic')->group(function () {
         Route::post('/logout', [PicLoginController::class, 'logout'])->name('pic.logout');
         
+        // PIC Dashboard - redirect to author dashboard
+        Route::get('/dashboard', [AuthorController::class, 'dashboard'])->name('pic.dashboard');
+        
         // PIC Author routes
         Route::prefix('author')->name('pic.author.')->group(function () {
             Route::get('/dashboard', [AuthorController::class, 'dashboard'])->name('dashboard');
@@ -276,5 +282,48 @@ Route::prefix('pic')->group(function () {
             Route::post('/store', [AuthorController::class, 'store'])->name('store');
             Route::get('/{journal}', [AuthorController::class, 'show'])->name('show');
         });
+        
+        // PIC Pengelolaan Jurnal (menggunakan controller PIC)
+        Route::prefix('journals')->name('pic.journals.')->group(function () {
+            Route::get('/', [PicJournalController::class, 'journalsIndex'])->name('index');
+            Route::get('/create', [PicJournalController::class, 'journalsCreate'])->name('create');
+            Route::post('/', [PicJournalController::class, 'journalsStore'])->name('store');
+            Route::get('/{journal}/edit', [PicJournalController::class, 'journalsEdit'])->name('edit');
+            Route::put('/{journal}', [PicJournalController::class, 'journalsUpdate'])->name('update');
+            Route::delete('/{journal}', [PicJournalController::class, 'journalsDestroy'])->name('destroy');
+        });
+        
+        Route::prefix('journal-slots')->name('pic.journal-slots.')->group(function () {
+            Route::get('/', [PicJournalController::class, 'slotsIndex'])->name('index');
+            Route::get('/monitoring', [PicJournalController::class, 'slotsMonitoring'])->name('monitoring');
+            Route::get('/create', [PicJournalController::class, 'slotsCreate'])->name('create');
+            Route::post('/', [PicJournalController::class, 'slotsStore'])->name('store');
+            Route::get('/{slot}/edit', [PicJournalController::class, 'slotsEdit'])->name('edit');
+            Route::put('/{slot}', [PicJournalController::class, 'slotsUpdate'])->name('update');
+            Route::delete('/{slot}', [PicJournalController::class, 'slotsDestroy'])->name('destroy');
+        });
+        
+        Route::prefix('submissions')->name('pic.submissions.')->group(function () {
+            Route::get('/', [PicJournalController::class, 'submissionsIndex'])->name('index');
+            Route::get('/monitoring', [PicJournalController::class, 'submissionsMonitoring'])->name('monitoring');
+            Route::get('/create', [PicJournalController::class, 'submissionsCreate'])->name('create');
+            Route::post('/', [PicJournalController::class, 'submissionsStore'])->name('store');
+            Route::get('/{submission}', [PicJournalController::class, 'submissionsShow'])->name('show');
+            Route::get('/{submission}/process', [PicJournalController::class, 'submissionsProcess'])->name('process');
+            Route::post('/{submission}/validate-step', [PicJournalController::class, 'validateStep'])->name('validate-step');
+            Route::post('/{submission}/request-revision', [PicJournalController::class, 'requestRevision'])->name('request-revision');
+        });
+        
+        // Akreditasi
+        Route::prefix('accreditations')->name('pic.accreditations.')->group(function () {
+            Route::get('/', [PicJournalController::class, 'accreditationsIndex'])->name('index');
+        });
+        
+        // Tugas Saya (My Tasks)
+        Route::get('/my-tasks', [PicJournalController::class, 'myTasks'])->name('pic.my-tasks.index');
+        
+        // Reviewers
+        Route::get('/reviewers', [PicJournalController::class, 'reviewersIndex'])->name('pic.reviewers.index');
+        Route::post('/reviewers/{reviewer}/login-as', [PicJournalController::class, 'loginAsReviewer'])->name('pic.reviewers.login-as');
     });
 });

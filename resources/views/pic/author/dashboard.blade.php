@@ -4,12 +4,7 @@
 @section('page-title', 'Dashboard PIC Author')
 
 @section('sidebar')
-    <a href="{{ route('pic.author.dashboard') }}" class="nav-link active">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="{{ route('pic.author.create') }}" class="nav-link">
-        <i class="bi bi-plus-circle"></i> Input Artikel Baru
-    </a>
+    @include('pic.partials.sidebar')
 @endsection
 
 @section('content')
@@ -81,11 +76,6 @@
                         </td>
                         <td>-</td>
                         <td>-</td>
-                        <td>{{ $journal->created_at->format('d M Y') }}</td>
-                            @else
-                                -
-                            @endif
-                        </td>
                         <td>{{ $journal->created_at->format('d M Y') }}</td>
                         <td>
                             <a href="{{ route('pic.author.show', $journal) }}" class="btn btn-sm btn-info">

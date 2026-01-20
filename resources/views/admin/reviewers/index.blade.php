@@ -160,12 +160,20 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.reviewers.show', $reviewer) }}" class="btn btn-sm btn-info" title="Detail">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-sm btn-primary" title="Edit">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.reviewers.show', $reviewer) }}" class="btn btn-sm btn-info" title="Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-sm btn-primary" title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <form action="{{ route('admin.reviewers.login-as', $reviewer) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="Login sebagai {{ $reviewer->name }}">
+                                                <i class="bi bi-box-arrow-in-right"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty

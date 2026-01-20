@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Pic;
 
 class Submission extends Model
 {
@@ -168,22 +169,22 @@ class Submission extends Model
 
     public function petugasSubmit()
     {
-        return $this->belongsTo(User::class, 'petugas_submit_id');
+        return $this->belongsTo(Pic::class, 'petugas_submit_id');
     }
 
     public function petugasEditor1()
     {
-        return $this->belongsTo(User::class, 'petugas_editor1_id');
+        return $this->belongsTo(Pic::class, 'petugas_editor1_id');
     }
 
     public function petugasAuthor1()
     {
-        return $this->belongsTo(User::class, 'petugas_author1_id');
+        return $this->belongsTo(Pic::class, 'petugas_author1_id');
     }
 
     public function petugasEditor2()
     {
-        return $this->belongsTo(User::class, 'petugas_editor2_id');
+        return $this->belongsTo(Pic::class, 'petugas_editor2_id');
     }
 
     public function petugasReviewer1()
@@ -198,17 +199,17 @@ class Submission extends Model
 
     public function petugasEditor3()
     {
-        return $this->belongsTo(User::class, 'petugas_editor3_id');
+        return $this->belongsTo(Pic::class, 'petugas_editor3_id');
     }
 
     public function petugasAuthor2()
     {
-        return $this->belongsTo(User::class, 'petugas_author2_id');
+        return $this->belongsTo(Pic::class, 'petugas_author2_id');
     }
 
     public function petugasProduction()
     {
-        return $this->belongsTo(User::class, 'petugas_production_id');
+        return $this->belongsTo(Pic::class, 'petugas_production_id');
     }
 
     // Histories relationship

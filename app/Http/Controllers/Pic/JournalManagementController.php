@@ -1,0 +1,606 @@
+<?php
+
+namespace App\Http\Controllers\Pic;
+
+use App\Http\Controllers\Controller;
+use App\Models\JournalMaster;
+use App\Models\JournalSlot;
+use App\Models\Submission;
+use App\Models\Accreditation;
+use App\Models\Marketing;
+use App\Models\Pic;
+use Illuminate\Http\Request;
+
+class JournalManagementController extends Controller
+{
+    // ==================== JOURNAL MASTER ====================
+    public function journalsIndex()
+    {
+        $journals = JournalMaster::where('is_active', true)->latest()->paginate(20);
+        return view('pic.journals.index', compact('journals'));
+    }
+
+    public function journalsCreate()
+    {
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
+        return view('pic.journals.create', compact('accreditations'));
+    }
+
+    public function journalsStore(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_jurnal' => 'required|string|max:255',
+            'publisher' => 'nullable|string|max:255',
+            'link_jurnal' => 'nullable|url|max:500',
+            'accreditation' => 'nullable|string|max:50',
+            'is_active' => 'boolean',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active');
+        $validated['created_by'] = auth()->guard('pic')->id();
+
+        JournalMaster::create($validated);
+
+        return redirect()->route('pic.journals.index')
+            ->with('success', 'Jurnal berhasil ditambahkan');
+    }
+
+    public function journalsEdit(JournalMaster $journal)
+    {
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
+        return view('pic.journals.edit', compact('journal', 'accreditations'));
+    }
+
+    public function journalsUpdate(Request $request, JournalMaster $journal)
+    {
+        $validated = $request->validate([
+            'nama_jurnal' => 'required|string|max:255',
+            'publisher' => 'nullable|string|max:255',
+            'link_jurnal' => 'nullable|url|max:500',
+            'accreditation' => 'nullable|string|max:50',
+            'is_active' => 'boolean',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active');
+
+        $journal->update($validated);
+
+        return redirect()->route('pic.journals.index')
+            ->with('success', 'Jurnal berhasil diupdate');
+    }
+
+    public function journalsDestroy(JournalMaster $journal)
+    {
+        $journal->delete();
+        return redirect()->route('pic.journals.index')
+            ->with('success', 'Jurnal berhasil dihapus');
+    }
+
+    // ==================== JOURNAL SLOTS ====================
+    public function slotsIndex(Request $request)
+    {
+        $query = JournalSlot::with(['journalMaster']);
+        
+        if ($request->filled('journal_id')) {
+            $query->where('journal_master_id', $request->journal_id);
+        }
+        if ($request->filled('year')) {
+            $query->where('tahun', $request->year);
+        }
+        if ($request->filled('month')) {
+            $query->where('bulan', $request->month);
+        }
+
+        $slots = $query->latest()->paginate(20);
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        return view('pic.journal-slots.index', compact('slots', 'journals'));
+    }
+
+    public function slotsCreate()
+    {
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        return view('pic.journal-slots.create', compact('journals'));
+    }
+
+    public function slotsStore(Request $request)
+    {
+        $validated = $request->validate([
+            'journal_master_id' => 'required|exists:journal_masters,id',
+            'tahun' => 'required|integer|min:2020|max:2030',
+            'bulan' => 'required|integer|min:1|max:12',
+            'volume' => 'nullable|string|max:50',
+            'nomor' => 'nullable|string|max:50',
+            'jumlah_slot' => 'required|integer|min:1',
+        ]);
+
+        $validated['slot_terpakai'] = 0;
+        $validated['is_active'] = true;
+        $validated['created_by'] = auth()->guard('pic')->id();
+
+        JournalSlot::create($validated);
+
+        return redirect()->route('pic.journal-slots.index')
+            ->with('success', 'Slot jurnal berhasil ditambahkan');
+    }
+
+    public function slotsEdit(JournalSlot $slot)
+    {
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        return view('pic.journal-slots.edit', compact('slot', 'journals'));
+    }
+
+    public function slotsUpdate(Request $request, JournalSlot $slot)
+    {
+        $validated = $request->validate([
+            'journal_master_id' => 'required|exists:journal_masters,id',
+            'tahun' => 'required|integer|min:2020|max:2030',
+            'bulan' => 'required|integer|min:1|max:12',
+            'volume' => 'nullable|string|max:50',
+            'nomor' => 'nullable|string|max:50',
+            'jumlah_slot' => 'required|integer|min:1',
+        ]);
+
+        $slot->update($validated);
+
+        return redirect()->route('pic.journal-slots.index')
+            ->with('success', 'Slot jurnal berhasil diupdate');
+    }
+
+    public function slotsDestroy(JournalSlot $slot)
+    {
+        $slot->delete();
+        return redirect()->route('pic.journal-slots.index')
+            ->with('success', 'Slot jurnal berhasil dihapus');
+    }
+
+    public function slotsMonitoring(Request $request)
+    {
+        $query = JournalSlot::with(['journalMaster', 'submissions']);
+        
+        if ($request->filled('journal_id')) {
+            $query->where('journal_master_id', $request->journal_id);
+        }
+        if ($request->filled('year')) {
+            $query->where('tahun', $request->year);
+        }
+
+        $slots = $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->paginate(20);
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        return view('pic.journal-slots.monitoring', compact('slots', 'journals'));
+    }
+
+    // ==================== SUBMISSIONS ====================
+    public function submissionsIndex(Request $request)
+    {
+        $query = Submission::with(['journalSlot.journalMaster']);
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('id_artikel', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+
+        $submissions = $query->latest()->paginate(20);
+        
+        return view('pic.submissions.index', compact('submissions'));
+    }
+
+    public function submissionsCreate()
+    {
+        $slots = JournalSlot::with('journalMaster')
+            ->where('available_slots', '>', 0)
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        
+        return view('pic.submissions.create', compact('slots', 'marketings', 'pics'));
+    }
+
+    public function submissionsStore(Request $request)
+    {
+        $validated = $request->validate([
+            'journal_slot_id' => 'required|exists:journal_slots,id',
+            'id_artikel' => 'nullable|string|max:100',
+            'judul_artikel' => 'required|string|max:500',
+            'link_artikel' => 'nullable|url|max:500',
+            'nama_penulis' => 'required|string|max:255',
+            'no_hp_penulis' => 'nullable|string|max:20',
+            'username_author' => 'nullable|string|max:100',
+            'password_author' => 'nullable|string|max:100',
+            'marketing_id' => 'nullable|exists:marketings,id',
+        ]);
+
+        // Generate kode_submit
+        $today = now()->format('Ymd');
+        $lastSubmit = Submission::where('kode_submit', 'like', "SUB{$today}%")->latest()->first();
+        $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
+        $validated['kode_submit'] = "SUB{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        
+        $validated['status'] = 'submitted';
+        $validated['created_by'] = auth()->guard('pic')->id();
+
+        Submission::create($validated);
+
+        // Decrease available slots
+        $slot = JournalSlot::find($validated['journal_slot_id']);
+        if ($slot && $slot->available_slots > 0) {
+            $slot->decrement('available_slots');
+        }
+
+        return redirect()->route('pic.submissions.index')
+            ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
+    }
+
+    public function submissionsShow(Submission $submission)
+    {
+        $submission->load(['journalSlot.journalMaster', 'histories', 
+            'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 
+            'petugasAuthor1', 'petugasAuthor2', 'petugasProduction', 'petugasSubmit']);
+        
+        $picId = auth()->guard('pic')->id();
+        $currentRole = $this->getCurrentRoleForPic($submission, $picId);
+        $canProcess = $this->isUrgentForPic($submission, $picId);
+        
+        return view('pic.submissions.show', compact('submission', 'currentRole', 'canProcess'));
+    }
+    
+    /**
+     * Get current role name for PIC on this submission
+     */
+    private function getCurrentRoleForPic(Submission $submission, int $picId): ?string
+    {
+        $status = strtoupper($submission->status);
+        
+        $roleMappings = [
+            'NEW' => ['petugas_submit_id' => 'Submit'],
+            'EDITOR1' => ['petugas_editor1_id' => 'Editor 1'],
+            'AUTHOR1' => ['petugas_author1_id' => 'Author 1'],
+            'EDITOR2' => ['petugas_editor2_id' => 'Editor 2'],
+            'REVIEWER1' => ['petugas_editor1_id' => 'Reviewer Coordinator'],
+            'REVIEWER2' => ['petugas_editor2_id' => 'Reviewer Coordinator'],
+            'EDITOR3' => ['petugas_editor3_id' => 'Editor 3'],
+            'AUTHOR2' => ['petugas_author2_id' => 'Author 2'],
+            'PRODUCTION' => ['petugas_production_id' => 'Production'],
+        ];
+        
+        foreach ($roleMappings as $statusKey => $fields) {
+            if (str_contains($status, $statusKey)) {
+                foreach ($fields as $field => $roleName) {
+                    if ($submission->$field == $picId) {
+                        return $roleName;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    public function submissionsProcess(Submission $submission)
+    {
+        $submission->load(['journalSlot.journalMaster', 'histories',
+            'petugasEditor1', 'petugasEditor2', 'petugasEditor3',
+            'petugasAuthor1', 'petugasAuthor2', 'petugasProduction', 'petugasSubmit']);
+        
+        $picId = auth()->guard('pic')->id();
+        $currentRole = $this->getCurrentRoleForPic($submission, $picId);
+        $canProcess = $this->isUrgentForPic($submission, $picId);
+        
+        if (!$canProcess) {
+            return redirect()->route('pic.submissions.show', $submission)
+                ->with('error', 'Anda tidak memiliki akses untuk memproses submission ini pada tahap saat ini.');
+        }
+        
+        return view('pic.submissions.process', compact('submission', 'currentRole', 'canProcess'));
+    }
+    
+    public function validateStep(Request $request, Submission $submission)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        if (!$this->isUrgentForPic($submission, $picId)) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk memvalidasi tahap ini.');
+        }
+        
+        $request->validate([
+            'notes' => 'nullable|string|max:1000',
+        ]);
+        
+        $status = strtoupper($submission->status);
+        $nextStatus = $this->getNextStatus($status);
+        $validField = $this->getValidField($status);
+        
+        if ($validField) {
+            $submission->$validField = true;
+        }
+        $submission->status = $nextStatus;
+        $submission->save();
+        
+        // Record history
+        \DB::table('submission_histories')->insert([
+            'submission_id' => $submission->id,
+            'status' => $nextStatus,
+            'notes' => $request->notes ?? 'Divalidasi oleh PIC',
+            'created_by' => $picId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        return redirect()->route('pic.submissions.show', $submission)
+            ->with('success', 'Tahap berhasil divalidasi. Status baru: ' . str_replace('_', ' ', $nextStatus));
+    }
+    
+    public function requestRevision(Request $request, Submission $submission)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        if (!$this->isUrgentForPic($submission, $picId)) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk meminta revisi.');
+        }
+        
+        $request->validate([
+            'revision_notes' => 'required|string|max:2000',
+        ]);
+        
+        $status = strtoupper($submission->status);
+        $revisionStatus = str_replace('_PROCESS', '_REVISION', $status);
+        
+        $submission->status = $revisionStatus;
+        $submission->revision_notes = $request->revision_notes;
+        $submission->save();
+        
+        // Record history
+        \DB::table('submission_histories')->insert([
+            'submission_id' => $submission->id,
+            'status' => $revisionStatus,
+            'notes' => 'Permintaan revisi: ' . $request->revision_notes,
+            'created_by' => $picId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        return redirect()->route('pic.submissions.show', $submission)
+            ->with('success', 'Permintaan revisi berhasil dikirim.');
+    }
+    
+    private function getNextStatus(string $currentStatus): string
+    {
+        $statusFlow = [
+            'NEW' => 'EDITOR1_PROCESS',
+            'EDITOR1_PROCESS' => 'AUTHOR1_PROCESS',
+            'EDITOR1_REVISION' => 'AUTHOR1_PROCESS',
+            'AUTHOR1_PROCESS' => 'EDITOR2_PROCESS',
+            'AUTHOR1_REVISION' => 'EDITOR2_PROCESS',
+            'EDITOR2_PROCESS' => 'REVIEWER1_PROCESS',
+            'EDITOR2_REVISION' => 'REVIEWER1_PROCESS',
+            'REVIEWER1_PROCESS' => 'REVIEWER2_PROCESS',
+            'REVIEWER2_PROCESS' => 'EDITOR3_PROCESS',
+            'EDITOR3_PROCESS' => 'AUTHOR2_PROCESS',
+            'EDITOR3_REVISION' => 'AUTHOR2_PROCESS',
+            'AUTHOR2_PROCESS' => 'PRODUCTION_PROCESS',
+            'AUTHOR2_REVISION' => 'PRODUCTION_PROCESS',
+            'PRODUCTION_PROCESS' => 'PUBLISHED',
+            'PRODUCTION_REVISION' => 'PUBLISHED',
+        ];
+        
+        return $statusFlow[$currentStatus] ?? $currentStatus;
+    }
+    
+    private function getValidField(string $status): ?string
+    {
+        $validFields = [
+            'EDITOR1' => 'editor1_valid',
+            'AUTHOR1' => 'author1_valid',
+            'EDITOR2' => 'editor2_valid',
+            'REVIEWER1' => 'reviewer1_valid',
+            'REVIEWER2' => 'reviewer2_valid',
+            'EDITOR3' => 'editor3_valid',
+            'AUTHOR2' => 'author2_valid',
+            'PRODUCTION' => 'production_valid',
+        ];
+        
+        foreach ($validFields as $key => $field) {
+            if (str_contains($status, $key)) {
+                return $field;
+            }
+        }
+        
+        return null;
+    }
+
+    public function submissionsMonitoring(Request $request)
+    {
+        $query = Submission::with(['journalSlot.journalMaster', 
+            'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor1', 'petugasAuthor2', 
+            'petugasReviewer1', 'petugasReviewer2', 'petugasProduction']);
+        
+        if ($request->filled('journal_id')) {
+            $query->whereHas('journalSlot', function($q) use ($request) {
+                $q->where('journal_master_id', $request->journal_id);
+            });
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('id_artikel', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+
+        $submissions = $query->latest()->paginate(20);
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        // Statistics
+        $stats = [
+            'new' => Submission::where('status', 'new')->count(),
+            'in_progress' => Submission::where('status', 'in_progress')->count(),
+            'published' => Submission::where('status', 'published')->count(),
+        ];
+        
+        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats'));
+    }
+
+    // ==================== ACCREDITATIONS ====================
+    public function accreditationsIndex()
+    {
+        $accreditations = Accreditation::with('journals')->where('is_active', true)->orderBy('name')->paginate(20);
+        return view('pic.accreditations.index', compact('accreditations'));
+    }
+
+    // ==================== TUGAS SAYA (MY TASKS) ====================
+    public function myTasks(Request $request)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        // Get all submissions where current PIC is assigned as petugas
+        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit', 'petugasEditor1', 'petugasAuthor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor2', 'petugasProduction'])
+            ->where(function($q) use ($picId) {
+                $q->where('created_by', $picId)
+                  ->orWhere('petugas_submit_id', $picId)
+                  ->orWhere('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId);
+            });
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('id_artikel', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+
+        $submissions = $query->latest()->paginate(20);
+        
+        // Statistics for current PIC - all assigned submissions
+        $baseQuery = function() use ($picId) {
+            return Submission::where(function($q) use ($picId) {
+                $q->where('created_by', $picId)
+                  ->orWhere('petugas_submit_id', $picId)
+                  ->orWhere('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId);
+            });
+        };
+        
+        $stats = [
+            'total' => $baseQuery()->count(),
+            'new' => $baseQuery()->where('status', 'new')->count(),
+            'in_progress' => $baseQuery()->whereNotIn('status', ['new', 'PUBLISHED', 'published'])->count(),
+            'published' => $baseQuery()->whereIn('status', ['PUBLISHED', 'published'])->count(),
+        ];
+        
+        // Count urgent tasks - tasks where status matches PIC's assigned role
+        $urgentCount = 0;
+        $allSubmissions = $baseQuery()->whereNotIn('status', ['PUBLISHED', 'published'])->get();
+        foreach ($allSubmissions as $sub) {
+            if ($this->isUrgentForPic($sub, $picId)) {
+                $urgentCount++;
+            }
+        }
+        $stats['urgent'] = $urgentCount;
+        
+        return view('pic.my-tasks.index', compact('submissions', 'stats'));
+    }
+
+    // ==================== REVIEWERS ====================
+    public function reviewersIndex(Request $request)
+    {
+        $search = $request->get('search');
+        
+        $reviewers = \App\Models\User::where('role', 'reviewer')
+            ->when($search, function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('institution', 'like', "%{$search}%");
+                });
+            })
+            ->withCount('reviewAssignments')
+            ->latest()
+            ->paginate(20);
+
+        return view('pic.reviewers.index', compact('reviewers', 'search'));
+    }
+
+    public function loginAsReviewer(\App\Models\User $reviewer)
+    {
+        if ($reviewer->role !== 'reviewer') {
+            return back()->with('error', 'User bukan reviewer.');
+        }
+
+        // Store original PIC session
+        session(['pic_impersonator' => auth()->guard('pic')->id()]);
+        
+        // Login as reviewer using web guard
+        \Illuminate\Support\Facades\Auth::guard('web')->login($reviewer);
+        
+        return redirect()->route('reviewer.dashboard')->with('success', 'Login sebagai ' . $reviewer->name);
+    }
+    
+    /**
+     * Check if submission is urgent for the given PIC based on current status
+     */
+    private function isUrgentForPic(Submission $submission, int $picId): bool
+    {
+        $status = strtoupper($submission->status);
+        
+        // Check if current status matches PIC's assigned role
+        $urgentMappings = [
+            'NEW' => ['petugas_submit_id'],
+            'EDITOR1_PROCESS' => ['petugas_editor1_id'],
+            'EDITOR1_REVISION' => ['petugas_editor1_id'],
+            'AUTHOR1_REVISION' => ['petugas_author1_id'],
+            'AUTHOR1_PROCESS' => ['petugas_author1_id'],
+            'EDITOR2_PROCESS' => ['petugas_editor2_id'],
+            'EDITOR2_REVISION' => ['petugas_editor2_id'],
+            'REVIEWER1_PROCESS' => ['petugas_editor1_id', 'petugas_editor2_id'],
+            'REVIEWER2_PROCESS' => ['petugas_editor1_id', 'petugas_editor2_id'],
+            'EDITOR3_PROCESS' => ['petugas_editor3_id'],
+            'EDITOR3_REVISION' => ['petugas_editor3_id'],
+            'AUTHOR2_REVISION' => ['petugas_author2_id'],
+            'AUTHOR2_PROCESS' => ['petugas_author2_id'],
+            'PRODUCTION_PROCESS' => ['petugas_production_id'],
+            'PRODUCTION_REVISION' => ['petugas_production_id'],
+        ];
+        
+        foreach ($urgentMappings as $statusKey => $fields) {
+            if (str_contains($status, $statusKey) || $status === $statusKey) {
+                foreach ($fields as $field) {
+                    if ($submission->$field == $picId) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+}

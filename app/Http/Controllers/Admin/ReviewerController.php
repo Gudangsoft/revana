@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Exports\ReviewersExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -136,5 +137,24 @@ class ReviewerController extends Controller
         $filename = 'Data_Reviewer_' . date('Y-m-d_His') . '.xlsx';
         
         return Excel::download(new ReviewersExport($search), $filename);
+    }
+
+    /**
+     * Login as a Reviewer (Admin impersonation)
+     */
+    public function loginAs(User $reviewer)
+    {
+        if (!$reviewer->isReviewer()) {
+            abort(404);
+        }
+
+        // Store original admin user ID in session for potential return
+        session(['admin_impersonating' => Auth::id()]);
+        
+        // Login as reviewer (same guard - web)
+        Auth::login($reviewer);
+        
+        return redirect()->route('reviewer.dashboard')
+            ->with('success', 'Anda sekarang login sebagai ' . $reviewer->name);
     }
 }

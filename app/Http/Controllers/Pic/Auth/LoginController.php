@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Pic\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -20,43 +22,38 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $email = $request->input('email');
+        $password = $request->input('password');
         $remember = $request->filled('remember');
 
-        // Debug: Check if PIC exists
-        $pic = \App\Models\Pic::where('email', $credentials['email'])->first();
+        // Find PIC by email
+        $pic = Pic::where('email', $email)->first();
+        
         if (!$pic) {
             return back()->withErrors([
                 'email' => 'PIC dengan email ini tidak ditemukan.',
             ])->withInput($request->only('email'));
         }
 
-        // Debug: Check password
-        if (!\Illuminate\Support\Facades\Hash::check($credentials['password'], $pic->password)) {
+        // Check if PIC is active
+        if (!$pic->is_active) {
+            return back()->withErrors([
+                'email' => 'Akun Anda tidak aktif. Hubungi administrator.',
+            ])->withInput($request->only('email'));
+        }
+
+        // Check password
+        if (!Hash::check($password, $pic->password)) {
             return back()->withErrors([
                 'email' => 'Password salah.',
             ])->withInput($request->only('email'));
         }
 
-        // Try to login
-        if (Auth::guard('pic')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            
-            $pic = Auth::guard('pic')->user();
-            
-            if (!$pic->is_active) {
-                Auth::guard('pic')->logout();
-                return back()->withErrors([
-                    'email' => 'Akun Anda tidak aktif.',
-                ]);
-            }
+        // Login the PIC
+        Auth::guard('pic')->login($pic, $remember);
+        $request->session()->regenerate();
 
-            return redirect()->intended(route('pic.dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => 'Login gagal. Silakan coba lagi.',
-        ])->withInput($request->only('email'));
+        return redirect()->intended(route('pic.dashboard'));
     }
 
     public function logout(Request $request)

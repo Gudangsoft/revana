@@ -48,7 +48,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Nama</th>
-                                <th>Username</th>
                                 <th>Email</th>
                                 <th>Telepon</th>
                                 <th>Status</th>
@@ -60,7 +59,6 @@
                             <tr>
                                 <td>{{ $loop->iteration + ($pics->currentPage() - 1) * $pics->perPage() }}</td>
                                 <td><strong>{{ $pic->name }}</strong></td>
-                                <td><code>{{ $pic->username ?? '-' }}</code></td>
                                 <td>{{ $pic->email ?? '-' }}</td>
                                 <td>{{ $pic->phone ?? '-' }}</td>
                                 <td>
@@ -71,21 +69,31 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.pics.edit', $pic) }}" class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.pics.destroy', $pic) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.pics.edit', $pic) }}" class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if($pic->is_active)
+                                        <form action="{{ route('admin.pics.login-as', $pic) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-info" title="Login sebagai {{ $pic->name }}">
+                                                <i class="bi bi-box-arrow-in-right"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        <form action="{{ route('admin.pics.destroy', $pic) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">Belum ada data PIC</td>
+                                <td colspan="6" class="text-center text-muted">Belum ada data PIC</td>
                             </tr>
                             @endforelse
                         </tbody>
