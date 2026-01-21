@@ -9,6 +9,7 @@ use App\Models\Submission;
 use App\Models\Accreditation;
 use App\Models\Marketing;
 use App\Models\Pic;
+use App\Models\PicPointHistory;
 use Illuminate\Http\Request;
 
 class JournalManagementController extends Controller
@@ -320,6 +321,7 @@ class JournalManagementController extends Controller
         $status = strtoupper($submission->status);
         $nextStatus = $this->getNextStatus($status);
         $validField = $this->getValidField($status);
+        $stepName = $this->getStepFromStatus($status);
         
         if ($validField) {
             $submission->$validField = true;
@@ -337,8 +339,23 @@ class JournalManagementController extends Controller
             'updated_at' => now(),
         ]);
         
+        // Award points to PIC
+        $pointsMessage = '';
+        if ($stepName) {
+            $pointHistory = PicPointHistory::awardPoints(
+                $picId,
+                $submission->id,
+                $stepName,
+                "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($stepName)
+            );
+            
+            if ($pointHistory) {
+                $pointsMessage = " Anda mendapatkan +{$pointHistory->points_earned} point!";
+            }
+        }
+        
         return redirect()->route('pic.submissions.show', $submission)
-            ->with('success', 'Tahap berhasil divalidasi. Status baru: ' . str_replace('_', ' ', $nextStatus));
+            ->with('success', 'Tahap berhasil divalidasi. Status baru: ' . str_replace('_', ' ', $nextStatus) . $pointsMessage);
     }
     
     public function requestRevision(Request $request, Submission $submission)
@@ -413,6 +430,26 @@ class JournalManagementController extends Controller
         foreach ($validFields as $key => $field) {
             if (str_contains($status, $key)) {
                 return $field;
+            }
+        }
+        
+        return null;
+    }
+    
+    private function getStepFromStatus(string $status): ?string
+    {
+        $stepMapping = [
+            'EDITOR1' => 'editor1',
+            'AUTHOR1' => 'author1',
+            'EDITOR2' => 'editor2',
+            'EDITOR3' => 'editor3',
+            'AUTHOR2' => 'author2',
+            'PRODUCTION' => 'production',
+        ];
+        
+        foreach ($stepMapping as $key => $step) {
+            if (str_contains($status, $key)) {
+                return $step;
             }
         }
         
