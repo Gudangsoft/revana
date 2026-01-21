@@ -167,6 +167,11 @@ class Submission extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function marketing()
+    {
+        return $this->belongsTo(Marketing::class, 'marketing_id');
+    }
+
     public function petugasSubmit()
     {
         return $this->belongsTo(Pic::class, 'petugas_submit_id');

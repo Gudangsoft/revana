@@ -11,37 +11,6 @@
     <i class="bi bi-graph-up"></i> Monitoring Review
 </a>
 
-{{-- Menu Jurnal dengan Accordion --}}
-<div class="accordion accordion-flush" id="accordionJournal">
-    <div class="accordion-item bg-transparent border-0">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'active' : '' }}" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#collapseJournal" 
-                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'true' : 'false' }}">
-                <i class="bi bi-journal-text"></i> Kelola Jurnal (Lama)
-            </button>
-        </h2>
-        <div id="collapseJournal" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journals') || str_starts_with($currentRoute, 'admin.articles') ? 'show' : '' }}" data-bs-parent="#accordionJournal">
-            <div class="accordion-body p-0">
-                <a href="{{ route('admin.journals.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.index' || $currentRoute == 'admin.journals.create' || $currentRoute == 'admin.journals.edit' ? 'active' : '' }}">
-                    <i class="bi bi-list"></i> Daftar Jurnal
-                </a>
-                <a href="{{ route('admin.journals.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journals.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart"></i> Pemantauan Slot
-                </a>
-                <a href="{{ route('admin.articles.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.articles.index' || $currentRoute == 'admin.articles.create' || $currentRoute == 'admin.articles.edit' ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text-fill"></i> Kelola Artikel
-                </a>
-                <a href="{{ route('admin.articles.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.articles.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-graph-up"></i> Monitoring Artikel
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
 {{-- Menu Pengelolaan Jurnal Baru --}}
 <div class="accordion accordion-flush" id="accordionJournalNew">
     <div class="accordion-item bg-transparent border-0">
@@ -134,12 +103,30 @@
 <a href="{{ route('admin.pics.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics.') ? 'active' : '' }}">
     <i class="bi bi-person-badge"></i> PIC
 </a>
-<a href="{{ route('admin.pic-points.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pic-points') ? 'active' : '' }}">
-    <i class="bi bi-trophy-fill text-warning"></i> Point PIC
-</a>
 <a href="{{ route('admin.field-of-studies.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.field-of-studies') ? 'active' : '' }}">
     <i class="bi bi-book-fill"></i> Bidang Ilmu
 </a>
+
+<!-- Laporan Point -->
+<div class="nav-item">
+    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') ? '' : 'collapsed' }}" 
+       data-bs-toggle="collapse" href="#pointReportMenu" role="button" 
+       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') ? 'true' : 'false' }}">
+        <i class="bi bi-trophy-fill text-warning"></i> Laporan Point
+        <i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') ? 'show' : '' }}" id="pointReportMenu">
+        <div class="nav flex-column ms-3">
+            <a href="{{ route('admin.marketing-points.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') ? 'active' : '' }}">
+                <i class="bi bi-trophy text-info"></i> Point Marketing
+            </a>
+            <a href="{{ route('admin.pic-points.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pic-points') ? 'active' : '' }}">
+                <i class="bi bi-trophy text-success"></i> Point PIC
+            </a>
+        </div>
+    </div>
+</div>
+
 <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.certificates') ? 'active' : '' }}">
     <i class="bi bi-award-fill"></i> Kelola Sertifikat
 </a>

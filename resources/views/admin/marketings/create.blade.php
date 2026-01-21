@@ -38,6 +38,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Password (untuk login portal marketing)</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               name="password" placeholder="Kosongkan jika tidak perlu login">
+                        @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Password diperlukan agar marketing bisa login ke portal mereka.</small>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Telepon</label>
                         <input type="text" class="form-control @error('phone') is-invalid @enderror" 
                                name="phone" value="{{ old('phone') }}" 

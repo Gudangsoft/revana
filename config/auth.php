@@ -14,6 +14,10 @@ return [
             'driver' => 'session',
             'provider' => 'pics',
         ],
+        'marketing' => [
+            'driver' => 'session',
+            'provider' => 'marketings',
+        ],
     ],
     'providers' => [
         'users' => [
@@ -23,6 +27,10 @@ return [
         'pics' => [
             'driver' => 'eloquent',
             'model' => App\Models\Pic::class,
+        ],
+        'marketings' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Marketing::class,
         ],
     ],
     'passwords' => [

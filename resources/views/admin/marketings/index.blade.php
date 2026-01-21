@@ -52,16 +52,26 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.marketings.edit', $marketing) }}" class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.marketings.destroy', $marketing) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.marketings.edit', $marketing) }}" class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if($marketing->is_active)
+                                        <form action="{{ route('admin.marketings.login-as', $marketing) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-info" title="Login sebagai {{ $marketing->name }}">
+                                                <i class="bi bi-box-arrow-in-right"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        <form action="{{ route('admin.marketings.destroy', $marketing) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty

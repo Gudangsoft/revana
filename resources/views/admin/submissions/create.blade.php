@@ -158,16 +158,16 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="pic_marketing" class="form-label">PIC Marketing</label>
-                                <select class="form-select @error('pic_marketing') is-invalid @enderror" id="pic_marketing" name="pic_marketing">
+                                <label for="marketing_id" class="form-label">PIC Marketing</label>
+                                <select class="form-select @error('marketing_id') is-invalid @enderror" id="marketing_id" name="marketing_id">
                                     <option value="">-- Pilih PIC Marketing --</option>
-                                    @foreach($pics as $pic)
-                                        <option value="{{ $pic->name }}" {{ old('pic_marketing') == $pic->name ? 'selected' : '' }}>
-                                            {{ $pic->name }}
+                                    @foreach($marketings as $marketing)
+                                        <option value="{{ $marketing->id }}" {{ old('marketing_id') == $marketing->id ? 'selected' : '' }}>
+                                            {{ $marketing->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('pic_marketing')
+                                @error('marketing_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

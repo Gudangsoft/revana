@@ -39,6 +39,23 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Password Baru</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               name="password" placeholder="Kosongkan jika tidak ingin mengubah password">
+                        @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">
+                            @if($marketing->password)
+                            <i class="bi bi-check-circle text-success"></i> Password sudah diatur.
+                            @else
+                            <i class="bi bi-exclamation-circle text-warning"></i> Password belum diatur.
+                            @endif
+                            Kosongkan jika tidak ingin mengubah.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Telepon</label>
                         <input type="text" class="form-control @error('phone') is-invalid @enderror" 
                                name="phone" value="{{ old('phone', $marketing->phone) }}" 

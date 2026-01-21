@@ -567,7 +567,18 @@
                                 <td>{{ $s->no_hp_penulis ?? '-' }}</td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
-                                <td>{{ $s->pic_marketing ?? '-' }}</td>
+                                <td>
+                                    <select class="inline-assign-select {{ $s->marketing_id ? 'has-value' : '' }}" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-type="marketing"
+                                            data-model="marketing"
+                                            onchange="quickAssignMarketing(this)">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($marketings as $mkt)
+                                            <option value="{{ $mkt->id }}" {{ $s->marketing_id == $mkt->id ? 'selected' : '' }}>{{ $mkt->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
                                 
                                 <!-- Editor 1 -->
@@ -766,6 +777,51 @@
 </div>
 
 <script>
+// Quick Assign Marketing function
+function quickAssignMarketing(selectEl) {
+    const submissionId = selectEl.dataset.submission;
+    const marketingId = selectEl.value;
+    
+    selectEl.classList.add('saving');
+    
+    fetch('{{ route("admin.submissions.quick-assign-marketing") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            marketing_id: marketingId || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        selectEl.classList.remove('saving');
+        if (data.success) {
+            if (marketingId) {
+                selectEl.classList.add('has-value');
+            } else {
+                selectEl.classList.remove('has-value');
+            }
+            selectEl.style.boxShadow = '0 0 0 2px rgba(25, 135, 84, 0.5)';
+            setTimeout(() => {
+                selectEl.style.boxShadow = '';
+            }, 1000);
+        } else {
+            alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
+            location.reload();
+        }
+    })
+    .catch(error => {
+        selectEl.classList.remove('saving');
+        console.error('Error:', error);
+        alert('Terjadi kesalahan jaringan');
+        location.reload();
+    });
+}
+
 // Quick Assign function for inline dropdown
 function quickAssign(selectEl) {
     const submissionId = selectEl.dataset.submission;

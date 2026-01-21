@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/bulk-assign', [SubmissionController::class, 'bulkAssign'])->name('submissions.bulk-assign');
         Route::post('/submissions/bulk-assign-with-credentials', [SubmissionController::class, 'bulkAssignWithCredentials'])->name('submissions.bulk-assign-with-credentials');
         Route::post('/submissions/quick-assign', [SubmissionController::class, 'quickAssign'])->name('submissions.quick-assign');
+        Route::post('/submissions/quick-assign-marketing', [SubmissionController::class, 'quickAssignMarketing'])->name('submissions.quick-assign-marketing');
         Route::post('/submissions/quick-update-credential', [SubmissionController::class, 'quickUpdateCredential'])->name('submissions.quick-update-credential');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
@@ -175,6 +176,12 @@ Route::middleware('auth')->group(function () {
         
         // Marketing Management
         Route::resource('marketings', MarketingController::class)->except(['show']);
+        Route::post('/marketings/{marketing}/login-as', [MarketingController::class, 'loginAs'])->name('marketings.login-as');
+        
+        // Marketing Point Report
+        Route::get('/marketing-points', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'index'])->name('marketing-points.index');
+        Route::get('/marketing-points/{marketing}', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'show'])->name('marketing-points.show');
+        Route::post('/marketing-points/{marketing}/adjust', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'adjustPoints'])->name('marketing-points.adjust');
         
         // PIC Management
         Route::resource('pics', PicController::class)->except(['show']);
@@ -337,5 +344,24 @@ Route::prefix('pic')->group(function () {
         // Reviewers
         Route::get('/reviewers', [PicJournalController::class, 'reviewersIndex'])->name('pic.reviewers.index');
         Route::post('/reviewers/{reviewer}/login-as', [PicJournalController::class, 'loginAsReviewer'])->name('pic.reviewers.login-as');
+    });
+});
+
+// =====================================================
+// MARKETING ROUTES
+// =====================================================
+use App\Http\Controllers\Marketing\DashboardController as MarketingDashboardController;
+
+Route::prefix('marketing')->group(function () {
+    // Guest routes
+    Route::get('/login', [MarketingDashboardController::class, 'loginForm'])->name('marketing.login');
+    Route::post('/login', [MarketingDashboardController::class, 'login'])->name('marketing.login.submit');
+    
+    // Authenticated routes
+    Route::middleware('auth:marketing')->group(function () {
+        Route::post('/logout', [MarketingDashboardController::class, 'logout'])->name('marketing.logout');
+        Route::get('/dashboard', [MarketingDashboardController::class, 'dashboard'])->name('marketing.dashboard');
+        Route::get('/submissions', [MarketingDashboardController::class, 'submissions'])->name('marketing.submissions');
+        Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
     });
 });

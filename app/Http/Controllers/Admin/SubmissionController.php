@@ -10,6 +10,8 @@ use App\Models\JournalMaster;
 use App\Models\User;
 use App\Models\Pic;
 use App\Models\PicPointHistory;
+use App\Models\Marketing;
+use App\Models\MarketingPointHistory;
 use App\Exports\SubmissionsExport;
 use App\Imports\SubmissionsImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -65,8 +67,9 @@ class SubmissionController extends Controller
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $slots = collect();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.submissions.create', compact('journals', 'slots', 'pics'));
+        return view('admin.submissions.create', compact('journals', 'slots', 'pics', 'marketings'));
     }
 
     public function store(Request $request)
@@ -81,7 +84,7 @@ class SubmissionController extends Controller
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
-            'pic_marketing' => 'nullable|string|max:255',
+            'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
         ]);
@@ -106,6 +109,14 @@ class SubmissionController extends Controller
         // petugas_submit_id is now from pics table (no default)
         $validated['tanggal_submit'] = now()->toDateString();
         $validated['status'] = 'SUBMITTED';
+        
+        // Set pic_marketing from marketing name for backward compatibility
+        if (!empty($validated['marketing_id'])) {
+            $marketing = Marketing::find($validated['marketing_id']);
+            if ($marketing) {
+                $validated['pic_marketing'] = $marketing->name;
+            }
+        }
 
         $submission = Submission::create($validated);
         
@@ -114,9 +125,24 @@ class SubmissionController extends Controller
             'judul_artikel' => $submission->judul_artikel,
             'nama_penulis' => $submission->nama_penulis,
         ]);
+        
+        // Award points to Marketing
+        $pointMessage = '';
+        if (!empty($validated['marketing_id'])) {
+            $pointHistory = MarketingPointHistory::awardPoints(
+                $validated['marketing_id'],
+                $submission->id,
+                "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
+            );
+            
+            if ($pointHistory) {
+                $marketing = Marketing::find($validated['marketing_id']);
+                $pointMessage = " Marketing {$marketing->name} mendapatkan +{$pointHistory->points_earned} point!";
+            }
+        }
 
         return redirect()->route('admin.submissions.index')
-            ->with('success', 'Data Submit berhasil ditambahkan');
+            ->with('success', 'Data Submit berhasil ditambahkan.' . $pointMessage);
     }
 
     public function show(Submission $submission)
@@ -146,9 +172,10 @@ class SubmissionController extends Controller
             ->get();
         $users = User::orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $statusOptions = Submission::getStatusOptions();
         
-        return view('admin.submissions.edit', compact('submission', 'journals', 'slots', 'users', 'pics', 'statusOptions'));
+        return view('admin.submissions.edit', compact('submission', 'journals', 'slots', 'users', 'pics', 'marketings', 'statusOptions'));
     }
 
     public function update(Request $request, Submission $submission)
@@ -163,7 +190,7 @@ class SubmissionController extends Controller
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
-            'pic_marketing' => 'nullable|string|max:255',
+            'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
             
@@ -196,6 +223,14 @@ class SubmissionController extends Controller
             'link_publish' => 'nullable|url',
             'status' => 'nullable|string',
         ]);
+        
+        // Set pic_marketing from marketing name for backward compatibility
+        if (!empty($validated['marketing_id'])) {
+            $marketing = Marketing::find($validated['marketing_id']);
+            if ($marketing) {
+                $validated['pic_marketing'] = $marketing->name;
+            }
+        }
 
         // Handle file upload
         if ($request->hasFile('file_artikel')) {
@@ -544,6 +579,7 @@ class SubmissionController extends Controller
     {
         $query = Submission::with([
             'journalSlot.journalMaster',
+            'marketing',
             'petugasSubmit',
             'petugasEditor1',
             'petugasAuthor1',
@@ -582,6 +618,7 @@ class SubmissionController extends Controller
         // Get PICs and Users for inline assignment dropdowns
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $users = User::where('role', 'admin')->orderBy('name')->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         
         // Statistics
         $stats = [
@@ -598,7 +635,7 @@ class SubmissionController extends Controller
         });
         $pendingCount = $pendingValidations->count();
         
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'pendingValidations', 'pendingCount'));
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
     }
 
     /**
@@ -1031,6 +1068,29 @@ class SubmissionController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
+    }
+
+    /**
+     * Quick assign marketing via AJAX (inline dropdown in monitoring table)
+     */
+    public function quickAssignMarketing(Request $request)
+    {
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'marketing_id' => 'nullable|exists:marketings,id',
+        ]);
+
+        $submission = Submission::findOrFail($request->submission_id);
+        $oldMarketingId = $submission->marketing_id;
+        $submission->marketing_id = $request->marketing_id;
+        $submission->save();
+
+        // Award points to marketing if newly assigned
+        if ($request->marketing_id && $request->marketing_id != $oldMarketingId) {
+            MarketingPointHistory::awardPoints($request->marketing_id, $submission->id);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Marketing berhasil diassign']);
     }
 
     /**
