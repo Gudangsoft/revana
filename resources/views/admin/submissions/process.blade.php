@@ -223,9 +223,15 @@
                                     <label class="form-label">Petugas {{ $stepCfg['title'] }}</label>
                                     <select class="form-select form-select-sm" name="petugas_{{ $stepKey }}_id" {{ $isValid ? 'disabled' : '' }}>
                                         <option value="">-- Pilih Petugas --</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ $petugasId == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                        @endforeach
+                                        @if(in_array($stepKey, ['reviewer1', 'reviewer2']))
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}" {{ $petugasId == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                            @endforeach
+                                        @else
+                                            @foreach($pics as $pic)
+                                                <option value="{{ $pic->id }}" {{ $petugasId == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                 </div>
                                 

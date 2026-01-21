@@ -12,6 +12,16 @@
     <a href="{{ route('pic.my-tasks.index') }}" class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}">
         <i class="bi bi-list-task"></i> Tugas Saya
     </a>
+    <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}">
+        <i class="bi bi-trophy"></i> Point Saya
+        @php
+            $picUser = Auth::guard('pic')->user();
+            $totalPoints = $picUser ? $picUser->total_points : 0;
+        @endphp
+        @if($totalPoints > 0)
+            <span class="badge bg-success ms-1">{{ number_format($totalPoints) }}</span>
+        @endif
+    </a>
     
     <hr class="mx-3">
     

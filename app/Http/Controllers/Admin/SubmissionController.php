@@ -8,6 +8,8 @@ use App\Models\SubmissionHistory;
 use App\Models\JournalSlot;
 use App\Models\JournalMaster;
 use App\Models\User;
+use App\Models\Pic;
+use App\Models\PicPointHistory;
 use App\Exports\SubmissionsExport;
 use App\Imports\SubmissionsImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -144,9 +146,10 @@ class SubmissionController extends Controller
             ->where('is_active', true)
             ->get();
         $users = User::orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $statusOptions = Submission::getStatusOptions();
         
-        return view('admin.submissions.edit', compact('submission', 'journals', 'slots', 'users', 'statusOptions'));
+        return view('admin.submissions.edit', compact('submission', 'journals', 'slots', 'users', 'pics', 'statusOptions'));
     }
 
     public function update(Request $request, Submission $submission)
@@ -165,15 +168,16 @@ class SubmissionController extends Controller
             'petugas_submit_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
             
-            // Workflow fields
-            'petugas_editor1_id' => 'nullable|exists:users,id',
+            // Workflow fields - Editor, Author, Production use pics table
+            'petugas_editor1_id' => 'nullable|exists:pics,id',
             'username_editor' => 'nullable|string|max:255',
             'password_editor' => 'nullable|string|max:255',
             
-            'petugas_author1_id' => 'nullable|exists:users,id',
+            'petugas_author1_id' => 'nullable|exists:pics,id',
             
-            'petugas_editor2_id' => 'nullable|exists:users,id',
+            'petugas_editor2_id' => 'nullable|exists:pics,id',
             
+            // Reviewers use users table
             'petugas_reviewer1_id' => 'nullable|exists:users,id',
             'username_reviewer1' => 'nullable|string|max:255',
             'password_reviewer1' => 'nullable|string|max:255',
@@ -184,11 +188,11 @@ class SubmissionController extends Controller
             'password_reviewer2' => 'nullable|string|max:255',
             'catatan_reviewer2' => 'nullable|string',
             
-            'petugas_editor3_id' => 'nullable|exists:users,id',
+            'petugas_editor3_id' => 'nullable|exists:pics,id',
             
-            'petugas_author2_id' => 'nullable|exists:users,id',
+            'petugas_author2_id' => 'nullable|exists:pics,id',
             
-            'petugas_production_id' => 'nullable|exists:users,id',
+            'petugas_production_id' => 'nullable|exists:pics,id',
             
             'link_publish' => 'nullable|url',
             'status' => 'nullable|string',
@@ -256,11 +260,12 @@ class SubmissionController extends Controller
         ]);
         
         $users = User::orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
         
         // Group histories by step
         $historiesByStep = $submission->histories->sortBy('created_at')->groupBy('step');
         
-        return view('admin.submissions.process', compact('submission', 'users', 'historiesByStep'));
+        return view('admin.submissions.process', compact('submission', 'users', 'pics', 'historiesByStep'));
     }
 
     // Update process step
@@ -271,13 +276,13 @@ class SubmissionController extends Controller
         switch ($step) {
             case 'editor1':
                 $validated = $request->validate([
-                    'petugas_editor1_id' => 'required|exists:users,id',
+                    'petugas_editor1_id' => 'required|exists:pics,id',
                     'username_editor' => 'required|string|max:255',
                     'password_editor' => 'required|string|max:255',
                 ]);
                 $submission->update(array_merge($validated, ['status' => 'EDITOR1_PROCESS']));
                 
-                $petugas = User::find($validated['petugas_editor1_id']);
+                $petugas = Pic::find($validated['petugas_editor1_id']);
                 $submission->logHistory('editor1', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
                     'petugas_id' => $validated['petugas_editor1_id'],
                     'petugas_name' => $petugas->name,
@@ -287,11 +292,11 @@ class SubmissionController extends Controller
                 
             case 'author1':
                 $validated = $request->validate([
-                    'petugas_author1_id' => 'required|exists:users,id',
+                    'petugas_author1_id' => 'required|exists:pics,id',
                 ]);
                 $submission->update($validated);
                 
-                $petugas = User::find($validated['petugas_author1_id']);
+                $petugas = Pic::find($validated['petugas_author1_id']);
                 $submission->logHistory('author1', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
                     'petugas_id' => $validated['petugas_author1_id'],
                     'petugas_name' => $petugas->name,
@@ -300,11 +305,11 @@ class SubmissionController extends Controller
                 
             case 'editor2':
                 $validated = $request->validate([
-                    'petugas_editor2_id' => 'required|exists:users,id',
+                    'petugas_editor2_id' => 'required|exists:pics,id',
                 ]);
                 $submission->update($validated);
                 
-                $petugas = User::find($validated['petugas_editor2_id']);
+                $petugas = Pic::find($validated['petugas_editor2_id']);
                 $submission->logHistory('editor2', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
                     'petugas_id' => $validated['petugas_editor2_id'],
                     'petugas_name' => $petugas->name,
@@ -345,11 +350,11 @@ class SubmissionController extends Controller
                 
             case 'editor3':
                 $validated = $request->validate([
-                    'petugas_editor3_id' => 'required|exists:users,id',
+                    'petugas_editor3_id' => 'required|exists:pics,id',
                 ]);
                 $submission->update($validated);
                 
-                $petugas = User::find($validated['petugas_editor3_id']);
+                $petugas = Pic::find($validated['petugas_editor3_id']);
                 $submission->logHistory('editor3', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
                     'petugas_id' => $validated['petugas_editor3_id'],
                     'petugas_name' => $petugas->name,
@@ -358,11 +363,11 @@ class SubmissionController extends Controller
                 
             case 'author2':
                 $validated = $request->validate([
-                    'petugas_author2_id' => 'required|exists:users,id',
+                    'petugas_author2_id' => 'required|exists:pics,id',
                 ]);
                 $submission->update($validated);
                 
-                $petugas = User::find($validated['petugas_author2_id']);
+                $petugas = Pic::find($validated['petugas_author2_id']);
                 $submission->logHistory('author2', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
                     'petugas_id' => $validated['petugas_author2_id'],
                     'petugas_name' => $petugas->name,
@@ -371,12 +376,12 @@ class SubmissionController extends Controller
                 
             case 'production':
                 $validated = $request->validate([
-                    'petugas_production_id' => 'required|exists:users,id',
+                    'petugas_production_id' => 'required|exists:pics,id',
                     'link_publish' => 'nullable|url',
                 ]);
                 $submission->update($validated);
                 
-                $petugas = User::find($validated['petugas_production_id']);
+                $petugas = Pic::find($validated['petugas_production_id']);
                 $submission->logHistory('production', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
                     'petugas_id' => $validated['petugas_production_id'],
                     'petugas_name' => $petugas->name,
@@ -392,6 +397,16 @@ class SubmissionController extends Controller
     {
         $step = $request->input('step');
         $notes = $request->input('notes', '');
+        
+        // Map step to petugas field for point awarding
+        $stepToPetugasField = [
+            'editor1' => 'petugas_editor1_id',
+            'author1' => 'petugas_author1_id',
+            'editor2' => 'petugas_editor2_id',
+            'editor3' => 'petugas_editor3_id',
+            'author2' => 'petugas_author2_id',
+            'production' => 'petugas_production_id',
+        ];
         
         switch ($step) {
             case 'editor1':
@@ -428,6 +443,24 @@ class SubmissionController extends Controller
                     'link_publish' => $submission->link_publish
                 ]);
                 break;
+        }
+        
+        // Award points to PIC if step is handled by PIC (not reviewer)
+        if (isset($stepToPetugasField[$step])) {
+            $petugasId = $submission->{$stepToPetugasField[$step]};
+            if ($petugasId) {
+                $pointHistory = PicPointHistory::awardPoints(
+                    $petugasId,
+                    $submission->id,
+                    $step,
+                    "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($step)
+                );
+                
+                if ($pointHistory) {
+                    $pointsEarned = $pointHistory->points_earned;
+                    return back()->with('success', "Langkah berhasil divalidasi. PIC mendapatkan +{$pointsEarned} point!");
+                }
+            }
         }
         
         return back()->with('success', 'Langkah berhasil divalidasi');
@@ -669,10 +702,15 @@ class SubmissionController extends Controller
      */
     public function bulkAssign(Request $request)
     {
+        $assignmentType = $request->assignment_type;
+        
+        // Determine which table to validate against based on assignment type
+        $isReviewer = in_array($assignmentType, ['reviewer1', 'reviewer2']);
+        
         $request->validate([
             'submission_ids' => 'required|string',
             'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
-            'petugas_id' => 'required|exists:users,id',
+            'petugas_id' => 'required|exists:' . ($isReviewer ? 'users' : 'pics') . ',id',
         ]);
 
         $submissionIds = json_decode($request->submission_ids, true);
@@ -681,9 +719,8 @@ class SubmissionController extends Controller
             return back()->with('error', 'Tidak ada submission yang dipilih');
         }
 
-        $assignmentType = $request->assignment_type;
         $petugasId = $request->petugas_id;
-        $petugas = User::find($petugasId);
+        $petugas = $isReviewer ? User::find($petugasId) : Pic::find($petugasId);
         
         $updated = 0;
         $submissions = Submission::whereIn('id', $submissionIds)->get();

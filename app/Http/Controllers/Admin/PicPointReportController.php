@@ -1,0 +1,156 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Pic;
+use App\Models\PicPointHistory;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PicPointsExport;
+
+class PicPointReportController extends Controller
+{
+    /**
+     * Display PIC points leaderboard/report
+     */
+    public function index(Request $request)
+    {
+        $query = Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc');
+        
+        // Filter by search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        
+        $pics = $query->paginate(20);
+        
+        // Get overall statistics
+        $totalPics = Pic::where('is_active', true)->count();
+        $totalPoints = Pic::where('is_active', true)->sum('total_points');
+        $totalTasks = PicPointHistory::count();
+        
+        // Top performer this month
+        $topPerformerThisMonth = Pic::where('is_active', true)
+            ->whereHas('pointHistories', function($q) {
+                $q->whereMonth('created_at', now()->month)
+                  ->whereYear('created_at', now()->year);
+            })
+            ->withSum(['pointHistories as points_this_month' => function($q) {
+                $q->whereMonth('created_at', now()->month)
+                  ->whereYear('created_at', now()->year);
+            }], 'points_earned')
+            ->orderByDesc('points_this_month')
+            ->first();
+        
+        // Points distribution by step
+        $pointsByStep = PicPointHistory::selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
+            ->groupBy('step')
+            ->get();
+        
+        $stepConfig = PicPointHistory::POINT_CONFIG;
+        
+        return view('admin.pic-points.index', compact(
+            'pics',
+            'totalPics',
+            'totalPoints',
+            'totalTasks',
+            'topPerformerThisMonth',
+            'pointsByStep',
+            'stepConfig'
+        ));
+    }
+
+    /**
+     * Show detail points for a specific PIC
+     */
+    public function show(Request $request, Pic $pic)
+    {
+        $query = $pic->pointHistories()->with('submission');
+        
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
+        
+        // Filter by step
+        if ($request->filled('step')) {
+            $query->where('step', $request->step);
+        }
+        
+        $pointHistories = $query->paginate(20);
+        
+        // Stats
+        $stats = [
+            'total_points' => $pic->total_points,
+            'points_this_month' => $pic->points_this_month,
+            'points_today' => $pic->points_today,
+            'total_tasks' => $pic->total_tasks_completed,
+        ];
+        
+        // Points by step
+        $pointsByStep = $pic->pointHistories()
+            ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
+            ->groupBy('step')
+            ->get();
+        
+        $stepConfig = PicPointHistory::POINT_CONFIG;
+        
+        return view('admin.pic-points.show', compact(
+            'pic',
+            'pointHistories',
+            'stats',
+            'pointsByStep',
+            'stepConfig'
+        ));
+    }
+
+    /**
+     * Manually adjust points for a PIC
+     */
+    public function adjustPoints(Request $request, Pic $pic)
+    {
+        $validated = $request->validate([
+            'adjustment' => 'required|integer',
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $adjustment = $validated['adjustment'];
+        $reason = $validated['reason'];
+
+        // Create history entry
+        PicPointHistory::create([
+            'pic_id' => $pic->id,
+            'submission_id' => null,
+            'step' => 'adjustment',
+            'points_earned' => $adjustment,
+            'description' => "Penyesuaian manual: {$reason}",
+        ]);
+
+        // Update total points
+        $pic->increment('total_points', $adjustment);
+
+        $action = $adjustment > 0 ? 'ditambahkan' : 'dikurangi';
+        $absPoints = abs($adjustment);
+
+        return back()->with('success', "{$absPoints} point berhasil {$action} untuk {$pic->name}");
+    }
+
+    /**
+     * Export points report
+     */
+    public function export(Request $request)
+    {
+        $filename = 'laporan-point-pic-' . now()->format('Y-m-d') . '.xlsx';
+        return Excel::download(new PicPointsExport($request), $filename);
+    }
+}

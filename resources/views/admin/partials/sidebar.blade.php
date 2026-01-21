@@ -126,8 +126,11 @@
 <a href="{{ route('admin.marketings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.marketings') ? 'active' : '' }}">
     <i class="bi bi-megaphone"></i> Marketing
 </a>
-<a href="{{ route('admin.pics.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics') ? 'active' : '' }}">
+<a href="{{ route('admin.pics.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics.') ? 'active' : '' }}">
     <i class="bi bi-person-badge"></i> PIC
+</a>
+<a href="{{ route('admin.pic-points.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pic-points') ? 'active' : '' }}">
+    <i class="bi bi-trophy-fill text-warning"></i> Point PIC
 </a>
 <a href="{{ route('admin.field-of-studies.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.field-of-studies') ? 'active' : '' }}">
     <i class="bi bi-book-fill"></i> Bidang Ilmu

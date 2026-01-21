@@ -178,6 +178,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/pics-export', [PicController::class, 'export'])->name('pics.export');
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
+        
+        // PIC Point Report
+        Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
+        Route::get('/pic-points/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'export'])->name('pic-points.export');
+        Route::get('/pic-points/{pic}', [\App\Http\Controllers\Admin\PicPointReportController::class, 'show'])->name('pic-points.show');
+        Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
         Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
         
         // Field of Study Management
@@ -321,6 +327,9 @@ Route::prefix('pic')->group(function () {
         
         // Tugas Saya (My Tasks)
         Route::get('/my-tasks', [PicJournalController::class, 'myTasks'])->name('pic.my-tasks.index');
+        
+        // Point Saya
+        Route::get('/points', [\App\Http\Controllers\Pic\PicPointController::class, 'index'])->name('pic.points.index');
         
         // Reviewers
         Route::get('/reviewers', [PicJournalController::class, 'reviewersIndex'])->name('pic.reviewers.index');
