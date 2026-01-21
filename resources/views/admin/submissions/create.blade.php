@@ -159,7 +159,14 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="pic_marketing" class="form-label">PIC Marketing</label>
-                                <input type="text" class="form-control @error('pic_marketing') is-invalid @enderror" id="pic_marketing" name="pic_marketing" value="{{ old('pic_marketing') }}" placeholder="Nama PIC Marketing">
+                                <select class="form-select @error('pic_marketing') is-invalid @enderror" id="pic_marketing" name="pic_marketing">
+                                    <option value="">-- Pilih PIC Marketing --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->name }}" {{ old('pic_marketing') == $pic->name ? 'selected' : '' }}>
+                                            {{ $pic->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error('pic_marketing')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
