@@ -1,7 +1,11 @@
-@extends('layouts.pic')
+@extends('pic.layouts.app')
 
-@section('title', 'Point Saya - ' . $appSettings['app_name'])
+@section('title', 'Point Saya')
 @section('page-title', 'Point Saya')
+
+@section('sidebar')
+    @include('pic.partials.sidebar')
+@endsection
 
 @section('content')
 <div class="row">

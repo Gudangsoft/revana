@@ -43,18 +43,17 @@ class PicPointController extends Controller
         ];
         
         // Monthly breakdown for chart
-        $monthlyPoints = $pic->pointHistories()
+        $monthlyPoints = PicPointHistory::where('pic_id', $pic->id)
             ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(points_earned) as total')
             ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->orderByRaw('year DESC, month DESC')
             ->limit(6)
             ->get()
             ->reverse()
             ->values();
         
         // Points by step breakdown
-        $pointsByStep = $pic->pointHistories()
+        $pointsByStep = PicPointHistory::where('pic_id', $pic->id)
             ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
             ->get();
