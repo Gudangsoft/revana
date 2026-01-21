@@ -64,9 +64,9 @@ class SubmissionController extends Controller
     {
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $slots = collect();
-        $users = User::orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.submissions.create', compact('journals', 'slots', 'users'));
+        return view('admin.submissions.create', compact('journals', 'slots', 'pics'));
     }
 
     public function store(Request $request)
@@ -82,7 +82,7 @@ class SubmissionController extends Controller
             'username_author' => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
             'pic_marketing' => 'nullable|string|max:255',
-            'petugas_submit_id' => 'nullable|exists:users,id',
+            'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
         ]);
 
@@ -103,8 +103,7 @@ class SubmissionController extends Controller
         }
 
         $validated['created_by'] = auth()->id();
-        // Use selected petugas_submit_id or default to current user
-        $validated['petugas_submit_id'] = $validated['petugas_submit_id'] ?? auth()->id();
+        // petugas_submit_id is now from pics table (no default)
         $validated['tanggal_submit'] = now()->toDateString();
         $validated['status'] = 'SUBMITTED';
 
@@ -165,7 +164,7 @@ class SubmissionController extends Controller
             'username_author' => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
             'pic_marketing' => 'nullable|string|max:255',
-            'petugas_submit_id' => 'nullable|exists:users,id',
+            'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
             
             // Workflow fields - Editor, Author, Production use pics table

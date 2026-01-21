@@ -331,42 +331,52 @@
             <div class="card-body">
                 <!-- Filter -->
                 <form action="{{ route('admin.submissions.monitoring') }}" method="GET" class="mb-4">
-                    <div class="row g-3">
+                    <div class="row g-2 align-items-end">
                         <div class="col-md-2">
-                            <label for="tanggal_dari" class="form-label">Tanggal Dari</label>
-                            <input type="date" class="form-control" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
+                            <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
+                            <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
                         </div>
                         <div class="col-md-2">
-                            <label for="tanggal_sampai" class="form-label">Tanggal Sampai</label>
-                            <input type="date" class="form-control" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
+                            <label for="tanggal_sampai" class="form-label small mb-1">Tanggal Sampai</label>
+                            <input type="date" class="form-control form-control-sm" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
                         </div>
-                        <div class="col-md-3">
-                            <label for="journal_master_id" class="form-label">Jurnal</label>
-                            <select class="form-select" id="journal_master_id" name="journal_master_id">
-                                <option value="">-- Semua Jurnal --</option>
+                        <div class="col-md-2">
+                            <label for="journal_master_id" class="form-label small mb-1">Jurnal</label>
+                            <select class="form-select form-select-sm" id="journal_master_id" name="journal_master_id">
+                                <option value="">-- Semua --</option>
                                 @foreach($journals as $journal)
                                     <option value="{{ $journal->id }}" {{ request('journal_master_id') == $journal->id ? 'selected' : '' }}>
-                                        {{ $journal->nama_jurnal }}
+                                        {{ Str::limit($journal->nama_jurnal, 20) }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" id="status" name="status">
+                            <label for="status" class="form-label small mb-1">Status</label>
+                            <select class="form-select form-select-sm" id="status" name="status">
                                 <option value="">-- Semua --</option>
                                 @foreach($statusOptions as $key => $value)
                                     <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $value }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="bi bi-search"></i> Filter
-                            </button>
-                            <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-secondary">
-                                <i class="bi bi-x-circle"></i> Reset
-                            </a>
+                        <div class="col-md-4">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Filter
+                                </button>
+                                <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
+                            </div>
+                            <div class="btn-group btn-group-sm ms-2" role="group">
+                                <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-success">
+                                    <i class="bi bi-file-earmark-excel"></i> Export
+                                </a>
+                                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                                    <i class="bi bi-upload"></i> Import
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1189,6 +1199,53 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-circle"></i> Tugaskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-upload"></i> Import Data Submission</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.submissions.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Format file:</strong> Excel (.xlsx, .xls) atau CSV
+                        <br>
+                        <a href="{{ route('admin.submissions.template') }}" class="text-decoration-none">
+                            <i class="bi bi-download"></i> Download Template
+                        </a>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Pilih File <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="importFile" name="file" accept=".xlsx,.xls,.csv" required>
+                        <div class="form-text">Maksimal 10MB</div>
+                    </div>
+                    
+                    <div class="alert alert-warning small mb-0">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Perhatian:</strong>
+                        <ul class="mb-0 ps-3">
+                            <li>Data dengan Kode Submit yang sama akan diupdate</li>
+                            <li>Pastikan format tanggal: YYYY-MM-DD</li>
+                            <li>Kolom wajib: kode_submit, judul_artikel, nama_penulis</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-upload"></i> Import
                     </button>
                 </div>
             </form>

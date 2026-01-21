@@ -171,10 +171,10 @@
                             <div class="mb-3">
                                 <label for="petugas_submit_id" class="form-label">PIC Submit</label>
                                 <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
-                                    <option value="">-- Pilih PIC Submit --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ old('petugas_submit_id', $submission->petugas_submit_id) == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
+                                    <option value="">-- Pilih PIC --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ old('petugas_submit_id', $submission->petugas_submit_id) == $pic->id ? 'selected' : '' }}>
+                                            {{ $pic->name }}
                                         </option>
                                     @endforeach
                                 </select>

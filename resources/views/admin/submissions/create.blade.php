@@ -169,17 +169,17 @@
                             <div class="mb-3">
                                 <label for="petugas_submit_id" class="form-label">PIC Submit</label>
                                 <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
-                                    <option value="">-- Otomatis User Login --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ old('petugas_submit_id', auth()->id()) == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
+                                    <option value="">-- Pilih PIC --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ old('petugas_submit_id') == $pic->id ? 'selected' : '' }}>
+                                            {{ $pic->name }}
                                         </option>
                                     @endforeach
                                 </select>
                                 @error('petugas_submit_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">Petugas yang melakukan submit. Default: user yang login.</small>
+                                <small class="text-muted">Pilih PIC yang melakukan submit.</small>
                             </div>
                         </div>
                     </div>
