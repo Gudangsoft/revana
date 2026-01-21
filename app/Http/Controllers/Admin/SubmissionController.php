@@ -572,6 +572,10 @@ class SubmissionController extends Controller
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
         
+        // Get PICs and Users for inline assignment dropdowns
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        $users = User::where('role', 'admin')->orderBy('name')->get();
+        
         // Statistics
         $stats = [
             'total' => $submissions->count(),
@@ -581,7 +585,7 @@ class SubmissionController extends Controller
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
         ];
         
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats'));
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users'));
     }
 
     /**
@@ -811,5 +815,237 @@ class SubmissionController extends Controller
         ];
 
         return back()->with('success', "{$updated} submission berhasil ditugaskan ke {$petugas->name} sebagai {$typeLabels[$assignmentType]}");
+    }
+
+    /**
+     * Bulk assign petugas with per-submission credentials
+     */
+    public function bulkAssignWithCredentials(Request $request)
+    {
+        $assignmentType = $request->assignment_type;
+        
+        // Determine which table to validate against based on assignment type
+        $isReviewer = in_array($assignmentType, ['reviewer1', 'reviewer2']);
+        
+        $request->validate([
+            'submission_ids' => 'required|string',
+            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'petugas_id' => 'required|exists:' . ($isReviewer ? 'users' : 'pics') . ',id',
+            'credentials' => 'nullable|array',
+        ]);
+
+        $submissionIds = json_decode($request->submission_ids, true);
+        
+        if (empty($submissionIds) || !is_array($submissionIds)) {
+            return back()->with('error', 'Tidak ada submission yang dipilih');
+        }
+
+        $petugasId = $request->petugas_id;
+        $petugas = $isReviewer ? User::find($petugasId) : Pic::find($petugasId);
+        $credentials = $request->credentials ?? [];
+        
+        $updated = 0;
+        $submissions = Submission::whereIn('id', $submissionIds)->get();
+
+        foreach ($submissions as $submission) {
+            $updateData = [];
+            $logStep = $assignmentType;
+            
+            // Get credentials for this specific submission
+            $submissionCredentials = $credentials[$submission->id] ?? [];
+            $username = $submissionCredentials['username'] ?? null;
+            $password = $submissionCredentials['password'] ?? null;
+            
+            switch ($assignmentType) {
+                case 'editor1':
+                    $updateData['petugas_editor1_id'] = $petugasId;
+                    if (!empty($username)) {
+                        $updateData['username_editor'] = $username;
+                    }
+                    if (!empty($password)) {
+                        $updateData['password_editor'] = $password;
+                    }
+                    // Update status if still SUBMITTED
+                    if ($submission->status === 'SUBMITTED') {
+                        $updateData['status'] = 'EDITOR1_PROCESS';
+                    }
+                    break;
+                    
+                case 'editor2':
+                    $updateData['petugas_editor2_id'] = $petugasId;
+                    if (!empty($username)) {
+                        $updateData['username_editor'] = $username;
+                    }
+                    if (!empty($password)) {
+                        $updateData['password_editor'] = $password;
+                    }
+                    break;
+                    
+                case 'editor3':
+                    $updateData['petugas_editor3_id'] = $petugasId;
+                    if (!empty($username)) {
+                        $updateData['username_editor'] = $username;
+                    }
+                    if (!empty($password)) {
+                        $updateData['password_editor'] = $password;
+                    }
+                    break;
+                    
+                case 'author1':
+                    $updateData['petugas_author1_id'] = $petugasId;
+                    break;
+                    
+                case 'author2':
+                    $updateData['petugas_author2_id'] = $petugasId;
+                    break;
+                    
+                case 'reviewer1':
+                    $updateData['petugas_reviewer1_id'] = $petugasId;
+                    if (!empty($username)) {
+                        $updateData['username_reviewer1'] = $username;
+                    }
+                    if (!empty($password)) {
+                        $updateData['password_reviewer1'] = $password;
+                    }
+                    break;
+                    
+                case 'reviewer2':
+                    $updateData['petugas_reviewer2_id'] = $petugasId;
+                    if (!empty($username)) {
+                        $updateData['username_reviewer2'] = $username;
+                    }
+                    if (!empty($password)) {
+                        $updateData['password_reviewer2'] = $password;
+                    }
+                    break;
+                    
+                case 'production':
+                    $updateData['petugas_production_id'] = $petugasId;
+                    break;
+            }
+
+            if (!empty($updateData)) {
+                $submission->update($updateData);
+                
+                // Log history
+                $submission->logHistory($logStep, 'assigned', "Ditugaskan ke {$petugas->name} (Bulk Assignment)", [
+                    'petugas_id' => $petugasId,
+                    'petugas_name' => $petugas->name,
+                    'bulk_assignment' => true,
+                    'has_credentials' => !empty($username) || !empty($password),
+                ]);
+                
+                $updated++;
+            }
+        }
+
+        $typeLabels = [
+            'editor1' => 'Editor 1',
+            'editor2' => 'Editor 2', 
+            'editor3' => 'Editor 3',
+            'author1' => 'Author 1',
+            'author2' => 'Author 2',
+            'reviewer1' => 'Reviewer 1',
+            'reviewer2' => 'Reviewer 2',
+            'production' => 'Production',
+        ];
+
+        return back()->with('success', "{$updated} submission berhasil ditugaskan ke {$petugas->name} sebagai {$typeLabels[$assignmentType]}");
+    }
+
+    /**
+     * Quick assign petugas via AJAX (inline dropdown in monitoring table)
+     */
+    public function quickAssign(Request $request)
+    {
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'petugas_id' => 'nullable|integer',
+        ]);
+
+        $submission = Submission::findOrFail($request->submission_id);
+        $assignmentType = $request->assignment_type;
+        $petugasId = $request->petugas_id;
+        
+        // Determine field name based on assignment type
+        $fieldMap = [
+            'editor1' => 'petugas_editor1_id',
+            'editor2' => 'petugas_editor2_id',
+            'editor3' => 'petugas_editor3_id',
+            'author1' => 'petugas_author1_id',
+            'author2' => 'petugas_author2_id',
+            'reviewer1' => 'petugas_reviewer1_id',
+            'reviewer2' => 'petugas_reviewer2_id',
+            'production' => 'petugas_production_id',
+        ];
+
+        $field = $fieldMap[$assignmentType];
+        
+        // Validate petugas exists if provided
+        if ($petugasId) {
+            $isReviewer = in_array($assignmentType, ['reviewer1', 'reviewer2']);
+            if ($isReviewer) {
+                $petugas = User::find($petugasId);
+            } else {
+                $petugas = Pic::find($petugasId);
+            }
+            
+            if (!$petugas) {
+                return response()->json(['success' => false, 'message' => 'Petugas tidak ditemukan']);
+            }
+        }
+
+        // Update the submission
+        $updateData = [$field => $petugasId ?: null];
+        
+        // If assigning Editor 1 and status is SUBMITTED, update status
+        if ($assignmentType === 'editor1' && $petugasId && $submission->status === 'SUBMITTED') {
+            $updateData['status'] = 'EDITOR1_PROCESS';
+        }
+        
+        $submission->update($updateData);
+        
+        // Log history
+        if ($petugasId) {
+            $petugasName = $isReviewer ? User::find($petugasId)->name : Pic::find($petugasId)->name;
+            $submission->logHistory($assignmentType, 'assigned', "Ditugaskan ke {$petugasName} (Quick Assign)", [
+                'petugas_id' => $petugasId,
+                'petugas_name' => $petugasName,
+            ]);
+        } else {
+            $submission->logHistory($assignmentType, 'unassigned', "Penugasan dihapus (Quick Assign)", []);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
+    }
+
+    /**
+     * Quick update credential via AJAX (inline input in monitoring table)
+     */
+    public function quickUpdateCredential(Request $request)
+    {
+        $allowedFields = [
+            'username_editor',
+            'password_editor',
+            'username_reviewer1',
+            'password_reviewer1',
+            'username_reviewer2',
+            'password_reviewer2',
+        ];
+
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'field' => 'required|in:' . implode(',', $allowedFields),
+            'value' => 'nullable|string|max:255',
+        ]);
+
+        $submission = Submission::findOrFail($request->submission_id);
+        $field = $request->field;
+        $value = $request->value;
+        
+        $submission->update([$field => $value ?: null]);
+        
+        return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
     }
 }

@@ -1,5 +1,46 @@
 <!-- PIC Sidebar -->
 <nav class="nav flex-column">
+    @php
+        $picUser = Auth::guard('pic')->user();
+        $picId = $picUser ? $picUser->id : 0;
+        
+        // Count pending tasks that require PIC's action
+        $pendingTasks = 0;
+        if ($picId) {
+            $allTasks = \App\Models\Submission::where(function($q) use ($picId) {
+                $q->where('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId);
+            })->whereNotIn('status', ['PUBLISHED', 'published'])->get();
+            
+            // Count only tasks where status matches PIC's role
+            $urgentMappings = [
+                'EDITOR1' => ['petugas_editor1_id'],
+                'AUTHOR1' => ['petugas_author1_id'],
+                'EDITOR2' => ['petugas_editor2_id'],
+                'EDITOR3' => ['petugas_editor3_id'],
+                'AUTHOR2' => ['petugas_author2_id'],
+                'PRODUCTION' => ['petugas_production_id'],
+            ];
+            foreach ($allTasks as $task) {
+                $status = strtoupper($task->status);
+                foreach ($urgentMappings as $statusKey => $fields) {
+                    if (str_contains($status, $statusKey)) {
+                        foreach ($fields as $field) {
+                            if ($task->$field == $picId) {
+                                $pendingTasks++;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $totalPoints = $picUser ? $picUser->total_points : 0;
+    @endphp
     <h6 class="px-3 py-2 text-muted text-uppercase small">
         <i class="bi bi-speedometer2"></i> Dashboard
     </h6>
@@ -11,13 +52,12 @@
     </a>
     <a href="{{ route('pic.my-tasks.index') }}" class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}">
         <i class="bi bi-list-task"></i> Tugas Saya
+        @if($pendingTasks > 0)
+            <span class="badge bg-danger ms-1">{{ $pendingTasks }}</span>
+        @endif
     </a>
     <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}">
         <i class="bi bi-trophy"></i> Point Saya
-        @php
-            $picUser = Auth::guard('pic')->user();
-            $totalPoints = $picUser ? $picUser->total_points : 0;
-        @endphp
         @if($totalPoints > 0)
             <span class="badge bg-success ms-1">{{ number_format($totalPoints) }}</span>
         @endif

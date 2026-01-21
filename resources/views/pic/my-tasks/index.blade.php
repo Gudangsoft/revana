@@ -122,6 +122,16 @@
     </div>
 </div>
 
+@if(isset($stats['new_tasks']) && $stats['new_tasks'] > 0)
+<div class="alert alert-info d-flex align-items-center mb-4 animate__animated animate__fadeIn" role="alert">
+    <i class="bi bi-bell-fill me-2" style="font-size: 1.5rem;"></i>
+    <div>
+        <strong>🎉 Tugas Baru!</strong> Anda memiliki <strong>{{ $stats['new_tasks'] }}</strong> tugas baru yang ditugaskan kepada Anda.
+        Tugas baru ditandai dengan <span class="badge bg-info"><i class="bi bi-star-fill"></i> Baru</span> pada tabel.
+    </div>
+</div>
+@endif
+
 @if(($stats['urgent'] ?? 0) > 0)
 <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
     <i class="bi bi-bell-fill me-2" style="font-size: 1.5rem;"></i>
@@ -240,10 +250,15 @@
                                 }
                             }
                         }
+                        
+                        // Check if this is a new task
+                        $isNewTask = isset($newTaskIds) && in_array($submission->id, $newTaskIds);
                     @endphp
-                    <tr class="{{ $isUrgent ? 'table-danger' : '' }}">
+                    <tr class="{{ $isUrgent ? 'table-danger' : '' }} {{ $isNewTask ? 'table-info' : '' }}">
                         <td class="text-muted">
-                            @if($isUrgent)
+                            @if($isNewTask)
+                                <span class="badge bg-info" title="Tugas Baru"><i class="bi bi-star-fill"></i> Baru</span>
+                            @elseif($isUrgent)
                                 <span class="badge bg-danger badge-urgent" title="Harus segera dikerjakan"><i class="bi bi-exclamation-circle"></i></span>
                             @endif
                             {{ $loop->iteration + ($submissions->currentPage() - 1) * $submissions->perPage() }}

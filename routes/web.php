@@ -98,6 +98,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/import', [SubmissionController::class, 'import'])->name('submissions.import');
         Route::get('/submissions/template', [SubmissionController::class, 'downloadTemplate'])->name('submissions.template');
         Route::post('/submissions/bulk-assign', [SubmissionController::class, 'bulkAssign'])->name('submissions.bulk-assign');
+        Route::post('/submissions/bulk-assign-with-credentials', [SubmissionController::class, 'bulkAssignWithCredentials'])->name('submissions.bulk-assign-with-credentials');
+        Route::post('/submissions/quick-assign', [SubmissionController::class, 'quickAssign'])->name('submissions.quick-assign');
+        Route::post('/submissions/quick-update-credential', [SubmissionController::class, 'quickUpdateCredential'])->name('submissions.quick-update-credential');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');

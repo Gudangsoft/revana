@@ -468,6 +468,9 @@ class JournalManagementController extends Controller
     {
         $picId = auth()->guard('pic')->id();
         
+        // Get last viewed timestamp from session
+        $lastViewed = session('pic_tasks_last_viewed_' . $picId);
+        
         // Get all submissions where current PIC is assigned as petugas
         $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit', 'petugasEditor1', 'petugasAuthor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor2', 'petugasProduction'])
             ->where(function($q) use ($picId) {
@@ -527,7 +530,23 @@ class JournalManagementController extends Controller
         }
         $stats['urgent'] = $urgentCount;
         
-        return view('pic.my-tasks.index', compact('submissions', 'stats'));
+        // Count new tasks (assigned after last viewed)
+        $newTasksCount = 0;
+        $newTaskIds = [];
+        if ($lastViewed) {
+            foreach ($allSubmissions as $sub) {
+                if ($sub->updated_at > $lastViewed && $this->isUrgentForPic($sub, $picId)) {
+                    $newTasksCount++;
+                    $newTaskIds[] = $sub->id;
+                }
+            }
+        }
+        $stats['new_tasks'] = $newTasksCount;
+        
+        // Update last viewed timestamp
+        session(['pic_tasks_last_viewed_' . $picId => now()]);
+        
+        return view('pic.my-tasks.index', compact('submissions', 'stats', 'newTaskIds'));
     }
 
     // ==================== REVIEWERS ====================
