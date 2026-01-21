@@ -306,12 +306,16 @@ class JournalManagementController extends Controller
         return view('pic.submissions.process', compact('submission', 'currentRole', 'canProcess'));
     }
     
-    public function validateStep(Request $request, Submission $submission)
+    /**
+     * PIC menandai pekerjaan sudah selesai dikerjakan
+     * Point akan diberikan setelah Admin memvalidasi
+     */
+    public function submitWork(Request $request, Submission $submission)
     {
         $picId = auth()->guard('pic')->id();
         
         if (!$this->isUrgentForPic($submission, $picId)) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk memvalidasi tahap ini.');
+            return back()->with('error', 'Anda tidak memiliki akses untuk submit pekerjaan ini.');
         }
         
         $request->validate([
@@ -319,43 +323,33 @@ class JournalManagementController extends Controller
         ]);
         
         $status = strtoupper($submission->status);
-        $nextStatus = $this->getNextStatus($status);
-        $validField = $this->getValidField($status);
         $stepName = $this->getStepFromStatus($status);
         
-        if ($validField) {
-            $submission->$validField = true;
-        }
-        $submission->status = $nextStatus;
+        // Change status to waiting validation (add _SUBMITTED suffix)
+        // e.g. EDITOR1_PROCESS → EDITOR1_SUBMITTED
+        $submittedStatus = str_replace('_PROCESS', '_SUBMITTED', $status);
+        $submittedStatus = str_replace('_REVISION', '_SUBMITTED', $submittedStatus);
+        
+        $submission->status = $submittedStatus;
         $submission->save();
         
-        // Record history
-        \DB::table('submission_histories')->insert([
-            'submission_id' => $submission->id,
-            'status' => $nextStatus,
-            'notes' => $request->notes ?? 'Divalidasi oleh PIC',
-            'created_by' => $picId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        
-        // Award points to PIC
-        $pointsMessage = '';
+        // Record history - PIC submitted work
         if ($stepName) {
-            $pointHistory = PicPointHistory::awardPoints(
-                $picId,
-                $submission->id,
-                $stepName,
-                "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($stepName)
-            );
-            
-            if ($pointHistory) {
-                $pointsMessage = " Anda mendapatkan +{$pointHistory->points_earned} point!";
-            }
+            \DB::table('submission_histories')->insert([
+                'submission_id' => $submission->id,
+                'step' => $stepName,
+                'action' => 'submitted',
+                'user_id' => null,
+                'notes' => $request->notes ?? 'Pekerjaan diserahkan oleh PIC',
+                'data' => json_encode(['pic_id' => $picId]),
+                'revision_number' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
         
         return redirect()->route('pic.submissions.show', $submission)
-            ->with('success', 'Tahap berhasil divalidasi. Status baru: ' . str_replace('_', ' ', $nextStatus) . $pointsMessage);
+            ->with('success', 'Pekerjaan berhasil diserahkan! Menunggu validasi dari Admin.');
     }
     
     public function requestRevision(Request $request, Submission $submission)

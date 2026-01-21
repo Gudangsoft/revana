@@ -262,7 +262,43 @@
     color: white;
     border-color: #0d6efd;
 }
+
+/* Pending validation alert animation */
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+.pending-validation-alert {
+    animation: pulse-warning 2s infinite;
+}
 </style>
+
+{{-- Notifikasi Tugas Menunggu Validasi --}}
+@if($pendingCount > 0)
+<div class="alert alert-warning alert-dismissible fade show pending-validation-alert mb-4" role="alert">
+    <div class="d-flex align-items-center">
+        <div class="me-3">
+            <i class="bi bi-hourglass-split" style="font-size: 2.5rem;"></i>
+        </div>
+        <div class="flex-grow-1">
+            <h5 class="alert-heading mb-1">
+                <i class="bi bi-bell-fill"></i> Ada {{ $pendingCount }} Tugas Menunggu Validasi!
+            </h5>
+            <p class="mb-2">PIC sudah menyelesaikan pekerjaan dan menunggu validasi dari Admin.</p>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($pendingValidations as $pending)
+                <a href="{{ route('admin.submissions.process', $pending) }}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-check-lg"></i> {{ $pending->kode_submit }} 
+                    <span class="badge bg-dark">{{ str_replace('_SUBMITTED', '', $pending->status) }}</span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">

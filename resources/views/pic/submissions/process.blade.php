@@ -110,23 +110,28 @@
 
 <!-- Action Cards -->
 <div class="row">
-    <!-- Validate / Approve -->
+    <!-- Submit Work -->
     <div class="col-md-6 mb-4">
-        <div class="card h-100 border-success">
-            <div class="card-header bg-success text-white">
-                <h6 class="mb-0"><i class="bi bi-check-circle"></i> Validasi & Lanjutkan</h6>
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="bi bi-send-check"></i> Serahkan Pekerjaan</h6>
             </div>
             <div class="card-body">
-                <p class="text-muted">Klik tombol di bawah jika pekerjaan pada tahap ini sudah selesai dan siap untuk dilanjutkan ke tahap berikutnya.</p>
+                <p class="text-muted">Klik tombol di bawah jika pekerjaan sudah selesai. Pekerjaan akan diperiksa oleh Admin, dan point akan diberikan setelah Admin memvalidasi.</p>
                 
-                <form action="{{ route('pic.submissions.validate-step', $submission) }}" method="POST">
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>Point akan diberikan setelah Admin memvalidasi pekerjaan Anda.</strong>
+                </div>
+                
+                <form action="{{ route('pic.submissions.submit-work', $submission) }}" method="POST">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Catatan (Opsional)</label>
-                        <textarea name="notes" class="form-control" rows="3" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Tambahkan catatan tentang pekerjaan yang sudah dilakukan..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-success w-100" onclick="return confirm('Yakin ingin memvalidasi tahap ini?')">
-                        <i class="bi bi-check-lg"></i> Validasi & Lanjutkan ke Tahap Berikutnya
+                    <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Yakin ingin menyerahkan pekerjaan ini untuk diperiksa Admin?')">
+                        <i class="bi bi-send"></i> Serahkan Pekerjaan ke Admin
                     </button>
                 </form>
             </div>

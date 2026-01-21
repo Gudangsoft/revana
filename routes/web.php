@@ -319,7 +319,7 @@ Route::prefix('pic')->group(function () {
             Route::post('/', [PicJournalController::class, 'submissionsStore'])->name('store');
             Route::get('/{submission}', [PicJournalController::class, 'submissionsShow'])->name('show');
             Route::get('/{submission}/process', [PicJournalController::class, 'submissionsProcess'])->name('process');
-            Route::post('/{submission}/validate-step', [PicJournalController::class, 'validateStep'])->name('validate-step');
+            Route::post('/{submission}/submit-work', [PicJournalController::class, 'submitWork'])->name('submit-work');
             Route::post('/{submission}/request-revision', [PicJournalController::class, 'requestRevision'])->name('request-revision');
         });
         

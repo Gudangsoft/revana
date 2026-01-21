@@ -109,6 +109,44 @@
             <div class="page-header">
                 <h2>@yield('page-title')</h2>
             </div>
+            
+            {{-- Flash Messages --}}
+            @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {!! session('success') !!}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+            
+            @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+            
+            @if(session('point_earned'))
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-trophy-fill" style="font-size: 2.5rem; color: #ffc107;"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1"><i class="bi bi-star-fill text-warning"></i> Selamat! Anda Mendapatkan Point!</h5>
+                        <p class="mb-1">
+                            <strong>+{{ session('point_earned') }} point</strong> untuk tugas <strong>{{ session('point_step') }}</strong>
+                        </p>
+                        <small class="text-muted">
+                            Total point Anda sekarang: <strong>{{ session('total_points') }} point</strong>
+                        </small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+            
             @yield('content')
         </div>
     </div>

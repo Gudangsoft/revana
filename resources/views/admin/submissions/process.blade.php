@@ -186,6 +186,11 @@
                     $lastRevisionSubmit = $stepHistories->where('action', 'revision_submit')->sortByDesc('created_at')->first();
                     $hasActiveRevision = $lastRevision && (!$lastRevisionSubmit || $lastRevision->created_at > $lastRevisionSubmit->created_at);
                     
+                    // Check if step is submitted (waiting for admin validation)
+                    $stepUpperKey = strtoupper($stepKey);
+                    $isSubmitted = str_contains($submission->status, $stepUpperKey . '_SUBMITTED');
+                    $lastSubmittedHistory = $stepHistories->where('action', 'submitted')->sortByDesc('created_at')->first();
+                    
                     // Credential check
                     $hasRequiredCredentials = true;
                     if (isset($stepCfg['has_credentials']) && $stepCfg['has_credentials']) {
@@ -196,8 +201,8 @@
                 @endphp
                 
                 <div class="col-md-6 mb-4">
-                    <div class="card {{ $isValid ? 'border-success' : ($hasActiveRevision ? 'border-warning' : '') }}">
-                        <div class="card-header d-flex justify-content-between align-items-center {{ $isValid ? 'bg-success text-white' : ($hasActiveRevision ? 'bg-warning' : '') }}">
+                    <div class="card {{ $isValid ? 'border-success' : ($isSubmitted ? 'border-info' : ($hasActiveRevision ? 'border-warning' : '')) }}">
+                        <div class="card-header d-flex justify-content-between align-items-center {{ $isValid ? 'bg-success text-white' : ($isSubmitted ? 'bg-info text-white' : ($hasActiveRevision ? 'bg-warning' : '')) }}">
                             <span>
                                 <i class="bi {{ $isValid ? 'bi-check-circle-fill' : 'bi-'.$stepCfg['icon'].'-circle' }}"></i>
                                 Petugas {{ $stepCfg['title'] }}
@@ -207,11 +212,26 @@
                             </span>
                             @if($isValid)
                                 <span class="badge bg-light text-success">Valid</span>
+                            @elseif($isSubmitted)
+                                <span class="badge bg-light text-info">
+                                    <i class="bi bi-hourglass-split"></i> Menunggu Validasi Admin
+                                </span>
                             @elseif($hasActiveRevision)
                                 <span class="badge bg-light text-warning">Menunggu Revisi</span>
                             @endif
                         </div>
                         <div class="card-body">
+                            @if($isSubmitted && $lastSubmittedHistory)
+                            <div class="alert alert-info py-2 mb-2">
+                                <i class="bi bi-info-circle"></i> 
+                                <strong>PIC sudah selesai mengerjakan!</strong><br>
+                                <small>Diserahkan: {{ $lastSubmittedHistory->created_at->format('d M Y H:i') }}</small>
+                                @if($lastSubmittedHistory->notes)
+                                <br><small class="fst-italic">Catatan: {{ $lastSubmittedHistory->notes }}</small>
+                                @endif
+                            </div>
+                            @endif
+                            
                             <small class="text-muted d-block mb-2">Bertugas: {{ $stepCfg['desc'] }}</small>
                             
                             <!-- Form Penugasan -->

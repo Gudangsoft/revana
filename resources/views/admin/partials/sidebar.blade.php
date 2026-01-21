@@ -1,5 +1,7 @@
 @php
     $currentRoute = Route::currentRouteName();
+    // Count pending validations
+    $pendingValidationCount = \App\Models\Submission::where('status', 'like', '%_SUBMITTED')->count();
 @endphp
 
 <a href="{{ route('admin.dashboard') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'active' : '' }}">
@@ -68,6 +70,9 @@
                 </a>
                 <a href="{{ route('admin.submissions.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
                     <i class="bi bi-graph-up"></i> Monitoring Proses
+                    @if($pendingValidationCount > 0)
+                    <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.accreditations.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.accreditations') ? 'active' : '' }}">
                     <i class="bi bi-award"></i> Akreditasi

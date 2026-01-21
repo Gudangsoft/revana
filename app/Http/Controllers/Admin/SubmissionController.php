@@ -456,8 +456,16 @@ class SubmissionController extends Controller
                 );
                 
                 if ($pointHistory) {
-                    $pointsEarned = $pointHistory->points_earned;
-                    return back()->with('success', "Langkah berhasil divalidasi. PIC mendapatkan +{$pointsEarned} point!");
+                    $pic = Pic::find($petugasId);
+                    
+                    return back()->with([
+                        'success' => 'Langkah berhasil divalidasi!',
+                        'point_awarded' => true,
+                        'pic_name' => $pic ? $pic->name : 'PIC',
+                        'points_earned' => $pointHistory->points_earned,
+                        'step_label' => PicPointHistory::getLabelForStep($step),
+                        'total_points' => $pic ? $pic->total_points : 0,
+                    ]);
                 }
             }
         }
@@ -584,7 +592,13 @@ class SubmissionController extends Controller
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
         ];
         
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users'));
+        // Count pending validations (status contains _SUBMITTED)
+        $pendingValidations = $submissions->filter(function($s) {
+            return str_contains($s->status, '_SUBMITTED');
+        });
+        $pendingCount = $pendingValidations->count();
+        
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'pendingValidations', 'pendingCount'));
     }
 
     /**
