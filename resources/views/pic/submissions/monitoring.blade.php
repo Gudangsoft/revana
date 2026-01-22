@@ -44,13 +44,25 @@
 
 /* Inline credential input */
 .inline-credential-input {
-    font-size: 0.65rem;
-    padding: 2px 4px;
-    width: 70px;
+    font-size: 0.6rem;
+    padding: 2px 3px;
+    width: 65px;
     border: 1px solid #dee2e6;
     border-radius: 3px;
     background: #fff;
     font-family: monospace;
+}
+
+/* Badge styling */
+.table-monitoring .badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+}
+
+/* Button styling */
+.table-monitoring .btn-sm {
+    padding: 2px 6px;
+    font-size: 0.7rem;
 }
 
 .inline-credential-input:focus {
@@ -87,11 +99,12 @@
     color: white !important;
     border: 1px solid #343a40;
     white-space: nowrap;
-    padding: 6px 8px;
+    padding: 5px 6px;
+    font-size: 0.75rem;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
-    top: 38px;
+    top: 33px;
     background: #343a40 !important;
     color: white !important;
 }
@@ -110,8 +123,10 @@
 
 .table-monitoring tbody td {
     white-space: nowrap;
-    padding: 5px 8px;
+    padding: 4px 6px;
     border: 1px solid #dee2e6;
+    font-size: 0.75rem;
+    vertical-align: middle;
 }
 
 .table-monitoring tbody tr:hover td {
@@ -135,16 +150,57 @@
 
 .table-monitoring tbody td code {
     background-color: #fff3cd;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-size: 0.7rem;
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-size: 0.65rem;
     display: inline-block;
 }
 
+/* Optimize column widths */
+.table-monitoring td:nth-child(3) { /* Judul */
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-monitoring td:nth-child(4) { /* Link */
+    max-width: 40px;
+    text-align: center;
+}
+
+.table-monitoring td:nth-child(5) { /* Penulis */
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-monitoring td:nth-child(6) { /* No HP */
+    max-width: 100px;
+}
+
+.table-monitoring td:nth-child(7), 
+.table-monitoring td:nth-child(8) { /* Username/Password Author */
+    max-width: 100px;
+    font-size: 0.65rem;
+}
+
+.table-monitoring td:nth-child(9) { /* PIC Marketing */
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-monitoring td:nth-child(10) { /* Petugas Submit */
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .table-monitoring tbody td input.form-control-sm {
-    font-size: 0.7rem;
-    padding: 2px 4px;
+    font-size: 0.65rem;
+    padding: 2px 3px;
     height: auto;
+    min-height: 20px;
 }
 
 /* Sticky first column (Kode Submit) */
@@ -154,7 +210,8 @@
     left: 0;
     z-index: 2;
     background: #fff;
-    min-width: 120px;
+    min-width: 105px;
+    max-width: 105px;
     box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
@@ -167,10 +224,11 @@
 .table-monitoring th.sticky-second,
 .table-monitoring td.sticky-second {
     position: sticky;
-    left: 120px;
+    left: 105px;
     z-index: 2;
     background: #fff;
-    min-width: 100px;
+    min-width: 60px;
+    max-width: 60px;
     box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
@@ -525,7 +583,7 @@
                                 </a>
                             </td>
                             <td class="sticky-second">{{ $s->id_artikel }}</td>
-                            <td title="{{ $s->judul_artikel }}" style="max-width: 200px;">{{ Str::limit($s->judul_artikel, 30) }}</td>
+                            <td title="{{ $s->judul_artikel }}" style="max-width: 180px;">{{ Str::limit($s->judul_artikel, 25) }}</td>
                             <td class="text-center">
                                 @if($s->link_artikel)
                                     <a href="{{ $s->link_artikel }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
@@ -533,18 +591,18 @@
                                     -
                                 @endif
                             </td>
-                            <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
+                            <td>{{ Str::limit($s->nama_penulis, 12) }}</td>
                             <td>{{ $s->no_hp_penulis ?? '-' }}</td>
                             <td>
                                 @if($s->username_author)
-                                    <code style="font-size: 0.7rem;">{{ $s->username_author }}</code>
+                                    <code style="font-size: 0.65rem;">{{ $s->username_author }}</code>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
                             <td>
                                 @if($s->password_author)
-                                    <code style="font-size: 0.7rem;">{{ $s->password_author }}</code>
+                                    <code style="font-size: 0.65rem;">{{ $s->password_author }}</code>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -576,29 +634,29 @@
                                 @if($s->petugas_editor1_id == $currentPicId)
                                     <div class="d-flex flex-column gap-1">
                                         <div class="d-flex gap-1 align-items-center">
-                                            <small style="font-size: 0.6rem; color: #666;">user:</small>
-                                            <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.7rem;" 
+                                            <small style="font-size: 0.55rem; color: #666; min-width: 28px;">user:</small>
+                                            <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
                                                    value="{{ $s->username_editor ?? '' }}" 
                                                    data-submission="{{ $s->id }}"
                                                    data-field="username_editor"
                                                    onchange="updateCredential(this)" 
-                                                   placeholder="username">
+                                                   placeholder="user">
                                         </div>
                                         <div class="d-flex gap-1 align-items-center">
-                                            <small style="font-size: 0.6rem; color: #666;">pass:</small>
-                                            <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.7rem;" 
+                                            <small style="font-size: 0.55rem; color: #666; min-width: 28px;">pass:</small>
+                                            <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
                                                    value="{{ $s->password_editor ?? '' }}" 
                                                    data-submission="{{ $s->id }}"
                                                    data-field="password_editor"
                                                    onchange="updateCredential(this)" 
-                                                   placeholder="password">
+                                                   placeholder="pass">
                                         </div>
                                     </div>
                                 @else
                                     @if($s->username_editor || $s->password_editor)
-                                        <div style="font-size: 0.7rem;">
-                                            <div><small class="text-muted">user:</small> <code>{{ $s->username_editor ?? '-' }}</code></div>
-                                            <div><small class="text-muted">pass:</small> <code>{{ $s->password_editor ?? '-' }}</code></div>
+                                        <div style="font-size: 0.65rem;">
+                                            <div><small class="text-muted" style="font-size: 0.6rem;">u:</small> <code>{{ $s->username_editor ?? '-' }}</code></div>
+                                            <div><small class="text-muted" style="font-size: 0.6rem;">p:</small> <code>{{ $s->password_editor ?? '-' }}</code></div>
                                         </div>
                                     @else
                                         <span class="text-muted">-</span>
@@ -652,17 +710,17 @@
                                             title="Klik untuk toggle validasi">
                                         <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                     </button>
-                                    <div class="mt-2 p-2 border rounded bg-light">
-                                        <div class="mb-2">
-                                            <label style="font-size:0.65rem; font-weight:bold; color:#0d6efd;">Reviewer 1:</label>
-                                            <div class="d-flex gap-1 mt-1">
-                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                    <div class="mt-1 p-1 border rounded bg-light" style="font-size: 0.6rem;">
+                                        <div class="mb-1">
+                                            <label style="font-size:0.6rem; font-weight:bold; color:#0d6efd;">R1:</label>
+                                            <div class="d-flex gap-1">
+                                                <input type="text" class="form-control form-control-sm" style="width: 50px; font-size: 0.6rem; padding: 1px 2px;" 
                                                        value="{{ $s->username_reviewer1 ?? '' }}" 
                                                        data-submission="{{ $s->id }}"
                                                        data-field="username_reviewer1"
                                                        onchange="updateCredential(this)" 
                                                        placeholder="user">
-                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                                <input type="text" class="form-control form-control-sm" style="width: 50px; font-size: 0.6rem; padding: 1px 2px;" 
                                                        value="{{ $s->password_reviewer1 ?? '' }}" 
                                                        data-submission="{{ $s->id }}"
                                                        data-field="password_reviewer1"
@@ -671,15 +729,15 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label style="font-size:0.65rem; font-weight:bold; color:#0d6efd;">Reviewer 2:</label>
-                                            <div class="d-flex gap-1 mt-1">
-                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                            <label style="font-size:0.6rem; font-weight:bold; color:#0d6efd;">R2:</label>
+                                            <div class="d-flex gap-1">
+                                                <input type="text" class="form-control form-control-sm" style="width: 50px; font-size: 0.6rem; padding: 1px 2px;" 
                                                        value="{{ $s->username_reviewer2 ?? '' }}" 
                                                        data-submission="{{ $s->id }}"
                                                        data-field="username_reviewer2"
                                                        onchange="updateCredential(this)" 
                                                        placeholder="user">
-                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                                <input type="text" class="form-control form-control-sm" style="width: 50px; font-size: 0.6rem; padding: 1px 2px;" 
                                                        value="{{ $s->password_reviewer2 ?? '' }}" 
                                                        data-submission="{{ $s->id }}"
                                                        data-field="password_reviewer2"
@@ -703,15 +761,15 @@
                             </td>
                             <td>
                                 @if($s->username_reviewer1 || $s->password_reviewer1)
-                                    <div style="font-size: 0.7rem;">
-                                        <div><small class="text-muted">user:</small> <code>{{ $s->username_reviewer1 ?? '-' }}</code></div>
-                                        <div><small class="text-muted">pass:</small> <code>{{ $s->password_reviewer1 ?? '-' }}</code></div>
+                                    <div style="font-size: 0.65rem;">
+                                        <div><small class="text-muted" style="font-size: 0.6rem;">u:</small> <code>{{ $s->username_reviewer1 ?? '-' }}</code></div>
+                                        <div><small class="text-muted" style="font-size: 0.6rem;">p:</small> <code>{{ $s->password_reviewer1 ?? '-' }}</code></div>
                                     </div>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
+                            <td title="{{ $s->catatan_reviewer1 }}" style="font-size: 0.65rem;">{{ Str::limit($s->catatan_reviewer1, 12) ?? '-' }}</td>
                             <td class="text-center">
                                 @if($s->petugas_reviewer1_id == $currentPicId)
                                     @if(!$s->editor2_valid)
@@ -740,15 +798,15 @@
                             </td>
                             <td>
                                 @if($s->username_reviewer2 || $s->password_reviewer2)
-                                    <div style="font-size: 0.7rem;">
-                                        <div><small class="text-muted">user:</small> <code>{{ $s->username_reviewer2 ?? '-' }}</code></div>
-                                        <div><small class="text-muted">pass:</small> <code>{{ $s->password_reviewer2 ?? '-' }}</code></div>
+                                    <div style="font-size: 0.65rem;">
+                                        <div><small class="text-muted" style="font-size: 0.6rem;">u:</small> <code>{{ $s->username_reviewer2 ?? '-' }}</code></div>
+                                        <div><small class="text-muted" style="font-size: 0.6rem;">p:</small> <code>{{ $s->password_reviewer2 ?? '-' }}</code></div>
                                     </div>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
+                            <td title="{{ $s->catatan_reviewer2 }}" style="font-size: 0.65rem;">{{ Str::limit($s->catatan_reviewer2, 12) ?? '-' }}</td>
                             <td class="text-center">
                                 @if($s->petugas_reviewer2_id == $currentPicId)
                                     @if(!$s->reviewer1_valid)
