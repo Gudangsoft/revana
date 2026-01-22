@@ -496,27 +496,9 @@
                                 @endif
                             </td>
                             <td>
-                                @if($s->petugas_reviewer1_id == $currentPicId)
-                                    <div class="d-flex gap-1 align-items-center">
-                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
-                                               value="{{ $s->username_reviewer1 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="username_reviewer1"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="user">
-                                        <span>/</span>
-                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
-                                               value="{{ $s->password_reviewer1 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="password_reviewer1"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="pass">
-                                    </div>
-                                @else
-                                    <code style="font-size: 0.65rem;">
-                                        {{ $s->username_reviewer1 ?? 'user' }} / {{ $s->password_reviewer1 ?? 'pass' }}
-                                    </code>
-                                @endif
+                                <code style="font-size: 0.65rem;">
+                                    {{ $s->username_reviewer1 ?? 'user' }} / {{ $s->password_reviewer1 ?? 'pass' }}
+                                </code>
                             </td>
                             <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
                             <td class="text-center">
@@ -546,36 +528,24 @@
                                 @endif
                             </td>
                             <td>
-                                @if($s->petugas_reviewer2_id == $currentPicId)
-                                    <div class="d-flex gap-1 align-items-center">
-                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
-                                               value="{{ $s->username_reviewer2 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="username_reviewer2"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="user">
-                                        <span>/</span>
-                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
-                                               value="{{ $s->password_reviewer2 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="password_reviewer2"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="pass">
-                                    </div>
-                                @else
-                                    <code style="font-size: 0.65rem;">
-                                        {{ $s->username_reviewer2 ?? 'user' }} / {{ $s->password_reviewer2 ?? 'pass' }}
-                                    </code>
-                                @endif
+                                <code style="font-size: 0.65rem;">
+                                    {{ $s->username_reviewer2 ?? 'user' }} / {{ $s->password_reviewer2 ?? 'pass' }}
+                                </code>
                             </td>
                             <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
                             <td class="text-center">
                                 @if($s->petugas_reviewer2_id == $currentPicId)
-                                    <button type="button" class="btn btn-sm {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                            onclick="toggleValid(this, {{ $s->id }}, 'reviewer2')"
-                                            title="Klik untuk toggle validasi">
-                                        <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                    </button>
+                                    @if(!$s->reviewer1_valid)
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled onclick="alert('Ada tugas lain yang belum dikerjakan!')">
+                                            <i class="bi bi-circle"></i>
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                onclick="toggleValid(this, {{ $s->id }}, 'reviewer2')"
+                                                title="Klik untuk toggle validasi">
+                                            <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @endif
                                 @else
                                     {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                 @endif
