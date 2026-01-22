@@ -59,6 +59,21 @@
     border: 1px solid #dee2e6;
     padding: 6px;
     vertical-align: middle;
+    min-width: 80px;
+}
+
+.table-monitoring tbody td code {
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    display: inline-block;
+}
+
+.table-monitoring tbody td input.form-control-sm {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    height: auto;
 }
 
 .sticky-first {
@@ -150,6 +165,28 @@
     height: 100%;
     background: linear-gradient(90deg, #0d6efd, #0dcaf0);
     transition: width 0.1s;
+}
+
+.btn-validation {
+    min-width: 35px;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-validation:hover {
+    transform: scale(1.1);
+}
+
+.credential-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.credential-input-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 </style>
 @endsection
@@ -358,8 +395,20 @@
                             </td>
                             <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
                             <td>{{ $s->no_hp_penulis ?? '-' }}</td>
-                            <td><code style="font-size: 0.7rem;">{{ $s->username_author ?? '-' }}</code></td>
-                            <td><code style="font-size: 0.7rem;">{{ $s->password_author ?? '-' }}</code></td>
+                            <td>
+                                @if($s->username_author)
+                                    <code style="font-size: 0.7rem;">{{ $s->username_author }}</code>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($s->password_author)
+                                    <code style="font-size: 0.7rem;">{{ $s->password_author }}</code>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($s->marketing)
                                     {{ $s->marketing->name }}
@@ -385,25 +434,35 @@
                             </td>
                             <td>
                                 @if($s->petugas_editor1_id == $currentPicId)
-                                    <div class="d-flex gap-1 align-items-center">
-                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
-                                               value="{{ $s->username_editor }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="username_editor"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="user">
-                                        <span>/</span>
-                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
-                                               value="{{ $s->password_editor }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="password_editor"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="pass">
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <small style="font-size: 0.6rem; color: #666;">user:</small>
+                                            <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.7rem;" 
+                                                   value="{{ $s->username_editor ?? '' }}" 
+                                                   data-submission="{{ $s->id }}"
+                                                   data-field="username_editor"
+                                                   onchange="updateCredential(this)" 
+                                                   placeholder="username">
+                                        </div>
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <small style="font-size: 0.6rem; color: #666;">pass:</small>
+                                            <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.7rem;" 
+                                                   value="{{ $s->password_editor ?? '' }}" 
+                                                   data-submission="{{ $s->id }}"
+                                                   data-field="password_editor"
+                                                   onchange="updateCredential(this)" 
+                                                   placeholder="password">
+                                        </div>
                                     </div>
                                 @else
-                                    <code style="font-size: 0.65rem;">
-                                        {{ $s->username_editor ?? 'user' }} / {{ $s->password_editor ?? 'pass' }}
-                                    </code>
+                                    @if($s->username_editor || $s->password_editor)
+                                        <div style="font-size: 0.7rem;">
+                                            <div><small class="text-muted">user:</small> <code>{{ $s->username_editor ?? '-' }}</code></div>
+                                            <div><small class="text-muted">pass:</small> <code>{{ $s->password_editor ?? '-' }}</code></div>
+                                        </div>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
                                 @endif
                             </td>
                             <td class="text-center">
@@ -453,34 +512,41 @@
                                             title="Klik untuk toggle validasi">
                                         <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                     </button>
-                                    <div class="mt-1">
-                                        <label style="font-size:0.7rem">Reviewer 1:</label>
-                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
-                                               value="{{ $s->username_reviewer1 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="username_reviewer1"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="user">
-                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
-                                               value="{{ $s->password_reviewer1 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="password_reviewer1"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="pass">
-                                        <br>
-                                        <label style="font-size:0.7rem">Reviewer 2:</label>
-                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
-                                               value="{{ $s->username_reviewer2 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="username_reviewer2"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="user">
-                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
-                                               value="{{ $s->password_reviewer2 }}" 
-                                               data-submission="{{ $s->id }}"
-                                               data-field="password_reviewer2"
-                                               onchange="updateCredential(this)" 
-                                               placeholder="pass">
+                                    <div class="mt-2 p-2 border rounded bg-light">
+                                        <div class="mb-2">
+                                            <label style="font-size:0.65rem; font-weight:bold; color:#0d6efd;">Reviewer 1:</label>
+                                            <div class="d-flex gap-1 mt-1">
+                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                                       value="{{ $s->username_reviewer1 ?? '' }}" 
+                                                       data-submission="{{ $s->id }}"
+                                                       data-field="username_reviewer1"
+                                                       onchange="updateCredential(this)" 
+                                                       placeholder="user">
+                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                                       value="{{ $s->password_reviewer1 ?? '' }}" 
+                                                       data-submission="{{ $s->id }}"
+                                                       data-field="password_reviewer1"
+                                                       onchange="updateCredential(this)" 
+                                                       placeholder="pass">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style="font-size:0.65rem; font-weight:bold; color:#0d6efd;">Reviewer 2:</label>
+                                            <div class="d-flex gap-1 mt-1">
+                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                                       value="{{ $s->username_reviewer2 ?? '' }}" 
+                                                       data-submission="{{ $s->id }}"
+                                                       data-field="username_reviewer2"
+                                                       onchange="updateCredential(this)" 
+                                                       placeholder="user">
+                                                <input type="text" class="form-control form-control-sm" style="width: 70px; font-size: 0.65rem;" 
+                                                       value="{{ $s->password_reviewer2 ?? '' }}" 
+                                                       data-submission="{{ $s->id }}"
+                                                       data-field="password_reviewer2"
+                                                       onchange="updateCredential(this)" 
+                                                       placeholder="pass">
+                                            </div>
+                                        </div>
                                     </div>
                                 @else
                                     {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
@@ -496,9 +562,14 @@
                                 @endif
                             </td>
                             <td>
-                                <code style="font-size: 0.65rem;">
-                                    {{ $s->username_reviewer1 ?? 'user' }} / {{ $s->password_reviewer1 ?? 'pass' }}
-                                </code>
+                                @if($s->username_reviewer1 || $s->password_reviewer1)
+                                    <div style="font-size: 0.7rem;">
+                                        <div><small class="text-muted">user:</small> <code>{{ $s->username_reviewer1 ?? '-' }}</code></div>
+                                        <div><small class="text-muted">pass:</small> <code>{{ $s->password_reviewer1 ?? '-' }}</code></div>
+                                    </div>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                             <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
                             <td class="text-center">
@@ -528,9 +599,14 @@
                                 @endif
                             </td>
                             <td>
-                                <code style="font-size: 0.65rem;">
-                                    {{ $s->username_reviewer2 ?? 'user' }} / {{ $s->password_reviewer2 ?? 'pass' }}
-                                </code>
+                                @if($s->username_reviewer2 || $s->password_reviewer2)
+                                    <div style="font-size: 0.7rem;">
+                                        <div><small class="text-muted">user:</small> <code>{{ $s->username_reviewer2 ?? '-' }}</code></div>
+                                        <div><small class="text-muted">pass:</small> <code>{{ $s->password_reviewer2 ?? '-' }}</code></div>
+                                    </div>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                             <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
                             <td class="text-center">
@@ -620,9 +696,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="30" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                                <p class="mt-2">Tidak ada data submission yang ditugaskan</p>
+                            <td colspan="32" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+                                <p class="mt-3 mb-0">Tidak ada data submission ditemukan</p>
+                                <small class="text-muted">Silakan coba filter yang berbeda atau hubungi admin</small>
                             </td>
                         </tr>
                     @endforelse
@@ -703,9 +780,17 @@ function updateCredential(element) {
     const field = element.dataset.field;
     const value = element.value;
     
+    // Validate input
+    if (!value || value.trim() === '') {
+        element.style.borderColor = '#dc3545';
+        showToast('⚠ Credential tidak boleh kosong', 'warning');
+        return;
+    }
+    
     // Show loading state
     element.disabled = true;
     element.style.opacity = '0.5';
+    element.style.borderColor = '#0d6efd';
     
     fetch('{{ route("pic.submissions.update-credential") }}', {
         method: 'POST',
@@ -727,13 +812,22 @@ function updateCredential(element) {
         if (data.success) {
             // Show success feedback
             element.style.borderColor = '#198754';
+            element.style.backgroundColor = '#d1e7dd';
+            showToast('✓ Credential berhasil diupdate', 'success');
+            
             setTimeout(() => {
                 element.style.borderColor = '';
-            }, 1000);
+                element.style.backgroundColor = '';
+            }, 1500);
         } else {
             // Show error
-            alert(data.message || 'Gagal update credential');
             element.style.borderColor = '#dc3545';
+            element.style.backgroundColor = '#f8d7da';
+            showToast('⚠ ' + (data.message || 'Gagal update credential'), 'danger');
+            
+            setTimeout(() => {
+                element.style.backgroundColor = '';
+            }, 2000);
         }
     })
     .catch(error => {
@@ -741,23 +835,43 @@ function updateCredential(element) {
         element.disabled = false;
         element.style.opacity = '1';
         element.style.borderColor = '#dc3545';
-        alert('Terjadi kesalahan saat update credential');
+        element.style.backgroundColor = '#f8d7da';
+        showToast('⚠ Terjadi kesalahan saat update credential', 'danger');
+        
+        setTimeout(() => {
+            element.style.backgroundColor = '';
+        }, 2000);
     });
 }
 
 // Toast notification
 function showToast(message, type = 'success') {
-    let toast = document.createElement('div');
+    const toast = document.createElement('div');
     toast.className = 'position-fixed top-0 end-0 p-3';
     toast.style.zIndex = 9999;
-    toast.innerHTML = `<div class="toast align-items-center text-bg-${type} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    
+    const bgClass = type === 'success' ? 'bg-success' : type === 'danger' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-info';
+    const icon = type === 'success' ? 'bi-check-circle-fill' : type === 'danger' ? 'bi-x-circle-fill' : type === 'warning' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
+    
+    toast.innerHTML = `
+        <div class="toast align-items-center text-white ${bgClass} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${icon} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('.position-fixed').remove()" aria-label="Close"></button>
+            </div>
         </div>
-    </div>`;
+    `;
+    
     document.body.appendChild(toast);
-    setTimeout(() => { toast.remove(); }, 2000);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => { 
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // Toggle Valid Function
@@ -765,8 +879,9 @@ function toggleValid(button, submissionId, stage) {
     // Show loading
     const icon = button.querySelector('i');
     const originalClass = icon.className;
-    icon.className = 'bi bi-arrow-repeat spinner-border spinner-border-sm';
+    icon.className = 'spinner-border spinner-border-sm';
     button.disabled = true;
+    button.style.opacity = '0.6';
     
     fetch('{{ route("pic.submissions.toggle-valid") }}', {
         method: 'POST',
@@ -782,32 +897,36 @@ function toggleValid(button, submissionId, stage) {
     .then(response => response.json())
     .then(data => {
         button.disabled = false;
+        button.style.opacity = '1';
+        
         if (data.success) {
             // Update button state
             if (data.valid) {
                 button.classList.remove('btn-outline-secondary');
                 button.classList.add('btn-success');
                 icon.className = 'bi bi-check-circle-fill';
-                button.style.borderColor = '#198754';
-                showToast('Validasi berhasil!', 'success');
+                showToast('✓ Validasi berhasil!', 'success');
             } else {
                 button.classList.remove('btn-success');
                 button.classList.add('btn-outline-secondary');
                 icon.className = 'bi bi-circle';
-                button.style.borderColor = '#dc3545';
-                showToast('Validasi dibatalkan!', 'danger');
+                showToast('✗ Validasi dibatalkan', 'warning');
             }
-            setTimeout(() => { button.style.borderColor = ''; }, 1200);
+            
+            // Add animation effect
+            button.style.transform = 'scale(1.1)';
+            setTimeout(() => { button.style.transform = 'scale(1)'; }, 200);
         } else {
             icon.className = originalClass;
-            showToast(data.message || 'Gagal toggle validasi', 'danger');
+            showToast('⚠ ' + (data.message || 'Gagal toggle validasi'), 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
         icon.className = originalClass;
         button.disabled = false;
-        showToast('Terjadi kesalahan saat toggle validasi', 'danger');
+        button.style.opacity = '1';
+        showToast('⚠ Terjadi kesalahan saat toggle validasi', 'danger');
     });
 }
 </script>
