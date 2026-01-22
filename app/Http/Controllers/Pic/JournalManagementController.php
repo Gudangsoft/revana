@@ -456,8 +456,8 @@ class JournalManagementController extends Controller
         
         // Only show submissions assigned to current PIC
         $query = Submission::with(['journalSlot.journalMaster', 
-            'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor1', 'petugasAuthor2', 
-            'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
+            'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 
+            'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
             ->where(function($q) use ($picId) {
                 $q->where('created_by', $picId)
                   ->orWhere('petugas_submit_id', $picId)
