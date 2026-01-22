@@ -73,6 +73,8 @@ class PublicLoaController extends Controller
         // Get settings for favicon
         $settings = [
             'favicon' => Setting::get('favicon', ''),
+            'logo' => Setting::get('logo', ''),
+            'app_name' => env('APP_NAME', 'SIPERA'),
         ];
         
         return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings'));

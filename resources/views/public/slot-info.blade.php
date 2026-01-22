@@ -238,7 +238,14 @@
     <div class="container container-main">
         <!-- Header -->
         <div class="header-section">
-            <h1><i class="bi bi-journal-bookmark-fill"></i> SIPERA</h1>
+            @if(isset($settings['logo']) && $settings['logo'])
+                <img src="{{ asset('storage/' . $settings['logo']) }}" alt="Logo" style="max-height: 80px; margin-bottom: 15px;">
+            @else
+                <h1><i class="bi bi-journal-bookmark-fill"></i> {{ $settings['app_name'] ?? 'SIPERA' }}</h1>
+            @endif
+            @if(isset($settings['logo']) && $settings['logo'])
+                <h1 class="mt-2">{{ $settings['app_name'] ?? 'SIPERA' }}</h1>
+            @endif
             <p class="lead mb-1">Sistem Insentif dan Penghargaan Reviewer APJI</p>
             <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
         </div>
