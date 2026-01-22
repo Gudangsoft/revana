@@ -397,13 +397,13 @@
                             </td>
                             <td class="text-center">
                                 @php
-                                    $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
+                                    $sisa = max(0, $slot->jumlah_slot - $slot->slot_terpakai);
                                     $badgeClass = $sisa > 0 ? 'success' : 'secondary';
                                 @endphp
                                 <span class="badge bg-{{ $badgeClass }} fs-6">{{ $sisa }}</span>
                             </td>
                             <td class="text-center">
-                                @if($slot->slot_terpakai >= $slot->jumlah_slot)
+                                @if($slot->slot_terpakai >= $slot->jumlah_slot || $slot->jumlah_slot <= 0)
                                     <span class="badge bg-danger">
                                         <i class="bi bi-x-circle"></i> Penuh
                                     </span>
