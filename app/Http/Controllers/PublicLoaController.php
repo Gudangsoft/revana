@@ -69,7 +69,10 @@ class PublicLoaController extends Controller
             'internasional' => JournalMaster::where('accreditation', 'INTERNASIONAL')->count(),
         ];
         
-        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats'));
+        // Get settings for favicon
+        $settings = \App\Models\Setting::getSettings();
+        
+        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings'));
     }
     
     public function show(JournalSlot $slot)

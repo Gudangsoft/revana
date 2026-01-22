@@ -26,6 +26,11 @@
     
     <title>Info Slot Jurnal - SIPERA</title>
     
+    <!-- Favicon -->
+    @if(isset($settings['favicon']) && $settings['favicon'])
+    <link rel="icon" href="{{ asset('storage/' . $settings['favicon']) }}" type="image/x-icon">
+    @endif
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
