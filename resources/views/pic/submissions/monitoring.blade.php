@@ -11,36 +11,43 @@
 <style>
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
-    overflow-x: auto;
+    overflow-x: scroll !important;
     overflow-y: auto;
     max-height: 70vh;
-    min-height: 300px;
+    min-height: 400px;
     position: relative;
     border: 1px solid #dee2e6;
     border-radius: 6px;
     background: white;
 }
 
+/* Force table to be wider than container */
+.monitoring-scroll-wrapper table {
+    min-width: 2500px;
+}
+
 /* Scrollbar styling for both horizontal and vertical */
 .monitoring-scroll-wrapper {
-    scrollbar-width: thin;
-    scrollbar-color: #6c757d #dee2e6;
+    scrollbar-width: auto;
+    scrollbar-color: #6c757d #e9ecef;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 14px;
-    width: 14px;
+    height: 16px;
+    width: 12px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-track {
-    background: #dee2e6;
-    border-radius: 7px;
+    background: #e9ecef;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #6c757d, #495057);
-    border-radius: 7px;
-    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    min-width: 50px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
@@ -48,7 +55,7 @@
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-corner {
-    background: #dee2e6;
+    background: #e9ecef;
 }
 
 /* Inline credential input */
@@ -286,29 +293,35 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 10px;
-    padding: 8px 12px;
+    padding: 10px 15px;
     background: #f8f9fa;
     border-radius: 6px;
+    border: 1px solid #dee2e6;
 }
 
 .scroll-nav-btn {
-    padding: 6px 12px;
+    padding: 8px 14px;
     border: 1px solid #dee2e6;
     background: white;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 0.9rem;
 }
 
-.scroll-nav-btn:hover {
+.scroll-nav-btn:hover:not(:disabled) {
     background: #e9ecef;
-    border-color: #adb5bd;
+    border-color: #0d6efd;
+    color: #0d6efd;
 }
 
 .scroll-nav-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    background: #f8f9fa;
 }
 
 .scroll-position-indicator {
@@ -318,39 +331,44 @@
 }
 
 .scroll-position-bar {
-    width: 200px;
-    height: 6px;
+    width: 150px;
+    height: 8px;
     background: #dee2e6;
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
+    border: 1px solid #ced4da;
 }
 
 .scroll-position-fill {
     height: 100%;
     background: linear-gradient(90deg, #0d6efd, #0dcaf0);
-    border-radius: 3px;
-    transition: width 0.1s;
+    border-radius: 4px;
+    transition: width 0.15s ease;
 }
 
 /* Quick navigation buttons */
 .quick-nav {
     display: flex;
-    gap: 4px;
+    gap: 5px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .quick-nav-btn {
-    padding: 4px 8px;
-    font-size: 0.7rem;
+    padding: 5px 10px;
+    font-size: 0.75rem;
     border: 1px solid #dee2e6;
     background: white;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
+    font-weight: 500;
 }
 
 .quick-nav-btn:hover {
-    background: #e9ecef;
+    background: #e7f1ff;
+    border-color: #0d6efd;
+    color: #0d6efd;
 }
 
 .quick-nav-btn.active {
@@ -523,8 +541,8 @@
             </div>
         </form>
 
-        <!-- Scroll Controls - di luar card-body -->
-        <div class="scroll-controls" style="border: 1px solid #dee2e6; border-radius: 6px;">
+        <!-- Scroll Controls -->
+        <div class="scroll-controls">
             <div class="d-flex align-items-center gap-3">
                 <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
                     <i class="bi bi-chevron-bar-left"></i>
