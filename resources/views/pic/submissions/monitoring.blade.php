@@ -38,6 +38,41 @@
     background: linear-gradient(135deg, #495057, #343a40);
 }
 
+.monitoring-scroll-wrapper::-webkit-scrollbar-corner {
+    background: #dee2e6;
+}
+
+/* Inline credential input */
+.inline-credential-input {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+    width: 70px;
+    border: 1px solid #dee2e6;
+    border-radius: 3px;
+    background: #fff;
+    font-family: monospace;
+}
+
+.inline-credential-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.inline-credential-input.has-value {
+    background-color: #fff3cd;
+}
+
+.inline-credential-input.saving {
+    opacity: 0.6;
+}
+
+.credential-group {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
 .table-monitoring {
     border-collapse: separate;
     border-spacing: 0;
@@ -47,23 +82,59 @@
 .table-monitoring thead th {
     position: sticky;
     top: 0;
-    z-index: 20;
-    background-color: #212529 !important;
+    z-index: 3;
+    background: #212529 !important;
     color: white !important;
-    border: 1px solid #404040;
-    padding: 8px 6px;
+    border: 1px solid #343a40;
     white-space: nowrap;
+    padding: 6px 8px;
+}
+
+.table-monitoring thead tr:nth-child(2) th {
+    top: 38px;
+    background: #343a40 !important;
+    color: white !important;
+}
+
+/* Override Bootstrap bg-* classes in header to ensure white text */
+.table-monitoring thead th.bg-info,
+.table-monitoring thead th.bg-warning,
+.table-monitoring thead th.bg-primary,
+.table-monitoring thead th.bg-success {
+    color: white !important;
+}
+
+.table-monitoring thead th.text-dark {
+    color: white !important;
 }
 
 .table-monitoring tbody td {
+    white-space: nowrap;
+    padding: 5px 8px;
     border: 1px solid #dee2e6;
-    padding: 6px;
-    vertical-align: middle;
-    min-width: 80px;
+}
+
+.table-monitoring tbody tr:hover td {
+    background-color: #e8f4fd !important;
+}
+
+.table-monitoring tbody tr:hover td.sticky-first,
+.table-monitoring tbody tr:hover td.sticky-second {
+    background-color: #e8f4fd !important;
+}
+
+/* Alternating row colors */
+.table-monitoring tbody tr:nth-child(even) td {
+    background-color: #f8f9fa;
+}
+
+.table-monitoring tbody tr:nth-child(even) td.sticky-first,
+.table-monitoring tbody tr:nth-child(even) td.sticky-second {
+    background-color: #f8f9fa;
 }
 
 .table-monitoring tbody td code {
-    background-color: #f8f9fa;
+    background-color: #fff3cd;
     padding: 2px 4px;
     border-radius: 3px;
     font-size: 0.7rem;
@@ -76,29 +147,46 @@
     height: auto;
 }
 
-.sticky-first {
+/* Sticky first column (Kode Submit) */
+.table-monitoring th.sticky-first,
+.table-monitoring td.sticky-first {
     position: sticky;
     left: 0;
-    z-index: 25;
-    background-color: #212529 !important;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 2;
+    background: #fff;
+    min-width: 120px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
-.sticky-second {
+.table-monitoring thead th.sticky-first {
+    z-index: 5;
+    background: #212529 !important;
+}
+
+/* Sticky second column (ID Artikel) */
+.table-monitoring th.sticky-second,
+.table-monitoring td.sticky-second {
     position: sticky;
     left: 120px;
-    z-index: 25;
-    background-color: #212529 !important;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 2;
+    background: #fff;
+    min-width: 100px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
-.table-monitoring tbody .sticky-first,
-.table-monitoring tbody .sticky-second {
-    background-color: white !important;
+.table-monitoring thead th.sticky-second {
+    z-index: 5;
+    background: #212529 !important;
 }
 
-.my-task-row {
+/* Highlight rows assigned to current PIC */
+.my-task-row td {
     background-color: #fff3cd !important;
+    font-weight: 500;
+}
+
+.my-task-row:hover td {
+    background-color: #ffe69c !important;
 }
 
 .my-task-row .sticky-first,
@@ -106,65 +194,87 @@
     background-color: #fff3cd !important;
 }
 
+.my-task-row:hover .sticky-first,
+.my-task-row:hover .sticky-second {
+    background-color: #ffe69c !important;
+}
+
+/* Scroll controls */
 .scroll-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
     background: #f8f9fa;
     border-radius: 6px;
-    margin-bottom: 10px;
 }
 
 .scroll-nav-btn {
-    background: white;
-    border: 1px solid #dee2e6;
     padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .scroll-nav-btn:hover {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
+    background: #e9ecef;
+    border-color: #adb5bd;
 }
 
-.quick-nav-btn {
-    background: white;
-    border: 1px solid #dee2e6;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    margin: 0 2px;
-    transition: all 0.2s;
-}
-
-.quick-nav-btn:hover {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
+.scroll-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .scroll-position-indicator {
-    flex: 1;
-    max-width: 300px;
-    margin: 0 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .scroll-position-bar {
-    height: 8px;
+    width: 200px;
+    height: 6px;
     background: #dee2e6;
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
 }
 
 .scroll-position-fill {
     height: 100%;
     background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+    border-radius: 3px;
     transition: width 0.1s;
+}
+
+/* Quick navigation buttons */
+.quick-nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.quick-nav-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-nav-btn:hover {
+    background: #e9ecef;
+}
+
+.quick-nav-btn.active {
+    background: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
 }
 
 .btn-validation {
@@ -193,36 +303,70 @@
 
 @section('content')
 <!-- Statistics Cards -->
-<div class="row mb-3">
-    <div class="col-md-4">
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-1">Total Submit</h6>
+                        <h2 class="card-title mb-0">{{ $stats['total'] ?? 0 }}</h2>
+                    </div>
+                    <i class="bi bi-file-earmark-text fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
         <div class="card bg-secondary text-white">
-            <div class="card-body text-center py-3">
-                <h3 class="mb-0">{{ $stats['new'] ?? 0 }}</h3>
-                <small>New</small>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-1">Baru</h6>
+                        <h2 class="card-title mb-0">{{ $stats['new'] ?? 0 }}</h2>
+                    </div>
+                    <i class="bi bi-clock fs-1 opacity-50"></i>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card bg-info text-white">
-            <div class="card-body text-center py-3">
-                <h3 class="mb-0">{{ $stats['in_progress'] ?? 0 }}</h3>
-                <small>In Progress</small>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-1">Dalam Proses</h6>
+                        <h2 class="card-title mb-0">{{ $stats['in_progress'] ?? 0 }}</h2>
+                    </div>
+                    <i class="bi bi-gear fs-1 opacity-50"></i>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card bg-success text-white">
-            <div class="card-body text-center py-3">
-                <h3 class="mb-0">{{ $stats['published'] ?? 0 }}</h3>
-                <small>Published</small>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-1">Published</h6>
+                        <h2 class="card-title mb-0">{{ $stats['published'] ?? 0 }}</h2>
+                    </div>
+                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Filter Card -->
-<div class="card mb-3">
-    <div class="card-body py-2">
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-bar-chart"></i> Monitoring Proses Review</span>
+        <a href="{{ route('pic.submissions.index') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+    </div>
+    <div class="card-body">
         <form method="GET" class="row g-2 align-items-end">
             <div class="col-md-3">
                 <label class="form-label small mb-1">Jurnal</label>
@@ -261,49 +405,45 @@
                 </div>
             </div>
         </form>
-    </div>
-</div>
 
-<!-- Scroll Controls -->
-<div class="scroll-controls">
-    <div class="d-flex align-items-center gap-3">
-        <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
-            <i class="bi bi-chevron-bar-left"></i>
-        </button>
-        <button type="button" class="scroll-nav-btn" id="scrollLeftBtn" title="Scroll Kiri">
-            <i class="bi bi-chevron-left"></i>
-        </button>
-        <div class="scroll-position-indicator">
-            <div class="scroll-position-bar">
-                <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
+        <!-- Scroll Controls -->
+        <div class="scroll-controls mt-3">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
+                    <i class="bi bi-chevron-bar-left"></i>
+                </button>
+                <button type="button" class="scroll-nav-btn" id="scrollLeftBtn" title="Scroll Kiri">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="scroll-position-indicator">
+                    <div class="scroll-position-bar">
+                        <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted" id="scrollPositionText">0%</small>
+                </div>
+                <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                <button type="button" class="scroll-nav-btn" id="scrollEndBtn" title="Ke Akhir">
+                    <i class="bi bi-chevron-bar-right"></i>
+                </button>
             </div>
-            <small class="text-muted" id="scrollPositionText">0%</small>
+            <div class="quick-nav">
+                <span class="text-muted me-2" style="font-size: 0.75rem;">Lompat ke:</span>
+                <button type="button" class="quick-nav-btn" data-target="submit">Submit</button>
+                <button type="button" class="quick-nav-btn" data-target="editor1">Editor1</button>
+                <button type="button" class="quick-nav-btn" data-target="author1">Author1</button>
+                <button type="button" class="quick-nav-btn" data-target="editor2">Editor2</button>
+                <button type="button" class="quick-nav-btn" data-target="reviewer1">Reviewer1</button>
+                <button type="button" class="quick-nav-btn" data-target="reviewer2">Reviewer2</button>
+                <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
+                <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
+                <button type="button" class="quick-nav-btn" data-target="production">Production</button>
+            </div>
         </div>
-        <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
-            <i class="bi bi-chevron-right"></i>
-        </button>
-        <button type="button" class="scroll-nav-btn" id="scrollEndBtn" title="Ke Akhir">
-            <i class="bi bi-chevron-bar-right"></i>
-        </button>
-    </div>
-    <div class="quick-nav">
-        <span class="text-muted me-2" style="font-size: 0.75rem;">Lompat ke:</span>
-        <button type="button" class="quick-nav-btn" data-target="submit">Submit</button>
-        <button type="button" class="quick-nav-btn" data-target="editor1">Editor1</button>
-        <button type="button" class="quick-nav-btn" data-target="author1">Author1</button>
-        <button type="button" class="quick-nav-btn" data-target="editor2">Editor2</button>
-        <button type="button" class="quick-nav-btn" data-target="reviewer1">Reviewer1</button>
-        <button type="button" class="quick-nav-btn" data-target="reviewer2">Reviewer2</button>
-        <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
-        <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
-        <button type="button" class="quick-nav-btn" data-target="production">Production</button>
-    </div>
-</div>
 
-<!-- Data Table -->
-<div class="card">
-    <div class="card-body p-0">
-        <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
+        <!-- Data Table -->
+        <div class="monitoring-scroll-wrapper mt-3" id="monitoringScrollWrapper">
             <table class="table table-monitoring table-bordered mb-0">
                 <thead class="table-dark">
                     <tr>
@@ -706,12 +846,12 @@
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
 
-<!-- Pagination -->
-<div class="mt-3">
-    {{ $submissions->links() }}
+        <!-- Pagination -->
+        <div class="mt-3">
+            {{ $submissions->links() }}
+        </div>
+    </div>
 </div>
 
 @endsection
