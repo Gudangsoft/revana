@@ -713,6 +713,15 @@
                                     <div class="p-1" style="font-size: 0.55rem;">
                                         <div class="mb-1">
                                             <label style="font-size:0.55rem; font-weight:bold; color:#0d6efd;">R1:</label>
+                                            <select class="form-select form-select-sm mb-1" style="font-size: 0.55rem; padding: 1px 2px; width: 100px;"
+                                                    data-submission="{{ $s->id }}"
+                                                    data-field="petugas_reviewer1_id"
+                                                    onchange="updatePetugas(this)">
+                                                <option value="">-- Pilih --</option>
+                                                @foreach($pics as $pic)
+                                                    <option value="{{ $pic->id }}" {{ $s->petugas_reviewer1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                                @endforeach
+                                            </select>
                                             <div class="d-flex gap-1">
                                                 <input type="text" class="form-control form-control-sm" style="width: 45px; font-size: 0.55rem; padding: 1px 2px;" 
                                                        value="{{ $s->username_reviewer1 ?? '' }}" 
@@ -730,6 +739,15 @@
                                         </div>
                                         <div>
                                             <label style="font-size:0.55rem; font-weight:bold; color:#0d6efd;">R2:</label>
+                                            <select class="form-select form-select-sm mb-1" style="font-size: 0.55rem; padding: 1px 2px; width: 100px;"
+                                                    data-submission="{{ $s->id }}"
+                                                    data-field="petugas_reviewer2_id"
+                                                    onchange="updatePetugas(this)">
+                                                <option value="">-- Pilih --</option>
+                                                @foreach($pics as $pic)
+                                                    <option value="{{ $pic->id }}" {{ $s->petugas_reviewer2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                                @endforeach
+                                            </select>
                                             <div class="d-flex gap-1">
                                                 <input type="text" class="form-control form-control-sm" style="width: 45px; font-size: 0.55rem; padding: 1px 2px;" 
                                                        value="{{ $s->username_reviewer2 ?? '' }}" 
@@ -747,13 +765,17 @@
                                         </div>
                                     </div>
                                 @else
-                                    @if($s->username_reviewer1 || $s->username_reviewer2)
+                                    @if($s->petugasReviewer1 || $s->petugasReviewer2 || $s->username_reviewer1 || $s->username_reviewer2)
                                         <div style="font-size: 0.55rem;">
-                                            @if($s->username_reviewer1)
-                                                <div><strong>R1:</strong> {{ $s->username_reviewer1 }}</div>
+                                            @if($s->petugasReviewer1 || $s->username_reviewer1)
+                                                <div><strong>R1:</strong> {{ $s->petugasReviewer1?->name ?? '-' }} 
+                                                    @if($s->username_reviewer1)<small class="text-muted">({{ $s->username_reviewer1 }})</small>@endif
+                                                </div>
                                             @endif
-                                            @if($s->username_reviewer2)
-                                                <div><strong>R2:</strong> {{ $s->username_reviewer2 }}</div>
+                                            @if($s->petugasReviewer2 || $s->username_reviewer2)
+                                                <div><strong>R2:</strong> {{ $s->petugasReviewer2?->name ?? '-' }}
+                                                    @if($s->username_reviewer2)<small class="text-muted">({{ $s->username_reviewer2 }})</small>@endif
+                                                </div>
                                             @endif
                                         </div>
                                     @else
@@ -1005,6 +1027,68 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial state
     updateScrollPosition();
 });
+
+// Update Petugas Reviewer Function
+function updatePetugas(element) {
+    const submissionId = element.dataset.submission;
+    const field = element.dataset.field;
+    const value = element.value;
+    
+    // Show loading state
+    element.disabled = true;
+    element.style.opacity = '0.5';
+    
+    fetch('{{ route("pic.submissions.update-petugas") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            field: field,
+            value: value || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        element.disabled = false;
+        element.style.opacity = '1';
+        
+        if (data.success) {
+            // Show success feedback
+            element.style.borderColor = '#198754';
+            element.style.backgroundColor = '#d1e7dd';
+            showToast('✓ Petugas berhasil diupdate', 'success');
+            
+            setTimeout(() => {
+                element.style.borderColor = '';
+                element.style.backgroundColor = '';
+            }, 1500);
+        } else {
+            // Show error
+            element.style.borderColor = '#dc3545';
+            element.style.backgroundColor = '#f8d7da';
+            showToast('⚠ ' + (data.message || 'Gagal update petugas'), 'danger');
+            
+            setTimeout(() => {
+                element.style.backgroundColor = '';
+            }, 2000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        element.disabled = false;
+        element.style.opacity = '1';
+        element.style.borderColor = '#dc3545';
+        element.style.backgroundColor = '#f8d7da';
+        showToast('⚠ Terjadi kesalahan saat update petugas', 'danger');
+        
+        setTimeout(() => {
+            element.style.backgroundColor = '';
+        }, 2000);
+    });
+}
 
 // Update Credential Function
 function updateCredential(element) {

@@ -585,7 +585,10 @@ class JournalManagementController extends Controller
         
         $stats['urgent'] = $urgentTasks;
         
-        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats'));
+        // Get all PICs for reviewer assignment dropdown
+        $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
+        
+        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats', 'pics'));
     }
 
     /**
@@ -621,6 +624,43 @@ class JournalManagementController extends Controller
         $submission->save();
         
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Update petugas reviewer assignment (only for Editor 2)
+     */
+    public function updatePetugas(Request $request)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'field' => 'required|string|in:petugas_reviewer1_id,petugas_reviewer2_id',
+            'value' => 'nullable|exists:pics,id',
+        ]);
+        
+        $submission = Submission::findOrFail($request->submission_id);
+        
+        // Only Editor 2 can assign reviewers
+        if ($submission->petugas_editor2_id != $picId) {
+            return response()->json(['success' => false, 'message' => 'Hanya Editor 2 yang dapat mengubah petugas reviewer'], 403);
+        }
+        
+        $submission->{$request->field} = $request->value ?: null;
+        $submission->save();
+        
+        // Get PIC name for response
+        $picName = null;
+        if ($request->value) {
+            $pic = Pic::find($request->value);
+            $picName = $pic ? $pic->name : null;
+        }
+        
+        return response()->json([
+            'success' => true,
+            'pic_name' => $picName,
+            'message' => 'Petugas berhasil diperbarui'
+        ]);
     }
 
     /**
