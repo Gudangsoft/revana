@@ -573,7 +573,7 @@
                         <th rowspan="2" class="align-middle" id="colSubmit">Petugas Submit</th>
                         <th colspan="3" class="text-center bg-info" id="colEditor1">Editor 1</th>
                         <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
-                        <th colspan="2" class="text-center bg-info" id="colEditor2">Editor 2</th>
+                        <th colspan="3" class="text-center bg-info" id="colEditor2">Editor 2</th>
                         <th colspan="2" class="text-center bg-info" id="colEditor3">Editor 3</th>
                         <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                         <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
@@ -589,8 +589,9 @@
                         <!-- Author 1 sub-headers (2 cols) -->
                         <th class="bg-warning">Petugas</th>
                         <th class="bg-warning">Valid</th>
-                        <!-- Editor 2 sub-headers (2 cols) -->
+                        <!-- Editor 2 sub-headers (3 cols) -->
                         <th class="bg-info">Petugas</th>
+                        <th class="bg-info">R1/R2</th>
                         <th class="bg-info">Valid</th>
                         <!-- Editor 3 sub-headers (2 cols) -->
                         <th class="bg-info">Petugas</th>
@@ -748,14 +749,9 @@
                                     {{ $s->petugasEditor2?->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="text-center">
+                            <td>
                                 @if($s->petugas_editor2_id == $currentPicId)
-                                    <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                            onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
-                                            title="Klik untuk toggle validasi">
-                                        <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                    </button>
-                                    <div class="mt-1 p-1 border rounded bg-light" style="font-size: 0.55rem;">
+                                    <div class="p-1" style="font-size: 0.55rem;">
                                         <div class="mb-1">
                                             <label style="font-size:0.55rem; font-weight:bold; color:#0d6efd;">R1:</label>
                                             <div class="d-flex gap-1">
@@ -791,6 +787,28 @@
                                             </div>
                                         </div>
                                     </div>
+                                @else
+                                    @if($s->username_reviewer1 || $s->username_reviewer2)
+                                        <div style="font-size: 0.55rem;">
+                                            @if($s->username_reviewer1)
+                                                <div><strong>R1:</strong> {{ $s->username_reviewer1 }}</div>
+                                            @endif
+                                            @if($s->username_reviewer2)
+                                                <div><strong>R2:</strong> {{ $s->username_reviewer2 }}</div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if($s->petugas_editor2_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
                                 @else
                                     {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                 @endif
