@@ -523,8 +523,8 @@
             </div>
         </form>
 
-        <!-- Scroll Controls -->
-        <div class="scroll-controls mt-2" style="padding: 6px 10px;">
+        <!-- Scroll Controls - di luar card-body -->
+        <div class="scroll-controls" style="border: 1px solid #dee2e6; border-radius: 6px;">
             <div class="d-flex align-items-center gap-3">
                 <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
                     <i class="bi bi-chevron-bar-left"></i>
@@ -558,7 +558,7 @@
         </div>
 
         <!-- Data Table -->
-        <div class="monitoring-scroll-wrapper mt-3" id="monitoringScrollWrapper">
+        <div class="monitoring-scroll-wrapper mt-2" id="monitoringScrollWrapper">
             <table class="table table-monitoring table-bordered mb-0">
                 <thead class="table-dark">
                     <tr>
@@ -936,9 +936,9 @@ document.addEventListener('DOMContentLoaded', function() {
             columnPositions['editor1'] = 500;
             columnPositions['author1'] = 750;
             columnPositions['editor2'] = 900;
-            columnPositions['editor3'] = 1050;
-            columnPositions['author2'] = 1200;
-            columnPositions['production'] = 1350;
+            columnPositions['editor3'] = 1100;
+            columnPositions['author2'] = 1250;
+            columnPositions['production'] = 1400;
         }
     }
     
