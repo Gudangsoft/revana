@@ -448,17 +448,40 @@
                             </td>
                             <td class="text-center">
                                 @if($s->petugas_editor2_id == $currentPicId)
-                                    @if(!$s->editor1_valid)
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled onclick="alert('Ada tugas lain yang belum dikerjakan!')">
-                                            <i class="bi bi-circle"></i>
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                                onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
-                                                title="Klik untuk toggle validasi">
-                                            <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                        </button>
-                                    @endif
+                                    <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                    <div class="mt-1">
+                                        <label style="font-size:0.7rem">Reviewer 1:</label>
+                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
+                                               value="{{ $s->username_reviewer1 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="username_reviewer1"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="user">
+                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
+                                               value="{{ $s->password_reviewer1 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="password_reviewer1"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="pass">
+                                        <br>
+                                        <label style="font-size:0.7rem">Reviewer 2:</label>
+                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
+                                               value="{{ $s->username_reviewer2 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="username_reviewer2"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="user">
+                                        <input type="text" class="form-control form-control-sm mb-1" style="width: 60px; font-size: 0.65rem; display:inline-block" 
+                                               value="{{ $s->password_reviewer2 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="password_reviewer2"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="pass">
+                                    </div>
                                 @else
                                     {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                 @endif
