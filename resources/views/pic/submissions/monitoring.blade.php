@@ -9,161 +9,247 @@
 
 @section('styles')
 <style>
-/* Sticky Table Styles for Monitoring */
+/* ===== SCROLL WRAPPER ===== */
 .monitoring-scroll-wrapper {
-    overflow-x: scroll !important;
+    overflow-x: auto;
     overflow-y: auto;
-    max-height: 70vh;
-    min-height: 400px;
+    max-height: 65vh;
     position: relative;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
     background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0 0 8px 8px;
 }
 
-/* Force table to be wider than container */
+/* Force horizontal scroll */
 .monitoring-scroll-wrapper table {
-    min-width: 2500px;
+    min-width: 2200px;
 }
 
-/* Scrollbar styling for both horizontal and vertical */
-.monitoring-scroll-wrapper {
-    scrollbar-width: auto;
-    scrollbar-color: #6c757d #e9ecef;
-}
-
+/* Custom Scrollbar - Mirip Admin */
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 16px;
-    width: 12px;
+    height: 12px;
+    width: 10px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-track {
-    background: #e9ecef;
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
+    background: #f1f3f4;
+    border-radius: 6px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #6c757d, #495057);
-    border-radius: 8px;
-    border: 2px solid #e9ecef;
-    min-width: 50px;
+    background: #adb5bd;
+    border-radius: 6px;
+    border: 2px solid #f1f3f4;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #495057, #343a40);
+    background: #6c757d;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-corner {
-    background: #e9ecef;
+    background: #f1f3f4;
 }
 
-/* Inline credential input */
-.inline-credential-input {
-    font-size: 0.55rem;
-    padding: 1px 2px;
-    width: 55px;
-    border: 1px solid #dee2e6;
-    border-radius: 2px;
-    background: #fff;
-    font-family: monospace;
+/* Firefox scrollbar */
+.monitoring-scroll-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #adb5bd #f1f3f4;
 }
 
-/* Badge styling */
-.table-monitoring .badge {
-    font-size: 0.6rem;
-    padding: 1px 4px;
-    line-height: 1.3;
-}
-
-/* Button styling */
-.table-monitoring .btn-sm {
-    padding: 2px 4px;
-    font-size: 0.65rem;
-}
-
-.table-monitoring .btn-sm i {
-    font-size: 0.75rem;
-}
-
-.inline-credential-input:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
-    outline: none;
-}
-
-.inline-credential-input.has-value {
-    background-color: #fff3cd;
-}
-
-.inline-credential-input.saving {
-    opacity: 0.6;
-}
-
-.credential-group {
+/* ===== SCROLL CONTROLS BAR ===== */
+.scroll-control-bar {
     display: flex;
-    gap: 2px;
     align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    gap: 15px;
 }
 
+.scroll-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.scroll-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ced4da;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #495057;
+}
+
+.scroll-btn:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.scroll-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Progress Bar */
+.scroll-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.scroll-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #dee2e6;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.scroll-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 3px;
+    transition: width 0.1s ease;
+    width: 0%;
+}
+
+.scroll-progress-text {
+    font-size: 0.75rem;
+    color: #6c757d;
+    min-width: 30px;
+    text-align: right;
+}
+
+/* Quick Jump Buttons */
+.quick-jump {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.quick-jump-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.jump-btn {
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #495057;
+}
+
+.jump-btn:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.jump-btn.active {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+/* ===== TABLE STYLING ===== */
 .table-monitoring {
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    margin-bottom: 0;
 }
 
 .table-monitoring thead th {
     position: sticky;
     top: 0;
     z-index: 3;
-    background: #212529 !important;
+    background: #343a40 !important;
     color: white !important;
-    border: 1px solid #343a40;
+    border: 1px solid #454d55;
     white-space: nowrap;
-    padding: 4px 5px;
-    font-size: 0.7rem;
-    line-height: 1.2;
+    padding: 6px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
-    top: 29px;
-    background: #343a40 !important;
-    color: white !important;
+    top: 32px;
 }
 
-/* Override Bootstrap bg-* classes in header to ensure white text */
-.table-monitoring thead th.bg-info,
-.table-monitoring thead th.bg-warning,
-.table-monitoring thead th.bg-primary,
-.table-monitoring thead th.bg-success {
-    color: white !important;
-}
-
-.table-monitoring thead th.text-dark {
-    color: white !important;
-}
+/* Color coded headers */
+.table-monitoring thead th.bg-info { background: #17a2b8 !important; }
+.table-monitoring thead th.bg-warning { background: #ffc107 !important; color: #212529 !important; }
+.table-monitoring thead th.bg-primary { background: #667eea !important; }
+.table-monitoring thead th.bg-success { background: #28a745 !important; }
+.table-monitoring thead th.bg-dark { background: #343a40 !important; }
 
 .table-monitoring tbody td {
     white-space: nowrap;
-    padding: 3px 4px;
-    border: 1px solid #dee2e6;
-    font-size: 0.7rem;
+    padding: 5px 8px;
+    border: 1px solid #e9ecef;
     vertical-align: middle;
-    line-height: 1.3;
+    font-size: 0.72rem;
 }
 
 .table-monitoring tbody tr:hover td {
-    background-color: #e8f4fd !important;
+    background-color: #e7f3ff !important;
+}
+
+.table-monitoring tbody tr:nth-child(even) td {
+    background-color: #f8f9fa;
+}
+
+/* Sticky columns */
+.table-monitoring th.sticky-first,
+.table-monitoring td.sticky-first {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fff;
+    min-width: 100px;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+}
+
+.table-monitoring thead th.sticky-first {
+    z-index: 5;
+    background: #343a40 !important;
+}
+
+.table-monitoring th.sticky-second,
+.table-monitoring td.sticky-second {
+    position: sticky;
+    left: 100px;
+    z-index: 2;
+    background: #fff;
+    min-width: 60px;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+}
+
+.table-monitoring thead th.sticky-second {
+    z-index: 5;
+    background: #343a40 !important;
 }
 
 .table-monitoring tbody tr:hover td.sticky-first,
 .table-monitoring tbody tr:hover td.sticky-second {
-    background-color: #e8f4fd !important;
-}
-
-/* Alternating row colors */
-.table-monitoring tbody tr:nth-child(even) td {
-    background-color: #f8f9fa;
+    background-color: #e7f3ff !important;
 }
 
 .table-monitoring tbody tr:nth-child(even) td.sticky-first,
@@ -171,107 +257,9 @@
     background-color: #f8f9fa;
 }
 
-.table-monitoring tbody td code {
-    background-color: #fff3cd;
-    padding: 1px 2px;
-    border-radius: 2px;
-    font-size: 0.6rem;
-    display: inline-block;
-    line-height: 1.2;
-}
-
-/* Optimize column widths */
-.table-monitoring td:nth-child(3) { /* Judul */
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.65rem;
-}
-
-.table-monitoring td:nth-child(4) { /* Link */
-    max-width: 35px;
-    text-align: center;
-}
-
-.table-monitoring td:nth-child(5) { /* Penulis */
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.65rem;
-}
-
-.table-monitoring td:nth-child(6) { /* No HP */
-    max-width: 75px;
-    font-size: 0.65rem;
-}
-
-.table-monitoring td:nth-child(7), 
-.table-monitoring td:nth-child(8) { /* Username/Password Author */
-    max-width: 70px;
-    font-size: 0.6rem;
-}
-
-.table-monitoring td:nth-child(9) { /* PIC Marketing */
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.65rem;
-}
-
-.table-monitoring td:nth-child(10) { /* Petugas Submit */
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.65rem;
-}
-
-.table-monitoring tbody td input.form-control-sm {
-    font-size: 0.6rem;
-    padding: 1px 2px;
-    height: auto;
-    min-height: 18px;
-}
-
-/* Sticky first column (Kode Submit) */
-.table-monitoring th.sticky-first,
-.table-monitoring td.sticky-first {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    background: #fff;
-    min-width: 95px;
-    max-width: 95px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
-    font-size: 0.65rem;
-}
-
-.table-monitoring thead th.sticky-first {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Sticky second column (ID Artikel) */
-.table-monitoring th.sticky-second,
-.table-monitoring td.sticky-second {
-    position: sticky;
-    left: 95px;
-    z-index: 2;
-    background: #fff;
-    min-width: 55px;
-    max-width: 55px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
-    font-size: 0.65rem;
-}
-
-.table-monitoring thead th.sticky-second {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Highlight rows assigned to current PIC */
+/* My task highlight */
 .my-task-row td {
     background-color: #fff3cd !important;
-    font-weight: 500;
 }
 
 .my-task-row:hover td {
@@ -283,109 +271,50 @@
     background-color: #fff3cd !important;
 }
 
-.my-task-row:hover .sticky-first,
-.my-task-row:hover .sticky-second {
-    background-color: #ffe69c !important;
-}
-
-/* Scroll controls */
-.scroll-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
-    padding: 10px 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
+/* ===== CREDENTIALS & INPUTS ===== */
+.inline-credential-input {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+    width: 60px;
     border: 1px solid #dee2e6;
+    border-radius: 3px;
+    background: #fff;
+    font-family: 'Consolas', monospace;
 }
 
-.scroll-nav-btn {
-    padding: 8px 14px;
-    border: 1px solid #dee2e6;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.9rem;
+.inline-credential-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    outline: none;
 }
 
-.scroll-nav-btn:hover:not(:disabled) {
-    background: #e9ecef;
-    border-color: #0d6efd;
-    color: #0d6efd;
+/* Badge styling */
+.table-monitoring .badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
 }
 
-.scroll-nav-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: #f8f9fa;
+/* Button styling */
+.table-monitoring .btn-sm {
+    padding: 3px 6px;
+    font-size: 0.7rem;
 }
 
-.scroll-position-indicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.table-monitoring .btn-sm i {
+    font-size: 0.8rem;
 }
 
-.scroll-position-bar {
-    width: 150px;
-    height: 8px;
-    background: #dee2e6;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid #ced4da;
+.table-monitoring td code {
+    background-color: #fff3cd;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 0.65rem;
 }
 
-.scroll-position-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #0d6efd, #0dcaf0);
-    border-radius: 4px;
-    transition: width 0.15s ease;
-}
-
-/* Quick navigation buttons */
-.quick-nav {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.quick-nav-btn {
-    padding: 5px 10px;
-    font-size: 0.75rem;
-    border: 1px solid #dee2e6;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 500;
-}
-
-.quick-nav-btn:hover {
-    background: #e7f1ff;
-    border-color: #0d6efd;
-    color: #0d6efd;
-}
-
-.quick-nav-btn.active {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-}
-
-.btn-validation {
-    min-width: 35px;
-    padding: 4px 8px;
-    transition: all 0.2s ease;
-}
-
-.btn-validation:hover {
-    transform: scale(1.1);
-}
+/* Column widths */
+.table-monitoring td:nth-child(3) { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.table-monitoring td:nth-child(5) { max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+.table-monitoring td:nth-child(6) { max-width: 90px; }
 
 .credential-input-group {
     display: flex;
@@ -397,6 +326,16 @@
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.btn-validation {
+    min-width: 32px;
+    padding: 4px 8px;
+    transition: all 0.15s;
+}
+
+.btn-validation:hover {
+    transform: scale(1.05);
 }
 </style>
 @endsection
@@ -541,42 +480,42 @@
             </div>
         </form>
 
-        <!-- Scroll Controls -->
-        <div class="scroll-controls">
-            <div class="d-flex align-items-center gap-3">
-                <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
+        <!-- Scroll Control Bar -->
+        <div class="scroll-control-bar">
+            <div class="scroll-nav-group">
+                <button type="button" class="scroll-btn" id="scrollStartBtn" title="Ke Awal">
                     <i class="bi bi-chevron-bar-left"></i>
                 </button>
-                <button type="button" class="scroll-nav-btn" id="scrollLeftBtn" title="Scroll Kiri">
+                <button type="button" class="scroll-btn" id="scrollLeftBtn" title="Scroll Kiri">
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <div class="scroll-position-indicator">
-                    <div class="scroll-position-bar">
-                        <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
+                <div class="scroll-progress">
+                    <div class="scroll-progress-bar">
+                        <div class="scroll-progress-fill" id="scrollPositionFill"></div>
                     </div>
-                    <small class="text-muted" id="scrollPositionText">0%</small>
+                    <span class="scroll-progress-text" id="scrollPositionText">0%</span>
                 </div>
-                <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
+                <button type="button" class="scroll-btn" id="scrollRightBtn" title="Scroll Kanan">
                     <i class="bi bi-chevron-right"></i>
                 </button>
-                <button type="button" class="scroll-nav-btn" id="scrollEndBtn" title="Ke Akhir">
+                <button type="button" class="scroll-btn" id="scrollEndBtn" title="Ke Akhir">
                     <i class="bi bi-chevron-bar-right"></i>
                 </button>
             </div>
-            <div class="quick-nav">
-                <span class="text-muted me-2" style="font-size: 0.75rem;">Lompat ke:</span>
-                <button type="button" class="quick-nav-btn" data-target="submit">Submit</button>
-                <button type="button" class="quick-nav-btn" data-target="editor1">Editor1</button>
-                <button type="button" class="quick-nav-btn" data-target="author1">Author1</button>
-                <button type="button" class="quick-nav-btn" data-target="editor2">Editor2</button>
-                <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
-                <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
-                <button type="button" class="quick-nav-btn" data-target="production">Production</button>
+            <div class="quick-jump">
+                <span class="quick-jump-label">Lompat ke:</span>
+                <button type="button" class="jump-btn" data-target="submit">Submit</button>
+                <button type="button" class="jump-btn" data-target="editor1">Editor1</button>
+                <button type="button" class="jump-btn" data-target="author1">Author1</button>
+                <button type="button" class="jump-btn" data-target="editor2">Editor2</button>
+                <button type="button" class="jump-btn" data-target="editor3">Editor3</button>
+                <button type="button" class="jump-btn" data-target="author2">Author2</button>
+                <button type="button" class="jump-btn" data-target="production">Production</button>
             </div>
         </div>
 
         <!-- Data Table -->
-        <div class="monitoring-scroll-wrapper mt-2" id="monitoringScrollWrapper">
+        <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
             <table class="table table-monitoring table-bordered mb-0">
                 <thead class="table-dark">
                     <tr>
@@ -982,8 +921,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (scrollRightBtn) scrollRightBtn.disabled = scrollLeft >= scrollWidth;
         if (scrollEndBtn) scrollEndBtn.disabled = scrollLeft >= scrollWidth;
         
-        // Update quick nav active state
-        document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+        // Update jump btn active state
+        document.querySelectorAll('.jump-btn').forEach(btn => {
             btn.classList.remove('active');
         });
     }
@@ -1020,8 +959,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Quick navigation
-    document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+    // Quick navigation - Jump buttons
+    document.querySelectorAll('.jump-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const target = this.dataset.target;
             const position = columnPositions[target] || 0;
@@ -1029,7 +968,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (wrapper) {
                 wrapper.scrollTo({ left: position, behavior: 'smooth' });
                 
-                document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.jump-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
             }
         });
