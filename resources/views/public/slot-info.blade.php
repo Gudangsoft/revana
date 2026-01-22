@@ -390,10 +390,10 @@
                             </td>
                             <td>{{ $slot->journalMaster->publisher ?? '-' }}</td>
                             <td class="text-center">
-                                <span class="badge bg-primary fs-6">{{ $slot->jumlah_slot }}</span>
+                                <span class="badge bg-primary fs-6">{{ max(0, $slot->jumlah_slot) }}</span>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-info fs-6">{{ $slot->slot_terpakai }}</span>
+                                <span class="badge bg-info fs-6">{{ max(0, $slot->slot_terpakai) }}</span>
                             </td>
                             <td class="text-center">
                                 @php
