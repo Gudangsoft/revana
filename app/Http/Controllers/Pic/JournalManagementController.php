@@ -165,6 +165,20 @@ class JournalManagementController extends Controller
         if ($request->filled('year')) {
             $query->where('tahun', $request->year);
         }
+        // Filter akreditasi
+        if ($request->filled('accreditation')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('accreditation', $request->accreditation);
+            });
+        }
+        // Filter search (nama jurnal/publisher)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('journalMaster', function($q) use ($search) {
+                $q->where('nama_jurnal', 'like', "%$search%")
+                  ->orWhere('publisher', 'like', "%$search%");
+            });
+        }
 
         $slots = $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
