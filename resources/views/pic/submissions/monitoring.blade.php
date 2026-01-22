@@ -943,57 +943,117 @@
 <script>
 // Scroll Navigation
 document.addEventListener('DOMContentLoaded', function() {
-    const scrollWrapper = document.getElementById('monitoringScrollWrapper');
-    const scrollPositionFill = document.getElementById('scrollPositionFill');
-    const scrollPositionText = document.getElementById('scrollPositionText');
+    const wrapper = document.getElementById('monitoringScrollWrapper');
+    const positionFill = document.getElementById('scrollPositionFill');
+    const positionText = document.getElementById('scrollPositionText');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const scrollStartBtn = document.getElementById('scrollStartBtn');
+    const scrollEndBtn = document.getElementById('scrollEndBtn');
+    
+    // Column positions for quick navigation
+    const columnPositions = {
+        'submit': 0,
+        'editor1': 600,
+        'author1': 850,
+        'editor2': 1000,
+        'reviewer1': 1150,
+        'reviewer2': 1500,
+        'editor3': 1850,
+        'author2': 2000,
+        'production': 2150
+    };
     
     // Update scroll position indicator
     function updateScrollPosition() {
-        if (scrollWrapper) {
-            const scrollLeft = scrollWrapper.scrollLeft;
-            const scrollWidth = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-            const percentage = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
-            
-            if (scrollPositionFill) scrollPositionFill.style.width = percentage + '%';
-            if (scrollPositionText) scrollPositionText.textContent = Math.round(percentage) + '%';
-        }
+        if (!wrapper) return;
+        
+        const scrollLeft = wrapper.scrollLeft;
+        const scrollWidth = wrapper.scrollWidth - wrapper.clientWidth;
+        const progress = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
+        
+        if (positionFill) positionFill.style.width = progress + '%';
+        if (positionText) positionText.textContent = Math.round(progress) + '%';
+        
+        // Update button states
+        if (scrollStartBtn) scrollStartBtn.disabled = scrollLeft <= 0;
+        if (scrollLeftBtn) scrollLeftBtn.disabled = scrollLeft <= 0;
+        if (scrollRightBtn) scrollRightBtn.disabled = scrollLeft >= scrollWidth;
+        if (scrollEndBtn) scrollEndBtn.disabled = scrollLeft >= scrollWidth;
+        
+        // Update quick nav active state
+        document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
     }
     
-    if (scrollWrapper) {
-        scrollWrapper.addEventListener('scroll', updateScrollPosition);
+    if (wrapper) {
+        wrapper.addEventListener('scroll', updateScrollPosition);
     }
+    
+    // Scroll amount
+    const scrollAmount = 400;
     
     // Scroll buttons
-    document.getElementById('scrollStartBtn')?.addEventListener('click', function() {
-        scrollWrapper.scrollTo({ left: 0, behavior: 'smooth' });
-    });
+    if (scrollLeftBtn) {
+        scrollLeftBtn.addEventListener('click', () => {
+            wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+    }
     
-    document.getElementById('scrollLeftBtn')?.addEventListener('click', function() {
-        scrollWrapper.scrollBy({ left: -300, behavior: 'smooth' });
-    });
+    if (scrollRightBtn) {
+        scrollRightBtn.addEventListener('click', () => {
+            wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+    }
     
-    document.getElementById('scrollRightBtn')?.addEventListener('click', function() {
-        scrollWrapper.scrollBy({ left: 300, behavior: 'smooth' });
-    });
+    if (scrollStartBtn) {
+        scrollStartBtn.addEventListener('click', () => {
+            wrapper.scrollTo({ left: 0, behavior: 'smooth' });
+        });
+    }
     
-    document.getElementById('scrollEndBtn')?.addEventListener('click', function() {
-        scrollWrapper.scrollTo({ left: scrollWrapper.scrollWidth, behavior: 'smooth' });
-    });
+    if (scrollEndBtn) {
+        scrollEndBtn.addEventListener('click', () => {
+            wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
+        });
+    }
     
-    // Quick navigation buttons
+    // Quick navigation
     document.querySelectorAll('.quick-nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const target = this.dataset.target;
-            const targetCol = document.getElementById('col' + target.charAt(0).toUpperCase() + target.slice(1));
+            const position = columnPositions[target] || 0;
             
-            if (targetCol && scrollWrapper) {
-                const targetLeft = targetCol.offsetLeft - 150;
-                scrollWrapper.scrollTo({ left: targetLeft, behavior: 'smooth' });
-            }
+            wrapper.scrollTo({ left: position, behavior: 'smooth' });
+            
+            document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
         });
     });
     
-    // Initial position
+    // Keyboard navigation
+    if (wrapper) {
+        wrapper.setAttribute('tabindex', '0');
+        wrapper.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    wrapper.scrollBy({ left: -100, behavior: 'smooth' });
+                    break;
+                case 'ArrowRight':
+                    wrapper.scrollBy({ left: 100, behavior: 'smooth' });
+                    break;
+                case 'Home':
+                    wrapper.scrollTo({ left: 0, behavior: 'smooth' });
+                    break;
+                case 'End':
+                    wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
+                    break;
+            }
+        });
+    }
+    
+    // Initial state
     updateScrollPosition();
 });
 
