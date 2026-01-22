@@ -585,10 +585,13 @@ class JournalManagementController extends Controller
         
         $stats['urgent'] = $urgentTasks;
         
-        // Get all PICs for reviewer assignment dropdown
+        // Get all PICs for assignment dropdown
         $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
         
-        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats', 'pics'));
+        // Get all Marketings for assignment dropdown
+        $marketings = \App\Models\Marketing::where('is_active', true)->orderBy('name')->get();
+        
+        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats', 'pics', 'marketings'));
     }
 
     /**
@@ -596,8 +599,6 @@ class JournalManagementController extends Controller
      */
     public function updateCredential(Request $request)
     {
-        $picId = auth()->guard('pic')->id();
-        
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
             'field' => 'required|string|in:username_editor,password_editor,username_reviewer1,password_reviewer1,username_reviewer2,password_reviewer2',
@@ -605,20 +606,6 @@ class JournalManagementController extends Controller
         ]);
         
         $submission = Submission::findOrFail($request->submission_id);
-        
-        // Check if PIC has permission to edit this field
-        $canEdit = false;
-        if (in_array($request->field, ['username_editor', 'password_editor'])) {
-            $canEdit = $submission->petugas_editor1_id == $picId;
-        } elseif (in_array($request->field, ['username_reviewer1', 'password_reviewer1'])) {
-            $canEdit = $submission->petugas_reviewer1_id == $picId;
-        } elseif (in_array($request->field, ['username_reviewer2', 'password_reviewer2'])) {
-            $canEdit = $submission->petugas_reviewer2_id == $picId;
-        }
-        
-        if (!$canEdit) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
         
         $submission->{$request->field} = $request->value;
         $submission->save();
@@ -633,8 +620,8 @@ class JournalManagementController extends Controller
     {
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'field' => 'required|string|in:petugas_submit_id,petugas_editor1_id,petugas_author1_id,petugas_editor2_id,petugas_reviewer1_id,petugas_reviewer2_id,petugas_editor3_id,petugas_author2_id,petugas_production_id',
-            'value' => 'nullable|exists:pics,id',
+            'field' => 'required|string|in:marketing_id,petugas_submit_id,petugas_editor1_id,petugas_author1_id,petugas_editor2_id,petugas_reviewer1_id,petugas_reviewer2_id,petugas_editor3_id,petugas_author2_id,petugas_production_id',
+            'value' => 'nullable',
         ]);
         
         $submission = Submission::findOrFail($request->submission_id);
@@ -642,16 +629,21 @@ class JournalManagementController extends Controller
         $submission->{$request->field} = $request->value ?: null;
         $submission->save();
         
-        // Get PIC name for response
-        $picName = null;
+        // Get name for response
+        $name = null;
         if ($request->value) {
-            $pic = Pic::find($request->value);
-            $picName = $pic ? $pic->name : null;
+            if ($request->field === 'marketing_id') {
+                $marketing = \App\Models\Marketing::find($request->value);
+                $name = $marketing ? $marketing->name : null;
+            } else {
+                $pic = Pic::find($request->value);
+                $name = $pic ? $pic->name : null;
+            }
         }
         
         return response()->json([
             'success' => true,
-            'pic_name' => $picName,
+            'name' => $name,
             'message' => 'Petugas berhasil diperbarui'
         ]);
     }
