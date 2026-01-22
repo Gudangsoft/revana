@@ -14,10 +14,13 @@
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
-    overflow-y: visible;
-    max-height: 70vh;
+    overflow-y: auto;
+    max-height: calc(100vh - 420px);
+    min-height: 300px;
     scrollbar-width: thin;
     scrollbar-color: #6c757d #dee2e6;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar {
@@ -56,6 +59,27 @@
     padding: 2px 4px;
     background: #f8f9fa;
     border-radius: 3px;
+}
+
+/* Validation checkbox button */
+.validation-btn {
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+}
+.validation-btn:hover {
+    background: #e9ecef;
+    transform: scale(1.2);
+}
+.validation-btn.saving {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.validation-btn i {
+    font-size: 1rem;
 }
 
 .table-monitoring {
@@ -491,15 +515,39 @@
                                         <code>{{ $s->password_editor ?? '-' }}</code>
                                     </div>
                                 </td>
-                                <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="editor1_valid"
+                                            data-current="{{ $s->editor1_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Author 1 -->
                                 <td>{{ $s->petugasAuthor1?->name ?? '-' }}</td>
-                                <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="author1_valid"
+                                            data-current="{{ $s->author1_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Editor 2 -->
                                 <td>{{ $s->petugasEditor2?->name ?? '-' }}</td>
-                                <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="editor2_valid"
+                                            data-current="{{ $s->editor2_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Reviewer 1 -->
                                 <td>{{ $s->petugasReviewer1?->name ?? '-' }}</td>
@@ -510,7 +558,15 @@
                                         <code>{{ $s->password_reviewer1 ?? '-' }}</code>
                                     </div>
                                 </td>
-                                <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="reviewer1_valid"
+                                            data-current="{{ $s->reviewer1_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Reviewer 2 -->
                                 <td>{{ $s->petugasReviewer2?->name ?? '-' }}</td>
@@ -521,15 +577,39 @@
                                         <code>{{ $s->password_reviewer2 ?? '-' }}</code>
                                     </div>
                                 </td>
-                                <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="reviewer2_valid"
+                                            data-current="{{ $s->reviewer2_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Editor 3 -->
                                 <td>{{ $s->petugasEditor3?->name ?? '-' }}</td>
-                                <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="editor3_valid"
+                                            data-current="{{ $s->editor3_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Author 2 -->
                                 <td>{{ $s->petugasAuthor2?->name ?? '-' }}</td>
-                                <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="author2_valid"
+                                            data-current="{{ $s->author2_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Production -->
                                 <td>{{ $s->petugasProduction?->name ?? '-' }}</td>
@@ -540,7 +620,15 @@
                                         -
                                     @endif
                                 </td>
-                                <td class="text-center">{!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="validation-btn" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-field="production_valid"
+                                            data-current="{{ $s->production_valid ? '1' : '0' }}"
+                                            onclick="toggleValidation(this)">
+                                        {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                             </tr>
                             @empty
                             <tr>
@@ -563,6 +651,51 @@
 </div>
 
 <script>
+// Toggle Validation function
+function toggleValidation(btn) {
+    const submissionId = btn.dataset.submission;
+    const field = btn.dataset.field;
+    const currentValue = btn.dataset.current === '1';
+    
+    // Convert field name to stage (e.g., 'editor1_valid' -> 'editor1')
+    const stage = field.replace('_valid', '');
+    
+    btn.classList.add('saving');
+    
+    fetch('{{ route("pic.submissions.toggle-valid") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            stage: stage
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.classList.remove('saving');
+        if (data.success) {
+            const newValue = data.is_valid;
+            btn.dataset.current = newValue ? '1' : '0';
+            if (newValue) {
+                btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+            } else {
+                btn.innerHTML = '<i class="bi bi-circle text-muted"></i>';
+            }
+        } else {
+            alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
+        }
+    })
+    .catch(error => {
+        btn.classList.remove('saving');
+        console.error('Error:', error);
+        alert('Terjadi kesalahan jaringan');
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const wrapper = document.getElementById('monitoringScrollWrapper');
     const positionFill = document.getElementById('scrollPositionFill');

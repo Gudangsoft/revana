@@ -649,40 +649,24 @@ class JournalManagementController extends Controller
         ]);
         
         $submission = Submission::findOrFail($request->submission_id);
-        
-        // Check if PIC has permission to toggle this stage
-        $canToggle = false;
         $field = $request->stage . '_valid';
         
-        switch ($request->stage) {
-            case 'editor1':
-                $canToggle = $submission->petugas_editor1_id == $picId;
-                break;
-            case 'author1':
-                $canToggle = $submission->petugas_author1_id == $picId;
-                break;
-            case 'editor2':
-                $canToggle = $submission->petugas_editor2_id == $picId;
-                break;
-            case 'reviewer1':
-                $canToggle = $submission->petugas_reviewer1_id == $picId;
-                break;
-            case 'reviewer2':
-                $canToggle = $submission->petugas_reviewer2_id == $picId;
-                break;
-            case 'editor3':
-                $canToggle = $submission->petugas_editor3_id == $picId;
-                break;
-            case 'author2':
-                $canToggle = $submission->petugas_author2_id == $picId;
-                break;
-            case 'production':
-                $canToggle = $submission->petugas_production_id == $picId;
-                break;
-        }
+        // Check if PIC is assigned to this submission in any stage
+        $isAssigned = (
+            $submission->created_by == $picId ||
+            $submission->petugas_submit_id == $picId ||
+            $submission->petugas_editor1_id == $picId ||
+            $submission->petugas_author1_id == $picId ||
+            $submission->petugas_editor2_id == $picId ||
+            $submission->petugas_reviewer1_id == $picId ||
+            $submission->petugas_reviewer2_id == $picId ||
+            $submission->petugas_editor3_id == $picId ||
+            $submission->petugas_author2_id == $picId ||
+            $submission->petugas_production_id == $picId
+        );
         
-        if (!$canToggle) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        if (!$isAssigned) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses ke submission ini'], 403);
         }
         
         // Toggle the valid status
