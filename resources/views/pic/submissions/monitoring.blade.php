@@ -12,7 +12,7 @@
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
-    overflow-y: visible;
+    overflow-y: auto;
     max-height: 70vh;
     scrollbar-width: thin;
     scrollbar-color: #6c757d #dee2e6;
@@ -976,18 +976,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollStartBtn = document.getElementById('scrollStartBtn');
     const scrollEndBtn = document.getElementById('scrollEndBtn');
     
-    // Column positions for quick navigation
-    const columnPositions = {
-        'submit': 0,
-        'editor1': 600,
-        'author1': 850,
-        'editor2': 1000,
-        'reviewer1': 1150,
-        'reviewer2': 1500,
-        'editor3': 1850,
-        'author2': 2000,
-        'production': 2150
-    };
+    // Calculate column positions dynamically
+    const columnPositions = {};
+    function calculateColumnPositions() {
+        const targets = ['submit', 'editor1', 'author1', 'editor2', 'reviewer1', 'reviewer2', 'editor3', 'author2', 'production'];
+        targets.forEach(target => {
+            const colId = 'col' + target.charAt(0).toUpperCase() + target.slice(1);
+            const col = document.getElementById(colId);
+            if (col && wrapper) {
+                // Get position relative to the scrollable wrapper
+                const colRect = col.getBoundingClientRect();
+                const wrapperRect = wrapper.getBoundingClientRect();
+                columnPositions[target] = col.offsetLeft - 200; // Offset for better visibility
+            }
+        });
+        
+        // Fallback positions if elements not found
+        if (Object.keys(columnPositions).length === 0) {
+            columnPositions['submit'] = 0;
+            columnPositions['editor1'] = 500;
+            columnPositions['author1'] = 750;
+            columnPositions['editor2'] = 900;
+            columnPositions['reviewer1'] = 1050;
+            columnPositions['reviewer2'] = 1400;
+            columnPositions['editor3'] = 1750;
+            columnPositions['author2'] = 1900;
+            columnPositions['production'] = 2050;
+        }
+    }
+    
+    // Calculate on load with slight delay to ensure table is rendered
+    setTimeout(() => {
+        calculateColumnPositions();
+    }, 100);
     
     // Update scroll position indicator
     function updateScrollPosition() {
@@ -1050,10 +1071,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const target = this.dataset.target;
             const position = columnPositions[target] || 0;
             
-            wrapper.scrollTo({ left: position, behavior: 'smooth' });
-            
-            document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+            if (wrapper) {
+                wrapper.scrollTo({ left: position, behavior: 'smooth' });
+                
+                document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            }
         });
     });
     
@@ -1077,6 +1100,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Recalculate column positions on window resize
+    window.addEventListener('resize', function() {
+        calculateColumnPositions();
+    });
     
     // Initial state
     updateScrollPosition();
