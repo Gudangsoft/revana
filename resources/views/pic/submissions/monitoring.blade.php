@@ -13,34 +13,45 @@
 <style>
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
-    overflow-x: auto;
+    overflow-x: scroll !important;
     overflow-y: auto;
-    max-height: calc(100vh - 420px);
-    min-height: 300px;
-    scrollbar-width: thin;
-    scrollbar-color: #6c757d #dee2e6;
+    max-height: calc(100vh - 350px);
+    min-height: 400px;
     border: 1px solid #dee2e6;
     border-radius: 6px;
+    position: relative;
 }
 
+/* Custom scrollbar for all browsers */
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 14px;
+    height: 18px !important;
     width: 14px;
+    background: #e9ecef;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-track {
     background: #dee2e6;
-    border-radius: 7px;
+    border-radius: 0;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #6c757d, #495057);
-    border-radius: 7px;
-    border: 2px solid #dee2e6;
+    background: linear-gradient(180deg, #0d6efd, #0b5ed7);
+    border-radius: 9px;
+    border: 3px solid #dee2e6;
+    min-width: 80px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #495057, #343a40);
+    background: linear-gradient(180deg, #0b5ed7, #0a58ca);
+}
+
+/* Firefox scrollbar */
+@-moz-document url-prefix() {
+    .monitoring-scroll-wrapper {
+        scrollbar-width: auto;
+        scrollbar-color: #0d6efd #dee2e6;
+    }
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-corner {
