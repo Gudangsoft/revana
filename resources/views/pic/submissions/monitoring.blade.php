@@ -11,23 +11,20 @@
 <style>
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
-    overflow-x: scroll !important;
+    overflow-x: auto;
     overflow-y: auto;
-    max-height: calc(100vh - 350px);
-    min-height: 400px;
+    max-height: calc(100vh - 380px);
     border: 1px solid #dee2e6;
     border-radius: 6px;
     position: relative;
-    /* Force scrollbar to always show */
-    -ms-overflow-style: scrollbar;
 }
 
-/* Custom scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+/* Hide default scrollbar, use custom one below */
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 20px !important;
-    width: 14px;
-    background: #dee2e6;
-    display: block !important;
+    height: 0px;
+    width: 10px;
+    background: transparent;
+}
     visibility: visible !important;
 }
 
@@ -144,8 +141,8 @@
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.8rem;
-    min-width: 2500px; /* Force horizontal scroll */
-    width: max-content;
+    width: 100%;
+    table-layout: fixed;
 }
 
 .table-monitoring thead th {
@@ -157,6 +154,8 @@
     border: 1px solid #343a40;
     white-space: nowrap;
     padding: 6px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
