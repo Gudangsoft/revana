@@ -742,6 +742,7 @@ function updateCredential(element) {
 
 // Toggle Valid Function
 function toggleValid(button, submissionId, stage) {
+    alert('Toggle valid clicked: ' + submissionId + ' - ' + stage); // DEBUG
     // Show loading
     const icon = button.querySelector('i');
     const originalClass = icon.className;
@@ -776,14 +777,14 @@ function toggleValid(button, submissionId, stage) {
             }
         } else {
             icon.className = originalClass;
-            alert(data.message || 'Gagal toggle validasi');
+            alert('API gagal: ' + (data.message || 'Gagal toggle validasi'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
         icon.className = originalClass;
         button.disabled = false;
-        alert('Terjadi kesalahan saat toggle validasi');
+        alert('Terjadi kesalahan JS/fetch: ' + error);
     });
 }
 </script>

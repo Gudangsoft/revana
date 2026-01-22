@@ -55,6 +55,7 @@
                     <tr>
                         <th>#</th>
                         <th>Jurnal</th>
+                        <th>Publisher</th>
                         <th>Akreditasi</th>
                         <th>Periode</th>
                         <th>Volume/Issue</th>
@@ -72,6 +73,7 @@
                     <tr>
                         <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
                         <td><strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong></td>
+                        <td>{{ $slot->journalMaster->publisher ?? '-' }}</td>
                         <td>
                             @if($slot->journalMaster && $slot->journalMaster->accreditation)
                                 <span class="badge bg-info">{{ $slot->journalMaster->accreditation }}</span>
@@ -99,7 +101,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted">Belum ada data slot</td>
+                        <td colspan="9" class="text-center text-muted">Belum ada data slot</td>
                     </tr>
                     @endforelse
                 </tbody>
