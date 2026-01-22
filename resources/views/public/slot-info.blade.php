@@ -6,25 +6,25 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Informasi Slot Jurnal dan Artikel Publikasi SIPERA APJI. Lihat daftar artikel yang telah dipublikasikan beserta informasi penulis dan link publikasi.">
-    <meta name="keywords" content="info slot jurnal, daftar artikel, publikasi ilmiah, SIPERA, APJI, artikel jurnal, slot jurnal Indonesia">
+    <meta name="description" content="Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal SIPERA APJI. Temukan slot jurnal yang tersedia untuk publikasi artikel ilmiah Anda.">
+    <meta name="keywords" content="info slot jurnal, ketersediaan slot, publikasi jurnal, SIPERA, APJI, slot jurnal tersedia, jurnal SINTA, jurnal nasional, jurnal internasional">
     <meta name="author" content="APJI - Asosiasi Penerbit Jurnal Indonesia">
     <meta name="robots" content="index, follow">
     <meta name="language" content="Indonesian">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Informasi Slot Jurnal - SIPERA APJI">
-    <meta property="og:description" content="Lihat daftar artikel yang telah dipublikasikan di slot jurnal SIPERA APJI">
+    <meta property="og:title" content="Info Slot Jurnal - SIPERA APJI">
+    <meta property="og:description" content="Temukan slot jurnal yang tersedia untuk publikasi artikel ilmiah Anda di SIPERA APJI">
     <meta property="og:site_name" content="SIPERA - APJI">
     <meta property="og:url" content="{{ url()->current() }}">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Informasi Slot Jurnal - SIPERA APJI">
-    <meta name="twitter:description" content="Lihat daftar artikel yang telah dipublikasikan di slot jurnal SIPERA APJI">
+    <meta name="twitter:title" content="Info Slot Jurnal - SIPERA APJI">
+    <meta name="twitter:description" content="Temukan slot jurnal yang tersedia untuk publikasi artikel ilmiah Anda di SIPERA APJI">
     
-    <title>Informasi Slot Jurnal - SIPERA</title>
+    <title>Info Slot Jurnal - SIPERA</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -34,159 +34,283 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 40px 0;
+            padding: 20px 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .info-container {
+        .container-main {
             max-width: 1400px;
             margin: 0 auto;
         }
         
-        .header-card {
+        .header-section {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
+            padding: 30px;
+            margin-bottom: 25px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo-section {
             text-align: center;
-            margin-bottom: 30px;
         }
         
-        .logo-section h1 {
+        .header-section h1 {
             color: #667eea;
             font-weight: bold;
             font-size: 2.5rem;
             margin-bottom: 10px;
         }
         
+        .stats-section {
+            margin-bottom: 25px;
+        }
+        
         .stat-card {
             background: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             text-align: center;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             height: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
         
         .stat-card i {
-            font-size: 3rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
         
-        .filter-card {
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .filter-section {
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         
-        .article-card {
+        .table-section {
             background: white;
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 0;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
+            overflow: hidden;
         }
         
-        .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        .table-responsive {
+            border-radius: 15px;
         }
         
-        .article-number {
+        .journal-table {
+            margin-bottom: 0;
+        }
+        
+        .journal-table thead {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
         }
         
-        .info-label {
-            font-size: 0.85rem;
-            color: #6c757d;
+        .journal-table thead th {
+            border: none;
+            padding: 15px 10px;
             font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 0.9rem;
+            vertical-align: middle;
         }
         
-        .info-value {
-            font-size: 1rem;
-            color: #212529;
-            margin-bottom: 15px;
+        .journal-table tbody td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            font-size: 0.85rem;
         }
         
-        .login-link {
+        .journal-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .journal-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .badge-indexasi {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-nasional {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-sinta4 {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .badge-sinta5 {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .badge-internasional {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .slot-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .journal-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        .journal-info {
+            color: #666;
+            font-size: 0.75rem;
+            margin-top: 3px;
+        }
+        
+        .login-section {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
         }
         
-        .login-link a {
+        .login-section a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 10px 20px;
+            padding: 12px 30px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             display: inline-block;
             transition: all 0.3s;
         }
         
-        .login-link a:hover {
+        .login-section a:hover {
             background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .footer-section {
+            text-align: center;
+            margin-top: 25px;
+            color: white;
+        }
+        
+        .pagination {
+            margin: 20px;
+        }
+        
+        .no-image {
+            width: 60px;
+            height: 60px;
+            background: #e9ecef;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
         }
     </style>
 </head>
 <body>
-    <div class="container info-container">
-        <div class="header-card">
-            <div class="logo-section">
-                <h1><i class="bi bi-journal-bookmark-fill"></i> SIPERA</h1>
-                <p class="lead">Sistem Insentif dan Penghargaan Reviewer APJI</p>
-                <p class="text-muted">Informasi Slot Jurnal dan Artikel Publikasi</p>
+    <div class="container container-main">
+        <!-- Header -->
+        <div class="header-section">
+            <h1><i class="bi bi-journal-bookmark-fill"></i> SIPERA</h1>
+            <p class="lead mb-1">Sistem Insentif dan Penghargaan Reviewer APJI</p>
+            <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-journals text-primary"></i>
+                        <h3 class="text-primary">{{ $stats['total_journals'] }}</h3>
+                        <p class="mb-0">Journals</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-calendar-check text-success"></i>
+                        <h3 class="text-success">{{ $stats['total_slots'] }}</h3>
+                        <p class="mb-0">Slots Ready</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-check-circle text-info"></i>
+                        <h3 class="text-info">{{ $stats['slot_terisi'] }}</h3>
+                        <p class="mb-0">Terisi</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-circle text-warning"></i>
+                        <h3 class="text-warning">{{ $stats['total_slots'] - $stats['slot_terisi'] }}</h3>
+                        <p class="mb-0">Tersedia</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="stat-card">
-                    <i class="bi bi-file-earmark-text text-primary"></i>
-                    <h3 class="text-primary">{{ $stats['total_submissions'] }}</h3>
-                    <p>Total Artikel</p>
+        <!-- Indexasi Stats -->
+        <div class="stats-section">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3 class="text-success">{{ $stats['nasional'] }}</h3>
+                        <p class="mb-0">NASIONAL</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="stat-card">
-                    <i class="bi bi-calendar-range text-success"></i>
-                    <h3 class="text-success">{{ $stats['total_slots'] }}</h3>
-                    <p>Total Slot Jurnal</p>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3 class="text-info">{{ $stats['sinta4'] }}</h3>
+                        <p class="mb-0">SINTA 4</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="stat-card">
-                    <i class="bi bi-journal-bookmark text-info"></i>
-                    <h3 class="text-info">{{ $stats['total_journals'] }}</h3>
-                    <p>Jurnal Aktif</p>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3 class="text-warning">{{ $stats['sinta5'] }}</h3>
+                        <p class="mb-0">SINTA 5</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3 class="text-danger">{{ $stats['internasional'] }}</h3>
+                        <p class="mb-0">INTERNASIONAL</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Filter Section -->
-        <div class="filter-card">
-            <h5 class="mb-3"><i class="bi bi-funnel"></i> Filter Artikel</h5>
+        <div class="filter-section">
+            <h5 class="mb-3"><i class="bi bi-funnel"></i> Cari Jurnal</h5>
             <form method="GET" action="{{ route('public.slot.info') }}">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Jurnal</label>
+                        <input type="text" name="search" class="form-control" placeholder="Cari nama jurnal atau rumpun ilmu..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-3">
                         <select name="journal_id" class="form-select">
                             <option value="">-- Semua Jurnal --</option>
                             @foreach($journals as $journal)
@@ -196,175 +320,141 @@
                             @endforeach
                         </select>
                     </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Slot</label>
-                        <select name="slot_id" class="form-select">
-                            <option value="">-- Semua Slot --</option>
-                            @foreach($slots as $slot)
-                                <option value="{{ $slot->id }}" {{ request('slot_id') == $slot->id ? 'selected' : '' }}>
-                                    {{ $slot->kode_slot }} - {{ $slot->journalMaster->nama_jurnal ?? '' }}
+                    <div class="col-md-3">
+                        <select name="indexasi" class="form-select">
+                            <option value="">-- Semua Indexasi --</option>
+                            @foreach($indexations as $idx)
+                                <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
+                                    {{ $idx }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Urutkan</label>
-                        <div class="input-group">
-                            <select name="sort_by" class="form-select">
-                                <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Tanggal</option>
-                                <option value="id_artikel" {{ request('sort_by') == 'id_artikel' ? 'selected' : '' }}>Kode Artikel</option>
-                                <option value="nama_penulis" {{ request('sort_by') == 'nama_penulis' ? 'selected' : '' }}>Penulis</option>
-                            </select>
-                            <select name="sort_order" class="form-select" style="max-width: 80px;">
-                                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>▼</option>
-                                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>▲</option>
-                            </select>
-                        </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
                     </div>
                 </div>
-                
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-funnel"></i> Terapkan Filter
-                    </button>
-                    <a href="{{ route('public.slot.info') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                @if(request()->hasAny(['search', 'journal_id', 'indexasi']))
+                <div class="mt-2">
+                    <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset Filter
                     </a>
                 </div>
+                @endif
             </form>
         </div>
 
-        <!-- Articles List -->
-        <div class="mb-3">
-            <h4 class="text-white">
-                <i class="bi bi-list-ul"></i> Daftar Artikel
-                <span class="badge bg-light text-dark ms-2">{{ $submissions->total() }} Artikel</span>
-            </h4>
-        </div>
+        <!-- Table Section -->
+        <div class="table-section">
+            <div class="table-responsive">
+                <table class="table journal-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">No</th>
+                            <th style="width: 15%;">Kode LOA</th>
+                            <th style="width: 35%;">Nama Jurnal</th>
+                            <th style="width: 15%;">Penerbit</th>
+                            <th style="width: 10%;" class="text-center">Jumlah Slot</th>
+                            <th style="width: 10%;" class="text-center">Slot Terpakai</th>
+                            <th style="width: 10%;" class="text-center">Sisa</th>
+                            <th style="width: 10%;" class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($slots as $index => $slot)
+                        <tr>
+                            <td class="text-center">{{ $slots->firstItem() + $index }}</td>
+                            <td>
+                                <strong class="text-primary">{{ $slot->kode_slot }}</strong>
+                                @if($slot->journalMaster && $slot->journalMaster->accreditation)
+                                    <br>
+                                    @php
+                                        $accreditation = $slot->journalMaster->accreditation;
+                                        $badgeClass = 'bg-success';
+                                        if (str_contains($accreditation, 'SINTA 4')) $badgeClass = 'bg-info';
+                                        elseif (str_contains($accreditation, 'SINTA 5')) $badgeClass = 'bg-warning';
+                                        elseif (str_contains($accreditation, 'INTERNASIONAL')) $badgeClass = 'bg-danger';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }} mt-1">
+                                        {{ $accreditation }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
+                                @if($slot->journalMaster)
+                                    <br><small class="text-muted">{{ $slot->journalMaster->rumpun_ilmu ?? '' }}</small>
+                                @endif
+                            </td>
+                            <td>{{ $slot->journalMaster->publisher ?? '-' }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-primary fs-6">{{ $slot->jumlah_slot }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info fs-6">{{ $slot->slot_terpakai }}</span>
+                            </td>
+                            <td class="text-center">
+                                @php
+                                    $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
+                                    $badgeClass = $sisa > 0 ? 'success' : 'secondary';
+                                @endphp
+                                <span class="badge bg-{{ $badgeClass }} fs-6">{{ $sisa }}</span>
+                            </td>
+                            <td class="text-center">
+                                @if($slot->slot_terpakai >= $slot->jumlah_slot)
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Penuh
+                                    </span>
+                                @else
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Tersedia
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <i class="bi bi-inbox fs-1 text-muted"></i>
+                                <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-        @forelse($submissions as $index => $submission)
-        <div class="article-card">
-            <div class="row align-items-center">
-                <div class="col-md-1 text-center mb-3 mb-md-0">
-                    <div class="article-number">{{ $submissions->firstItem() + $index }}</div>
+            <!-- Pagination -->
+            @if($slots->hasPages())
+            <div class="d-flex justify-content-between align-items-center px-3 pb-3">
+                <div class="text-muted">
+                    Menampilkan {{ $slots->firstItem() ?? 0 }} - {{ $slots->lastItem() ?? 0 }} dari {{ $slots->total() }} slot
                 </div>
-                <div class="col-md-11">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="info-label">
-                                <i class="bi bi-tag-fill"></i> Kode Artikel
-                            </div>
-                            <div class="info-value">
-                                <code class="fs-5 text-primary">{{ $submission->id_artikel ?? '-' }}</code>
-                            </div>
-                            
-                            <div class="info-label">
-                                <i class="bi bi-person-fill"></i> Nama Penulis
-                            </div>
-                            <div class="info-value">
-                                <strong>{{ $submission->nama_penulis ?? '-' }}</strong>
-                            </div>
-                            
-                            <div class="info-label">
-                                <i class="bi bi-calendar-check"></i> Slot Jurnal
-                            </div>
-                            <div class="info-value">
-                                @if($submission->journalSlot)
-                                    <span class="badge bg-primary">{{ $submission->journalSlot->kode_slot }}</span>
-                                    <small class="text-muted d-block mt-1">
-                                        Vol. {{ $submission->journalSlot->volume }}, 
-                                        No. {{ $submission->journalSlot->nomor }}, 
-                                        {{ $submission->journalSlot->bulan }} {{ $submission->journalSlot->tahun }}
-                                    </small>
-                                @else
-                                    -
-                                @endif
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <div class="info-label">
-                                <i class="bi bi-journal-text"></i> Judul Artikel
-                            </div>
-                            <div class="info-value">
-                                {{ $submission->judul_artikel ?? '-' }}
-                            </div>
-                            
-                            <div class="info-label">
-                                <i class="bi bi-journal-bookmark"></i> Nama Jurnal
-                            </div>
-                            <div class="info-value">
-                                @if($submission->journalSlot && $submission->journalSlot->journalMaster)
-                                    <strong>{{ $submission->journalSlot->journalMaster->nama_jurnal }}</strong>
-                                    @if($submission->journalSlot->journalMaster->accreditation)
-                                        <span class="badge bg-info ms-1">
-                                            {{ $submission->journalSlot->journalMaster->accreditation }}
-                                        </span>
-                                    @endif
-                                @else
-                                    -
-                                @endif
-                            </div>
-                            
-                            <div class="info-label">
-                                <i class="bi bi-link-45deg"></i> Link Publikasi
-                            </div>
-                            <div class="info-value">
-                                @if($submission->link_publikasi)
-                                    <a href="{{ $submission->link_publikasi }}" target="_blank" class="btn btn-success btn-sm">
-                                        <i class="bi bi-box-arrow-up-right"></i> Buka Link
-                                    </a>
-                                @else
-                                    <span class="text-muted">Belum tersedia</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    
-                    @if($submission->status)
-                    <div class="mt-2">
-                        <span class="badge bg-secondary">
-                            <i class="bi bi-info-circle"></i> Status: {{ $submission->status }}
-                        </span>
-                    </div>
-                    @endif
+                <div>
+                    {{ $slots->links() }}
                 </div>
             </div>
+            @endif
         </div>
-        @empty
-        <div class="article-card text-center py-5">
-            <i class="bi bi-inbox fs-1 text-muted"></i>
-            <p class="mt-3 text-muted">Belum ada artikel yang terdaftar</p>
-        </div>
-        @endforelse
-
-        <!-- Pagination -->
-        @if($submissions->hasPages())
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="text-white">
-                Menampilkan {{ $submissions->firstItem() ?? 0 }} - {{ $submissions->lastItem() ?? 0 }} dari {{ $submissions->total() }} artikel
-            </div>
-            <div>
-                {{ $submissions->links() }}
-            </div>
-        </div>
-        @endif
 
         <!-- Login Link -->
-        <div class="login-link">
+        <div class="login-section">
             <a href="{{ route('login') }}">
                 <i class="bi bi-box-arrow-in-right"></i> Login ke Sistem SIPERA
             </a>
         </div>
-        
+
         <!-- Footer -->
-        <div class="text-center mt-4">
-            <p class="text-white">
+        <div class="footer-section">
+            <p class="mb-1">
                 <small>
                     &copy; {{ date('Y') }} SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI
-                    <br>
+                </small>
+            </p>
+            <p>
+                <small>
                     Jl. Watunganten I No.1, Karangrawa, Batursari, Kec. Mranggen, Kabupaten Demak, Jawa Tengah 59567
                 </small>
             </p>

@@ -11,19 +11,32 @@ class PublicLoaController extends Controller
 {
     public function index(Request $request)
     {
-        // Get all submissions with slot and journal info
-        $query = Submission::with(['journalSlot.journalMaster'])
-            ->whereNotNull('journal_slot_id');
-        
-        // Filter by slot if specified
-        if ($request->filled('slot_id')) {
-            $query->where('journal_slot_id', $request->slot_id);
-        }
+        // Get slots with journal info and submission count
+        $query = JournalSlot::with(['journalMaster', 'submissions'])
+            ->select('journal_slots.*')
+            ->withCount('submissions');
         
         // Filter by journal if specified
         if ($request->filled('journal_id')) {
-            $query->whereHas('journalSlot', function($q) use ($request) {
-                $q->where('journal_master_id', $request->journal_id);
+            $query->where('journal_master_id', $request->journal_id);
+        }
+        
+        // Filter by indexation
+        if ($request->filled('indexasi')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('accreditation', $request->indexasi);
+            });
+        }
+        
+        // Search by journal name or code
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_slot', 'like', "%{$search}%")
+                  ->orWhereHas('journalMaster', function($q2) use ($search) {
+                      $q2->where('nama_jurnal', 'like', "%{$search}%")
+                         ->orWhere('rumpun_ilmu', 'like', "%{$search}%");
+                  });
             });
         }
         
@@ -32,24 +45,31 @@ class PublicLoaController extends Controller
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
         
-        $submissions = $query->paginate(20)->withQueryString();
+        $slots = $query->paginate(10)->withQueryString();
         
         // Get all journals for filter
-        $journals = \App\Models\JournalMaster::orderBy('nama_jurnal')->get();
-        
-        // Get all slots for filter
-        $slots = \App\Models\JournalSlot::with('journalMaster')
-            ->orderBy('kode_slot', 'desc')
+        $journals = JournalMaster::where('is_active', true)
+            ->orderBy('nama_jurnal')
             ->get();
         
-        // Statistics
+        // Get unique indexations
+        $indexations = JournalMaster::select('accreditation')
+            ->distinct()
+            ->whereNotNull('accreditation')
+            ->pluck('accreditation');
+        
+        // Statistics by indexation
         $stats = [
-            'total_submissions' => Submission::whereNotNull('journal_slot_id')->count(),
-            'total_slots' => \App\Models\JournalSlot::count(),
-            'total_journals' => \App\Models\JournalMaster::where('is_active', true)->count(),
+            'total_slots' => JournalSlot::count(),
+            'total_journals' => JournalMaster::where('is_active', true)->count(),
+            'slot_terisi' => Submission::whereNotNull('journal_slot_id')->count(),
+            'nasional' => JournalMaster::where('accreditation', 'NASIONAL')->count(),
+            'sinta4' => JournalMaster::where('accreditation', 'SINTA 4')->count(),
+            'sinta5' => JournalMaster::where('accreditation', 'SINTA 5')->count(),
+            'internasional' => JournalMaster::where('accreditation', 'INTERNASIONAL')->count(),
         ];
         
-        return view('public.slot-info', compact('submissions', 'journals', 'slots', 'stats'));
+        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats'));
     }
     
     public function show(JournalSlot $slot)
