@@ -453,7 +453,7 @@
 
         <!-- Login Link -->
         <div class="login-section">
-            <a href="{{ route('login') }}">
+            <a href="{{ route('login') }}" target="_blank">
                 <i class="bi bi-box-arrow-in-right"></i> Login ke Sistem SIPERA
             </a>
         </div>
