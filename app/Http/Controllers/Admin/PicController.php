@@ -106,9 +106,15 @@ class PicController extends Controller
 
             $created = $import->getCreatedCount();
             $updated = $import->getUpdatedCount();
+            $skipped = $import->getSkippedCount();
+            
+            $message = "Import berhasil! {$created} PIC baru ditambahkan, {$updated} PIC diupdate.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} baris dilewati karena data tidak valid (email tidak valid atau nama kosong).";
+            }
             
             return redirect()->route('admin.pics.index')
-                ->with('success', "Import berhasil! {$created} PIC baru ditambahkan, {$updated} PIC diupdate.");
+                ->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->route('admin.pics.index')
                 ->with('error', 'Import gagal: ' . $e->getMessage());

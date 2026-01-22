@@ -5,11 +5,15 @@ namespace App\Imports;
 use App\Models\Pic;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Maatwebsite\Excel\Validators\Failure;
 use Illuminate\Support\Str;
 
-class PicsImport implements ToModel, WithHeadingRow, WithValidation
+class PicsImport implements ToModel, WithHeadingRow, SkipsOnFailure
 {
+    use SkipsFailures;
+    
     protected $rowCount = 0;
     protected $updatedCount = 0;
     protected $createdCount = 0;
@@ -24,6 +28,15 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
         $email = $row['email'] ?? $row['Email'] ?? null;
         $phone = $row['telepon'] ?? $row['phone'] ?? $row['Telepon'] ?? $row['Phone'] ?? $row['no_hp'] ?? $row['No HP'] ?? null;
         $status = $row['status'] ?? $row['Status'] ?? $row['is_active'] ?? null;
+
+        // Clean up whitespace
+        $email = !empty($email) ? trim($email) : null;
+        
+        // Validate email format if provided
+        if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Skip rows with invalid email
+            return null;
+        }
 
         if (empty($name)) {
             return null;
@@ -76,18 +89,6 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
         ]);
     }
 
-    public function rules(): array
-    {
-        return [
-            '*.nama' => 'nullable|string|max:255',
-            '*.name' => 'nullable|string|max:255',
-            '*.username' => 'nullable|string|max:255',
-            '*.email' => 'nullable|email|max:255',
-            '*.telepon' => 'nullable|string|max:20',
-            '*.phone' => 'nullable|string|max:20',
-        ];
-    }
-
     public function getRowCount(): int
     {
         return $this->rowCount;
@@ -101,5 +102,10 @@ class PicsImport implements ToModel, WithHeadingRow, WithValidation
     public function getCreatedCount(): int
     {
         return $this->createdCount;
+    }
+    
+    public function getSkippedCount(): int
+    {
+        return count($this->failures());
     }
 }
