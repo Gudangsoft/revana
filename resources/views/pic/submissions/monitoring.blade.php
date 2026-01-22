@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Monitoring Proses Review')
-@section('page-title', 'Monitoring Proses Review')
+@section('title', 'Monitoring & Tugas Saya')
+@section('page-title', 'Monitoring & Tugas Saya')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -431,10 +431,25 @@
     </div>
 </div>
 
+@if(request('my_tasks') && isset($stats['urgent']) && $stats['urgent'] > 0)
+<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+        <div>
+            <h5 class="alert-heading mb-1">
+                <strong>{{ $stats['urgent'] }}</strong> Tugas Mendesak Memerlukan Perhatian Anda!
+            </h5>
+            <p class="mb-0 small">Tugas-tugas ini membutuhkan tindakan Anda segera untuk melanjutkan proses review.</p>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <!-- Filter Card -->
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center py-2">
-        <span style="font-size: 0.9rem;"><i class="bi bi-bar-chart"></i> Monitoring Proses Review</span>
+        <span style="font-size: 0.9rem;"><i class="bi bi-bar-chart"></i> Monitoring & Tugas Saya</span>
         <a href="{{ route('pic.submissions.index') }}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 8px;">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
@@ -442,6 +457,15 @@
     <div class="card-body py-2">
         <form method="GET" class="mb-2">
             <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small mb-0" style="font-size: 0.75rem;">&nbsp;</label>
+                    <div class="form-check" style="padding-top: 6px;">
+                        <input class="form-check-input" type="checkbox" name="my_tasks" id="myTasksFilter" value="1" {{ request('my_tasks') ? 'checked' : '' }} onchange="this.form.submit()">
+                        <label class="form-check-label" for="myTasksFilter" style="font-size: 0.8rem; font-weight: 600; color: #dc3545;">
+                            <i class="bi bi-person-check-fill"></i> Hanya Tugas Saya
+                        </label>
+                    </div>
+                </div>
                 <div class="col-md-2">
                     <label for="tanggal_dari" class="form-label small mb-0" style="font-size: 0.75rem;">Tanggal Dari</label>
                     <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}" style="font-size: 0.75rem; padding: 4px 8px;">
@@ -474,9 +498,10 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small mb-0" style="font-size: 0.75rem;">Cari</label>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari..." value="{{ request('search') }}" style="font-size: 0.75rem; padding: 4px 8px;">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Kode/Judul/Penulis" value="{{ request('search') }}" style="font-size: 0.75rem; padding: 4px 8px;">
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label small mb-0" style="font-size: 0.75rem;">&nbsp;</label>
                     <div class="btn-group btn-group-sm w-100" role="group">
                         <button type="submit" class="btn btn-primary" style="font-size: 0.75rem; padding: 4px 8px;">
                             <i class="bi bi-search"></i> Filter

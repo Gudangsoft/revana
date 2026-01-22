@@ -469,11 +469,14 @@ class JournalManagementController extends Controller
     {
         $picId = auth()->guard('pic')->id();
         
-        // Only show submissions assigned to current PIC
+        // Base query - show all submissions if not filtered
         $query = Submission::with(['journalSlot.journalMaster', 'marketing',
             'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 
-            'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
-            ->where(function($q) use ($picId) {
+            'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction']);
+        
+        // Filter by my tasks only
+        if ($request->filled('my_tasks')) {
+            $query->where(function($q) use ($picId) {
                 $q->where('created_by', $picId)
                   ->orWhere('petugas_submit_id', $picId)
                   ->orWhere('petugas_editor1_id', $picId)
@@ -485,6 +488,15 @@ class JournalManagementController extends Controller
                   ->orWhere('petugas_reviewer2_id', $picId)
                   ->orWhere('petugas_production_id', $picId);
             });
+        }
+        
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
         
         if ($request->filled('journal_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {
@@ -507,51 +519,71 @@ class JournalManagementController extends Controller
         $submissions = $query->latest()->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         
-        // Statistics - only for assigned submissions
+        // Statistics - based on filter
+        $statsQuery = Submission::query();
+        if ($request->filled('my_tasks')) {
+            $statsQuery->where(function($q) use ($picId) {
+                $q->where('created_by', $picId)
+                  ->orWhere('petugas_submit_id', $picId)
+                  ->orWhere('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_reviewer1_id', $picId)
+                  ->orWhere('petugas_reviewer2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId);
+            });
+        }
+        
         $stats = [
-            'new' => Submission::where('status', 'new')
-                ->where(function($q) use ($picId) {
-                    $q->where('created_by', $picId)
-                      ->orWhere('petugas_submit_id', $picId)
-                      ->orWhere('petugas_editor1_id', $picId)
-                      ->orWhere('petugas_author1_id', $picId)
-                      ->orWhere('petugas_editor2_id', $picId)
-                      ->orWhere('petugas_editor3_id', $picId)
-                      ->orWhere('petugas_author2_id', $picId)
-                      ->orWhere('petugas_reviewer1_id', $picId)
-                      ->orWhere('petugas_reviewer2_id', $picId)
-                      ->orWhere('petugas_production_id', $picId);
-                })
-                ->count(),
-            'in_progress' => Submission::where('status', 'in_progress')
-                ->where(function($q) use ($picId) {
-                    $q->where('created_by', $picId)
-                      ->orWhere('petugas_submit_id', $picId)
-                      ->orWhere('petugas_editor1_id', $picId)
-                      ->orWhere('petugas_author1_id', $picId)
-                      ->orWhere('petugas_editor2_id', $picId)
-                      ->orWhere('petugas_editor3_id', $picId)
-                      ->orWhere('petugas_author2_id', $picId)
-                      ->orWhere('petugas_reviewer1_id', $picId)
-                      ->orWhere('petugas_reviewer2_id', $picId)
-                      ->orWhere('petugas_production_id', $picId);
-                })
-                ->count(),
-            'published' => Submission::where('status', 'published')
-                ->where(function($q) use ($picId) {
-                    $q->where('created_by', $picId)
-                      ->orWhere('petugas_submit_id', $picId)
-                      ->orWhere('petugas_editor1_id', $picId)
-                      ->orWhere('petugas_author1_id', $picId)
-                      ->orWhere('petugas_editor2_id', $picId)
-                      ->orWhere('petugas_editor3_id', $picId)
-                      ->orWhere('petugas_author2_id', $picId)
-                      ->orWhere('petugas_reviewer1_id', $picId)
-                      ->orWhere('petugas_reviewer2_id', $picId)
-                      ->orWhere('petugas_production_id', $picId);
-                })
-                ->count(),
+            'total' => (clone $statsQuery)->count(),
+            'new' => (clone $statsQuery)->where('status', 'new')->count(),
+            'in_progress' => (clone $statsQuery)->whereNotIn('status', ['new', 'published', 'rejected'])->count(),
+            'published' => (clone $statsQuery)->where('status', 'published')->count(),
         ];
+        
+        // Count urgent tasks (tasks that require current PIC's action)
+        $urgentTasks = 0;
+        if ($request->filled('my_tasks')) {
+            $mySubmissions = Submission::where(function($q) use ($picId) {
+                $q->where('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_reviewer1_id', $picId)
+                  ->orWhere('petugas_reviewer2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId);
+            })->whereNotIn('status', ['PUBLISHED', 'published', 'rejected'])->get();
+            
+            $urgentMappings = [
+                'EDITOR1' => ['petugas_editor1_id'],
+                'AUTHOR1' => ['petugas_author1_id'],
+                'EDITOR2' => ['petugas_editor2_id'],
+                'EDITOR3' => ['petugas_editor3_id'],
+                'AUTHOR2' => ['petugas_author2_id'],
+                'REVIEWER1' => ['petugas_reviewer1_id'],
+                'REVIEWER2' => ['petugas_reviewer2_id'],
+                'PRODUCTION' => ['petugas_production_id'],
+            ];
+            
+            foreach ($mySubmissions as $task) {
+                $status = strtoupper($task->status);
+                foreach ($urgentMappings as $statusKey => $fields) {
+                    if (str_contains($status, $statusKey)) {
+                        foreach ($fields as $field) {
+                            if ($task->$field == $picId) {
+                                $urgentTasks++;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        $stats['urgent'] = $urgentTasks;
         
         return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats'));
     }

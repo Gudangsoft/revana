@@ -129,9 +129,9 @@
         <span>Dashboard</span>
     </a>
     
-    <a href="{{ route('pic.my-tasks.index') }}" class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}">
-        <i class="bi bi-list-task"></i>
-        <span>Tugas Saya</span>
+    <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring', 'pic.my-tasks.*') ? 'active' : '' }}">
+        <i class="bi bi-list-check"></i>
+        <span>Monitoring & Tugas Saya</span>
         @if($pendingTasks > 0)
             <span class="badge bg-danger">{{ $pendingTasks }}</span>
         @endif
@@ -171,11 +171,6 @@
     <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}">
         <i class="bi bi-file-earmark-text"></i>
         <span>Data Submit</span>
-    </a>
-    
-    <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring') ? 'active' : '' }}">
-        <i class="bi bi-graph-up-arrow"></i>
-        <span>Monitoring Proses</span>
     </a>
     
     <a href="{{ route('pic.accreditations.index') }}" class="nav-link {{ request()->routeIs('pic.accreditations.*') ? 'active' : '' }}">
