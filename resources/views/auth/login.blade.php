@@ -139,6 +139,9 @@
 
                             <div class="mt-3 text-center">
                                 <hr class="my-3">
+                                <a href="{{ route('public.slot.info') }}" class="btn btn-info w-100 mb-2">
+                                    <i class="bi bi-calendar-range"></i> Info Slot Jurnal
+                                </a>
                                 <a href="{{ route('reviewer-registration.form') }}" class="btn btn-success w-100 mb-2">
                                     <i class="bi bi-person-plus-fill"></i> Daftar sebagai Reviewer
                                 </a>
