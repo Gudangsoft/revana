@@ -12,52 +12,30 @@
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
-    overflow-y: auto;
-    max-height: calc(100vh - 380px);
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    position: relative;
+    overflow-y: visible;
+    max-height: 70vh;
+    scrollbar-width: thin;
+    scrollbar-color: #6c757d #dee2e6;
 }
 
-/* Hide default scrollbar, use custom one below */
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 0px;
-    width: 10px;
-    background: transparent;
-}
-    visibility: visible !important;
+    height: 14px;
+    width: 14px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-track {
-    background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
-    border-radius: 0;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
-    border-top: 1px solid #ced4da;
+    background: #dee2e6;
+    border-radius: 7px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #0d6efd, #0b5ed7);
-    border-radius: 10px;
-    border: 4px solid #dee2e6;
-    min-width: 100px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border-radius: 7px;
+    border: 2px solid #dee2e6;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #0b5ed7, #0a58ca);
-    cursor: grab;
-}
-
-.monitoring-scroll-wrapper::-webkit-scrollbar-thumb:active {
-    cursor: grabbing;
-}
-
-/* Firefox scrollbar */
-@supports (-moz-appearance:none) {
-    .monitoring-scroll-wrapper {
-        scrollbar-width: auto;
-        scrollbar-color: #0d6efd #dee2e6;
-    }
+    background: linear-gradient(135deg, #495057, #343a40);
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-corner {
@@ -141,8 +119,6 @@
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.8rem;
-    width: 100%;
-    table-layout: fixed;
 }
 
 .table-monitoring thead th {
@@ -154,8 +130,6 @@
     border: 1px solid #343a40;
     white-space: nowrap;
     padding: 6px 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
@@ -177,98 +151,33 @@
 }
 
 /* Sticky first column (Kode Submit) */
-.table-monitoring th.sticky-col-1,
-.table-monitoring td.sticky-col-1 {
+.table-monitoring th.sticky-first,
+.table-monitoring td.sticky-first {
     position: sticky;
     left: 0;
     z-index: 2;
     background: #fff;
     min-width: 120px;
-    max-width: 120px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
-.table-monitoring thead th.sticky-col-1 {
+.table-monitoring thead th.sticky-first {
     z-index: 5;
     background: #212529 !important;
 }
 
 /* Sticky second column (ID Artikel) */
-.table-monitoring th.sticky-col-2,
-.table-monitoring td.sticky-col-2 {
+.table-monitoring th.sticky-second,
+.table-monitoring td.sticky-second {
     position: sticky;
     left: 120px;
     z-index: 2;
     background: #fff;
     min-width: 80px;
-    max-width: 80px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
-.table-monitoring thead th.sticky-col-2 {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Sticky third column (Judul) */
-.table-monitoring th.sticky-col-3,
-.table-monitoring td.sticky-col-3 {
-    position: sticky;
-    left: 200px;
-    z-index: 2;
-    background: #fff;
-    min-width: 150px;
-    max-width: 150px;
-}
-
-.table-monitoring thead th.sticky-col-3 {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Sticky fourth column (Link) */
-.table-monitoring th.sticky-col-4,
-.table-monitoring td.sticky-col-4 {
-    position: sticky;
-    left: 350px;
-    z-index: 2;
-    background: #fff;
-    min-width: 50px;
-    max-width: 50px;
-}
-
-.table-monitoring thead th.sticky-col-4 {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Sticky fifth column (Penulis) */
-.table-monitoring th.sticky-col-5,
-.table-monitoring td.sticky-col-5 {
-    position: sticky;
-    left: 400px;
-    z-index: 2;
-    background: #fff;
-    min-width: 100px;
-    max-width: 100px;
-}
-
-.table-monitoring thead th.sticky-col-5 {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Sticky sixth column (No HP) - last sticky with shadow */
-.table-monitoring th.sticky-col-6,
-.table-monitoring td.sticky-col-6 {
-    position: sticky;
-    left: 500px;
-    z-index: 2;
-    background: #fff;
-    min-width: 60px;
-    max-width: 60px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.2);
-}
-
-.table-monitoring thead th.sticky-col-6 {
+.table-monitoring thead th.sticky-second {
     z-index: 5;
     background: #212529 !important;
 }
@@ -283,12 +192,8 @@
     background-color: #e8f4fd !important;
 }
 
-.table-monitoring tbody tr:hover td.sticky-col-1,
-.table-monitoring tbody tr:hover td.sticky-col-2,
-.table-monitoring tbody tr:hover td.sticky-col-3,
-.table-monitoring tbody tr:hover td.sticky-col-4,
-.table-monitoring tbody tr:hover td.sticky-col-5,
-.table-monitoring tbody tr:hover td.sticky-col-6 {
+.table-monitoring tbody tr:hover td.sticky-first,
+.table-monitoring tbody tr:hover td.sticky-second {
     background-color: #e8f4fd !important;
 }
 
@@ -297,12 +202,8 @@
     background-color: #f8f9fa;
 }
 
-.table-monitoring tbody tr:nth-child(even) td.sticky-col-1,
-.table-monitoring tbody tr:nth-child(even) td.sticky-col-2,
-.table-monitoring tbody tr:nth-child(even) td.sticky-col-3,
-.table-monitoring tbody tr:nth-child(even) td.sticky-col-4,
-.table-monitoring tbody tr:nth-child(even) td.sticky-col-5,
-.table-monitoring tbody tr:nth-child(even) td.sticky-col-6 {
+.table-monitoring tbody tr:nth-child(even) td.sticky-first,
+.table-monitoring tbody tr:nth-child(even) td.sticky-second {
     background-color: #f8f9fa;
 }
 
@@ -540,12 +441,12 @@
                     <table class="table table-monitoring table-bordered">
                         <thead class="table-dark">
                             <tr>
-                                <th rowspan="2" class="align-middle sticky-col-1">Kode Submit</th>
-                                <th rowspan="2" class="align-middle sticky-col-2">ID Artikel</th>
-                                <th rowspan="2" class="align-middle sticky-col-3">Judul</th>
-                                <th rowspan="2" class="align-middle sticky-col-4">Link</th>
-                                <th rowspan="2" class="align-middle sticky-col-5">Penulis</th>
-                                <th rowspan="2" class="align-middle sticky-col-6">No HP</th>
+                                <th rowspan="2" class="align-middle sticky-first">Kode Submit</th>
+                                <th rowspan="2" class="align-middle sticky-second">ID Artikel</th>
+                                <th rowspan="2" class="align-middle">Judul</th>
+                                <th rowspan="2" class="align-middle">Link</th>
+                                <th rowspan="2" class="align-middle">Penulis</th>
+                                <th rowspan="2" class="align-middle">No HP</th>
                                 <th colspan="2" class="text-center">Author Access</th>
                                 <th rowspan="2" class="align-middle">PIC Marketing</th>
                                 <th rowspan="2" class="align-middle" id="colSubmit">Petugas Submit</th>
@@ -595,22 +496,22 @@
                         <tbody>
                             @forelse($submissions as $s)
                             <tr>
-                                <td class="sticky-col-1">
+                                <td class="sticky-first">
                                     <a href="{{ route('pic.submissions.show', $s) }}" class="text-decoration-none" title="Klik untuk detail">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
                                 </td>
-                                <td class="sticky-col-2">{{ $s->id_artikel }}</td>
-                                <td class="sticky-col-3" title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 20) }}</td>
-                                <td class="sticky-col-4 text-center">
+                                <td class="sticky-second">{{ $s->id_artikel }}</td>
+                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>
+                                <td class="text-center">
                                     @if($s->link_artikel)
                                         <a href="{{ $s->link_artikel }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
                                     @else
                                         -
                                     @endif
                                 </td>
-                                <td class="sticky-col-5">{{ Str::limit($s->nama_penulis, 12) }}</td>
-                                <td class="sticky-col-6">
+                                <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
+                                <td>
                                     @if($s->no_hp_penulis)
                                         @php
                                             $waNumber = preg_replace('/[^0-9]/', '', $s->no_hp_penulis);
