@@ -1,4 +1,80 @@
 <!-- PIC Sidebar -->
+<style>
+    .sidebar-section-header {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 12px 20px 8px;
+        margin-top: 8px;
+        color: #6c757d;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .sidebar-section-header i {
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    .nav-link {
+        padding: 10px 20px;
+        color: #495057;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-left: 3px solid transparent;
+        font-size: 0.9rem;
+    }
+    
+    .nav-link i {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+        opacity: 0.8;
+    }
+    
+    .nav-link:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+        border-left-color: #0d6efd;
+        text-decoration: none;
+    }
+    
+    .nav-link:hover i {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    .nav-link.active {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+        font-weight: 600;
+        border-left-color: #0d6efd;
+    }
+    
+    .nav-link.active i {
+        opacity: 1;
+        color: #0d6efd;
+    }
+    
+    .nav-link .badge {
+        margin-left: auto;
+        font-size: 0.7rem;
+        padding: 3px 7px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    
+    .sidebar-divider {
+        margin: 12px 20px;
+        border-top: 1px solid #dee2e6;
+        opacity: 0.5;
+    }
+</style>
+
 <nav class="nav flex-column">
     @php
         $picUser = Auth::guard('pic')->user();
@@ -41,58 +117,87 @@
         }
         $totalPoints = $picUser ? $picUser->total_points : 0;
     @endphp
-    <h6 class="px-3 py-2 text-muted text-uppercase small">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </h6>
+    
+    <!-- Dashboard Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+    </div>
+    
     <a href="{{ route('pic.dashboard') }}" class="nav-link {{ request()->routeIs('pic.dashboard', 'pic.author.dashboard') ? 'active' : '' }}">
-        <i class="bi bi-house"></i> Dashboard
+        <i class="bi bi-house-door"></i>
+        <span>Dashboard</span>
     </a>
+    
     <a href="{{ route('pic.author.create') }}" class="nav-link {{ request()->routeIs('pic.author.create') ? 'active' : '' }}">
-        <i class="bi bi-plus-circle"></i> Input Artikel Baru
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Input Artikel Baru</span>
     </a>
+    
     <a href="{{ route('pic.my-tasks.index') }}" class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}">
-        <i class="bi bi-list-task"></i> Tugas Saya
+        <i class="bi bi-list-task"></i>
+        <span>Tugas Saya</span>
         @if($pendingTasks > 0)
-            <span class="badge bg-danger ms-1">{{ $pendingTasks }}</span>
+            <span class="badge bg-danger">{{ $pendingTasks }}</span>
         @endif
     </a>
+    
     <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}">
-        <i class="bi bi-trophy"></i> Point Saya
+        <i class="bi bi-trophy-fill"></i>
+        <span>Point Saya</span>
         @if($totalPoints > 0)
-            <span class="badge bg-success ms-1">{{ number_format($totalPoints) }}</span>
+            <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
         @endif
     </a>
     
-    <hr class="mx-3">
+    <hr class="sidebar-divider">
     
-    <h6 class="px-3 py-2 text-muted text-uppercase small">
-        <i class="bi bi-journal-bookmark"></i> Pengelolaan Jurnal
-    </h6>
+    <!-- Pengelolaan Jurnal Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-journal-bookmark-fill"></i>
+        <span>Pengelolaan Jurnal</span>
+    </div>
+    
     <a href="{{ route('pic.journals.index') }}" class="nav-link {{ request()->routeIs('pic.journals.*') ? 'active' : '' }}">
-        <i class="bi bi-journal-text"></i> Data Jurnal
+        <i class="bi bi-journal-text"></i>
+        <span>Data Jurnal</span>
     </a>
+    
     <a href="{{ route('pic.journal-slots.index') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.index', 'pic.journal-slots.create', 'pic.journal-slots.edit') ? 'active' : '' }}">
-        <i class="bi bi-calendar3"></i> Data Slot
+        <i class="bi bi-calendar3"></i>
+        <span>Data Slot</span>
     </a>
+    
     <a href="{{ route('pic.journal-slots.monitoring') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.monitoring') ? 'active' : '' }}">
-        <i class="bi bi-bar-chart"></i> Monitoring Slot
+        <i class="bi bi-bar-chart-line"></i>
+        <span>Monitoring Slot</span>
     </a>
+    
     <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}">
-        <i class="bi bi-file-earmark-plus"></i> Data Submit
+        <i class="bi bi-file-earmark-text"></i>
+        <span>Data Submit</span>
     </a>
+    
     <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring') ? 'active' : '' }}">
-        <i class="bi bi-graph-up"></i> Monitoring Proses
+        <i class="bi bi-graph-up-arrow"></i>
+        <span>Monitoring Proses</span>
     </a>
+    
     <a href="{{ route('pic.accreditations.index') }}" class="nav-link {{ request()->routeIs('pic.accreditations.*') ? 'active' : '' }}">
-        <i class="bi bi-award"></i> Akreditasi
+        <i class="bi bi-award-fill"></i>
+        <span>Akreditasi</span>
     </a>
     
-    <hr class="mx-3">
+    <hr class="sidebar-divider">
     
-    <h6 class="px-3 py-2 text-muted text-uppercase small">
-        <i class="bi bi-people"></i> Tim
-    </h6>
+    <!-- Tim Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-people-fill"></i>
+        <span>Tim</span>
+    </div>
+    
     <a href="{{ route('pic.reviewers.index') }}" class="nav-link {{ request()->routeIs('pic.reviewers.*') ? 'active' : '' }}">
-        <i class="bi bi-person-check"></i> Reviewer
+        <i class="bi bi-person-check-fill"></i>
+        <span>Reviewer</span>
     </a>
 </nav>
