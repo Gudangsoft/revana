@@ -448,11 +448,17 @@
                             </td>
                             <td class="text-center">
                                 @if($s->petugas_editor2_id == $currentPicId)
-                                    <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                            onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
-                                            title="Klik untuk toggle validasi">
-                                        <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                    </button>
+                                    @if(!$s->editor1_valid)
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled onclick="alert('Ada tugas lain yang belum dikerjakan!')">
+                                            <i class="bi bi-circle"></i>
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
+                                                title="Klik untuk toggle validasi">
+                                            <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @endif
                                 @else
                                     {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                 @endif
@@ -492,11 +498,17 @@
                             <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
                             <td class="text-center">
                                 @if($s->petugas_reviewer1_id == $currentPicId)
-                                    <button type="button" class="btn btn-sm {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                            onclick="toggleValid(this, {{ $s->id }}, 'reviewer1')"
-                                            title="Klik untuk toggle validasi">
-                                        <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                    </button>
+                                    @if(!$s->editor2_valid)
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled onclick="alert('Ada tugas lain yang belum dikerjakan!')">
+                                            <i class="bi bi-circle"></i>
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                onclick="toggleValid(this, {{ $s->id }}, 'reviewer1')"
+                                                title="Klik untuk toggle validasi">
+                                            <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @endif
                                 @else
                                     {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                 @endif
