@@ -3,8 +3,6 @@
 @section('title', 'Tugas Saya')
 @section('page-title', 'Tugas Saya')
 
-@section('sidebar-class', 'auto-collapse')
-
 @section('sidebar')
     @include('pic.partials.sidebar')
 @endsection
@@ -67,6 +65,44 @@
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-corner {
     background: #dee2e6;
+}
+
+/* Custom Scrollbar Container */
+.custom-scrollbar-container {
+    margin-top: 8px;
+    padding: 0 10px;
+}
+
+.custom-scrollbar-track {
+    height: 16px;
+    background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    position: relative;
+    cursor: pointer;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.custom-scrollbar-thumb {
+    height: 14px;
+    background: linear-gradient(180deg, #0d6efd, #0b5ed7);
+    border-radius: 7px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 60px;
+    cursor: grab;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+
+.custom-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #0b5ed7, #0a58ca);
+}
+
+.custom-scrollbar-thumb:active {
+    cursor: grabbing;
+    background: linear-gradient(180deg, #0a58ca, #084298);
 }
 
 /* Credential display */
@@ -738,6 +774,13 @@
                     </table>
                 </div>
 
+                <!-- Custom Horizontal Scrollbar -->
+                <div class="custom-scrollbar-container">
+                    <div class="custom-scrollbar-track">
+                        <div class="custom-scrollbar-thumb" id="customScrollThumb"></div>
+                    </div>
+                </div>
+
                 <!-- Pagination -->
                 <div class="mt-3">
                     {{ $submissions->links() }}
@@ -890,6 +933,98 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial state
     updateScrollPosition();
+    
+    // Custom Scrollbar Logic
+    const customThumb = document.getElementById('customScrollThumb');
+    const customTrack = customThumb.parentElement;
+    
+    function updateCustomScrollbar() {
+        const scrollLeft = wrapper.scrollLeft;
+        const scrollWidth = wrapper.scrollWidth;
+        const clientWidth = wrapper.clientWidth;
+        const trackWidth = customTrack.offsetWidth;
+        
+        // Calculate thumb width proportional to visible area
+        const thumbWidth = Math.max(60, (clientWidth / scrollWidth) * trackWidth);
+        customThumb.style.width = thumbWidth + 'px';
+        
+        // Calculate thumb position
+        const maxScrollLeft = scrollWidth - clientWidth;
+        const maxThumbLeft = trackWidth - thumbWidth;
+        const thumbLeft = maxScrollLeft > 0 ? (scrollLeft / maxScrollLeft) * maxThumbLeft : 0;
+        customThumb.style.left = thumbLeft + 'px';
+    }
+    
+    // Update custom scrollbar when table scrolls
+    wrapper.addEventListener('scroll', updateCustomScrollbar);
+    
+    // Drag custom scrollbar thumb
+    let isDragging = false;
+    let startX = 0;
+    let startLeft = 0;
+    
+    customThumb.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startLeft = parseFloat(customThumb.style.left) || 0;
+        customThumb.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - startX;
+        const trackWidth = customTrack.offsetWidth;
+        const thumbWidth = customThumb.offsetWidth;
+        const maxThumbLeft = trackWidth - thumbWidth;
+        
+        let newLeft = startLeft + deltaX;
+        newLeft = Math.max(0, Math.min(newLeft, maxThumbLeft));
+        
+        customThumb.style.left = newLeft + 'px';
+        
+        // Sync table scroll
+        const scrollWidth = wrapper.scrollWidth;
+        const clientWidth = wrapper.clientWidth;
+        const maxScrollLeft = scrollWidth - clientWidth;
+        const scrollLeft = maxThumbLeft > 0 ? (newLeft / maxThumbLeft) * maxScrollLeft : 0;
+        wrapper.scrollLeft = scrollLeft;
+    });
+    
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            customThumb.style.cursor = 'grab';
+        }
+    });
+    
+    // Click on track to jump
+    customTrack.addEventListener('click', function(e) {
+        if (e.target === customThumb) return;
+        
+        const trackRect = customTrack.getBoundingClientRect();
+        const clickX = e.clientX - trackRect.left;
+        const trackWidth = customTrack.offsetWidth;
+        const thumbWidth = customThumb.offsetWidth;
+        
+        let newLeft = clickX - (thumbWidth / 2);
+        newLeft = Math.max(0, Math.min(newLeft, trackWidth - thumbWidth));
+        
+        customThumb.style.left = newLeft + 'px';
+        
+        // Sync table scroll
+        const scrollWidth = wrapper.scrollWidth;
+        const clientWidth = wrapper.clientWidth;
+        const maxScrollLeft = scrollWidth - clientWidth;
+        const maxThumbLeft = trackWidth - thumbWidth;
+        const scrollLeft = maxThumbLeft > 0 ? (newLeft / maxThumbLeft) * maxScrollLeft : 0;
+        wrapper.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    });
+    
+    // Initial custom scrollbar state
+    updateCustomScrollbar();
+    window.addEventListener('resize', updateCustomScrollbar);
 });
 </script>
 @endsection
