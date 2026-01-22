@@ -42,6 +42,13 @@
                 </div>
             </div>
             <div class="card-body">
+                <form method="GET" class="mb-3 d-flex gap-2">
+                    <input type="text" name="search" class="form-control" placeholder="Cari Nama, Email, atau Telepon" value="{{ request('search') }}" style="max-width:300px">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Cari</button>
+                    @if(request('search'))
+                    <a href="{{ route('admin.pics.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Reset</a>
+                    @endif
+                </form>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
