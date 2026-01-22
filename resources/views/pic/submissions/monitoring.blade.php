@@ -740,9 +740,23 @@ function updateCredential(element) {
     });
 }
 
+// Toast notification
+function showToast(message, type = 'success') {
+    let toast = document.createElement('div');
+    toast.className = 'position-fixed top-0 end-0 p-3';
+    toast.style.zIndex = 9999;
+    toast.innerHTML = `<div class="toast align-items-center text-bg-${type} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2000);
+}
+
 // Toggle Valid Function
 function toggleValid(button, submissionId, stage) {
-    alert('Toggle valid clicked: ' + submissionId + ' - ' + stage); // DEBUG
     // Show loading
     const icon = button.querySelector('i');
     const originalClass = icon.className;
@@ -763,28 +777,32 @@ function toggleValid(button, submissionId, stage) {
     .then(response => response.json())
     .then(data => {
         button.disabled = false;
-        
         if (data.success) {
             // Update button state
             if (data.valid) {
                 button.classList.remove('btn-outline-secondary');
                 button.classList.add('btn-success');
                 icon.className = 'bi bi-check-circle-fill';
+                button.style.borderColor = '#198754';
+                showToast('Validasi berhasil!', 'success');
             } else {
                 button.classList.remove('btn-success');
                 button.classList.add('btn-outline-secondary');
                 icon.className = 'bi bi-circle';
+                button.style.borderColor = '#dc3545';
+                showToast('Validasi dibatalkan!', 'danger');
             }
+            setTimeout(() => { button.style.borderColor = ''; }, 1200);
         } else {
             icon.className = originalClass;
-            alert('API gagal: ' + (data.message || 'Gagal toggle validasi'));
+            showToast(data.message || 'Gagal toggle validasi', 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
         icon.className = originalClass;
         button.disabled = false;
-        alert('Terjadi kesalahan JS/fetch: ' + error);
+        showToast('Terjadi kesalahan saat toggle validasi', 'danger');
     });
 }
 </script>
