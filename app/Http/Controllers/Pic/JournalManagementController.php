@@ -452,9 +452,24 @@ class JournalManagementController extends Controller
 
     public function submissionsMonitoring(Request $request)
     {
+        $picId = auth()->guard('pic')->id();
+        
+        // Only show submissions assigned to current PIC
         $query = Submission::with(['journalSlot.journalMaster', 
             'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor1', 'petugasAuthor2', 
-            'petugasReviewer1', 'petugasReviewer2', 'petugasProduction']);
+            'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
+            ->where(function($q) use ($picId) {
+                $q->where('created_by', $picId)
+                  ->orWhere('petugas_submit_id', $picId)
+                  ->orWhere('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_reviewer1_id', $picId)
+                  ->orWhere('petugas_reviewer2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId);
+            });
         
         if ($request->filled('journal_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {
@@ -477,11 +492,50 @@ class JournalManagementController extends Controller
         $submissions = $query->latest()->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         
-        // Statistics
+        // Statistics - only for assigned submissions
         $stats = [
-            'new' => Submission::where('status', 'new')->count(),
-            'in_progress' => Submission::where('status', 'in_progress')->count(),
-            'published' => Submission::where('status', 'published')->count(),
+            'new' => Submission::where('status', 'new')
+                ->where(function($q) use ($picId) {
+                    $q->where('created_by', $picId)
+                      ->orWhere('petugas_submit_id', $picId)
+                      ->orWhere('petugas_editor1_id', $picId)
+                      ->orWhere('petugas_author1_id', $picId)
+                      ->orWhere('petugas_editor2_id', $picId)
+                      ->orWhere('petugas_editor3_id', $picId)
+                      ->orWhere('petugas_author2_id', $picId)
+                      ->orWhere('petugas_reviewer1_id', $picId)
+                      ->orWhere('petugas_reviewer2_id', $picId)
+                      ->orWhere('petugas_production_id', $picId);
+                })
+                ->count(),
+            'in_progress' => Submission::where('status', 'in_progress')
+                ->where(function($q) use ($picId) {
+                    $q->where('created_by', $picId)
+                      ->orWhere('petugas_submit_id', $picId)
+                      ->orWhere('petugas_editor1_id', $picId)
+                      ->orWhere('petugas_author1_id', $picId)
+                      ->orWhere('petugas_editor2_id', $picId)
+                      ->orWhere('petugas_editor3_id', $picId)
+                      ->orWhere('petugas_author2_id', $picId)
+                      ->orWhere('petugas_reviewer1_id', $picId)
+                      ->orWhere('petugas_reviewer2_id', $picId)
+                      ->orWhere('petugas_production_id', $picId);
+                })
+                ->count(),
+            'published' => Submission::where('status', 'published')
+                ->where(function($q) use ($picId) {
+                    $q->where('created_by', $picId)
+                      ->orWhere('petugas_submit_id', $picId)
+                      ->orWhere('petugas_editor1_id', $picId)
+                      ->orWhere('petugas_author1_id', $picId)
+                      ->orWhere('petugas_editor2_id', $picId)
+                      ->orWhere('petugas_editor3_id', $picId)
+                      ->orWhere('petugas_author2_id', $picId)
+                      ->orWhere('petugas_reviewer1_id', $picId)
+                      ->orWhere('petugas_reviewer2_id', $picId)
+                      ->orWhere('petugas_production_id', $picId);
+                })
+                ->count(),
         ];
         
         return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats'));
@@ -503,7 +557,7 @@ class JournalManagementController extends Controller
         $lastViewed = session('pic_tasks_last_viewed_' . $picId);
         
         // Get all submissions where current PIC is assigned as petugas
-        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit', 'petugasEditor1', 'petugasAuthor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor2', 'petugasProduction'])
+        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit', 'petugasEditor1', 'petugasAuthor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
             ->where(function($q) use ($picId) {
                 $q->where('created_by', $picId)
                   ->orWhere('petugas_submit_id', $picId)
@@ -512,6 +566,8 @@ class JournalManagementController extends Controller
                   ->orWhere('petugas_editor2_id', $picId)
                   ->orWhere('petugas_editor3_id', $picId)
                   ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_reviewer1_id', $picId)
+                  ->orWhere('petugas_reviewer2_id', $picId)
                   ->orWhere('petugas_production_id', $picId);
             });
         
@@ -540,6 +596,8 @@ class JournalManagementController extends Controller
                   ->orWhere('petugas_editor2_id', $picId)
                   ->orWhere('petugas_editor3_id', $picId)
                   ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_reviewer1_id', $picId)
+                  ->orWhere('petugas_reviewer2_id', $picId)
                   ->orWhere('petugas_production_id', $picId);
             });
         };
