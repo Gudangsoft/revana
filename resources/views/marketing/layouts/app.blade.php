@@ -96,7 +96,10 @@
                 <a href="{{ route('marketing.dashboard') }}" class="nav-link {{ $currentRoute == 'marketing.dashboard' ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
-                <a href="{{ route('marketing.submissions') }}" class="nav-link {{ $currentRoute == 'marketing.submissions' ? 'active' : '' }}">
+                <a href="{{ route('marketing.submissions.create') }}" class="nav-link {{ $currentRoute == 'marketing.submissions.create' ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle"></i> Submit Artikel
+                </a>
+                <a href="{{ route('marketing.submissions') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && $currentRoute != 'marketing.submissions.create' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i> Artikel Saya
                 </a>
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">

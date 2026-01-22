@@ -455,7 +455,7 @@ class JournalManagementController extends Controller
         $picId = auth()->guard('pic')->id();
         
         // Only show submissions assigned to current PIC
-        $query = Submission::with(['journalSlot.journalMaster', 
+        $query = Submission::with(['journalSlot.journalMaster', 'marketing',
             'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 
             'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
             ->where(function($q) use ($picId) {

@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Models\Submission;
+use App\Models\JournalMaster;
+use App\Models\JournalSlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -134,5 +137,104 @@ class DashboardController extends Controller
             ->paginate(20);
         
         return view('marketing.points', compact('marketing', 'pointHistories'));
+    }
+
+    /**
+     * Show Create Submission Form
+     */
+    public function createSubmission()
+    {
+        $marketing = Auth::guard('marketing')->user();
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $slots = JournalSlot::with('journalMaster')
+            ->where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date', 'desc')
+            ->get();
+        
+        return view('marketing.create-submission', compact('marketing', 'journals', 'slots'));
+    }
+
+    /**
+     * Store New Submission
+     */
+    public function storeSubmission(Request $request)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $request->validate([
+            'journal_slot_id' => 'required|exists:journal_slots,id',
+            'judul_artikel' => 'required|string|max:500',
+            'link_artikel' => 'required|url',
+            'nama_penulis' => 'required|string|max:255',
+            'no_hp_penulis' => 'nullable|string|max:20',
+            'username_author' => 'nullable|string|max:100',
+            'password_author' => 'nullable|string|max:100',
+        ]);
+        
+        // Get slot info
+        $slot = JournalSlot::findOrFail($request->journal_slot_id);
+        
+        // Generate kode submit
+        $lastSubmission = Submission::where('kode_submit', 'like', 'SUB' . date('Y') . '%')
+            ->orderBy('kode_submit', 'desc')
+            ->first();
+        
+        if ($lastSubmission) {
+            $lastNumber = (int) substr($lastSubmission->kode_submit, 7);
+            $newNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '010001';
+        }
+        
+        $kodeSubmit = 'SUB' . date('Y') . $newNumber;
+        
+        // Create submission
+        $submission = Submission::create([
+            'kode_submit' => $kodeSubmit,
+            'journal_slot_id' => $request->journal_slot_id,
+            'marketing_id' => $marketing->id,
+            'judul_artikel' => $request->judul_artikel,
+            'link_artikel' => $request->link_artikel,
+            'nama_penulis' => $request->nama_penulis,
+            'no_hp_penulis' => $request->no_hp_penulis,
+            'username_author' => $request->username_author,
+            'password_author' => $request->password_author,
+            'tanggal_submit' => now(),
+            'status' => 'SUBMITTED',
+        ]);
+        
+        return redirect()
+            ->route('marketing.submissions.show', $submission)
+            ->with('success', 'Artikel berhasil disubmit! Kode: ' . $kodeSubmit);
+    }
+
+    /**
+     * Show Submission Detail
+     */
+    public function showSubmission(Submission $submission)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        // Check if this submission belongs to this marketing
+        if ($submission->marketing_id != $marketing->id) {
+            abort(403, 'Unauthorized');
+        }
+        
+        $submission->load([
+            'journalSlot.journalMaster',
+            'petugasSubmit',
+            'petugasEditor1',
+            'petugasAuthor1',
+            'petugasEditor2',
+            'petugasReviewer1',
+            'petugasReviewer2',
+            'petugasEditor3',
+            'petugasAuthor2',
+            'petugasProduction'
+        ]);
+        
+        return view('marketing.show-submission', compact('marketing', 'submission'));
     }
 }

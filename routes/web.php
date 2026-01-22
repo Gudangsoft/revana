@@ -362,6 +362,9 @@ Route::prefix('marketing')->group(function () {
         Route::post('/logout', [MarketingDashboardController::class, 'logout'])->name('marketing.logout');
         Route::get('/dashboard', [MarketingDashboardController::class, 'dashboard'])->name('marketing.dashboard');
         Route::get('/submissions', [MarketingDashboardController::class, 'submissions'])->name('marketing.submissions');
+        Route::get('/submissions/create', [MarketingDashboardController::class, 'createSubmission'])->name('marketing.submissions.create');
+        Route::post('/submissions', [MarketingDashboardController::class, 'storeSubmission'])->name('marketing.submissions.store');
+        Route::get('/submissions/{submission}', [MarketingDashboardController::class, 'showSubmission'])->name('marketing.submissions.show');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
     });
 });

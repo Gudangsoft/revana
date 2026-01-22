@@ -5,9 +5,14 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
-        <i class="bi bi-graph-up"></i> Monitoring Artikel
+        <i class="bi bi-file-earmark-text"></i> Artikel Saya
     </h4>
-    <span class="badge bg-primary fs-6">Total: {{ $submissions->total() }} artikel</span>
+    <div>
+        <a href="{{ route('marketing.submissions.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Submit Artikel Baru
+        </a>
+        <span class="badge bg-secondary fs-6 ms-2">Total: {{ $submissions->total() }} artikel</span>
+    </div>
 </div>
 
 <!-- Filter -->
@@ -94,12 +99,19 @@
 <div class="card mb-3 border-{{ $borderColor }}">
     <div class="card-header bg-{{ $borderColor }} bg-opacity-10 d-flex justify-content-between align-items-center">
         <div>
-            <code class="bg-white px-2 py-1 rounded me-2">{{ $submission->kode_submit }}</code>
-            <strong>{{ Str::limit($submission->judul_artikel, 50) }}</strong>
+            <a href="{{ route('marketing.submissions.show', $submission) }}" class="text-decoration-none text-dark">
+                <code class="bg-white px-2 py-1 rounded me-2">{{ $submission->kode_submit }}</code>
+                <strong>{{ Str::limit($submission->judul_artikel, 50) }}</strong>
+            </a>
         </div>
-        <span class="badge bg-{{ $borderColor }} fs-6">
-            <i class="bi {{ $currentStep['icon'] }}"></i> {{ $currentStep['label'] }}
-        </span>
+        <div>
+            <a href="{{ route('marketing.submissions.show', $submission) }}" class="btn btn-sm btn-outline-primary me-2">
+                <i class="bi bi-eye"></i> Detail
+            </a>
+            <span class="badge bg-{{ $borderColor }} fs-6">
+                <i class="bi {{ $currentStep['icon'] }}"></i> {{ $currentStep['label'] }}
+            </span>
+        </div>
     </div>
     <div class="card-body">
         <div class="row mb-3">
