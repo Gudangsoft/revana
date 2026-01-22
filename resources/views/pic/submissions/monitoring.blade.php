@@ -361,55 +361,55 @@
 
 @section('content')
 <!-- Statistics Cards -->
-<div class="row mb-4">
+<div class="row mb-3">
     <div class="col-md-3">
         <div class="card bg-primary text-white">
-            <div class="card-body">
+            <div class="card-body py-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-subtitle mb-1">Total Submit</h6>
-                        <h2 class="card-title mb-0">{{ $stats['total'] ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-0" style="font-size: 0.75rem;">Total Submit</h6>
+                        <h3 class="card-title mb-0" style="font-size: 1.5rem;">{{ $stats['total'] ?? 0 }}</h3>
                     </div>
-                    <i class="bi bi-file-earmark-text fs-1 opacity-50"></i>
+                    <i class="bi bi-file-earmark-text fs-3 opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-secondary text-white">
-            <div class="card-body">
+            <div class="card-body py-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-subtitle mb-1">Baru</h6>
-                        <h2 class="card-title mb-0">{{ $stats['new'] ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-0" style="font-size: 0.75rem;">Baru</h6>
+                        <h3 class="card-title mb-0" style="font-size: 1.5rem;">{{ $stats['new'] ?? 0 }}</h3>
                     </div>
-                    <i class="bi bi-clock fs-1 opacity-50"></i>
+                    <i class="bi bi-clock fs-3 opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-warning text-dark">
-            <div class="card-body">
+            <div class="card-body py-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-subtitle mb-1">Dalam Proses</h6>
-                        <h2 class="card-title mb-0">{{ $stats['in_progress'] ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-0" style="font-size: 0.75rem;">Dalam Proses</h6>
+                        <h3 class="card-title mb-0" style="font-size: 1.5rem;">{{ $stats['in_progress'] ?? 0 }}</h3>
                     </div>
-                    <i class="bi bi-gear fs-1 opacity-50"></i>
+                    <i class="bi bi-gear fs-3 opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-success text-white">
-            <div class="card-body">
+            <div class="card-body py-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-subtitle mb-1">Published</h6>
-                        <h2 class="card-title mb-0">{{ $stats['published'] ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-0" style="font-size: 0.75rem;">Published</h6>
+                        <h3 class="card-title mb-0" style="font-size: 1.5rem;">{{ $stats['published'] ?? 0 }}</h3>
                     </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                    <i class="bi bi-check-circle fs-3 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -417,27 +417,27 @@
 </div>
 
 <!-- Filter Card -->
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-bar-chart"></i> Monitoring Proses Review</span>
-        <a href="{{ route('pic.submissions.index') }}" class="btn btn-secondary btn-sm">
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center py-2">
+        <span style="font-size: 0.9rem;"><i class="bi bi-bar-chart"></i> Monitoring Proses Review</span>
+        <a href="{{ route('pic.submissions.index') }}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 8px;">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
-    <div class="card-body">
-        <form method="GET" class="mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="mb-2">
             <div class="row g-2 align-items-end">
                 <div class="col-md-2">
-                    <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
-                    <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
+                    <label for="tanggal_dari" class="form-label small mb-0" style="font-size: 0.75rem;">Tanggal Dari</label>
+                    <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}" style="font-size: 0.75rem; padding: 4px 8px;">
                 </div>
                 <div class="col-md-2">
-                    <label for="tanggal_sampai" class="form-label small mb-1">Tanggal Sampai</label>
-                    <input type="date" class="form-control form-control-sm" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
+                    <label for="tanggal_sampai" class="form-label small mb-0" style="font-size: 0.75rem;">Tanggal Sampai</label>
+                    <input type="date" class="form-control form-control-sm" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" style="font-size: 0.75rem; padding: 4px 8px;">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small mb-1">Jurnal</label>
-                    <select name="journal_id" class="form-select form-select-sm">
+                    <label class="form-label small mb-0" style="font-size: 0.75rem;">Jurnal</label>
+                    <select name="journal_id" class="form-select form-select-sm" style="font-size: 0.75rem; padding: 4px 8px;">
                         <option value="">-- Semua --</option>
                         @foreach($journals as $journal)
                             <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
@@ -447,8 +447,8 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small mb-1">Status</label>
-                    <select name="status" class="form-select form-select-sm">
+                    <label class="form-label small mb-0" style="font-size: 0.75rem;">Status</label>
+                    <select name="status" class="form-select form-select-sm" style="font-size: 0.75rem; padding: 4px 8px;">
                         <option value="">-- Semua --</option>
                         <option value="new" {{ request('status') == 'new' ? 'selected' : '' }}>New</option>
                         <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Submitted</option>
@@ -458,15 +458,15 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small mb-1">Cari</label>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari judul/penulis..." value="{{ request('search') }}">
+                    <label class="form-label small mb-0" style="font-size: 0.75rem;">Cari</label>
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari..." value="{{ request('search') }}" style="font-size: 0.75rem; padding: 4px 8px;">
                 </div>
                 <div class="col-md-2">
                     <div class="btn-group btn-group-sm w-100" role="group">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" style="font-size: 0.75rem; padding: 4px 8px;">
                             <i class="bi bi-search"></i> Filter
                         </button>
-                        <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-secondary" style="font-size: 0.75rem; padding: 4px 8px;">
                             <i class="bi bi-x-circle"></i> Reset
                         </a>
                     </div>
@@ -474,36 +474,8 @@
             </div>
         </form>
 
-        <!-- Bulk Assignment Controls (Hidden for PIC, only for visual consistency) -->
-        <div class="card bg-light mb-3" style="display: none;">
-            <div class="card-body py-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="selectAll">
-                            <label class="form-check-label" for="selectAll">
-                                <strong>Pilih Semua</strong>
-                            </label>
-                        </div>
-                        <span class="text-muted" id="selectedCount">0 dipilih</span>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-info btn-sm" disabled>
-                            <i class="bi bi-people"></i> Tugaskan Editor
-                        </button>
-                        <button type="button" class="btn btn-warning btn-sm" disabled>
-                            <i class="bi bi-person-check"></i> Tugaskan Author
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm" disabled>
-                            <i class="bi bi-journal-check"></i> Tugaskan Reviewer
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Scroll Controls -->
-        <div class="scroll-controls mt-3">
+        <div class="scroll-controls mt-2" style="padding: 6px 10px;">
             <div class="d-flex align-items-center gap-3">
                 <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
                     <i class="bi bi-chevron-bar-left"></i>
