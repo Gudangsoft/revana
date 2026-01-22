@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JournalSlot;
 use App\Models\Submission;
 use App\Models\JournalMaster;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class PublicLoaController extends Controller
@@ -70,7 +71,9 @@ class PublicLoaController extends Controller
         ];
         
         // Get settings for favicon
-        $settings = \App\Models\Setting::getSettings();
+        $settings = [
+            'favicon' => Setting::get('favicon', ''),
+        ];
         
         return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings'));
     }
