@@ -564,7 +564,29 @@
                                     @endif
                                 </td>
                                 <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
-                                <td>{{ $s->no_hp_penulis ?? '-' }}</td>
+                                <td>
+                                    @if($s->no_hp_penulis)
+                                        @php
+                                            $waNumber = preg_replace('/[^0-9]/', '', $s->no_hp_penulis);
+                                            if (substr($waNumber, 0, 1) === '0') {
+                                                $waNumber = '62' . substr($waNumber, 1);
+                                            }
+                                            $waMessage = "Salam sejahtera untuk author bernama *{$s->nama_penulis}*\n\n";
+                                            $waMessage .= "Dengan kode submit: *{$s->kode_submit}*\n";
+                                            $waMessage .= "Link artikel: {$s->link_artikel}\n";
+                                            $waMessage .= "Kode LOA: *{$s->kode_loa}*\n\n";
+                                            $waMessage .= "User: `{$s->username_author}`\n";
+                                            $waMessage .= "Pass: `{$s->password_author}`\n\n";
+                                            $waMessage .= "Sedang dalam proses *{$s->status}*";
+                                            $waUrl = "https://wa.me/{$waNumber}?text=" . urlencode($waMessage);
+                                        @endphp
+                                        <a href="{{ $waUrl }}" target="_blank" class="btn btn-success btn-sm" style="padding: 2px 6px; font-size: 0.7rem;" title="Chat WhatsApp {{ $s->no_hp_penulis }}">
+                                            <i class="bi bi-whatsapp"></i>
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 <td>
