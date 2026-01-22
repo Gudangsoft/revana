@@ -118,33 +118,98 @@
 }
 
 /* Sticky first column (Kode Submit) */
-.table-monitoring th.sticky-first,
-.table-monitoring td.sticky-first {
+.table-monitoring th.sticky-col-1,
+.table-monitoring td.sticky-col-1 {
     position: sticky;
     left: 0;
     z-index: 2;
     background: #fff;
     min-width: 120px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    max-width: 120px;
 }
 
-.table-monitoring thead th.sticky-first {
+.table-monitoring thead th.sticky-col-1 {
     z-index: 5;
     background: #212529 !important;
 }
 
 /* Sticky second column (ID Artikel) */
-.table-monitoring th.sticky-second,
-.table-monitoring td.sticky-second {
+.table-monitoring th.sticky-col-2,
+.table-monitoring td.sticky-col-2 {
     position: sticky;
     left: 120px;
     z-index: 2;
     background: #fff;
-    min-width: 100px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    min-width: 80px;
+    max-width: 80px;
 }
 
-.table-monitoring thead th.sticky-second {
+.table-monitoring thead th.sticky-col-2 {
+    z-index: 5;
+    background: #212529 !important;
+}
+
+/* Sticky third column (Judul) */
+.table-monitoring th.sticky-col-3,
+.table-monitoring td.sticky-col-3 {
+    position: sticky;
+    left: 200px;
+    z-index: 2;
+    background: #fff;
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.table-monitoring thead th.sticky-col-3 {
+    z-index: 5;
+    background: #212529 !important;
+}
+
+/* Sticky fourth column (Link) */
+.table-monitoring th.sticky-col-4,
+.table-monitoring td.sticky-col-4 {
+    position: sticky;
+    left: 350px;
+    z-index: 2;
+    background: #fff;
+    min-width: 50px;
+    max-width: 50px;
+}
+
+.table-monitoring thead th.sticky-col-4 {
+    z-index: 5;
+    background: #212529 !important;
+}
+
+/* Sticky fifth column (Penulis) */
+.table-monitoring th.sticky-col-5,
+.table-monitoring td.sticky-col-5 {
+    position: sticky;
+    left: 400px;
+    z-index: 2;
+    background: #fff;
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.table-monitoring thead th.sticky-col-5 {
+    z-index: 5;
+    background: #212529 !important;
+}
+
+/* Sticky sixth column (No HP) - last sticky with shadow */
+.table-monitoring th.sticky-col-6,
+.table-monitoring td.sticky-col-6 {
+    position: sticky;
+    left: 500px;
+    z-index: 2;
+    background: #fff;
+    min-width: 60px;
+    max-width: 60px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.2);
+}
+
+.table-monitoring thead th.sticky-col-6 {
     z-index: 5;
     background: #212529 !important;
 }
@@ -159,8 +224,12 @@
     background-color: #e8f4fd !important;
 }
 
-.table-monitoring tbody tr:hover td.sticky-first,
-.table-monitoring tbody tr:hover td.sticky-second {
+.table-monitoring tbody tr:hover td.sticky-col-1,
+.table-monitoring tbody tr:hover td.sticky-col-2,
+.table-monitoring tbody tr:hover td.sticky-col-3,
+.table-monitoring tbody tr:hover td.sticky-col-4,
+.table-monitoring tbody tr:hover td.sticky-col-5,
+.table-monitoring tbody tr:hover td.sticky-col-6 {
     background-color: #e8f4fd !important;
 }
 
@@ -169,8 +238,12 @@
     background-color: #f8f9fa;
 }
 
-.table-monitoring tbody tr:nth-child(even) td.sticky-first,
-.table-monitoring tbody tr:nth-child(even) td.sticky-second {
+.table-monitoring tbody tr:nth-child(even) td.sticky-col-1,
+.table-monitoring tbody tr:nth-child(even) td.sticky-col-2,
+.table-monitoring tbody tr:nth-child(even) td.sticky-col-3,
+.table-monitoring tbody tr:nth-child(even) td.sticky-col-4,
+.table-monitoring tbody tr:nth-child(even) td.sticky-col-5,
+.table-monitoring tbody tr:nth-child(even) td.sticky-col-6 {
     background-color: #f8f9fa;
 }
 
@@ -408,12 +481,12 @@
                     <table class="table table-monitoring table-bordered">
                         <thead class="table-dark">
                             <tr>
-                                <th rowspan="2" class="align-middle sticky-first">Kode Submit</th>
-                                <th rowspan="2" class="align-middle sticky-second">ID Artikel</th>
-                                <th rowspan="2" class="align-middle">Judul</th>
-                                <th rowspan="2" class="align-middle">Link</th>
-                                <th rowspan="2" class="align-middle">Penulis</th>
-                                <th rowspan="2" class="align-middle">No HP</th>
+                                <th rowspan="2" class="align-middle sticky-col-1">Kode Submit</th>
+                                <th rowspan="2" class="align-middle sticky-col-2">ID Artikel</th>
+                                <th rowspan="2" class="align-middle sticky-col-3">Judul</th>
+                                <th rowspan="2" class="align-middle sticky-col-4">Link</th>
+                                <th rowspan="2" class="align-middle sticky-col-5">Penulis</th>
+                                <th rowspan="2" class="align-middle sticky-col-6">No HP</th>
                                 <th colspan="2" class="text-center">Author Access</th>
                                 <th rowspan="2" class="align-middle">PIC Marketing</th>
                                 <th rowspan="2" class="align-middle" id="colSubmit">Petugas Submit</th>
@@ -463,22 +536,22 @@
                         <tbody>
                             @forelse($submissions as $s)
                             <tr>
-                                <td class="sticky-first">
+                                <td class="sticky-col-1">
                                     <a href="{{ route('pic.submissions.show', $s) }}" class="text-decoration-none" title="Klik untuk detail">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
                                 </td>
-                                <td class="sticky-second">{{ $s->id_artikel }}</td>
-                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>
-                                <td class="text-center">
+                                <td class="sticky-col-2">{{ $s->id_artikel }}</td>
+                                <td class="sticky-col-3" title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 20) }}</td>
+                                <td class="sticky-col-4 text-center">
                                     @if($s->link_artikel)
                                         <a href="{{ $s->link_artikel }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
                                     @else
                                         -
                                     @endif
                                 </td>
-                                <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
-                                <td>
+                                <td class="sticky-col-5">{{ Str::limit($s->nama_penulis, 12) }}</td>
+                                <td class="sticky-col-6">
                                     @if($s->no_hp_penulis)
                                         @php
                                             $waNumber = preg_replace('/[^0-9]/', '', $s->no_hp_penulis);
