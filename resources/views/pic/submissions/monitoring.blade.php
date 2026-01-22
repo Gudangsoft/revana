@@ -14,6 +14,15 @@
     overflow-x: auto;
     overflow-y: auto;
     max-height: 70vh;
+    min-height: 300px;
+    position: relative;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+}
+
+/* Scrollbar styling for both horizontal and vertical */
+.monitoring-scroll-wrapper {
     scrollbar-width: thin;
     scrollbar-color: #6c757d #dee2e6;
 }
