@@ -12,9 +12,18 @@ use Illuminate\Support\Facades\Auth;
 
 class PicController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pics = Pic::latest()->paginate(20);
+        $query = Pic::query();
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%");
+            });
+        }
+        $pics = $query->orderBy('name')->paginate(20);
         return view('admin.pics.index', compact('pics'));
     }
 
