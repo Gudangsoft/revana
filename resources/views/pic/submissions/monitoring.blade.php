@@ -20,34 +20,45 @@
     border: 1px solid #dee2e6;
     border-radius: 6px;
     position: relative;
+    /* Force scrollbar to always show */
+    -ms-overflow-style: scrollbar;
 }
 
-/* Custom scrollbar for all browsers */
+/* Custom scrollbar for Webkit browsers (Chrome, Edge, Safari) */
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 18px !important;
+    height: 20px !important;
     width: 14px;
-    background: #e9ecef;
+    background: #dee2e6;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-track {
-    background: #dee2e6;
+    background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
     border-radius: 0;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    border-top: 1px solid #ced4da;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, #0d6efd, #0b5ed7);
-    border-radius: 9px;
-    border: 3px solid #dee2e6;
-    min-width: 80px;
+    border-radius: 10px;
+    border: 4px solid #dee2e6;
+    min-width: 100px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #0b5ed7, #0a58ca);
+    cursor: grab;
+}
+
+.monitoring-scroll-wrapper::-webkit-scrollbar-thumb:active {
+    cursor: grabbing;
 }
 
 /* Firefox scrollbar */
-@-moz-document url-prefix() {
+@supports (-moz-appearance:none) {
     .monitoring-scroll-wrapper {
         scrollbar-width: auto;
         scrollbar-color: #0d6efd #dee2e6;
@@ -97,6 +108,8 @@
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.8rem;
+    min-width: 2500px; /* Force horizontal scroll */
+    width: max-content;
 }
 
 .table-monitoring thead th {
