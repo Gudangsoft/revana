@@ -73,6 +73,7 @@ class PicsImport implements ToModel, WithHeadingRow, SkipsOnFailure
                 'email' => $email,
                 'phone' => $phone,
                 'is_active' => $isActive,
+                'password' => bcrypt('pic@apjikom.or.id'), // Set default password
             ]);
             $this->updatedCount++;
             return null;
@@ -86,6 +87,7 @@ class PicsImport implements ToModel, WithHeadingRow, SkipsOnFailure
             'email' => $email,
             'phone' => $phone,
             'is_active' => $isActive,
+            'password' => bcrypt('pic@apjikom.or.id'), // Set default password
         ]);
     }
 
