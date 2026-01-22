@@ -541,6 +541,100 @@ class JournalManagementController extends Controller
         return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats'));
     }
 
+    /**
+     * Update credential for submission (username/password for editor or reviewer)
+     */
+    public function updateCredential(Request $request)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'field' => 'required|string|in:username_editor,password_editor,username_reviewer1,password_reviewer1,username_reviewer2,password_reviewer2',
+            'value' => 'nullable|string|max:100',
+        ]);
+        
+        $submission = Submission::findOrFail($request->submission_id);
+        
+        // Check if PIC has permission to edit this field
+        $canEdit = false;
+        if (in_array($request->field, ['username_editor', 'password_editor'])) {
+            $canEdit = $submission->petugas_editor1_id == $picId;
+        } elseif (in_array($request->field, ['username_reviewer1', 'password_reviewer1'])) {
+            $canEdit = $submission->petugas_reviewer1_id == $picId;
+        } elseif (in_array($request->field, ['username_reviewer2', 'password_reviewer2'])) {
+            $canEdit = $submission->petugas_reviewer2_id == $picId;
+        }
+        
+        if (!$canEdit) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        
+        $submission->{$request->field} = $request->value;
+        $submission->save();
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Toggle validation status for submission stage
+     */
+    public function toggleValid(Request $request)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'stage' => 'required|string|in:editor1,author1,editor2,reviewer1,reviewer2,editor3,author2,production',
+        ]);
+        
+        $submission = Submission::findOrFail($request->submission_id);
+        
+        // Check if PIC has permission to toggle this stage
+        $canToggle = false;
+        $field = $request->stage . '_valid';
+        
+        switch ($request->stage) {
+            case 'editor1':
+                $canToggle = $submission->petugas_editor1_id == $picId;
+                break;
+            case 'author1':
+                $canToggle = $submission->petugas_author1_id == $picId;
+                break;
+            case 'editor2':
+                $canToggle = $submission->petugas_editor2_id == $picId;
+                break;
+            case 'reviewer1':
+                $canToggle = $submission->petugas_reviewer1_id == $picId;
+                break;
+            case 'reviewer2':
+                $canToggle = $submission->petugas_reviewer2_id == $picId;
+                break;
+            case 'editor3':
+                $canToggle = $submission->petugas_editor3_id == $picId;
+                break;
+            case 'author2':
+                $canToggle = $submission->petugas_author2_id == $picId;
+                break;
+            case 'production':
+                $canToggle = $submission->petugas_production_id == $picId;
+                break;
+        }
+        
+        if (!$canToggle) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        
+        // Toggle the valid status
+        $submission->{$field} = !$submission->{$field};
+        $submission->save();
+        
+        return response()->json([
+            'success' => true,
+            'is_valid' => $submission->{$field}
+        ]);
+    }
+
     // ==================== ACCREDITATIONS ====================
     public function accreditationsIndex()
     {

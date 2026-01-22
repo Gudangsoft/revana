@@ -384,11 +384,39 @@
                                 @endif
                             </td>
                             <td>
-                                <code style="font-size: 0.65rem;">
-                                    {{ $s->username_editor ?? 'user' }} / {{ $s->password_editor ?? 'pass' }}
-                                </code>
+                                @if($s->petugas_editor1_id == $currentPicId)
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
+                                               value="{{ $s->username_editor }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="username_editor"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="user">
+                                        <span>/</span>
+                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
+                                               value="{{ $s->password_editor }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="password_editor"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="pass">
+                                    </div>
+                                @else
+                                    <code style="font-size: 0.65rem;">
+                                        {{ $s->username_editor ?? 'user' }} / {{ $s->password_editor ?? 'pass' }}
+                                    </code>
+                                @endif
                             </td>
-                            <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_editor1_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->editor1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'editor1')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Author 1 -->
                             <td>
@@ -398,7 +426,17 @@
                                     {{ $s->petugasAuthor1?->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_author1_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->author1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'author1')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Editor 2 -->
                             <td>
@@ -408,7 +446,17 @@
                                     {{ $s->petugasEditor2?->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_editor2_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'editor2')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Reviewer 1 -->
                             <td>
@@ -419,12 +467,40 @@
                                 @endif
                             </td>
                             <td>
-                                <code style="font-size: 0.65rem;">
-                                    {{ $s->username_reviewer1 ?? 'user' }} / {{ $s->password_reviewer1 ?? 'pass' }}
-                                </code>
+                                @if($s->petugas_reviewer1_id == $currentPicId)
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
+                                               value="{{ $s->username_reviewer1 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="username_reviewer1"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="user">
+                                        <span>/</span>
+                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
+                                               value="{{ $s->password_reviewer1 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="password_reviewer1"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="pass">
+                                    </div>
+                                @else
+                                    <code style="font-size: 0.65rem;">
+                                        {{ $s->username_reviewer1 ?? 'user' }} / {{ $s->password_reviewer1 ?? 'pass' }}
+                                    </code>
+                                @endif
                             </td>
                             <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
-                            <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_reviewer1_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'reviewer1')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Reviewer 2 -->
                             <td>
@@ -435,12 +511,40 @@
                                 @endif
                             </td>
                             <td>
-                                <code style="font-size: 0.65rem;">
-                                    {{ $s->username_reviewer2 ?? 'user' }} / {{ $s->password_reviewer2 ?? 'pass' }}
-                                </code>
+                                @if($s->petugas_reviewer2_id == $currentPicId)
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
+                                               value="{{ $s->username_reviewer2 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="username_reviewer2"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="user">
+                                        <span>/</span>
+                                        <input type="text" class="form-control form-control-sm" style="width: 60px; font-size: 0.65rem;" 
+                                               value="{{ $s->password_reviewer2 }}" 
+                                               data-submission="{{ $s->id }}"
+                                               data-field="password_reviewer2"
+                                               onchange="updateCredential(this)" 
+                                               placeholder="pass">
+                                    </div>
+                                @else
+                                    <code style="font-size: 0.65rem;">
+                                        {{ $s->username_reviewer2 ?? 'user' }} / {{ $s->password_reviewer2 ?? 'pass' }}
+                                    </code>
+                                @endif
                             </td>
                             <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
-                            <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_reviewer2_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'reviewer2')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Editor 3 -->
                             <td>
@@ -450,7 +554,17 @@
                                     {{ $s->petugasEditor3?->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_editor3_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->editor3_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'editor3')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Author 2 -->
                             <td>
@@ -460,7 +574,17 @@
                                     {{ $s->petugasAuthor2?->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_author2_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->author2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'author2')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                             
                             <!-- Production -->
                             <td>
@@ -477,7 +601,17 @@
                                     -
                                 @endif
                             </td>
-                            <td class="text-center">{!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                            <td class="text-center">
+                                @if($s->petugas_production_id == $currentPicId)
+                                    <button type="button" class="btn btn-sm {{ $s->production_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                            onclick="toggleValid(this, {{ $s->id }}, 'production')"
+                                            title="Klik untuk toggle validasi">
+                                        <i class="bi {{ $s->production_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                    </button>
+                                @else
+                                    {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -557,5 +691,100 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial position
     updateScrollPosition();
 });
+
+// Update Credential Function
+function updateCredential(element) {
+    const submissionId = element.dataset.submission;
+    const field = element.dataset.field;
+    const value = element.value;
+    
+    // Show loading state
+    element.disabled = true;
+    element.style.opacity = '0.5';
+    
+    fetch('{{ route("pic.submissions.update-credential") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            field: field,
+            value: value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        element.disabled = false;
+        element.style.opacity = '1';
+        
+        if (data.success) {
+            // Show success feedback
+            element.style.borderColor = '#198754';
+            setTimeout(() => {
+                element.style.borderColor = '';
+            }, 1000);
+        } else {
+            // Show error
+            alert(data.message || 'Gagal update credential');
+            element.style.borderColor = '#dc3545';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        element.disabled = false;
+        element.style.opacity = '1';
+        element.style.borderColor = '#dc3545';
+        alert('Terjadi kesalahan saat update credential');
+    });
+}
+
+// Toggle Valid Function
+function toggleValid(button, submissionId, stage) {
+    // Show loading
+    const icon = button.querySelector('i');
+    const originalClass = icon.className;
+    icon.className = 'bi bi-arrow-repeat spinner-border spinner-border-sm';
+    button.disabled = true;
+    
+    fetch('{{ route("pic.submissions.toggle-valid") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            stage: stage
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        button.disabled = false;
+        
+        if (data.success) {
+            // Update button state
+            if (data.valid) {
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-success');
+                icon.className = 'bi bi-check-circle-fill';
+            } else {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+                icon.className = 'bi bi-circle';
+            }
+        } else {
+            icon.className = originalClass;
+            alert(data.message || 'Gagal toggle validasi');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        icon.className = originalClass;
+        button.disabled = false;
+        alert('Terjadi kesalahan saat toggle validasi');
+    });
+}
 </script>
 @endsection

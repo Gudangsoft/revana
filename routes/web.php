@@ -322,6 +322,8 @@ Route::prefix('pic')->group(function () {
         Route::prefix('submissions')->name('pic.submissions.')->group(function () {
             Route::get('/', [PicJournalController::class, 'submissionsIndex'])->name('index');
             Route::get('/monitoring', [PicJournalController::class, 'submissionsMonitoring'])->name('monitoring');
+            Route::post('/update-credential', [PicJournalController::class, 'updateCredential'])->name('update-credential');
+            Route::post('/toggle-valid', [PicJournalController::class, 'toggleValid'])->name('toggle-valid');
             Route::get('/create', [PicJournalController::class, 'submissionsCreate'])->name('create');
             Route::post('/', [PicJournalController::class, 'submissionsStore'])->name('store');
             Route::get('/{submission}', [PicJournalController::class, 'submissionsShow'])->name('show');
