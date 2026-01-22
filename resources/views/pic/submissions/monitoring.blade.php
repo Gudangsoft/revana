@@ -425,44 +425,82 @@
         </a>
     </div>
     <div class="card-body">
-        <form method="GET" class="row g-2 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label small mb-1">Jurnal</label>
-                <select name="journal_id" class="form-select form-select-sm">
-                    <option value="">-- Semua --</option>
-                    @foreach($journals as $journal)
-                        <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
-                            {{ $journal->nama_jurnal }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small mb-1">Status</label>
-                <select name="status" class="form-select form-select-sm">
-                    <option value="">-- Semua --</option>
-                    <option value="new" {{ request('status') == 'new' ? 'selected' : '' }}>New</option>
-                    <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Submitted</option>
-                    <option value="editor1_process" {{ request('status') == 'editor1_process' ? 'selected' : '' }}>Editor1 Process</option>
-                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                    <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label small mb-1">Cari</label>
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari judul/penulis..." value="{{ request('search') }}">
-            </div>
-            <div class="col-md-3">
-                <div class="btn-group btn-group-sm w-100" role="group">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Filter
-                    </button>
-                    <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle"></i> Reset
-                    </a>
+        <form method="GET" class="mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
+                    <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="tanggal_sampai" class="form-label small mb-1">Tanggal Sampai</label>
+                    <input type="date" class="form-control form-control-sm" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Jurnal</label>
+                    <select name="journal_id" class="form-select form-select-sm">
+                        <option value="">-- Semua --</option>
+                        @foreach($journals as $journal)
+                            <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
+                                {{ Str::limit($journal->nama_jurnal, 20) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">-- Semua --</option>
+                        <option value="new" {{ request('status') == 'new' ? 'selected' : '' }}>New</option>
+                        <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Submitted</option>
+                        <option value="editor1_process" {{ request('status') == 'editor1_process' ? 'selected' : '' }}>Editor1 Process</option>
+                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                        <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Cari</label>
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari judul/penulis..." value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group btn-group-sm w-100" role="group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                        <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>
+
+        <!-- Bulk Assignment Controls (Hidden for PIC, only for visual consistency) -->
+        <div class="card bg-light mb-3" style="display: none;">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAll">
+                            <label class="form-check-label" for="selectAll">
+                                <strong>Pilih Semua</strong>
+                            </label>
+                        </div>
+                        <span class="text-muted" id="selectedCount">0 dipilih</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-info btn-sm" disabled>
+                            <i class="bi bi-people"></i> Tugaskan Editor
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" disabled>
+                            <i class="bi bi-person-check"></i> Tugaskan Author
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" disabled>
+                            <i class="bi bi-journal-check"></i> Tugaskan Reviewer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Scroll Controls -->
         <div class="scroll-controls mt-3">
