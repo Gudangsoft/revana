@@ -551,8 +551,6 @@
                 <button type="button" class="quick-nav-btn" data-target="editor1">Editor1</button>
                 <button type="button" class="quick-nav-btn" data-target="author1">Author1</button>
                 <button type="button" class="quick-nav-btn" data-target="editor2">Editor2</button>
-                <button type="button" class="quick-nav-btn" data-target="reviewer1">Reviewer1</button>
-                <button type="button" class="quick-nav-btn" data-target="reviewer2">Reviewer2</button>
                 <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
                 <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                 <button type="button" class="quick-nav-btn" data-target="production">Production</button>
@@ -576,8 +574,6 @@
                         <th colspan="3" class="text-center bg-info" id="colEditor1">Editor 1</th>
                         <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
                         <th colspan="2" class="text-center bg-info" id="colEditor2">Editor 2</th>
-                        <th colspan="4" class="text-center bg-primary" id="colReviewer1">Reviewer 1</th>
-                        <th colspan="4" class="text-center bg-primary" id="colReviewer2">Reviewer 2</th>
                         <th colspan="2" class="text-center bg-info" id="colEditor3">Editor 3</th>
                         <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                         <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
@@ -596,16 +592,6 @@
                         <!-- Editor 2 sub-headers (2 cols) -->
                         <th class="bg-info">Petugas</th>
                         <th class="bg-info">Valid</th>
-                        <!-- Reviewer 1 sub-headers (4 cols) -->
-                        <th class="bg-primary">Petugas</th>
-                        <th class="bg-primary">User/Pass</th>
-                        <th class="bg-primary">Catatan</th>
-                        <th class="bg-primary">Valid</th>
-                        <!-- Reviewer 2 sub-headers (4 cols) -->
-                        <th class="bg-primary">Petugas</th>
-                        <th class="bg-primary">User/Pass</th>
-                        <th class="bg-primary">Catatan</th>
-                        <th class="bg-primary">Valid</th>
                         <!-- Editor 3 sub-headers (2 cols) -->
                         <th class="bg-info">Petugas</th>
                         <th class="bg-info">Valid</th>
@@ -810,80 +796,6 @@
                                 @endif
                             </td>
                             
-                            <!-- Reviewer 1 -->
-                            <td>
-                                @if($s->petugas_reviewer1_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasReviewer1?->name ?? '-' }}
-                                @endif
-                            </td>
-                            <td>
-                                @if($s->username_reviewer1 || $s->password_reviewer1)
-                                    <div style="font-size: 0.6rem;">
-                                        <div><small class="text-muted" style="font-size: 0.55rem;">u:</small> <code>{{ $s->username_reviewer1 ?? '-' }}</code></div>
-                                        <div><small class="text-muted" style="font-size: 0.55rem;">p:</small> <code>{{ $s->password_reviewer1 ?? '-' }}</code></div>
-                                    </div>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td title="{{ $s->catatan_reviewer1 }}" style="font-size: 0.6rem;">{{ Str::limit($s->catatan_reviewer1, 8) ?? '-' }}</td>
-                            <td class="text-center">
-                                @if($s->petugas_reviewer1_id == $currentPicId)
-                                    @if(!$s->editor2_valid)
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled onclick="alert('Ada tugas lain yang belum dikerjakan!')">
-                                            <i class="bi bi-circle"></i>
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-sm {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                                onclick="toggleValid(this, {{ $s->id }}, 'reviewer1')"
-                                                title="Klik untuk toggle validasi">
-                                            <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                        </button>
-                                    @endif
-                                @else
-                                    {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                @endif
-                            </td>
-                            
-                            <!-- Reviewer 2 -->
-                            <td>
-                                @if($s->petugas_reviewer2_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasReviewer2?->name ?? '-' }}
-                                @endif
-                            </td>
-                            <td>
-                                @if($s->username_reviewer2 || $s->password_reviewer2)
-                                    <div style="font-size: 0.6rem;">
-                                        <div><small class="text-muted" style="font-size: 0.55rem;">u:</small> <code>{{ $s->username_reviewer2 ?? '-' }}</code></div>
-                                        <div><small class="text-muted" style="font-size: 0.55rem;">p:</small> <code>{{ $s->password_reviewer2 ?? '-' }}</code></div>
-                                    </div>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td title="{{ $s->catatan_reviewer2 }}" style="font-size: 0.6rem;">{{ Str::limit($s->catatan_reviewer2, 8) ?? '-' }}</td>
-                            <td class="text-center">
-                                @if($s->petugas_reviewer2_id == $currentPicId)
-                                    @if(!$s->reviewer1_valid)
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled onclick="alert('Ada tugas lain yang belum dikerjakan!')">
-                                            <i class="bi bi-circle"></i>
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-sm {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                                onclick="toggleValid(this, {{ $s->id }}, 'reviewer2')"
-                                                title="Klik untuk toggle validasi">
-                                            <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
-                                        </button>
-                                    @endif
-                                @else
-                                    {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                @endif
-                            </td>
-                            
                             <!-- Editor 3 -->
                             <td>
                                 @if($s->petugas_editor3_id == $currentPicId)
@@ -988,7 +900,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate column positions dynamically
     const columnPositions = {};
     function calculateColumnPositions() {
-        const targets = ['submit', 'editor1', 'author1', 'editor2', 'reviewer1', 'reviewer2', 'editor3', 'author2', 'production'];
+        const targets = ['submit', 'editor1', 'author1', 'editor2', 'editor3', 'author2', 'production'];
         targets.forEach(target => {
             const colId = 'col' + target.charAt(0).toUpperCase() + target.slice(1);
             const col = document.getElementById(colId);
@@ -1006,11 +918,9 @@ document.addEventListener('DOMContentLoaded', function() {
             columnPositions['editor1'] = 500;
             columnPositions['author1'] = 750;
             columnPositions['editor2'] = 900;
-            columnPositions['reviewer1'] = 1050;
-            columnPositions['reviewer2'] = 1400;
-            columnPositions['editor3'] = 1750;
-            columnPositions['author2'] = 1900;
-            columnPositions['production'] = 2050;
+            columnPositions['editor3'] = 1050;
+            columnPositions['author2'] = 1200;
+            columnPositions['production'] = 1350;
         }
     }
     

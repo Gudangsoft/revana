@@ -24,9 +24,14 @@
         }
         .sidebar {
             width: 250px;
+            min-width: 250px;
+            max-width: 250px;
+            flex-shrink: 0;
             background: white;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             padding: 20px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         .sidebar .nav-link {
             color: #333;
