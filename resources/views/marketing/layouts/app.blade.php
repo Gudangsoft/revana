@@ -102,6 +102,17 @@
                 <a href="{{ route('marketing.submissions') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && $currentRoute != 'marketing.submissions.create' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i> Artikel Saya
                 </a>
+                <hr style="margin: 15px 0; opacity: 0.2;">
+                <div style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 15px; color: #6c757d; text-transform: uppercase;">
+                    <i class="bi bi-journal-bookmark"></i> Pengelolaan Jurnal
+                </div>
+                <a href="{{ route('marketing.journals.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.journals') ? 'active' : '' }}">
+                    <i class="bi bi-journal-text"></i> Data Jurnal
+                </a>
+                <a href="{{ route('marketing.journal-slots.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.journal-slots') ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot
+                </a>
+                <hr style="margin: 15px 0; opacity: 0.2;">
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">
                     <i class="bi bi-trophy"></i> Point Saya
                 </a>

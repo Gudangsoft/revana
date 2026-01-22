@@ -368,5 +368,9 @@ Route::prefix('marketing')->group(function () {
         Route::post('/submissions', [MarketingDashboardController::class, 'storeSubmission'])->name('marketing.submissions.store');
         Route::get('/submissions/{submission}', [MarketingDashboardController::class, 'showSubmission'])->name('marketing.submissions.show');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
+        
+        // Journal Management
+        Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
+        Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
     });
 });

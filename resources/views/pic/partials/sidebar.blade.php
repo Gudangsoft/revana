@@ -129,11 +129,6 @@
         <span>Dashboard</span>
     </a>
     
-    <a href="{{ route('pic.author.create') }}" class="nav-link {{ request()->routeIs('pic.author.create') ? 'active' : '' }}">
-        <i class="bi bi-plus-circle-fill"></i>
-        <span>Input Artikel Baru</span>
-    </a>
-    
     <a href="{{ route('pic.my-tasks.index') }}" class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}">
         <i class="bi bi-list-task"></i>
         <span>Tugas Saya</span>

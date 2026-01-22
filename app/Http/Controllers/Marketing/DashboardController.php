@@ -237,4 +237,49 @@ class DashboardController extends Controller
         
         return view('marketing.show-submission', compact('marketing', 'submission'));
     }
+
+    /**
+     * Journals Index for Marketing
+     */
+    public function journalsIndex()
+    {
+        $marketing = Auth::guard('marketing')->user();
+        $journals = JournalMaster::with(['journalSlots' => function($q) {
+                $q->where('is_active', true);
+            }])
+            ->where('is_active', true)
+            ->orderBy('nama_jurnal')
+            ->paginate(20);
+        
+        return view('marketing.journals.index', compact('marketing', 'journals'));
+    }
+
+    /**
+     * Journal Slots Index for Marketing
+     */
+    public function journalSlotsIndex(Request $request)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $query = JournalSlot::with('journalMaster')
+            ->where('is_active', true);
+        
+        // Filter by journal
+        if ($request->filled('journal_master_id')) {
+            $query->where('journal_master_id', $request->journal_master_id);
+        }
+        
+        // Filter by year
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+        
+        $slots = $query->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->paginate(20);
+        
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        return view('marketing.journal-slots.index', compact('marketing', 'slots', 'journals'));
+    }
 }
