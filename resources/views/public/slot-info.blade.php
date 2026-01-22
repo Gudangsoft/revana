@@ -265,7 +265,7 @@
                 <div class="col-6 col-md-3">
                     <div class="stat-card">
                         <i class="bi bi-circle text-warning"></i>
-                        <h3 class="text-warning">{{ $stats['total_slots'] - $stats['slot_terisi'] }}</h3>
+                        <h3 class="text-warning">{{ max(0, $stats['total_slots'] - $stats['slot_terisi']) }}</h3>
                         <p class="mb-0">Tersedia</p>
                     </div>
                 </div>
