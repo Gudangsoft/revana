@@ -212,9 +212,10 @@ class JournalManagementController extends Controller
     public function submissionsCreate()
     {
         $slots = JournalSlot::with('journalMaster')
-            ->where('available_slots', '>', 0)
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->whereRaw('jumlah_slot > slot_terpakai')
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
             ->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
@@ -247,10 +248,10 @@ class JournalManagementController extends Controller
 
         Submission::create($validated);
 
-        // Decrease available slots
+        // Increase slot_terpakai
         $slot = JournalSlot::find($validated['journal_slot_id']);
-        if ($slot && $slot->available_slots > 0) {
-            $slot->decrement('available_slots');
+        if ($slot && $slot->slot_terpakai < $slot->jumlah_slot) {
+            $slot->increment('slot_terpakai');
         }
 
         return redirect()->route('pic.submissions.index')
