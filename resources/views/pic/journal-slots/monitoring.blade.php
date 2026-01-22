@@ -12,7 +12,7 @@
 <div class="card mb-3">
     <div class="card-body">
         <form method="GET" class="row g-3">
-            <div class="col-md-5">
+            <div class="col-md-3">
                 <select name="journal_id" class="form-select">
                     <option value="">Semua Jurnal</option>
                     @foreach($journals as $journal)
@@ -23,6 +23,19 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="Cari Jurnal/Publisher" value="{{ request('search') }}">
+            </div>
+            <div class="col-md-2">
+                <select name="accreditation" class="form-select">
+                    <option value="">Semua Akreditasi</option>
+                    <option value="SINTA 1" {{ request('accreditation') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                    <option value="SINTA 2" {{ request('accreditation') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                    <option value="SINTA 3" {{ request('accreditation') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                    <option value="SINTA 4" {{ request('accreditation') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                    <option value="SINTA 5" {{ request('accreditation') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <select name="year" class="form-select">
                     <option value="">Semua Tahun</option>
                     @for($y = date('Y') + 1; $y >= 2020; $y--)
@@ -30,12 +43,12 @@
                     @endfor
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search"></i> Filter
+                    <i class="bi bi-search"></i> Cari
                 </button>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <a href="{{ route('pic.journal-slots.monitoring') }}" class="btn btn-secondary w-100">
                     <i class="bi bi-x-circle"></i> Reset
                 </a>
