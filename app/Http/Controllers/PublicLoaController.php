@@ -36,7 +36,7 @@ class PublicLoaController extends Controller
                 $q->where('kode_slot', 'like', "%{$search}%")
                   ->orWhereHas('journalMaster', function($q2) use ($search) {
                       $q2->where('nama_jurnal', 'like', "%{$search}%")
-                         ->orWhere('rumpun_ilmu', 'like', "%{$search}%");
+                         ->orWhere('publisher', 'like', "%{$search}%");
                   });
             });
         }
