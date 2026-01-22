@@ -7,9 +7,6 @@
     <a href="{{ route('pic.author.dashboard') }}" class="nav-link">
         <i class="bi bi-speedometer2"></i> Dashboard
     </a>
-    <a href="{{ route('pic.author.create') }}" class="nav-link">
-        <i class="bi bi-plus-circle"></i> Input Artikel Baru
-    </a>
 @endsection
 
 @section('content')

@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Tugas Saya')
-@section('page-title', 'Tugas Saya')
+@section('title', 'Monitoring')
+@section('page-title', 'Monitoring')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -9,6 +9,12 @@
 
 @section('content')
 <style>
+/* Override content width for this page */
+.content {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
@@ -42,327 +48,426 @@
     background: #dee2e6;
 }
 
-/* Custom Scrollbar Container */
-.custom-scrollbar-container {
-    margin-top: 8px;
-    padding: 0 10px;
-}
-
-.custom-scrollbar-track {
-    height: 16px;
-    background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
-    border-radius: 8px;
-    border: 1px solid #ced4da;
-    position: relative;
-    cursor: pointer;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.custom-scrollbar-thumb {
-    height: 14px;
-    background: linear-gradient(180deg, #0d6efd, #0b5ed7);
-    border-radius: 7px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    min-width: 60px;
-    cursor: grab;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: background 0.2s;
-}
-
-.custom-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #0b5ed7, #0a58ca);
-}
-
-.custom-scrollbar-thumb:active {
-    cursor: grabbing;
-    background: linear-gradient(180deg, #0a58ca, #084298);
-}
-
-/* Credential display */
-.credential-group {
+/* Editable credential inputs */
+.editable-credential {
     display: flex;
-    gap: 2px;
+    gap: 4px;
     align-items: center;
 }
 
-.credential-group code {
-    font-size: 0.7rem;
-    padding: 2px 4px;
-    background: #f8f9fa;
-    border-radius: 3px;
+.editable-credential input {
+    transition: border-color 0.2s;
+}
+
+.editable-credential input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Validation toggle button */
+.validation-toggle {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-width: 1px;
+}
+
+.validation-toggle:hover {
+    transform: scale(1.1);
+}
+
+.validation-toggle.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.validation-toggle.btn-outline-secondary {
+    background-color: transparent;
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.validation-toggle.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
 }
 
 /* Validation checkbox button */
-.validation-btn {
+.validation-checkbox {
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-    transition: all 0.2s;
-    border: none;
-    background: transparent;
-}
-.validation-btn:hover {
-    background: #e9ecef;
-    transform: scale(1.2);
-}
-.validation-btn.saving {
-    opacity: 0.5;
-    pointer-events: none;
-}
-.validation-btn i {
-    font-size: 1rem;
 }
 
 .table-monitoring {
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
     font-size: 0.8rem;
+    margin: 0;
+    border-spacing: 0;
 }
 
 .table-monitoring thead th {
     position: sticky;
     top: 0;
-    z-index: 3;
-    background: #212529 !important;
-    color: white !important;
-    border: 1px solid #343a40;
+    z-index: 20;
+    font-size: 0.7rem;
+    padding: 4px;
+    border: 1px solid #dee2e6;
     white-space: nowrap;
-    padding: 6px 8px;
+    background-color: #212529 !important;
+    color: #fff !important;
+    line-height: 1;
+    vertical-align: middle;
+    height: 32px;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
-    top: 38px;
-    background: #343a40 !important;
-    color: white !important;
+    position: sticky;
+    top: 32px;
+    z-index: 20;
+    line-height: 1;
+    vertical-align: middle;
+    height: 32px;
 }
 
-/* Override Bootstrap bg-* classes in header to ensure white text */
-.table-monitoring thead th.bg-info,
-.table-monitoring thead th.bg-warning,
-.table-monitoring thead th.bg-primary,
+.table-monitoring thead th.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-primary {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
 .table-monitoring thead th.bg-success {
-    color: white !important;
+    background-color: #198754 !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-dark {
+    background-color: #212529 !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
 }
 
 .table-monitoring thead th.text-dark {
-    color: white !important;
+    color: #000 !important;
 }
 
-/* Sticky first column (Kode Submit) */
+/* Sticky first column */
 .table-monitoring th.sticky-first,
 .table-monitoring td.sticky-first {
     position: sticky;
     left: 0;
-    z-index: 2;
+    z-index: 3;
     background: #fff;
-    min-width: 120px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    min-width: 110px;
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1);
 }
 
 .table-monitoring thead th.sticky-first {
-    z-index: 5;
-    background: #212529 !important;
+    z-index: 21;
+    background-color: #212529 !important;
+    color: #fff !important;
 }
 
-/* Sticky second column (ID Artikel) */
+/* Sticky second column */
 .table-monitoring th.sticky-second,
 .table-monitoring td.sticky-second {
     position: sticky;
-    left: 120px;
-    z-index: 2;
+    left: 110px;
+    z-index: 3;
     background: #fff;
-    min-width: 80px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    min-width: 90px;
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1);
 }
 
 .table-monitoring thead th.sticky-second {
-    z-index: 5;
-    background: #212529 !important;
+    z-index: 21;
+    background-color: #212529 !important;
+    color: #fff !important;
+}
+
+/* Non-sticky columns */
+.table-monitoring td:not(.sticky-first):not(.sticky-second),
+.table-monitoring th:not(.sticky-first):not(.sticky-second) {
+    z-index: 1;
+    position: relative;
 }
 
 .table-monitoring tbody td {
-    white-space: nowrap;
-    padding: 5px 8px;
+    padding: 4px;
     border: 1px solid #dee2e6;
+    white-space: nowrap;
+    line-height: 1;
+    vertical-align: middle;
+    height: 30px;
 }
 
 .table-monitoring tbody tr:hover td {
-    background-color: #e8f4fd !important;
+    background-color: #f1f3f5;
 }
 
 .table-monitoring tbody tr:hover td.sticky-first,
 .table-monitoring tbody tr:hover td.sticky-second {
-    background-color: #e8f4fd !important;
+    background-color: #e9ecef;
 }
 
-/* Alternating row colors */
 .table-monitoring tbody tr:nth-child(even) td {
-    background-color: #f8f9fa;
+    background-color: #f9fafb;
 }
 
 .table-monitoring tbody tr:nth-child(even) td.sticky-first,
 .table-monitoring tbody tr:nth-child(even) td.sticky-second {
-    background-color: #f8f9fa;
+    background-color: #f9fafb;
+}
+
+/* Highlight for current user's assigned tasks */
+.table-monitoring tbody tr.my-task td {
+    background-color: #fff3cd;
+}
+
+.table-monitoring tbody tr.my-task td.sticky-first,
+.table-monitoring tbody tr.my-task td.sticky-second {
+    background-color: #fff3cd;
+}
+
+.table-monitoring tbody tr.my-task:hover td {
+    background-color: #ffe69c;
+}
+
+.table-monitoring tbody tr.my-task:hover td.sticky-first,
+.table-monitoring tbody tr.my-task:hover td.sticky-second {
+    background-color: #ffe69c;
+}
+
+/* Highlight individual cells for assigned tasks */
+.table-monitoring tbody td.my-task {
+    background-color: #fff3cd !important;
+}
+
+.table-monitoring tbody tr:hover td.my-task {
+    background-color: #ffe69c !important;
+}
+
+/* Editable credential styling */
+.editable-credential {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    min-width: 200px;
+}
+
+.editable-credential input {
+    font-family: 'Courier New', monospace;
+}
+
+.editable-credential input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Validation toggle button */
+.validation-toggle {
+    min-width: 36px;
+    padding: 4px 8px;
+    transition: all 0.2s;
+}
+
+.validation-toggle:hover {
+    transform: scale(1.1);
+}
+
+.task-indicator {
+    display: inline-block;
+    margin-right: 4px;
+    color: #ffc107;
 }
 
 /* Scroll controls */
 .scroll-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 10px;
     padding: 8px 12px;
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 6px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 20;
 }
 
 .scroll-nav-btn {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: white;
+    border: none;
     padding: 6px 12px;
-    border: 1px solid #dee2e6;
-    background: white;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 0.875rem;
     transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 21;
 }
 
-.scroll-nav-btn:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
+.scroll-nav-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0b5ed7, #0a58ca);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
 }
 
 .scroll-nav-btn:disabled {
-    opacity: 0.5;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
     cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .scroll-position-indicator {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    max-width: 300px;
 }
 
 .scroll-position-bar {
     width: 200px;
-    height: 6px;
+    height: 8px;
     background: #dee2e6;
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .scroll-position-fill {
     height: 100%;
-    background: linear-gradient(90deg, #0d6efd, #0dcaf0);
-    border-radius: 3px;
-    transition: width 0.1s;
+    background: linear-gradient(90deg, #198754, #20c997);
+    transition: width 0.2s ease;
 }
 
-/* Quick navigation buttons */
 .quick-nav {
+    margin-top: 10px;
     display: flex;
-    gap: 4px;
     flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
 }
 
 .quick-nav-btn {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    border: 1px solid #dee2e6;
-    background: white;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    border: none;
+    padding: 5px 12px;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 0.75rem;
     transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 21;
 }
 
 .quick-nav-btn:hover {
-    background: #e9ecef;
+    background: linear-gradient(135deg, #5a6268, #495057);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .quick-nav-btn.active {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+/* Summary cards */
+.summary-cards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    flex: 0 0 auto;
+    min-width: 120px;
+    max-width: 180px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.summary-card h6 {
+    font-size: 0.7rem;
+    color: #6c757d;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.summary-card .value {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #212529;
+}
+
+.summary-card.my-tasks {
+    border-left: 4px solid #ffc107;
+}
+
+.summary-card.all-tasks {
+    border-left: 4px solid #0d6efd;
 }
 </style>
-
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-subtitle mb-1">Total</h6>
-                        <h2 class="card-title mb-0">{{ $stats['total'] }}</h2>
-                    </div>
-                    <i class="bi bi-file-earmark-text fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-secondary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-subtitle mb-1">Baru</h6>
-                        <h2 class="card-title mb-0">{{ $stats['new'] }}</h2>
-                    </div>
-                    <i class="bi bi-clock fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-dark">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-subtitle mb-1">Dalam Proses</h6>
-                        <h2 class="card-title mb-0">{{ $stats['in_progress'] }}</h2>
-                    </div>
-                    <i class="bi bi-gear fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-subtitle mb-1">Published</h6>
-                        <h2 class="card-title mb-0">{{ $stats['published'] }}</h2>
-                    </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-bar-chart"></i> Monitoring Proses Submit</span>
+                <span><i class="bi bi-clipboard-data"></i> Monitoring Proses Submit</span>
             </div>
             <div class="card-body">
-                <!-- Filter -->
-                <form action="{{ route('pic.submissions.monitoring') }}" method="GET" class="mb-4" id="filterForm">
+                <!-- Summary Cards -->
+                <div class="summary-cards mb-3">
+                    <div class="summary-card my-tasks">
+                        <h6>Tugas Saya</h6>
+                        <div class="value">{{ $myTaskCount }}</div>
+                    </div>
+                    <div class="summary-card all-tasks">
+                        <h6>Total Submit</h6>
+                        <div class="value">{{ $totalSubmissions }}</div>
+                    </div>
+                </div>
+                    <!-- Filter Form -->
+                <form action="{{ route('pic.submissions.monitoring') }}" method="GET" class="mb-3" id="filterForm">
                     <div class="row g-2 align-items-end">
-                        <div class="col-md-2">
+                        <div class="col-auto">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
-                            <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
+                            <input type="date" class="form-control form-control-sm" style="width: 150px;" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-auto">
                             <label for="tanggal_sampai" class="form-label small mb-1">Tanggal Sampai</label>
-                            <input type="date" class="form-control form-control-sm" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
+                            <input type="date" class="form-control form-control-sm" style="width: 150px;" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-auto">
                             <label for="journal_id" class="form-label small mb-1">Jurnal</label>
-                            <select class="form-select form-select-sm" id="journal_id" name="journal_id">
+                            <select class="form-select form-select-sm" style="width: 180px;" id="journal_id" name="journal_id">
                                 <option value="">-- Semua --</option>
                                 @foreach($journals as $journal)
                                     <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
@@ -371,9 +476,9 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-auto">
                             <label for="status" class="form-label small mb-1">Status</label>
-                            <select class="form-select form-select-sm" id="status" name="status">
+                            <select class="form-select form-select-sm" style="width: 130px;" id="status" name="status">
                                 <option value="">-- Semua --</option>
                                 <option value="new" {{ request('status') == 'new' ? 'selected' : '' }}>New</option>
                                 <option value="EDITOR1" {{ request('status') == 'EDITOR1' ? 'selected' : '' }}>Editor 1</option>
@@ -387,7 +492,7 @@
                                 <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-auto">
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i> Filter
@@ -436,76 +541,117 @@
                     </div>
                 </div>
 
-                <!-- Data Table with Full Process Columns -->
+                <!-- Submissions Monitoring Table -->
                 <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
                     <table class="table table-monitoring table-bordered">
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
-                                <th rowspan="2" class="align-middle sticky-first">Kode Submit</th>
-                                <th rowspan="2" class="align-middle sticky-second">ID Artikel</th>
-                                <th rowspan="2" class="align-middle">Judul</th>
-                                <th rowspan="2" class="align-middle">Link</th>
-                                <th rowspan="2" class="align-middle">Penulis</th>
-                                <th rowspan="2" class="align-middle">No HP</th>
-                                <th colspan="2" class="text-center">Author Access</th>
-                                <th rowspan="2" class="align-middle">PIC Marketing</th>
-                                <th rowspan="2" class="align-middle" id="colSubmit">Petugas Submit</th>
-                                <th colspan="3" class="text-center bg-info" id="colEditor1">Editor 1</th>
+                                <th rowspan="2" class="text-center">
+                                    <input type="checkbox" class="form-check-input" id="selectAll">
+                                </th>
+                                <th rowspan="2" class="sticky-first">Kode Submit</th>
+                                <th rowspan="2" class="sticky-second">ID Artikel</th>
+                                <th rowspan="2">Judul</th>
+                                <th rowspan="2">Link</th>
+                                <th rowspan="2">Penulis</th>
+                                <th rowspan="2">No HP</th>
+                                <th colspan="2" class="text-center bg-dark text-white" id="colAuthorAccess">Author Access</th>
+                                <th rowspan="2">PIC Marketing</th>
+                                <th rowspan="2" id="colSubmit">Petugas Submit</th>
+                                <th colspan="3" class="text-center bg-info text-dark" id="colEditor1">Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
-                                <th colspan="2" class="text-center bg-info" id="colEditor2">Editor 2</th>
-                                <th colspan="3" class="text-center bg-primary" id="colReviewer1">Reviewer 1</th>
-                                <th colspan="3" class="text-center bg-primary" id="colReviewer2">Reviewer 2</th>
-                                <th colspan="2" class="text-center bg-info" id="colEditor3">Editor 3</th>
+                                <th colspan="4" class="text-center bg-info text-dark" id="colEditor2">Editor 2</th>
+                                <th colspan="2" class="text-center bg-primary text-white" id="colReviewer1">Reviewer 1</th>
+                                <th colspan="2" class="text-center bg-primary text-white" id="colReviewer2">Reviewer 2</th>
+                                <th colspan="2" class="text-center bg-info text-dark" id="colEditor3">Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
-                                <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
+                                <th colspan="3" class="text-center bg-success text-white" id="colProduction">Production</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers -->
-                                <th class="bg-dark">Username</th>
-                                <th class="bg-dark">Password</th>
+                                <th class="bg-dark text-white">Username</th>
+                                <th class="bg-dark text-white">Password</th>
                                 <!-- Editor 1 sub-headers (3 cols) -->
-                                <th class="bg-info">Petugas</th>
-                                <th class="bg-info">User/Pass</th>
-                                <th class="bg-info">Valid</th>
+                                <th class="bg-info text-dark">Petugas</th>
+                                <th class="bg-info text-dark">User/Pass</th>
+                                <th class="bg-info text-dark">Valid</th>
                                 <!-- Author 1 sub-headers (2 cols) -->
-                                <th class="bg-warning">Petugas</th>
-                                <th class="bg-warning">Valid</th>
-                                <!-- Editor 2 sub-headers (2 cols) -->
-                                <th class="bg-info">Petugas</th>
-                                <th class="bg-info">Valid</th>
-                                <!-- Reviewer 1 sub-headers (3 cols) -->
-                                <th class="bg-primary">Petugas</th>
-                                <th class="bg-primary">User/Pass</th>
-                                <th class="bg-primary">Valid</th>
-                                <!-- Reviewer 2 sub-headers (3 cols) -->
-                                <th class="bg-primary">Petugas</th>
-                                <th class="bg-primary">User/Pass</th>
-                                <th class="bg-primary">Valid</th>
+                                <th class="bg-warning text-dark">Petugas</th>
+                                <th class="bg-warning text-dark">Valid</th>
+                                <!-- Editor 2 sub-headers (5 cols) -->
+                                <th class="bg-info text-dark">Petugas</th>
+                                <th class="bg-info text-dark">User/Pass R1</th>
+                                <th class="bg-info text-dark">User/Pass R2</th>
+                                <th class="bg-info text-dark">Valid</th>
+                                <!-- Reviewer 1 sub-headers (2 cols) -->
+                                <th class="bg-primary text-white">Petugas</th>
+                                <th class="bg-primary text-white">Valid</th>
+                                <!-- Reviewer 2 sub-headers (2 cols) -->
+                                <th class="bg-primary text-white">Petugas</th>
+                                <th class="bg-primary text-white">Valid</th>
                                 <!-- Editor 3 sub-headers (2 cols) -->
-                                <th class="bg-info">Petugas</th>
-                                <th class="bg-info">Valid</th>
+                                <th class="bg-info text-dark">Petugas</th>
+                                <th class="bg-info text-dark">Valid</th>
                                 <!-- Author 2 sub-headers (2 cols) -->
-                                <th class="bg-warning">Petugas</th>
-                                <th class="bg-warning">Valid</th>
+                                <th class="bg-warning text-dark">Petugas</th>
+                                <th class="bg-warning text-dark">Valid</th>
                                 <!-- Production sub-headers (3 cols) -->
-                                <th class="bg-success">Petugas</th>
-                                <th class="bg-success">Link Publish</th>
-                                <th class="bg-success">Valid</th>
+                                <th class="bg-success text-white">Petugas</th>
+                                <th class="bg-success text-white">Link Publish</th>
+                                <th class="bg-success text-white">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($submissions as $s)
-                            <tr>
+                            @php
+                                $picId = auth()->guard('pic')->id();
+                            @endphp
+                            <tr class="{{ 
+                                $s->petugas_editor1_id == $picId || 
+                                $s->petugas_author1_id == $picId || 
+                                $s->petugas_editor2_id == $picId || 
+                                $s->petugas_reviewer1_id == $picId || 
+                                $s->petugas_reviewer2_id == $picId || 
+                                $s->petugas_editor3_id == $picId || 
+                                $s->petugas_author2_id == $picId || 
+                                $s->petugas_production_id == $picId 
+                                ? 'my-task' : '' }}"
+                                data-submission-id="{{ $s->id }}"
+                                data-editor1-valid="{{ $s->editor1_valid ? '1' : '0' }}"
+                                data-author1-valid="{{ $s->author1_valid ? '1' : '0' }}"
+                                data-editor2-valid="{{ $s->editor2_valid ? '1' : '0' }}"
+                                data-reviewer1-valid="{{ $s->reviewer1_valid ? '1' : '0' }}"
+                                data-reviewer2-valid="{{ $s->reviewer2_valid ? '1' : '0' }}"
+                                data-editor3-valid="{{ $s->editor3_valid ? '1' : '0' }}"
+                                data-author2-valid="{{ $s->author2_valid ? '1' : '0' }}"
+                                data-production-valid="{{ $s->production_valid ? '1' : '0' }}">
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
+                                </td>
                                 <td class="sticky-first">
-                                    <a href="{{ route('pic.submissions.show', $s) }}" class="text-decoration-none" title="Klik untuk detail">
+                                    @if($s->petugas_editor1_id == $picId || 
+                                        $s->petugas_author1_id == $picId || 
+                                        $s->petugas_editor2_id == $picId || 
+                                        $s->petugas_reviewer1_id == $picId || 
+                                        $s->petugas_reviewer2_id == $picId || 
+                                        $s->petugas_editor3_id == $picId || 
+                                        $s->petugas_author2_id == $picId || 
+                                        $s->petugas_production_id == $picId)
+                                        <span class="task-indicator" title="Tugas Anda">
+                                            <i class="bi bi-star-fill"></i>
+                                        </span>
+                                    @endif
+                                    <a href="{{ route('pic.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
-                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>
+                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 30) }}</td>
                                 <td class="text-center">
                                     @if($s->link_artikel)
-                                        <a href="{{ $s->link_artikel }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
+                                        <a href="{{ $s->link_artikel }}" target="_blank" title="Buka Link Artikel">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </a>
                                     @else
                                         -
                                     @endif
@@ -536,137 +682,239 @@
                                 </td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
-                                <td>{{ $s->marketing?->name ?? '-' }}</td>
+                                <td>{{ $s->picMarketing?->name ?? '-' }}</td>
                                 <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
                                 
                                 <!-- Editor 1 -->
-                                <td>{{ $s->petugasEditor1?->name ?? '-' }}</td>
-                                <td>
-                                    <div class="credential-group">
-                                        <code>{{ $s->username_editor ?? '-' }}</code>
-                                        <span>/</span>
-                                        <code>{{ $s->password_editor ?? '-' }}</code>
-                                    </div>
+                                <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasEditor1?->name ?? '-' }}
+                                    @if($s->petugas_editor1_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
                                 </td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="editor1_valid"
-                                            data-current="{{ $s->editor1_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor1_id == $picId)
+                                        <div class="editable-credential" data-submission="{{ $s->id }}" data-field-user="username_editor" data-field-pass="password_editor">
+                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->username_editor }}" placeholder="Username">
+                                            <span>/</span>
+                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->password_editor }}" placeholder="Password">
+                                        </div>
+                                    @else
+                                        @if($s->username_editor || $s->password_editor)
+                                            <div class="credential-group">
+                                                <code>{{ $s->username_editor ?? '-' }}</code>
+                                                <span>/</span>
+                                                <code>{{ $s->password_editor ?? '-' }}</code>
+                                            </div>
+                                        @else
+                                            -
+                                        @endif
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor1_id == $picId)
+                                        {{-- Editor1 is first stage, always enabled --}}
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->editor1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="editor1_valid" data-current="{{ $s->editor1_valid ? '1' : '0' }}"
+                                                data-stage-index="0">
+                                            <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Author 1 -->
-                                <td>{{ $s->petugasAuthor1?->name ?? '-' }}</td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="author1_valid"
-                                            data-current="{{ $s->author1_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="{{ $s->petugas_author1_id == auth()->id() ? 'my-task' : '' }}">
+                                    {{ $s->petugasAuthor1?->name ?? '-' }}
+                                    @if($s->petugas_author1_id == auth()->id())
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_author1_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_author1_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->author1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="author1_valid" data-current="{{ $s->author1_valid ? '1' : '0' }}"
+                                                data-stage-index="1">
+                                            <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Editor 2 -->
-                                <td>{{ $s->petugasEditor2?->name ?? '-' }}</td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="editor2_valid"
-                                            data-current="{{ $s->editor2_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasEditor2?->name ?? '-' }}
+                                    @if($s->petugas_editor2_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
+                                </td>
+                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor2_id == $picId)
+                                        <div class="editable-credential" data-submission="{{ $s->id }}" data-field-user="username_reviewer1" data-field-pass="password_reviewer1">
+                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->username_reviewer1 }}" placeholder="Username">
+                                            <span>/</span>
+                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->password_reviewer1 }}" placeholder="Password">
+                                        </div>
+                                    @else
+                                        @if($s->username_reviewer1 || $s->password_reviewer1)
+                                            <div class="credential-group">
+                                                <code>{{ $s->username_reviewer1 ?? '-' }}</code>
+                                                <span>/</span>
+                                                <code>{{ $s->password_reviewer1 ?? '-' }}</code>
+                                            </div>
+                                        @else
+                                            -
+                                        @endif
+                                    @endif
+                                </td>
+                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor2_id == $picId)
+                                        <div class="editable-credential" data-submission="{{ $s->id }}" data-field-user="username_reviewer2" data-field-pass="password_reviewer2">
+                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->username_reviewer2 }}" placeholder="Username">
+                                            <span>/</span>
+                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->password_reviewer2 }}" placeholder="Password">
+                                        </div>
+                                    @else
+                                        @if($s->username_reviewer2 || $s->password_reviewer2)
+                                            <div class="credential-group">
+                                                <code>{{ $s->username_reviewer2 ?? '-' }}</code>
+                                                <span>/</span>
+                                                <code>{{ $s->password_reviewer2 ?? '-' }}</code>
+                                            </div>
+                                        @else
+                                            -
+                                        @endif
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor2_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="editor2_valid" data-current="{{ $s->editor2_valid ? '1' : '0' }}"
+                                                data-stage-index="2">
+                                            <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Reviewer 1 -->
-                                <td>{{ $s->petugasReviewer1?->name ?? '-' }}</td>
-                                <td>
-                                    <div class="credential-group">
-                                        <code>{{ $s->username_reviewer1 ?? '-' }}</code>
-                                        <span>/</span>
-                                        <code>{{ $s->password_reviewer1 ?? '-' }}</code>
-                                    </div>
+                                <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasReviewer1?->name ?? '-' }}
+                                    @if($s->petugas_reviewer1_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
                                 </td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="reviewer1_valid"
-                                            data-current="{{ $s->reviewer1_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="text-center {{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_reviewer1_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="reviewer1_valid" data-current="{{ $s->reviewer1_valid ? '1' : '0' }}"
+                                                data-stage-index="3">
+                                            <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Reviewer 2 -->
-                                <td>{{ $s->petugasReviewer2?->name ?? '-' }}</td>
-                                <td>
-                                    <div class="credential-group">
-                                        <code>{{ $s->username_reviewer2 ?? '-' }}</code>
-                                        <span>/</span>
-                                        <code>{{ $s->password_reviewer2 ?? '-' }}</code>
-                                    </div>
+                                <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasReviewer2?->name ?? '-' }}
+                                    @if($s->petugas_reviewer2_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
                                 </td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="reviewer2_valid"
-                                            data-current="{{ $s->reviewer2_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="text-center {{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_reviewer2_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="reviewer2_valid" data-current="{{ $s->reviewer2_valid ? '1' : '0' }}"
+                                                data-stage-index="4">
+                                            <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Editor 3 -->
-                                <td>{{ $s->petugasEditor3?->name ?? '-' }}</td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="editor3_valid"
-                                            data-current="{{ $s->editor3_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="{{ $s->petugas_editor3_id == auth()->id() ? 'my-task' : '' }}">
+                                    {{ $s->petugasEditor3?->name ?? '-' }}
+                                    @if($s->petugas_editor3_id == auth()->id())
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_editor3_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor3_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->editor3_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="editor3_valid" data-current="{{ $s->editor3_valid ? '1' : '0' }}"
+                                                data-stage-index="5">
+                                            <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Author 2 -->
-                                <td>{{ $s->petugasAuthor2?->name ?? '-' }}</td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="author2_valid"
-                                            data-current="{{ $s->author2_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="{{ $s->petugas_author2_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasAuthor2?->name ?? '-' }}
+                                    @if($s->petugas_author2_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_author2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_author2_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->author2_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="author2_valid" data-current="{{ $s->author2_valid ? '1' : '0' }}"
+                                                data-stage-index="6">
+                                            <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                                 
                                 <!-- Production -->
-                                <td>{{ $s->petugasProduction?->name ?? '-' }}</td>
-                                <td>
-                                    @if($s->link_publish)
-                                        <a href="{{ $s->link_publish }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
-                                    @else
-                                        -
+                                <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasProduction?->name ?? '-' }}
+                                    @if($s->petugas_production_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
                                     @endif
                                 </td>
-                                <td class="text-center">
-                                    <button type="button" class="validation-btn" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-field="production_valid"
-                                            data-current="{{ $s->production_valid ? '1' : '0' }}"
-                                            onclick="toggleValidation(this)">
+                                <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_production_id == $picId)
+                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.7rem; min-width: 150px;" 
+                                               value="{{ $s->link_publish }}" placeholder="Link Publish" 
+                                               data-submission="{{ $s->id }}" data-field="link_publish">
+                                    @else
+                                        @if($s->link_publish)
+                                            <a href="{{ $s->link_publish }}" target="_blank" title="Buka Link Publish">
+                                                <i class="bi bi-link-45deg"></i>
+                                            </a>
+                                        @else
+                                            -
+                                        @endif
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_production_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->production_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="production_valid" data-current="{{ $s->production_valid ? '1' : '0' }}"
+                                                data-stage-index="7">
+                                            <i class="bi {{ $s->production_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
                                         {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
-                                    </button>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="28" class="text-center text-muted py-4">
-                                    Tidak ada data tugas yang ditugaskan kepada Anda
+                                <td colspan="29" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mt-2">Tidak ada data submissions</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -674,68 +922,23 @@
                     </table>
                 </div>
 
-                <!-- Custom Horizontal Scrollbar -->
-                <div class="custom-scrollbar-container">
-                    <div class="custom-scrollbar-track">
-                        <div class="custom-scrollbar-thumb" id="customScrollThumb"></div>
+                <!-- Pagination -->
+                @if($submissions->hasPages())
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Menampilkan {{ $submissions->firstItem() ?? 0 }} - {{ $submissions->lastItem() ?? 0 }} dari {{ $submissions->total() }} tugas
+                    </div>
+                    <div>
+                        {{ $submissions->links() }}
                     </div>
                 </div>
-
-                <!-- Pagination -->
-                <div class="mt-3">
-                    {{ $submissions->links() }}
-                </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Toggle Validation function
-function toggleValidation(btn) {
-    const submissionId = btn.dataset.submission;
-    const field = btn.dataset.field;
-    const currentValue = btn.dataset.current === '1';
-    
-    // Convert field name to stage (e.g., 'editor1_valid' -> 'editor1')
-    const stage = field.replace('_valid', '');
-    
-    btn.classList.add('saving');
-    
-    fetch('{{ route("pic.submissions.toggle-valid") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            submission_id: submissionId,
-            stage: stage
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        btn.classList.remove('saving');
-        if (data.success) {
-            const newValue = data.is_valid;
-            btn.dataset.current = newValue ? '1' : '0';
-            if (newValue) {
-                btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
-            } else {
-                btn.innerHTML = '<i class="bi bi-circle text-muted"></i>';
-            }
-        } else {
-            alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
-        }
-    })
-    .catch(error => {
-        btn.classList.remove('saving');
-        console.error('Error:', error);
-        alert('Terjadi kesalahan jaringan');
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     const wrapper = document.getElementById('monitoringScrollWrapper');
     const positionFill = document.getElementById('scrollPositionFill');
@@ -818,113 +1021,172 @@ document.addEventListener('DOMContentLoaded', function() {
         switch(e.key) {
             case 'ArrowLeft':
                 wrapper.scrollBy({ left: -100, behavior: 'smooth' });
+                e.preventDefault();
                 break;
             case 'ArrowRight':
                 wrapper.scrollBy({ left: 100, behavior: 'smooth' });
+                e.preventDefault();
                 break;
             case 'Home':
                 wrapper.scrollTo({ left: 0, behavior: 'smooth' });
+                e.preventDefault();
                 break;
             case 'End':
                 wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
+                e.preventDefault();
                 break;
         }
     });
+    
+    // Horizontal scroll with Shift + Mouse Wheel
+    wrapper.addEventListener('wheel', function(e) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            wrapper.scrollLeft += e.deltaY;
+        }
+    }, { passive: false });
     
     // Initial state
     updateScrollPosition();
     
-    // Custom Scrollbar Logic
-    const customThumb = document.getElementById('customScrollThumb');
-    const customTrack = customThumb.parentElement;
+    // Checkbox functionality
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
     
-    function updateCustomScrollbar() {
-        const scrollLeft = wrapper.scrollLeft;
-        const scrollWidth = wrapper.scrollWidth;
-        const clientWidth = wrapper.clientWidth;
-        const trackWidth = customTrack.offsetWidth;
-        
-        // Calculate thumb width proportional to visible area
-        const thumbWidth = Math.max(60, (clientWidth / scrollWidth) * trackWidth);
-        customThumb.style.width = thumbWidth + 'px';
-        
-        // Calculate thumb position
-        const maxScrollLeft = scrollWidth - clientWidth;
-        const maxThumbLeft = trackWidth - thumbWidth;
-        const thumbLeft = maxScrollLeft > 0 ? (scrollLeft / maxScrollLeft) * maxThumbLeft : 0;
-        customThumb.style.left = thumbLeft + 'px';
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
     }
     
-    // Update custom scrollbar when table scrolls
-    wrapper.addEventListener('scroll', updateCustomScrollbar);
-    
-    // Drag custom scrollbar thumb
-    let isDragging = false;
-    let startX = 0;
-    let startLeft = 0;
-    
-    customThumb.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        startX = e.clientX;
-        startLeft = parseFloat(customThumb.style.left) || 0;
-        customThumb.style.cursor = 'grabbing';
-        e.preventDefault();
+    if (checkboxes.length > 0) {
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+                if (selectAll) selectAll.checked = allChecked;
+            });
+        });
+    }
+
+    // Inline credential editing
+    document.querySelectorAll('.editable-credential input').forEach(input => {
+        input.addEventListener('blur', function() {
+            const container = this.closest('.editable-credential');
+            const submissionId = container.dataset.submission;
+            const inputs = container.querySelectorAll('input');
+            const username = inputs[0].value;
+            const password = inputs[1].value;
+            const fieldUser = container.dataset.fieldUser;
+            const fieldPass = container.dataset.fieldPass;
+
+            // Save both username and password
+            saveCredential(submissionId, fieldUser, username);
+            saveCredential(submissionId, fieldPass, password);
+        });
     });
-    
-    document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        
-        const deltaX = e.clientX - startX;
-        const trackWidth = customTrack.offsetWidth;
-        const thumbWidth = customThumb.offsetWidth;
-        const maxThumbLeft = trackWidth - thumbWidth;
-        
-        let newLeft = startLeft + deltaX;
-        newLeft = Math.max(0, Math.min(newLeft, maxThumbLeft));
-        
-        customThumb.style.left = newLeft + 'px';
-        
-        // Sync table scroll
-        const scrollWidth = wrapper.scrollWidth;
-        const clientWidth = wrapper.clientWidth;
-        const maxScrollLeft = scrollWidth - clientWidth;
-        const scrollLeft = maxThumbLeft > 0 ? (newLeft / maxThumbLeft) * maxScrollLeft : 0;
-        wrapper.scrollLeft = scrollLeft;
+
+    // Link publish editing
+    document.querySelectorAll('input[data-field="link_publish"]').forEach(input => {
+        input.addEventListener('blur', function() {
+            const submissionId = this.dataset.submission;
+            const value = this.value;
+            saveCredential(submissionId, 'link_publish', value);
+        });
     });
-    
-    document.addEventListener('mouseup', function() {
-        if (isDragging) {
-            isDragging = false;
-            customThumb.style.cursor = 'grab';
-        }
+
+    // Validation toggle
+    document.querySelectorAll('.validation-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const submissionId = this.dataset.submission;
+            const field = this.dataset.field;
+            const current = this.dataset.current === '1';
+            const newValue = !current;
+            
+            // Check if previous stages are valid (sequential validation)
+            const row = this.closest('tr');
+            const stageOrder = ['editor1_valid', 'author1_valid', 'editor2_valid', 'reviewer1_valid', 'reviewer2_valid', 'editor3_valid', 'author2_valid', 'production_valid'];
+            const currentStageIndex = stageOrder.indexOf(field);
+            
+            // Check all previous stages
+            for (let i = 0; i < currentStageIndex; i++) {
+                const previousStage = stageOrder[i];
+                const previousValid = row.dataset[previousStage.replace('_', '') + 'Valid'] === '1';
+                
+                if (!previousValid) {
+                    const stageNames = {
+                        'editor1_valid': 'Editor 1',
+                        'author1_valid': 'Author 1',
+                        'editor2_valid': 'Editor 2',
+                        'reviewer1_valid': 'Reviewer 1',
+                        'reviewer2_valid': 'Reviewer 2',
+                        'editor3_valid': 'Editor 3',
+                        'author2_valid': 'Author 2',
+                        'production_valid': 'Production'
+                    };
+                    
+                    alert('Proses sebelumnya (' + stageNames[previousStage] + ') belum valid. Harap tunggu validasi dari tahap sebelumnya.');
+                    return;
+                }
+            }
+
+            fetch('{{ route("pic.submissions.toggle-validation") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    submission_id: submissionId,
+                    field: field,
+                    value: newValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button appearance
+                    this.dataset.current = newValue ? '1' : '0';
+                    this.className = newValue ? 'btn btn-sm validation-toggle btn-success' : 'btn btn-sm validation-toggle btn-outline-secondary';
+                    this.querySelector('i').className = newValue ? 'bi bi-check-circle-fill' : 'bi bi-circle';
+                    
+                    // Update row data attribute
+                    const dataAttr = field.replace('_', '') + 'Valid';
+                    row.dataset[dataAttr] = newValue ? '1' : '0';
+                } else {
+                    alert('Gagal update validasi: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat update validasi');
+            });
+        });
     });
-    
-    // Click on track to jump
-    customTrack.addEventListener('click', function(e) {
-        if (e.target === customThumb) return;
-        
-        const trackRect = customTrack.getBoundingClientRect();
-        const clickX = e.clientX - trackRect.left;
-        const trackWidth = customTrack.offsetWidth;
-        const thumbWidth = customThumb.offsetWidth;
-        
-        let newLeft = clickX - (thumbWidth / 2);
-        newLeft = Math.max(0, Math.min(newLeft, trackWidth - thumbWidth));
-        
-        customThumb.style.left = newLeft + 'px';
-        
-        // Sync table scroll
-        const scrollWidth = wrapper.scrollWidth;
-        const clientWidth = wrapper.clientWidth;
-        const maxScrollLeft = scrollWidth - clientWidth;
-        const maxThumbLeft = trackWidth - thumbWidth;
-        const scrollLeft = maxThumbLeft > 0 ? (newLeft / maxThumbLeft) * maxScrollLeft : 0;
-        wrapper.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-    });
-    
-    // Initial custom scrollbar state
-    updateCustomScrollbar();
-    window.addEventListener('resize', updateCustomScrollbar);
+
+    function saveCredential(submissionId, field, value) {
+        fetch('{{ route("pic.submissions.update-credential") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                submission_id: submissionId,
+                field: field,
+                value: value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Gagal menyimpan: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyimpan');
+        });
+    }
 });
 </script>
 @endsection

@@ -53,6 +53,9 @@ Route::get('/pic-login-test', function () {
 Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'showForm'])->name('reviewer-registration.form');
 Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store'])->name('reviewer-registration.store');
 
+// Public LOA Search (no login required)
+Route::get('/cari-loa', [\App\Http\Controllers\PublicLoaController::class, 'index'])->name('public.loa.search');
+
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -70,6 +73,9 @@ Route::middleware('auth')->group(function () {
         
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
+        
+        // Slot Jurnal dengan pencarian LOA
+        Route::get('/slot-jurnal', [\App\Http\Controllers\Admin\SlotJurnalController::class, 'index'])->name('slot-jurnal.index');
         
         // Journals
         Route::get('/journals/monitoring', [JournalController::class, 'monitoringSlots'])->name('journals.monitoring');
@@ -323,6 +329,7 @@ Route::prefix('pic')->group(function () {
             Route::get('/', [PicJournalController::class, 'submissionsIndex'])->name('index');
             Route::get('/monitoring', [PicJournalController::class, 'submissionsMonitoring'])->name('monitoring');
             Route::post('/update-credential', [PicJournalController::class, 'updateCredential'])->name('update-credential');
+            Route::post('/toggle-validation', [PicJournalController::class, 'toggleValidation'])->name('toggle-validation');
             Route::post('/update-petugas', [PicJournalController::class, 'updatePetugas'])->name('update-petugas');
             Route::post('/toggle-valid', [PicJournalController::class, 'toggleValid'])->name('toggle-valid');
             Route::get('/create', [PicJournalController::class, 'submissionsCreate'])->name('create');

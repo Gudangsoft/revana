@@ -579,7 +579,11 @@ class JournalManagementController extends Controller
         
         $stats['urgent'] = $urgentTasks;
         
-        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats'));
+        // Additional counts for summary cards
+        $myTaskCount = $mySubmissions->count();
+        $totalSubmissions = Submission::count();
+        
+        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats', 'myTaskCount', 'totalSubmissions'));
     }
 
     /**
@@ -589,16 +593,122 @@ class JournalManagementController extends Controller
     {
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'field' => 'required|string|in:username_editor,password_editor,username_reviewer1,password_reviewer1,username_reviewer2,password_reviewer2',
-            'value' => 'nullable|string|max:100',
+            'field' => 'required|string|in:username_editor,password_editor,username_reviewer1,password_reviewer1,username_reviewer2,password_reviewer2,link_publish',
+            'value' => 'nullable|string|max:255',
         ]);
         
         $submission = Submission::findOrFail($request->submission_id);
         
+        // Verify that current PIC is assigned to this task
+        $picId = auth()->guard('pic')->id();
+        $allowed = false;
+        
+        // Check which field is being updated and verify assignment
+        if (in_array($request->field, ['username_editor', 'password_editor'])) {
+            $allowed = $submission->petugas_editor1_id == $picId;
+        } elseif (in_array($request->field, ['username_reviewer1', 'password_reviewer1', 'username_reviewer2', 'password_reviewer2'])) {
+            // Editor2 can edit reviewer credentials
+            $allowed = $submission->petugas_editor2_id == $picId;
+        } elseif ($request->field === 'link_publish') {
+            $allowed = $submission->petugas_production_id == $picId;
+        }
+        
+        if (!$allowed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah field ini'
+            ], 403);
+        }
+        
         $submission->{$request->field} = $request->value;
         $submission->save();
         
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
+    }
+
+    /**
+     * Toggle validation status for submission stage (for assigned PIC only)
+     */
+    public function toggleValidation(Request $request)
+    {
+        $picId = auth()->guard('pic')->id();
+        
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'field' => 'required|string|in:editor1_valid,author1_valid,editor2_valid,reviewer1_valid,reviewer2_valid,editor3_valid,author2_valid,production_valid',
+            'value' => 'required|boolean',
+        ]);
+        
+        $submission = Submission::findOrFail($request->submission_id);
+        
+        // Verify that current PIC is assigned to this stage
+        $allowed = false;
+        $fieldMap = [
+            'editor1_valid' => 'petugas_editor1_id',
+            'author1_valid' => 'petugas_author1_id',
+            'editor2_valid' => 'petugas_editor2_id',
+            'reviewer1_valid' => 'petugas_reviewer1_id',
+            'reviewer2_valid' => 'petugas_reviewer2_id',
+            'editor3_valid' => 'petugas_editor3_id',
+            'author2_valid' => 'petugas_author2_id',
+            'production_valid' => 'petugas_production_id',
+        ];
+        
+        if (isset($fieldMap[$request->field])) {
+            $petugasField = $fieldMap[$request->field];
+            $allowed = $submission->{$petugasField} == $picId;
+        }
+        
+        if (!$allowed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah validasi ini'
+            ], 403);
+        }
+        
+        // Check if previous stages are completed (sequential validation)
+        $stageOrder = [
+            'editor1_valid',
+            'author1_valid',
+            'editor2_valid',
+            'reviewer1_valid',
+            'reviewer2_valid',
+            'editor3_valid',
+            'author2_valid',
+            'production_valid',
+        ];
+        
+        $currentStageIndex = array_search($request->field, $stageOrder);
+        
+        // Check all previous stages must be valid
+        for ($i = 0; $i < $currentStageIndex; $i++) {
+            $previousStage = $stageOrder[$i];
+            if (!$submission->{$previousStage}) {
+                $stageNames = [
+                    'editor1_valid' => 'Editor 1',
+                    'author1_valid' => 'Author 1',
+                    'editor2_valid' => 'Editor 2',
+                    'reviewer1_valid' => 'Reviewer 1',
+                    'reviewer2_valid' => 'Reviewer 2',
+                    'editor3_valid' => 'Editor 3',
+                    'author2_valid' => 'Author 2',
+                    'production_valid' => 'Production',
+                ];
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proses sebelumnya (' . $stageNames[$previousStage] . ') belum valid. Harap tunggu validasi dari tahap sebelumnya.'
+                ], 400);
+            }
+        }
+        
+        $submission->{$request->field} = $request->value;
+        $submission->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Status validasi berhasil diperbarui'
+        ]);
     }
 
     /**

@@ -87,6 +87,9 @@
                         <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
                         <td>
                             <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
+                            @if($slot->journalMaster && $slot->journalMaster->penerbit)
+                                <br><small class="text-muted">{{ $slot->journalMaster->penerbit }}</small>
+                            @endif
                             @if($slot->journalMaster && $slot->journalMaster->accreditation)
                                 <br><small class="badge bg-info">{{ $slot->journalMaster->accreditation }}</small>
                             @endif
