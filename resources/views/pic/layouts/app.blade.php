@@ -22,6 +22,8 @@
             display: flex;
             min-height: calc(100vh - 56px);
         }
+        
+        /* Sidebar Styles */
         .sidebar {
             width: 250px;
             min-width: 250px;
@@ -32,12 +34,77 @@
             padding: 20px 0;
             overflow-y: auto;
             overflow-x: hidden;
+            transition: all 0.3s ease;
+            position: relative;
         }
+        
+        /* Collapsed Sidebar */
+        .sidebar.collapsed {
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            padding: 12px 18px;
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-link span,
+        .sidebar.collapsed .nav-link .badge,
+        .sidebar.collapsed .sidebar-section-header span,
+        .sidebar.collapsed .sidebar-section-header {
+            display: none !important;
+        }
+        
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0 !important;
+            font-size: 1.2rem;
+        }
+        
+        /* Toggle Button */
+        .sidebar-toggle {
+            position: absolute;
+            top: 10px;
+            right: -12px;
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            border: 2px solid white;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-toggle:hover {
+            background: #764ba2;
+            transform: scale(1.1);
+        }
+        
+        .sidebar.collapsed .sidebar-toggle {
+            right: -12px;
+        }
+        
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+        
         .sidebar .nav-link {
             color: #333;
             padding: 12px 20px;
             border-left: 3px solid transparent;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
         }
         .sidebar .nav-link:hover {
             background-color: #f8f9fa;
@@ -48,10 +115,14 @@
             color: white;
             border-left-color: #764ba2;
         }
+        
+        /* Content area adjusts when sidebar collapsed */
         .content {
             flex: 1;
             padding: 30px;
+            transition: all 0.3s ease;
         }
+        
         .page-header {
             background: white;
             padding: 20px;
@@ -67,6 +138,29 @@
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+        
+        /* Tooltip for collapsed sidebar */
+        .sidebar.collapsed .nav-link {
+            position: relative;
+        }
+        
+        .sidebar.collapsed .nav-link:hover::after {
+            content: attr(data-title);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-left: 10px;
+        }
+        
+        @yield('styles')
     </style>
 </head>
 <body>
@@ -107,7 +201,10 @@
     </nav>
 
     <div class="main-container">
-        <div class="sidebar">
+        <div class="sidebar @yield('sidebar-class')" id="sidebar">
+            <div class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Menu">
+                <i class="bi bi-chevron-left"></i>
+            </div>
             @yield('sidebar')
         </div>
         <div class="content">
@@ -157,6 +254,35 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            
+            // Save state to localStorage
+            if (sidebar.classList.contains('collapsed')) {
+                localStorage.setItem('sidebarCollapsed', 'true');
+            } else {
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+        }
+        
+        // Check if page should auto-collapse sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const autoCollapse = sidebar.classList.contains('auto-collapse');
+            
+            if (autoCollapse) {
+                sidebar.classList.add('collapsed');
+            } else {
+                // Restore from localStorage for other pages
+                const savedState = localStorage.getItem('sidebarCollapsed');
+                if (savedState === 'true') {
+                    sidebar.classList.add('collapsed');
+                }
+            }
+        });
+    </script>
     @yield('scripts')
 </body>
 </html>

@@ -3,6 +3,8 @@
 @section('title', 'Monitoring & Tugas Saya')
 @section('page-title', 'Monitoring & Tugas Saya')
 
+@section('sidebar-class', 'auto-collapse')
+
 @section('sidebar')
     @include('pic.partials.sidebar')
 @endsection

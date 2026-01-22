@@ -124,12 +124,12 @@
         <span>Dashboard</span>
     </div>
     
-    <a href="{{ route('pic.dashboard') }}" class="nav-link {{ request()->routeIs('pic.dashboard', 'pic.author.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('pic.dashboard') }}" class="nav-link {{ request()->routeIs('pic.dashboard', 'pic.author.dashboard') ? 'active' : '' }}" data-title="Dashboard">
         <i class="bi bi-house-door"></i>
         <span>Dashboard</span>
     </a>
     
-    <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring', 'pic.my-tasks.*') ? 'active' : '' }}">
+    <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring', 'pic.my-tasks.*') ? 'active' : '' }}" data-title="Monitoring & Tugas">
         <i class="bi bi-list-check"></i>
         <span>Monitoring & Tugas Saya</span>
         @if($pendingTasks > 0)
@@ -137,7 +137,7 @@
         @endif
     </a>
     
-    <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}">
+    <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}" data-title="Point Saya">
         <i class="bi bi-trophy-fill"></i>
         <span>Point Saya</span>
         @if($totalPoints > 0)
@@ -153,27 +153,27 @@
         <span>Pengelolaan Jurnal</span>
     </div>
     
-    <a href="{{ route('pic.journals.index') }}" class="nav-link {{ request()->routeIs('pic.journals.*') ? 'active' : '' }}">
+    <a href="{{ route('pic.journals.index') }}" class="nav-link {{ request()->routeIs('pic.journals.*') ? 'active' : '' }}" data-title="Data Jurnal">
         <i class="bi bi-journal-text"></i>
         <span>Data Jurnal</span>
     </a>
     
-    <a href="{{ route('pic.journal-slots.index') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.index', 'pic.journal-slots.create', 'pic.journal-slots.edit') ? 'active' : '' }}">
+    <a href="{{ route('pic.journal-slots.index') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.index', 'pic.journal-slots.create', 'pic.journal-slots.edit') ? 'active' : '' }}" data-title="Data Slot">
         <i class="bi bi-calendar3"></i>
         <span>Data Slot</span>
     </a>
     
-    <a href="{{ route('pic.journal-slots.monitoring') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.monitoring') ? 'active' : '' }}">
+    <a href="{{ route('pic.journal-slots.monitoring') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.monitoring') ? 'active' : '' }}" data-title="Monitoring Slot">
         <i class="bi bi-bar-chart-line"></i>
         <span>Monitoring Slot</span>
     </a>
     
-    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}">
+    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit">
         <i class="bi bi-file-earmark-text"></i>
         <span>Data Submit</span>
     </a>
     
-    <a href="{{ route('pic.accreditations.index') }}" class="nav-link {{ request()->routeIs('pic.accreditations.*') ? 'active' : '' }}">
+    <a href="{{ route('pic.accreditations.index') }}" class="nav-link {{ request()->routeIs('pic.accreditations.*') ? 'active' : '' }}" data-title="Akreditasi">
         <i class="bi bi-award-fill"></i>
         <span>Akreditasi</span>
     </a>
@@ -186,7 +186,7 @@
         <span>Tim</span>
     </div>
     
-    <a href="{{ route('pic.reviewers.index') }}" class="nav-link {{ request()->routeIs('pic.reviewers.*') ? 'active' : '' }}">
+    <a href="{{ route('pic.reviewers.index') }}" class="nav-link {{ request()->routeIs('pic.reviewers.*') ? 'active' : '' }}" data-title="Reviewer">
         <i class="bi bi-person-check-fill"></i>
         <span>Reviewer</span>
     </a>
