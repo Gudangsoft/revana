@@ -648,11 +648,11 @@
                                     <select class="inline-assign-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="reviewer1"
-                                            data-model="user"
+                                            data-model="pic"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ $s->petugas_reviewer1_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                        @foreach($pics as $pic)
+                                            <option value="{{ $pic->id }}" {{ $s->petugas_reviewer1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
@@ -681,11 +681,11 @@
                                     <select class="inline-assign-select {{ $s->petugas_reviewer2_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="reviewer2"
-                                            data-model="user"
+                                            data-model="pic"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ $s->petugas_reviewer2_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                        @foreach($pics as $pic)
+                                            <option value="{{ $pic->id }}" {{ $s->petugas_reviewer2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
