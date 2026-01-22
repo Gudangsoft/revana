@@ -627,24 +627,17 @@ class JournalManagementController extends Controller
     }
 
     /**
-     * Update petugas reviewer assignment (only for Editor 2)
+     * Update petugas assignment (for all stages)
      */
     public function updatePetugas(Request $request)
     {
-        $picId = auth()->guard('pic')->id();
-        
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'field' => 'required|string|in:petugas_reviewer1_id,petugas_reviewer2_id',
+            'field' => 'required|string|in:petugas_submit_id,petugas_editor1_id,petugas_author1_id,petugas_editor2_id,petugas_reviewer1_id,petugas_reviewer2_id,petugas_editor3_id,petugas_author2_id,petugas_production_id',
             'value' => 'nullable|exists:pics,id',
         ]);
         
         $submission = Submission::findOrFail($request->submission_id);
-        
-        // Only Editor 2 can assign reviewers
-        if ($submission->petugas_editor2_id != $picId) {
-            return response()->json(['success' => false, 'message' => 'Hanya Editor 2 yang dapat mengubah petugas reviewer'], 403);
-        }
         
         $submission->{$request->field} = $request->value ?: null;
         $submission->save();

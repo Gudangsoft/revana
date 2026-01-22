@@ -620,20 +620,28 @@
                                 @endif
                             </td>
                             <td>
-                                @if($s->petugas_submit_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasSubmit?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_submit_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_submit_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             
                             <!-- Editor 1 -->
                             <td>
-                                @if($s->petugas_editor1_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasEditor1?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_editor1_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_editor1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td>
                                 @if($s->petugas_editor1_id == $currentPicId)
@@ -682,11 +690,15 @@
                             
                             <!-- Author 1 -->
                             <td>
-                                @if($s->petugas_author1_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasAuthor1?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_author1_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_author1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td class="text-center">
                                 @if($s->petugas_author1_id == $currentPicId)
@@ -702,11 +714,15 @@
                             
                             <!-- Editor 2 -->
                             <td>
-                                @if($s->petugas_editor2_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasEditor2?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_editor2_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_editor2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td>
                                 @if($s->petugas_editor2_id == $currentPicId)
@@ -797,11 +813,15 @@
                             
                             <!-- Editor 3 -->
                             <td>
-                                @if($s->petugas_editor3_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasEditor3?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_editor3_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_editor3_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td class="text-center">
                                 @if($s->petugas_editor3_id == $currentPicId)
@@ -817,11 +837,15 @@
                             
                             <!-- Author 2 -->
                             <td>
-                                @if($s->petugas_author2_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasAuthor2?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_author2_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_author2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td class="text-center">
                                 @if($s->petugas_author2_id == $currentPicId)
@@ -837,11 +861,15 @@
                             
                             <!-- Production -->
                             <td>
-                                @if($s->petugas_production_id == $currentPicId)
-                                    <span class="badge bg-primary">Saya</span>
-                                @else
-                                    {{ $s->petugasProduction?->name ?? '-' }}
-                                @endif
+                                <select class="form-select form-select-sm" style="font-size: 0.55rem; padding: 1px 2px; width: 80px;"
+                                        data-submission="{{ $s->id }}"
+                                        data-field="petugas_production_id"
+                                        onchange="updatePetugas(this)">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($pics as $pic)
+                                        <option value="{{ $pic->id }}" {{ $s->petugas_production_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td>
                                 @if($s->link_publish)
