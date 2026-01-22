@@ -53,8 +53,9 @@ Route::get('/pic-login-test', function () {
 Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'showForm'])->name('reviewer-registration.form');
 Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store'])->name('reviewer-registration.store');
 
-// Public LOA Search (no login required)
-Route::get('/cari-loa', [\App\Http\Controllers\PublicLoaController::class, 'index'])->name('public.loa.search');
+// Public Slot Info (no login required)
+Route::get('/info-slot', [\App\Http\Controllers\PublicLoaController::class, 'index'])->name('public.slot.info');
+Route::get('/info-slot/{slot}', [\App\Http\Controllers\PublicLoaController::class, 'show'])->name('public.slot.detail');
 
 // Guest routes
 Route::middleware('guest')->group(function () {

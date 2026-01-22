@@ -571,13 +571,12 @@
                                             if (substr($waNumber, 0, 1) === '0') {
                                                 $waNumber = '62' . substr($waNumber, 1);
                                             }
-                                            $waMessage = "Salam sejahtera untuk author bernama *{$s->nama_penulis}*\n\n";
-                                            $waMessage .= "Dengan kode submit: *{$s->kode_submit}*\n";
-                                            $waMessage .= "Link artikel: {$s->link_artikel}\n";
-                                            $waMessage .= "Kode LOA: *{$s->kode_loa}*\n\n";
-                                            $waMessage .= "User: `{$s->username_author}`\n";
-                                            $waMessage .= "Pass: `{$s->password_author}`\n\n";
-                                            $waMessage .= "Sedang dalam proses *{$s->status}*";
+                                            $waMessage = "Selamat Artikel anda sudah terpublikasi:\n\n";
+                                            $waMessage .= "Kode artikel: *{$s->id_artikel}*\n";
+                                            $waMessage .= "Nama Penulis: *{$s->nama_penulis}*\n";
+                                            $waMessage .= "Link Publikasi: {$s->link_publikasi}\n\n";
+                                            $waMessage .= "Jangan lupa di referensikan ke teman2 nya.\n\n";
+                                            $waMessage .= "SALAM APJI";
                                             $waUrl = "https://wa.me/{$waNumber}?text=" . urlencode($waMessage);
                                         @endphp
                                         <a href="{{ $waUrl }}" target="_blank" class="btn btn-success btn-sm" style="padding: 2px 6px; font-size: 0.7rem;" title="Chat WhatsApp {{ $s->no_hp_penulis }}">

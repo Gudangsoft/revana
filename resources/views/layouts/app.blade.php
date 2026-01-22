@@ -3,6 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI. Platform manajemen jurnal ilmiah, review artikel, dan penghargaan bagi reviewer di Indonesia.">
+    <meta name="keywords" content="SIPERA, APJI, Asosiasi Penerbit Jurnal Indonesia, reviewer jurnal, insentif reviewer, penghargaan reviewer, manajemen jurnal ilmiah, jurnal Indonesia, peer review, publikasi ilmiah, akreditasi jurnal, LOA jurnal">
+    <meta name="author" content="APJI - Asosiasi Penerbit Jurnal Indonesia">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Indonesian">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])">
+    <meta property="og:description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI untuk manajemen jurnal ilmiah dan penghargaan reviewer">
+    <meta property="og:site_name" content="{{ $appSettings['app_name'] }}">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])">
+    <meta name="twitter:description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI">
+    
     <title>@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])</title>
     @if($appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">

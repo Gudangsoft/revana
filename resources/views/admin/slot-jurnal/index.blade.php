@@ -114,9 +114,9 @@
                     </label>
                     <div class="input-group">
                         <select name="sort_by" class="form-select">
-                            <option value="kode_loa" {{ request('sort_by') == 'kode_loa' ? 'selected' : '' }}>Kode LOA</option>
+                            <option value="kode_slot" {{ request('sort_by') == 'kode_slot' ? 'selected' : '' }}>Kode Slot</option>
                             <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Tanggal</option>
-                            <option value="kapasitas" {{ request('sort_by') == 'kapasitas' ? 'selected' : '' }}>Kapasitas</option>
+                            <option value="jumlah_slot" {{ request('sort_by') == 'jumlah_slot' ? 'selected' : '' }}>Jumlah Slot</option>
                         </select>
                         <select name="sort_order" class="form-select" style="max-width: 80px;">
                             <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>▲</option>
@@ -170,10 +170,10 @@
                             <i class="bi bi-building"></i> Penerbit
                         </th>
                         <th style="width: 10%" class="text-center">
-                            <i class="bi bi-bar-chart"></i> Kapasitas
+                            <i class="bi bi-bar-chart"></i> Jumlah Slot
                         </th>
                         <th style="width: 10%" class="text-center">
-                            <i class="bi bi-check2-circle"></i> Terisi
+                            <i class="bi bi-check2-circle"></i> Slot Terpakai
                         </th>
                         <th style="width: 10%" class="text-center">
                             <i class="bi bi-hourglass-split"></i> Sisa
@@ -186,11 +186,11 @@
                     <tr>
                         <td class="text-center">{{ $slots->firstItem() + $index }}</td>
                         <td>
-                            <strong class="text-primary">{{ $slot->kode_loa }}</strong>
-                            @if($slot->journalMaster && $slot->journalMaster->latest_accreditation)
+                            <strong class="text-primary">{{ $slot->kode_slot }}</strong>
+                            @if($slot->journalMaster && $slot->journalMaster->accreditation)
                                 <br>
-                                <span class="badge bg-{{ $slot->journalMaster->latest_accreditation->accreditation_badge_class }} mt-1">
-                                    {{ $slot->journalMaster->latest_accreditation->accreditation }}
+                                <span class="badge bg-info mt-1">
+                                    {{ $slot->journalMaster->accreditation }}
                                 </span>
                             @endif
                         </td>
@@ -202,20 +202,20 @@
                         </td>
                         <td>{{ $slot->journalMaster->penerbit ?? '-' }}</td>
                         <td class="text-center">
-                            <span class="badge bg-primary fs-6">{{ $slot->kapasitas }}</span>
+                            <span class="badge bg-primary fs-6">{{ $slot->jumlah_slot }}</span>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-info fs-6">{{ $slot->jumlah_terisi }}</span>
+                            <span class="badge bg-info fs-6">{{ $slot->slot_terpakai }}</span>
                         </td>
                         <td class="text-center">
                             @php
-                                $sisa = $slot->kapasitas - $slot->jumlah_terisi;
+                                $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
                                 $badgeClass = $sisa > 0 ? 'success' : 'secondary';
                             @endphp
                             <span class="badge bg-{{ $badgeClass }} fs-6">{{ $sisa }}</span>
                         </td>
                         <td class="text-center">
-                            @if($slot->jumlah_terisi >= $slot->kapasitas)
+                            @if($slot->slot_terpakai >= $slot->jumlah_slot)
                                 <span class="badge bg-danger">
                                     <i class="bi bi-x-circle"></i> Penuh
                                 </span>

@@ -3,6 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Daftar sebagai reviewer jurnal ilmiah di SIPERA APJI. Dapatkan insentif dan penghargaan untuk setiap review artikel yang Anda selesaikan.">
+    <meta name="keywords" content="daftar reviewer, pendaftaran reviewer, reviewer jurnal, menjadi reviewer, peer reviewer Indonesia, APJI reviewer, insentif reviewer, daftar peer review">
+    <meta name="author" content="APJI - Asosiasi Penerbit Jurnal Indonesia">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Indonesian">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Pendaftaran Reviewer - SIPERA APJI">
+    <meta property="og:description" content="Daftar sebagai reviewer jurnal ilmiah dan dapatkan insentif serta penghargaan">
+    <meta property="og:site_name" content="{{ $appSettings['app_name'] }}">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pendaftaran Reviewer - SIPERA APJI">
+    <meta name="twitter:description" content="Daftar sebagai reviewer jurnal ilmiah dan dapatkan insentif serta penghargaan">
+    
     <title>Pendaftaran Reviewer - {{ $appSettings['app_name'] }}</title>
     @if($appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">

@@ -17,7 +17,7 @@ class SlotJurnalController extends Controller
         // Search by LOA
         if ($request->filled('search_loa')) {
             $searchLoa = $request->search_loa;
-            $query->where('kode_loa', 'like', "%{$searchLoa}%");
+            $query->where('kode_slot', 'like', "%{$searchLoa}%");
         }
         
         // Filter by journal
@@ -28,14 +28,14 @@ class SlotJurnalController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             if ($request->status === 'available') {
-                $query->whereColumn('jumlah_terisi', '<', 'kapasitas');
+                $query->whereColumn('slot_terpakai', '<', 'jumlah_slot');
             } elseif ($request->status === 'full') {
-                $query->whereColumn('jumlah_terisi', '>=', 'kapasitas');
+                $query->whereColumn('slot_terpakai', '>=', 'jumlah_slot');
             }
         }
         
         // Sort
-        $sortBy = $request->get('sort_by', 'kode_loa');
+        $sortBy = $request->get('sort_by', 'kode_slot');
         $sortOrder = $request->get('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
         
@@ -47,8 +47,8 @@ class SlotJurnalController extends Controller
         // Statistics
         $stats = [
             'total_slots' => JournalSlot::count(),
-            'available_slots' => JournalSlot::whereColumn('jumlah_terisi', '<', 'kapasitas')->count(),
-            'full_slots' => JournalSlot::whereColumn('jumlah_terisi', '>=', 'kapasitas')->count(),
+            'available_slots' => JournalSlot::whereColumn('slot_terpakai', '<', 'jumlah_slot')->count(),
+            'full_slots' => JournalSlot::whereColumn('slot_terpakai', '>=', 'jumlah_slot')->count(),
             'total_submissions' => Submission::count(),
         ];
         
