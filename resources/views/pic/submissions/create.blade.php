@@ -163,6 +163,8 @@
     </div>
 </div>
 
+@endsection
+
 @push('scripts')
 <script>
 // Journal search functionality with textbox display
@@ -279,4 +281,3 @@ if (hiddenInput.value) {
 }
 </script>
 @endpush
-@endsection
