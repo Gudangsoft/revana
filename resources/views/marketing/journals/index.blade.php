@@ -8,6 +8,39 @@
     <span class="badge bg-primary fs-6">Total: {{ $journals->total() }} jurnal</span>
 </div>
 
+<!-- Search & Filter Form -->
+<div class="card mb-3 shadow-sm border-0">
+    <div class="card-body py-2">
+        <form method="GET" action="{{ route('marketing.journals.index') }}" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="search" class="form-control form-control-sm" 
+                       placeholder="🔍 Cari nama jurnal atau publisher..." value="{{ request('search') }}">
+            </div>
+            <div class="col-md-3">
+                <select name="akreditasi" class="form-select form-select-sm">
+                    <option value="">-- Semua Akreditasi --</option>
+                    <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                    <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                    <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                    <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                    <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                    <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-search"></i> Cari
+                    </button>
+                    <a href="{{ route('marketing.journals.index') }}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-x-circle"></i> Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <div class="table-responsive">

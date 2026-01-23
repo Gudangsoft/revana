@@ -282,15 +282,30 @@ class DashboardController extends Controller
     /**
      * Journals Index for Marketing
      */
-    public function journalsIndex()
+    public function journalsIndex(Request $request)
     {
         $marketing = Auth::guard('marketing')->user();
-        $journals = JournalMaster::with(['slots' => function($q) {
+        
+        $query = JournalMaster::with(['slots' => function($q) {
                 $q->where('is_active', true);
             }])
-            ->where('is_active', true)
-            ->orderBy('nama_jurnal')
-            ->paginate(20);
+            ->where('is_active', true);
+        
+        // Search by nama jurnal or publisher
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_jurnal', 'like', "%{$search}%")
+                  ->orWhere('publisher', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by akreditasi
+        if ($request->filled('akreditasi')) {
+            $query->where('akreditasi', $request->akreditasi);
+        }
+        
+        $journals = $query->orderBy('nama_jurnal')->paginate(20)->withQueryString();
         
         return view('marketing.journals.index', compact('marketing', 'journals'));
     }
@@ -305,9 +320,24 @@ class DashboardController extends Controller
         $query = JournalSlot::with('journalMaster')
             ->where('is_active', true);
         
+        // Search by nama jurnal
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('journalMaster', function($q) use ($search) {
+                $q->where('nama_jurnal', 'like', "%{$search}%");
+            });
+        }
+        
         // Filter by journal
         if ($request->filled('journal_master_id')) {
             $query->where('journal_master_id', $request->journal_master_id);
+        }
+        
+        // Filter by akreditasi
+        if ($request->filled('akreditasi')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('akreditasi', $request->akreditasi);
+            });
         }
         
         // Filter by year
@@ -315,9 +345,15 @@ class DashboardController extends Controller
             $query->where('tahun', $request->tahun);
         }
         
+        // Filter by month
+        if ($request->filled('bulan')) {
+            $query->where('bulan', $request->bulan);
+        }
+        
         $slots = $query->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         

@@ -8,30 +8,55 @@
 
     <!-- Filter -->
     <div class="card mb-3">
-        <div class="card-body">
-            <form action="{{ route('marketing.journal-slots.index') }}" method="GET" class="row g-3">
-                <div class="col-md-4">
+        <div class="card-body py-2">
+            <form action="{{ route('marketing.journal-slots.index') }}" method="GET" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small">Cari Nama Jurnal</label>
+                    <input type="text" name="search" class="form-control form-control-sm" 
+                           placeholder="🔍 Ketik nama jurnal..." value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2">
                     <label class="form-label small">Jurnal</label>
                     <select name="journal_master_id" class="form-select form-select-sm">
-                        <option value="">-- Semua Jurnal --</option>
+                        <option value="">-- Semua --</option>
                         @foreach($journals as $j)
                             <option value="{{ $j->id }}" {{ request('journal_master_id') == $j->id ? 'selected' : '' }}>
-                                {{ $j->nama_jurnal }}
+                                {{ Str::limit($j->nama_jurnal, 30) }}
                             </option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label small">Akreditasi</label>
+                    <select name="akreditasi" class="form-select form-select-sm">
+                        <option value="">-- Semua --</option>
+                        <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                        <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                        <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                        <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                        <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                        <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Bulan</label>
+                    <select name="bulan" class="form-select form-select-sm">
+                        <option value="">-- Semua --</option>
+                        @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $month)
+                            <option value="{{ $month }}" {{ request('bulan') == $month ? 'selected' : '' }}>{{ $month }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-1">
                     <label class="form-label small">Tahun</label>
                     <input type="number" name="tahun" class="form-control form-control-sm" value="{{ request('tahun') }}" placeholder="2026">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small">&nbsp;</label>
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-search"></i> Filter
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-search"></i> Cari
                         </button>
-                        <a href="{{ route('marketing.journal-slots.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <a href="{{ route('marketing.journal-slots.index') }}" class="btn btn-secondary btn-sm">
                             <i class="bi bi-x-circle"></i>
                         </a>
                     </div>
@@ -49,6 +74,7 @@
                             <th style="width: 50px;">No</th>
                             <th>Kode Slot</th>
                             <th>Jurnal</th>
+                            <th>Publisher</th>
                             <th>Volume</th>
                             <th>Nomor</th>
                             <th>Bulan/Tahun</th>
@@ -65,7 +91,13 @@
                         <tr>
                             <td>{{ $slots->firstItem() + $index }}</td>
                             <td><code>{{ $slot->kode_slot }}</code></td>
-                            <td>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</td>
+                            <td>
+                                <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
+                                @if($slot->journalMaster->akreditasi)
+                                    <br><small class="badge bg-success">{{ $slot->journalMaster->akreditasi }}</small>
+                                @endif
+                            </td>
+                            <td><small>{{ $slot->journalMaster->publisher ?? '-' }}</small></td>
                             <td><span class="badge bg-secondary">Vol. {{ $slot->volume }}</span></td>
                             <td><span class="badge bg-secondary">No. {{ $slot->nomor }}</span></td>
                             <td>{{ $slot->bulan }} {{ $slot->tahun }}</td>
@@ -104,7 +136,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data slot</p>
                             </td>
