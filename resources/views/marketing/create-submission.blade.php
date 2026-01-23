@@ -50,8 +50,8 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">ID Artikel</label>
-                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Opsional">
+                    <label class="form-label">ID Artikel <span class="text-danger">*</span></label>
+                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Masukkan ID Artikel" required>
                     @error('id_artikel')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

@@ -165,7 +165,7 @@ class DashboardController extends Controller
         
         $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
-            'id_artikel' => 'nullable|string|max:100',
+            'id_artikel' => 'required|string|max:100',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
             'nama_penulis' => 'required|string|max:255',
