@@ -34,7 +34,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="journal_master_id" class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
+                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Ketik untuk mencari jurnal..." autocomplete="off">
                                 <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" required size="8" style="height: auto;">
                                     <option value="">-- Pilih Jurnal --</option>
                                     @foreach($journals as $journal)
@@ -43,7 +43,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari.</small>
+                                <small class="text-muted"><strong>Cara:</strong> Ketik nama jurnal, hasil muncul di bawah, klik untuk pilih.</small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -222,10 +222,14 @@ const searchInput = document.getElementById('search_journal');
 const journalSelect = document.getElementById('journal_master_id');
 const options = journalSelect.querySelectorAll('option');
 
+console.log('Search initialized. Total journals:', options.length - 1);
+
 searchInput.addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase().trim();
     let visibleCount = 0;
     let lastVisibleOption = null;
+    
+    console.log('Searching for:', searchTerm);
     
     options.forEach(option => {
         if (option.value === '') {
@@ -243,10 +247,20 @@ searchInput.addEventListener('input', function() {
         }
     });
     
+    console.log('Visible results:', visibleCount);
+    
     // Auto-select if only one result
     if (visibleCount === 1 && lastVisibleOption) {
+        console.log('Auto-selecting:', lastVisibleOption.text);
         lastVisibleOption.selected = true;
         journalSelect.dispatchEvent(new Event('change'));
+    }
+});
+
+// User can also click directly on dropdown to select
+journalSelect.addEventListener('click', function() {
+    if (this.value) {
+        console.log('Journal clicked:', this.value);
     }
 });
 
@@ -258,6 +272,8 @@ document.getElementById('journal_master_id').addEventListener('change', function
     const journalId = this.value;
     const slotSelect = document.getElementById('journal_slot_id');
     
+    console.log('Journal changed to:', journalId);
+    
     if (!journalId) {
         slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
         return;
@@ -265,19 +281,33 @@ document.getElementById('journal_master_id').addEventListener('change', function
     
     slotSelect.innerHTML = '<option value="">Loading...</option>';
     
-    fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
-        .then(response => response.json())
+    const url = `{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`;
+    console.log('Fetching slots from:', url);
+    
+    fetch(url)
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Slots received:', data.length);
+            if (data.length === 0) {
+                slotSelect.innerHTML = '<option value="">Tidak ada slot tersedia</option>';
+                return;
+            }
             let options = '<option value="">-- Pilih Slot --</option>';
             data.forEach(slot => {
                 options += `<option value="${slot.id}">${slot.text}</option>`;
             });
             slotSelect.innerHTML = options;
+            console.log('Slots loaded successfully');
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error loading slots:', error);
             slotSelect.innerHTML = '<option value="">Error loading slots</option>';
+            alert('Error loading slots. Check console for details.');
         });
+});
 });
 </script>
 @endpush
