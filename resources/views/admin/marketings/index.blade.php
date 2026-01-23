@@ -20,31 +20,36 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-megaphone"></i> Daftar Marketing</span>
-                <div class="btn-group">
+                <div class="d-flex gap-2">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i> Export/Import
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.marketings.export') }}">
+                                    <i class="bi bi-file-earmark-excel"></i> Export to Excel
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
+                                    <i class="bi bi-upload"></i> Import dari Excel
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.marketings.template') }}">
+                                    <i class="bi bi-file-earmark-arrow-down"></i> Download Template
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                        <i class="bi bi-key-fill"></i> Reset Semua Password
+                    </button>
                     <a href="{{ route('admin.marketings.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah Marketing
                     </a>
-                    <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                        <i class="bi bi-download"></i> Export/Import
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('admin.marketings.export') }}">
-                                <i class="bi bi-file-earmark-excel"></i> Export to Excel
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
-                                <i class="bi bi-upload"></i> Import dari Excel
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('admin.marketings.template') }}">
-                                <i class="bi bi-file-earmark-arrow-down"></i> Download Template
-                            </a>
-                        </li>
-                    </ul>
                 </div>
             </div>
             <div class="card-body">
@@ -175,4 +180,64 @@
     </div>
 </div>
 
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-key-fill"></i> Reset Semua Password Marketing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.marketings.reset-all-passwords') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Perhatian!</strong><br>
+                        Tindakan ini akan mereset password <strong>SEMUA MARKETING</strong> ke password default.
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <strong>Password Default:</strong><br>
+                        <code class="fs-5">marketing123</code><br>
+                        <small class="text-muted">Semua marketing akan menggunakan password ini untuk login</small>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="confirmResetMarketing" required>
+                        <label class="form-check-label" for="confirmResetMarketing">
+                            Saya memahami dan ingin melanjutkan reset password semua marketing
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning" id="btnResetPasswordMarketing">
+                        <i class="bi bi-key-fill"></i> Reset Semua Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+const resetPasswordFormMarketing = document.querySelector('#resetPasswordModal form');
+const btnResetPasswordMarketing = document.getElementById('btnResetPasswordMarketing');
+
+if (resetPasswordFormMarketing) {
+    resetPasswordFormMarketing.addEventListener('submit', function() {
+        // Disable button and show loading
+        btnResetPasswordMarketing.disabled = true;
+        btnResetPasswordMarketing.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+        
+        // Show loading overlay
+        const modal = document.getElementById('resetPasswordModal');
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        overlay.innerHTML = '<div class="spinner-border text-warning" role="status"></div>';
+        modal.querySelector('.modal-content').style.position = 'relative';
+        modal.querySelector('.modal-content').appendChild(overlay);
+    });
+}
+</script>
+@endpush
 @endsection

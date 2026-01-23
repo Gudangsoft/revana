@@ -185,7 +185,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning">
+                    <button type="submit" class="btn btn-warning" id="btnResetPassword">
                         <i class="bi bi-key-fill"></i> Reset Semua Password
                     </button>
                 </div>
@@ -193,4 +193,28 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+const resetPasswordForm = document.querySelector('#resetPasswordModal form');
+const btnResetPassword = document.getElementById('btnResetPassword');
+
+if (resetPasswordForm) {
+    resetPasswordForm.addEventListener('submit', function() {
+        // Disable button and show loading
+        btnResetPassword.disabled = true;
+        btnResetPassword.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+        
+        // Show loading overlay
+        const modal = document.getElementById('resetPasswordModal');
+        const modalBody = modal.querySelector('.modal-body');
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        overlay.innerHTML = '<div class="spinner-border text-warning" role="status"></div>';
+        modal.querySelector('.modal-content').style.position = 'relative';
+        modal.querySelector('.modal-content').appendChild(overlay);
+    });
+}
+</script>
+@endpush
 @endsection

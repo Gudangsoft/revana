@@ -196,7 +196,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/marketings/{marketing}/login-as', [MarketingController::class, 'loginAs'])->name('marketings.login-as');
         Route::get('/marketings-export', [MarketingController::class, 'export'])->name('marketings.export');
         Route::post('/marketings-import', [MarketingController::class, 'import'])->name('marketings.import');
-        Route::get('/marketings-template', [MarketingController::class, 'template'])->name('marketings.template');
+        Route::get('/marketings-template', [MarketingController::class, 'downloadTemplate'])->name('marketings.template');
+        Route::post('/marketings-reset-all-passwords', [MarketingController::class, 'resetAllPasswords'])->name('marketings.reset-all-passwords');
         
         // Marketing Point Report
         Route::get('/marketing-points', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'index'])->name('marketing-points.index');

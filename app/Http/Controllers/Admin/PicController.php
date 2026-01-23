@@ -134,25 +134,20 @@ class PicController extends Controller
 
     public function downloadTemplate()
     {
-        $headers = ['Nama', 'Username', 'Email', 'Telepon', 'Status'];
-        $sample = [
-            ['John Doe', 'john_doe', 'john@example.com', '081234567890', 'Aktif'],
-            ['Jane Smith', 'jane_smith', 'jane@example.com', '089876543210', 'Nonaktif'],
-        ];
-
-        $callback = function() use ($headers, $sample) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-            foreach ($sample as $row) {
-                fputcsv($file, $row);
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
+            public function array(): array
+            {
+                return [
+                    ['John Doe', 'john_doe', 'john@example.com', '081234567890', 'Aktif'],
+                    ['Jane Smith', 'jane_smith', 'jane@example.com', '089876543210', 'Nonaktif'],
+                ];
             }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="template_pics.csv"',
-        ]);
+            
+            public function headings(): array
+            {
+                return ['Nama', 'Username', 'Email', 'Telepon', 'Status'];
+            }
+        }, 'template_pics.xlsx');
     }
 
     /**
@@ -243,11 +238,13 @@ class PicController extends Controller
     {
         $defaultPassword = bcrypt('pic123');
         
-        $count = Pic::query()->update([
-            'password' => $defaultPassword
+        // Use single query for better performance
+        $count = DB::table('pics')->update([
+            'password' => $defaultPassword,
+            'updated_at' => now()
         ]);
         
         return redirect()->route('admin.pics.index')
-            ->with('success', "Password {$count} PIC berhasil direset ke default: pic123");
+            ->with('success', "Berhasil! Password {$count} PIC telah direset ke default: pic123");
     }
 }

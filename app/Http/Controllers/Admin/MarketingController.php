@@ -9,6 +9,7 @@ use App\Imports\MarketingsImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MarketingController extends Controller
@@ -139,35 +140,40 @@ class MarketingController extends Controller
      */
     public function template()
     {
-        $headers = [
-            'nama',
-            'email',
-            'telepon',
-            'password',
-            'status',
-        ];
-
-        $example = [
-            'John Doe',
-            'john@example.com',
-            '081234567890',
-            'password123',
-            'Aktif',
-        ];
-
-        $data = [$headers, $example];
-
-        $callback = function() use ($data) {
-            $file = fopen('php://output', 'w');
-            foreach ($data as $row) {
-                fputcsv($file, $row);
+    /**
+     * Download template Excel
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
+            public function array(): array
+            {
+                return [
+                    ['John Doe', 'john@example.com', '081234567890', 'password123', 'Aktif'],
+                ];
             }
-            fclose($file);
-        };
+            
+            public function headings(): array
+            {
+                return ['Nama', 'Email', 'Telepon', 'Password', 'Status'];
+            }
+        }, 'template_marketing.xlsx');
+    }
 
-        return response()->stream($callback, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="template_import_marketing.csv"',
+    /**
+     * Reset all Marketing passwords to default
+     */
+    public function resetAllPasswords()
+    {
+        $defaultPassword = Hash::make('marketing123');
+        
+        // Use single query for better performance
+        $count = DB::table('marketings')->update([
+            'password' => $defaultPassword,
+            'updated_at' => now()
         ]);
+        
+        return redirect()->route('admin.marketings.index')
+            ->with('success', "Berhasil! Password {$count} Marketing telah direset ke default: marketing123");
     }
 }
