@@ -192,10 +192,7 @@ class DashboardController extends Controller
         
         $kodeSubmit = 'SUB' . date('Y') . $newNumber;
         
-        // Get first admin user as creator (required by foreign key)
-        $firstAdmin = \App\Models\User::first();
-        
-        // Create submission
+        // Create submission (created_by=1 is system default, actual creator tracked via marketing_id)
         $submission = Submission::create([
             'kode_submit' => $kodeSubmit,
             'journal_slot_id' => $request->journal_slot_id,
@@ -210,7 +207,7 @@ class DashboardController extends Controller
             'notes' => $request->notes,
             'tanggal_submit' => now(),
             'status' => 'SUBMITTED',
-            'created_by' => $firstAdmin ? $firstAdmin->id : 1,
+            'created_by' => 1, // System default, actual creator is marketing_id
         ]);
         
         return redirect()
@@ -226,8 +223,8 @@ class DashboardController extends Controller
         $marketing = Auth::guard('marketing')->user();
         
         // Check if this submission belongs to this marketing
-        if ($submission->marketing_id != $marketing->id) {
-            abort(403, 'Unauthorized');
+        if ($submission->marketing_id !== $marketing->id) {
+            abort(403, 'Akses Ditolak - Submission ini bukan milik Anda');
         }
         
         $submission->load([
