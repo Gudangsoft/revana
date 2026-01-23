@@ -165,12 +165,14 @@ class DashboardController extends Controller
         
         $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
+            'id_artikel' => 'nullable|string|max:100',
             'judul_artikel' => 'required|string|max:500',
-            'link_artikel' => 'required|url',
+            'link_artikel' => 'nullable|url',
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:100',
             'password_author' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
         ]);
         
         // Get slot info
@@ -195,12 +197,14 @@ class DashboardController extends Controller
             'kode_submit' => $kodeSubmit,
             'journal_slot_id' => $request->journal_slot_id,
             'marketing_id' => $marketing->id,
+            'id_artikel' => $request->id_artikel,
             'judul_artikel' => $request->judul_artikel,
             'link_artikel' => $request->link_artikel,
             'nama_penulis' => $request->nama_penulis,
             'no_hp_penulis' => $request->no_hp_penulis,
             'username_author' => $request->username_author,
             'password_author' => $request->password_author,
+            'notes' => $request->notes,
             'tanggal_submit' => now(),
             'status' => 'SUBMITTED',
         ]);
