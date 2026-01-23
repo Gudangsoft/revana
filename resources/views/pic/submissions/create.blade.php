@@ -34,7 +34,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal..." autocomplete="off">
+                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
                                 <select class="form-select @error('journal_master_id') is-invalid @enderror" 
                                         id="journal_master_id" 
                                         name="journal_master_id" 
@@ -50,7 +50,9 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Ketik untuk mencari, <strong>klik jurnal</strong> untuk load slot</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> Ketik untuk mencari → Klik jurnal (atau tekan Enter) → Slot akan muncul otomatis
+                                </small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -59,9 +61,17 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="journal_slot_id" class="form-label">Pilih Slot <span class="text-danger">*</span></label>
-                                <select class="form-select @error('journal_slot_id') is-invalid @enderror" id="journal_slot_id" name="journal_slot_id" required>
+                                <select class="form-select @error('journal_slot_id') is-invalid @enderror" 
+                                        id="journal_slot_id" 
+                                        name="journal_slot_id" 
+                                        required
+                                        size="10" 
+                                        style="min-height: 250px;">
                                     <option value="">-- Pilih Jurnal terlebih dahulu --</option>
                                 </select>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3"></i> Slot akan ditampilkan setelah memilih jurnal
+                                </small>
                                 @error('journal_slot_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
