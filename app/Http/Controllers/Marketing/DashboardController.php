@@ -302,7 +302,7 @@ class DashboardController extends Controller
         
         // Filter by akreditasi
         if ($request->filled('akreditasi')) {
-            $query->where('akreditasi', $request->akreditasi);
+            $query->where('accreditation', $request->akreditasi);
         }
         
         $journals = $query->orderBy('nama_jurnal')->paginate(20)->withQueryString();
@@ -336,7 +336,7 @@ class DashboardController extends Controller
         // Filter by akreditasi
         if ($request->filled('akreditasi')) {
             $query->whereHas('journalMaster', function($q) use ($request) {
-                $q->where('akreditasi', $request->akreditasi);
+                $q->where('accreditation', $request->akreditasi);
             });
         }
         

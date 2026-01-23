@@ -93,8 +93,8 @@
                             <td><code>{{ $slot->kode_slot }}</code></td>
                             <td>
                                 <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
-                                @if($slot->journalMaster->akreditasi)
-                                    <br><small class="badge bg-success">{{ $slot->journalMaster->akreditasi }}</small>
+                                @if($slot->journalMaster->accreditation)
+                                    <br><small class="badge bg-success">{{ $slot->journalMaster->accreditation }}</small>
                                 @endif
                             </td>
                             <td><small>{{ $slot->journalMaster->publisher ?? '-' }}</small></td>
