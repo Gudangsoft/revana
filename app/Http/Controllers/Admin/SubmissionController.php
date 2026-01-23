@@ -618,6 +618,7 @@ class SubmissionController extends Controller
         // Get PICs and Users for inline assignment dropdowns
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $users = User::where('role', 'admin')->orderBy('name')->get();
+        $reviewers = User::where('role', 'reviewer')->orderBy('name')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         
         // Statistics
@@ -635,7 +636,7 @@ class SubmissionController extends Controller
         });
         $pendingCount = $pendingValidations->count();
         
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'reviewers', 'marketings', 'pendingValidations', 'pendingCount'));
     }
 
     /**

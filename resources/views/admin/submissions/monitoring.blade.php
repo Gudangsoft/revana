@@ -669,11 +669,11 @@
                                     <select class="inline-assign-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="reviewer1"
-                                            data-model="pic"
+                                            data-model="user"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_reviewer1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                        @foreach($reviewers as $reviewer)
+                                            <option value="{{ $reviewer->id }}" {{ $s->petugas_reviewer1_id == $reviewer->id ? 'selected' : '' }}>{{ $reviewer->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
@@ -702,11 +702,11 @@
                                     <select class="inline-assign-select {{ $s->petugas_reviewer2_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="reviewer2"
-                                            data-model="pic"
+                                            data-model="user"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_reviewer2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                        @foreach($reviewers as $reviewer)
+                                            <option value="{{ $reviewer->id }}" {{ $s->petugas_reviewer2_id == $reviewer->id ? 'selected' : '' }}>{{ $reviewer->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
@@ -1283,8 +1283,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
                             <select class="form-select" name="petugas_id" required>
                                 <option value="">-- Pilih Petugas --</option>
-                                @foreach(\App\Models\Pic::where('is_active', true)->orderBy('name')->get() as $pic)
-                                    <option value="{{ $pic->id }}">{{ $pic->name }}</option>
+                                @foreach($reviewers as $reviewer)
+                                    <option value="{{ $reviewer->id }}">{{ $reviewer->name }}</option>
                                 @endforeach
                             </select>
                         </div>
