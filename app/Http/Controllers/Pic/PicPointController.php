@@ -32,14 +32,25 @@ class PicPointController extends Controller
             $query->where('step', $request->step);
         }
         
-        $pointHistories = $query->paginate(20);
+        $pointHistories = $query->latest()->paginate(20);
         
-        // Statistics
+        // Statistics - calculate real-time
+        $pointsToday = $pic->pointHistories()
+            ->whereDate('created_at', today())
+            ->sum('points_earned');
+            
+        $pointsThisMonth = $pic->pointHistories()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('points_earned');
+            
+        $totalTasks = $pic->pointHistories()->count();
+        
         $stats = [
-            'total_points' => $pic->total_points,
-            'points_today' => $pic->points_today,
-            'points_this_month' => $pic->points_this_month,
-            'total_tasks' => $pic->total_tasks_completed,
+            'total_points' => $pic->total_points ?? 0,
+            'points_today' => $pointsToday,
+            'points_this_month' => $pointsThisMonth,
+            'total_tasks' => $totalTasks,
         ];
         
         // Monthly breakdown for chart
@@ -56,6 +67,7 @@ class PicPointController extends Controller
         $pointsByStep = PicPointHistory::where('pic_id', $pic->id)
             ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
+            ->orderBy('total', 'desc')
             ->get();
         
         $stepConfig = PicPointHistory::POINT_CONFIG;

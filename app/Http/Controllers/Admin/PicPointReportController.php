@@ -87,20 +87,19 @@ class PicPointReportController extends Controller
             $query->where('step', $request->step);
         }
         
-        $pointHistories = $query->paginate(20);
+        $pointHistories = $query->latest()->paginate(20);
         
         // Stats
         $stats = [
-            'total_points' => $pic->total_points,
-            'points_this_month' => $pic->points_this_month,
-            'points_today' => $pic->points_today,
-            'total_tasks' => $pic->total_tasks_completed,
+            'total_points' => $pic->total_points ?? 0,
+            'total_tasks' => $pic->pointHistories()->count(),
         ];
         
         // Points by step
         $pointsByStep = $pic->pointHistories()
             ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
+            ->orderBy('total', 'desc')
             ->get();
         
         $stepConfig = PicPointHistory::POINT_CONFIG;
