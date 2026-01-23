@@ -43,7 +43,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted"><strong>Cara:</strong> Ketik nama jurnal, hasil muncul di bawah, klik untuk pilih.</small>
+                                <small class="text-muted"><strong>Cara:</strong> 1) Ketik nama jurnal 2) <strong>Klik pada hasil yang muncul</strong> 3) Slot akan otomatis muncul</small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -258,10 +258,14 @@ searchInput.addEventListener('input', function() {
 });
 
 // User can also click directly on dropdown to select
-journalSelect.addEventListener('click', function() {
-    if (this.value) {
-        console.log('Journal clicked:', this.value);
-    }
+journalSelect.addEventListener('click', function(e) {
+    // Small delay to ensure the option is selected
+    setTimeout(() => {
+        if (this.value) {
+            console.log('Journal clicked, triggering change for:', this.value);
+            this.dispatchEvent(new Event('change'));
+        }
+    }, 150);
 });
 
 // Focus search on page load
