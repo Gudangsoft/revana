@@ -115,5 +115,3 @@ document.getElementById('submissionForm').addEventListener('submit', function(e)
 });
 </script>
 @endsection
-
-@endsection
