@@ -69,6 +69,17 @@
                             @enderror
                             <small class="text-muted">Tagline atau slogan aplikasi</small>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">URL Aplikasi <span class="text-danger">*</span></label>
+                            <input type="url" class="form-control @error('app_url') is-invalid @enderror" 
+                                   name="app_url" value="{{ old('app_url', $settings['app_url'] ?? '') }}" 
+                                   placeholder="https://example.com" required>
+                            @error('app_url')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">URL lengkap aplikasi (contoh: https://sipera.example.com)</small>
+                        </div>
                     </div>
 
                     <div class="mb-4">
