@@ -179,9 +179,16 @@
                 <div class="result-header">
                     <i class="bi bi-check-circle" style="font-size: 3rem;"></i>
                     <h2>Artikel Ditemukan!</h2>
-                    <div class="status-badge {{ $submission->status == 'PUBLISHED' ? 'success' : ($submission->status == 'REJECTED' ? 'danger' : 'info') }}">
-                        <i class="bi bi-{{ $submission->status == 'PUBLISHED' ? 'check-circle-fill' : ($submission->status == 'REJECTED' ? 'x-circle-fill' : 'clock-fill') }}"></i>
-                        {{ str_replace('_', ' ', $submission->status) }}
+                    @php
+                        // Determine status based on production_valid
+                        $isPublished = $submission->production_valid == 1;
+                        $statusText = $isPublished ? 'TERBIT' : 'DALAM PROSES';
+                        $statusClass = $isPublished ? 'success' : 'info';
+                        $statusIcon = $isPublished ? 'check-circle-fill' : 'clock-fill';
+                    @endphp
+                    <div class="status-badge {{ $statusClass }}">
+                        <i class="bi bi-{{ $statusIcon }}"></i>
+                        {{ $statusText }}
                     </div>
                 </div>
 
