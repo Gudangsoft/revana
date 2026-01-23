@@ -233,24 +233,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchResults = document.getElementById('search_results');
     const slotSelect = document.getElementById('journal_slot_id');
     
-    // Data jurnal - Build array directly
-    const journals = [
-        @foreach($journals as $journal)
-        {
-            id: {{ $journal->id }},
-            nama: {!! json_encode($journal->nama_jurnal) !!},
-            publisher: {!! json_encode($journal->publisher ?? '') !!}
-        },
-        @endforeach
-    ];
+    // Data jurnal - menggunakan JSON encode yang aman
+    const journalsData = {!! json_encode($journals->map(function($j) {
+        return [
+            'id' => $j->id,
+            'nama' => $j->nama_jurnal,
+            'publisher' => $j->publisher ?? ''
+        ];
+    })->values()) !!};
     
-    // Add search field to each journal
-    journals.forEach(j => {
-        j.search = (j.nama + ' ' + j.publisher).toLowerCase();
-    });
+    // Add search field
+    const journals = journalsData.map(j => ({
+        ...j,
+        search: (j.nama + ' ' + j.publisher).toLowerCase()
+    }));
     
     console.log('✅ Journal data loaded:', journals.length, 'journals');
-    console.log('📋 Sample:', journals[0]);
+    if (journals.length > 0) {
+        console.log('📋 Sample:', journals[0]);
+    }
     
     if (journals.length === 0) {
         console.error('❌ No journals found! Check controller data.');
@@ -281,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Jika tidak ada hasil
         if (filtered.length === 0) {
-            searchResults.innerHTML = '<div class="list-group-item text-muted"><i class="bi bi-info-circle"></i> Tidak ada hasil ditemukan untuk "' + searchTerm + '"</div>';
+            searchResults.innerHTML = '<div class="list-group-item text-muted"><i class="bi bi-info-circle"></i> Tidak ada hasil ditemukan untuk "' + escapeHtml(searchTerm) + '"</div>';
             searchResults.style.display = 'block';
             return;
         }
