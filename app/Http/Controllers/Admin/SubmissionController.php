@@ -618,7 +618,6 @@ class SubmissionController extends Controller
         // Get PICs and Users for inline assignment dropdowns
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $users = User::where('role', 'admin')->orderBy('name')->get();
-        $reviewers = User::where('role', 'reviewer')->orderBy('name')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         
         // Statistics
@@ -636,7 +635,7 @@ class SubmissionController extends Controller
         });
         $pendingCount = $pendingValidations->count();
         
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'reviewers', 'marketings', 'pendingValidations', 'pendingCount'));
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
     }
 
     /**
@@ -875,13 +874,11 @@ class SubmissionController extends Controller
     {
         $assignmentType = $request->assignment_type;
         
-        // Determine which table to validate against based on assignment type
-        $isReviewer = in_array($assignmentType, ['reviewer1', 'reviewer2']);
-        
+        // All assignment types now use Pic model
         $request->validate([
             'submission_ids' => 'required|string',
             'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
-            'petugas_id' => 'required|exists:' . ($isReviewer ? 'users' : 'pics') . ',id',
+            'petugas_id' => 'required|exists:pics,id',
             'credentials' => 'nullable|array',
         ]);
 
@@ -892,7 +889,7 @@ class SubmissionController extends Controller
         }
 
         $petugasId = $request->petugas_id;
-        $petugas = $isReviewer ? User::find($petugasId) : Pic::find($petugasId);
+        $petugas = Pic::find($petugasId);
         $credentials = $request->credentials ?? [];
         
         $updated = 0;
@@ -1035,12 +1032,7 @@ class SubmissionController extends Controller
         
         // Validate petugas exists if provided
         if ($petugasId) {
-            $isReviewer = in_array($assignmentType, ['reviewer1', 'reviewer2']);
-            if ($isReviewer) {
-                $petugas = User::find($petugasId);
-            } else {
-                $petugas = Pic::find($petugasId);
-            }
+            $petugas = Pic::find($petugasId);
             
             if (!$petugas) {
                 return response()->json(['success' => false, 'message' => 'Petugas tidak ditemukan']);
@@ -1059,7 +1051,7 @@ class SubmissionController extends Controller
         
         // Log history
         if ($petugasId) {
-            $petugasName = $isReviewer ? User::find($petugasId)->name : Pic::find($petugasId)->name;
+            $petugasName = Pic::find($petugasId)->name;
             $submission->logHistory($assignmentType, 'assigned', "Ditugaskan ke {$petugasName} (Quick Assign)", [
                 'petugas_id' => $petugasId,
                 'petugas_name' => $petugasName,
