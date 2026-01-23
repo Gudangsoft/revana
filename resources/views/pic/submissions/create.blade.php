@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Initialized:', allOptions.length - 1, 'journals');
     
-    // Search functionality
+    // Search functionality - filter journals in real-time
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase().trim();
         
@@ -246,7 +246,20 @@ document.addEventListener('DOMContentLoaded', function() {
             option.style.display = searchData.includes(searchTerm) ? '' : 'none';
         });
         
-        console.log('🔍 Search:', searchTerm);
+        console.log('🔍 Search:', searchTerm, '- Filtered list updated');
+    });
+    
+    // Enhanced: Press Enter on search to select first visible option
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstVisible = allOptions.find(opt => opt.value && opt.style.display !== 'none');
+            if (firstVisible) {
+                journalSelect.value = firstVisible.value;
+                journalSelect.dispatchEvent(new Event('change'));
+                console.log('⌨️ Enter pressed - Selected first match:', firstVisible.value);
+            }
+        }
     });
     
     // When journal selected - load slots immediately
@@ -255,18 +268,30 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!journalId) {
             slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
+            slotSelect.disabled = true;
             return;
         }
         
-        console.log('📌 Selected journal ID:', journalId);
+        console.log('📌 Journal selected, ID:', journalId);
         loadSlots(journalId);
     });
     
-    // Click on option - force selection
+    // Click on option - immediate selection and slot loading
     journalSelect.addEventListener('click', function(e) {
         if (e.target.tagName === 'OPTION' && e.target.value) {
-            console.log('🖱️ Clicked:', e.target.value);
+            console.log('🖱️ Option clicked:', e.target.value);
             this.value = e.target.value;
+            // Small delay to ensure the value is set
+            setTimeout(() => {
+                this.dispatchEvent(new Event('change'));
+            }, 50);
+        }
+    });
+    
+    // Double-click support for better UX
+    journalSelect.addEventListener('dblclick', function() {
+        if (this.value) {
+            console.log('🖱️🖱️ Double-clicked, triggering change');
             this.dispatchEvent(new Event('change'));
         }
     });
@@ -280,16 +305,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
             .then(response => {
-                console.log('📡 Response:', response.status);
+                console.log('📡 Response status:', response.status);
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Received:', data.length, 'slots');
+                console.log('📦 Received slots:', data.length);
                 
                 if (!Array.isArray(data) || data.length === 0) {
                     slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia</option>';
                     slotSelect.disabled = false;
+                    console.log('⚠️ No slots available for this journal');
                     return;
                 }
                 
@@ -300,25 +326,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 slotSelect.innerHTML = html;
                 slotSelect.disabled = false;
-                console.log('✅ Slots loaded successfully');
+                console.log('✅ Slots loaded successfully -', data.length, 'options available');
             })
             .catch(error => {
-                console.error('❌ Error:', error);
+                console.error('❌ Error loading slots:', error);
                 slotSelect.innerHTML = '<option value="">❌ Error: ' + error.message + '</option>';
                 slotSelect.disabled = false;
             });
     }
     
-    // Restore old selection if exists
+    // Restore old selection if exists (after form validation error)
     if (journalSelect.value) {
-        console.log('♻️ Restoring selection:', journalSelect.value);
+        console.log('♻️ Restoring previous selection:', journalSelect.value);
         loadSlots(journalSelect.value);
     }
     
-    // Focus on search input
+    // Focus on search input for better UX
     searchInput.focus();
     
-    console.log('✅ All ready');
+    console.log('✅ Search and slot functionality ready');
 });
 </script>
 @endpush
