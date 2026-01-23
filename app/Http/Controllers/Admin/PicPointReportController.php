@@ -99,7 +99,7 @@ class PicPointReportController extends Controller
         $pointsByStep = $pic->pointHistories()
             ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
-            ->orderBy('total', 'desc')
+            ->orderByRaw('SUM(points_earned) desc')
             ->get();
         
         $stepConfig = PicPointHistory::POINT_CONFIG;
