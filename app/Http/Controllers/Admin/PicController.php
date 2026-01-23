@@ -235,4 +235,19 @@ class PicController extends Controller
         
         return view('admin.pics.activity-report', compact('pics', 'stats', 'allPics'));
     }
+
+    /**
+     * Reset all PICs password to default
+     */
+    public function resetAllPasswords()
+    {
+        $defaultPassword = bcrypt('pic123');
+        
+        $count = Pic::query()->update([
+            'password' => $defaultPassword
+        ]);
+        
+        return redirect()->route('admin.pics.index')
+            ->with('success', "Password {$count} PIC berhasil direset ke default: pic123");
+    }
 }

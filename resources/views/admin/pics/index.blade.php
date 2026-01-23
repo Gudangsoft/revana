@@ -36,6 +36,9 @@
                             <i class="bi bi-upload"></i> Import
                         </button>
                     </div>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                        <i class="bi bi-key-fill"></i> Reset Semua Password
+                    </button>
                     <a href="{{ route('admin.pics.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah PIC
                     </a>
@@ -146,6 +149,44 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-info">
                         <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-key-fill"></i> Reset Semua Password PIC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.pics.reset-all-passwords') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Perhatian!</strong><br>
+                        Tindakan ini akan mereset password <strong>SEMUA PIC</strong> ke password default.
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <strong>Password Default:</strong><br>
+                        <code class="fs-5">pic123</code><br>
+                        <small class="text-muted">Semua PIC akan menggunakan password ini untuk login</small>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="confirmReset" required>
+                        <label class="form-check-label" for="confirmReset">
+                            Saya memahami dan ingin melanjutkan reset password semua PIC
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-key-fill"></i> Reset Semua Password
                     </button>
                 </div>
             </form>

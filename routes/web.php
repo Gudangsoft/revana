@@ -209,6 +209,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
         Route::get('/pics-activity-report', [PicController::class, 'activityReport'])->name('pics.activity-report');
+        Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         
         // PIC Point Report
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
