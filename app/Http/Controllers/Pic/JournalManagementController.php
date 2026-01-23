@@ -680,9 +680,17 @@ class JournalManagementController extends Controller
         
         $currentStageIndex = array_search($request->field, $stageOrder);
         
-        // Check all previous stages must be valid
+        // Check all previous stages must be valid (skip if petugas not assigned)
         for ($i = 0; $i < $currentStageIndex; $i++) {
             $previousStage = $stageOrder[$i];
+            
+            // Skip validation check if petugas for this stage is not assigned
+            $petugasFieldForPreviousStage = $fieldMap[$previousStage] ?? null;
+            if ($petugasFieldForPreviousStage && !$submission->{$petugasFieldForPreviousStage}) {
+                // Petugas not assigned for this stage, skip validation check
+                continue;
+            }
+            
             if (!$submission->{$previousStage}) {
                 $stageNames = [
                     'editor1_valid' => 'Editor 1',
