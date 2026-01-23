@@ -4,13 +4,25 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card">
+    <div class="col-md-10 mx-auto">
+        <div class="card shadow-sm border-0">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Submit Artikel Baru</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('marketing.submissions.store') }}">
+                @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <strong>Terdapat kesalahan:</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+                
+                <form method="POST" action="{{ route('marketing.submissions.store') }}" id="submissionForm">
                     @csrf
                     
                     <!-- Slot Jurnal -->
@@ -18,19 +30,22 @@
                         <label class="form-label">Slot Jurnal <span class="text-danger">*</span></label>
                         <select name="journal_slot_id" class="form-select @error('journal_slot_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Slot Jurnal --</option>
-                            @foreach($slots as $slot)
+                            @forelse($slots as $slot)
                                 <option value="{{ $slot->id }}" {{ old('journal_slot_id') == $slot->id ? 'selected' : '' }}>
                                     {{ $slot->journalMaster->nama_jurnal }} - 
-                                    Volume {{ $slot->volume }}, Nomor {{ $slot->nomor }} 
-                                    ({{ \Carbon\Carbon::parse($slot->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($slot->end_date)->format('d M Y') }})
+                                    {{ $slot->bulan }}/{{ $slot->tahun }}
+                                    @if($slot->volume) Vol. {{ $slot->volume }} @endif
+                                    @if($slot->nomor) No. {{ $slot->nomor }} @endif
                                 </option>
-                            @endforeach
+                            @empty
+                                <option value="" disabled>Tidak ada slot tersedia</option>
+                            @endforelse
                         </select>
                         @error('journal_slot_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="form-text text-muted">
-                            <i class="bi bi-info-circle"></i> Pilih slot jurnal yang masih aktif
+                            <i class="bi bi-info-circle"></i> Pilih slot jurnal yang tersedia
                         </small>
                     </div>
                     
@@ -115,13 +130,32 @@
                         <a href="{{ route('marketing.submissions') }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
                             <i class="bi bi-send"></i> Submit Artikel
                         </button>
                     </div>
                 </form>
             </div>
         </div>
+        
+        @if($slots->count() == 0)
+        <div class="alert alert-warning mt-3">
+            <i class="bi bi-exclamation-triangle-fill"></i> 
+            <strong>Perhatian:</strong> Saat ini tidak ada slot jurnal yang tersedia. 
+            Silakan hubungi admin untuk informasi lebih lanjut.
+        </div>
+        @endif
     </div>
 </div>
+
+@section('scripts')
+<script>
+document.getElementById('submissionForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
+});
+</script>
+@endsection
+
 @endsection

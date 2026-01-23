@@ -149,9 +149,8 @@ class DashboardController extends Controller
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $slots = JournalSlot::with('journalMaster')
             ->where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->orderBy('end_date', 'desc')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
             ->get();
         
         return view('marketing.create-submission', compact('marketing', 'journals', 'slots'));
