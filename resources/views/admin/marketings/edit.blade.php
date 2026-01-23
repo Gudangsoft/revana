@@ -40,10 +40,18 @@
 
                     <div class="mb-3">
                         <label class="form-label">Password Baru</label>
-                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                               name="password" placeholder="Kosongkan jika tidak ingin mengubah password">
+                        <div class="input-group">
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                                   name="password" id="password" placeholder="Kosongkan jika tidak ingin mengubah password">
+                            <button class="btn btn-outline-secondary" type="button" id="setDefaultPassword">
+                                <i class="bi bi-key"></i> Set Default
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
                         @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                         <small class="text-muted">
                             @if($marketing->password)
@@ -51,7 +59,7 @@
                             @else
                             <i class="bi bi-exclamation-circle text-warning"></i> Password belum diatur.
                             @endif
-                            Kosongkan jika tidak ingin mengubah.
+                            Kosongkan jika tidak ingin mengubah. Password default: <code>marketing123</code>
                         </small>
                     </div>
 
@@ -89,3 +97,43 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Set default password
+    document.getElementById('setDefaultPassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        passwordField.type = 'text';
+        passwordField.value = 'marketing123';
+        
+        // Show notification
+        const btn = this;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Set!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    });
+</script>
+@endpush
