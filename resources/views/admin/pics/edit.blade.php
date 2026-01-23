@@ -41,13 +41,21 @@
 
                     <div class="mb-3">
                         <label class="form-label">Password</label>
-                        <input type="text" class="form-control @error('password') is-invalid @enderror" 
-                               name="password" value="" 
-                               placeholder="Kosongkan jika tidak diubah">
-                        <small class="text-muted">Password saat ini tersimpan terenkripsi</small>
+                        <div class="input-group">
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                                   name="password" id="password" value="" 
+                                   placeholder="Kosongkan jika tidak diubah">
+                            <button class="btn btn-outline-secondary" type="button" id="setDefaultPassword">
+                                <i class="bi bi-key"></i> Set Default
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
                         @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
+                        <small class="text-muted">Password saat ini tersimpan terenkripsi. Password default: <code>pic123</code></small>
                     </div>
 
                     <div class="mb-3">
@@ -84,3 +92,43 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Set default password
+    document.getElementById('setDefaultPassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        passwordField.type = 'text';
+        passwordField.value = 'pic123';
+        
+        // Show notification
+        const btn = this;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Set!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    });
+</script>
+@endpush
