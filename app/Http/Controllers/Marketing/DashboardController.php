@@ -192,6 +192,9 @@ class DashboardController extends Controller
         
         $kodeSubmit = 'SUB' . date('Y') . $newNumber;
         
+        // Get first admin user as creator (required by foreign key)
+        $firstAdmin = \App\Models\User::first();
+        
         // Create submission
         $submission = Submission::create([
             'kode_submit' => $kodeSubmit,
@@ -207,7 +210,7 @@ class DashboardController extends Controller
             'notes' => $request->notes,
             'tanggal_submit' => now(),
             'status' => 'SUBMITTED',
-            'created_by' => null, // Marketing submission, not from admin
+            'created_by' => $firstAdmin ? $firstAdmin->id : 1,
         ]);
         
         return redirect()
