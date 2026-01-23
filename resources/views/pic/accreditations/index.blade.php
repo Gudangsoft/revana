@@ -18,7 +18,42 @@
         'SINTA 5' => 'secondary',
         'SINTA 6' => 'dark',
     ];
+    $peringkatIcons = [
+        'Non SINTA' => 'bookmark',
+        'SINTA 1' => 'trophy-fill',
+        'SINTA 2' => 'award-fill',
+        'SINTA 3' => 'bookmark-star-fill',
+        'SINTA 4' => 'bookmark-fill',
+        'SINTA 5' => 'bookmark',
+        'SINTA 6' => 'bookmark',
+    ];
 @endphp
+
+<!-- Akreditasi Cards Summary -->
+<div class="row g-3 mb-4">
+    @foreach($accreditations as $accreditation)
+    @php
+        $color = $peringkatColors[$accreditation->name] ?? 'secondary';
+        $icon = $peringkatIcons[$accreditation->name] ?? 'bookmark';
+        $journalCount = $accreditation->journals ? $accreditation->journals->count() : 0;
+    @endphp
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid var(--bs-{{ $color }}) !important;">
+            <div class="card-body text-center py-3">
+                <div class="rounded-circle bg-{{ $color }} bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-2" style="width: 45px; height: 45px;">
+                    <i class="bi bi-{{ $icon }} text-{{ $color }} fs-5"></i>
+                </div>
+                <h6 class="mb-1">
+                    <span class="badge bg-{{ $color }}">{{ $accreditation->name }}</span>
+                </h6>
+                <p class="text-muted mb-0 small">
+                    <i class="bi bi-journal-text"></i> {{ $journalCount }} Jurnal
+                </p>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
 
 <!-- Jurnal per Akreditasi -->
 <div class="card shadow-sm">
