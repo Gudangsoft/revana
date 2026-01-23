@@ -46,45 +46,44 @@
                 </div>
                 @endif
 
-                <!-- Filter -->
+                <!-- Search & Filter Form -->
                 <form action="{{ route('admin.journal-slots.index') }}" method="GET" class="mb-4">
                     <div class="row g-3">
-                        <div class="col-md-4">
-                            <label for="journal_master_id" class="form-label">Jurnal</label>
-                            <select class="form-select" id="journal_master_id" name="journal_master_id">
-                                <option value="">-- Semua Jurnal --</option>
-                                @foreach($journals as $journal)
-                                    <option value="{{ $journal->id }}" {{ request('journal_master_id') == $journal->id ? 'selected' : '' }}>
-                                        {{ $journal->nama_jurnal }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
                         <div class="col-md-3">
-                            <label for="bulan" class="form-label">Bulan</label>
+                            <input type="text" class="form-control" name="search" placeholder="Cari jurnal / kode slot..." value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-2">
                             <select class="form-select" id="bulan" name="bulan">
-                                <option value="">-- Semua Bulan --</option>
+                                <option value="">-- Bulan --</option>
                                 @foreach($bulanOptions as $key => $value)
                                     <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>{{ $value }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="tahun" class="form-label">Tahun</label>
                             <select class="form-select" id="tahun" name="tahun">
-                                <option value="">-- Semua Tahun --</option>
+                                <option value="">-- Tahun --</option>
                                 @for($y = date('Y') + 1; $y >= 2020; $y--)
                                     <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
                                 @endfor
                             </select>
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="bi bi-search"></i> Filter
+                        <div class="col-md-2">
+                            <select class="form-select" name="status">
+                                <option value="">-- Status --</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
+                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="bi bi-search"></i> Cari
                             </button>
-                            <a href="{{ route('admin.journal-slots.index') }}" class="btn btn-secondary">
+                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status']))
+                            <a href="{{ route('admin.journal-slots.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle"></i> Reset
                             </a>
+                            @endif
                         </div>
                     </div>
                 </form>

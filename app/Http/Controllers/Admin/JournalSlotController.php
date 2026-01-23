@@ -16,9 +16,16 @@ class JournalSlotController extends Controller
     {
         $query = JournalSlot::with(['journalMaster', 'creator', 'submissions']);
         
-        // Filter by journal
-        if ($request->filled('journal_master_id')) {
-            $query->where('journal_master_id', $request->journal_master_id);
+        // Search by journal name, publisher, or kode_slot
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_slot', 'like', "%{$search}%")
+                  ->orWhereHas('journalMaster', function($jq) use ($search) {
+                      $jq->where('nama_jurnal', 'like', "%{$search}%")
+                         ->orWhere('publisher', 'like', "%{$search}%");
+                  });
+            });
         }
         
         // Filter by year
@@ -29,6 +36,11 @@ class JournalSlotController extends Controller
         // Filter by month
         if ($request->filled('bulan')) {
             $query->where('bulan', $request->bulan);
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
         }
         
         $slots = $query->latest()->paginate(20);
