@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Marketing;
+use App\Exports\MarketingsExport;
+use App\Imports\MarketingsImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MarketingController extends Controller
 {
@@ -101,5 +104,70 @@ class MarketingController extends Controller
         
         return redirect()->route('marketing.dashboard')
             ->with('success', 'Anda sekarang login sebagai ' . $marketing->name);
+    }
+
+    /**
+     * Export Marketings to Excel
+     */
+    public function export()
+    {
+        return Excel::download(new MarketingsExport, 'marketings_' . date('Y-m-d_His') . '.xlsx');
+    }
+
+    /**
+     * Import Marketings from Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new MarketingsImport, $request->file('file'));
+
+            return redirect()->route('admin.marketings.index')
+                ->with('success', 'Data marketing berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.marketings.index')
+                ->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Import Template
+     */
+    public function template()
+    {
+        $headers = [
+            'nama',
+            'email',
+            'telepon',
+            'password',
+            'status',
+        ];
+
+        $example = [
+            'John Doe',
+            'john@example.com',
+            '081234567890',
+            'password123',
+            'Aktif',
+        ];
+
+        $data = [$headers, $example];
+
+        $callback = function() use ($data) {
+            $file = fopen('php://output', 'w');
+            foreach ($data as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_import_marketing.csv"',
+        ]);
     }
 }
