@@ -91,11 +91,11 @@
                         <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
                         <td>
                             <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
-                            @if($slot->journalMaster && $slot->journalMaster->penerbit)
-                                <br><small class="text-muted">{{ $slot->journalMaster->penerbit }}</small>
+                            @if($slot->journalMaster && $slot->journalMaster->publisher)
+                                <br><small class="text-muted"><i class="bi bi-building"></i> {{ $slot->journalMaster->publisher }}</small>
                             @endif
                             @if($slot->journalMaster && $slot->journalMaster->accreditation)
-                                <br><small class="badge bg-info">{{ $slot->journalMaster->accreditation }}</small>
+                                <span class="badge bg-info ms-1">{{ $slot->journalMaster->accreditation }}</span>
                             @endif
                         </td>
                         <td>{{ $slot->bulan }}/{{ $slot->tahun }}</td>

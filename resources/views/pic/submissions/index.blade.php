@@ -76,7 +76,10 @@
                         <td title="{{ $submission->judul_artikel }}">{{ Str::limit($submission->judul_artikel, 30) }}</td>
                         <td>
                             @if($submission->journalSlot && $submission->journalSlot->journalMaster)
-                                {{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal, 20) }}
+                                <strong>{{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal, 25) }}</strong>
+                                @if($submission->journalSlot->journalMaster->publisher)
+                                    <br><small class="text-muted"><i class="bi bi-building"></i> {{ Str::limit($submission->journalSlot->journalMaster->publisher, 20) }}</small>
+                                @endif
                             @else
                                 -
                             @endif
