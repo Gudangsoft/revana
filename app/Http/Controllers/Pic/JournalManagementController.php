@@ -13,6 +13,7 @@ use App\Models\Pic;
 use App\Models\PicPointHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class JournalManagementController extends Controller
 {
@@ -814,11 +815,14 @@ class JournalManagementController extends Controller
         }
 
         
+        // Store old value before update
+        $oldValue = $submission->{$request->field};
+        
         $submission->{$request->field} = $request->value;
         $submission->save();
         
-        // Add points when validation is set to true
-        if ($request->value == true) {
+        // Add points when validation is set to true (and was previously false to prevent duplicate points)
+        if ($request->value == true && $oldValue != true) {
             $pointsToAdd = 0;
             $stageName = '';
             
@@ -859,45 +863,50 @@ class JournalManagementController extends Controller
             }
             
             if ($pointsToAdd > 0) {
-                // Add points to the assigned PIC
-                $petugasField = $fieldMap[$request->field];
-                $picId = $submission->{$petugasField};
-                
-                if ($picId) {
-                    $pic = Pic::find($picId);
-                    if ($pic) {
-                        // Update total points
-                        $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
-                        $pic->save();
-                        
-                        // Log point history
-                        PicPointHistory::create([
-                            'pic_id' => $picId,
-                            'submission_id' => $submission->id,
-                            'points' => $pointsToAdd,
-                            'description' => "Validasi {$stageName} - {$submission->kode_submit}",
-                            'created_at' => now(),
-                        ]);
+                try {
+                    // Add points to the assigned PIC
+                    $petugasField = $fieldMap[$request->field];
+                    $picId = $submission->{$petugasField};
+                    
+                    if ($picId) {
+                        $pic = Pic::find($picId);
+                        if ($pic) {
+                            // Update total points
+                            $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
+                            $pic->save();
+                            
+                            // Log point history
+                            PicPointHistory::create([
+                                'pic_id' => $picId,
+                                'submission_id' => $submission->id,
+                                'points' => $pointsToAdd,
+                                'description' => "Validasi {$stageName} - {$submission->kode_submit}",
+                                'created_at' => now(),
+                            ]);
+                        }
                     }
-                }
-                
-                // Also add points to marketing if this is the final validation (production)
-                if ($request->field === 'production_valid' && $submission->marketing_id) {
-                    $marketing = Marketing::find($submission->marketing_id);
-                    if ($marketing) {
-                        $marketingPoints = 20; // Marketing gets points when article is completed
-                        $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
-                        $marketing->save();
-                        
-                        // Log marketing point history
-                        MarketingPointHistory::create([
-                            'marketing_id' => $marketing->id,
-                            'submission_id' => $submission->id,
-                            'points' => $marketingPoints,
-                            'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
-                            'created_at' => now(),
-                        ]);
+                    
+                    // Also add points to marketing if this is the final validation (production)
+                    if ($request->field === 'production_valid' && $submission->marketing_id) {
+                        $marketing = Marketing::find($submission->marketing_id);
+                        if ($marketing) {
+                            $marketingPoints = 20; // Marketing gets points when article is completed
+                            $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
+                            $marketing->save();
+                            
+                            // Log marketing point history
+                            MarketingPointHistory::create([
+                                'marketing_id' => $marketing->id,
+                                'submission_id' => $submission->id,
+                                'points' => $marketingPoints,
+                                'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
+                                'created_at' => now(),
+                            ]);
+                        }
                     }
+                } catch (\Exception $e) {
+                    // Log error but don't fail the validation
+                    Log::error('Error adding points for validation: ' . $e->getMessage());
                 }
             }
         }
