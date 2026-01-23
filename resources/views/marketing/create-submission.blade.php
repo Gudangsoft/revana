@@ -46,6 +46,18 @@
             </div>
 
             <hr>
+            <h6 class="text-muted mb-3"><i class="bi bi-megaphone"></i> Data Marketing</h6>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Marketing <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" value="{{ $marketing->name }} ({{ $marketing->email }})" readonly style="background-color: #e9ecef;">
+                    <input type="hidden" name="marketing_id" value="{{ $marketing->id }}">
+                    <small class="text-muted">Marketing yang login</small>
+                </div>
+            </div>
+
+            <hr>
             <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
 
             <div class="row mb-3">
