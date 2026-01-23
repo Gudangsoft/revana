@@ -61,7 +61,8 @@
                         <th>#</th>
                         <th>Nama Jurnal</th>
                         <th>Penerbit</th>
-                        <th>Link Jurnal</th>
+                        <th>Kategori</th>
+                        <th>Jenis</th>
                         <th>Akreditasi</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -71,15 +72,29 @@
                     @forelse($journals as $journal)
                     <tr>
                         <td>{{ $loop->iteration + ($journals->currentPage() - 1) * $journals->perPage() }}</td>
-                        <td><strong>{{ $journal->nama_jurnal }}</strong></td>
+                        <td>
+                            <strong>{{ $journal->nama_jurnal }}</strong>
+                            @if($journal->link_jurnal)
+                                <a href="{{ $journal->link_jurnal }}" target="_blank" class="ms-1" title="Buka Link">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            @endif
+                        </td>
                         <td>{{ $journal->publisher ?? '-' }}</td>
                         <td>
-                            @if($journal->link_jurnal)
-                                <a href="{{ $journal->link_jurnal }}" target="_blank" class="text-primary">
-                                    <i class="bi bi-link-45deg"></i> Link
-                                </a>
+                            @if($journal->kategori)
+                                <span class="badge bg-{{ $journal->kategori == 'Penelitian' ? 'primary' : 'success' }}">{{ $journal->kategori }}</span>
                             @else
-                                -
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($journal->jenis_jurnal)
+                                <span class="badge bg-{{ $journal->jenis_jurnal == 'Jurnal Internasional' ? 'warning' : 'secondary' }}">
+                                    {{ $journal->jenis_jurnal == 'Jurnal Internasional' ? 'Intl' : 'Nas' }}
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
                             @endif
                         </td>
                         <td>
@@ -111,7 +126,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted">Belum ada data jurnal</td>
+                        <td colspan="8" class="text-center text-muted">Belum ada data jurnal</td>
                     </tr>
                     @endforelse
                 </tbody>

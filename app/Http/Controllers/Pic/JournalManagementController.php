@@ -53,6 +53,8 @@ class JournalManagementController extends Controller
             'publisher' => 'nullable|string|max:255',
             'link_jurnal' => 'nullable|url|max:500',
             'accreditation' => 'nullable|string|max:50',
+            'kategori' => 'nullable|in:Penelitian,PKM',
+            'jenis_jurnal' => 'nullable|in:Jurnal Nasional,Jurnal Internasional',
             'is_active' => 'boolean',
         ]);
 
@@ -78,6 +80,8 @@ class JournalManagementController extends Controller
             'publisher' => 'nullable|string|max:255',
             'link_jurnal' => 'nullable|url|max:500',
             'accreditation' => 'nullable|string|max:50',
+            'kategori' => 'nullable|in:Penelitian,PKM',
+            'jenis_jurnal' => 'nullable|in:Jurnal Nasional,Jurnal Internasional',
             'is_active' => 'boolean',
         ]);
 
