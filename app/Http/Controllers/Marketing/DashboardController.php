@@ -175,55 +175,61 @@ class DashboardController extends Controller
             'notes' => 'nullable|string',
         ]);
         
-        // Get slot info
-        $slot = JournalSlot::findOrFail($request->journal_slot_id);
-        
-        // Generate kode submit
-        $lastSubmission = Submission::where('kode_submit', 'like', 'SUB' . date('Y') . '%')
-            ->orderBy('kode_submit', 'desc')
-            ->first();
-        
-        if ($lastSubmission) {
-            $lastNumber = (int) substr($lastSubmission->kode_submit, 7);
-            $newNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '010001';
+        try {
+            // Get slot info
+            $slot = JournalSlot::findOrFail($request->journal_slot_id);
+            
+            // Generate kode submit
+            $lastSubmission = Submission::where('kode_submit', 'like', 'SUB' . date('Y') . '%')
+                ->orderBy('kode_submit', 'desc')
+                ->first();
+            
+            if ($lastSubmission) {
+                $lastNumber = (int) substr($lastSubmission->kode_submit, 7);
+                $newNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
+            } else {
+                $newNumber = '010001';
+            }
+            
+            $kodeSubmit = 'SUB' . date('Y') . $newNumber;
+            
+            // Get admin user for created_by
+            $adminUser = \App\Models\User::orderBy('id')->first();
+            if (!$adminUser) {
+                return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.')->withInput();
+            }
+            
+            // Create submission
+            $submission = Submission::create([
+                'kode_submit' => $kodeSubmit,
+                'journal_slot_id' => $request->journal_slot_id,
+                'marketing_id' => $marketing->id,
+                'id_artikel' => $request->id_artikel,
+                'judul_artikel' => $request->judul_artikel,
+                'link_artikel' => $request->link_artikel,
+                'nama_penulis' => $request->nama_penulis,
+                'no_hp_penulis' => $request->no_hp_penulis,
+                'username_author' => $request->username_author,
+                'password_author' => $request->password_author,
+                'notes' => $request->notes,
+                'tanggal_submit' => now(),
+                'status' => 'SUBMITTED',
+                'created_by' => $adminUser->id,
+            ]);
+            
+            // Increment slot terpakai
+            $slot->increment('slot_terpakai');
+            
+            return redirect()
+                ->route('marketing.submissions', ['highlight' => $submission->id])
+                ->with('success', 'Artikel berhasil disubmit! Kode: ' . $kodeSubmit);
+                
+        } catch (\Exception $e) {
+            \Log::error('Marketing submission error: ' . $e->getMessage());
+            return back()
+                ->with('error', 'Gagal menyimpan submission: ' . $e->getMessage())
+                ->withInput();
         }
-        
-        $kodeSubmit = 'SUB' . date('Y') . $newNumber;
-        
-        // Get admin user for created_by (required by FK, actual creator tracked via marketing_id)
-        $adminUser = \App\Models\User::orderBy('id')->first();
-        if (!$adminUser) {
-            return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.');
-        }
-        
-        // Create submission
-        $submission = Submission::create([
-            'kode_submit' => $kodeSubmit,
-            'journal_slot_id' => $request->journal_slot_id,
-            'marketing_id' => $marketing->id,
-            'id_artikel' => $request->id_artikel,
-            'judul_artikel' => $request->judul_artikel,
-            'link_artikel' => $request->link_artikel,
-            'nama_penulis' => $request->nama_penulis,
-            'no_hp_penulis' => $request->no_hp_penulis,
-            'username_author' => $request->username_author,
-            'password_author' => $request->password_author,
-            'notes' => $request->notes,
-            'tanggal_submit' => now(),
-            'status' => 'SUBMITTED',
-            'created_by' => $adminUser->id,
-        ]);
-        
-        // Verify submission was created properly
-        if (!$submission || !$submission->id) {
-            return back()->with('error', 'Gagal menyimpan submission')->withInput();
-        }
-        
-        return redirect()
-            ->route('marketing.submissions', ['highlight' => $submission->id])
-            ->with('success', 'Artikel berhasil disubmit! Kode: ' . $kodeSubmit);
     }
 
     /**
