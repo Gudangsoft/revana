@@ -216,8 +216,13 @@ class DashboardController extends Controller
             'created_by' => $adminUser->id,
         ]);
         
+        // Verify submission was created properly
+        if (!$submission || !$submission->id) {
+            return back()->with('error', 'Gagal menyimpan submission')->withInput();
+        }
+        
         return redirect()
-            ->route('marketing.submissions.show', $submission)
+            ->route('marketing.submissions', ['highlight' => $submission->id])
             ->with('success', 'Artikel berhasil disubmit! Kode: ' . $kodeSubmit);
     }
 
@@ -228,9 +233,11 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
-        // Check if this submission belongs to this marketing
-        if ($submission->marketing_id !== $marketing->id) {
-            abort(403, 'Akses Ditolak - Submission ini bukan milik Anda');
+        // Check if this submission belongs to this marketing (allow null for backwards compat)
+        if ($submission->marketing_id && $submission->marketing_id !== $marketing->id) {
+            return redirect()
+                ->route('marketing.submissions')
+                ->with('error', 'Anda tidak memiliki akses ke submission ini');
         }
         
         $submission->load([
