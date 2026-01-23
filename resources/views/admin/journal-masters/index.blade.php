@@ -46,29 +46,36 @@
                 <!-- Search & Filter Form -->
                 <form action="{{ route('admin.journal-masters.index') }}" method="GET" class="mb-4">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <input type="text" class="form-control" name="search" placeholder="Cari jurnal..." value="{{ request('search') }}">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <select class="form-select" name="accreditation">
-                                <option value="">-- Semua Akreditasi --</option>
+                                <option value="">-- Akreditasi --</option>
                                 @foreach($accreditations as $acc)
                                 <option value="{{ $acc->name }}" {{ request('accreditation') == $acc->name ? 'selected' : '' }}>{{ $acc->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <select class="form-select" name="status">
-                                <option value="">-- Semua Status --</option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
-                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                            <select class="form-select" name="kategori">
+                                <option value="">-- Kategori --</option>
+                                <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
+                                <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="jenis_jurnal">
+                                <option value="">-- Jenis Jurnal --</option>
+                                <option value="Jurnal Nasional" {{ request('jenis_jurnal') == 'Jurnal Nasional' ? 'selected' : '' }}>Nasional</option>
+                                <option value="Jurnal Internasional" {{ request('jenis_jurnal') == 'Jurnal Internasional' ? 'selected' : '' }}>Internasional</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <button class="btn btn-outline-primary" type="submit">
                                 <i class="bi bi-search"></i> Cari
                             </button>
-                            @if(request()->hasAny(['search', 'accreditation', 'status']))
+                            @if(request()->hasAny(['search', 'accreditation', 'status', 'kategori', 'jenis_jurnal']))
                             <a href="{{ route('admin.journal-masters.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle"></i> Reset
                             </a>
@@ -85,7 +92,8 @@
                                 <th>Kode Jurnal</th>
                                 <th>Nama Jurnal</th>
                                 <th>Publisher</th>
-                                <th>Link Jurnal</th>
+                                <th>Kategori</th>
+                                <th>Jenis</th>
                                 <th>Akreditasi</th>
                                 <th>Total Slot</th>
                                 <th>Status</th>
@@ -98,13 +106,29 @@
                                 <td>{{ $loop->iteration + ($journals->currentPage() - 1) * $journals->perPage() }}</td>
                                 <td><code>{{ $journal->kode_jurnal }}</code></td>
                                 <td>
-                                    <strong>{{ Str::limit($journal->nama_jurnal, 50) }}</strong>
+                                    <strong>{{ Str::limit($journal->nama_jurnal, 40) }}</strong>
+                                    @if($journal->link_jurnal)
+                                        <a href="{{ $journal->link_jurnal }}" target="_blank" class="ms-1" title="Buka Link">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                    @endif
                                 </td>
-                                <td>{{ Str::limit($journal->publisher, 30) }}</td>
+                                <td>{{ Str::limit($journal->publisher, 25) }}</td>
                                 <td>
-                                    <a href="{{ $journal->link_jurnal }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-link-45deg"></i> Buka
-                                    </a>
+                                    @if($journal->kategori)
+                                        <span class="badge bg-{{ $journal->kategori == 'Penelitian' ? 'primary' : 'success' }}">{{ $journal->kategori }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($journal->jenis_jurnal)
+                                        <span class="badge bg-{{ $journal->jenis_jurnal == 'Jurnal Internasional' ? 'warning' : 'secondary' }}">
+                                            {{ $journal->jenis_jurnal == 'Jurnal Internasional' ? 'Internasional' : 'Nasional' }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($journal->accreditation)

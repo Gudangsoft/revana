@@ -32,6 +32,16 @@ class JournalMasterController extends Controller
             $query->where('accreditation', $request->accreditation);
         }
 
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // Filter by jenis_jurnal
+        if ($request->filled('jenis_jurnal')) {
+            $query->where('jenis_jurnal', $request->jenis_jurnal);
+        }
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('is_active', $request->status == 'active');
@@ -57,6 +67,8 @@ class JournalMasterController extends Controller
             'publisher' => 'required|string|max:255',
             'link_jurnal' => 'required|url',
             'accreditation' => 'nullable|string|max:50',
+            'kategori' => 'nullable|in:Penelitian,PKM',
+            'jenis_jurnal' => 'nullable|in:Jurnal Nasional,Jurnal Internasional',
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -88,6 +100,8 @@ class JournalMasterController extends Controller
             'publisher' => 'required|string|max:255',
             'link_jurnal' => 'required|url',
             'accreditation' => 'nullable|string|max:50',
+            'kategori' => 'nullable|in:Penelitian,PKM',
+            'jenis_jurnal' => 'nullable|in:Jurnal Nasional,Jurnal Internasional',
             'is_active' => 'boolean',
         ]);
 

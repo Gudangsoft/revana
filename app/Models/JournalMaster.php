@@ -15,6 +15,8 @@ class JournalMaster extends Model
         'publisher',
         'link_jurnal',
         'accreditation',
+        'kategori',
+        'jenis_jurnal',
         'points',
         'is_active',
         'created_by',

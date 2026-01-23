@@ -66,6 +66,35 @@
                         @enderror
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="kategori" class="form-label">Kategori</label>
+                                <select class="form-select @error('kategori') is-invalid @enderror" id="kategori" name="kategori">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="Penelitian" {{ old('kategori', $journalMaster->kategori) == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
+                                    <option value="PKM" {{ old('kategori', $journalMaster->kategori) == 'PKM' ? 'selected' : '' }}>PKM</option>
+                                </select>
+                                @error('kategori')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="jenis_jurnal" class="form-label">Jenis Jurnal</label>
+                                <select class="form-select @error('jenis_jurnal') is-invalid @enderror" id="jenis_jurnal" name="jenis_jurnal">
+                                    <option value="">-- Pilih Jenis Jurnal --</option>
+                                    <option value="Jurnal Nasional" {{ old('jenis_jurnal', $journalMaster->jenis_jurnal) == 'Jurnal Nasional' ? 'selected' : '' }}>Jurnal Nasional</option>
+                                    <option value="Jurnal Internasional" {{ old('jenis_jurnal', $journalMaster->jenis_jurnal) == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional</option>
+                                </select>
+                                @error('jenis_jurnal')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $journalMaster->is_active) ? 'checked' : '' }}>

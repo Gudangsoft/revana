@@ -65,6 +65,35 @@
                         @enderror
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="kategori" class="form-label">Kategori</label>
+                                <select class="form-select @error('kategori') is-invalid @enderror" id="kategori" name="kategori">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="Penelitian" {{ old('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
+                                    <option value="PKM" {{ old('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
+                                </select>
+                                @error('kategori')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="jenis_jurnal" class="form-label">Jenis Jurnal</label>
+                                <select class="form-select @error('jenis_jurnal') is-invalid @enderror" id="jenis_jurnal" name="jenis_jurnal">
+                                    <option value="">-- Pilih Jenis Jurnal --</option>
+                                    <option value="Jurnal Nasional" {{ old('jenis_jurnal') == 'Jurnal Nasional' ? 'selected' : '' }}>Jurnal Nasional</option>
+                                    <option value="Jurnal Internasional" {{ old('jenis_jurnal') == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional</option>
+                                </select>
+                                @error('jenis_jurnal')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('admin.journal-masters.index') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali
