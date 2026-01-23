@@ -207,7 +207,7 @@ class DashboardController extends Controller
             'notes' => $request->notes,
             'tanggal_submit' => now(),
             'status' => 'SUBMITTED',
-            'created_by' => $marketing->id,
+            'created_by' => null, // Marketing submission, not from admin
         ]);
         
         return redirect()
