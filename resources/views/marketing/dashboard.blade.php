@@ -1,80 +1,94 @@
 @extends('marketing.layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard Marketing')
 
 @section('content')
-<h4 class="mb-4">
-    <i class="bi bi-speedometer2"></i> Dashboard Marketing
-</h4>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">
+        <i class="bi bi-speedometer2"></i> Dashboard Marketing
+    </h4>
+    <div class="text-muted">
+        <i class="bi bi-person-circle"></i> {{ $marketing->name }}
+    </div>
+</div>
 
 <!-- Welcome Card -->
-<div class="card mb-4 bg-gradient" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-    <div class="card-body text-white">
+<div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+    <div class="card-body text-white py-4">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h3>Selamat Datang, {{ $marketing->name }}!</h3>
-                <p class="mb-0">Pantau performa artikel Anda dan dapatkan point dari setiap submit yang berhasil.</p>
+                <h3 class="mb-2">Selamat Datang, {{ $marketing->name }}!</h3>
+                <p class="mb-0 opacity-75">Pantau performa artikel Anda dan dapatkan point dari setiap submit yang berhasil.</p>
             </div>
             <div class="col-md-4 text-end">
-                <div class="display-4">
+                <div class="display-3 mb-2 opacity-75">
                     <i class="bi bi-trophy-fill"></i>
                 </div>
-                <h2 class="mb-0">{{ number_format($marketing->total_points ?? 0) }} Point</h2>
+                <h2 class="mb-0 fw-bold">{{ number_format($marketing->total_points ?? 0) }}</h2>
+                <small class="opacity-75">Total Point</small>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h6 class="mb-1">Total Artikel</h6>
-                        <h2 class="mb-0">{{ $stats['total_submissions'] }}</h2>
+                        <p class="mb-1 opacity-75 small">Total Artikel</p>
+                        <h2 class="mb-0 fw-bold">{{ $stats['total_submissions'] }}</h2>
                     </div>
-                    <i class="bi bi-file-earmark-text" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    <div class="bg-white bg-opacity-25 p-2 rounded">
+                        <i class="bi bi-file-earmark-text fs-4"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card bg-warning text-dark">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h6 class="mb-1">Baru Submit</h6>
-                        <h2 class="mb-0">{{ $stats['submitted'] }}</h2>
+                        <p class="mb-1 opacity-75 small">Baru Submit</p>
+                        <h2 class="mb-0 fw-bold">{{ $stats['submitted'] }}</h2>
                     </div>
-                    <i class="bi bi-hourglass-split" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    <div class="bg-white bg-opacity-25 p-2 rounded">
+                        <i class="bi bi-hourglass-split fs-4"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card bg-info text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h6 class="mb-1">Dalam Proses</h6>
-                        <h2 class="mb-0">{{ $stats['in_process'] }}</h2>
+                        <p class="mb-1 opacity-75 small">Dalam Proses</p>
+                        <h2 class="mb-0 fw-bold">{{ $stats['in_process'] }}</h2>
                     </div>
-                    <i class="bi bi-gear" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    <div class="bg-white bg-opacity-25 p-2 rounded">
+                        <i class="bi bi-gear-fill fs-4"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h6 class="mb-1">Published</h6>
-                        <h2 class="mb-0">{{ $stats['published'] }}</h2>
+                        <p class="mb-1 opacity-75 small">Published</p>
+                        <h2 class="mb-0 fw-bold">{{ $stats['published'] }}</h2>
                     </div>
-                    <i class="bi bi-check-circle" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    <div class="bg-white bg-opacity-25 p-2 rounded">
+                        <i class="bi bi-check-circle-fill fs-4"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,9 +97,9 @@
 
 <!-- Progress Overview -->
 @if($stats['total_submissions'] > 0)
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="bi bi-bar-chart"></i> Progress Artikel
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0"><i class="bi bi-bar-chart-fill"></i> Progress Artikel</h5>
     </div>
     <div class="card-body">
         @php
@@ -96,66 +110,84 @@
             $rejectedPct = $total > 0 ? round(($stats['rejected'] / $total) * 100) : 0;
         @endphp
         
-        <div class="progress mb-3" style="height: 30px;">
-            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $submittedPct }}%" 
+        <div class="progress mb-3" style="height: 35px; border-radius: 10px;">
+            @if($submittedPct > 0)
+            <div class="progress-bar" role="progressbar" style="width: {{ $submittedPct }}%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" 
                  title="Baru Submit: {{ $stats['submitted'] }}">
-                @if($submittedPct > 10) Submitted ({{ $stats['submitted'] }}) @endif
+                @if($submittedPct > 10) <strong>{{ $stats['submitted'] }}</strong> @endif
             </div>
-            <div class="progress-bar bg-info" role="progressbar" style="width: {{ $processPct }}%"
+            @endif
+            @if($processPct > 0)
+            <div class="progress-bar" role="progressbar" style="width: {{ $processPct }}%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"
                  title="Dalam Proses: {{ $stats['in_process'] }}">
-                @if($processPct > 10) Proses ({{ $stats['in_process'] }}) @endif
+                @if($processPct > 10) <strong>{{ $stats['in_process'] }}</strong> @endif
             </div>
-            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $publishedPct }}%"
+            @endif
+            @if($publishedPct > 0)
+            <div class="progress-bar" role="progressbar" style="width: {{ $publishedPct }}%; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"
                  title="Published: {{ $stats['published'] }}">
-                @if($publishedPct > 10) Published ({{ $stats['published'] }}) @endif
+                @if($publishedPct > 10) <strong>{{ $stats['published'] }}</strong> @endif
             </div>
+            @endif
+            @if($rejectedPct > 0)
             <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $rejectedPct }}%"
                  title="Rejected: {{ $stats['rejected'] }}">
-                @if($rejectedPct > 10) Rejected ({{ $stats['rejected'] }}) @endif
+                @if($rejectedPct > 10) <strong>{{ $stats['rejected'] }}</strong> @endif
             </div>
+            @endif
         </div>
         
-        <div class="row text-center">
-            <div class="col-md-3">
-                <span class="badge bg-warning text-dark">Submitted</span>
-                <div class="fw-bold">{{ $stats['submitted'] }} artikel</div>
+        <div class="row text-center g-3">
+            <div class="col-3">
+                <div class="p-2 rounded" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="text-white fw-bold fs-4">{{ $stats['submitted'] }}</div>
+                    <small class="text-white opacity-75">Submitted</small>
+                </div>
             </div>
-            <div class="col-md-3">
-                <span class="badge bg-info">Dalam Proses</span>
-                <div class="fw-bold">{{ $stats['in_process'] }} artikel</div>
+            <div class="col-3">
+                <div class="p-2 rounded" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="text-white fw-bold fs-4">{{ $stats['in_process'] }}</div>
+                    <small class="text-white opacity-75">Proses</small>
+                </div>
             </div>
-            <div class="col-md-3">
-                <span class="badge bg-success">Published</span>
-                <div class="fw-bold">{{ $stats['published'] }} artikel</div>
+            <div class="col-3">
+                <div class="p-2 rounded" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <div class="text-white fw-bold fs-4">{{ $stats['published'] }}</div>
+                    <small class="text-white opacity-75">Published</small>
+                </div>
             </div>
-            <div class="col-md-3">
-                <span class="badge bg-danger">Rejected</span>
-                <div class="fw-bold">{{ $stats['rejected'] }} artikel</div>
+            <div class="col-3">
+                <div class="p-2 rounded bg-danger">
+                    <div class="text-white fw-bold fs-4">{{ $stats['rejected'] }}</div>
+                    <small class="text-white opacity-75">Rejected</small>
+                </div>
             </div>
         </div>
     </div>
 </div>
 @endif
 
-<div class="row">
+<div class="row g-3">
     <!-- Recent Submissions with Progress -->
-    <div class="col-md-7">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-text"></i> Artikel Terbaru & Progress</span>
-                <a href="{{ route('marketing.submissions') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text-fill"></i> Artikel Terbaru</h5>
+                <a href="{{ route('marketing.submissions') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-list-ul"></i> Lihat Semua
+                </a>
             </div>
             <div class="card-body p-0">
                 @if($submissions->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Kode</th>
-                                <th>Judul</th>
+                                <th class="px-3">Kode</th>
+                                <th>Judul Artikel</th>
                                 <th>Jurnal</th>
-                                <th>Status</th>
-                                <th>Progress</th>
+                                <th class="text-center">Status</th>
+                                <th style="width: 140px;">Progress</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -185,15 +217,19 @@
                                                ($progress < 50 ? 'warning' : 'info'));
                             @endphp
                             <tr>
-                                <td><code class="small">{{ $submission->kode_submit }}</code></td>
-                                <td>
-                                    <div class="fw-bold">{{ Str::limit($submission->judul_artikel, 25) }}</div>
-                                    <small class="text-muted">{{ $submission->tanggal_submit?->format('d M Y') }}</small>
+                                <td class="px-3">
+                                    <code class="badge bg-light text-dark">{{ $submission->kode_submit }}</code>
                                 </td>
                                 <td>
-                                    <small>{{ $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</small>
+                                    <div class="fw-semibold">{{ Str::limit($submission->judul_artikel, 35) }}</div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i> {{ $submission->tanggal_submit?->format('d M Y') }}
+                                    </small>
                                 </td>
                                 <td>
+                                    <small class="text-muted">{{ Str::limit($submission->journalSlot?->journalMaster?->nama_jurnal ?? '-', 20) }}</small>
+                                </td>
+                                <td class="text-center">
                                     @php
                                         $badgeColor = match($submission->status) {
                                             'SUBMITTED' => 'secondary',
@@ -209,12 +245,14 @@
                                     @endphp
                                     <span class="badge bg-{{ $badgeColor }} small">{{ str_replace('_', ' ', $submission->status) }}</span>
                                 </td>
-                                <td style="width: 120px;">
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-{{ $progressColor }}" role="progressbar" 
-                                             style="width: {{ $progress }}%" title="{{ $progress }}%"></div>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 10px;">
+                                            <div class="progress-bar bg-{{ $progressColor }}" role="progressbar" 
+                                                 style="width: {{ $progress }}%" title="{{ $progress }}%"></div>
+                                        </div>
+                                        <small class="text-muted" style="min-width: 35px;">{{ $progress }}%</small>
                                     </div>
-                                    <small class="text-muted">{{ $progress }}%</small>
                                 </td>
                             </tr>
                             @endforeach
@@ -222,9 +260,9 @@
                     </table>
                 </div>
                 @else
-                <div class="text-center text-muted py-4">
-                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                    <p>Belum ada artikel yang disubmit</p>
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                    <p class="text-muted mt-3 mb-0">Belum ada artikel yang disubmit</p>
                 </div>
                 @endif
             </div>
@@ -232,44 +270,54 @@
     </div>
     
     <!-- Recent Points -->
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-trophy"></i> Riwayat Point</span>
-                <a href="{{ route('marketing.points') }}" class="btn btn-sm btn-outline-warning">Lihat Semua</a>
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Riwayat Point</h5>
+                <a href="{{ route('marketing.points') }}" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-clock-history"></i> Semua
+                </a>
             </div>
             <div class="card-body">
                 <!-- Point Summary -->
-                <div class="alert alert-success py-2 mb-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-coin"></i> Total Point Anda</span>
-                        <span class="fw-bold fs-5">{{ number_format($marketing->total_points ?? 0) }}</span>
+                <div class="alert mb-3 border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="d-flex justify-content-between align-items-center text-white">
+                        <div>
+                            <i class="bi bi-coin"></i> <strong>Total Point</strong>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ number_format($marketing->total_points ?? 0) }}</div>
                     </div>
                 </div>
                 
                 @if($pointHistories->count() > 0)
                 <div class="list-group list-group-flush">
-                    @foreach($pointHistories as $history)
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <div>
-                            @if($history->points_earned >= 0)
-                            <div class="fw-bold text-success">+{{ $history->points_earned }} point</div>
-                            @else
-                            <div class="fw-bold text-danger">{{ $history->points_earned }} point</div>
-                            @endif
-                            <small class="text-muted">{{ Str::limit($history->description, 35) }}</small>
-                            @if($history->submission)
-                            <br><small class="text-primary">{{ Str::limit($history->submission->judul_artikel, 30) }}</small>
-                            @endif
+                    @foreach($pointHistories->take(8) as $history)
+                    <div class="list-group-item px-0 border-bottom">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    @if($history->points_earned >= 0)
+                                    <span class="badge bg-success">+{{ $history->points_earned }}</span>
+                                    @else
+                                    <span class="badge bg-danger">{{ $history->points_earned }}</span>
+                                    @endif
+                                    <small class="text-muted">{{ $history->created_at->diffForHumans() }}</small>
+                                </div>
+                                <small class="text-muted d-block">{{ Str::limit($history->description, 40) }}</small>
+                                @if($history->submission)
+                                <small class="text-primary d-block">
+                                    <i class="bi bi-file-text"></i> {{ Str::limit($history->submission->judul_artikel, 35) }}
+                                </small>
+                                @endif
+                            </div>
                         </div>
-                        <small class="text-muted">{{ $history->created_at->format('d M') }}</small>
                     </div>
                     @endforeach
                 </div>
                 @else
-                <div class="text-center text-muted py-4">
-                    <i class="bi bi-star" style="font-size: 3rem;"></i>
-                    <p>Belum ada point yang didapatkan</p>
+                <div class="text-center py-4">
+                    <i class="bi bi-star text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3 mb-0">Belum ada point</p>
                 </div>
                 @endif
             </div>
