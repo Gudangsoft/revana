@@ -331,6 +331,9 @@ class JournalManagementController extends Controller
         $validated['status'] = 'submitted';
         $validated['tanggal_submit'] = now();
         
+        // Set created_by to current PIC
+        $validated['created_by'] = auth()->guard('pic')->id();
+        
         // Set petugas_submit_id to current PIC if not provided
         if (!isset($validated['petugas_submit_id'])) {
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
