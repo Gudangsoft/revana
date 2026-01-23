@@ -56,7 +56,7 @@
                             <option value="">-- Pilih Akreditasi --</option>
                             @foreach($accreditations as $acc)
                                 <option value="{{ $acc->name }}" {{ old('accreditation') == $acc->name ? 'selected' : '' }}>
-                                    {{ $acc->name }} ({{ $acc->points }} pts)
+                                    {{ $acc->name }}
                                 </option>
                             @endforeach
                         </select>

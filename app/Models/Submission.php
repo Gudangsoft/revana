@@ -15,6 +15,8 @@ class Submission extends Model
         'kode_submit',
         'kode_loa',
         'journal_slot_id',
+        'kategori_id',
+        'jenis_jurnal_id',
         'marketing_id',
         'id_artikel',
         'judul_artikel',
@@ -161,6 +163,16 @@ class Submission extends Model
     public function journalSlot()
     {
         return $this->belongsTo(JournalSlot::class, 'journal_slot_id');
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
+    }
+
+    public function jenisJurnal()
+    {
+        return $this->belongsTo(JenisJurnal::class, 'jenis_jurnal_id');
     }
 
     public function creator()

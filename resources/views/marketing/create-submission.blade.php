@@ -62,6 +62,37 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
+                    <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                    <select class="form-select @error('kategori_id') is-invalid @enderror" name="kategori_id" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach($kategoris ?? [] as $kategori)
+                            <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                {{ $kategori->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('kategori_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Jenis Jurnal <span class="text-danger">*</span></label>
+                    <select class="form-select @error('jenis_jurnal_id') is-invalid @enderror" name="jenis_jurnal_id" required>
+                        <option value="">-- Pilih Jenis Jurnal --</option>
+                        @foreach($jenisJurnals ?? [] as $jenis)
+                            <option value="{{ $jenis->id }}" {{ old('jenis_jurnal_id') == $jenis->id ? 'selected' : '' }}>
+                                {{ $jenis->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('jenis_jurnal_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
                     <label class="form-label">ID Artikel <span class="text-danger">*</span></label>
                     <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Masukkan ID Artikel" required>
                     @error('id_artikel')

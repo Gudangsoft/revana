@@ -145,6 +145,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/accreditations/template', [\App\Http\Controllers\Admin\AccreditationController::class, 'downloadTemplate'])->name('accreditations.template');
         Route::resource('accreditations', \App\Http\Controllers\Admin\AccreditationController::class);
         
+        // Kategori
+        Route::patch('/kategoris/{kategori}/toggle-active', [\App\Http\Controllers\Admin\KategoriController::class, 'toggleActive'])->name('kategoris.toggle-active');
+        Route::resource('kategoris', \App\Http\Controllers\Admin\KategoriController::class);
+        
+        // Jenis Jurnal
+        Route::patch('/jenis-jurnals/{jenisJurnal}/toggle-active', [\App\Http\Controllers\Admin\JenisJurnalController::class, 'toggleActive'])->name('jenis-jurnals.toggle-active');
+        Route::resource('jenis-jurnals', \App\Http\Controllers\Admin\JenisJurnalController::class)->parameters([
+            'jenis-jurnals' => 'jenisJurnal'
+        ]);
+        
         // Review Assignments
         Route::get('/assignments', [AdminReviewAssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/assignments/create', [AdminReviewAssignmentController::class, 'create'])->name('assignments.create');

@@ -18,15 +18,15 @@
 <div class="accordion accordion-flush" id="accordionJournalNew">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') ? 'active' : '' }}" 
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}" 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapseJournalNew" 
-                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') ? 'true' : 'false' }}">
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'true' : 'false' }}">
                 <i class="bi bi-journal-bookmark-fill"></i> Pengelolaan Jurnal
             </button>
         </h2>
-        <div id="collapseJournalNew" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') ? 'show' : '' }}" data-bs-parent="#accordionJournalNew">
+        <div id="collapseJournalNew" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'show' : '' }}" data-bs-parent="#accordionJournalNew">
             <div class="accordion-body p-0">
                 <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i> Data Jurnal
@@ -48,6 +48,12 @@
                 </a>
                 <a href="{{ route('admin.accreditations.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.accreditations') ? 'active' : '' }}">
                     <i class="bi bi-award"></i> Akreditasi
+                </a>
+                <a href="{{ route('admin.kategoris.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.kategoris') ? 'active' : '' }}">
+                    <i class="bi bi-tags"></i> Kategori
+                </a>
+                <a href="{{ route('admin.jenis-jurnals.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}">
+                    <i class="bi bi-journal-bookmark"></i> Jenis Jurnal
                 </a>
             </div>
         </div>

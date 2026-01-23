@@ -70,13 +70,19 @@ class SubmissionController extends Controller
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.submissions.create', compact('journals', 'slots', 'pics', 'marketings'));
+        // Data Kategori dan Jenis Jurnal
+        $kategoris = \App\Models\Kategori::where('is_active', true)->orderBy('name')->get();
+        $jenisJurnals = \App\Models\JenisJurnal::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.submissions.create', compact('journals', 'slots', 'pics', 'marketings', 'kategoris', 'jenisJurnals'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
+            'kategori_id' => 'nullable|exists:kategoris,id',
+            'jenis_jurnal_id' => 'nullable|exists:jenis_jurnals,id',
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
@@ -176,13 +182,19 @@ class SubmissionController extends Controller
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $statusOptions = Submission::getStatusOptions();
         
-        return view('admin.submissions.edit', compact('submission', 'journals', 'slots', 'users', 'pics', 'marketings', 'statusOptions'));
+        // Data Kategori dan Jenis Jurnal
+        $kategoris = \App\Models\Kategori::where('is_active', true)->orderBy('name')->get();
+        $jenisJurnals = \App\Models\JenisJurnal::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.submissions.edit', compact('submission', 'journals', 'slots', 'users', 'pics', 'marketings', 'statusOptions', 'kategoris', 'jenisJurnals'));
     }
 
     public function update(Request $request, Submission $submission)
     {
         $validated = $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
+            'kategori_id' => 'nullable|exists:kategoris,id',
+            'jenis_jurnal_id' => 'nullable|exists:jenis_jurnals,id',
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
