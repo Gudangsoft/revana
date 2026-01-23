@@ -548,7 +548,11 @@
                         </thead>
                         <tbody>
                             @forelse($submissions as $s)
-                            <tr>
+                            @php
+                                // Check if all workflow is completed
+                                $isCompleted = $s->production_valid == 1;
+                            @endphp
+                            <tr class="{{ $isCompleted ? 'table-success' : '' }}">
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
@@ -556,6 +560,9 @@
                                     <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
+                                    @if($isCompleted)
+                                        <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
+                                    @endif
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>

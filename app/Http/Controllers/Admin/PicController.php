@@ -180,16 +180,8 @@ class PicController extends Controller
      */
     public function activityReport(Request $request)
     {
-        // Get all PICs with their points
-        $query = Pic::withCount('pointHistories')
-            ->with(['pointHistories' => function($q) use ($request) {
-                if ($request->filled('tanggal_dari')) {
-                    $q->whereDate('created_at', '>=', $request->tanggal_dari);
-                }
-                if ($request->filled('tanggal_sampai')) {
-                    $q->whereDate('created_at', '<=', $request->tanggal_sampai);
-                }
-            }]);
+        // Get all PICs
+        $query = Pic::query();
         
         // Filter by PIC
         if ($request->filled('pic_id')) {
@@ -205,7 +197,7 @@ class PicController extends Controller
         
         // Calculate filtered points for each PIC
         $pics->each(function($pic) use ($request) {
-            $pointQuery = $pic->pointHistories();
+            $pointQuery = PicPointHistory::where('pic_id', $pic->id);
             
             if ($request->filled('tanggal_dari')) {
                 $pointQuery->whereDate('created_at', '>=', $request->tanggal_dari);
@@ -218,7 +210,13 @@ class PicController extends Controller
             $pic->filtered_tasks = $pointQuery->count();
             
             // Get breakdown by step
-            $pic->step_breakdown = $pointQuery
+            $pic->step_breakdown = PicPointHistory::where('pic_id', $pic->id)
+                ->when($request->filled('tanggal_dari'), function($q) use ($request) {
+                    $q->whereDate('created_at', '>=', $request->tanggal_dari);
+                })
+                ->when($request->filled('tanggal_sampai'), function($q) use ($request) {
+                    $q->whereDate('created_at', '<=', $request->tanggal_sampai);
+                })
                 ->select('step', DB::raw('COUNT(*) as count'), DB::raw('SUM(points_earned) as total'))
                 ->groupBy('step')
                 ->get();
