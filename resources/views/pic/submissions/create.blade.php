@@ -34,24 +34,19 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
-                                <select class="form-select @error('journal_master_id') is-invalid @enderror" 
-                                        id="journal_master_id" 
-                                        name="journal_master_id" 
-                                        required 
-                                        size="10" 
-                                        style="min-height: 250px;">
-                                    <option value="">-- Pilih Jurnal --</option>
-                                    @foreach($journals as $journal)
-                                        <option value="{{ $journal->id }}" 
-                                                data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" 
-                                                {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
-                                            {{ $journal->nama_jurnal }} ({{ $journal->publisher }})
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <div class="position-relative">
+                                    <input type="text" 
+                                           class="form-control @error('journal_master_id') is-invalid @enderror" 
+                                           id="search_journal" 
+                                           placeholder="🔍 Ketik untuk mencari → Klik jurnal (atau tekan Enter) → Slot akan muncul otomatis" 
+                                           autocomplete="off">
+                                    <input type="hidden" name="journal_master_id" id="journal_master_id" value="{{ old('journal_master_id') }}">
+                                    
+                                    <!-- Dropdown hasil pencarian -->
+                                    <div id="search_results" class="list-group position-absolute w-100 shadow-lg" style="display: none; max-height: 400px; overflow-y: auto; z-index: 1000;"></div>
+                                </div>
                                 <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i> Ketik untuk mencari → Klik jurnal (atau tekan Enter) → Slot akan muncul otomatis
+                                    <i class="bi bi-info-circle"></i> Menampilkan {{ count($journals) }} jurnal aktif
                                 </small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -64,9 +59,7 @@
                                 <select class="form-select @error('journal_slot_id') is-invalid @enderror" 
                                         id="journal_slot_id" 
                                         name="journal_slot_id" 
-                                        required
-                                        size="10" 
-                                        style="min-height: 250px;">
+                                        required>
                                     <option value="">-- Pilih Jurnal terlebih dahulu --</option>
                                 </select>
                                 <small class="text-muted">
@@ -236,75 +229,114 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search_journal');
-    const journalSelect = document.getElementById('journal_master_id');
+    const hiddenInput = document.getElementById('journal_master_id');
+    const searchResults = document.getElementById('search_results');
     const slotSelect = document.getElementById('journal_slot_id');
-    const allOptions = Array.from(journalSelect.options);
     
-    console.log('✅ Initialized:', allOptions.length - 1, 'journals');
+    // Data jurnal
+    const journals = @json($journals->map(function($j) {
+        return [
+            'id' => $j->id,
+            'nama' => $j->nama_jurnal,
+            'publisher' => $j->publisher,
+            'search' => strtolower($j->nama_jurnal . ' ' . $j->publisher)
+        ];
+    }));
     
-    // Search functionality - filter journals in real-time
+    console.log('✅ Initialized:', journals.length, 'journals');
+    
+    let selectedJournalName = '';
+    
+    // Search input - tampilkan hasil
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase().trim();
         
-        allOptions.forEach((option, index) => {
-            if (index === 0) { // Skip first "-- Pilih Jurnal --"
-                option.style.display = searchTerm ? 'none' : '';
-                return;
-            }
-            
-            const searchData = option.getAttribute('data-search') || '';
-            option.style.display = searchData.includes(searchTerm) ? '' : 'none';
-        });
-        
-        console.log('🔍 Search:', searchTerm, '- Filtered list updated');
-    });
-    
-    // Enhanced: Press Enter on search to select first visible option
-    searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const firstVisible = allOptions.find(opt => opt.value && opt.style.display !== 'none');
-            if (firstVisible) {
-                journalSelect.value = firstVisible.value;
-                journalSelect.dispatchEvent(new Event('change'));
-                console.log('⌨️ Enter pressed - Selected first match:', firstVisible.value);
-            }
-        }
-    });
-    
-    // When journal selected - load slots immediately
-    journalSelect.addEventListener('change', function() {
-        const journalId = this.value;
-        
-        if (!journalId) {
-            slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
-            slotSelect.disabled = true;
+        if (searchTerm.length < 2) {
+            searchResults.style.display = 'none';
             return;
         }
         
-        console.log('📌 Journal selected, ID:', journalId);
+        const filtered = journals.filter(j => j.search.includes(searchTerm));
+        
+        if (filtered.length === 0) {
+            searchResults.innerHTML = '<div class="list-group-item text-muted">Tidak ada hasil</div>';
+            searchResults.style.display = 'block';
+            return;
+        }
+        
+        let html = '';
+        filtered.forEach(journal => {
+            html += `
+                <a href="#" class="list-group-item list-group-item-action" data-id="${journal.id}" data-name="${journal.nama}">
+                    <strong>${journal.nama}</strong>
+                    <br><small class="text-muted">${journal.publisher}</small>
+                </a>
+            `;
+        });
+        
+        searchResults.innerHTML = html;
+        searchResults.style.display = 'block';
+        
+        console.log('🔍 Found:', filtered.length, 'matches');
+    });
+    
+    // Klik hasil pencarian
+    searchResults.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = e.target.closest('.list-group-item');
+        if (!target) return;
+        
+        const journalId = target.getAttribute('data-id');
+        const journalName = target.getAttribute('data-name');
+        
+        if (journalId) {
+            selectJournal(journalId, journalName);
+        }
+    });
+    
+    // Keyboard navigation - Enter
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstResult = searchResults.querySelector('.list-group-item[data-id]');
+            if (firstResult) {
+                const journalId = firstResult.getAttribute('data-id');
+                const journalName = firstResult.getAttribute('data-name');
+                selectJournal(journalId, journalName);
+            }
+        } else if (e.key === 'Escape') {
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    // Klik di luar untuk tutup dropdown
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    // Focus - show selected or prompt
+    searchInput.addEventListener('focus', function() {
+        if (hiddenInput.value && selectedJournalName) {
+            // Don't clear if already selected
+        } else if (this.value.length >= 2) {
+            this.dispatchEvent(new Event('input'));
+        }
+    });
+    
+    // Fungsi untuk select jurnal
+    function selectJournal(journalId, journalName) {
+        hiddenInput.value = journalId;
+        selectedJournalName = journalName;
+        searchInput.value = journalName;
+        searchResults.style.display = 'none';
+        
+        console.log('✅ Selected journal:', journalId, '-', journalName);
+        
+        // Load slots
         loadSlots(journalId);
-    });
-    
-    // Click on option - immediate selection and slot loading
-    journalSelect.addEventListener('click', function(e) {
-        if (e.target.tagName === 'OPTION' && e.target.value) {
-            console.log('🖱️ Option clicked:', e.target.value);
-            this.value = e.target.value;
-            // Small delay to ensure the value is set
-            setTimeout(() => {
-                this.dispatchEvent(new Event('change'));
-            }, 50);
-        }
-    });
-    
-    // Double-click support for better UX
-    journalSelect.addEventListener('dblclick', function() {
-        if (this.value) {
-            console.log('🖱️🖱️ Double-clicked, triggering change');
-            this.dispatchEvent(new Event('change'));
-        }
-    });
+    }
     
     // Load slots function
     function loadSlots(journalId) {
@@ -346,15 +378,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Restore old selection if exists (after form validation error)
-    if (journalSelect.value) {
-        console.log('♻️ Restoring previous selection:', journalSelect.value);
-        loadSlots(journalSelect.value);
-    }
+    @if(old('journal_master_id'))
+        const oldJournalId = '{{ old('journal_master_id') }}';
+        const oldJournal = journals.find(j => j.id == oldJournalId);
+        if (oldJournal) {
+            selectJournal(oldJournal.id, oldJournal.nama);
+        }
+    @endif
     
-    // Focus on search input for better UX
+    // Focus on search input
     searchInput.focus();
     
-    console.log('✅ Search and slot functionality ready');
+    console.log('✅ Search functionality ready');
 });
 </script>
 @endpush
