@@ -340,6 +340,7 @@ Route::prefix('pic')->group(function () {
             Route::get('/{slot}/edit', [PicJournalController::class, 'slotsEdit'])->name('edit');
             Route::put('/{slot}', [PicJournalController::class, 'slotsUpdate'])->name('update');
             Route::delete('/{slot}', [PicJournalController::class, 'slotsDestroy'])->name('destroy');
+            Route::get('/get-by-journal', [PicJournalController::class, 'getSlotsByJournal'])->name('get-by-journal');
         });
         
         Route::prefix('submissions')->name('pic.submissions.')->group(function () {
@@ -355,7 +356,6 @@ Route::prefix('pic')->group(function () {
             Route::get('/{submission}/process', [PicJournalController::class, 'submissionsProcess'])->name('process');
             Route::post('/{submission}/submit-work', [PicJournalController::class, 'submitWork'])->name('submit-work');
             Route::post('/{submission}/request-revision', [PicJournalController::class, 'requestRevision'])->name('request-revision');
-            Route::get('/journal-slots/get-by-journal', [PicJournalController::class, 'getSlotsByJournal'])->name('slots.by-journal');
         });
         
         // Akreditasi

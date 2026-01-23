@@ -234,22 +234,27 @@ class JournalManagementController extends Controller
     {
         $journalId = $request->get('journal_master_id');
         
+        if (!$journalId) {
+            return response()->json([]);
+        }
+        
         $slots = JournalSlot::where('journal_master_id', $journalId)
-            ->whereRaw('jumlah_slot > slot_terpakai')
             ->where('is_active', true)
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
             ->get()
             ->map(function($slot) {
+                $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
                 return [
                     'id' => $slot->id,
                     'text' => sprintf(
-                        '%s/%s - Vol. %s No. %s (Sisa: %d slot)',
-                        $slot->bulan,
-                        $slot->tahun,
+                        'Vol. %s No. %s - %s/%s (Sisa: %d/%d slot)',
                         $slot->volume ?? '-',
                         $slot->nomor ?? '-',
-                        $slot->jumlah_slot - $slot->slot_terpakai
+                        $slot->bulan,
+                        $slot->tahun,
+                        $sisa > 0 ? $sisa : 0,
+                        $slot->jumlah_slot
                     )
                 ];
             });

@@ -316,20 +316,37 @@ function loadSlots(journalId) {
         return;
     }
     
+    console.log('Loading slots for journal:', journalId);
     slotSelect.innerHTML = '<option value="">Loading...</option>';
     
-    fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
-        .then(response => response.json())
+    const url = `{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`;
+    console.log('Fetching from URL:', url);
+    
+    fetch(url)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Received slots data:', data);
+            if (data.length === 0) {
+                slotSelect.innerHTML = '<option value="">Tidak ada slot tersedia</option>';
+                return;
+            }
             let options = '<option value="">-- Pilih Slot --</option>';
             data.forEach(slot => {
                 options += `<option value="${slot.id}">${slot.text}</option>`;
             });
             slotSelect.innerHTML = options;
+            console.log('Slots loaded successfully, total:', data.length);
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error loading slots:', error);
             slotSelect.innerHTML = '<option value="">Error loading slots</option>';
+            alert('Error loading slots: ' + error.message);
         });
 }
 
