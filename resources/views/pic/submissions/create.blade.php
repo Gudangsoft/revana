@@ -234,14 +234,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const slotSelect = document.getElementById('journal_slot_id');
     
     // Data jurnal
-    const journals = @json($journals->map(function($j) {
-        return [
-            'id' => $j->id,
-            'nama' => $j->nama_jurnal,
-            'publisher' => $j->publisher,
-            'search' => strtolower($j->nama_jurnal . ' ' . $j->publisher)
-        ];
-    }));
+    const journals = [
+        @foreach($journals as $journal)
+        {
+            id: {{ $journal->id }},
+            nama: "{{ addslashes($journal->nama_jurnal) }}",
+            publisher: "{{ addslashes($journal->publisher ?? '') }}",
+            search: "{{ strtolower(addslashes($journal->nama_jurnal . ' ' . ($journal->publisher ?? ''))) }}"
+        },
+        @endforeach
+    ];
     
     console.log('✅ Initialized:', journals.length, 'journals');
     
