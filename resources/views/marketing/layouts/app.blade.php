@@ -113,10 +113,7 @@
                     <i class="bi bi-calendar3"></i> Data Slot
                 </a>
                 <a href="{{ route('marketing.submissions.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart-line"></i> Monitoring Slot
-                </a>
-                <a href="{{ route('marketing.submissions') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.data-submit') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-check"></i> Data Submit
+                    <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
                 </a>
                 <a href="{{ route('marketing.accreditations.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.accreditations') ? 'active' : '' }}">
                     <i class="bi bi-award"></i> Akreditasi

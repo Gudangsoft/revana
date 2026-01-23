@@ -1,11 +1,11 @@
 @extends('marketing.layouts.app')
 
-@section('title', 'Monitoring Slot')
+@section('title', 'Monitoring Artikel')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
-        <i class="bi bi-bar-chart-line"></i> Monitoring Slot Jurnal
+        <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
     </h4>
     <span class="badge bg-info fs-6">Total: {{ $submissions->total() }} submission</span>
 </div>
@@ -47,7 +47,7 @@
                     <i class="bi bi-search"></i> Filter
                 </button>
                 <a href="{{ route('marketing.submissions.monitoring') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i> Reset
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
                 </a>
             </div>
         </form>
@@ -118,6 +118,7 @@
                         <th class="px-3">Kode Submit</th>
                         <th>ID Artikel</th>
                         <th>Judul Artikel</th>
+                        <th>No HP</th>
                         <th>Jurnal / Slot</th>
                         <th>Tanggal Submit</th>
                         <th class="text-center">Status</th>
@@ -167,6 +168,9 @@
                         <td>
                             <div class="fw-semibold">{{ Str::limit($submission->judul_artikel, 40) }}</div>
                             <small class="text-muted">{{ $submission->nama_penulis }}</small>
+                        </td>
+                        <td>
+                            <small>{{ $submission->no_hp_penulis ?? '-' }}</small>
                         </td>
                         <td>
                             <small class="text-primary fw-semibold">

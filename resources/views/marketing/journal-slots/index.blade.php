@@ -11,20 +11,9 @@
         <div class="card-body py-2">
             <form action="{{ route('marketing.journal-slots.index') }}" method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small">Cari Nama Jurnal</label>
+                    <label class="form-label small">Cari Jurnal / Publisher</label>
                     <input type="text" name="search" class="form-control form-control-sm" 
-                           placeholder="🔍 Ketik nama jurnal..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small">Jurnal</label>
-                    <select name="journal_master_id" class="form-select form-select-sm">
-                        <option value="">-- Semua --</option>
-                        @foreach($journals as $j)
-                            <option value="{{ $j->id }}" {{ request('journal_master_id') == $j->id ? 'selected' : '' }}>
-                                {{ Str::limit($j->nama_jurnal, 30) }}
-                            </option>
-                        @endforeach
-                    </select>
+                           placeholder="🔍 Ketik nama jurnal atau publisher..." value="{{ request('search') }}">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small">Akreditasi</label>
@@ -72,7 +61,6 @@
                     <thead class="table-light">
                         <tr>
                             <th style="width: 50px;">No</th>
-                            <th>Kode Slot</th>
                             <th>Jurnal</th>
                             <th>Publisher</th>
                             <th>Volume</th>
@@ -90,7 +78,6 @@
                         @endphp
                         <tr>
                             <td>{{ $slots->firstItem() + $index }}</td>
-                            <td><code>{{ $slot->kode_slot }}</code></td>
                             <td>
                                 <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
                                 @if($slot->journalMaster->accreditation)
@@ -136,7 +123,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-4">
+                            <td colspan="8" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data slot</p>
                             </td>

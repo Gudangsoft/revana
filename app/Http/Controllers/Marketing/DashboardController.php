@@ -328,17 +328,13 @@ class DashboardController extends Controller
         $query = JournalSlot::with('journalMaster')
             ->where('is_active', true);
         
-        // Search by nama jurnal
+        // Search by nama jurnal atau publisher
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('journalMaster', function($q) use ($search) {
-                $q->where('nama_jurnal', 'like', "%{$search}%");
+                $q->where('nama_jurnal', 'like', "%{$search}%")
+                  ->orWhere('publisher', 'like', "%{$search}%");
             });
-        }
-        
-        // Filter by journal
-        if ($request->filled('journal_master_id')) {
-            $query->where('journal_master_id', $request->journal_master_id);
         }
         
         // Filter by akreditasi
