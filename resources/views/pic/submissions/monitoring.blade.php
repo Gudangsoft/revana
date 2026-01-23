@@ -1102,7 +1102,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const newValue = !current;
             
             // Check if previous stages are valid (sequential validation)
-            // EXCEPTION: Reviewer 1 and Reviewer 2 can work in parallel
+            // EXCEPTION 1: Reviewer 1 and Reviewer 2 can work in parallel
+            // EXCEPTION 2: Editor 3 and Author 2 are OPTIONAL (can be skipped)
             const row = this.closest('tr');
             const stageOrder = ['editor1_valid', 'author1_valid', 'editor2_valid', 'reviewer1_valid', 'reviewer2_valid', 'editor3_valid', 'author2_valid', 'production_valid'];
             const currentStageIndex = stageOrder.indexOf(field);
@@ -1111,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 0; i < currentStageIndex; i++) {
                 const previousStage = stageOrder[i];
                 
-                // SPECIAL CASE: Reviewer 1 and Reviewer 2 work in parallel
+                // SPECIAL CASE 1: Reviewer 1 and Reviewer 2 work in parallel
                 // If current stage is reviewer2, skip reviewer1 validation check
                 if (field === 'reviewer2_valid' && previousStage === 'reviewer1_valid') {
                     continue;
@@ -1119,6 +1120,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 // If current stage is reviewer1, skip reviewer2 validation check (shouldn't happen but for safety)
                 if (field === 'reviewer1_valid' && previousStage === 'reviewer2_valid') {
                     continue;
+                }
+                
+                // SPECIAL CASE 2: Editor 3 and Author 2 are OPTIONAL
+                // Production can skip editor3 and author2 validation
+                if (field === 'production_valid') {
+                    if (previousStage === 'editor3_valid' || previousStage === 'author2_valid') {
+                        continue; // Skip optional stages
+                    }
+                }
+                
+                // Author 2 can skip Editor 3 validation
+                if (field === 'author2_valid' && previousStage === 'editor3_valid') {
+                    continue; // Skip editor3 for author2
                 }
                 
                 // Convert snake_case to camelCase for dataset access: editor1_valid -> editor1Valid
@@ -1149,6 +1163,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (!reviewer1Valid || !reviewer2Valid) {
                     alert('Editor 3 hanya bisa diproses setelah Reviewer 1 DAN Reviewer 2 selesai.');
+                    return;
+                }
+            }
+            
+            // SPECIAL VALIDATION: Production requires BOTH Reviewer 1 AND Reviewer 2 (minimum)
+            if (field === 'production_valid') {
+                const reviewer1Valid = row.dataset.reviewer1Valid === '1';
+                const reviewer2Valid = row.dataset.reviewer2Valid === '1';
+                
+                if (!reviewer1Valid || !reviewer2Valid) {
+                    alert('Production minimal memerlukan Reviewer 1 DAN Reviewer 2 selesai. Editor 3 dan Author 2 bersifat opsional.');
                     return;
                 }
             }

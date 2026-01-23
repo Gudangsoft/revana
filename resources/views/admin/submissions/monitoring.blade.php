@@ -440,6 +440,9 @@
                                 <button type="button" class="btn btn-primary btn-sm" id="bulkReviewerBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkReviewerModal">
                                     <i class="bi bi-journal-check"></i> Tugaskan Reviewer
                                 </button>
+                                <button type="button" class="btn btn-success btn-sm" id="bulkProductionBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkProductionModal">
+                                    <i class="bi bi-gear"></i> Tugaskan Production
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1048,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bulkEditorBtn = document.getElementById('bulkEditorBtn');
     const bulkAuthorBtn = document.getElementById('bulkAuthorBtn');
     const bulkReviewerBtn = document.getElementById('bulkReviewerBtn');
+    const bulkProductionBtn = document.getElementById('bulkProductionBtn');
     
     function updateSelectedCount() {
         const checked = document.querySelectorAll('.submission-checkbox:checked');
@@ -1058,6 +1062,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bulkEditorBtn.disabled = count === 0;
         bulkAuthorBtn.disabled = count === 0;
         bulkReviewerBtn.disabled = count === 0;
+        bulkProductionBtn.disabled = count === 0;
         
         // Update select all checkboxes
         selectAll.checked = count === checkboxes.length && count > 0;
@@ -1123,6 +1128,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>`;
             });
             reviewerCredentialsList.innerHTML = html || '<tr><td colspan="3" class="text-center text-muted">Pilih submission terlebih dahulu</td></tr>';
+        }
+        
+        // Update production selected count in modal
+        const productionSelectedCount = document.getElementById('productionSelectedCount');
+        if (productionSelectedCount) {
+            productionSelectedCount.textContent = ids.length;
         }
     }
     
@@ -1311,6 +1322,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Tugaskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Production Assignment Modal -->
+<div class="modal fade" id="bulkProductionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-gear"></i> Penugasan Massal Production</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
+                @csrf
+                <input type="hidden" name="submission_ids" class="bulk-submission-ids">
+                <input type="hidden" name="assignment_type" value="production">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Anda akan menugaskan petugas Production untuk <strong id="productionSelectedCount">0</strong> submission yang dipilih.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Petugas Production <span class="text-danger">*</span></label>
+                        <select class="form-select" name="petugas_id" required>
+                            <option value="">-- Pilih Petugas --</option>
+                            @foreach($pics as $pic)
+                                <option value="{{ $pic->id }}">{{ $pic->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
                         <i class="bi bi-check-circle"></i> Tugaskan
                     </button>
                 </div>

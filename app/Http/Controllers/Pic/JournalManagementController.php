@@ -667,15 +667,16 @@ class JournalManagementController extends Controller
         }
         
         // Check if previous stages are completed (sequential validation)
-        // EXCEPTION: Reviewer 1 and Reviewer 2 can work in parallel
+        // EXCEPTION 1: Reviewer 1 and Reviewer 2 can work in parallel
+        // EXCEPTION 2: Editor 3 and Author 2 are OPTIONAL (can be skipped)
         $stageOrder = [
             'editor1_valid',
             'author1_valid',
             'editor2_valid',
             'reviewer1_valid',
             'reviewer2_valid',
-            'editor3_valid',
-            'author2_valid',
+            'editor3_valid',      // OPTIONAL
+            'author2_valid',      // OPTIONAL
             'production_valid',
         ];
         
@@ -685,13 +686,28 @@ class JournalManagementController extends Controller
         for ($i = 0; $i < $currentStageIndex; $i++) {
             $previousStage = $stageOrder[$i];
             
-            // SPECIAL CASE: Reviewer 1 and Reviewer 2 work in parallel
+            // SPECIAL CASE 1: Reviewer 1 and Reviewer 2 work in parallel
             // If current stage is reviewer2, skip reviewer1 validation check
             if ($request->field === 'reviewer2_valid' && $previousStage === 'reviewer1_valid') {
                 continue;
             }
             // If current stage is reviewer1, skip reviewer2 validation check (shouldn't happen but for safety)
             if ($request->field === 'reviewer1_valid' && $previousStage === 'reviewer2_valid') {
+                continue;
+            }
+            
+            // SPECIAL CASE 2: Editor 3 and Author 2 are OPTIONAL
+            // Production can skip editor3 and author2 if not assigned
+            if ($request->field === 'production_valid') {
+                if ($previousStage === 'editor3_valid' || $previousStage === 'author2_valid') {
+                    // Skip editor3 and author2 validation for production - they are optional
+                    continue;
+                }
+            }
+            
+            // Author 2 can skip Editor 3 validation if editor3 not assigned
+            if ($request->field === 'author2_valid' && $previousStage === 'editor3_valid') {
+                // Skip editor3 validation for author2 - editor3 is optional
                 continue;
             }
             
@@ -721,7 +737,7 @@ class JournalManagementController extends Controller
             }
         }
         
-        // SPECIAL VALIDATION: Editor 3 requires BOTH Reviewer 1 AND Reviewer 2 to be completed
+        // SPECIAL VALIDATION: Editor 3 requires BOTH Reviewer 1 AND Reviewer 2 to be completed (if assigned)
         if ($request->field === 'editor3_valid') {
             // Check if reviewer1 has petugas assigned and is not valid
             if ($submission->petugas_reviewer1_id && !$submission->reviewer1_valid) {
@@ -738,6 +754,25 @@ class JournalManagementController extends Controller
                 ], 400);
             }
         }
+        
+        // SPECIAL VALIDATION: Production requires BOTH Reviewer 1 AND Reviewer 2 (minimum requirement)
+        if ($request->field === 'production_valid') {
+            // Check if reviewer1 has petugas assigned and is not valid
+            if ($submission->petugas_reviewer1_id && !$submission->reviewer1_valid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reviewer 1 belum valid. Production minimal memerlukan Reviewer 1 dan Reviewer 2 selesai.'
+                ], 400);
+            }
+            // Check if reviewer2 has petugas assigned and is not valid
+            if ($submission->petugas_reviewer2_id && !$submission->reviewer2_valid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reviewer 2 belum valid. Production minimal memerlukan Reviewer 1 dan Reviewer 2 selesai.'
+                ], 400);
+            }
+        }
+
         
         $submission->{$request->field} = $request->value;
         $submission->save();
