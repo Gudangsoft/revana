@@ -35,9 +35,9 @@
                             <div class="mb-3">
                                 <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
-                                <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly style="cursor: pointer;">
-                                <input type="hidden" id="journal_master_id" name="journal_master_id" value="{{ old('journal_master_id') }}">
-                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="8" style="height: auto;">
+                                <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly style="cursor: pointer; background-color: #e9ecef;">
+                                <input type="hidden" id="journal_master_id" name="journal_master_id" value="{{ old('journal_master_id') }}" required>
+                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="8" style="height: auto; cursor: pointer;">
                                     <option value="">-- Pilih Jurnal --</option>
                                     @foreach($journals as $journal)
                                         <option value="{{ $journal->id }}" data-name="{{ $journal->nama_jurnal }}" data-publisher="{{ $journal->publisher }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
@@ -45,7 +45,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari, klik/Enter untuk memilih.</small>
+                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari, <strong>klik pada jurnal</strong> untuk memilih.</small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -226,6 +226,8 @@ const selectedDisplay = document.getElementById('selected_journal_display');
 const hiddenInput = document.getElementById('journal_master_id');
 const options = journalSelect.querySelectorAll('option');
 
+console.log('✅ Form initialized. Total journals:', options.length - 1);
+
 // Search filter
 searchInput.addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase().trim();
@@ -248,6 +250,8 @@ searchInput.addEventListener('input', function() {
         }
     });
     
+    console.log('🔍 Search:', searchTerm, '| Visible:', visibleCount);
+    
     // Auto-select first visible
     if (visibleCount > 0 && firstVisible) {
         firstVisible.selected = true;
@@ -260,6 +264,7 @@ searchInput.addEventListener('keydown', function(e) {
         e.preventDefault();
         const selected = journalSelect.options[journalSelect.selectedIndex];
         if (selected && selected.value) {
+            console.log('⌨️ Enter pressed, selecting:', selected.value);
             journalSelect.dispatchEvent(new Event('change'));
         }
     }
@@ -268,7 +273,12 @@ searchInput.addEventListener('keydown', function(e) {
 // When journal is selected
 journalSelect.addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
-    if (!selectedOption || !selectedOption.value) return;
+    if (!selectedOption || !selectedOption.value) {
+        console.log('❌ No valid selection');
+        return;
+    }
+    
+    console.log('✅ Journal selected:', selectedOption.value);
     
     const journalName = selectedOption.getAttribute('data-name');
     const publisher = selectedOption.getAttribute('data-publisher');
@@ -282,34 +292,37 @@ journalSelect.addEventListener('change', function() {
     
     // Hide dropdown and search
     journalSelect.classList.add('d-none');
-    searchInput.value = '';
+    searchInput.classList.add('d-none');
     
     // Load slots
+    console.log('📥 Loading slots for journal:', selectedOption.value);
     loadSlots(selectedOption.value);
 });
 
 // Single click on dropdown to select
 journalSelect.addEventListener('click', function(e) {
     if (e.target.tagName === 'OPTION' && e.target.value) {
+        console.log('🖱️ Option clicked:', e.target.value);
         setTimeout(() => {
             this.dispatchEvent(new Event('change'));
-        }, 100);
-    }
-});
-
-// Double click
-journalSelect.addEventListener('dblclick', function() {
-    if (this.value) {
-        this.dispatchEvent(new Event('change'));
+        }, 50);
     }
 });
 
 // Click on textbox to reopen search
 selectedDisplay.addEventListener('click', function() {
+    console.log('🔄 Reopening search');
     this.classList.add('d-none');
     journalSelect.classList.remove('d-none');
+    searchInput.classList.remove('d-none');
+    searchInput.value = '';
     searchInput.focus();
     hiddenInput.value = '';
+    
+    // Reset all options visibility
+    options.forEach(option => {
+        option.style.display = '';
+    });
 });
 
 // Focus search on page load
@@ -324,25 +337,39 @@ function loadSlots(journalId) {
         return;
     }
     
-    slotSelect.innerHTML = '<option value="">Loading...</option>';
+    console.log('⏳ Fetching slots...');
+    slotSelect.innerHTML = '<option value="">⏳ Loading...</option>';
     
     fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
-        .then(response => response.json())
+        .then(response => {
+            console.log('📡 Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('📦 Received:', data.length, 'slots');
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia</option>';
+                return;
+            }
+            
             let options = '<option value="">-- Pilih Slot --</option>';
             data.forEach(slot => {
                 options += `<option value="${slot.id}">${slot.text}</option>`;
             });
             slotSelect.innerHTML = options;
+            
+            console.log('✅ Slots loaded successfully');
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('❌ Error loading slots:', error);
             slotSelect.innerHTML = '<option value="">Error loading slots</option>';
         });
 }
 
 // Load slots if journal already selected (from old input)
 if (hiddenInput.value) {
+    console.log('♻️ Restoring previous selection:', hiddenInput.value);
     const selectedOption = Array.from(options).find(opt => opt.value == hiddenInput.value);
     if (selectedOption) {
         const journalName = selectedOption.getAttribute('data-name');
@@ -350,8 +377,11 @@ if (hiddenInput.value) {
         selectedDisplay.value = `${journalName} (${publisher})`;
         selectedDisplay.classList.remove('d-none');
         journalSelect.classList.add('d-none');
+        searchInput.classList.add('d-none');
         loadSlots(hiddenInput.value);
     }
 }
+
+console.log('✅ All event listeners ready');
 </script>
 @endpush
