@@ -233,19 +233,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchResults = document.getElementById('search_results');
     const slotSelect = document.getElementById('journal_slot_id');
     
-    // Data jurnal
+    // Data jurnal - Build array directly
     const journals = [
         @foreach($journals as $journal)
         {
             id: {{ $journal->id }},
             nama: {!! json_encode($journal->nama_jurnal) !!},
-            publisher: {!! json_encode($journal->publisher ?? '') !!},
-            search: {!! json_encode(strtolower($journal->nama_jurnal . ' ' . ($journal->publisher ?? ''))) !!}
+            publisher: {!! json_encode($journal->publisher ?? '') !!}
         },
         @endforeach
     ];
     
-    console.log('✅ Initialized:', journals.length, 'journals');
+    // Add search field to each journal
+    journals.forEach(j => {
+        j.search = (j.nama + ' ' + j.publisher).toLowerCase();
+    });
+    
+    console.log('✅ Journal data loaded:', journals.length, 'journals');
+    console.log('📋 Sample:', journals[0]);
+    
+    if (journals.length === 0) {
+        console.error('❌ No journals found! Check controller data.');
+        searchInput.placeholder = '❌ Tidak ada data jurnal';
+        searchInput.disabled = true;
+        return;
+    }
     
     let selectedJournalName = '';
     
@@ -269,27 +281,27 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Jika tidak ada hasil
         if (filtered.length === 0) {
-            searchResults.innerHTML = '<div class="list-group-item text-muted"><i class="bi bi-info-circle"></i> Tidak ada hasil ditemukan</div>';
+            searchResults.innerHTML = '<div class="list-group-item text-muted"><i class="bi bi-info-circle"></i> Tidak ada hasil ditemukan untuk "' + searchTerm + '"</div>';
             searchResults.style.display = 'block';
             return;
         }
         
-        // Tampilkan hasil (maksimal 20 untuk performa)
+        // Tampilkan hasil (maksimal 15 untuk performa)
         let html = '';
-        const maxResults = Math.min(filtered.length, 20);
+        const maxResults = Math.min(filtered.length, 15);
         
         for (let i = 0; i < maxResults; i++) {
             const journal = filtered[i];
             html += `
-                <a href="#" class="list-group-item list-group-item-action py-2" data-id="${journal.id}" data-name="${escapeHtml(journal.nama)}">
+                <a href="javascript:void(0)" class="list-group-item list-group-item-action py-2" data-id="${journal.id}" data-name="${escapeHtml(journal.nama)}">
                     <div><strong>${highlightMatch(journal.nama, searchTerm)}</strong></div>
-                    ${journal.publisher ? '<div><small class="text-muted">' + highlightMatch(journal.publisher, searchTerm) + '</small></div>' : ''}
+                    ${journal.publisher ? '<div><small class="text-muted">' + escapeHtml(journal.publisher) + '</small></div>' : ''}
                 </a>
             `;
         }
         
-        if (filtered.length > 20) {
-            html += `<div class="list-group-item text-muted small">+ ${filtered.length - 20} jurnal lainnya. Ketik lebih spesifik...</div>`;
+        if (filtered.length > 15) {
+            html += `<div class="list-group-item text-muted small text-center">+ ${filtered.length - 15} jurnal lainnya. Ketik lebih spesifik...</div>`;
         }
         
         searchResults.innerHTML = html;
@@ -306,8 +318,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Helper function untuk highlight match
     function highlightMatch(text, term) {
         if (!term) return escapeHtml(text);
+        const escaped = escapeHtml(text);
         const regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+        return escaped.replace(regex, '<span style="background-color: #fff3cd; font-weight: bold;">$1</span>');
     }
     
     // Klik hasil pencarian
@@ -318,6 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const journalId = target.getAttribute('data-id');
         const journalName = target.getAttribute('data-name');
+        
+        console.log('🖱️ Clicked journal:', journalId, journalName);
         
         if (journalId) {
             selectJournal(journalId, journalName);
@@ -332,6 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (firstResult) {
                 const journalId = firstResult.getAttribute('data-id');
                 const journalName = firstResult.getAttribute('data-name');
+                console.log('⌨️ Enter pressed, selecting:', journalId);
                 selectJournal(journalId, journalName);
             }
         } else if (e.key === 'Escape') {
@@ -342,7 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Klik di luar untuk tutup dropdown
     document.addEventListener('click', function(e) {
         if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-            searchResults.style.display = 'none';
+            if (searchResults.style.display === 'block') {
+                console.log('👋 Closing dropdown - clicked outside');
+                searchResults.style.display = 'none';
+            }
         }
     });
     
@@ -352,9 +371,11 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedJournalName = journalName;
         searchInput.value = '✓ ' + journalName;
         searchInput.classList.add('is-valid');
+        searchInput.classList.remove('is-invalid');
         searchResults.style.display = 'none';
         
-        console.log('✅ Selected journal:', journalId, '-', journalName);
+        console.log('✅ Selected journal ID:', journalId);
+        console.log('✅ Selected journal name:', journalName);
         
         // Load slots
         loadSlots(journalId);
@@ -363,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear selection when editing
     searchInput.addEventListener('focus', function() {
         if (hiddenInput.value && this.value.startsWith('✓ ')) {
-            // Allow editing - show current search
+            // Allow editing - show current search without checkmark
             this.value = selectedJournalName;
             this.select();
         }
@@ -371,22 +392,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load slots function
     function loadSlots(journalId) {
-        console.log('⏳ Loading slots for journal:', journalId);
+        console.log('⏳ Loading slots for journal ID:', journalId);
         
         slotSelect.innerHTML = '<option value="">⏳ Memuat slot...</option>';
         slotSelect.disabled = true;
         
-        fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
+        const url = `{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`;
+        console.log('📡 Fetching from:', url);
+        
+        fetch(url)
             .then(response => {
                 console.log('📡 Response status:', response.status);
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Received slots:', data.length);
+                console.log('📦 Received slots:', data);
                 
                 if (!Array.isArray(data) || data.length === 0) {
-                    slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia</option>';
+                    slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia untuk jurnal ini</option>';
                     slotSelect.disabled = false;
                     console.log('⚠️ No slots available for this journal');
                     return;
@@ -399,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 slotSelect.innerHTML = html;
                 slotSelect.disabled = false;
-                console.log('✅ Slots loaded successfully -', data.length, 'options available');
+                console.log('✅ Slots loaded successfully -', data.length, 'slot(s) available');
             })
             .catch(error => {
                 console.error('❌ Error loading slots:', error);
@@ -413,14 +437,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const oldJournalId = '{{ old('journal_master_id') }}';
         const oldJournal = journals.find(j => j.id == oldJournalId);
         if (oldJournal) {
+            console.log('♻️ Restoring previous selection:', oldJournalId);
             selectJournal(oldJournal.id, oldJournal.nama);
         }
     @endif
     
     // Focus on search input
-    searchInput.focus();
+    setTimeout(() => {
+        searchInput.focus();
+    }, 100);
     
     console.log('✅ Search functionality ready - Type to search!');
+    console.log('💡 Try typing part of a journal name...');
 });
 </script>
 @endpush
