@@ -15,6 +15,20 @@
     </div>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <!-- Filter -->
 <div class="card mb-3">
     <div class="card-body py-2">
@@ -83,9 +97,12 @@
                         $badgeColor = $submission->production_valid ? 'success' : 'warning';
                         $statusText = $submission->production_valid ? 'TERBIT' : 'PROSES';
                     @endphp
-                    <tr>
+                    <tr class="{{ request('highlight') == $submission->id ? 'table-success' : '' }}">
                         <td>
                             <code class="text-primary">{{ $submission->kode_submit }}</code>
+                            @if(request('highlight') == $submission->id)
+                                <span class="badge bg-success ms-1">BARU</span>
+                            @endif
                         </td>
                         <td>
                             <strong>{{ Str::limit($submission->judul_artikel, 60) }}</strong>
