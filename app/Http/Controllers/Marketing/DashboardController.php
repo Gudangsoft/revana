@@ -245,7 +245,7 @@ class DashboardController extends Controller
     public function journalsIndex()
     {
         $marketing = Auth::guard('marketing')->user();
-        $journals = JournalMaster::with(['journalSlots' => function($q) {
+        $journals = JournalMaster::with(['slots' => function($q) {
                 $q->where('is_active', true);
             }])
             ->where('is_active', true)

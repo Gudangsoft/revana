@@ -53,7 +53,7 @@
                                 <span class="badge bg-warning text-dark">{{ $journal->points }} Point</span>
                             </td>
                             <td>
-                                <span class="badge bg-info">{{ $journal->journalSlots->count() }} Slot</span>
+                                <span class="badge bg-info">{{ $journal->slots->count() }} Slot</span>
                             </td>
                             <td>
                                 @if($journal->is_active)
