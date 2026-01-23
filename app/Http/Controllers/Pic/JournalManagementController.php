@@ -18,9 +18,25 @@ use Illuminate\Support\Facades\Log;
 class JournalManagementController extends Controller
 {
     // ==================== JOURNAL MASTER ====================
-    public function journalsIndex()
+    public function journalsIndex(Request $request)
     {
-        $journals = JournalMaster::where('is_active', true)->latest()->paginate(20);
+        $query = JournalMaster::where('is_active', true);
+        
+        // Search by nama jurnal or publisher
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_jurnal', 'like', "%{$search}%")
+                  ->orWhere('publisher', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by akreditasi
+        if ($request->filled('akreditasi')) {
+            $query->where('accreditation', $request->akreditasi);
+        }
+        
+        $journals = $query->latest()->paginate(20)->withQueryString();
         return view('pic.journals.index', compact('journals'));
     }
 

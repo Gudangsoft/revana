@@ -23,6 +23,37 @@
         </a>
     </div>
     <div class="card-body">
+        <!-- Search & Filter Form -->
+        <form method="GET" action="{{ route('pic.journals.index') }}" class="mb-3">
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="🔍 Cari nama jurnal atau publisher..." value="{{ request('search') }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="akreditasi" class="form-select">
+                        <option value="">-- Semua Akreditasi --</option>
+                        <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                        <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                        <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                        <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                        <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                        <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
+                        <a href="{{ route('pic.journals.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
