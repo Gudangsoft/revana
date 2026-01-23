@@ -50,8 +50,10 @@ class PicPointReportController extends Controller
             ->first();
         
         // Points distribution by step
-        $pointsByStep = PicPointHistory::selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
+        $pointsByStep = \DB::table('pic_point_histories')
+            ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
+            ->orderByRaw('SUM(points_earned) desc')
             ->get();
         
         $stepConfig = PicPointHistory::POINT_CONFIG;
@@ -96,7 +98,8 @@ class PicPointReportController extends Controller
         ];
         
         // Points by step
-        $pointsByStep = $pic->pointHistories()
+        $pointsByStep = \DB::table('pic_point_histories')
+            ->where('pic_id', $pic->id)
             ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
             ->orderByRaw('SUM(points_earned) desc')
