@@ -102,6 +102,12 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
+        // Debug log
+        \Log::info('Marketing submissions query', [
+            'marketing_id' => $marketing->id,
+            'marketing_name' => $marketing->name,
+        ]);
+        
         $query = Submission::where('marketing_id', $marketing->id)
             ->with('journalSlot.journalMaster');
         
@@ -121,6 +127,9 @@ class DashboardController extends Controller
         }
         
         $submissions = $query->latest('tanggal_submit')->paginate(10);
+        
+        // Debug log
+        \Log::info('Submissions found: ' . $submissions->total());
         
         return view('marketing.submissions', compact('marketing', 'submissions'));
     }
@@ -215,6 +224,14 @@ class DashboardController extends Controller
                 'tanggal_submit' => now(),
                 'status' => 'SUBMITTED',
                 'created_by' => $adminUser->id,
+            ]);
+            
+            // Log for debugging
+            \Log::info('Marketing submission created', [
+                'submission_id' => $submission->id,
+                'marketing_id' => $marketing->id,
+                'marketing_name' => $marketing->name,
+                'kode_submit' => $kodeSubmit,
             ]);
             
             // Increment slot terpakai

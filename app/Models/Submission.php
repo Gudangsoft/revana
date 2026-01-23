@@ -15,6 +15,7 @@ class Submission extends Model
         'kode_submit',
         'kode_loa',
         'journal_slot_id',
+        'marketing_id',
         'id_artikel',
         'judul_artikel',
         'link_artikel',
