@@ -208,6 +208,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pics-export', [PicController::class, 'export'])->name('pics.export');
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
+        Route::get('/pics-activity-report', [PicController::class, 'activityReport'])->name('pics.activity-report');
         
         // PIC Point Report
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');

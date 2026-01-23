@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pic;
+use App\Models\PicPointHistory;
 use App\Exports\PicsExport;
 use App\Imports\PicsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PicController extends Controller
 {
@@ -171,5 +173,68 @@ class PicController extends Controller
         
         return redirect()->route('pic.dashboard')
             ->with('success', 'Anda sekarang login sebagai ' . $pic->name);
+    }
+
+    /**
+     * Show PIC activity report
+     */
+    public function activityReport(Request $request)
+    {
+        // Get all PICs with their points
+        $query = Pic::withCount('pointHistories')
+            ->with(['pointHistories' => function($q) use ($request) {
+                if ($request->filled('tanggal_dari')) {
+                    $q->whereDate('created_at', '>=', $request->tanggal_dari);
+                }
+                if ($request->filled('tanggal_sampai')) {
+                    $q->whereDate('created_at', '<=', $request->tanggal_sampai);
+                }
+            }]);
+        
+        // Filter by PIC
+        if ($request->filled('pic_id')) {
+            $query->where('id', $request->pic_id);
+        }
+        
+        // Only show active PICs by default
+        if (!$request->filled('show_inactive')) {
+            $query->where('is_active', true);
+        }
+        
+        $pics = $query->orderBy('total_points', 'desc')->get();
+        
+        // Calculate filtered points for each PIC
+        $pics->each(function($pic) use ($request) {
+            $pointQuery = $pic->pointHistories();
+            
+            if ($request->filled('tanggal_dari')) {
+                $pointQuery->whereDate('created_at', '>=', $request->tanggal_dari);
+            }
+            if ($request->filled('tanggal_sampai')) {
+                $pointQuery->whereDate('created_at', '<=', $request->tanggal_sampai);
+            }
+            
+            $pic->filtered_points = $pointQuery->sum('points_earned');
+            $pic->filtered_tasks = $pointQuery->count();
+            
+            // Get breakdown by step
+            $pic->step_breakdown = $pointQuery
+                ->select('step', DB::raw('COUNT(*) as count'), DB::raw('SUM(points_earned) as total'))
+                ->groupBy('step')
+                ->get();
+        });
+        
+        // Overall statistics
+        $stats = [
+            'total_pics' => $pics->count(),
+            'active_pics' => Pic::where('is_active', true)->count(),
+            'total_points_given' => $pics->sum('filtered_points'),
+            'total_tasks_completed' => $pics->sum('filtered_tasks'),
+        ];
+        
+        // Get all PICs for filter dropdown
+        $allPics = Pic::orderBy('name')->get();
+        
+        return view('admin.pics.activity-report', compact('pics', 'stats', 'allPics'));
     }
 }
