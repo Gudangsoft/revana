@@ -95,6 +95,13 @@ class PicPointReportController extends Controller
         $stats = [
             'total_points' => $pic->total_points ?? 0,
             'total_tasks' => $pic->pointHistories()->count(),
+            'points_today' => $pic->pointHistories()
+                ->whereDate('created_at', now()->toDateString())
+                ->sum('points_earned'),
+            'points_this_month' => $pic->pointHistories()
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('points_earned'),
         ];
         
         // Points by step
