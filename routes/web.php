@@ -355,6 +355,7 @@ Route::prefix('pic')->group(function () {
             Route::get('/{submission}/process', [PicJournalController::class, 'submissionsProcess'])->name('process');
             Route::post('/{submission}/submit-work', [PicJournalController::class, 'submitWork'])->name('submit-work');
             Route::post('/{submission}/request-revision', [PicJournalController::class, 'requestRevision'])->name('request-revision');
+            Route::get('/journal-slots/get-by-journal', [PicJournalController::class, 'getSlotsByJournal'])->name('slots.by-journal');
         });
         
         // Akreditasi

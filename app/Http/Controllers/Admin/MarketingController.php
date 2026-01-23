@@ -136,11 +136,6 @@ class MarketingController extends Controller
     }
 
     /**
-     * Download Import Template
-     */
-    public function template()
-    {
-    /**
      * Download template Excel
      */
     public function downloadTemplate()

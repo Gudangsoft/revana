@@ -211,16 +211,48 @@ class JournalManagementController extends Controller
 
     public function submissionsCreate()
     {
+        $journals = JournalMaster::where('is_active', true)
+            ->orderBy('nama_jurnal')
+            ->get();
+            
         $slots = JournalSlot::with('journalMaster')
             ->whereRaw('jumlah_slot > slot_terpakai')
             ->where('is_active', true)
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
             ->get();
+            
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         
-        return view('pic.submissions.create', compact('slots', 'marketings', 'pics'));
+        return view('pic.submissions.create', compact('journals', 'slots', 'marketings', 'pics'));
+    }
+
+    public function getSlotsByJournal(Request $request)
+    {
+        $journalId = $request->get('journal_master_id');
+        
+        $slots = JournalSlot::where('journal_master_id', $journalId)
+            ->whereRaw('jumlah_slot > slot_terpakai')
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get()
+            ->map(function($slot) {
+                return [
+                    'id' => $slot->id,
+                    'text' => sprintf(
+                        '%s/%s - Vol. %s No. %s (Sisa: %d slot)',
+                        $slot->bulan,
+                        $slot->tahun,
+                        $slot->volume ?? '-',
+                        $slot->nomor ?? '-',
+                        $slot->jumlah_slot - $slot->slot_terpakai
+                    )
+                ];
+            });
+        
+        return response()->json($slots);
     }
 
     public function submissionsStore(Request $request)
