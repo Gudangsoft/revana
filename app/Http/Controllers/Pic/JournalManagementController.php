@@ -868,36 +868,45 @@ class JournalManagementController extends Controller
         if ($request->value == true && $oldValue != true) {
             $pointsToAdd = 1; // Every validation = 1 point
             $stageName = '';
+            $stepName = '';
             
-            // Define stage name for each field
+            // Define stage name and step for each field
             switch($request->field) {
                 case 'editor1_valid':
                     $stageName = 'Editor 1';
+                    $stepName = 'editor1';
                     break;
                 case 'author1_valid':
                     $stageName = 'Author 1';
+                    $stepName = 'author1';
                     break;
                 case 'editor2_valid':
                     $stageName = 'Editor 2';
+                    $stepName = 'editor2';
                     break;
                 case 'reviewer1_valid':
                     $stageName = 'Reviewer 1';
+                    $stepName = 'reviewer1';
                     break;
                 case 'reviewer2_valid':
                     $stageName = 'Reviewer 2';
+                    $stepName = 'reviewer2';
                     break;
                 case 'editor3_valid':
                     $stageName = 'Editor 3';
+                    $stepName = 'editor3';
                     break;
                 case 'author2_valid':
                     $stageName = 'Author 2';
+                    $stepName = 'author2';
                     break;
                 case 'production_valid':
                     $stageName = 'Production';
+                    $stepName = 'production';
                     break;
             }
             
-            if ($pointsToAdd > 0) {
+            if ($pointsToAdd > 0 && $stepName) {
                 try {
                     // Add points to the assigned PIC
                     $petugasField = $fieldMap[$request->field];
@@ -910,13 +919,13 @@ class JournalManagementController extends Controller
                             $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
                             $pic->save();
                             
-                            // Log point history
+                            // Log point history with correct fields
                             PicPointHistory::create([
                                 'pic_id' => $picId,
                                 'submission_id' => $submission->id,
-                                'points' => $pointsToAdd,
+                                'step' => $stepName,
+                                'points_earned' => $pointsToAdd,
                                 'description' => "Validasi {$stageName} - {$submission->kode_submit}",
-                                'created_at' => now(),
                             ]);
                         }
                     }
@@ -935,7 +944,6 @@ class JournalManagementController extends Controller
                                 'submission_id' => $submission->id,
                                 'points' => $marketingPoints,
                                 'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
-                                'created_at' => now(),
                             ]);
                         }
                     }

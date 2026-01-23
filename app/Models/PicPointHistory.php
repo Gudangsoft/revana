@@ -21,12 +21,14 @@ class PicPointHistory extends Model
      * Point configuration per step
      */
     public const POINT_CONFIG = [
-        'editor1' => ['points' => 10, 'label' => 'Editor 1'],
-        'author1' => ['points' => 5, 'label' => 'Author 1'],
-        'editor2' => ['points' => 10, 'label' => 'Editor 2'],
-        'editor3' => ['points' => 10, 'label' => 'Editor 3'],
-        'author2' => ['points' => 5, 'label' => 'Author 2'],
-        'production' => ['points' => 15, 'label' => 'Production'],
+        'editor1' => ['points' => 1, 'label' => 'Editor 1'],
+        'author1' => ['points' => 1, 'label' => 'Author 1'],
+        'editor2' => ['points' => 1, 'label' => 'Editor 2'],
+        'reviewer1' => ['points' => 1, 'label' => 'Reviewer 1'],
+        'reviewer2' => ['points' => 1, 'label' => 'Reviewer 2'],
+        'editor3' => ['points' => 1, 'label' => 'Editor 3'],
+        'author2' => ['points' => 1, 'label' => 'Author 2'],
+        'production' => ['points' => 1, 'label' => 'Production'],
         'adjustment' => ['points' => 0, 'label' => 'Penyesuaian'],
     ];
 
