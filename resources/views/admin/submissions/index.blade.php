@@ -324,7 +324,18 @@
                                         @endif
                                     </td>
                                     <td>{{ $submission->nama_penulis }}</td>
-                                    <td>{{ $submission->no_hp_penulis ?? '-' }}</td>
+                                    <td>
+                                        @if($submission->no_hp_penulis)
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $submission->no_hp_penulis) }}" 
+                                               target="_blank" 
+                                               class="btn btn-success btn-sm" 
+                                               title="Chat WhatsApp">
+                                                <i class="bi bi-whatsapp"></i> {{ $submission->no_hp_penulis }}
+                                            </a>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td><code class="text-success">{{ $submission->username_author ?? '-' }}</code></td>
                                     <td><code class="text-warning">{{ $submission->password_author ?? '-' }}</code></td>
                                     <td>
