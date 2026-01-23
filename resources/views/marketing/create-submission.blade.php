@@ -19,9 +19,9 @@
                 <div class="col-md-6">
                     <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
                     <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
-                    <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly>
+                    <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly style="cursor: pointer;">
                     <input type="hidden" id="journal_master_id" name="journal_master_id" value="{{ old('journal_master_id') }}">
-                    <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="6" style="height: auto;">
+                    <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="8" style="height: auto;">
                         <option value="">-- Pilih Jurnal --</option>
                         @foreach($journals as $journal)
                             <option value="{{ $journal->id }}" data-name="{{ $journal->nama_jurnal }}" data-publisher="{{ $journal->publisher }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
@@ -29,7 +29,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari.</small>
+                    <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari, klik/Enter untuk memilih.</small>
                     @error('journal_master_id')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -173,6 +173,17 @@ searchInput.addEventListener('input', function() {
     }
 });
 
+// Handle Enter key in search box
+searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const selectedOption = journalSelect.options[journalSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            journalSelect.dispatchEvent(new Event('change'));
+        }
+    }
+});
+
 // When journal is selected from dropdown
 journalSelect.addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
@@ -193,6 +204,22 @@ journalSelect.addEventListener('change', function() {
         
         // Load slots
         loadSlots(selectedOption.value);
+    }
+});
+
+// Single click on dropdown to select (more intuitive)
+journalSelect.addEventListener('click', function(e) {
+    if (e.target.tagName === 'OPTION' && e.target.value) {
+        setTimeout(() => {
+            this.dispatchEvent(new Event('change'));
+        }, 100);
+    }
+});
+
+// Also support double click
+journalSelect.addEventListener('dblclick', function() {
+    if (this.value) {
+        this.dispatchEvent(new Event('change'));
     }
 });
 

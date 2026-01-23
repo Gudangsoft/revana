@@ -11,6 +11,7 @@ use App\Models\Marketing;
 use App\Models\Pic;
 use App\Models\PicPointHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JournalManagementController extends Controller
 {
@@ -224,8 +225,9 @@ class JournalManagementController extends Controller
             
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        $currentPic = Auth::guard('pic')->user();
         
-        return view('pic.submissions.create', compact('journals', 'slots', 'marketings', 'pics'));
+        return view('pic.submissions.create', compact('journals', 'slots', 'marketings', 'pics', 'currentPic'));
     }
 
     public function getSlotsByJournal(Request $request)
