@@ -866,41 +866,33 @@ class JournalManagementController extends Controller
         
         // Add points when validation is set to true (and was previously false to prevent duplicate points)
         if ($request->value == true && $oldValue != true) {
-            $pointsToAdd = 0;
+            $pointsToAdd = 1; // Every validation = 1 point
             $stageName = '';
             
-            // Define points for each stage
+            // Define stage name for each field
             switch($request->field) {
                 case 'editor1_valid':
-                    $pointsToAdd = 5;
                     $stageName = 'Editor 1';
                     break;
                 case 'author1_valid':
-                    $pointsToAdd = 5;
                     $stageName = 'Author 1';
                     break;
                 case 'editor2_valid':
-                    $pointsToAdd = 5;
                     $stageName = 'Editor 2';
                     break;
                 case 'reviewer1_valid':
-                    $pointsToAdd = 10;
                     $stageName = 'Reviewer 1';
                     break;
                 case 'reviewer2_valid':
-                    $pointsToAdd = 10;
                     $stageName = 'Reviewer 2';
                     break;
                 case 'editor3_valid':
-                    $pointsToAdd = 5;
                     $stageName = 'Editor 3';
                     break;
                 case 'author2_valid':
-                    $pointsToAdd = 5;
                     $stageName = 'Author 2';
                     break;
                 case 'production_valid':
-                    $pointsToAdd = 10;
                     $stageName = 'Production';
                     break;
             }
@@ -933,7 +925,7 @@ class JournalManagementController extends Controller
                     if ($request->field === 'production_valid' && $submission->marketing_id) {
                         $marketing = Marketing::find($submission->marketing_id);
                         if ($marketing) {
-                            $marketingPoints = 20; // Marketing gets points when article is completed
+                            $marketingPoints = 1; // Marketing also gets 1 point when article is completed
                             $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
                             $marketing->save();
                             
