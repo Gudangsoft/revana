@@ -354,9 +354,17 @@ class DashboardController extends Controller
             ->orderBy('bulan', 'desc')
             ->get()
             ->map(function ($slot) {
+                $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
                 return [
                     'id' => $slot->id,
-                    'text' => "Vol. {$slot->volume} No. {$slot->nomor} ({$slot->tahun})"
+                    'text' => sprintf(
+                        'Vol. %s No. %s (%s) - Sisa: %d/%d slot',
+                        $slot->volume ?? '-',
+                        $slot->nomor ?? '-',
+                        $slot->tahun,
+                        $sisa > 0 ? $sisa : 0,
+                        $slot->jumlah_slot
+                    )
                 ];
             });
         

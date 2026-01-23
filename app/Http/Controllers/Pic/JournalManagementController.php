@@ -250,10 +250,9 @@ class JournalManagementController extends Controller
                 return [
                     'id' => $slot->id,
                     'text' => sprintf(
-                        'Vol. %s No. %s - %s/%s (Sisa: %d/%d slot)',
+                        'Vol. %s No. %s (%s) - Sisa: %d/%d slot',
                         $slot->volume ?? '-',
                         $slot->nomor ?? '-',
-                        $slot->bulan,
                         $slot->tahun,
                         $sisa > 0 ? $sisa : 0,
                         $slot->jumlah_slot
