@@ -35,19 +35,17 @@
                             <div class="mb-3">
                                 <label for="journal_master_id" class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
-                                <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly style="cursor: pointer;">
-                                <input type="hidden" id="journal_master_id" name="journal_master_id" value="{{ old('journal_master_id') }}">
-                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="8" style="height: auto;">
+                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" required size="8" style="height: auto;">
                                     <option value="">-- Pilih Jurnal --</option>
                                     @foreach($journals as $journal)
-                                        <option value="{{ $journal->id }}" data-name="{{ $journal->nama_jurnal }}" data-publisher="{{ $journal->publisher }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
+                                        <option value="{{ $journal->id }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
                                             {{ $journal->nama_jurnal }} ({{ $journal->publisher }})
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari, klik/Enter untuk memilih.</small>
+                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari.</small>
                                 @error('journal_master_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -70,8 +68,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_artikel" class="form-label">ID Artikel</label>
-                                <input type="text" class="form-control @error('id_artikel') is-invalid @enderror" id="id_artikel" name="id_artikel" value="{{ old('id_artikel') }}" placeholder="Opsional">
+                                <label for="id_artikel" class="form-label">ID Artikel <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('id_artikel') is-invalid @enderror" id="id_artikel" name="id_artikel" value="{{ old('id_artikel') }}" required>
                                 @error('id_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -84,6 +82,19 @@
                                 @error('link_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="file_artikel" class="form-label">Upload File Artikel (Word/PDF)</label>
+                                <input type="file" class="form-control @error('file_artikel') is-invalid @enderror" id="file_artikel" name="file_artikel" accept=".doc,.docx,.pdf">
+                                @error('file_artikel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
                             </div>
                         </div>
                     </div>
@@ -171,16 +182,16 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="pic_id" class="form-label">PIC Submit</label>
-                                <select class="form-select @error('pic_id') is-invalid @enderror" id="pic_id" name="pic_id">
+                                <label for="petugas_submit_id" class="form-label">PIC Submit</label>
+                                <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
                                     <option value="">-- Pilih PIC --</option>
                                     @foreach($pics as $pic)
-                                        <option value="{{ $pic->id }}" {{ (old('pic_id') ?? $currentPic->id ?? null) == $pic->id ? 'selected' : '' }}>
+                                        <option value="{{ $pic->id }}" {{ (old('petugas_submit_id') ?? $currentPic->id ?? null) == $pic->id ? 'selected' : '' }}>
                                             {{ $pic->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('pic_id')
+                                @error('petugas_submit_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <small class="text-muted">Pilih PIC yang melakukan submit.</small>
@@ -206,11 +217,9 @@
 
 @push('scripts')
 <script>
-// Journal search functionality with textbox display
+// Journal search functionality
 const searchInput = document.getElementById('search_journal');
-const journalSelect = document.getElementById('journal_master_select');
-const selectedDisplay = document.getElementById('selected_journal_display');
-const hiddenInput = document.getElementById('journal_master_id');
+const journalSelect = document.getElementById('journal_master_id');
 const options = journalSelect.querySelectorAll('option');
 
 searchInput.addEventListener('input', function() {
@@ -218,22 +227,9 @@ searchInput.addEventListener('input', function() {
     let visibleCount = 0;
     let lastVisibleOption = null;
     
-    // Always show dropdown when typing, hide selected display
-    journalSelect.classList.remove('d-none');
-    selectedDisplay.classList.add('d-none');
-    hiddenInput.value = ''; // Clear selection
-    
-    // If empty search, show all
-    if (!searchTerm) {
-        options.forEach(option => {
-            option.style.display = '';
-        });
-        return;
-    }
-    
     options.forEach(option => {
         if (option.value === '') {
-            option.style.display = 'none'; // Hide placeholder when searching
+            option.style.display = searchTerm ? 'none' : '';
             return;
         }
         
@@ -250,72 +246,16 @@ searchInput.addEventListener('input', function() {
     // Auto-select if only one result
     if (visibleCount === 1 && lastVisibleOption) {
         lastVisibleOption.selected = true;
+        journalSelect.dispatchEvent(new Event('change'));
     }
-});
-
-// Handle Enter key in search box
-searchInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        const selectedOption = journalSelect.options[journalSelect.selectedIndex];
-        if (selectedOption && selectedOption.value) {
-            journalSelect.dispatchEvent(new Event('change'));
-        }
-    }
-});
-
-// When journal is selected from dropdown
-journalSelect.addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    if (selectedOption.value) {
-        const journalName = selectedOption.getAttribute('data-name');
-        const publisher = selectedOption.getAttribute('data-publisher');
-        
-        // Set hidden input
-        hiddenInput.value = selectedOption.value;
-        
-        // Show in textbox
-        selectedDisplay.value = `${journalName} (${publisher})`;
-        selectedDisplay.classList.remove('d-none');
-        
-        // Hide dropdown and search
-        journalSelect.classList.add('d-none');
-        searchInput.value = '';
-        
-        // Load slots
-        loadSlots(selectedOption.value);
-    }
-});
-
-// Single click on dropdown to select (more intuitive)
-journalSelect.addEventListener('click', function(e) {
-    if (e.target.tagName === 'OPTION' && e.target.value) {
-        setTimeout(() => {
-            this.dispatchEvent(new Event('change'));
-        }, 100);
-    }
-});
-
-// Also support double click
-journalSelect.addEventListener('dblclick', function() {
-    if (this.value) {
-        this.dispatchEvent(new Event('change'));
-    }
-});
-
-// Click on textbox to reopen search
-selectedDisplay.addEventListener('click', function() {
-    this.classList.add('d-none');
-    journalSelect.classList.remove('d-none');
-    searchInput.focus();
-    hiddenInput.value = '';
 });
 
 // Focus search on page load
 searchInput.focus();
 
-// Load slots function
-function loadSlots(journalId) {
+// Slot loading functionality
+document.getElementById('journal_master_id').addEventListener('change', function() {
+    const journalId = this.value;
     const slotSelect = document.getElementById('journal_slot_id');
     
     if (!journalId) {
@@ -323,51 +263,21 @@ function loadSlots(journalId) {
         return;
     }
     
-    console.log('Loading slots for journal:', journalId);
     slotSelect.innerHTML = '<option value="">Loading...</option>';
     
-    const url = `{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`;
-    console.log('Fetching from URL:', url);
-    
-    fetch(url)
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+    fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
+        .then(response => response.json())
         .then(data => {
-            console.log('Received slots data:', data);
-            if (data.length === 0) {
-                slotSelect.innerHTML = '<option value="">Tidak ada slot tersedia</option>';
-                return;
-            }
             let options = '<option value="">-- Pilih Slot --</option>';
             data.forEach(slot => {
                 options += `<option value="${slot.id}">${slot.text}</option>`;
             });
             slotSelect.innerHTML = options;
-            console.log('Slots loaded successfully, total:', data.length);
         })
         .catch(error => {
-            console.error('Error loading slots:', error);
+            console.error('Error:', error);
             slotSelect.innerHTML = '<option value="">Error loading slots</option>';
-            alert('Error loading slots: ' + error.message);
         });
-}
-
-// Load slots if journal already selected (from old input)
-if (hiddenInput.value) {
-    const selectedOption = Array.from(options).find(opt => opt.value == hiddenInput.value);
-    if (selectedOption) {
-        const journalName = selectedOption.getAttribute('data-name');
-        const publisher = selectedOption.getAttribute('data-publisher');
-        selectedDisplay.value = `${journalName} (${publisher})`;
-        selectedDisplay.classList.remove('d-none');
-        journalSelect.classList.add('d-none');
-        loadSlots(hiddenInput.value);
-    }
-}
+});
 </script>
 @endpush

@@ -268,7 +268,7 @@ class JournalManagementController extends Controller
     {
         $validated = $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
-            'id_artikel' => 'nullable|string|max:100',
+            'id_artikel' => 'required|string|max:100',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
             'nama_penulis' => 'required|string|max:255',
@@ -276,7 +276,18 @@ class JournalManagementController extends Controller
             'username_author' => 'nullable|string|max:100',
             'password_author' => 'nullable|string|max:100',
             'marketing_id' => 'nullable|exists:marketings,id',
+            'petugas_submit_id' => 'nullable|exists:pics,id',
+            'notes' => 'nullable|string',
+            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // 10MB
         ]);
+
+        // Handle file upload
+        if ($request->hasFile('file_artikel')) {
+            $file = $request->file('file_artikel');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/artikels', $filename);
+            $validated['file_artikel'] = $filename;
+        }
 
         // Generate kode_submit
         $today = now()->format('Ymd');
@@ -284,8 +295,16 @@ class JournalManagementController extends Controller
         $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
         $validated['kode_submit'] = "SUB{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
         
+        // Generate kode_loa
+        $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
+        
         $validated['status'] = 'submitted';
-        $validated['created_by'] = auth()->guard('pic')->id();
+        $validated['tanggal_submit'] = now();
+        
+        // Set petugas_submit_id to current PIC if not provided
+        if (!isset($validated['petugas_submit_id'])) {
+            $validated['petugas_submit_id'] = auth()->guard('pic')->id();
+        }
 
         Submission::create($validated);
 
