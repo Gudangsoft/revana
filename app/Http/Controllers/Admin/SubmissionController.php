@@ -32,7 +32,8 @@ class SubmissionController extends Controller
             'petugasEditor3',
             'petugasAuthor2',
             'petugasProduction',
-            'creator'
+            'creator',
+            'marketing'
         ]);
         
         // Filter by date range

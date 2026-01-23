@@ -301,6 +301,7 @@
                                     <th>No HP</th>
                                     <th>Username</th>
                                     <th>Password</th>
+                                    <th>Submit By</th>
                                     <th>PIC Marketing</th>
                                     <th>Petugas Submit</th>
                                     <th>Tanggal</th>
@@ -326,6 +327,19 @@
                                     <td>{{ $submission->no_hp_penulis ?? '-' }}</td>
                                     <td><code class="text-success">{{ $submission->username_author ?? '-' }}</code></td>
                                     <td><code class="text-warning">{{ $submission->password_author ?? '-' }}</code></td>
+                                    <td>
+                                        @if($submission->marketing_id && $submission->marketing)
+                                            <span class="badge bg-info" title="Marketing">
+                                                <i class="bi bi-megaphone"></i> {{ $submission->marketing->name }}
+                                            </span>
+                                        @elseif($submission->creator)
+                                            <span class="badge bg-primary" title="Admin">
+                                                <i class="bi bi-person-badge"></i> {{ $submission->creator->name }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $submission->pic_marketing ?? '-' }}</td>
                                     <td>{{ $submission->petugasSubmit?->name ?? '-' }}</td>
                                     <td>{{ $submission->tanggal_submit?->format('d/m/Y') }}</td>
@@ -356,7 +370,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="13" class="text-center text-muted py-4">
+                                    <td colspan="14" class="text-center text-muted py-4">
                                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                         Belum ada data submission
                                     </td>
