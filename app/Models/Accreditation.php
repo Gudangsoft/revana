@@ -22,6 +22,6 @@ class Accreditation extends Model
 
     public function journals()
     {
-        return $this->hasMany(Journal::class, 'accreditation', 'name');
+        return $this->hasMany(JournalMaster::class, 'accreditation', 'name');
     }
 }
