@@ -63,6 +63,7 @@
                 @php
                     $color = $peringkatColors[$accreditation->name]['bg'] ?? 'secondary';
                     $journals = $accreditation->journals ?? collect();
+                    $cardId = 'acc-' . Str::slug($accreditation->name);
                 @endphp
                 @if($journals->count() > 0)
                 <div class="col-lg-6">
@@ -74,19 +75,34 @@
                             <span class="badge bg-{{ $color }}">{{ $journals->count() }}</span>
                         </div>
                         <div class="card-body py-2 px-3">
+                            {{-- Jurnal pertama (selalu tampil) --}}
                             @foreach($journals->take(5) as $journal)
-                                <div class="d-flex align-items-center py-1 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                <div class="d-flex align-items-center py-1 border-bottom">
                                     <i class="bi bi-journal text-{{ $color }} me-2"></i>
-                                    <span class="small text-truncate" title="{{ $journal->nama_jurnal }}">
+                                    <span class="small" title="{{ $journal->nama_jurnal }}">
                                         {{ $journal->nama_jurnal }}
                                     </span>
                                 </div>
                             @endforeach
+                            
+                            {{-- Jurnal tersembunyi --}}
                             @if($journals->count() > 5)
+                                <div id="{{ $cardId }}-more" style="display: none;">
+                                    @foreach($journals->skip(5) as $journal)
+                                        <div class="d-flex align-items-center py-1 border-bottom">
+                                            <i class="bi bi-journal text-{{ $color }} me-2"></i>
+                                            <span class="small" title="{{ $journal->nama_jurnal }}">
+                                                {{ $journal->nama_jurnal }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
                                 <div class="text-center py-2">
-                                    <span class="badge bg-light text-muted">
-                                        +{{ $journals->count() - 5 }} jurnal lainnya
-                                    </span>
+                                    <button type="button" class="btn btn-sm btn-outline-{{ $color }} toggle-more" 
+                                            data-target="{{ $cardId }}-more">
+                                        <i class="bi bi-chevron-down"></i> 
+                                        <span class="btn-text">Tampilkan {{ $journals->count() - 5 }} lainnya</span>
+                                    </button>
                                 </div>
                             @endif
                         </div>
@@ -104,4 +120,34 @@
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.toggle-more').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const target = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            const text = this.querySelector('.btn-text');
+            
+            if (target.style.display === 'none') {
+                target.style.display = 'block';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+                text.textContent = 'Sembunyikan';
+            } else {
+                target.style.display = 'none';
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+                text.textContent = this.getAttribute('data-original-text') || 'Tampilkan lainnya';
+            }
+        });
+        
+        // Store original text
+        const text = btn.querySelector('.btn-text');
+        btn.setAttribute('data-original-text', text.textContent);
+    });
+});
+</script>
 @endsection
