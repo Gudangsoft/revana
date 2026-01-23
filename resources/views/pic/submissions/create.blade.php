@@ -226,7 +226,7 @@
 
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search_journal');
@@ -445,4 +445,4 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Ready! Type to search...');
 });
 </script>
-@endpush
+@endsection
