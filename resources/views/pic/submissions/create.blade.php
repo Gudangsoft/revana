@@ -47,6 +47,7 @@
                                 </div>
                                 <small class="text-muted d-block mt-1">
                                     <i class="bi bi-info-circle"></i> Ketik minimal 1 huruf untuk mencari. Klik jurnal untuk memilih.
+                                    <span id="journal_count_info" class="badge bg-info ms-1">{{ $journals->count() }} jurnal tersedia</span>
                                 </small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -233,14 +234,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchResults = document.getElementById('search_results');
     const slotSelect = document.getElementById('journal_slot_id');
     
-    // Data jurnal dari server
-    const journalsRaw = <?php echo json_encode($journals->map(function($j) {
-        return [
-            'id' => $j->id,
-            'nama' => $j->nama_jurnal,
-            'publisher' => $j->publisher ?? ''
-        ];
-    })->values()->all()); ?>;
+    // Data jurnal dari server - di-load langsung dari database
+    // Jika tidak ada data muncul, pastikan ada jurnal aktif di database
+    let journalsRaw = [];
+    try {
+        journalsRaw = @json($journals->map(function($j) {
+            return [
+                'id' => $j->id,
+                'nama' => $j->nama_jurnal,
+                'publisher' => $j->publisher ?? ''
+            ];
+        })->values()->all());
+    } catch (e) {
+        console.error('❌ Error parsing journal data:', e);
+    }
     
     // Add search field
     const journals = journalsRaw.map(function(j) {
@@ -252,15 +259,21 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     });
     
+    console.log('=== DEBUG JOURNAL SEARCH ===');
     console.log('✅ Journal data loaded:', journals.length, 'journals');
     if (journals.length > 0) {
-        console.log('📋 First journal:', journals[0].nama);
+        console.log('📋 First 3 journals:');
+        journals.slice(0, 3).forEach(function(j, idx) {
+            console.log('  ' + (idx+1) + '. [' + j.id + '] ' + j.nama + ' - ' + j.publisher);
+        });
     }
+    console.log('=== END DEBUG ===');
     
     if (journals.length === 0) {
-        console.error('❌ No journals found!');
-        searchInput.placeholder = '❌ Tidak ada data jurnal';
+        console.error('❌ No journals found! Check database or controller.');
+        searchInput.placeholder = '❌ Tidak ada data jurnal - silakan hubungi admin';
         searchInput.disabled = true;
+        alert('Tidak ada data jurnal yang tersedia. Silakan tambahkan jurnal terlebih dahulu di menu Data Jurnal.');
         return;
     }
     
@@ -270,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase().trim();
         
-        console.log('🔍 Searching:', searchTerm);
+        console.log('🔍 Searching for:', searchTerm);
         
         if (searchTerm.length === 0) {
             searchResults.style.display = 'none';
@@ -282,10 +295,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return j.search.indexOf(searchTerm) !== -1;
         });
         
-        console.log('📋 Found:', filtered.length, 'matches');
+        console.log('📋 Found:', filtered.length, 'matches for "' + searchTerm + '"');
         
         if (filtered.length === 0) {
-            searchResults.innerHTML = '<div class="list-group-item text-muted"><i class="bi bi-info-circle"></i> Tidak ada hasil</div>';
+            searchResults.innerHTML = '<div class="list-group-item text-muted py-3">' +
+                '<div><i class="bi bi-info-circle"></i> Tidak ada jurnal yang cocok dengan "<strong>' + escapeHtml(searchTerm) + '</strong>"</div>' +
+                '<small class="text-muted mt-1 d-block">Coba kata kunci lain, atau <a href="{{ route("pic.journals.index") }}" target="_blank">lihat daftar jurnal</a></small>' +
+                '</div>';
             searchResults.style.display = 'block';
             return;
         }

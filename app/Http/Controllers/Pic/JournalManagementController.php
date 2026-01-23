@@ -242,6 +242,12 @@ class JournalManagementController extends Controller
         $journals = JournalMaster::where('is_active', true)
             ->orderBy('nama_jurnal')
             ->get();
+        
+        // Debug log untuk troubleshooting
+        Log::info('PIC Submissions Create - Journals loaded', [
+            'count' => $journals->count(),
+            'journals' => $journals->pluck('nama_jurnal', 'id')->toArray()
+        ]);
             
         $slots = JournalSlot::with('journalMaster')
             ->whereRaw('jumlah_slot > slot_terpakai')
