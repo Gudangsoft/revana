@@ -194,12 +194,12 @@ class Submission extends Model
 
     public function petugasReviewer1()
     {
-        return $this->belongsTo(User::class, 'petugas_reviewer1_id');
+        return $this->belongsTo(Pic::class, 'petugas_reviewer1_id');
     }
 
     public function petugasReviewer2()
     {
-        return $this->belongsTo(User::class, 'petugas_reviewer2_id');
+        return $this->belongsTo(Pic::class, 'petugas_reviewer2_id');
     }
 
     public function petugasEditor3()
