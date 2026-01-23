@@ -1109,7 +1109,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check all previous stages
             for (let i = 0; i < currentStageIndex; i++) {
                 const previousStage = stageOrder[i];
-                const previousValid = row.dataset[previousStage.replace('_', '') + 'Valid'] === '1';
+                // Convert snake_case to camelCase for dataset access: editor1_valid -> editor1Valid
+                const dataAttr = previousStage.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
+                const previousValid = row.dataset[dataAttr] === '1';
                 
                 if (!previousValid) {
                     const stageNames = {
@@ -1148,8 +1150,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.className = newValue ? 'btn btn-sm validation-toggle btn-success' : 'btn btn-sm validation-toggle btn-outline-secondary';
                     this.querySelector('i').className = newValue ? 'bi bi-check-circle-fill' : 'bi bi-circle';
                     
-                    // Update row data attribute
-                    const dataAttr = field.replace('_', '') + 'Valid';
+                    // Update row data attribute (convert snake_case to camelCase)
+                    const dataAttr = field.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
                     row.dataset[dataAttr] = newValue ? '1' : '0';
                 } else {
                     alert('Gagal update validasi: ' + (data.message || 'Unknown error'));
