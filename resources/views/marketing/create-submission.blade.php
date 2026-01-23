@@ -145,15 +145,22 @@ searchInput.addEventListener('input', function() {
     let visibleCount = 0;
     let lastVisibleOption = null;
     
-    // Reset hidden input if searching
-    if (searchTerm) {
-        journalSelect.classList.remove('d-none');
-        selectedDisplay.classList.add('d-none');
+    // Always show dropdown when typing, hide selected display
+    journalSelect.classList.remove('d-none');
+    selectedDisplay.classList.add('d-none');
+    hiddenInput.value = ''; // Clear selection
+    
+    // If empty search, show all
+    if (!searchTerm) {
+        options.forEach(option => {
+            option.style.display = '';
+        });
+        return;
     }
     
     options.forEach(option => {
         if (option.value === '') {
-            option.style.display = searchTerm ? 'none' : '';
+            option.style.display = 'none'; // Hide placeholder when searching
             return;
         }
         

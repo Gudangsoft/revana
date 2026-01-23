@@ -8,6 +8,7 @@ use App\Models\JournalSlot;
 use App\Models\Submission;
 use App\Models\Accreditation;
 use App\Models\Marketing;
+use App\Models\MarketingPointHistory;
 use App\Models\Pic;
 use App\Models\PicPointHistory;
 use Illuminate\Http\Request;
@@ -815,6 +816,91 @@ class JournalManagementController extends Controller
         
         $submission->{$request->field} = $request->value;
         $submission->save();
+        
+        // Add points when validation is set to true
+        if ($request->value == true) {
+            $pointsToAdd = 0;
+            $stageName = '';
+            
+            // Define points for each stage
+            switch($request->field) {
+                case 'editor1_valid':
+                    $pointsToAdd = 5;
+                    $stageName = 'Editor 1';
+                    break;
+                case 'author1_valid':
+                    $pointsToAdd = 5;
+                    $stageName = 'Author 1';
+                    break;
+                case 'editor2_valid':
+                    $pointsToAdd = 5;
+                    $stageName = 'Editor 2';
+                    break;
+                case 'reviewer1_valid':
+                    $pointsToAdd = 10;
+                    $stageName = 'Reviewer 1';
+                    break;
+                case 'reviewer2_valid':
+                    $pointsToAdd = 10;
+                    $stageName = 'Reviewer 2';
+                    break;
+                case 'editor3_valid':
+                    $pointsToAdd = 5;
+                    $stageName = 'Editor 3';
+                    break;
+                case 'author2_valid':
+                    $pointsToAdd = 5;
+                    $stageName = 'Author 2';
+                    break;
+                case 'production_valid':
+                    $pointsToAdd = 10;
+                    $stageName = 'Production';
+                    break;
+            }
+            
+            if ($pointsToAdd > 0) {
+                // Add points to the assigned PIC
+                $petugasField = $fieldMap[$request->field];
+                $picId = $submission->{$petugasField};
+                
+                if ($picId) {
+                    $pic = Pic::find($picId);
+                    if ($pic) {
+                        // Update total points
+                        $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
+                        $pic->save();
+                        
+                        // Log point history
+                        PicPointHistory::create([
+                            'pic_id' => $picId,
+                            'submission_id' => $submission->id,
+                            'points' => $pointsToAdd,
+                            'description' => "Validasi {$stageName} - {$submission->kode_submit}",
+                            'created_at' => now(),
+                        ]);
+                    }
+                }
+                
+                // Also add points to marketing if this is the final validation (production)
+                if ($request->field === 'production_valid' && $submission->marketing_id) {
+                    $marketing = Marketing::find($submission->marketing_id);
+                    if ($marketing) {
+                        $marketingPoints = 20; // Marketing gets points when article is completed
+                        $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
+                        $marketing->save();
+                        
+                        // Log marketing point history
+                        MarketingPointHistory::create([
+                            'marketing_id' => $marketing->id,
+                            'submission_id' => $submission->id,
+                            'points' => $marketingPoints,
+                            'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
+                            'created_at' => now(),
+                        ]);
+                    }
+                }
+            }
+        }
         
         return response()->json([
             'success' => true,
