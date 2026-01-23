@@ -34,18 +34,23 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
-                                <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly style="cursor: pointer; background-color: #e9ecef;">
-                                <input type="hidden" id="journal_master_id" name="journal_master_id" value="{{ old('journal_master_id') }}" required>
-                                <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="8" style="height: auto; cursor: pointer;">
+                                <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal..." autocomplete="off">
+                                <select class="form-select @error('journal_master_id') is-invalid @enderror" 
+                                        id="journal_master_id" 
+                                        name="journal_master_id" 
+                                        required 
+                                        size="10" 
+                                        style="min-height: 250px;">
                                     <option value="">-- Pilih Jurnal --</option>
                                     @foreach($journals as $journal)
-                                        <option value="{{ $journal->id }}" data-name="{{ $journal->nama_jurnal }}" data-publisher="{{ $journal->publisher }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
+                                        <option value="{{ $journal->id }}" 
+                                                data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" 
+                                                {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
                                             {{ $journal->nama_jurnal }} ({{ $journal->publisher }})
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari, <strong>klik pada jurnal</strong> untuk memilih.</small>
+                                <small class="text-muted">Ketik untuk mencari, <strong>klik jurnal</strong> untuk load slot</small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -219,169 +224,101 @@
 
 @push('scripts')
 <script>
-// Journal search and selection
-const searchInput = document.getElementById('search_journal');
-const journalSelect = document.getElementById('journal_master_select');
-const selectedDisplay = document.getElementById('selected_journal_display');
-const hiddenInput = document.getElementById('journal_master_id');
-const options = journalSelect.querySelectorAll('option');
-
-console.log('✅ Form initialized. Total journals:', options.length - 1);
-
-// Search filter
-searchInput.addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase().trim();
-    let visibleCount = 0;
-    let firstVisible = null;
-    
-    options.forEach(option => {
-        if (option.value === '') {
-            option.style.display = searchTerm ? 'none' : '';
-            return;
-        }
-        
-        const searchData = option.getAttribute('data-search') || '';
-        if (!searchTerm || searchData.includes(searchTerm)) {
-            option.style.display = '';
-            visibleCount++;
-            if (!firstVisible) firstVisible = option;
-        } else {
-            option.style.display = 'none';
-        }
-    });
-    
-    console.log('🔍 Search:', searchTerm, '| Visible:', visibleCount);
-    
-    // Auto-select first visible
-    if (visibleCount > 0 && firstVisible) {
-        firstVisible.selected = true;
-    }
-});
-
-// Enter key to select
-searchInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        const selected = journalSelect.options[journalSelect.selectedIndex];
-        if (selected && selected.value) {
-            console.log('⌨️ Enter pressed, selecting:', selected.value);
-            journalSelect.dispatchEvent(new Event('change'));
-        }
-    }
-});
-
-// When journal is selected
-journalSelect.addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    if (!selectedOption || !selectedOption.value) {
-        console.log('❌ No valid selection');
-        return;
-    }
-    
-    console.log('✅ Journal selected:', selectedOption.value);
-    
-    const journalName = selectedOption.getAttribute('data-name');
-    const publisher = selectedOption.getAttribute('data-publisher');
-    
-    // Set hidden input
-    hiddenInput.value = selectedOption.value;
-    
-    // Show selected in display field
-    selectedDisplay.value = `${journalName} (${publisher})`;
-    selectedDisplay.classList.remove('d-none');
-    
-    // Hide dropdown and search
-    journalSelect.classList.add('d-none');
-    searchInput.classList.add('d-none');
-    
-    // Load slots
-    console.log('📥 Loading slots for journal:', selectedOption.value);
-    loadSlots(selectedOption.value);
-});
-
-// Single click on dropdown to select
-journalSelect.addEventListener('click', function(e) {
-    if (e.target.tagName === 'OPTION' && e.target.value) {
-        console.log('🖱️ Option clicked:', e.target.value);
-        setTimeout(() => {
-            this.dispatchEvent(new Event('change'));
-        }, 50);
-    }
-});
-
-// Click on textbox to reopen search
-selectedDisplay.addEventListener('click', function() {
-    console.log('🔄 Reopening search');
-    this.classList.add('d-none');
-    journalSelect.classList.remove('d-none');
-    searchInput.classList.remove('d-none');
-    searchInput.value = '';
-    searchInput.focus();
-    hiddenInput.value = '';
-    
-    // Reset all options visibility
-    options.forEach(option => {
-        option.style.display = '';
-    });
-});
-
-// Focus search on page load
-searchInput.focus();
-
-// Load slots function
-function loadSlots(journalId) {
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search_journal');
+    const journalSelect = document.getElementById('journal_master_id');
     const slotSelect = document.getElementById('journal_slot_id');
+    const allOptions = Array.from(journalSelect.options);
     
-    if (!journalId) {
-        slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
-        return;
-    }
+    console.log('✅ Initialized:', allOptions.length - 1, 'journals');
     
-    console.log('⏳ Fetching slots...');
-    slotSelect.innerHTML = '<option value="">⏳ Loading...</option>';
-    
-    fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
-        .then(response => {
-            console.log('📡 Response status:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('📦 Received:', data.length, 'slots');
-            
-            if (!Array.isArray(data) || data.length === 0) {
-                slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia</option>';
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        allOptions.forEach((option, index) => {
+            if (index === 0) { // Skip first "-- Pilih Jurnal --"
+                option.style.display = searchTerm ? 'none' : '';
                 return;
             }
             
-            let options = '<option value="">-- Pilih Slot --</option>';
-            data.forEach(slot => {
-                options += `<option value="${slot.id}">${slot.text}</option>`;
-            });
-            slotSelect.innerHTML = options;
-            
-            console.log('✅ Slots loaded successfully');
-        })
-        .catch(error => {
-            console.error('❌ Error loading slots:', error);
-            slotSelect.innerHTML = '<option value="">Error loading slots</option>';
+            const searchData = option.getAttribute('data-search') || '';
+            option.style.display = searchData.includes(searchTerm) ? '' : 'none';
         });
-}
-
-// Load slots if journal already selected (from old input)
-if (hiddenInput.value) {
-    console.log('♻️ Restoring previous selection:', hiddenInput.value);
-    const selectedOption = Array.from(options).find(opt => opt.value == hiddenInput.value);
-    if (selectedOption) {
-        const journalName = selectedOption.getAttribute('data-name');
-        const publisher = selectedOption.getAttribute('data-publisher');
-        selectedDisplay.value = `${journalName} (${publisher})`;
-        selectedDisplay.classList.remove('d-none');
-        journalSelect.classList.add('d-none');
-        searchInput.classList.add('d-none');
-        loadSlots(hiddenInput.value);
+        
+        console.log('🔍 Search:', searchTerm);
+    });
+    
+    // When journal selected - load slots immediately
+    journalSelect.addEventListener('change', function() {
+        const journalId = this.value;
+        
+        if (!journalId) {
+            slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
+            return;
+        }
+        
+        console.log('📌 Selected journal ID:', journalId);
+        loadSlots(journalId);
+    });
+    
+    // Click on option - force selection
+    journalSelect.addEventListener('click', function(e) {
+        if (e.target.tagName === 'OPTION' && e.target.value) {
+            console.log('🖱️ Clicked:', e.target.value);
+            this.value = e.target.value;
+            this.dispatchEvent(new Event('change'));
+        }
+    });
+    
+    // Load slots function
+    function loadSlots(journalId) {
+        console.log('⏳ Loading slots for journal:', journalId);
+        
+        slotSelect.innerHTML = '<option value="">⏳ Memuat slot...</option>';
+        slotSelect.disabled = true;
+        
+        fetch(`{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
+            .then(response => {
+                console.log('📡 Response:', response.status);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Received:', data.length, 'slots');
+                
+                if (!Array.isArray(data) || data.length === 0) {
+                    slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia</option>';
+                    slotSelect.disabled = false;
+                    return;
+                }
+                
+                let html = '<option value="">-- Pilih Slot --</option>';
+                data.forEach(slot => {
+                    html += `<option value="${slot.id}">${slot.text}</option>`;
+                });
+                
+                slotSelect.innerHTML = html;
+                slotSelect.disabled = false;
+                console.log('✅ Slots loaded successfully');
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                slotSelect.innerHTML = '<option value="">❌ Error: ' + error.message + '</option>';
+                slotSelect.disabled = false;
+            });
     }
-}
-
-console.log('✅ All event listeners ready');
+    
+    // Restore old selection if exists
+    if (journalSelect.value) {
+        console.log('♻️ Restoring selection:', journalSelect.value);
+        loadSlots(journalSelect.value);
+    }
+    
+    // Focus on search input
+    searchInput.focus();
+    
+    console.log('✅ All ready');
+});
 </script>
 @endpush
