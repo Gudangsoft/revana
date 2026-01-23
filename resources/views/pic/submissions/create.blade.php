@@ -342,4 +342,3 @@ function loadSlots(journalId) {
 console.log('✅ All event listeners ready');
 </script>
 @endpush
-@endsection
