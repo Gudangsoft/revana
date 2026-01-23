@@ -45,6 +45,11 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
+// Test route
+Route::get('/test-tracking', function () {
+    return 'Tracking route works!';
+});
+
 // Public LOA Tracking (no login required)
 Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('tracking.search');
