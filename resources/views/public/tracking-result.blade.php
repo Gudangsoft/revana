@@ -238,6 +238,19 @@
                             {{ $submission->tanggal_submit?->format('d F Y') ?? '-' }}
                         </div>
                     </div>
+                    @if($submission->marketing)
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="bi bi-briefcase"></i> Marketing
+                        </div>
+                        <div class="info-value">
+                            {{ $submission->marketing->nama }}
+                            @if($submission->marketing->telp)
+                            <br><small class="text-muted"><i class="bi bi-telephone"></i> {{ $submission->marketing->telp }}</small>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
                     @if($submission->link_publish)
                     <div class="info-row">
                         <div class="info-label">
@@ -259,59 +272,325 @@
                     </div>
                     <div class="timeline">
                         @php
-                            $stages = [
-                                'SUBMITTED' => 'Artikel Disubmit',
-                                'REVIEW' => 'Proses Review',
-                                'EDITING' => 'Proses Editing',
-                                'LAYOUT' => 'Proses Layout',
-                                'PRODUCTION' => 'Proses Production',
-                                'PUBLISHED' => 'Artikel Dipublikasi',
-                            ];
+                            // Stage 1: Submit
+                            $submitComplete = $submission->petugas_submit_id ? true : false;
                             
+                            // Stage 2: Editor 1
+                            $editor1Complete = $submission->editor1_valid == 1;
+                            
+                            // Stage 3: Author 1
+                            $author1Complete = $submission->author1_valid == 1;
+                            
+                            // Stage 4: Editor 2
+                            $editor2Complete = $submission->editor2_valid == 1;
+                            
+                            // Stage 5: Reviewer (both must complete)
+                            $reviewer1Complete = $submission->reviewer1_valid == 1;
+                            $reviewer2Complete = $submission->reviewer2_valid == 1;
+                            $reviewerComplete = $reviewer1Complete && $reviewer2Complete;
+                            
+                            // Stage 6: Editor 3 (optional)
+                            $editor3Assigned = $submission->petugas_editor3_id ? true : false;
+                            $editor3Complete = $submission->editor3_valid == 1;
+                            
+                            // Stage 7: Author 2 (optional)
+                            $author2Assigned = $submission->petugas_author2_id ? true : false;
+                            $author2Complete = $submission->author2_valid == 1;
+                            
+                            // Stage 8: Production (final)
+                            $productionComplete = $submission->production_valid == 1;
+                            
+                            // Determine current active stage
                             $currentStage = '';
-                            if ($submission->status == 'SUBMITTED') $currentStage = 'SUBMITTED';
-                            elseif (in_array($submission->status, ['REVIEW_ASSIGNED', 'UNDER_REVIEW', 'REVISION_REQUIRED', 'REVISED'])) $currentStage = 'REVIEW';
-                            elseif (in_array($submission->status, ['EDITING', 'EDITING_SUBMITTED', 'EDITING_COMPLETED'])) $currentStage = 'EDITING';
-                            elseif (in_array($submission->status, ['LAYOUT', 'LAYOUT_SUBMITTED', 'LAYOUT_COMPLETED'])) $currentStage = 'LAYOUT';
-                            elseif (in_array($submission->status, ['PRODUCTION', 'PRODUCTION_SUBMITTED'])) $currentStage = 'PRODUCTION';
-                            elseif ($submission->status == 'PUBLISHED') $currentStage = 'PUBLISHED';
-                            
-                            $stageOrder = array_keys($stages);
-                            $currentIndex = array_search($currentStage, $stageOrder);
+                            if (!$submitComplete) $currentStage = 'submit';
+                            elseif (!$editor1Complete) $currentStage = 'editor1';
+                            elseif (!$author1Complete) $currentStage = 'author1';
+                            elseif (!$editor2Complete) $currentStage = 'editor2';
+                            elseif (!$reviewerComplete) $currentStage = 'reviewer';
+                            elseif ($editor3Assigned && !$editor3Complete) $currentStage = 'editor3';
+                            elseif ($author2Assigned && !$author2Complete) $currentStage = 'author2';
+                            elseif (!$productionComplete) $currentStage = 'production';
+                            else $currentStage = 'published';
                         @endphp
                         
-                        @foreach($stages as $key => $label)
-                            @php
-                                $index = array_search($key, $stageOrder);
-                                $isCompleted = $index < $currentIndex;
-                                $isActive = $key == $currentStage;
-                                $isPending = $index > $currentIndex;
-                            @endphp
-                            <div class="timeline-item {{ $isCompleted ? 'completed' : ($isActive ? 'active' : '') }}">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <h6>
-                                        @if($isCompleted)
-                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                        @elseif($isActive)
-                                            <i class="bi bi-arrow-right-circle-fill text-info"></i>
-                                        @else
-                                            <i class="bi bi-circle text-muted"></i>
+                        <!-- Stage 1: Submit -->
+                        <div class="timeline-item {{ $submitComplete ? 'completed' : 'active' }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($submitComplete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @else
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @endif
+                                    Submit Artikel
+                                </h6>
+                                <small>
+                                    @if($submitComplete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasSubmit->nama ?? '-' }}
+                                        @if($submission->tanggal_submit)
+                                        <br>{{ $submission->tanggal_submit->format('d/m/Y') }}
                                         @endif
-                                        {{ $label }}
-                                    </h6>
-                                    <small>
-                                        @if($isCompleted)
-                                            Selesai
-                                        @elseif($isActive)
-                                            Sedang diproses
-                                        @else
-                                            Menunggu
-                                        @endif
-                                    </small>
-                                </div>
+                                    @else
+                                        Menunggu proses submit
+                                    @endif
+                                </small>
                             </div>
-                        @endforeach
+                        </div>
+
+                        <!-- Stage 2: Editor 1 -->
+                        <div class="timeline-item {{ $editor1Complete ? 'completed' : ($currentStage == 'editor1' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($editor1Complete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'editor1')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Editor 1 - Proofreading
+                                </h6>
+                                <small>
+                                    @if($editor1Complete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasEditor1->nama ?? '-' }}
+                                        @if($submission->editor1_validated_at)
+                                        <br>{{ $submission->editor1_validated_at->format('d/m/Y H:i') }}
+                                        @endif
+                                    @elseif($submission->petugas_editor1_id)
+                                        Ditugaskan: {{ $submission->petugasEditor1->nama }}
+                                    @else
+                                        Menunggu
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Stage 3: Author 1 -->
+                        <div class="timeline-item {{ $author1Complete ? 'completed' : ($currentStage == 'author1' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($author1Complete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'author1')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Author 1 - Revisi Penulis
+                                </h6>
+                                <small>
+                                    @if($author1Complete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasAuthor1->nama ?? '-' }}
+                                        @if($submission->author1_validated_at)
+                                        <br>{{ $submission->author1_validated_at->format('d/m/Y H:i') }}
+                                        @endif
+                                    @elseif($submission->petugas_author1_id)
+                                        Ditugaskan: {{ $submission->petugasAuthor1->nama }}
+                                    @else
+                                        Menunggu
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Stage 4: Editor 2 -->
+                        <div class="timeline-item {{ $editor2Complete ? 'completed' : ($currentStage == 'editor2' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($editor2Complete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'editor2')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Editor 2 - Editing Lanjutan
+                                </h6>
+                                <small>
+                                    @if($editor2Complete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasEditor2->nama ?? '-' }}
+                                        @if($submission->editor2_validated_at)
+                                        <br>{{ $submission->editor2_validated_at->format('d/m/Y H:i') }}
+                                        @endif
+                                    @elseif($submission->petugas_editor2_id)
+                                        Ditugaskan: {{ $submission->petugasEditor2->nama }}
+                                    @else
+                                        Menunggu
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Stage 5: Reviewers -->
+                        <div class="timeline-item {{ $reviewerComplete ? 'completed' : ($currentStage == 'reviewer' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($reviewerComplete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'reviewer')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Review - Peer Review
+                                </h6>
+                                <small>
+                                    @if($reviewerComplete)
+                                        <strong>Selesai</strong>
+                                        @if($submission->reviewer1_validated_at || $submission->reviewer2_validated_at)
+                                        <br>
+                                        @endif
+                                    @endif
+                                    
+                                    <!-- Reviewer 1 -->
+                                    @if($submission->petugas_reviewer1_id)
+                                        <div class="mt-1">
+                                            @if($reviewer1Complete)
+                                                <i class="bi bi-check-circle-fill text-success"></i>
+                                            @else
+                                                <i class="bi bi-clock text-warning"></i>
+                                            @endif
+                                            Reviewer 1: {{ $submission->petugasReviewer1->nama }}
+                                            @if($submission->reviewer1_validated_at)
+                                            ({{ $submission->reviewer1_validated_at->format('d/m/Y') }})
+                                            @endif
+                                        </div>
+                                    @endif
+                                    
+                                    <!-- Reviewer 2 -->
+                                    @if($submission->petugas_reviewer2_id)
+                                        <div class="mt-1">
+                                            @if($reviewer2Complete)
+                                                <i class="bi bi-check-circle-fill text-success"></i>
+                                            @else
+                                                <i class="bi bi-clock text-warning"></i>
+                                            @endif
+                                            Reviewer 2: {{ $submission->petugasReviewer2->nama }}
+                                            @if($submission->reviewer2_validated_at)
+                                            ({{ $submission->reviewer2_validated_at->format('d/m/Y') }})
+                                            @endif
+                                        </div>
+                                    @endif
+                                    
+                                    @if(!$submission->petugas_reviewer1_id && !$submission->petugas_reviewer2_id)
+                                        Menunggu
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Stage 6: Editor 3 (Optional) -->
+                        @if($editor3Assigned)
+                        <div class="timeline-item {{ $editor3Complete ? 'completed' : ($currentStage == 'editor3' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($editor3Complete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'editor3')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Editor 3 - Final Editing <span class="badge bg-info">Opsional</span>
+                                </h6>
+                                <small>
+                                    @if($editor3Complete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasEditor3->nama ?? '-' }}
+                                        @if($submission->editor3_validated_at)
+                                        <br>{{ $submission->editor3_validated_at->format('d/m/Y H:i') }}
+                                        @endif
+                                    @else
+                                        Ditugaskan: {{ $submission->petugasEditor3->nama }}
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Stage 7: Author 2 (Optional) -->
+                        @if($author2Assigned)
+                        <div class="timeline-item {{ $author2Complete ? 'completed' : ($currentStage == 'author2' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($author2Complete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'author2')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Author 2 - Revisi Final <span class="badge bg-info">Opsional</span>
+                                </h6>
+                                <small>
+                                    @if($author2Complete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasAuthor2->nama ?? '-' }}
+                                        @if($submission->author2_validated_at)
+                                        <br>{{ $submission->author2_validated_at->format('d/m/Y H:i') }}
+                                        @endif
+                                    @else
+                                        Ditugaskan: {{ $submission->petugasAuthor2->nama }}
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Stage 8: Production (Final) -->
+                        <div class="timeline-item {{ $productionComplete ? 'completed' : ($currentStage == 'production' ? 'active' : '') }}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    @if($productionComplete)
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($currentStage == 'production')
+                                        <i class="bi bi-arrow-right-circle-fill text-info"></i>
+                                    @else
+                                        <i class="bi bi-circle text-muted"></i>
+                                    @endif
+                                    Production - Layout & Publish
+                                </h6>
+                                <small>
+                                    @if($productionComplete)
+                                        <strong>Selesai</strong> oleh {{ $submission->petugasProduction->nama ?? '-' }}
+                                        @if($submission->production_validated_at)
+                                        <br>{{ $submission->production_validated_at->format('d/m/Y H:i') }}
+                                        @endif
+                                        @if($submission->link_publish)
+                                        <br><a href="{{ $submission->link_publish }}" target="_blank" class="text-success">
+                                            <i class="bi bi-link-45deg"></i> Link Publish
+                                        </a>
+                                        @endif
+                                    @elseif($submission->petugas_production_id)
+                                        Ditugaskan: {{ $submission->petugasProduction->nama }}
+                                    @else
+                                        Menunggu
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+
+                        @if($productionComplete)
+                        <!-- Final: Published -->
+                        <div class="timeline-item completed">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    <strong>Artikel Dipublikasi</strong>
+                                </h6>
+                                <small class="text-success">
+                                    Proses selesai - Artikel telah dipublikasi
+                                </small>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
