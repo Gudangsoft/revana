@@ -36,7 +36,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-semibold">{{ $accreditation->name }}</div>
-                                    <small class="text-muted">Tingkat: {{ $accreditation->level ?? '-' }}</small>
+                                    <small class="text-muted">Point: {{ $accreditation->points }}</small>
                                 </div>
                             </div>
                         </td>

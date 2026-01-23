@@ -1,23 +1,25 @@
 @extends('marketing.layouts.app')
 
-@section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4><i class="bi bi-journal-text"></i> Data Jurnal</h4>
-    </div>
+@section('title', 'Data Jurnal')
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-journal-text"></i> Data Jurnal</h4>
+    <span class="badge bg-primary fs-6">Total: {{ $journals->total() }} jurnal</span>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 50px;">No</th>
                             <th>Nama Jurnal</th>
-                            <th>ISSN</th>
-                            <th>E-ISSN</th>
-                            <th>Penerbit</th>
+                            <th>Kode Jurnal</th>
+                            <th>Publisher</th>
                             <th>Akreditasi</th>
+                            <th>Point</th>
                             <th>Total Slot</th>
                             <th>Status</th>
                         </tr>
@@ -28,23 +30,27 @@
                             <td>{{ $journals->firstItem() + $index }}</td>
                             <td>
                                 <strong>{{ $journal->nama_jurnal }}</strong>
-                                @if($journal->website)
+                                @if($journal->link_jurnal)
                                     <br><small class="text-muted">
-                                        <a href="{{ $journal->website }}" target="_blank">
-                                            <i class="bi bi-link-45deg"></i> {{ $journal->website }}
+                                        <a href="{{ $journal->link_jurnal }}" target="_blank" class="text-decoration-none">
+                                            <i class="bi bi-link-45deg"></i> Link Jurnal
                                         </a>
                                     </small>
                                 @endif
                             </td>
-                            <td>{{ $journal->issn ?? '-' }}</td>
-                            <td>{{ $journal->e_issn ?? '-' }}</td>
-                            <td>{{ $journal->penerbit ?? '-' }}</td>
                             <td>
-                                @if($journal->akreditasi)
-                                    <span class="badge bg-success">{{ $journal->akreditasi }}</span>
+                                <code class="badge bg-light text-dark">{{ $journal->kode_jurnal }}</code>
+                            </td>
+                            <td>{{ $journal->publisher ?? '-' }}</td>
+                            <td>
+                                @if($journal->accreditation)
+                                    <span class="badge bg-success">{{ $journal->accreditation }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-warning text-dark">{{ $journal->points }} Point</span>
                             </td>
                             <td>
                                 <span class="badge bg-info">{{ $journal->journalSlots->count() }} Slot</span>
@@ -68,11 +74,9 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="mt-3">
-                {{ $journals->links() }}
-            </div>
+        </div>
+        <div class="card-footer bg-white">
+            {{ $journals->links() }}
         </div>
     </div>
-</div>
 @endsection

@@ -8,6 +8,7 @@ use App\Models\MarketingPointHistory;
 use App\Models\Submission;
 use App\Models\JournalMaster;
 use App\Models\JournalSlot;
+use App\Models\Accreditation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
