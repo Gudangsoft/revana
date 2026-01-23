@@ -26,7 +26,19 @@ class TrackingController extends Controller
 
         $kodeLOA = strtoupper(trim($request->kode_loa));
 
-        $submission = Submission::with(['journalSlot.journalMaster', 'marketing'])
+        $submission = Submission::with([
+            'journalSlot.journalMaster', 
+            'marketing',
+            'petugasSubmit',
+            'petugasEditor1',
+            'petugasAuthor1',
+            'petugasEditor2',
+            'petugasReviewer1',
+            'petugasReviewer2',
+            'petugasEditor3',
+            'petugasAuthor2',
+            'petugasProduction'
+        ])
             ->where('kode_loa', $kodeLOA)
             ->orWhere('kode_submit', $kodeLOA)
             ->first();
