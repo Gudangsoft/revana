@@ -11,25 +11,55 @@
         <form action="{{ route('marketing.submissions.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
+            <div class="alert alert-info mb-3">
+                <i class="bi bi-info-circle"></i> <strong>Kode Submit</strong> dan <strong>Kode LOA</strong> akan otomatis ter-generate setelah data disimpan.
+            </div>
+
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">Slot Jurnal <span class="text-danger">*</span></label>
-                    <select name="journal_slot_id" class="form-select @error('journal_slot_id') is-invalid @enderror" required>
-                        <option value="">Pilih Slot</option>
-                        @foreach($slots as $slot)
-                            <option value="{{ $slot->id }}" {{ old('journal_slot_id') == $slot->id ? 'selected' : '' }}>
-                                {{ $slot->journalMaster->nama_jurnal ?? 'Unknown' }} - Vol. {{ $slot->volume }} No. {{ $slot->nomor }} ({{ $slot->tahun }})
+                    <label class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Cari nama jurnal atau publisher..." autocomplete="off">
+                    <input type="text" class="form-control mb-2 d-none" id="selected_journal_display" readonly>
+                    <input type="hidden" id="journal_master_id" name="journal_master_id" value="{{ old('journal_master_id') }}">
+                    <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_select" size="6" style="height: auto;">
+                        <option value="">-- Pilih Jurnal --</option>
+                        @foreach($journals as $journal)
+                            <option value="{{ $journal->id }}" data-name="{{ $journal->nama_jurnal }}" data-publisher="{{ $journal->publisher }}" data-search="{{ strtolower($journal->nama_jurnal . ' ' . $journal->publisher) }}" {{ old('journal_master_id') == $journal->id ? 'selected' : '' }}>
+                                {{ $journal->nama_jurnal }} ({{ $journal->publisher }})
                             </option>
                         @endforeach
+                    </select>
+                    <small class="text-muted">Menampilkan {{ count($journals) }} jurnal. Ketik untuk mencari.</small>
+                    @error('journal_master_id')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Pilih Slot <span class="text-danger">*</span></label>
+                    <select class="form-select @error('journal_slot_id') is-invalid @enderror" id="journal_slot_id" name="journal_slot_id" required>
+                        <option value="">-- Pilih Jurnal terlebih dahulu --</option>
                     </select>
                     @error('journal_slot_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+            </div>
+
+            <hr>
+            <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
+
+            <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">ID Artikel</label>
                     <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Opsional">
                     @error('id_artikel')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Link Artikel</label>
+                    <input type="url" name="link_artikel" class="form-control @error('link_artikel') is-invalid @enderror" value="{{ old('link_artikel') }}" placeholder="https://...">
+                    @error('link_artikel')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
