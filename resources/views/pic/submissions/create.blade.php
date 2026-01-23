@@ -38,15 +38,15 @@
                                     <input type="text" 
                                            class="form-control @error('journal_master_id') is-invalid @enderror" 
                                            id="search_journal" 
-                                           placeholder="🔍 Ketik untuk mencari → Klik jurnal (atau tekan Enter) → Slot akan muncul otomatis" 
+                                           placeholder="🔍 Ketik untuk mencari jurnal..." 
                                            autocomplete="off">
-                                    <input type="hidden" name="journal_master_id" id="journal_master_id" value="{{ old('journal_master_id') }}">
+                                    <input type="hidden" name="journal_master_id" id="journal_master_id" value="{{ old('journal_master_id') }}" required>
                                     
                                     <!-- Dropdown hasil pencarian -->
-                                    <div id="search_results" class="list-group position-absolute w-100 shadow-lg" style="display: none; max-height: 400px; overflow-y: auto; z-index: 1000;"></div>
+                                    <div id="search_results" class="list-group position-absolute w-100 shadow" style="display: none; max-height: 350px; overflow-y: auto; z-index: 1050; background: white; border: 1px solid #dee2e6; border-radius: 0.25rem; margin-top: 2px;"></div>
                                 </div>
-                                <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i> Menampilkan {{ count($journals) }} jurnal aktif
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-info-circle"></i> Ketik minimal 1 huruf untuk mencari. Klik jurnal untuk memilih.
                                 </small>
                                 @error('journal_master_id')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -238,9 +238,9 @@ document.addEventListener('DOMContentLoaded', function() {
         @foreach($journals as $journal)
         {
             id: {{ $journal->id }},
-            nama: "{{ addslashes($journal->nama_jurnal) }}",
-            publisher: "{{ addslashes($journal->publisher ?? '') }}",
-            search: "{{ strtolower(addslashes($journal->nama_jurnal . ' ' . ($journal->publisher ?? ''))) }}"
+            nama: {!! json_encode($journal->nama_jurnal) !!},
+            publisher: {!! json_encode($journal->publisher ?? '') !!},
+            search: {!! json_encode(strtolower($journal->nama_jurnal . ' ' . ($journal->publisher ?? ''))) !!}
         },
         @endforeach
     ];
@@ -249,43 +249,71 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let selectedJournalName = '';
     
-    // Search input - tampilkan hasil
+    // Search input - tampilkan hasil SETIAP kali mengetik
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase().trim();
         
-        if (searchTerm.length < 2) {
+        console.log('🔍 Searching for:', searchTerm);
+        
+        // Jika kosong, sembunyikan hasil
+        if (searchTerm.length === 0) {
             searchResults.style.display = 'none';
+            hiddenInput.value = '';
             return;
         }
         
+        // Filter jurnal yang cocok
         const filtered = journals.filter(j => j.search.includes(searchTerm));
         
+        console.log('📋 Found:', filtered.length, 'matches');
+        
+        // Jika tidak ada hasil
         if (filtered.length === 0) {
-            searchResults.innerHTML = '<div class="list-group-item text-muted">Tidak ada hasil</div>';
+            searchResults.innerHTML = '<div class="list-group-item text-muted"><i class="bi bi-info-circle"></i> Tidak ada hasil ditemukan</div>';
             searchResults.style.display = 'block';
             return;
         }
         
+        // Tampilkan hasil (maksimal 20 untuk performa)
         let html = '';
-        filtered.forEach(journal => {
+        const maxResults = Math.min(filtered.length, 20);
+        
+        for (let i = 0; i < maxResults; i++) {
+            const journal = filtered[i];
             html += `
-                <a href="#" class="list-group-item list-group-item-action" data-id="${journal.id}" data-name="${journal.nama}">
-                    <strong>${journal.nama}</strong>
-                    <br><small class="text-muted">${journal.publisher}</small>
+                <a href="#" class="list-group-item list-group-item-action py-2" data-id="${journal.id}" data-name="${escapeHtml(journal.nama)}">
+                    <div><strong>${highlightMatch(journal.nama, searchTerm)}</strong></div>
+                    ${journal.publisher ? '<div><small class="text-muted">' + highlightMatch(journal.publisher, searchTerm) + '</small></div>' : ''}
                 </a>
             `;
-        });
+        }
+        
+        if (filtered.length > 20) {
+            html += `<div class="list-group-item text-muted small">+ ${filtered.length - 20} jurnal lainnya. Ketik lebih spesifik...</div>`;
+        }
         
         searchResults.innerHTML = html;
         searchResults.style.display = 'block';
-        
-        console.log('🔍 Found:', filtered.length, 'matches');
     });
+    
+    // Helper function untuk escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Helper function untuk highlight match
+    function highlightMatch(text, term) {
+        if (!term) return escapeHtml(text);
+        const regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+    }
     
     // Klik hasil pencarian
     searchResults.addEventListener('click', function(e) {
         e.preventDefault();
-        const target = e.target.closest('.list-group-item');
+        const target = e.target.closest('.list-group-item-action');
         if (!target) return;
         
         const journalId = target.getAttribute('data-id');
@@ -296,11 +324,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Keyboard navigation - Enter
+    // Keyboard navigation - Enter untuk pilih pertama
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const firstResult = searchResults.querySelector('.list-group-item[data-id]');
+            const firstResult = searchResults.querySelector('.list-group-item-action[data-id]');
             if (firstResult) {
                 const journalId = firstResult.getAttribute('data-id');
                 const journalName = firstResult.getAttribute('data-name');
@@ -318,20 +346,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Focus - show selected or prompt
-    searchInput.addEventListener('focus', function() {
-        if (hiddenInput.value && selectedJournalName) {
-            // Don't clear if already selected
-        } else if (this.value.length >= 2) {
-            this.dispatchEvent(new Event('input'));
-        }
-    });
-    
     // Fungsi untuk select jurnal
     function selectJournal(journalId, journalName) {
         hiddenInput.value = journalId;
         selectedJournalName = journalName;
-        searchInput.value = journalName;
+        searchInput.value = '✓ ' + journalName;
+        searchInput.classList.add('is-valid');
         searchResults.style.display = 'none';
         
         console.log('✅ Selected journal:', journalId, '-', journalName);
@@ -339,6 +359,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Load slots
         loadSlots(journalId);
     }
+    
+    // Clear selection when editing
+    searchInput.addEventListener('focus', function() {
+        if (hiddenInput.value && this.value.startsWith('✓ ')) {
+            // Allow editing - show current search
+            this.value = selectedJournalName;
+            this.select();
+        }
+    });
     
     // Load slots function
     function loadSlots(journalId) {
@@ -391,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Focus on search input
     searchInput.focus();
     
-    console.log('✅ Search functionality ready');
+    console.log('✅ Search functionality ready - Type to search!');
 });
 </script>
 @endpush
