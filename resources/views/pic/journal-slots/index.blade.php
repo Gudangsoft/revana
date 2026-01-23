@@ -18,20 +18,24 @@
 <!-- Filter -->
 <div class="card mb-3">
     <div class="card-body">
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
+        <form method="GET" class="row g-2">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="🔍 Cari nama jurnal atau publisher..." value="{{ request('search') }}">
+            </div>
+            <div class="col-md-3">
                 <select name="journal_id" class="form-select">
-                    <option value="">Semua Jurnal</option>
+                    <option value="">-- Semua Jurnal --</option>
                     @foreach($journals as $journal)
                         <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
-                            {{ $journal->nama_jurnal }}
+                            {{ Str::limit($journal->nama_jurnal, 35) }}
                         </option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-2">
                 <select name="year" class="form-select">
-                    <option value="">Semua Tahun</option>
+                    <option value="">-- Tahun --</option>
                     @for($y = date('Y') + 1; $y >= 2020; $y--)
                         <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endfor
@@ -39,21 +43,21 @@
             </div>
             <div class="col-md-2">
                 <select name="month" class="form-select">
-                    <option value="">Semua Bulan</option>
+                    <option value="">-- Bulan --</option>
                     @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $i => $m)
                         <option value="{{ $i + 1 }}" {{ request('month') == ($i + 1) ? 'selected' : '' }}>{{ $m }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search"></i> Filter
-                </button>
-            </div>
-            <div class="col-md-2">
-                <a href="{{ route('pic.journal-slots.index') }}" class="btn btn-secondary w-100">
-                    <i class="bi bi-x-circle"></i> Reset
-                </a>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Cari
+                    </button>
+                    <a href="{{ route('pic.journal-slots.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
             </div>
         </form>
     </div>

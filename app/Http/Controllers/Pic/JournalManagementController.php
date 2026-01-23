@@ -101,6 +101,15 @@ class JournalManagementController extends Controller
     {
         $query = JournalSlot::with(['journalMaster']);
         
+        // Search by nama jurnal
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('journalMaster', function($q) use ($search) {
+                $q->where('nama_jurnal', 'like', "%{$search}%")
+                  ->orWhere('publisher', 'like', "%{$search}%");
+            });
+        }
+        
         if ($request->filled('journal_id')) {
             $query->where('journal_master_id', $request->journal_id);
         }
@@ -111,7 +120,7 @@ class JournalManagementController extends Controller
             $query->where('bulan', $request->month);
         }
 
-        $slots = $query->latest()->paginate(20);
+        $slots = $query->latest()->paginate(20)->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         
         return view('pic.journal-slots.index', compact('slots', 'journals'));
