@@ -28,6 +28,7 @@ use App\Http\Controllers\Pic\JournalManagementController as PicJournalController
 use App\Http\Controllers\ReviewerRegistrationController;
 use App\Http\Controllers\Admin\ReviewerRegistrationController as AdminReviewerRegistrationController;
 use App\Http\Controllers\ReviewRequestController;
+use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,6 +44,10 @@ Route::get('/', function () {
     }
     return redirect('/login');
 });
+
+// Public LOA Tracking (no login required)
+Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('tracking.search');
 
 // Test route PIC login
 Route::get('/pic-login-test', function () {
