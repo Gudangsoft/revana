@@ -14,9 +14,26 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class MarketingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $marketings = Marketing::latest()->paginate(20);
+        $query = Marketing::query();
+        
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        
+        // Active status filter
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+        
+        $marketings = $query->latest()->paginate(20)->withQueryString();
         return view('admin.marketings.index', compact('marketings'));
     }
 

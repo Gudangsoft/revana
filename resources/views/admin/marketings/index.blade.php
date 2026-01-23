@@ -53,6 +53,32 @@
                 </div>
             </div>
             <div class="card-body">
+                <!-- Search Form -->
+                <form method="GET" action="{{ route('admin.marketings.index') }}" class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <input type="text" name="search" class="form-control" placeholder="🔍 Cari nama, email, atau telepon..." value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select">
+                                <option value="">Semua Status</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Cari
+                                </button>
+                                <a href="{{ route('admin.marketings.index') }}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
