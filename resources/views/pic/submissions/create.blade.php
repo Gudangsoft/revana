@@ -33,7 +33,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="journal_master_id" class="form-label">Pilih Jurnal <span class="text-danger">*</span></label>
+                                <label for="journal_master_id" class="form-label">Pilih Jurnal <span class="text-danger">*</span> 
+                                    <small class="text-muted">(Ketik → tekan Enter atau klik 2x)</small>
+                                </label>
                                 <input type="text" class="form-control mb-2" id="search_journal" placeholder="🔍 Ketik untuk mencari jurnal..." autocomplete="off">
                                 <select class="form-select @error('journal_master_id') is-invalid @enderror" id="journal_master_id" name="journal_master_id" required size="8" style="height: auto;">
                                     <option value="">-- Pilih Jurnal --</option>
@@ -227,7 +229,7 @@ console.log('Search initialized. Total journals:', options.length - 1);
 searchInput.addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase().trim();
     let visibleCount = 0;
-    let lastVisibleOption = null;
+    let firstVisibleOption = null;
     
     console.log('Searching for:', searchTerm);
     
@@ -238,10 +240,10 @@ searchInput.addEventListener('input', function() {
         }
         
         const searchData = option.getAttribute('data-search') || '';
-        if (searchData.includes(searchTerm)) {
+        if (!searchTerm || searchData.includes(searchTerm)) {
             option.style.display = '';
             visibleCount++;
-            lastVisibleOption = option;
+            if (!firstVisibleOption) firstVisibleOption = option;
         } else {
             option.style.display = 'none';
         }
@@ -249,69 +251,95 @@ searchInput.addEventListener('input', function() {
     
     console.log('Visible results:', visibleCount);
     
-    // Auto-select if only one result
-    if (visibleCount === 1 && lastVisibleOption) {
-        console.log('Auto-selecting:', lastVisibleOption.text);
-        lastVisibleOption.selected = true;
-        journalSelect.dispatchEvent(new Event('change'));
+    // Auto-select first visible option
+    if (visibleCount > 0 && firstVisibleOption) {
+        firstVisibleOption.selected = true;
     }
 });
 
-// User can also click directly on dropdown to select
-journalSelect.addEventListener('click', function(e) {
-    // Small delay to ensure the option is selected
+// Enter key to load slots
+searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (journalSelect.value) {
+            console.log('Enter pressed, loading slots for:', journalSelect.value);
+            loadSlots(journalSelect.value);
+        }
+    }
+});
+
+// Click on dropdown
+journalSelect.addEventListener('click', function() {
     setTimeout(() => {
         if (this.value) {
-            console.log('Journal clicked, triggering change for:', this.value);
-            this.dispatchEvent(new Event('change'));
+            console.log('Dropdown clicked:', this.value);
+            loadSlots(this.value);
         }
-    }, 150);
+    }, 100);
+});
+
+// Double click
+journalSelect.addEventListener('dblclick', function() {
+    if (this.value) {
+        console.log('Double clicked:', this.value);
+        loadSlots(this.value);
+    }
+});
+
+// Change event
+journalSelect.addEventListener('change', function() {
+    if (this.value) {
+        console.log('Selection changed:', this.value);
+        loadSlots(this.value);
+    }
 });
 
 // Focus search on page load
 searchInput.focus();
 
-// Slot loading functionality
-document.getElementById('journal_master_id').addEventListener('change', function() {
-    const journalId = this.value;
-    const slotSelect = document.getElementById('journal_slot_id');
-    
-    console.log('Journal changed to:', journalId);
-    
+// Load slots function
+function loadSlots(journalId) {
     if (!journalId) {
         slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
         return;
     }
     
-    slotSelect.innerHTML = '<option value="">Loading...</option>';
+    console.log('Loading slots for journal ID:', journalId);
+    const slotSelect = document.getElementById('journal_slot_id');
+    slotSelect.innerHTML = '<option value="">⏳ Memuat slot...</option>';
     
     const url = `{{ url('pic/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`;
-    console.log('Fetching slots from:', url);
+    console.log('Fetching from:', url);
     
     fetch(url)
         .then(response => {
             console.log('Response status:', response.status);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
             return response.json();
         })
         .then(data => {
-            console.log('Slots received:', data.length);
-            if (data.length === 0) {
-                slotSelect.innerHTML = '<option value="">Tidak ada slot tersedia</option>';
+            console.log('Received slots:', data.length, 'items');
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                slotSelect.innerHTML = '<option value="">❌ Tidak ada slot tersedia</option>';
                 return;
             }
-            let options = '<option value="">-- Pilih Slot --</option>';
+            
+            let html = '<option value="">-- Pilih Slot --</option>';
             data.forEach(slot => {
-                options += `<option value="${slot.id}">${slot.text}</option>`;
+                html += `<option value="${slot.id}">${slot.text}</option>`;
             });
-            slotSelect.innerHTML = options;
-            console.log('Slots loaded successfully');
+            slotSelect.innerHTML = html;
+            
+            console.log('✅ Slots loaded successfully');
         })
         .catch(error => {
-            console.error('Error loading slots:', error);
-            slotSelect.innerHTML = '<option value="">Error loading slots</option>';
-            alert('Error loading slots. Check console for details.');
+            console.error('❌ Error:', error);
+            slotSelect.innerHTML = `<option value="">❌ Error: ${error.message}</option>`;
         });
-});
-});
+}
+
+console.log('✅ All event listeners ready');
 </script>
 @endpush
+@endsection
