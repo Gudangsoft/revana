@@ -192,7 +192,13 @@ class DashboardController extends Controller
         
         $kodeSubmit = 'SUB' . date('Y') . $newNumber;
         
-        // Create submission (created_by=1 is system default, actual creator tracked via marketing_id)
+        // Get admin user for created_by (required by FK, actual creator tracked via marketing_id)
+        $adminUser = \App\Models\User::orderBy('id')->first();
+        if (!$adminUser) {
+            return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.');
+        }
+        
+        // Create submission
         $submission = Submission::create([
             'kode_submit' => $kodeSubmit,
             'journal_slot_id' => $request->journal_slot_id,
@@ -207,7 +213,7 @@ class DashboardController extends Controller
             'notes' => $request->notes,
             'tanggal_submit' => now(),
             'status' => 'SUBMITTED',
-            'created_by' => 1, // System default, actual creator is marketing_id
+            'created_by' => $adminUser->id,
         ]);
         
         return redirect()
