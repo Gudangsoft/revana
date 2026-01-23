@@ -667,6 +667,7 @@ class JournalManagementController extends Controller
         }
         
         // Check if previous stages are completed (sequential validation)
+        // EXCEPTION: Reviewer 1 and Reviewer 2 can work in parallel
         $stageOrder = [
             'editor1_valid',
             'author1_valid',
@@ -683,6 +684,16 @@ class JournalManagementController extends Controller
         // Check all previous stages must be valid (skip if petugas not assigned)
         for ($i = 0; $i < $currentStageIndex; $i++) {
             $previousStage = $stageOrder[$i];
+            
+            // SPECIAL CASE: Reviewer 1 and Reviewer 2 work in parallel
+            // If current stage is reviewer2, skip reviewer1 validation check
+            if ($request->field === 'reviewer2_valid' && $previousStage === 'reviewer1_valid') {
+                continue;
+            }
+            // If current stage is reviewer1, skip reviewer2 validation check (shouldn't happen but for safety)
+            if ($request->field === 'reviewer1_valid' && $previousStage === 'reviewer2_valid') {
+                continue;
+            }
             
             // Skip validation check if petugas for this stage is not assigned
             $petugasFieldForPreviousStage = $fieldMap[$previousStage] ?? null;
@@ -706,6 +717,24 @@ class JournalManagementController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Proses sebelumnya (' . $stageNames[$previousStage] . ') belum valid. Harap tunggu validasi dari tahap sebelumnya.'
+                ], 400);
+            }
+        }
+        
+        // SPECIAL VALIDATION: Editor 3 requires BOTH Reviewer 1 AND Reviewer 2 to be completed
+        if ($request->field === 'editor3_valid') {
+            // Check if reviewer1 has petugas assigned and is not valid
+            if ($submission->petugas_reviewer1_id && !$submission->reviewer1_valid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reviewer 1 belum valid. Editor 3 hanya bisa diproses setelah Reviewer 1 dan Reviewer 2 selesai.'
+                ], 400);
+            }
+            // Check if reviewer2 has petugas assigned and is not valid
+            if ($submission->petugas_reviewer2_id && !$submission->reviewer2_valid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reviewer 2 belum valid. Editor 3 hanya bisa diproses setelah Reviewer 1 dan Reviewer 2 selesai.'
                 ], 400);
             }
         }

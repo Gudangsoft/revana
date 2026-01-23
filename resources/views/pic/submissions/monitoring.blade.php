@@ -1102,6 +1102,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const newValue = !current;
             
             // Check if previous stages are valid (sequential validation)
+            // EXCEPTION: Reviewer 1 and Reviewer 2 can work in parallel
             const row = this.closest('tr');
             const stageOrder = ['editor1_valid', 'author1_valid', 'editor2_valid', 'reviewer1_valid', 'reviewer2_valid', 'editor3_valid', 'author2_valid', 'production_valid'];
             const currentStageIndex = stageOrder.indexOf(field);
@@ -1109,6 +1110,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check all previous stages
             for (let i = 0; i < currentStageIndex; i++) {
                 const previousStage = stageOrder[i];
+                
+                // SPECIAL CASE: Reviewer 1 and Reviewer 2 work in parallel
+                // If current stage is reviewer2, skip reviewer1 validation check
+                if (field === 'reviewer2_valid' && previousStage === 'reviewer1_valid') {
+                    continue;
+                }
+                // If current stage is reviewer1, skip reviewer2 validation check (shouldn't happen but for safety)
+                if (field === 'reviewer1_valid' && previousStage === 'reviewer2_valid') {
+                    continue;
+                }
+                
                 // Convert snake_case to camelCase for dataset access: editor1_valid -> editor1Valid
                 const dataAttr = previousStage.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
                 const previousValid = row.dataset[dataAttr] === '1';
@@ -1126,6 +1138,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
                     
                     alert('Proses sebelumnya (' + stageNames[previousStage] + ') belum valid. Harap tunggu validasi dari tahap sebelumnya.');
+                    return;
+                }
+            }
+            
+            // SPECIAL VALIDATION: Editor 3 requires BOTH Reviewer 1 AND Reviewer 2 to be completed
+            if (field === 'editor3_valid') {
+                const reviewer1Valid = row.dataset.reviewer1Valid === '1';
+                const reviewer2Valid = row.dataset.reviewer2Valid === '1';
+                
+                if (!reviewer1Valid || !reviewer2Valid) {
+                    alert('Editor 3 hanya bisa diproses setelah Reviewer 1 DAN Reviewer 2 selesai.');
                     return;
                 }
             }
