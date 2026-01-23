@@ -282,4 +282,53 @@ class DashboardController extends Controller
         
         return view('marketing.journal-slots.index', compact('marketing', 'slots', 'journals'));
     }
+
+    /**
+     * Submissions Monitoring for Marketing
+     */
+    public function submissionsMonitoring(Request $request)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $query = Submission::with(['journalSlot.journalMaster'])
+            ->where('marketing_id', $marketing->id);
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Filter by journal
+        if ($request->filled('journal_slot_id')) {
+            $query->where('journal_slot_id', $request->journal_slot_id);
+        }
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('id_artikel', 'like', "%{$search}%");
+            });
+        }
+        
+        $submissions = $query->latest('tanggal_submit')->paginate(20);
+        $slots = JournalSlot::with('journalMaster')->where('is_active', true)->get();
+        
+        return view('marketing.submissions-monitoring', compact('marketing', 'submissions', 'slots'));
+    }
+
+    /**
+     * Accreditations Index for Marketing
+     */
+    public function accreditationsIndex()
+    {
+        $marketing = Auth::guard('marketing')->user();
+        $accreditations = Accreditation::where('is_active', true)
+            ->orderBy('name')
+            ->paginate(20);
+        
+        return view('marketing.accreditations.index', compact('marketing', 'accreditations'));
+    }
 }

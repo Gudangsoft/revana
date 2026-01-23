@@ -376,10 +376,12 @@ Route::prefix('marketing')->group(function () {
         Route::get('/submissions/create', [MarketingDashboardController::class, 'createSubmission'])->name('marketing.submissions.create');
         Route::post('/submissions', [MarketingDashboardController::class, 'storeSubmission'])->name('marketing.submissions.store');
         Route::get('/submissions/{submission}', [MarketingDashboardController::class, 'showSubmission'])->name('marketing.submissions.show');
+        Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
         
         // Journal Management
         Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
+        Route::get('/accreditations', [MarketingDashboardController::class, 'accreditationsIndex'])->name('marketing.accreditations.index');
     });
 });
