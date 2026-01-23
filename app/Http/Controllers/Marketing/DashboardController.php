@@ -335,4 +335,30 @@ class DashboardController extends Controller
         
         return view('marketing.accreditations.index', compact('marketing', 'accreditations'));
     }
+
+    /**
+     * Get Journal Slots by Journal Master ID (AJAX)
+     */
+    public function getSlotsByJournal(Request $request)
+    {
+        $journalMasterId = $request->get('journal_master_id');
+        
+        if (!$journalMasterId) {
+            return response()->json([]);
+        }
+        
+        $slots = JournalSlot::where('journal_master_id', $journalMasterId)
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get()
+            ->map(function ($slot) {
+                return [
+                    'id' => $slot->id,
+                    'text' => "Vol. {$slot->volume} No. {$slot->nomor} ({$slot->tahun})"
+                ];
+            });
+        
+        return response()->json($slots);
+    }
 }

@@ -396,6 +396,9 @@ Route::prefix('marketing')->group(function () {
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
         
+        // AJAX: Get slots by journal
+        Route::get('/journal-slots/get-by-journal', [MarketingDashboardController::class, 'getSlotsByJournal'])->name('marketing.journal-slots.get-by-journal');
+        
         // Journal Management
         Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');

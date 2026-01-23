@@ -67,19 +67,14 @@
             
             <div class="mb-3">
                 <label class="form-label">Judul Artikel <span class="text-danger">*</span></label>
-                <input type="text" name="judul_artikel" class="form-control @error('judul_artikel') is-invalid @enderror" value="{{ old('judul_artikel') }}" required>
+                <textarea class="form-control @error('judul_artikel') is-invalid @enderror" name="judul_artikel" rows="2" required>{{ old('judul_artikel') }}</textarea>
                 @error('judul_artikel')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Link Artikel</label>
-                <input type="url" name="link_artikel" class="form-control @error('link_artikel') is-invalid @enderror" value="{{ old('link_artikel') }}" placeholder="https://...">
-                @error('link_artikel')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
+
+            <hr>
+            <h6 class="text-muted mb-3"><i class="bi bi-person"></i> Data Penulis</h6>
             
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -138,10 +133,117 @@
 
 @section('scripts')
 <script>
-document.getElementById('submissionForm').addEventListener('submit', function(e) {
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
+// Journal search functionality with textbox display
+const searchInput = document.getElementById('search_journal');
+const journalSelect = document.getElementById('journal_master_select');
+const selectedDisplay = document.getElementById('selected_journal_display');
+const hiddenInput = document.getElementById('journal_master_id');
+const options = journalSelect.querySelectorAll('option');
+
+searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    let visibleCount = 0;
+    let lastVisibleOption = null;
+    
+    // Reset hidden input if searching
+    if (searchTerm) {
+        journalSelect.classList.remove('d-none');
+        selectedDisplay.classList.add('d-none');
+    }
+    
+    options.forEach(option => {
+        if (option.value === '') {
+            option.style.display = searchTerm ? 'none' : '';
+            return;
+        }
+        
+        const searchData = option.getAttribute('data-search') || '';
+        if (searchData.includes(searchTerm)) {
+            option.style.display = '';
+            visibleCount++;
+            lastVisibleOption = option;
+        } else {
+            option.style.display = 'none';
+        }
+    });
+    
+    // Auto-select if only one result
+    if (visibleCount === 1 && lastVisibleOption) {
+        lastVisibleOption.selected = true;
+    }
 });
+
+// When journal is selected from dropdown
+journalSelect.addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    if (selectedOption.value) {
+        const journalName = selectedOption.getAttribute('data-name');
+        const publisher = selectedOption.getAttribute('data-publisher');
+        
+        // Set hidden input
+        hiddenInput.value = selectedOption.value;
+        
+        // Show in textbox
+        selectedDisplay.value = `${journalName} (${publisher})`;
+        selectedDisplay.classList.remove('d-none');
+        
+        // Hide dropdown and search
+        journalSelect.classList.add('d-none');
+        searchInput.value = '';
+        
+        // Load slots
+        loadSlots(selectedOption.value);
+    }
+});
+
+// Click on textbox to reopen search
+selectedDisplay.addEventListener('click', function() {
+    this.classList.add('d-none');
+    journalSelect.classList.remove('d-none');
+    searchInput.focus();
+    hiddenInput.value = '';
+});
+
+// Focus search on page load
+searchInput.focus();
+
+// Load slots function
+function loadSlots(journalId) {
+    const slotSelect = document.getElementById('journal_slot_id');
+    
+    if (!journalId) {
+        slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
+        return;
+    }
+    
+    slotSelect.innerHTML = '<option value="">Loading...</option>';
+    
+    fetch(`{{ url('marketing/journal-slots/get-by-journal') }}?journal_master_id=${journalId}`)
+        .then(response => response.json())
+        .then(data => {
+            let options = '<option value="">-- Pilih Slot --</option>';
+            data.forEach(slot => {
+                options += `<option value="${slot.id}">${slot.text}</option>`;
+            });
+            slotSelect.innerHTML = options;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            slotSelect.innerHTML = '<option value="">Error loading slots</option>';
+        });
+}
+
+// Load slots if journal already selected (from old input)
+if (hiddenInput.value) {
+    const selectedOption = Array.from(options).find(opt => opt.value == hiddenInput.value);
+    if (selectedOption) {
+        const journalName = selectedOption.getAttribute('data-name');
+        const publisher = selectedOption.getAttribute('data-publisher');
+        selectedDisplay.value = `${journalName} (${publisher})`;
+        selectedDisplay.classList.remove('d-none');
+        journalSelect.classList.add('d-none');
+        loadSlots(hiddenInput.value);
+    }
+}
 </script>
 @endsection
