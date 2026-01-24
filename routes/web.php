@@ -381,6 +381,11 @@ Route::prefix('pic')->group(function () {
         // Point Saya
         Route::get('/points', [\App\Http\Controllers\Pic\PicPointController::class, 'index'])->name('pic.points.index');
         
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Pic\ProfileController::class, 'edit'])->name('pic.profile.edit');
+        Route::post('/profile', [\App\Http\Controllers\Pic\ProfileController::class, 'update'])->name('pic.profile.update');
+        Route::post('/profile/password', [\App\Http\Controllers\Pic\ProfileController::class, 'updatePassword'])->name('pic.profile.update-password');
+        
         // Reviewers
         Route::get('/reviewers', [PicJournalController::class, 'reviewersIndex'])->name('pic.reviewers.index');
         Route::post('/reviewers/{reviewer}/login-as', [PicJournalController::class, 'loginAsReviewer'])->name('pic.reviewers.login-as');
@@ -415,5 +420,10 @@ Route::prefix('marketing')->group(function () {
         Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
         Route::get('/accreditations', [MarketingDashboardController::class, 'accreditationsIndex'])->name('marketing.accreditations.index');
+        
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'edit'])->name('marketing.profile.edit');
+        Route::post('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'update'])->name('marketing.profile.update');
+        Route::post('/profile/password', [\App\Http\Controllers\Marketing\ProfileController::class, 'updatePassword'])->name('marketing.profile.update-password');
     });
 });

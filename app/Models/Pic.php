@@ -15,6 +15,7 @@ class Pic extends Authenticatable
         'username',
         'role',
         'email',
+        'photo',
         'password',
         'phone',
         'is_active',

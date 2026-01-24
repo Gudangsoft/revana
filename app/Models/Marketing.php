@@ -11,7 +11,9 @@ class Marketing extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'email',
+        'photo',
         'phone',
         'password',
         'is_active',

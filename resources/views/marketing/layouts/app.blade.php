@@ -122,6 +122,10 @@
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">
                     <i class="bi bi-trophy"></i> Point Saya
                 </a>
+                <hr style="margin: 15px 0; opacity: 0.2;">
+                <a href="{{ route('marketing.profile.edit') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.profile') ? 'active' : '' }}">
+                    <i class="bi bi-person-circle"></i> Profile Saya
+                </a>
             </div>
             <div class="col-md-10 content">
                 @if(session('success'))

@@ -149,4 +149,11 @@
             <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
         @endif
     </a>
+    
+    <div class="sidebar-divider"></div>
+    
+    <a href="{{ route('pic.profile.edit') }}" class="nav-link {{ request()->routeIs('pic.profile.*') ? 'active' : '' }}" data-title="Profile Saya">
+        <i class="bi bi-person-circle"></i>
+        <span>Profile Saya</span>
+    </a>
 </nav>
