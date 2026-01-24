@@ -115,9 +115,6 @@
                 <a href="{{ route('marketing.submissions.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
                 </a>
-                <a href="{{ route('marketing.accreditations.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.accreditations') ? 'active' : '' }}">
-                    <i class="bi bi-award"></i> Akreditasi
-                </a>
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">
                     <i class="bi bi-trophy"></i> Point Saya

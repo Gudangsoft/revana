@@ -419,7 +419,6 @@ Route::prefix('marketing')->group(function () {
         // Journal Management
         Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
-        Route::get('/accreditations', [MarketingDashboardController::class, 'accreditationsIndex'])->name('marketing.accreditations.index');
         
         // Profile
         Route::get('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'edit'])->name('marketing.profile.edit');
