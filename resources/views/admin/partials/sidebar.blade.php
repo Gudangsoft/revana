@@ -28,11 +28,8 @@
                 <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i> Data Jurnal
                 </a>
-                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.index' || $currentRoute == 'admin.journal-slots.create' || $currentRoute == 'admin.journal-slots.edit' || $currentRoute == 'admin.journal-slots.show' ? 'active' : '' }}">
-                    <i class="bi bi-calendar3"></i> Data Slot
-                </a>
-                <a href="{{ route('admin.journal-slots.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart"></i> Monitoring Slot
+                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.index' || $currentRoute == 'admin.journal-slots.create' || $currentRoute == 'admin.journal-slots.edit' || $currentRoute == 'admin.journal-slots.show' || $currentRoute == 'admin.journal-slots.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot & Monitoring
                 </a>
                 <a href="{{ route('admin.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.index' || $currentRoute == 'admin.submissions.create' || $currentRoute == 'admin.submissions.edit' || $currentRoute == 'admin.submissions.show' || $currentRoute == 'admin.submissions.process' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i> Data Submit

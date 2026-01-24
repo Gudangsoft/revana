@@ -47,7 +47,49 @@ class JournalSlotController extends Controller
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $bulanOptions = JournalSlot::getBulanOptions();
         
-        return view('admin.journal-slots.index', compact('slots', 'journals', 'bulanOptions'));
+        // If monitoring tab is active, load monitoring data
+        $slotStats = null;
+        if ($request->tab == 'monitoring') {
+            $monitoringQuery = JournalSlot::with(['journalMaster', 'submissions']);
+            
+            // Filter by journal
+            if ($request->filled('journal_master_id')) {
+                $monitoringQuery->where('journal_master_id', $request->journal_master_id);
+            }
+            
+            // Filter by year
+            if ($request->filled('tahun')) {
+                $monitoringQuery->where('tahun', $request->tahun);
+            }
+            
+            $monitoringSlots = $monitoringQuery->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->get();
+            
+            $slotStats = $monitoringSlots->map(function($slot) {
+                $total = $slot->jumlah_slot;
+                $used = $slot->slot_terpakai;
+                $available = $total - $used;
+                $percentage = $total > 0 ? round(($used / $total) * 100, 1) : 0;
+                
+                // Determine status color
+                $status = 'success'; // Default green
+                if ($percentage >= 80) {
+                    $status = 'danger'; // Red if >= 80%
+                } elseif ($percentage >= 50) {
+                    $status = 'warning'; // Yellow if >= 50%
+                }
+                
+                return [
+                    'slot' => $slot,
+                    'total_slots' => $total,
+                    'used_slots' => $used,
+                    'available_slots' => $available,
+                    'percentage' => $percentage,
+                    'status' => $status
+                ];
+            });
+        }
+        
+        return view('admin.journal-slots.index', compact('slots', 'journals', 'bulanOptions', 'slotStats'));
     }
 
     public function create()
