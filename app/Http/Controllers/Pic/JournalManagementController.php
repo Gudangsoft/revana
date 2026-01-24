@@ -264,11 +264,7 @@ class JournalManagementController extends Controller
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $currentPic = Auth::guard('pic')->user();
         
-        // Data Kategori dan Jenis Jurnal
-        $kategoris = \App\Models\Kategori::where('is_active', true)->orderBy('name')->get();
-        $jenisJurnals = \App\Models\JenisJurnal::where('is_active', true)->orderBy('name')->get();
-        
-        return view('pic.submissions.create', compact('journals', 'slots', 'marketings', 'pics', 'currentPic', 'kategoris', 'jenisJurnals'));
+        return view('pic.submissions.create', compact('journals', 'slots', 'marketings', 'pics', 'currentPic'));
     }
 
     public function getSlotsByJournal(Request $request)
@@ -306,8 +302,6 @@ class JournalManagementController extends Controller
     {
         $validated = $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
-            'kategori_id' => 'required|exists:kategoris,id',
-            'jenis_jurnal_id' => 'required|exists:jenis_jurnals,id',
             'id_artikel' => 'required|string|max:100',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
