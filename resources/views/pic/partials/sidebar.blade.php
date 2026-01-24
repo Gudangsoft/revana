@@ -149,17 +149,4 @@
         <i class="bi bi-file-earmark-text"></i>
         <span>Data Submit</span>
     </a>
-    
-    <hr class="sidebar-divider">
-    
-    <!-- Edit Profile Section -->
-    <div class="sidebar-section-header">
-        <i class="bi bi-gear-fill"></i>
-        <span>Pengaturan</span>
-    </div>
-    
-    <a href="{{ route('pic.profile.edit') }}" class="nav-link {{ request()->routeIs('pic.profile.*') ? 'active' : '' }}" data-title="Edit Profile">
-        <i class="bi bi-person-circle"></i>
-        <span>Edit Profile</span>
-    </a>
-</nav>
+
