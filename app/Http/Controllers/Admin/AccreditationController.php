@@ -37,8 +37,6 @@ class AccreditationController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:accreditations,name',
-            'points' => 'required|integer|min:0',
-            'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 
@@ -59,8 +57,6 @@ class AccreditationController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:accreditations,name,' . $accreditation->id,
-            'points' => 'required|integer|min:0',
-            'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 

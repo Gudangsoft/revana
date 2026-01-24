@@ -30,27 +30,6 @@
                         <small class="text-muted">Nama akreditasi harus unik</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Points <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('points') is-invalid @enderror" 
-                               name="points" value="{{ old('points', $accreditation->points) }}" 
-                               placeholder="Contoh: 100" min="0" required>
-                        @error('points')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted">Jumlah poin yang akan diberikan untuk akreditasi ini</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Deskripsi</label>
-                        <textarea class="form-control @error('description') is-invalid @enderror" 
-                                  name="description" rows="3" 
-                                  placeholder="Deskripsi opsional tentang akreditasi ini">{{ old('description', $accreditation->description) }}</textarea>
-                        @error('description')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" name="is_active" 
                                id="is_active" value="1" {{ old('is_active', $accreditation->is_active) ? 'checked' : '' }}>

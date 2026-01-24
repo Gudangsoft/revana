@@ -10,9 +10,6 @@
 <a href="{{ route('admin.monitoring') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.monitoring') ? 'active' : '' }}">
     <i class="bi bi-graph-up"></i> Monitoring Review
 </a>
-<a href="{{ route('admin.slot-jurnal.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.slot-jurnal') ? 'active' : '' }}">
-    <i class="bi bi-calendar-range"></i> Slot Jurnal
-</a>
 
 {{-- Menu Pengelolaan Jurnal Baru --}}
 <div class="accordion accordion-flush" id="accordionJournalNew">

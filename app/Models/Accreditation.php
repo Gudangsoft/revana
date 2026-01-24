@@ -11,8 +11,6 @@ class Accreditation extends Model
 
     protected $fillable = [
         'name',
-        'points',
-        'description',
         'is_active',
     ];
 

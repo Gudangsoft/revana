@@ -173,6 +173,19 @@ class MarketingController extends Controller
     }
 
     /**
+     * Reset individual Marketing password to default
+     */
+    public function resetPassword(Marketing $marketing)
+    {
+        $defaultPassword = 'marketing123';
+        $marketing->password = Hash::make($defaultPassword);
+        $marketing->save();
+
+        return redirect()->route('admin.marketings.index')
+            ->with('success', "Password untuk {$marketing->name} telah direset ke default: {$defaultPassword}");
+    }
+
+    /**
      * Reset all Marketing passwords to default
      */
     public function resetAllPasswords()

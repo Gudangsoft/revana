@@ -83,6 +83,12 @@
                                         <a href="{{ route('admin.pics.edit', $pic) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <form action="{{ route('admin.pics.reset-password', $pic) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin mereset password {{ $pic->name }}?')">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-secondary" title="Reset Password">
+                                                <i class="bi bi-key"></i>
+                                            </button>
+                                        </form>
                                         @if($pic->is_active)
                                         <form action="{{ route('admin.pics.login-as', $pic) }}" method="POST" class="d-inline">
                                             @csrf

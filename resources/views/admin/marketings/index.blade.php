@@ -110,6 +110,12 @@
                                         <a href="{{ route('admin.marketings.edit', $marketing) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <form action="{{ route('admin.marketings.reset-password', $marketing) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin mereset password {{ $marketing->name }}?')">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-secondary" title="Reset Password">
+                                                <i class="bi bi-key"></i>
+                                            </button>
+                                        </form>
                                         @if($marketing->is_active)
                                         <form action="{{ route('admin.marketings.login-as', $marketing) }}" method="POST" class="d-inline">
                                             @csrf

@@ -207,6 +207,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketings-export', [MarketingController::class, 'export'])->name('marketings.export');
         Route::post('/marketings-import', [MarketingController::class, 'import'])->name('marketings.import');
         Route::get('/marketings-template', [MarketingController::class, 'downloadTemplate'])->name('marketings.template');
+        Route::post('/marketings/{marketing}/reset-password', [MarketingController::class, 'resetPassword'])->name('marketings.reset-password');
         Route::post('/marketings-reset-all-passwords', [MarketingController::class, 'resetAllPasswords'])->name('marketings.reset-all-passwords');
         
         // Marketing Point Report
@@ -220,6 +221,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
         Route::get('/pics-activity-report', [PicController::class, 'activityReport'])->name('pics.activity-report');
+        Route::post('/pics/{pic}/reset-password', [PicController::class, 'resetPassword'])->name('pics.reset-password');
         Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         
         // PIC Point Report

@@ -232,6 +232,19 @@ class PicController extends Controller
     }
 
     /**
+     * Reset individual PIC password to default
+     */
+    public function resetPassword(Pic $pic)
+    {
+        $defaultPassword = 'pic123';
+        $pic->password = bcrypt($defaultPassword);
+        $pic->save();
+
+        return redirect()->route('admin.pics.index')
+            ->with('success', "Password untuk {$pic->name} telah direset ke default: {$defaultPassword}");
+    }
+
+    /**
      * Reset all PICs password to default
      */
     public function resetAllPasswords()

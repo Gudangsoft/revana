@@ -65,8 +65,6 @@
                 <thead class="table-light">
                     <tr>
                         <th>Nama Akreditasi</th>
-                        <th>Points</th>
-                        <th>Deskripsi</th>
                         <th>Jumlah Jurnal</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -77,12 +75,6 @@
                     <tr>
                         <td>
                             <strong>{{ $accreditation->name }}</strong>
-                        </td>
-                        <td>
-                            <span class="badge bg-primary">{{ $accreditation->points }} points</span>
-                        </td>
-                        <td>
-                            <small class="text-muted">{{ $accreditation->description ?? '-' }}</small>
                         </td>
                         <td>
                             <span class="badge bg-info">{{ $accreditation->journals_count }} jurnal</span>
@@ -156,8 +148,8 @@
                         <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Petunjuk Import</h6>
                         <ul class="mb-0 small">
                             <li>Download template terlebih dahulu untuk format yang benar</li>
-                            <li>Kolom wajib: <strong>nama</strong>, <strong>points</strong></li>
-                            <li>Kolom opsional: <strong>deskripsi</strong>, <strong>status</strong></li>
+                            <li>Kolom wajib: <strong>nama</strong></li>
+                            <li>Kolom opsional: <strong>status</strong></li>
                             <li>Jika nama akreditasi sudah ada, data akan diperbarui</li>
                             <li>Status: "Aktif", "Ya", "Yes", "1" = Aktif. Lainnya = Nonaktif</li>
                         </ul>

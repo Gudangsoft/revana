@@ -145,49 +145,21 @@
         @endif
     </a>
     
-    <hr class="sidebar-divider">
-    
-    <!-- Pengelolaan Jurnal Section -->
-    <div class="sidebar-section-header">
-        <i class="bi bi-journal-bookmark-fill"></i>
-        <span>Pengelolaan Jurnal</span>
-    </div>
-    
-    <a href="{{ route('pic.journals.index') }}" class="nav-link {{ request()->routeIs('pic.journals.*') ? 'active' : '' }}" data-title="Data Jurnal">
-        <i class="bi bi-journal-text"></i>
-        <span>Data Jurnal</span>
-    </a>
-    
-    <a href="{{ route('pic.journal-slots.index') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.index', 'pic.journal-slots.create', 'pic.journal-slots.edit') ? 'active' : '' }}" data-title="Data Slot">
-        <i class="bi bi-calendar3"></i>
-        <span>Data Slot</span>
-    </a>
-    
-    <a href="{{ route('pic.journal-slots.monitoring') }}" class="nav-link {{ request()->routeIs('pic.journal-slots.monitoring') ? 'active' : '' }}" data-title="Monitoring Slot">
-        <i class="bi bi-bar-chart-line"></i>
-        <span>Monitoring Slot</span>
-    </a>
-    
     <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit">
         <i class="bi bi-file-earmark-text"></i>
         <span>Data Submit</span>
     </a>
     
-    <a href="{{ route('pic.accreditations.index') }}" class="nav-link {{ request()->routeIs('pic.accreditations.*') ? 'active' : '' }}" data-title="Akreditasi">
-        <i class="bi bi-award-fill"></i>
-        <span>Akreditasi</span>
-    </a>
-    
     <hr class="sidebar-divider">
     
-    <!-- Tim Section -->
+    <!-- Edit Profile Section -->
     <div class="sidebar-section-header">
-        <i class="bi bi-people-fill"></i>
-        <span>Tim</span>
+        <i class="bi bi-gear-fill"></i>
+        <span>Pengaturan</span>
     </div>
     
-    <a href="{{ route('pic.reviewers.index') }}" class="nav-link {{ request()->routeIs('pic.reviewers.*') ? 'active' : '' }}" data-title="Reviewer">
-        <i class="bi bi-person-check-fill"></i>
-        <span>Reviewer</span>
+    <a href="{{ route('pic.profile.edit') }}" class="nav-link {{ request()->routeIs('pic.profile.*') ? 'active' : '' }}" data-title="Edit Profile">
+        <i class="bi bi-person-circle"></i>
+        <span>Edit Profile</span>
     </a>
 </nav>
