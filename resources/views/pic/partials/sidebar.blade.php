@@ -137,6 +137,11 @@
         @endif
     </a>
     
+    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit">
+        <i class="bi bi-file-earmark-text"></i>
+        <span>Data Submit</span>
+    </a>
+    
     <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}" data-title="Point Saya">
         <i class="bi bi-trophy-fill"></i>
         <span>Point Saya</span>
@@ -144,9 +149,4 @@
             <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
         @endif
     </a>
-    
-    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit">
-        <i class="bi bi-file-earmark-text"></i>
-        <span>Data Submit</span>
-    </a>
-
+</nav>
