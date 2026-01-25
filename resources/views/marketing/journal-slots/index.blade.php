@@ -32,16 +32,16 @@
                         <label class="form-label small mb-1">Kategori</label>
                         <select name="kategori" class="form-select form-select-sm">
                             <option value="">-- Semua --</option>
-                            <option value="Nasional" {{ request('kategori') == 'Nasional' ? 'selected' : '' }}>Nasional</option>
-                            <option value="Internasional" {{ request('kategori') == 'Internasional' ? 'selected' : '' }}>Internasional</option>
+                            <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
+                            <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small mb-1">Jenis</label>
                         <select name="jenis" class="form-select form-select-sm">
                             <option value="">-- Semua --</option>
-                            <option value="Jurnal" {{ request('jenis') == 'Jurnal' ? 'selected' : '' }}>Jurnal</option>
-                            <option value="Prosiding" {{ request('jenis') == 'Prosiding' ? 'selected' : '' }}>Prosiding</option>
+                            <option value="Jurnal Nasional" {{ request('jenis') == 'Jurnal Nasional' ? 'selected' : '' }}>Jurnal Nasional</option>
+                            <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional</option>
                         </select>
                     </div>
                     <div class="col-md-2">
