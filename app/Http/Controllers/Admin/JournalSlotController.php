@@ -57,6 +57,13 @@ class JournalSlotController extends Controller
             });
         }
         
+        // Filter by akreditasi
+        if ($request->filled('akreditasi')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('accreditation', $request->akreditasi);
+            });
+        }
+        
         $slots = $query->latest()->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $bulanOptions = JournalSlot::getBulanOptions();

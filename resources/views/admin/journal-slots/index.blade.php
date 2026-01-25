@@ -107,11 +107,22 @@
                                 <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional</option>
                             </select>
                         </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="akreditasi">
+                                <option value="">-- Akreditasi --</option>
+                                <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                                <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                                <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                                <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                                <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                                <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
+                            </select>
+                        </div>
                         <div class="col-md-3">
                             <button class="btn btn-outline-primary" type="submit">
                                 <i class="bi bi-search"></i> Cari
                             </button>
-                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status', 'kategori', 'jenis']))
+                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status', 'kategori', 'jenis', 'akreditasi']))
                             <a href="{{ route('admin.journal-slots.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle"></i> Reset
                             </a>
@@ -130,6 +141,7 @@
                                 <th>Publisher</th>
                                 <th>Kategori</th>
                                 <th>Jenis</th>
+                                <th>Akreditasi</th>
                                 <th>Volume</th>
                                 <th>Nomor</th>
                                 <th>Bulan</th>
@@ -164,6 +176,13 @@
                                         <span class="badge bg-{{ $slot->journalMaster->jenis_jurnal == 'Jurnal Internasional' ? 'warning' : 'secondary' }}">
                                             {{ $slot->journalMaster->jenis_jurnal == 'Jurnal Internasional' ? 'Internasional' : 'Nasional' }}
                                         </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($slot->journalMaster->accreditation)
+                                        <span class="badge bg-info">{{ $slot->journalMaster->accreditation }}</span>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif

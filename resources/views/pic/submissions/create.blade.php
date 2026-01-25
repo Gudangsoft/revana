@@ -194,18 +194,15 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="petugas_submit_id" class="form-label">PIC Submit</label>
-                                <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
-                                    <option value="">-- Pilih PIC --</option>
+                                <input type="hidden" name="petugas_submit_id" value="{{ $currentPic->id ?? auth()->id() }}">
+                                <select class="form-select" id="petugas_submit_id" disabled>
                                     @foreach($pics as $pic)
-                                        <option value="{{ $pic->id }}" {{ (old('petugas_submit_id') ?? $currentPic->id ?? null) == $pic->id ? 'selected' : '' }}>
+                                        <option value="{{ $pic->id }}" {{ ($currentPic->id ?? auth()->id()) == $pic->id ? 'selected' : '' }}>
                                             {{ $pic->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('petugas_submit_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">Pilih PIC yang melakukan submit.</small>
+                                <small class="text-muted"><i class="bi bi-lock"></i> PIC Submit otomatis diisi dengan akun Anda.</small>
                             </div>
                         </div>
                     </div>
