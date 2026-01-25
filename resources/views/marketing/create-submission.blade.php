@@ -65,14 +65,14 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">ID Artikel <span class="text-danger">*</span></label>
-                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Masukkan ID Artikel" required>
+                    <label class="form-label">Nomor Submit <span class="text-danger">*</span></label>
+                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Masukkan Nomor Submit" required>
                     @error('id_artikel')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Link Artikel</label>
+                    <label class="form-label">Link Submit</label>
                     <input type="url" name="link_artikel" class="form-control @error('link_artikel') is-invalid @enderror" value="{{ old('link_artikel') }}" placeholder="https://...">
                     @error('link_artikel')
                         <div class="invalid-feedback">{{ $message }}</div>
