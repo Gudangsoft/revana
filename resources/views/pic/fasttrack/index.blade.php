@@ -1,6 +1,8 @@
 @extends('pic.layouts.app')
 
 @section('title', 'Monitoring Fasttrack')
+@section('page-title', '')
+@section('sidebar-class', 'auto-collapse')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -216,20 +218,6 @@
         <span class="badge bg-warning text-dark fs-6 ms-2">Total: {{ $submissions->total() }} artikel</span>
     </div>
 </div>
-
-@if(session('success'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-@endif
-
-@if(session('error'))
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-@endif
 
 <!-- Info Box -->
 <div class="alert alert-warning mb-3">
