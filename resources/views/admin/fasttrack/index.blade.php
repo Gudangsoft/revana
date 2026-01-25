@@ -894,19 +894,30 @@ function quickAssignMarketing(select, submissionId) {
     
     select.classList.add('saving');
     
+    // Build body with proper null handling
+    const bodyData = {
+        submission_id: parseInt(submissionId),
+        marketing_id: marketingId ? parseInt(marketingId) : null
+    };
+    
     fetch('/admin/submissions/quick-assign-marketing', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({
-            submission_id: submissionId,
-            marketing_id: marketingId || null
-        })
+        body: JSON.stringify(bodyData)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`HTTP ${response.status}: ${text}`);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('quickAssignMarketing response:', data);
         select.classList.remove('saving');
         if (data.success) {
             select.classList.add('success');
@@ -925,6 +936,7 @@ function quickAssignMarketing(select, submissionId) {
         select.value = originalValue;
         setTimeout(() => select.classList.remove('error'), 2000);
         console.error('Error:', error);
+        alert('Error: ' + error.message);
     });
 }
 
@@ -949,20 +961,31 @@ function quickAssign(select, submissionId, field) {
     
     select.classList.add('saving');
     
+    // Build body with proper null handling
+    const bodyData = {
+        submission_id: parseInt(submissionId),
+        assignment_type: assignmentType,
+        petugas_id: picId ? parseInt(picId) : null
+    };
+    
     fetch('/admin/submissions/quick-assign', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({
-            submission_id: submissionId,
-            assignment_type: assignmentType,
-            petugas_id: picId || null
-        })
+        body: JSON.stringify(bodyData)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`HTTP ${response.status}: ${text}`);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('quickAssign response:', data);
         select.classList.remove('saving');
         if (data.success) {
             select.classList.add('success');
@@ -981,6 +1004,7 @@ function quickAssign(select, submissionId, field) {
         select.value = originalValue;
         setTimeout(() => select.classList.remove('error'), 2000);
         console.error('Error:', error);
+        alert('Error: ' + error.message);
     });
 }
 
@@ -993,17 +1017,20 @@ function quickUpdateCredential(input, submissionId, field) {
     
     input.dataset.original = value;
     
+    // Build body with proper type
+    const bodyData = {
+        submission_id: parseInt(submissionId),
+        field: field,
+        value: value || null
+    };
+    
     fetch('/admin/submissions/quick-update-credential', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({
-            submission_id: submissionId,
-            field: field,
-            value: value
-        })
+        body: JSON.stringify(bodyData)
     })
     .then(response => response.json())
     .then(data => {
