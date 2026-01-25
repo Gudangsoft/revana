@@ -1262,51 +1262,75 @@ class SubmissionController extends Controller
      */
     public function fasttrackMonitoring(Request $request)
     {
-        $query = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
-            ->where('process_type', 'fasttrack');
-        
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
-        // Filter by journal
-        if ($request->filled('journal_master_id')) {
-            $query->whereHas('journalSlot', function($q) use ($request) {
-                $q->where('journal_master_id', $request->journal_master_id);
-            });
-        }
-        
-        // Filter by date range
-        if ($request->filled('from_date')) {
-            $query->whereDate('tanggal_submit', '>=', $request->from_date);
-        }
-        if ($request->filled('to_date')) {
-            $query->whereDate('tanggal_submit', '<=', $request->to_date);
-        }
-        
-        // Filter by marketing
-        if ($request->filled('marketing_id')) {
-            $query->where('marketing_id', $request->marketing_id);
-        }
-        
-        $submissions = $query->latest()->paginate(20)->withQueryString();
-        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
-        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
-        
         // Statistics
         $totalFasttrack = Submission::where('process_type', 'fasttrack')->count();
-        $thisMonthFasttrack = Submission::where('process_type', 'fasttrack')
+        $publishedCount = Submission::where('process_type', 'fasttrack')
+            ->where('status', 'PUBLISHED')
+            ->count();
+        $thisMonthCount = Submission::where('process_type', 'fasttrack')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
+        $thisYearCount = Submission::where('process_type', 'fasttrack')
+            ->whereYear('created_at', now()->year)
+            ->count();
         
-        return view('admin.fasttrack.monitoring', compact('submissions', 'journals', 'marketings', 'totalFasttrack', 'thisMonthFasttrack'));
+        // Marketing stats
+        $marketingStats = Marketing::where('is_active', true)
+            ->withCount([
+                'submissions as total_fasttrack' => function($q) {
+                    $q->where('process_type', 'fasttrack');
+                },
+                'submissions as month_fasttrack' => function($q) {
+                    $q->where('process_type', 'fasttrack')
+                      ->whereMonth('created_at', now()->month)
+                      ->whereYear('created_at', now()->year);
+                },
+                'submissions as year_fasttrack' => function($q) {
+                    $q->where('process_type', 'fasttrack')
+                      ->whereYear('created_at', now()->year);
+                }
+            ])
+            ->having('total_fasttrack', '>', 0)
+            ->orderByDesc('total_fasttrack')
+            ->get();
+        
+        // PIC stats
+        $picStats = Pic::where('is_active', true)
+            ->withCount([
+                'submissionsAsSubmit as total_fasttrack' => function($q) {
+                    $q->where('process_type', 'fasttrack');
+                },
+                'submissionsAsSubmit as month_fasttrack' => function($q) {
+                    $q->where('process_type', 'fasttrack')
+                      ->whereMonth('created_at', now()->month)
+                      ->whereYear('created_at', now()->year);
+                },
+                'submissionsAsSubmit as year_fasttrack' => function($q) {
+                    $q->where('process_type', 'fasttrack')
+                      ->whereYear('created_at', now()->year);
+                }
+            ])
+            ->having('total_fasttrack', '>', 0)
+            ->orderByDesc('total_fasttrack')
+            ->get();
+        
+        // Recent fasttrack
+        $recentFasttrack = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
+            ->where('process_type', 'fasttrack')
+            ->latest()
+            ->take(10)
+            ->get();
+        
+        return view('admin.fasttrack.monitoring', compact(
+            'totalFasttrack', 
+            'publishedCount', 
+            'thisMonthCount', 
+            'thisYearCount',
+            'marketingStats',
+            'picStats',
+            'recentFasttrack'
+        ));
     }
 
     /**
