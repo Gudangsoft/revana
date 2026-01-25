@@ -193,24 +193,29 @@
                     </div>
                     <!-- End Data Slot Tab -->
 
-                    <!-- Monitoring Slot Tab -->
                     <div class="tab-pane fade {{ request('tab') == 'monitoring' ? 'show active' : '' }}" id="monitoring-panel" role="tabpanel">
                         <!-- Filter -->
                         <form action="{{ route('admin.journal-slots.index') }}" method="GET" class="mb-4">
                             <input type="hidden" name="tab" value="monitoring">
                             <div class="row g-3">
                                 <div class="col-md-5">
-                                    <label for="journal_master_id_monitoring" class="form-label">Filter Jurnal</label>
-                                    <select class="form-select" id="journal_master_id_monitoring" name="journal_master_id">
-                                        <option value="">-- Semua Jurnal --</option>
+                                    <label class="form-label">Filter Jurnal</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="search_journal_monitoring" 
+                                           list="journals_list_monitoring"
+                                           placeholder="🔍 Ketik untuk mencari jurnal..." 
+                                           value="{{ request('journal_master_id') ? ($journals->firstWhere('id', request('journal_master_id'))->nama_jurnal ?? '') : '' }}"
+                                           autocomplete="off">
+                                    <input type="hidden" name="journal_master_id" id="journal_master_id_monitoring" value="{{ request('journal_master_id') }}">
+                                    <datalist id="journals_list_monitoring">
                                         @if(isset($journals))
                                         @foreach($journals as $journal)
-                                            <option value="{{ $journal->id }}" {{ request('journal_master_id') == $journal->id ? 'selected' : '' }}>
-                                                {{ $journal->nama_jurnal }}
-                                            </option>
+                                            <option value="{{ $journal->nama_jurnal }}" data-id="{{ $journal->id }}">{{ $journal->publisher }}</option>
                                         @endforeach
                                         @endif
-                                    </select>
+                                    </datalist>
+                                    <small class="text-muted">Ketik nama jurnal atau kosongkan untuk semua</small>
                                 </div>
                                 <div class="col-md-3">
                                     <label for="tahun_monitoring" class="form-label">Tahun</label>
@@ -320,4 +325,47 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Monitoring Tab - Journal search
+    const searchInputMonitoring = document.getElementById('search_journal_monitoring');
+    const hiddenInputMonitoring = document.getElementById('journal_master_id_monitoring');
+    
+    if (searchInputMonitoring) {
+        const journalsMonitoring = @json($journals->map(function($j) {
+            return ['id' => $j->id, 'nama' => $j->nama_jurnal];
+        })->values()->all());
+        
+        searchInputMonitoring.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                hiddenInputMonitoring.value = '';
+                return;
+            }
+            
+            // Find matching journal
+            const found = journalsMonitoring.find(j => j.nama.toLowerCase() === searchTerm);
+            if (found) {
+                hiddenInputMonitoring.value = found.id;
+            } else {
+                hiddenInputMonitoring.value = '';
+            }
+        });
+        
+        searchInputMonitoring.addEventListener('change', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            const found = journalsMonitoring.find(j => j.nama.toLowerCase() === searchTerm);
+            if (found) {
+                hiddenInputMonitoring.value = found.id;
+            } else {
+                hiddenInputMonitoring.value = '';
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection
