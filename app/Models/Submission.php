@@ -10,6 +10,10 @@ class Submission extends Model
 {
     use HasFactory;
 
+    // Process Type Constants
+    const PROCESS_NORMAL = 'normal';
+    const PROCESS_FASTTRACK = 'fasttrack';
+
     protected $fillable = [
         // Data Submit
         'kode_submit',
@@ -81,6 +85,7 @@ class Submission extends Model
         // Hasil
         'link_publish',
         'status',
+        'process_type',
         'tanggal_submit',
         'notes',
         'created_by',
@@ -412,5 +417,38 @@ class Submission extends Model
             'production_validated_at' => now(),
             'status' => 'PUBLISHED',
         ]);
+    }
+
+    // Process Type Helpers
+    public function isNormal()
+    {
+        return $this->process_type === self::PROCESS_NORMAL || $this->process_type === null;
+    }
+
+    public function isFasttrack()
+    {
+        return $this->process_type === self::PROCESS_FASTTRACK;
+    }
+
+    public static function getProcessTypeOptions()
+    {
+        return [
+            self::PROCESS_NORMAL => 'Normal',
+            self::PROCESS_FASTTRACK => 'Fasttrack',
+        ];
+    }
+
+    public function getProcessTypeLabelAttribute()
+    {
+        $types = self::getProcessTypeOptions();
+        return $types[$this->process_type] ?? 'Normal';
+    }
+
+    public function getProcessTypeBadgeClassAttribute()
+    {
+        return match($this->process_type) {
+            self::PROCESS_FASTTRACK => 'bg-warning text-dark',
+            default => 'bg-secondary',
+        };
     }
 }

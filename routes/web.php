@@ -377,6 +377,15 @@ Route::prefix('pic')->group(function () {
             Route::post('/{submission}/request-revision', [PicJournalController::class, 'requestRevision'])->name('request-revision');
         });
         
+        // Fasttrack Submissions
+        Route::prefix('fasttrack')->name('pic.fasttrack.')->group(function () {
+            Route::get('/', [PicJournalController::class, 'fasttrackIndex'])->name('index');
+            Route::get('/create', [PicJournalController::class, 'fasttrackCreate'])->name('create');
+            Route::post('/', [PicJournalController::class, 'fasttrackStore'])->name('store');
+            Route::get('/monitoring', [PicJournalController::class, 'fasttrackMonitoring'])->name('monitoring');
+            Route::get('/{submission}', [PicJournalController::class, 'fasttrackShow'])->name('show');
+        });
+        
         // Akreditasi
         Route::prefix('accreditations')->name('pic.accreditations.')->group(function () {
             Route::get('/', [PicJournalController::class, 'accreditationsIndex'])->name('index');
@@ -426,6 +435,13 @@ Route::prefix('marketing')->group(function () {
         // Journal Management
         Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
+        
+        // Fasttrack Submissions
+        Route::get('/fasttrack', [MarketingDashboardController::class, 'fasttrackIndex'])->name('marketing.fasttrack.index');
+        Route::get('/fasttrack/create', [MarketingDashboardController::class, 'fasttrackCreate'])->name('marketing.fasttrack.create');
+        Route::post('/fasttrack', [MarketingDashboardController::class, 'fasttrackStore'])->name('marketing.fasttrack.store');
+        Route::get('/fasttrack/monitoring', [MarketingDashboardController::class, 'fasttrackMonitoring'])->name('marketing.fasttrack.monitoring');
+        Route::get('/fasttrack/{submission}', [MarketingDashboardController::class, 'fasttrackShow'])->name('marketing.fasttrack.show');
         
         // Profile
         Route::get('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'edit'])->name('marketing.profile.edit');

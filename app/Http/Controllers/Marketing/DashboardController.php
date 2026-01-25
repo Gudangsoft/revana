@@ -468,4 +468,197 @@ class DashboardController extends Controller
         
         return response()->json($slots);
     }
+
+    // ==================== FASTTRACK SUBMISSIONS ====================
+    
+    /**
+     * Display fasttrack submissions index
+     */
+    public function fasttrackIndex(Request $request)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit'])
+            ->where('process_type', 'fasttrack')
+            ->where('marketing_id', $marketing->id);
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+        
+        $submissions = $query->latest()->paginate(20)->withQueryString();
+        
+        return view('marketing.fasttrack.index', compact('marketing', 'submissions'));
+    }
+
+    /**
+     * Show fasttrack create form
+     */
+    public function fasttrackCreate()
+    {
+        $marketing = Auth::guard('marketing')->user();
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $slots = JournalSlot::with('journalMaster')
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
+        
+        return view('marketing.fasttrack.create', compact('marketing', 'journals', 'slots'));
+    }
+
+    /**
+     * Store fasttrack submission
+     */
+    public function fasttrackStore(Request $request)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $validated = $request->validate([
+            'journal_slot_id' => 'required|exists:journal_slots,id',
+            'judul_artikel' => 'required|string|max:500',
+            'link_publish' => 'required|url|max:500',
+            'nama_penulis' => 'required|string|max:255',
+            'no_hp_penulis' => 'nullable|string|max:20',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Check slot availability
+        $slot = JournalSlot::find($validated['journal_slot_id']);
+        if (!$slot || $slot->slot_terpakai >= $slot->jumlah_slot) {
+            return back()->with('error', 'Slot jurnal sudah penuh!')->withInput();
+        }
+
+        // Generate kode_submit with FT prefix for fasttrack
+        $lastSubmission = Submission::where('kode_submit', 'like', 'FT' . date('Y') . '%')
+            ->orderBy('kode_submit', 'desc')
+            ->first();
+        
+        if ($lastSubmission) {
+            $lastNumber = (int) substr($lastSubmission->kode_submit, 6);
+            $newNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '010001';
+        }
+        
+        $kodeSubmit = 'FT' . date('Y') . $newNumber;
+        
+        // Get admin user for created_by
+        $adminUser = \App\Models\User::orderBy('id')->first();
+        if (!$adminUser) {
+            return back()->with('error', 'Error: Admin user tidak ditemukan.')->withInput();
+        }
+
+        // Create submission
+        $submission = Submission::create([
+            'kode_submit' => $kodeSubmit,
+            'kode_loa' => $kodeSubmit . 'SIPERA',
+            'journal_slot_id' => $validated['journal_slot_id'],
+            'marketing_id' => $marketing->id,
+            'judul_artikel' => $validated['judul_artikel'],
+            'link_publish' => $validated['link_publish'],
+            'nama_penulis' => $validated['nama_penulis'],
+            'no_hp_penulis' => $validated['no_hp_penulis'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'tanggal_submit' => now(),
+            'status' => 'PUBLISHED',
+            'process_type' => 'fasttrack',
+            'created_by' => $adminUser->id,
+        ]);
+
+        // Increment slot terpakai
+        $slot->increment('slot_terpakai');
+
+        // Log history
+        $submission->logHistory('fasttrack', 'created', 'Submission fasttrack dibuat oleh Marketing dengan link publish', [
+            'link_publish' => $validated['link_publish'],
+            'marketing_id' => $marketing->id
+        ]);
+
+        // Award points to Marketing
+        $pointHistory = MarketingPointHistory::awardPoints(
+            $marketing->id,
+            $submission->id,
+            "Fasttrack artikel: {$kodeSubmit} - {$submission->judul_artikel}"
+        );
+        
+        $pointMessage = '';
+        if ($pointHistory) {
+            $pointMessage = " Anda mendapatkan +{$pointHistory->points_earned} point!";
+        }
+
+        return redirect()->route('marketing.fasttrack.index')
+            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $kodeSubmit . $pointMessage);
+    }
+
+    /**
+     * Display fasttrack monitoring
+     */
+    public function fasttrackMonitoring(Request $request)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit'])
+            ->where('process_type', 'fasttrack')
+            ->where('marketing_id', $marketing->id);
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('tanggal_submit', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('tanggal_submit', '<=', $request->to_date);
+        }
+        
+        $submissions = $query->latest()->paginate(20)->withQueryString();
+        
+        // Statistics
+        $totalFasttrack = Submission::where('process_type', 'fasttrack')
+            ->where('marketing_id', $marketing->id)
+            ->count();
+        $thisMonthFasttrack = Submission::where('process_type', 'fasttrack')
+            ->where('marketing_id', $marketing->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        
+        return view('marketing.fasttrack.monitoring', compact('marketing', 'submissions', 'totalFasttrack', 'thisMonthFasttrack'));
+    }
+
+    /**
+     * Show fasttrack submission detail
+     */
+    public function fasttrackShow(Submission $submission)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        if ($submission->marketing_id !== $marketing->id) {
+            return redirect()->route('marketing.fasttrack.index')
+                ->with('error', 'Anda tidak memiliki akses ke submission ini');
+        }
+        
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('marketing.submissions.show', $submission);
+        }
+        
+        $submission->load(['journalSlot.journalMaster', 'petugasSubmit', 'histories']);
+        
+        return view('marketing.fasttrack.show', compact('marketing', 'submission'));
+    }
 }
