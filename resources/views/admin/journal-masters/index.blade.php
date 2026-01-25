@@ -8,6 +8,12 @@
 @endsection
 
 @section('content')
+<!-- Hidden form for bulk delete -->
+<form id="bulkDeleteForm" action="{{ route('admin.journal-masters.bulk-delete') }}" method="POST" style="display: none;">
+    @csrf
+    <div id="bulkDeleteInputs"></div>
+</form>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card">
@@ -100,19 +106,17 @@
                     </div>
                 </form>
 
-                <form id="bulkDeleteForm" action="{{ route('admin.journal-masters.bulk-delete') }}" method="POST">
-                    @csrf
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th width="40">
-                                        <input type="checkbox" class="form-check-input" id="selectAll" title="Pilih Semua">
-                                    </th>
-                                    <th>#</th>
-                                    <th>Kode Jurnal</th>
-                                    <th>Nama Jurnal</th>
-                                    <th>Publisher</th>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="40">
+                                    <input type="checkbox" class="form-check-input" id="selectAll" title="Pilih Semua">
+                                </th>
+                                <th>#</th>
+                                <th>Kode Jurnal</th>
+                                <th>Nama Jurnal</th>
+                                <th>Publisher</th>
                                     <th>Kategori</th>
                                     <th>Jenis</th>
                                     <th>Akreditasi</th>
@@ -203,7 +207,6 @@
                         </tbody>
                     </table>
                 </div>
-                </form>
 
                 <div class="mt-3">
                     @include('components.simple-pagination', ['paginator' => $journals->withQueryString()])
@@ -314,18 +317,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function confirmBulkDelete() {
-    const checkedCount = document.querySelectorAll('.journal-checkbox:checked').length;
+    const checkedBoxes = document.querySelectorAll('.journal-checkbox:checked');
+    const checkedCount = checkedBoxes.length;
     
     if (checkedCount === 0) {
         alert('Pilih minimal 1 jurnal untuk dihapus');
         return;
     }
     
-    const confirmMsg = `⚠️ PERINGATAN!\\n\\nAnda akan menghapus PERMANEN ${checkedCount} jurnal.\\n\\nData yang dihapus TIDAK BISA dikembalikan!\\n\\nKetik \"HAPUS\" untuk konfirmasi:`;
+    const confirmMsg = `⚠️ PERINGATAN!\n\nAnda akan menghapus PERMANEN ${checkedCount} jurnal.\n\nData yang dihapus TIDAK BISA dikembalikan!\n\nKetik "HAPUS" untuk konfirmasi:`;
     
     const userInput = prompt(confirmMsg);
     
     if (userInput === 'HAPUS') {
+        // Populate hidden inputs with selected IDs
+        const inputsContainer = document.getElementById('bulkDeleteInputs');
+        inputsContainer.innerHTML = '';
+        
+        checkedBoxes.forEach(function(checkbox) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'journal_ids[]';
+            input.value = checkbox.value;
+            inputsContainer.appendChild(input);
+        });
+        
+        // Submit the form
         document.getElementById('bulkDeleteForm').submit();
     } else if (userInput !== null) {
         alert('Konfirmasi gagal. Penghapusan dibatalkan.');
