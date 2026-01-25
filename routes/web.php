@@ -93,10 +93,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('journals', JournalController::class);
         
         // Journal Masters (Data Jurnal)
+        Route::post('/journal-masters-bulk-delete', [JournalMasterController::class, 'bulkDelete'])->name('journal-masters.bulk-delete');
         Route::get('/journal-masters/export', [JournalMasterController::class, 'export'])->name('journal-masters.export');
         Route::post('/journal-masters/import', [JournalMasterController::class, 'import'])->name('journal-masters.import');
         Route::get('/journal-masters/template', [JournalMasterController::class, 'downloadTemplate'])->name('journal-masters.template');
-        Route::post('/journal-masters/bulk-delete', [JournalMasterController::class, 'bulkDelete'])->name('journal-masters.bulk-delete');
         Route::patch('/journal-masters/{journalMaster}/toggle-active', [JournalMasterController::class, 'toggleActive'])->name('journal-masters.toggle-active');
         Route::resource('journal-masters', JournalMasterController::class);
         
