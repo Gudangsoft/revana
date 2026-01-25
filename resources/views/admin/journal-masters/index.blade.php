@@ -102,7 +102,6 @@
 
                 <form id="bulkDeleteForm" action="{{ route('admin.journal-masters.bulk-delete') }}" method="POST">
                     @csrf
-                    @method('DELETE')
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
