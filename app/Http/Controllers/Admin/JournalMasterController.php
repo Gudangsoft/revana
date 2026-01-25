@@ -140,6 +140,51 @@ class JournalMasterController extends Controller
     }
 
     /**
+     * Bulk delete journal masters permanently
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'journal_ids' => 'required|array|min:1',
+            'journal_ids.*' => 'exists:journal_masters,id',
+        ], [
+            'journal_ids.required' => 'Pilih minimal 1 jurnal untuk dihapus',
+            'journal_ids.min' => 'Pilih minimal 1 jurnal untuk dihapus',
+        ]);
+
+        try {
+            $journalIds = $request->journal_ids;
+            
+            // Check if any journal has slots
+            $journalsWithSlots = JournalMaster::whereIn('id', $journalIds)
+                ->has('slots')
+                ->pluck('nama_jurnal')
+                ->toArray();
+            
+            if (!empty($journalsWithSlots)) {
+                $journalNames = implode(', ', array_slice($journalsWithSlots, 0, 3));
+                if (count($journalsWithSlots) > 3) {
+                    $journalNames .= ' dan ' . (count($journalsWithSlots) - 3) . ' lainnya';
+                }
+                
+                return back()->with('error', 
+                    "Tidak dapat menghapus jurnal: {$journalNames}. Jurnal masih memiliki slot yang terkait. Hapus slot terlebih dahulu."
+                );
+            }
+            
+            // Perform permanent deletion
+            $deletedCount = JournalMaster::whereIn('id', $journalIds)->forceDelete();
+            
+            return redirect()->route('admin.journal-masters.index')
+                ->with('success', "Berhasil menghapus permanen {$deletedCount} jurnal.");
+                
+        } catch (\Exception $e) {
+            \Log::error('Bulk delete journal masters error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus jurnal: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Export journal masters to Excel
      */
     public function export(Request $request)

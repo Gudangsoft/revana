@@ -14,6 +14,9 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-journal-bookmark"></i> Data Jurnal</span>
                 <div class="btn-group">
+                    <button type="button" class="btn btn-danger" id="bulkDeleteBtn" style="display: none;" onclick="confirmBulkDelete()">
+                        <i class="bi bi-trash"></i> Hapus <span id="selectedCount">0</span> Terpilih
+                    </button>
                     <a href="{{ route('admin.journal-masters.template') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-file-earmark-arrow-down"></i> Template
                     </a>
@@ -98,23 +101,32 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Kode Jurnal</th>
-                                <th>Nama Jurnal</th>
-                                <th>Publisher</th>
-                                <th>Kategori</th>
-                                <th>Jenis</th>
-                                <th>Akreditasi</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
+                    <form id="bulkDeleteForm" action="{{ route('admin.journal-masters.bulk-delete') }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="40">
+                                        <input type="checkbox" class="form-check-input" id="selectAll" title="Pilih Semua">
+                                    </th>
+                                    <th>#</th>
+                                    <th>Kode Jurnal</th>
+                                    <th>Nama Jurnal</th>
+                                    <th>Publisher</th>
+                                    <th>Kategori</th>
+                                    <th>Jenis</th>
+                                    <th>Akreditasi</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             @forelse($journals as $journal)
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input journal-checkbox" name="journal_ids[]" value="{{ $journal->id }}">
+                                </td>
                                 <td>{{ $loop->iteration + ($journals->currentPage() - 1) * $journals->perPage() }}</td>
                                 <td><code>{{ $journal->kode_jurnal }}</code></td>
                                 <td>
@@ -183,7 +195,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                     Belum ada data jurnal
                                 </td>
@@ -191,6 +203,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </form>
                 </div>
 
                 <div class="mt-3">
@@ -238,4 +251,75 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const journalCheckboxes = document.querySelectorAll('.journal-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    
+    // Select/Deselect all
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            journalCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkDeleteButton();
+        });
+    }
+    
+    // Individual checkbox change
+    journalCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectAllState();
+            updateBulkDeleteButton();
+        });
+    });
+    
+    // Update select all checkbox state
+    function updateSelectAllState() {
+        const checkedCount = document.querySelectorAll('.journal-checkbox:checked').length;
+        const totalCount = journalCheckboxes.length;
+        
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = checkedCount === totalCount && totalCount > 0;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+        }
+    }
+    
+    // Show/hide bulk delete button based on selection
+    function updateBulkDeleteButton() {
+        const checkedCount = document.querySelectorAll('.journal-checkbox:checked').length;
+        
+        if (checkedCount > 0) {
+            bulkDeleteBtn.style.display = 'inline-block';
+            selectedCountSpan.textContent = checkedCount;
+        } else {
+            bulkDeleteBtn.style.display = 'none';
+        }
+    }
+});
+
+function confirmBulkDelete() {
+    const checkedCount = document.querySelectorAll('.journal-checkbox:checked').length;
+    
+    if (checkedCount === 0) {
+        alert('Pilih minimal 1 jurnal untuk dihapus');
+        return;
+    }
+    
+    const confirmMsg = `⚠️ PERINGATAN!\\n\\nAnda akan menghapus PERMANEN ${checkedCount} jurnal.\\n\\nData yang dihapus TIDAK BISA dikembalikan!\\n\\nKetik \"HAPUS\" untuk konfirmasi:`;
+    
+    const userInput = prompt(confirmMsg);
+    
+    if (userInput === 'HAPUS') {
+        document.getElementById('bulkDeleteForm').submit();
+    } else if (userInput !== null) {
+        alert('Konfirmasi gagal. Penghapusan dibatalkan.');
+    }
+}
+</script>
 @endsection
