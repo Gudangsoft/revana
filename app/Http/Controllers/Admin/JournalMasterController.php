@@ -144,6 +144,12 @@ class JournalMasterController extends Controller
      */
     public function bulkDelete(Request $request)
     {
+        // Handle GET request - redirect to index
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.journal-masters.index')
+                ->with('info', 'Gunakan checkbox untuk memilih jurnal yang akan dihapus');
+        }
+
         $request->validate([
             'journal_ids' => 'required|array|min:1',
             'journal_ids.*' => 'exists:journal_masters,id',
