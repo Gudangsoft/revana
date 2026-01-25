@@ -352,6 +352,20 @@ class DashboardController extends Controller
             });
         }
         
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('kategori', $request->kategori);
+            });
+        }
+        
+        // Filter by jenis jurnal
+        if ($request->filled('jenis')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('jenis_jurnal', $request->jenis);
+            });
+        }
+        
         // Filter by year
         if ($request->filled('tahun')) {
             $query->where('tahun', $request->tahun);

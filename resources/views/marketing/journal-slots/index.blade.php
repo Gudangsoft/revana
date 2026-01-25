@@ -9,45 +9,65 @@
     <!-- Filter -->
     <div class="card mb-3">
         <div class="card-body py-2">
-            <form action="{{ route('marketing.journal-slots.index') }}" method="GET" class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small">Cari Jurnal / Publisher</label>
-                    <input type="text" name="search" class="form-control form-control-sm" 
-                           placeholder="🔍 Ketik nama jurnal atau publisher..." value="{{ request('search') }}">
+            <form action="{{ route('marketing.journal-slots.index') }}" method="GET">
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1">Cari Jurnal / Publisher</label>
+                        <input type="text" name="search" class="form-control form-control-sm" 
+                               placeholder="🔍 Ketik nama jurnal atau publisher..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Akreditasi</label>
+                        <select name="akreditasi" class="form-select form-select-sm">
+                            <option value="">-- Semua --</option>
+                            <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                            <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                            <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                            <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                            <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                            <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Kategori</label>
+                        <select name="kategori" class="form-select form-select-sm">
+                            <option value="">-- Semua --</option>
+                            <option value="Nasional" {{ request('kategori') == 'Nasional' ? 'selected' : '' }}>Nasional</option>
+                            <option value="Internasional" {{ request('kategori') == 'Internasional' ? 'selected' : '' }}>Internasional</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Jenis</label>
+                        <select name="jenis" class="form-select form-select-sm">
+                            <option value="">-- Semua --</option>
+                            <option value="Jurnal" {{ request('jenis') == 'Jurnal' ? 'selected' : '' }}>Jurnal</option>
+                            <option value="Prosiding" {{ request('jenis') == 'Prosiding' ? 'selected' : '' }}>Prosiding</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Bulan</label>
+                        <select name="bulan" class="form-select form-select-sm">
+                            <option value="">-- Semua --</option>
+                            @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $month)
+                                <option value="{{ $month }}" {{ request('bulan') == $month ? 'selected' : '' }}>{{ $month }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label small">Akreditasi</label>
-                    <select name="akreditasi" class="form-select form-select-sm">
-                        <option value="">-- Semua --</option>
-                        <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
-                        <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
-                        <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
-                        <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
-                        <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
-                        <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small">Bulan</label>
-                    <select name="bulan" class="form-select form-select-sm">
-                        <option value="">-- Semua --</option>
-                        @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $month)
-                            <option value="{{ $month }}" {{ request('bulan') == $month ? 'selected' : '' }}>{{ $month }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label small">Tahun</label>
-                    <input type="number" name="tahun" class="form-control form-control-sm" value="{{ request('tahun') }}" placeholder="2026">
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="bi bi-search"></i> Cari
-                        </button>
-                        <a href="{{ route('marketing.journal-slots.index') }}" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-x-circle"></i>
-                        </a>
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Tahun</label>
+                        <input type="number" name="tahun" class="form-control form-control-sm" value="{{ request('tahun') }}" placeholder="2026">
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-search"></i> Cari
+                            </button>
+                            <a href="{{ route('marketing.journal-slots.index') }}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </form>
