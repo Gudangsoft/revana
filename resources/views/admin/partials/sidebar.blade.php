@@ -112,14 +112,17 @@
 
 <!-- Laporan Point -->
 <div class="nav-item">
-    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') ? '' : 'collapsed' }}" 
+    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') ? '' : 'collapsed' }}" 
        data-bs-toggle="collapse" href="#pointReportMenu" role="button" 
-       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') ? 'true' : 'false' }}">
+       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') ? 'true' : 'false' }}">
         <i class="bi bi-trophy-fill text-warning"></i> Laporan Point
         <i class="bi bi-chevron-down ms-auto"></i>
     </a>
-    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') ? 'show' : '' }}" id="pointReportMenu">
+    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') ? 'show' : '' }}" id="pointReportMenu">
         <div class="nav flex-column ms-3">
+            <a href="{{ route('admin.task-point-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.task-point-settings') ? 'active' : '' }}">
+                <i class="bi bi-gear text-secondary"></i> Pengaturan Point
+            </a>
             <a href="{{ route('admin.marketing-points.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') ? 'active' : '' }}">
                 <i class="bi bi-trophy text-info"></i> Point Marketing
             </a>
@@ -145,9 +148,6 @@
 </a>
 <a href="{{ route('admin.settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.settings') && !str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-gear-fill"></i> Setting Web
-</a>
-<a href="{{ route('admin.task-point-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.task-point-settings') ? 'active' : '' }}">
-    <i class="bi bi-coin"></i> Pengaturan Point
 </a>
 <a href="{{ route('admin.email-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-envelope-at-fill"></i> Pengaturan Email
