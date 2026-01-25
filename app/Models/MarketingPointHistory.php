@@ -19,7 +19,7 @@ class MarketingPointHistory extends Model
     /**
      * Point per submission yang berhasil di-approve
      */
-    public const POINT_PER_SUBMISSION = 10;
+    public const POINT_PER_SUBMISSION = 1;
 
     /**
      * Relationship to Marketing
