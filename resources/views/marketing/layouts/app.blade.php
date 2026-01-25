@@ -99,6 +99,9 @@
                 <a href="{{ route('marketing.submissions') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i> Artikel
                 </a>
+                <a href="{{ route('marketing.submissions.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
+                </a>
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 20px; color: #6c757d; text-transform: uppercase;">
                     <i class="bi bi-journal-bookmark"></i> Pengelolaan Jurnal
@@ -108,9 +111,6 @@
                 </a>
                 <a href="{{ route('marketing.journal-slots.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.journal-slots') ? 'active' : '' }}">
                     <i class="bi bi-calendar3"></i> Data Slot
-                </a>
-                <a href="{{ route('marketing.submissions.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
                 </a>
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">
