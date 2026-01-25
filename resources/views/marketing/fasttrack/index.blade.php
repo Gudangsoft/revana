@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-/* Sticky Table Styles */
+/* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
     overflow-y: visible;
@@ -27,6 +27,14 @@
     background: linear-gradient(135deg, #6c757d, #495057);
     border-radius: 7px;
     border: 2px solid #dee2e6;
+}
+
+.monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #495057, #343a40);
+}
+
+.monitoring-scroll-wrapper::-webkit-scrollbar-corner {
+    background: #dee2e6;
 }
 
 .table-monitoring {
@@ -98,21 +106,72 @@
 }
 
 .table-monitoring tbody tr:hover td {
-    background-color: #fff8e1 !important;
+    background-color: #e8f4fd !important;
 }
 
 .table-monitoring tbody tr:hover td.sticky-first,
 .table-monitoring tbody tr:hover td.sticky-second {
-    background-color: #fff8e1 !important;
+    background-color: #e8f4fd !important;
 }
 
 .table-monitoring tbody tr:nth-child(even) td {
-    background-color: #fffaf0;
+    background-color: #f8f9fa;
 }
 
 .table-monitoring tbody tr:nth-child(even) td.sticky-first,
 .table-monitoring tbody tr:nth-child(even) td.sticky-second {
-    background-color: #fffaf0;
+    background-color: #f8f9fa;
+}
+
+/* Scroll controls */
+.scroll-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.scroll-nav-btn {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.scroll-nav-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.scroll-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.scroll-position-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.scroll-position-bar {
+    width: 200px;
+    height: 6px;
+    background: #dee2e6;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.scroll-position-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+    border-radius: 3px;
+    transition: width 0.1s;
 }
 
 .quick-nav {
@@ -128,6 +187,7 @@
     background: white;
     border-radius: 4px;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
 .quick-nav-btn:hover {
@@ -138,30 +198,6 @@
     background: #ffc107;
     color: #000;
     border-color: #ffc107;
-}
-
-.scroll-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 8px 12px;
-    background: #fffaf0;
-    border-radius: 6px;
-    border: 1px solid #ffc107;
-}
-
-.scroll-nav-btn {
-    padding: 6px 12px;
-    border: 1px solid #ffc107;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.scroll-nav-btn:hover {
-    background: #ffc107;
-    color: #000;
 }
 </style>
 
@@ -255,46 +291,62 @@
                 <label class="form-label small mb-1">Cari</label>
                 <input type="text" name="search" class="form-control form-control-sm" placeholder="Kode/Judul/Penulis..." value="{{ request('search') }}">
             </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-sm btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                </button>
-                <a href="{{ route('marketing.fasttrack.index') }}" class="btn btn-sm btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh
-                </a>
+            <div class="col-md-4">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="{{ route('marketing.fasttrack.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </a>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Table -->
-<div class="card border-warning">
-    <div class="card-header bg-warning text-dark py-2">
-        <i class="bi bi-table"></i> Tabel Monitoring Fasttrack
-    </div>
-    <div class="card-body p-0">
+<!-- Table Card -->
+<div class="card">
+    <div class="card-body p-2">
         <!-- Scroll Controls -->
-        <div class="scroll-controls m-2">
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="scroll-nav-btn" onclick="scrollTableTo('left')">
-                    <i class="bi bi-chevron-double-left"></i> Kiri
+        <div class="scroll-controls">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
+                    <i class="bi bi-chevron-bar-left"></i>
                 </button>
-                <button type="button" class="scroll-nav-btn" onclick="scrollTableTo('right')">
-                    Kanan <i class="bi bi-chevron-double-right"></i>
+                <button type="button" class="scroll-nav-btn" id="scrollLeftBtn" title="Scroll Kiri">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="scroll-position-indicator">
+                    <div class="scroll-position-bar">
+                        <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted" id="scrollPositionText">0%</small>
+                </div>
+                <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                <button type="button" class="scroll-nav-btn" id="scrollEndBtn" title="Ke Akhir">
+                    <i class="bi bi-chevron-bar-right"></i>
                 </button>
             </div>
             <div class="quick-nav">
-                <span class="me-2 small text-muted">Loncat ke:</span>
+                <span class="text-muted me-2" style="font-size: 0.75rem;">Lompat ke:</span>
                 <button type="button" class="quick-nav-btn" data-target="submit">Submit</button>
-                <button type="button" class="quick-nav-btn" data-target="editor1">Editor 1</button>
-                <button type="button" class="quick-nav-btn" data-target="reviewer1">Reviewer 1</button>
+                <button type="button" class="quick-nav-btn" data-target="editor1">Editor1</button>
+                <button type="button" class="quick-nav-btn" data-target="author1">Author1</button>
+                <button type="button" class="quick-nav-btn" data-target="editor2">Editor2</button>
+                <button type="button" class="quick-nav-btn" data-target="reviewer1">Reviewer1</button>
+                <button type="button" class="quick-nav-btn" data-target="reviewer2">Reviewer2</button>
+                <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
+                <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                 <button type="button" class="quick-nav-btn" data-target="production">Production</button>
             </div>
         </div>
         
-        <div class="monitoring-scroll-wrapper" id="tableWrapper">
+        <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
             <table class="table table-monitoring table-bordered mb-0">
-                <thead>
+                <thead class="table-dark">
                     <tr>
                         <th rowspan="2" class="sticky-first text-center">Kode Submit</th>
                         <th rowspan="2" class="sticky-second">ID Artikel</th>
@@ -304,12 +356,12 @@
                         <th rowspan="2">No HP</th>
                         <th colspan="4" class="text-center bg-info" data-section="submit">Author Access</th>
                         <th colspan="3" class="text-center bg-warning" data-section="editor1">Editor 1</th>
-                        <th colspan="2" class="text-center bg-info">Author 1</th>
-                        <th colspan="2" class="text-center bg-warning">Editor 2</th>
+                        <th colspan="2" class="text-center bg-info" data-section="author1">Author 1</th>
+                        <th colspan="2" class="text-center bg-warning" data-section="editor2">Editor 2</th>
                         <th colspan="4" class="text-center bg-primary" data-section="reviewer1">Reviewer 1</th>
-                        <th colspan="4" class="text-center bg-primary">Reviewer 2</th>
-                        <th colspan="2" class="text-center bg-warning">Editor 3</th>
-                        <th colspan="2" class="text-center bg-info">Author 2</th>
+                        <th colspan="4" class="text-center bg-primary" data-section="reviewer2">Reviewer 2</th>
+                        <th colspan="2" class="text-center bg-warning" data-section="editor3">Editor 3</th>
+                        <th colspan="2" class="text-center bg-info" data-section="author2">Author 2</th>
                         <th colspan="3" class="text-center bg-success" data-section="production">Production</th>
                         <th rowspan="2">Aksi</th>
                     </tr>
@@ -350,7 +402,7 @@
                                 <code class="text-warning">{{ $s->kode_submit }}</code>
                             </a>
                             <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
-                            <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i></span>
+                            <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
                         </td>
                         <td class="sticky-second">{{ $s->id_artikel ?? '-' }}</td>
                         <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 20) }}</td>
@@ -459,31 +511,95 @@
 </div>
 
 <script>
-document.querySelectorAll('.quick-nav-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const target = this.dataset.target;
-        const wrapper = document.getElementById('tableWrapper');
-        const th = document.querySelector(`th[data-section="${target}"]`);
+document.addEventListener('DOMContentLoaded', function() {
+    const wrapper = document.getElementById('monitoringScrollWrapper');
+    const positionFill = document.getElementById('scrollPositionFill');
+    const positionText = document.getElementById('scrollPositionText');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const scrollStartBtn = document.getElementById('scrollStartBtn');
+    const scrollEndBtn = document.getElementById('scrollEndBtn');
+    
+    const columnPositions = {
+        'submit': 0,
+        'editor1': 600,
+        'author1': 850,
+        'editor2': 1000,
+        'reviewer1': 1150,
+        'reviewer2': 1500,
+        'editor3': 1850,
+        'author2': 2000,
+        'production': 2150
+    };
+    
+    function updateScrollPosition() {
+        const scrollLeft = wrapper.scrollLeft;
+        const scrollWidth = wrapper.scrollWidth - wrapper.clientWidth;
+        const progress = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
+        positionFill.style.width = progress + '%';
+        positionText.textContent = Math.round(progress) + '%';
         
-        if (th && wrapper) {
-            const offset = th.offsetLeft - 250;
-            wrapper.scrollTo({ left: offset, behavior: 'smooth' });
+        scrollStartBtn.disabled = scrollLeft <= 0;
+        scrollLeftBtn.disabled = scrollLeft <= 0;
+        scrollRightBtn.disabled = scrollLeft >= scrollWidth;
+        scrollEndBtn.disabled = scrollLeft >= scrollWidth;
+        
+        document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+    }
+    
+    wrapper.addEventListener('scroll', updateScrollPosition);
+    
+    const scrollAmount = 400;
+    
+    scrollLeftBtn.addEventListener('click', () => {
+        wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+    
+    scrollRightBtn.addEventListener('click', () => {
+        wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+    
+    scrollStartBtn.addEventListener('click', () => {
+        wrapper.scrollTo({ left: 0, behavior: 'smooth' });
+    });
+    
+    scrollEndBtn.addEventListener('click', () => {
+        wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
+    });
+    
+    document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = this.dataset.target;
+            const position = columnPositions[target] || 0;
+            
+            wrapper.scrollTo({ left: position, behavior: 'smooth' });
             
             document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
+        });
+    });
+    
+    wrapper.setAttribute('tabindex', '0');
+    wrapper.addEventListener('keydown', function(e) {
+        switch(e.key) {
+            case 'ArrowLeft':
+                wrapper.scrollBy({ left: -100, behavior: 'smooth' });
+                break;
+            case 'ArrowRight':
+                wrapper.scrollBy({ left: 100, behavior: 'smooth' });
+                break;
+            case 'Home':
+                wrapper.scrollTo({ left: 0, behavior: 'smooth' });
+                break;
+            case 'End':
+                wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
+                break;
         }
     });
-});
-
-function scrollTableTo(direction) {
-    const wrapper = document.getElementById('tableWrapper');
-    const scrollAmount = wrapper.clientWidth * 0.8;
     
-    if (direction === 'left') {
-        wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-    } else {
-        wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-}
+    updateScrollPosition();
+});
 </script>
 @endsection
