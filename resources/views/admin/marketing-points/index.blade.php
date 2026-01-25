@@ -170,3 +170,12 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+    // Auto refresh every 30 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+@endsection
