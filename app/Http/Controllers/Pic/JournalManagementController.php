@@ -879,7 +879,6 @@ class JournalManagementController extends Controller
         
         // Add points when validation is set to true (and was previously false to prevent duplicate points)
         if ($request->value == true && $oldValue != true) {
-            $pointsToAdd = 1; // Every validation = 1 point
             $stageName = '';
             $stepName = '';
             
@@ -919,6 +918,9 @@ class JournalManagementController extends Controller
                     break;
             }
             
+            // Get points from settings
+            $pointsToAdd = $stepName ? PicPointHistory::getPointsForStep($stepName) : 0;
+            
             if ($pointsToAdd > 0 && $stepName) {
                 try {
                     // Add points to the assigned PIC
@@ -947,7 +949,7 @@ class JournalManagementController extends Controller
                     if ($request->field === 'production_valid' && $submission->marketing_id) {
                         $marketing = Marketing::find($submission->marketing_id);
                         if ($marketing) {
-                            $marketingPoints = 1; // Marketing also gets 1 point when article is completed
+                            $marketingPoints = MarketingPointHistory::getPointsForSubmission();
                             $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
                             $marketing->save();
                             
@@ -955,7 +957,7 @@ class JournalManagementController extends Controller
                             MarketingPointHistory::create([
                                 'marketing_id' => $marketing->id,
                                 'submission_id' => $submission->id,
-                                'points' => $marketingPoints,
+                                'points_earned' => $marketingPoints,
                                 'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
                             ]);
                         }
