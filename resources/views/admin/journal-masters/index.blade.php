@@ -108,7 +108,6 @@
                                 <th>Kategori</th>
                                 <th>Jenis</th>
                                 <th>Akreditasi</th>
-                                <th>Total Slot</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -151,10 +150,6 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary">{{ $journal->total_slots }}</span>
-                                    <small class="text-muted">({{ $journal->used_slots }} terpakai)</small>
-                                </td>
-                                <td>
                                     @if($journal->is_active)
                                         <span class="badge bg-success">Aktif</span>
                                     @else
@@ -188,7 +183,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                     Belum ada data jurnal
                                 </td>
