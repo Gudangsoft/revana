@@ -129,6 +129,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/{submission}/update-reviewer-notes', [SubmissionController::class, 'updateReviewerNotes'])->name('submissions.update-reviewer-notes');
         Route::resource('submissions', SubmissionController::class);
         
+        // Fasttrack Submissions
+        Route::prefix('fasttrack')->name('fasttrack.')->group(function () {
+            Route::get('/', [SubmissionController::class, 'fasttrackIndex'])->name('index');
+            Route::get('/create', [SubmissionController::class, 'fasttrackCreate'])->name('create');
+            Route::post('/', [SubmissionController::class, 'fasttrackStore'])->name('store');
+            Route::get('/monitoring', [SubmissionController::class, 'fasttrackMonitoring'])->name('monitoring');
+            Route::get('/{submission}', [SubmissionController::class, 'fasttrackShow'])->name('show');
+            Route::get('/{submission}/edit', [SubmissionController::class, 'fasttrackEdit'])->name('edit');
+            Route::put('/{submission}', [SubmissionController::class, 'fasttrackUpdate'])->name('update');
+            Route::delete('/{submission}', [SubmissionController::class, 'fasttrackDestroy'])->name('destroy');
+        });
+        
         // Articles
         Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);

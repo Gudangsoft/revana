@@ -1155,4 +1155,261 @@ class SubmissionController extends Controller
         
         return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
     }
+
+    // ==================== FASTTRACK SUBMISSIONS ====================
+    
+    /**
+     * Display fasttrack submissions index
+     */
+    public function fasttrackIndex(Request $request)
+    {
+        $query = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
+            ->where('process_type', 'fasttrack');
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by journal
+        if ($request->filled('journal_master_id')) {
+            $query->whereHas('journalSlot', function($q) use ($request) {
+                $q->where('journal_master_id', $request->journal_master_id);
+            });
+        }
+        
+        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        return view('admin.fasttrack.index', compact('submissions', 'journals'));
+    }
+
+    /**
+     * Show fasttrack create form
+     */
+    public function fasttrackCreate()
+    {
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $slots = JournalSlot::with('journalMaster')
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.fasttrack.create', compact('journals', 'slots', 'marketings', 'pics'));
+    }
+
+    /**
+     * Store fasttrack submission
+     */
+    public function fasttrackStore(Request $request)
+    {
+        $validated = $request->validate([
+            'journal_slot_id' => 'required|exists:journal_slots,id',
+            'judul_artikel' => 'required|string|max:500',
+            'link_publish' => 'required|url|max:500',
+            'nama_penulis' => 'required|string|max:255',
+            'no_hp_penulis' => 'nullable|string|max:20',
+            'marketing_id' => 'nullable|exists:marketings,id',
+            'petugas_submit_id' => 'nullable|exists:pics,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Check slot availability
+        $slot = JournalSlot::find($validated['journal_slot_id']);
+        if (!$slot || $slot->slot_terpakai >= $slot->jumlah_slot) {
+            return back()->with('error', 'Slot jurnal sudah penuh!')->withInput();
+        }
+
+        // Generate kode_submit with FT prefix for fasttrack
+        $today = now()->format('Ymd');
+        $lastSubmit = Submission::where('kode_submit', 'like', "FT{$today}%")->latest()->first();
+        $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
+        $validated['kode_submit'] = "FT{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        
+        // Generate kode_loa
+        $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
+        
+        // Set fasttrack specific fields
+        $validated['process_type'] = 'fasttrack';
+        $validated['status'] = 'PUBLISHED';
+        $validated['tanggal_submit'] = now();
+        $validated['created_by'] = auth()->id();
+
+        $submission = Submission::create($validated);
+
+        // Increase slot_terpakai
+        $slot->increment('slot_terpakai');
+
+        // Log history
+        $submission->logHistory('fasttrack', 'created', 'Submission fasttrack dibuat oleh Admin dengan link publish', [
+            'link_publish' => $validated['link_publish']
+        ]);
+
+        return redirect()->route('admin.fasttrack.index')
+            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
+    }
+
+    /**
+     * Display fasttrack monitoring
+     */
+    public function fasttrackMonitoring(Request $request)
+    {
+        $query = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
+            ->where('process_type', 'fasttrack');
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_submit', 'like', "%{$search}%")
+                  ->orWhere('judul_artikel', 'like', "%{$search}%")
+                  ->orWhere('nama_penulis', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by journal
+        if ($request->filled('journal_master_id')) {
+            $query->whereHas('journalSlot', function($q) use ($request) {
+                $q->where('journal_master_id', $request->journal_master_id);
+            });
+        }
+        
+        // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('tanggal_submit', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('tanggal_submit', '<=', $request->to_date);
+        }
+        
+        // Filter by marketing
+        if ($request->filled('marketing_id')) {
+            $query->where('marketing_id', $request->marketing_id);
+        }
+        
+        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        
+        // Statistics
+        $totalFasttrack = Submission::where('process_type', 'fasttrack')->count();
+        $thisMonthFasttrack = Submission::where('process_type', 'fasttrack')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        
+        return view('admin.fasttrack.monitoring', compact('submissions', 'journals', 'marketings', 'totalFasttrack', 'thisMonthFasttrack'));
+    }
+
+    /**
+     * Show fasttrack submission detail
+     */
+    public function fasttrackShow(Submission $submission)
+    {
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('admin.submissions.show', $submission);
+        }
+        
+        $submission->load(['journalSlot.journalMaster', 'marketing', 'petugasSubmit', 'histories']);
+        
+        return view('admin.fasttrack.show', compact('submission'));
+    }
+
+    /**
+     * Show fasttrack edit form
+     */
+    public function fasttrackEdit(Submission $submission)
+    {
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('admin.submissions.edit', $submission);
+        }
+        
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $slots = JournalSlot::with('journalMaster')
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.fasttrack.edit', compact('submission', 'journals', 'slots', 'marketings', 'pics'));
+    }
+
+    /**
+     * Update fasttrack submission
+     */
+    public function fasttrackUpdate(Request $request, Submission $submission)
+    {
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('admin.submissions.edit', $submission);
+        }
+        
+        $validated = $request->validate([
+            'journal_slot_id' => 'required|exists:journal_slots,id',
+            'judul_artikel' => 'required|string|max:500',
+            'link_publish' => 'required|url|max:500',
+            'nama_penulis' => 'required|string|max:255',
+            'no_hp_penulis' => 'nullable|string|max:20',
+            'marketing_id' => 'nullable|exists:marketings,id',
+            'petugas_submit_id' => 'nullable|exists:pics,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Handle slot change
+        if ($submission->journal_slot_id != $validated['journal_slot_id']) {
+            // Decrement old slot
+            $oldSlot = JournalSlot::find($submission->journal_slot_id);
+            if ($oldSlot && $oldSlot->slot_terpakai > 0) {
+                $oldSlot->decrement('slot_terpakai');
+            }
+            
+            // Check new slot availability
+            $newSlot = JournalSlot::find($validated['journal_slot_id']);
+            if (!$newSlot || $newSlot->slot_terpakai >= $newSlot->jumlah_slot) {
+                return back()->with('error', 'Slot jurnal baru sudah penuh!')->withInput();
+            }
+            
+            // Increment new slot
+            $newSlot->increment('slot_terpakai');
+        }
+
+        $submission->update($validated);
+
+        // Log history
+        $submission->logHistory('fasttrack', 'updated', 'Submission fasttrack diupdate oleh Admin');
+
+        return redirect()->route('admin.fasttrack.index')
+            ->with('success', 'Fasttrack submission berhasil diupdate');
+    }
+
+    /**
+     * Delete fasttrack submission
+     */
+    public function fasttrackDestroy(Submission $submission)
+    {
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('admin.submissions.index');
+        }
+        
+        // Decrement slot
+        $slot = $submission->journalSlot;
+        if ($slot && $slot->slot_terpakai > 0) {
+            $slot->decrement('slot_terpakai');
+        }
+        
+        $kode = $submission->kode_submit;
+        $submission->delete();
+        
+        return redirect()->route('admin.fasttrack.index')
+            ->with('success', "Fasttrack submission {$kode} berhasil dihapus");
+    }
 }

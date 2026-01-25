@@ -53,6 +53,32 @@
         </div>
     </div>
 </div>
+
+{{-- Menu Fasttrack --}}
+<div class="accordion accordion-flush" id="accordionFasttrack">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.fasttrack') ? 'active' : '' }}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapseFasttrack" 
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.fasttrack') ? 'true' : 'false' }}">
+                <i class="bi bi-lightning-charge text-warning"></i> Fasttrack
+            </button>
+        </h2>
+        <div id="collapseFasttrack" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.fasttrack') ? 'show' : '' }}" data-bs-parent="#accordionFasttrack">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.fasttrack.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.index' || $currentRoute == 'admin.fasttrack.create' || $currentRoute == 'admin.fasttrack.show' || $currentRoute == 'admin.fasttrack.edit' ? 'active' : '' }}">
+                    <i class="bi bi-list-check"></i> Data Fasttrack
+                </a>
+                <a href="{{ route('admin.fasttrack.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Fasttrack
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.assignments') ? 'active' : '' }}">
     <i class="bi bi-clipboard-check"></i> Penugasan Review
 </a>
