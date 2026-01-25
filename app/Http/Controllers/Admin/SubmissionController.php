@@ -1295,23 +1295,14 @@ class SubmissionController extends Controller
             ->orderByDesc('total_fasttrack')
             ->get();
         
-        // PIC stats
-        $picStats = Pic::where('is_active', true)
-            ->withCount([
-                'submissionsAsSubmit as total_fasttrack' => function($q) {
-                    $q->where('process_type', 'fasttrack');
-                },
-                'submissionsAsSubmit as month_fasttrack' => function($q) {
-                    $q->where('process_type', 'fasttrack')
-                      ->whereMonth('created_at', now()->month)
-                      ->whereYear('created_at', now()->year);
-                },
-                'submissionsAsSubmit as year_fasttrack' => function($q) {
-                    $q->where('process_type', 'fasttrack')
-                      ->whereYear('created_at', now()->year);
-                }
-            ])
-            ->having('total_fasttrack', '>', 0)
+        // PIC stats - using raw query since Pic model doesn't have submissions relationship
+        $picStats = \DB::table('pics')
+            ->select('pics.id', 'pics.name')
+            ->selectRaw("(SELECT COUNT(*) FROM submissions WHERE submissions.petugas_submit_id = pics.id AND submissions.process_type = 'fasttrack') as total_fasttrack")
+            ->selectRaw("(SELECT COUNT(*) FROM submissions WHERE submissions.petugas_submit_id = pics.id AND submissions.process_type = 'fasttrack' AND MONTH(submissions.created_at) = ? AND YEAR(submissions.created_at) = ?) as month_fasttrack", [now()->month, now()->year])
+            ->selectRaw("(SELECT COUNT(*) FROM submissions WHERE submissions.petugas_submit_id = pics.id AND submissions.process_type = 'fasttrack' AND YEAR(submissions.created_at) = ?) as year_fasttrack", [now()->year])
+            ->where('pics.is_active', true)
+            ->havingRaw('total_fasttrack > 0')
             ->orderByDesc('total_fasttrack')
             ->get();
         
