@@ -49,6 +49,61 @@
     align-items: center;
 }
 
+/* Inline assignment select styles */
+.inline-assign-select {
+    min-width: 100px;
+    max-width: 130px;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.inline-assign-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.inline-assign-select.saving {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.inline-assign-select.success {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.inline-assign-select.error {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+/* Inline credential input styles */
+.inline-credential-input {
+    width: 60px;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.inline-credential-input:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.inline-credential-input.success {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.inline-credential-input.error {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
 .table-monitoring {
     border-collapse: collapse;
     border-spacing: 0;
@@ -489,72 +544,198 @@
                                 </td>
                                 
                                 <!-- Author Access: PIC Marketing, Petugas Submit, Username, Password -->
-                                <td>{{ $s->marketing->name ?? '-' }}</td>
                                 <td>
-                                    @if($s->petugasSubmit)
-                                        {{ $s->petugasSubmit->name }}
-                                    @elseif($s->marketing)
-                                        <span class="text-success" title="Disubmit oleh Marketing">{{ $s->marketing->name }}</span>
-                                    @else
-                                        -
-                                    @endif
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssignMarketing(this, {{ $s->id }})"
+                                            data-original="{{ $s->marketing_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($marketings as $m)
+                                            <option value="{{ $m->id }}" {{ $s->marketing_id == $m->id ? 'selected' : '' }}>
+                                                {{ $m->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_submit_id')"
+                                            data-original="{{ $s->petugas_submit_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_submit_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1: Petugas, User/Pass, Valid -->
-                                <td>{{ $s->petugasEditor1->name ?? '-' }}</td>
                                 <td>
-                                    @if($s->username_editor || $s->password_editor)
-                                        <code>{{ $s->username_editor ?? '-' }}/{{ $s->password_editor ?? '-' }}</code>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_editor1_id')"
+                                            data-original="{{ $s->petugas_editor1_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_editor1_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="credential-group">
+                                        <input type="text" 
+                                               class="inline-credential-input" 
+                                               value="{{ $s->username_editor }}" 
+                                               placeholder="user"
+                                               onblur="quickUpdateCredential(this, {{ $s->id }}, 'username_editor')">
+                                        <span>/</span>
+                                        <input type="text" 
+                                               class="inline-credential-input" 
+                                               value="{{ $s->password_editor }}" 
+                                               placeholder="pass"
+                                               onblur="quickUpdateCredential(this, {{ $s->id }}, 'password_editor')">
+                                    </div>
                                 </td>
                                 <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Author 1: Petugas, Valid -->
-                                <td>{{ $s->petugasAuthor1->name ?? '-' }}</td>
+                                <td>
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_author1_id')"
+                                            data-original="{{ $s->petugas_author1_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_author1_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Editor 2: Petugas, Valid -->
-                                <td>{{ $s->petugasEditor2->name ?? '-' }}</td>
+                                <td>
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_editor2_id')"
+                                            data-original="{{ $s->petugas_editor2_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_editor2_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Reviewer 1: Petugas, User/Pass, Catatan, Valid -->
-                                <td>{{ $s->petugasReviewer1->name ?? '-' }}</td>
                                 <td>
-                                    @if($s->username_reviewer1 || $s->password_reviewer1)
-                                        <code>{{ $s->username_reviewer1 ?? '-' }}/{{ $s->password_reviewer1 ?? '-' }}</code>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_reviewer1_id')"
+                                            data-original="{{ $s->petugas_reviewer1_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_reviewer1_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="credential-group">
+                                        <input type="text" 
+                                               class="inline-credential-input" 
+                                               value="{{ $s->username_reviewer1 }}" 
+                                               placeholder="user"
+                                               onblur="quickUpdateCredential(this, {{ $s->id }}, 'username_reviewer1')">
+                                        <span>/</span>
+                                        <input type="text" 
+                                               class="inline-credential-input" 
+                                               value="{{ $s->password_reviewer1 }}" 
+                                               placeholder="pass"
+                                               onblur="quickUpdateCredential(this, {{ $s->id }}, 'password_reviewer1')">
+                                    </div>
                                 </td>
                                 <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
                                 <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Reviewer 2: Petugas, User/Pass, Catatan, Valid -->
-                                <td>{{ $s->petugasReviewer2->name ?? '-' }}</td>
                                 <td>
-                                    @if($s->username_reviewer2 || $s->password_reviewer2)
-                                        <code>{{ $s->username_reviewer2 ?? '-' }}/{{ $s->password_reviewer2 ?? '-' }}</code>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_reviewer2_id')"
+                                            data-original="{{ $s->petugas_reviewer2_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_reviewer2_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="credential-group">
+                                        <input type="text" 
+                                               class="inline-credential-input" 
+                                               value="{{ $s->username_reviewer2 }}" 
+                                               placeholder="user"
+                                               onblur="quickUpdateCredential(this, {{ $s->id }}, 'username_reviewer2')">
+                                        <span>/</span>
+                                        <input type="text" 
+                                               class="inline-credential-input" 
+                                               value="{{ $s->password_reviewer2 }}" 
+                                               placeholder="pass"
+                                               onblur="quickUpdateCredential(this, {{ $s->id }}, 'password_reviewer2')">
+                                    </div>
                                 </td>
                                 <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
                                 <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Editor 3: Petugas, Valid -->
-                                <td>{{ $s->petugasEditor3->name ?? '-' }}</td>
+                                <td>
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_editor3_id')"
+                                            data-original="{{ $s->petugas_editor3_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_editor3_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Author 2: Petugas, Valid -->
-                                <td>{{ $s->petugasAuthor2->name ?? '-' }}</td>
+                                <td>
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_author2_id')"
+                                            data-original="{{ $s->petugas_author2_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_author2_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Production: Petugas, Link Publish, Valid -->
-                                <td>{{ $s->petugasProduction->name ?? '-' }}</td>
+                                <td>
+                                    <select class="inline-assign-select" 
+                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_production_id')"
+                                            data-original="{{ $s->petugas_production_id }}">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $p)
+                                            <option value="{{ $p->id }}" {{ $s->petugas_production_id == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td>
                                     @if($s->link_publish)
                                         <a href="{{ $s->link_publish }}" target="_blank" class="btn btn-sm btn-success" style="padding: 2px 6px; font-size: 0.7rem;">
@@ -705,5 +886,141 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial state
     updateScrollPosition();
 });
+
+// AJAX Quick Assignment Functions
+function quickAssignMarketing(select, submissionId) {
+    const marketingId = select.value;
+    const originalValue = select.dataset.original;
+    
+    select.classList.add('saving');
+    
+    fetch('/admin/submissions/quick-assign-marketing', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            marketing_id: marketingId || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        select.classList.remove('saving');
+        if (data.success) {
+            select.classList.add('success');
+            select.dataset.original = marketingId;
+            setTimeout(() => select.classList.remove('success'), 2000);
+        } else {
+            select.classList.add('error');
+            select.value = originalValue;
+            setTimeout(() => select.classList.remove('error'), 2000);
+            alert('Gagal: ' + (data.message || 'Error'));
+        }
+    })
+    .catch(error => {
+        select.classList.remove('saving');
+        select.classList.add('error');
+        select.value = originalValue;
+        setTimeout(() => select.classList.remove('error'), 2000);
+        console.error('Error:', error);
+    });
+}
+
+function quickAssign(select, submissionId, field) {
+    const picId = select.value;
+    const originalValue = select.dataset.original;
+    
+    // Map field to assignment_type
+    const fieldMap = {
+        'petugas_submit_id': 'submit',
+        'petugas_editor1_id': 'editor1',
+        'petugas_editor2_id': 'editor2',
+        'petugas_editor3_id': 'editor3',
+        'petugas_author1_id': 'author1',
+        'petugas_author2_id': 'author2',
+        'petugas_reviewer1_id': 'reviewer1',
+        'petugas_reviewer2_id': 'reviewer2',
+        'petugas_production_id': 'production',
+    };
+    
+    const assignmentType = fieldMap[field] || field;
+    
+    select.classList.add('saving');
+    
+    fetch('/admin/submissions/quick-assign', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            assignment_type: assignmentType,
+            petugas_id: picId || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        select.classList.remove('saving');
+        if (data.success) {
+            select.classList.add('success');
+            select.dataset.original = picId;
+            setTimeout(() => select.classList.remove('success'), 2000);
+        } else {
+            select.classList.add('error');
+            select.value = originalValue;
+            setTimeout(() => select.classList.remove('error'), 2000);
+            alert('Gagal: ' + (data.message || 'Error'));
+        }
+    })
+    .catch(error => {
+        select.classList.remove('saving');
+        select.classList.add('error');
+        select.value = originalValue;
+        setTimeout(() => select.classList.remove('error'), 2000);
+        console.error('Error:', error);
+    });
+}
+
+function quickUpdateCredential(input, submissionId, field) {
+    const value = input.value;
+    const originalValue = input.dataset.original || '';
+    
+    // Skip if no change
+    if (value === originalValue) return;
+    
+    input.dataset.original = value;
+    
+    fetch('/admin/submissions/quick-update-credential', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            field: field,
+            value: value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            input.classList.add('success');
+            setTimeout(() => input.classList.remove('success'), 2000);
+        } else {
+            input.classList.add('error');
+            setTimeout(() => input.classList.remove('error'), 2000);
+            alert('Gagal: ' + (data.message || 'Error'));
+        }
+    })
+    .catch(error => {
+        input.classList.add('error');
+        setTimeout(() => input.classList.remove('error'), 2000);
+        console.error('Error:', error);
+    });
+}
 </script>
 @endsection

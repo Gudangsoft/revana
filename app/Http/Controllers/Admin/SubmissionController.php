@@ -1049,7 +1049,7 @@ class SubmissionController extends Controller
     {
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'assignment_type' => 'required|in:submit,editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
             'petugas_id' => 'nullable|integer',
         ]);
 
@@ -1059,6 +1059,7 @@ class SubmissionController extends Controller
         
         // Determine field name based on assignment type
         $fieldMap = [
+            'submit' => 'petugas_submit_id',
             'editor1' => 'petugas_editor1_id',
             'editor2' => 'petugas_editor2_id',
             'editor3' => 'petugas_editor3_id',
@@ -1205,8 +1206,10 @@ class SubmissionController extends Controller
         
         $submissions = $query->latest()->paginate(20)->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.fasttrack.index', compact('submissions', 'journals'));
+        return view('admin.fasttrack.index', compact('submissions', 'journals', 'marketings', 'pics'));
     }
 
     /**
