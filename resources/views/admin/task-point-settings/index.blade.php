@@ -1,12 +1,16 @@
 @extends('layouts.app')
 
 @section('title', 'Pengaturan Point')
+@section('page-title', 'Pengaturan Point')
+
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow mb-4">
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="fas fa-coins me-2"></i>Pengaturan Point PIC & Marketing
@@ -200,5 +204,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
