@@ -243,6 +243,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
         
+        // Task Point Settings
+        Route::get('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'index'])->name('task-point-settings.index');
+        Route::put('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'update'])->name('task-point-settings.update');
+        Route::post('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'store'])->name('task-point-settings.store');
+        Route::delete('/task-point-settings/{id}', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'destroy'])->name('task-point-settings.destroy');
+        
         // Email Settings
         Route::get('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'index'])->name('email-settings.index');
         Route::put('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'update'])->name('email-settings.update');

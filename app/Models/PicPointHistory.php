@@ -18,7 +18,7 @@ class PicPointHistory extends Model
     ];
 
     /**
-     * Point configuration per step
+     * Point configuration per step (fallback if no database config)
      */
     public const POINT_CONFIG = [
         'editor1' => ['points' => 1, 'label' => 'Editor 1'],
@@ -32,18 +32,42 @@ class PicPointHistory extends Model
     ];
 
     /**
-     * Get points for a specific step
+     * Get points for a specific step (uses database config if available)
      */
     public static function getPointsForStep(string $step): int
     {
+        // Try to get from database first
+        try {
+            $dbPoints = TaskPointSetting::getPicPoints($step);
+            if ($dbPoints !== null) {
+                return $dbPoints;
+            }
+        } catch (\Exception $e) {
+            // Database not available, use fallback
+        }
+        
         return self::POINT_CONFIG[$step]['points'] ?? 0;
     }
 
     /**
-     * Get label for a specific step
+     * Get label for a specific step (uses database config if available)
      */
     public static function getLabelForStep(string $step): string
     {
+        // Try to get from database first
+        try {
+            $setting = TaskPointSetting::where('user_type', 'pic')
+                ->where('task_key', $step)
+                ->where('is_active', true)
+                ->first();
+            
+            if ($setting) {
+                return $setting->task_label;
+            }
+        } catch (\Exception $e) {
+            // Database not available, use fallback
+        }
+        
         return self::POINT_CONFIG[$step]['label'] ?? ucfirst($step);
     }
 

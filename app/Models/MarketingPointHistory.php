@@ -17,9 +17,26 @@ class MarketingPointHistory extends Model
     ];
 
     /**
-     * Point per submission yang berhasil di-approve
+     * Point per submission yang berhasil di-approve (fallback)
      */
     public const POINT_PER_SUBMISSION = 1;
+
+    /**
+     * Get points for submission (uses database config if available)
+     */
+    public static function getPointsForSubmission(): int
+    {
+        try {
+            $dbPoints = TaskPointSetting::getMarketingPoints('submit');
+            if ($dbPoints !== null) {
+                return $dbPoints;
+            }
+        } catch (\Exception $e) {
+            // Database not available, use fallback
+        }
+        
+        return self::POINT_PER_SUBMISSION;
+    }
 
     /**
      * Relationship to Marketing
@@ -51,16 +68,19 @@ class MarketingPointHistory extends Model
             return null; // Already awarded
         }
 
+        // Get points from config
+        $points = self::getPointsForSubmission();
+
         // Create point history
         $history = self::create([
             'marketing_id' => $marketingId,
             'submission_id' => $submissionId,
-            'points_earned' => self::POINT_PER_SUBMISSION,
+            'points_earned' => $points,
             'description' => $description ?? "Submit artikel berhasil",
         ]);
 
         // Update total points on Marketing
-        Marketing::where('id', $marketingId)->increment('total_points', self::POINT_PER_SUBMISSION);
+        Marketing::where('id', $marketingId)->increment('total_points', $points);
 
         return $history;
     }

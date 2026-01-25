@@ -146,6 +146,9 @@
 <a href="{{ route('admin.settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.settings') && !str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-gear-fill"></i> Setting Web
 </a>
+<a href="{{ route('admin.task-point-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.task-point-settings') ? 'active' : '' }}">
+    <i class="bi bi-coin"></i> Pengaturan Point
+</a>
 <a href="{{ route('admin.email-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-envelope-at-fill"></i> Pengaturan Email
 </a>
