@@ -63,6 +63,8 @@
                             <th style="width: 50px;">No</th>
                             <th>Jurnal</th>
                             <th>Publisher</th>
+                            <th>Kategori</th>
+                            <th>Jenis</th>
                             <th>Volume</th>
                             <th>Nomor</th>
                             <th>Bulan/Tahun</th>
@@ -85,6 +87,20 @@
                                 @endif
                             </td>
                             <td><small>{{ $slot->journalMaster->publisher ?? '-' }}</small></td>
+                            <td>
+                                @if($slot->journalMaster->kategori)
+                                    <span class="badge bg-info">{{ $slot->journalMaster->kategori }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($slot->journalMaster->jenis_jurnal)
+                                    <span class="badge bg-primary">{{ $slot->journalMaster->jenis_jurnal }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td><span class="badge bg-secondary">Vol. {{ $slot->volume }}</span></td>
                             <td><span class="badge bg-secondary">No. {{ $slot->nomor }}</span></td>
                             <td>{{ $slot->bulan }} {{ $slot->tahun }}</td>
@@ -123,7 +139,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="10" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data slot</p>
                             </td>
