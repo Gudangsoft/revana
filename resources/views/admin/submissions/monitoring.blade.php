@@ -498,7 +498,7 @@
                                 <th rowspan="2" class="align-middle">Link</th>
                                 <th rowspan="2" class="align-middle">Penulis</th>
                                 <th rowspan="2" class="align-middle">No HP</th>
-                                <th colspan="4" class="text-center" id="colSubmit">Author Access</th>
+                                <th colspan="4" class="text-center bg-dark" id="colSubmit">Author Access</th>
                                 <th colspan="3" class="text-center bg-info" id="colEditor1">Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor2">Editor 2</th>
