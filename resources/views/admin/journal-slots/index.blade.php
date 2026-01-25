@@ -91,11 +91,27 @@
                                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-2">
+                            <select class="form-select" name="kategori">
+                                <option value="">-- Kategori --</option>
+                                <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
+                                <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="jenis">
+                                <option value="">-- Jenis --</option>
+                                <option value="Jurnal Nasional" {{ request('jenis') == 'Jurnal Nasional' ? 'selected' : '' }}>Jurnal Nasional</option>
+                                <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional</option>
+                            </select>
+                        </div>
                         <div class="col-md-3">
                             <button class="btn btn-outline-primary" type="submit">
                                 <i class="bi bi-search"></i> Cari
                             </button>
-                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status']))
+                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status', 'kategori', 'jenis']))
                             <a href="{{ route('admin.journal-slots.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle"></i> Reset
                             </a>
@@ -112,6 +128,8 @@
                                 <th>Kode Slot</th>
                                 <th>Nama Jurnal</th>
                                 <th>Publisher</th>
+                                <th>Kategori</th>
+                                <th>Jenis</th>
                                 <th>Volume</th>
                                 <th>Nomor</th>
                                 <th>Bulan</th>
@@ -134,6 +152,22 @@
                                     </a>
                                 </td>
                                 <td>{{ Str::limit($slot->journalMaster->publisher, 20) }}</td>
+                                <td>
+                                    @if($slot->journalMaster->kategori)
+                                        <span class="badge bg-{{ $slot->journalMaster->kategori == 'Penelitian' ? 'primary' : 'success' }}">{{ $slot->journalMaster->kategori }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($slot->journalMaster->jenis_jurnal)
+                                        <span class="badge bg-{{ $slot->journalMaster->jenis_jurnal == 'Jurnal Internasional' ? 'warning' : 'secondary' }}">
+                                            {{ $slot->journalMaster->jenis_jurnal == 'Jurnal Internasional' ? 'Internasional' : 'Nasional' }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td>{{ $slot->volume }}</td>
                                 <td>{{ $slot->nomor }}</td>
                                 <td>{{ $slot->bulan }}</td>

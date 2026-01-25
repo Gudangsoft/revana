@@ -43,6 +43,20 @@ class JournalSlotController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
         
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('kategori', $request->kategori);
+            });
+        }
+        
+        // Filter by jenis jurnal
+        if ($request->filled('jenis')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('jenis_jurnal', $request->jenis);
+            });
+        }
+        
         $slots = $query->latest()->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $bulanOptions = JournalSlot::getBulanOptions();
