@@ -20,7 +20,7 @@
             <br><small>Artikel akan langsung berstatus "Published" tanpa melalui workflow normal.</small>
         </div>
 
-        <form action="{{ route('marketing.fasttrack.store') }}" method="POST">
+        <form action="{{ route('marketing.fasttrack.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <div class="alert alert-info mb-3">
@@ -76,6 +76,34 @@
             <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
 
             <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">ID Artikel <span class="text-danger">*</span></label>
+                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" required>
+                    @error('id_artikel')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Link Artikel</label>
+                    <input type="url" name="link_artikel" class="form-control @error('link_artikel') is-invalid @enderror" value="{{ old('link_artikel') }}" placeholder="https://">
+                    @error('link_artikel')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label">Upload File Artikel (Word/PDF)</label>
+                    <input type="file" name="file_artikel" class="form-control @error('file_artikel') is-invalid @enderror" accept=".doc,.docx,.pdf">
+                    @error('file_artikel')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
                 <div class="col-md-12">
                     <label class="form-label">Judul Artikel <span class="text-danger">*</span></label>
                     <textarea name="judul_artikel" class="form-control @error('judul_artikel') is-invalid @enderror" rows="2" required>{{ old('judul_artikel') }}</textarea>
@@ -111,6 +139,23 @@
                     <label class="form-label">No HP Penulis</label>
                     <input type="text" name="no_hp_penulis" class="form-control @error('no_hp_penulis') is-invalid @enderror" value="{{ old('no_hp_penulis') }}">
                     @error('no_hp_penulis')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Username Akses Author</label>
+                    <input type="text" name="username_author" class="form-control @error('username_author') is-invalid @enderror" value="{{ old('username_author') }}">
+                    @error('username_author')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Password Akses Author</label>
+                    <input type="text" name="password_author" class="form-control @error('password_author') is-invalid @enderror" value="{{ old('password_author') }}">
+                    @error('password_author')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

@@ -522,10 +522,15 @@ class DashboardController extends Controller
         
         $validated = $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
+            'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
+            'link_artikel' => 'nullable|url|max:500',
+            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240',
             'link_publish' => 'required|url|max:500',
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
+            'username_author' => 'nullable|string|max:255',
+            'password_author' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
 
@@ -533,6 +538,14 @@ class DashboardController extends Controller
         $slot = JournalSlot::find($validated['journal_slot_id']);
         if (!$slot || $slot->slot_terpakai >= $slot->jumlah_slot) {
             return back()->with('error', 'Slot jurnal sudah penuh!')->withInput();
+        }
+
+        // Handle file upload
+        $fileArtikel = null;
+        if ($request->hasFile('file_artikel')) {
+            $file = $request->file('file_artikel');
+            $fileArtikel = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/artikel', $fileArtikel);
         }
 
         // Generate kode_submit with FT prefix for fasttrack
@@ -561,10 +574,15 @@ class DashboardController extends Controller
             'kode_loa' => $kodeSubmit . 'SIPERA',
             'journal_slot_id' => $validated['journal_slot_id'],
             'marketing_id' => $marketing->id,
+            'id_artikel' => $validated['id_artikel'],
             'judul_artikel' => $validated['judul_artikel'],
+            'link_artikel' => $validated['link_artikel'] ?? null,
+            'file_artikel' => $fileArtikel,
             'link_publish' => $validated['link_publish'],
             'nama_penulis' => $validated['nama_penulis'],
             'no_hp_penulis' => $validated['no_hp_penulis'] ?? null,
+            'username_author' => $validated['username_author'] ?? null,
+            'password_author' => $validated['password_author'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'tanggal_submit' => now(),
             'status' => 'PUBLISHED',

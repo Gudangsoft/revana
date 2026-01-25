@@ -27,7 +27,7 @@
                     <br><small>Artikel akan langsung berstatus "Published" tanpa melalui workflow normal.</small>
                 </div>
 
-                <form action="{{ route('admin.fasttrack.store') }}" method="POST">
+                <form action="{{ route('admin.fasttrack.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="alert alert-info mb-3">
@@ -79,6 +79,54 @@
 
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_artikel" class="form-label">ID Artikel <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('id_artikel') is-invalid @enderror" 
+                                       id="id_artikel" 
+                                       name="id_artikel" 
+                                       value="{{ old('id_artikel') }}" 
+                                       required>
+                                @error('id_artikel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="link_artikel" class="form-label">Link Artikel</label>
+                                <input type="url" 
+                                       class="form-control @error('link_artikel') is-invalid @enderror" 
+                                       id="link_artikel" 
+                                       name="link_artikel" 
+                                       value="{{ old('link_artikel') }}" 
+                                       placeholder="https://">
+                                @error('link_artikel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="file_artikel" class="form-label">Upload File Artikel (Word/PDF)</label>
+                                <input type="file" 
+                                       class="form-control @error('file_artikel') is-invalid @enderror" 
+                                       id="file_artikel" 
+                                       name="file_artikel" 
+                                       accept=".doc,.docx,.pdf">
+                                @error('file_artikel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-12">
@@ -142,6 +190,35 @@
                                        name="no_hp_penulis" 
                                        value="{{ old('no_hp_penulis') }}">
                                 @error('no_hp_penulis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username_author" class="form-label">Username Akses Author</label>
+                                <input type="text" 
+                                       class="form-control @error('username_author') is-invalid @enderror" 
+                                       id="username_author" 
+                                       name="username_author" 
+                                       value="{{ old('username_author') }}">
+                                @error('username_author')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password_author" class="form-label">Password Akses Author</label>
+                                <input type="text" 
+                                       class="form-control @error('password_author') is-invalid @enderror" 
+                                       id="password_author" 
+                                       name="password_author" 
+                                       value="{{ old('password_author') }}">
+                                @error('password_author')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

@@ -1279,14 +1279,27 @@ class JournalManagementController extends Controller
     {
         $validated = $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
+            'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
+            'link_artikel' => 'nullable|url|max:500',
+            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240',
             'link_publish' => 'required|url|max:500',
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
+            'username_author' => 'nullable|string|max:255',
+            'password_author' => 'nullable|string|max:255',
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
         ]);
+
+        // Handle file upload
+        if ($request->hasFile('file_artikel')) {
+            $file = $request->file('file_artikel');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/artikel', $filename);
+            $validated['file_artikel'] = $filename;
+        }
 
         // Generate kode_submit with FT prefix for fasttrack
         $today = now()->format('Ymd');
