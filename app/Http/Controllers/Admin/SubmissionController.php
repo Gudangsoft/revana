@@ -1267,8 +1267,49 @@ class SubmissionController extends Controller
             'process_type' => 'fasttrack'
         ]);
 
+        // Award points to PIC if assigned
+        $pointMessage = '';
+        if (isset($validated['petugas_submit_id']) && $validated['petugas_submit_id']) {
+            $pic = Pic::find($validated['petugas_submit_id']);
+            $pointsToAdd = PicPointHistory::getPointsForStep('submit');
+            
+            if ($pointsToAdd > 0 && $pic) {
+                $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
+                $pic->save();
+                
+                PicPointHistory::create([
+                    'pic_id' => $pic->id,
+                    'submission_id' => $submission->id,
+                    'step' => 'submit',
+                    'points_earned' => $pointsToAdd,
+                    'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
+                ]);
+                
+                $pointMessage = " (+{$pointsToAdd} point untuk PIC)";
+            }
+        }
+        
+        // Award points to Marketing if assigned
+        if (isset($validated['marketing_id']) && $validated['marketing_id']) {
+            $marketing = Marketing::find($validated['marketing_id']);
+            if ($marketing) {
+                $marketingPoints = MarketingPointHistory::getPointsForSubmission();
+                if ($marketingPoints > 0) {
+                    $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
+                    $marketing->save();
+                    
+                    MarketingPointHistory::create([
+                        'marketing_id' => $marketing->id,
+                        'submission_id' => $submission->id,
+                        'points_earned' => $marketingPoints,
+                        'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('admin.fasttrack.index')
-            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
+            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
     }
 
     /**

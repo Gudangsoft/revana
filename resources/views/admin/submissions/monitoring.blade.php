@@ -563,6 +563,9 @@
                                     <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
+                                    @if($s->process_type === 'fasttrack')
+                                        <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
+                                    @endif
                                     @if($isCompleted)
                                         <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
                                     @endif

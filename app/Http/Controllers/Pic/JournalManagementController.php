@@ -1337,8 +1337,28 @@ class JournalManagementController extends Controller
             'process_type' => 'fasttrack'
         ]);
 
+        // Award points to PIC
+        $pic = auth()->guard('pic')->user();
+        $pointsToAdd = PicPointHistory::getPointsForStep('submit');
+        $pointMessage = '';
+        
+        if ($pointsToAdd > 0 && $pic) {
+            $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
+            $pic->save();
+            
+            PicPointHistory::create([
+                'pic_id' => $pic->id,
+                'submission_id' => $submission->id,
+                'step' => 'submit',
+                'points_earned' => $pointsToAdd,
+                'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
+            ]);
+            
+            $pointMessage = " Anda mendapatkan +{$pointsToAdd} point!";
+        }
+
         return redirect()->route('pic.fasttrack.index')
-            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
+            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
     }
 
     /**

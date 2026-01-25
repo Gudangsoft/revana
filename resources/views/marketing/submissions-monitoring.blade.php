@@ -163,6 +163,9 @@
                     <tr>
                         <td class="px-3">
                             <code class="badge bg-light text-dark">{{ $submission->kode_submit }}</code>
+                            @if($submission->process_type === 'fasttrack')
+                                <span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>
+                            @endif
                         </td>
                         <td>{{ $submission->id_artikel ?: '-' }}</td>
                         <td>

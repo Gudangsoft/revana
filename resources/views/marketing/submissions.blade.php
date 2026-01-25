@@ -100,6 +100,9 @@
                     <tr class="{{ request('highlight') == $submission->id ? 'table-success' : '' }}">
                         <td>
                             <code class="text-primary">{{ $submission->kode_submit }}</code>
+                            @if($submission->process_type === 'fasttrack')
+                                <span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>
+                            @endif
                             @if(request('highlight') == $submission->id)
                                 <span class="badge bg-success ms-1">BARU</span>
                             @endif

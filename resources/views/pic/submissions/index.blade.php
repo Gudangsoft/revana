@@ -71,7 +71,12 @@
                     @forelse($submissions as $submission)
                     <tr>
                         <td>{{ $loop->iteration + ($submissions->currentPage() - 1) * $submissions->perPage() }}</td>
-                        <td><code>{{ $submission->kode_submit }}</code></td>
+                        <td>
+                            <code>{{ $submission->kode_submit }}</code>
+                            @if($submission->process_type === 'fasttrack')
+                                <span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>
+                            @endif
+                        </td>
                         <td>{{ $submission->id_artikel ?? '-' }}</td>
                         <td title="{{ $submission->judul_artikel }}">{{ Str::limit($submission->judul_artikel, 30) }}</td>
                         <td>

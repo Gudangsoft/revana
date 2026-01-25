@@ -318,7 +318,12 @@
                                 @forelse($submissions as $submission)
                                 <tr>
                                     <td class="sticky-col-1">{{ $loop->iteration + ($submissions->currentPage() - 1) * $submissions->perPage() }}</td>
-                                    <td class="sticky-col-2"><code class="text-primary">{{ $submission->kode_submit }}</code></td>
+                                    <td class="sticky-col-2">
+                                        <code class="text-primary">{{ $submission->kode_submit }}</code>
+                                        @if($submission->process_type === 'fasttrack')
+                                            <br><span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $submission->id_artikel }}</td>
                                     <td class="wrap-text">
                                         <span title="{{ $submission->judul_artikel }}">{{ Str::limit($submission->judul_artikel, 40) }}</span>
