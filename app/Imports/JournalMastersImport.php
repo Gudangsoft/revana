@@ -37,6 +37,8 @@ class JournalMastersImport implements ToModel, WithHeadingRow, WithValidation, S
         $linkJurnal = $row['link_jurnal'] ?? $row['link'] ?? $row['url'] ?? $row['website'] ?? null;
         $accreditation = $row['accreditation'] ?? $row['akreditasi'] ?? null;
         $kodeJurnal = $row['kode_jurnal'] ?? $row['kode'] ?? $row['code'] ?? null;
+        $kategori = $row['kategori'] ?? $row['category'] ?? null;
+        $jenisJurnal = $row['jenis_jurnal'] ?? $row['jenis'] ?? $row['type'] ?? null;
 
         // Handle is_active with multiple possible column names and values
         $isActive = true; // default
@@ -68,6 +70,8 @@ class JournalMastersImport implements ToModel, WithHeadingRow, WithValidation, S
                 'publisher' => $publisher ?? $existing->publisher,
                 'link_jurnal' => $linkJurnal ?? $existing->link_jurnal,
                 'accreditation' => $accreditation ?? $existing->accreditation,
+                'kategori' => $kategori ?? $existing->kategori,
+                'jenis_jurnal' => $jenisJurnal ?? $existing->jenis_jurnal,
                 'is_active' => $isActive,
             ]);
             $this->updated++;
@@ -82,6 +86,8 @@ class JournalMastersImport implements ToModel, WithHeadingRow, WithValidation, S
             'publisher' => $publisher,
             'link_jurnal' => $linkJurnal,
             'accreditation' => $accreditation,
+            'kategori' => $kategori,
+            'jenis_jurnal' => $jenisJurnal,
             'is_active' => $isActive,
             'created_by' => $this->userId,
         ]);

@@ -49,7 +49,16 @@ class SubmissionController extends Controller
             $query->where('status', $request->status);
         }
         
-        // Filter by journal
+        // Filter by journal (using search term)
+        if ($request->filled('journal_search')) {
+            $searchTerm = $request->journal_search;
+            $query->whereHas('journalSlot.journalMaster', function($q) use ($searchTerm) {
+                $q->where('nama_jurnal', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('publisher', 'like', '%' . $searchTerm . '%');
+            });
+        }
+        
+        // Filter by journal master ID (legacy support)
         if ($request->filled('journal_master_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {
                 $q->where('journal_master_id', $request->journal_master_id);

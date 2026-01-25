@@ -27,6 +27,11 @@ class JournalMasterController extends Controller
             });
         }
 
+        // Filter by publisher
+        if ($request->filled('publisher')) {
+            $query->where('publisher', 'like', '%' . $request->publisher . '%');
+        }
+
         // Filter by accreditation
         if ($request->filled('accreditation')) {
             $query->where('accreditation', $request->accreditation);

@@ -238,15 +238,20 @@
                             <input type="date" class="form-control" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
                         </div>
                         <div class="col-md-3">
-                            <label for="journal_master_id" class="form-label">Jurnal</label>
-                            <select class="form-select" id="journal_master_id" name="journal_master_id">
-                                <option value="">-- Semua Jurnal --</option>
+                            <label for="journal_search" class="form-label">Jurnal</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="journal_search" 
+                                   placeholder="🔍 Ketik nama jurnal/publisher..." 
+                                   value="{{ request('journal_search') }}" 
+                                   name="journal_search"
+                                   list="journal-suggestions">
+                            <datalist id="journal-suggestions">
                                 @foreach($journals as $journal)
-                                    <option value="{{ $journal->id }}" {{ request('journal_master_id') == $journal->id ? 'selected' : '' }}>
-                                        {{ $journal->nama_jurnal }}
-                                    </option>
+                                    <option value="{{ $journal->nama_jurnal }}">{{ $journal->publisher ? '(' . $journal->publisher . ')' : '' }}</option>
                                 @endforeach
-                            </select>
+                            </datalist>
+                            <small class="text-muted">Ketik untuk mencari dan pilih</small>
                         </div>
                         <div class="col-md-2">
                             <label for="status" class="form-label">Status</label>

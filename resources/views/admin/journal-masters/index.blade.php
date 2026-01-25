@@ -47,40 +47,53 @@
                 <form action="{{ route('admin.journal-masters.index') }}" method="GET" class="mb-4">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <input type="text" class="form-control" name="search" placeholder="Cari jurnal..." value="{{ request('search') }}">
+                            <input type="text" class="form-control" name="search" placeholder="🔍 Cari nama jurnal..." value="{{ request('search') }}">
                         </div>
                         <div class="col-md-2">
-                            <select class="form-select" name="accreditation">
-                                <option value="">-- Akreditasi --</option>
-                                @foreach($accreditations as $acc)
-                                <option value="{{ $acc->name }}" {{ request('accreditation') == $acc->name ? 'selected' : '' }}>{{ $acc->name }}</option>
+                            <input type="text" class="form-control" name="publisher" placeholder="📚 Publisher..." value="{{ request('publisher') }}" list="publisher-list">
+                            <datalist id="publisher-list">
+                                @php
+                                    $publishers = \App\Models\JournalMaster::select('publisher')->distinct()->whereNotNull('publisher')->orderBy('publisher')->get();
+                                @endphp
+                                @foreach($publishers as $pub)
+                                    <option value="{{ $pub->publisher }}">
                                 @endforeach
-                            </select>
+                            </datalist>
                         </div>
                         <div class="col-md-2">
-                            <select class="form-select" name="kategori">
-                                <option value="">-- Kategori --</option>
-                                <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
-                                <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
-                            </select>
+                            <input type="text" class="form-control" name="accreditation" placeholder="🏆 Akreditasi..." value="{{ request('accreditation') }}" list="akreditasi-list">
+                            <datalist id="akreditasi-list">
+                                @foreach($accreditations as $acc)
+                                    <option value="{{ $acc->name }}">
+                                @endforeach
+                            </datalist>
                         </div>
                         <div class="col-md-2">
-                            <select class="form-select" name="jenis_jurnal">
-                                <option value="">-- Jenis Jurnal --</option>
-                                <option value="Jurnal Nasional" {{ request('jenis_jurnal') == 'Jurnal Nasional' ? 'selected' : '' }}>Nasional</option>
-                                <option value="Jurnal Internasional" {{ request('jenis_jurnal') == 'Jurnal Internasional' ? 'selected' : '' }}>Internasional</option>
-                            </select>
+                            <input type="text" class="form-control" name="kategori" placeholder="📂 Kategori..." value="{{ request('kategori') }}" list="kategori-list">
+                            <datalist id="kategori-list">
+                                <option value="Penelitian">
+                                <option value="PKM">
+                            </datalist>
                         </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-outline-primary" type="submit">
-                                <i class="bi bi-search"></i> Cari
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="jenis_jurnal" placeholder="🌐 Jenis..." value="{{ request('jenis_jurnal') }}" list="jenis-list">
+                            <datalist id="jenis-list">
+                                <option value="Jurnal Nasional">
+                                <option value="Jurnal Internasional">
+                            </datalist>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-primary w-100" type="submit" title="Filter">
+                                <i class="bi bi-search"></i>
                             </button>
-                            @if(request()->hasAny(['search', 'accreditation', 'status', 'kategori', 'jenis_jurnal']))
-                            <a href="{{ route('admin.journal-masters.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Reset
-                            </a>
-                            @endif
                         </div>
+                        @if(request()->hasAny(['search', 'publisher', 'accreditation', 'status', 'kategori', 'jenis_jurnal']))
+                        <div class="col-md-12">
+                            <a href="{{ route('admin.journal-masters.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-x-circle"></i> Reset Filter
+                            </a>
+                        </div>
+                        @endif
                     </div>
                 </form>
 
