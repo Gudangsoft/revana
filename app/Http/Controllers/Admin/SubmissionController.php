@@ -1163,7 +1163,19 @@ class SubmissionController extends Controller
      */
     public function fasttrackIndex(Request $request)
     {
-        $query = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
+        $query = Submission::with([
+                'journalSlot.journalMaster', 
+                'marketing', 
+                'petugasSubmit',
+                'petugasEditor1',
+                'petugasAuthor1',
+                'petugasEditor2',
+                'petugasReviewer1',
+                'petugasReviewer2',
+                'petugasEditor3',
+                'petugasAuthor2',
+                'petugasProduction'
+            ])
             ->where('process_type', 'fasttrack');
         
         // Search
@@ -1181,6 +1193,14 @@ class SubmissionController extends Controller
             $query->whereHas('journalSlot', function($q) use ($request) {
                 $q->where('journal_master_id', $request->journal_master_id);
             });
+        }
+        
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
         
         $submissions = $query->latest()->paginate(20)->withQueryString();

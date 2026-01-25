@@ -1231,7 +1231,19 @@ class JournalManagementController extends Controller
      */
     public function fasttrackIndex(Request $request)
     {
-        $query = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
+        $query = Submission::with([
+                'journalSlot.journalMaster', 
+                'marketing', 
+                'petugasSubmit',
+                'petugasEditor1',
+                'petugasAuthor1',
+                'petugasEditor2',
+                'petugasReviewer1',
+                'petugasReviewer2',
+                'petugasEditor3',
+                'petugasAuthor2',
+                'petugasProduction'
+            ])
             ->where('process_type', 'fasttrack');
         
         // Search
@@ -1244,9 +1256,12 @@ class JournalManagementController extends Controller
             });
         }
         
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
         
         $submissions = $query->latest()->paginate(20)->withQueryString();

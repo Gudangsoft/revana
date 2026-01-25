@@ -478,7 +478,19 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
-        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit'])
+        $query = Submission::with([
+                'journalSlot.journalMaster', 
+                'marketing',
+                'petugasSubmit',
+                'petugasEditor1',
+                'petugasAuthor1',
+                'petugasEditor2',
+                'petugasReviewer1',
+                'petugasReviewer2',
+                'petugasEditor3',
+                'petugasAuthor2',
+                'petugasProduction'
+            ])
             ->where('process_type', 'fasttrack')
             ->where('marketing_id', $marketing->id);
         
@@ -490,6 +502,14 @@ class DashboardController extends Controller
                   ->orWhere('judul_artikel', 'like', "%{$search}%")
                   ->orWhere('nama_penulis', 'like', "%{$search}%");
             });
+        }
+        
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
         
         $submissions = $query->latest()->paginate(20)->withQueryString();
