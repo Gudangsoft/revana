@@ -594,9 +594,10 @@ class DashboardController extends Controller
         $slot->increment('slot_terpakai');
 
         // Log history
-        $submission->logHistory('fasttrack', 'created', 'Submission fasttrack dibuat oleh Marketing dengan link publish', [
+        $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat oleh Marketing dengan link publish', [
             'link_publish' => $validated['link_publish'],
-            'marketing_id' => $marketing->id
+            'marketing_id' => $marketing->id,
+            'process_type' => 'fasttrack'
         ]);
 
         // Award points to Marketing

@@ -1262,8 +1262,9 @@ class SubmissionController extends Controller
         $slot->increment('slot_terpakai');
 
         // Log history
-        $submission->logHistory('fasttrack', 'created', 'Submission fasttrack dibuat oleh Admin dengan link publish', [
-            'link_publish' => $validated['link_publish']
+        $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat oleh Admin dengan link publish', [
+            'link_publish' => $validated['link_publish'],
+            'process_type' => 'fasttrack'
         ]);
 
         return redirect()->route('admin.fasttrack.index')

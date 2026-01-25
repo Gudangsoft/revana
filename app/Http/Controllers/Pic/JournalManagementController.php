@@ -1332,8 +1332,9 @@ class JournalManagementController extends Controller
         }
 
         // Log history
-        $submission->logHistory('fasttrack', 'created', 'Submission fasttrack dibuat dengan link publish', [
-            'link_publish' => $validated['link_publish']
+        $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat dengan link publish', [
+            'link_publish' => $validated['link_publish'],
+            'process_type' => 'fasttrack'
         ]);
 
         return redirect()->route('pic.fasttrack.index')
