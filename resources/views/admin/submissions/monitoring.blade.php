@@ -94,7 +94,7 @@
 }
 
 .table-monitoring {
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
     font-size: 0.8rem;
 }
@@ -105,23 +105,26 @@
     z-index: 3;
     background: #212529 !important;
     color: white !important;
-    border: 1px solid #343a40;
+    border: 1px solid #212529 !important;
     white-space: nowrap;
     padding: 6px 8px;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
-    top: 38px;
+    top: 32px;
     background: #343a40 !important;
     color: white !important;
+    border: 1px solid #343a40 !important;
 }
 
-/* Override Bootstrap bg-* classes in header to ensure white text */
+/* Override Bootstrap bg-* classes in header to ensure white text and no white borders */
 .table-monitoring thead th.bg-info,
 .table-monitoring thead th.bg-warning,
 .table-monitoring thead th.bg-primary,
-.table-monitoring thead th.bg-success {
+.table-monitoring thead th.bg-success,
+.table-monitoring thead th.bg-dark {
     color: white !important;
+    border-color: #212529 !important;
 }
 
 .table-monitoring thead th.text-dark {
