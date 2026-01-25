@@ -405,7 +405,7 @@
                                     <i class="bi bi-search"></i> Filter
                                 </button>
                                 <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle"></i> Reset
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh
                                 </a>
                             </div>
                             <div class="btn-group btn-group-sm ms-2" role="group">
