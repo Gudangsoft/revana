@@ -291,6 +291,25 @@ class SubmissionController extends Controller
 
     public function destroy(Submission $submission)
     {
+        // Revert marketing points if any were awarded
+        if ($submission->marketing_id) {
+            $pointHistory = MarketingPointHistory::where('marketing_id', $submission->marketing_id)
+                ->where('submission_id', $submission->id)
+                ->first();
+            
+            if ($pointHistory) {
+                // Decrease marketing total points
+                $marketing = Marketing::find($submission->marketing_id);
+                if ($marketing) {
+                    $marketing->total_points = max(0, ($marketing->total_points ?? 0) - $pointHistory->points_earned);
+                    $marketing->save();
+                }
+                
+                // Delete the point history record
+                $pointHistory->delete();
+            }
+        }
+        
         $submission->delete();
 
         return redirect()->route('admin.submissions.index')

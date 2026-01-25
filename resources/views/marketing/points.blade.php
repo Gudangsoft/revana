@@ -7,6 +7,9 @@
     <h4 class="mb-0">
         <i class="bi bi-trophy"></i> Point Saya
     </h4>
+    <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
 </div>
 
 <!-- Point Summary -->
@@ -83,4 +86,13 @@
         @endif
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    // Auto refresh every 30 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
 @endsection
