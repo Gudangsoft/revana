@@ -100,10 +100,10 @@
                     </div>
                 </form>
 
-                <div class="table-responsive">
-                    <form id="bulkDeleteForm" action="{{ route('admin.journal-masters.bulk-delete') }}" method="POST">
-                        @csrf
-                        @method('DELETE')
+                <form id="bulkDeleteForm" action="{{ route('admin.journal-masters.bulk-delete') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
@@ -203,8 +203,8 @@
                             @endforelse
                         </tbody>
                     </table>
-                    </form>
                 </div>
+                </form>
 
                 <div class="mt-3">
                     @include('components.simple-pagination', ['paginator' => $journals->withQueryString()])
@@ -253,17 +253,27 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Bulk delete script loaded');
+    
     const selectAllCheckbox = document.getElementById('selectAll');
     const journalCheckboxes = document.querySelectorAll('.journal-checkbox');
     const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
     const selectedCountSpan = document.getElementById('selectedCount');
     
+    console.log('Found elements:', {
+        selectAll: !!selectAllCheckbox,
+        checkboxes: journalCheckboxes.length,
+        deleteBtn: !!bulkDeleteBtn,
+        countSpan: !!selectedCountSpan
+    });
+    
     // Select/Deselect all
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function() {
+            console.log('Select all clicked:', this.checked);
             journalCheckboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
             });
@@ -274,6 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Individual checkbox change
     journalCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
+            console.log('Checkbox changed:', this.value, this.checked);
             updateSelectAllState();
             updateBulkDeleteButton();
         });
@@ -322,4 +333,4 @@ function confirmBulkDelete() {
     }
 }
 </script>
-@endsection
+@endpush
