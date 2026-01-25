@@ -139,9 +139,6 @@
 
                             <div class="mt-3 text-center">
                                 <hr class="my-3">
-                                <a href="{{ route('public.slot.info') }}" target="_blank" class="btn btn-info w-100 mb-2">
-                                    <i class="bi bi-calendar-range"></i> Info Slot Jurnal
-                                </a>
                                 <a href="{{ route('tracking.index') }}" target="_blank" class="btn btn-warning w-100 mb-2">
                                     <i class="bi bi-search"></i> Tracking LOA
                                 </a>
