@@ -478,10 +478,5 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Ready! Type to search...');
 });
 </script>
-@endpush {
-            slotSelect.innerHTML = '<option value="">Error loading slots</option>';
-        });
-});
-</script>
 @endpush
 @endsection
