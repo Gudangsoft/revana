@@ -51,6 +51,8 @@
                             <th>Nama Jurnal</th>
                             <th>Kode Jurnal</th>
                             <th>Publisher</th>
+                            <th>Kategori</th>
+                            <th>Jenis</th>
                             <th>Akreditasi</th>
                             <th>Status</th>
                         </tr>
@@ -74,6 +76,20 @@
                             </td>
                             <td>{{ $journal->publisher ?? '-' }}</td>
                             <td>
+                                @if($journal->kategori)
+                                    <span class="badge bg-info">{{ $journal->kategori }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($journal->jenis_jurnal)
+                                    <span class="badge bg-primary">{{ $journal->jenis_jurnal }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
                                 @if($journal->accreditation)
                                     <span class="badge bg-success">{{ $journal->accreditation }}</span>
                                 @else
@@ -90,7 +106,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="8" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data jurnal</p>
                             </td>
