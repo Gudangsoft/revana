@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pic;
 
 use App\Http\Controllers\Controller;
 use App\Models\PicPointHistory;
+use App\Models\TaskPointSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -70,7 +71,7 @@ class PicPointController extends Controller
             ->orderBy('total', 'desc')
             ->get();
         
-        $stepConfig = PicPointHistory::POINT_CONFIG;
+        $stepConfig = TaskPointSetting::getPicPointConfig();
         
         return view('pic.points.index', compact(
             'pic',

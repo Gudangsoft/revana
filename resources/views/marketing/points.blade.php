@@ -28,7 +28,7 @@
 <!-- Point Info -->
 <div class="alert alert-info mb-4">
     <i class="bi bi-info-circle"></i>
-    <strong>Sistem Point Marketing:</strong> Setiap artikel yang berhasil disubmit akan memberikan <strong>+10 point</strong>.
+    <strong>Sistem Point Marketing:</strong> Setiap artikel yang berhasil disubmit akan memberikan <strong>+{{ \App\Models\TaskPointSetting::getMarketingPoints('submit') }} point</strong>.
 </div>
 
 <!-- Point History -->

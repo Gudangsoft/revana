@@ -62,4 +62,66 @@ class TaskPointSetting extends Model
     {
         return self::where('user_type', 'marketing')->orderBy('id')->get();
     }
+
+    /**
+     * Get PIC point config in array format (compatible with POINT_CONFIG)
+     * Returns: ['editor1' => ['points' => 1, 'label' => 'Editor 1'], ...]
+     */
+    public static function getPicPointConfig(): array
+    {
+        $settings = self::where('user_type', 'pic')
+            ->where('is_active', true)
+            ->get();
+
+        $config = [];
+        foreach ($settings as $setting) {
+            $config[$setting->task_key] = [
+                'points' => $setting->points,
+                'label' => $setting->task_label,
+            ];
+        }
+
+        // Fallback to default if no settings
+        if (empty($config)) {
+            return [
+                'editor1' => ['points' => 1, 'label' => 'Editor 1'],
+                'author1' => ['points' => 1, 'label' => 'Author 1'],
+                'editor2' => ['points' => 1, 'label' => 'Editor 2'],
+                'reviewer1' => ['points' => 1, 'label' => 'Reviewer 1'],
+                'reviewer2' => ['points' => 1, 'label' => 'Reviewer 2'],
+                'editor3' => ['points' => 1, 'label' => 'Editor 3'],
+                'author2' => ['points' => 1, 'label' => 'Author 2'],
+                'production' => ['points' => 1, 'label' => 'Production'],
+            ];
+        }
+
+        return $config;
+    }
+
+    /**
+     * Get Marketing point config in array format
+     */
+    public static function getMarketingPointConfig(): array
+    {
+        $settings = self::where('user_type', 'marketing')
+            ->where('is_active', true)
+            ->get();
+
+        $config = [];
+        foreach ($settings as $setting) {
+            $config[$setting->task_key] = [
+                'points' => $setting->points,
+                'label' => $setting->task_label,
+            ];
+        }
+
+        // Fallback to default if no settings
+        if (empty($config)) {
+            return [
+                'submit' => ['points' => 1, 'label' => 'Submit Artikel'],
+            ];
+        }
+
+        return $config;
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pic;
 use App\Models\PicPointHistory;
+use App\Models\TaskPointSetting;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PicPointsExport;
@@ -56,7 +57,7 @@ class PicPointReportController extends Controller
             ->orderByRaw('SUM(points_earned) desc')
             ->get();
         
-        $stepConfig = PicPointHistory::POINT_CONFIG;
+        $stepConfig = TaskPointSetting::getPicPointConfig();
         
         return view('admin.pic-points.index', compact(
             'pics',
@@ -112,7 +113,7 @@ class PicPointReportController extends Controller
             ->orderByRaw('SUM(points_earned) desc')
             ->get();
         
-        $stepConfig = PicPointHistory::POINT_CONFIG;
+        $stepConfig = TaskPointSetting::getPicPointConfig();
         
         return view('admin.pic-points.show', compact(
             'pic',
