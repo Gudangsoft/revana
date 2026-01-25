@@ -574,7 +574,7 @@
                                         <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                         
                                         <!-- Production -->
-                                        <td>{{ $s->petugasProduction->name ?? '-' }}</td>
+                                        <td>{{ $s->petugasProduction->name ?? ($s->petugasSubmit->name ?? ($s->marketing->name ?? '-')) }}</td>
                                         <td>
                                             @if($s->link_publish)
                                                 <a href="{{ $s->link_publish }}" target="_blank" class="btn btn-sm btn-success" style="padding: 2px 6px; font-size: 0.7rem;">
