@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modify enum to add 'fasttrack' value
+        // Modify step enum to add 'fasttrack' value
         DB::statement("ALTER TABLE submission_histories MODIFY COLUMN step ENUM(
             'submit',
             'editor1',
@@ -25,6 +25,19 @@ return new class extends Migration
             'production',
             'fasttrack'
         )");
+        
+        // Modify action enum to add 'created' value
+        DB::statement("ALTER TABLE submission_histories MODIFY COLUMN action ENUM(
+            'assigned',
+            'submitted',
+            'revision_request',
+            'revision_submit',
+            'approved',
+            'rejected',
+            'note_added',
+            'credential_added',
+            'created'
+        )");
     }
 
     /**
@@ -32,7 +45,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remove 'fasttrack' from enum
+        // Remove 'fasttrack' from step enum
         DB::statement("ALTER TABLE submission_histories MODIFY COLUMN step ENUM(
             'submit',
             'editor1',
@@ -43,6 +56,18 @@ return new class extends Migration
             'editor3',
             'author2',
             'production'
+        )");
+        
+        // Remove 'created' from action enum
+        DB::statement("ALTER TABLE submission_histories MODIFY COLUMN action ENUM(
+            'assigned',
+            'submitted',
+            'revision_request',
+            'revision_submit',
+            'approved',
+            'rejected',
+            'note_added',
+            'credential_added'
         )");
     }
 };
