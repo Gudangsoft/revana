@@ -211,13 +211,11 @@
             @yield('sidebar')
         </div>
         <div class="content">
-            @hasSection('page-title')
-                @if(trim(View::yieldContent('page-title')) !== '')
-                <div class="page-header">
-                    <h2>@yield('page-title')</h2>
-                </div>
-                @endif
-            @endhasSection
+            @if(View::hasSection('page-title') && trim(View::yieldContent('page-title')) !== '')
+            <div class="page-header">
+                <h2>@yield('page-title')</h2>
+            </div>
+            @endif
             
             {{-- Flash Messages --}}
             @if(session('success'))
