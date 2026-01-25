@@ -1157,6 +1157,41 @@ class SubmissionController extends Controller
         return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
     }
 
+    /**
+     * Toggle valid field via AJAX (inline checkbox in monitoring/fasttrack table)
+     */
+    public function toggleValidField(Request $request)
+    {
+        $allowedFields = [
+            'editor1_valid',
+            'author1_valid',
+            'editor2_valid',
+            'reviewer1_valid',
+            'reviewer2_valid',
+            'editor3_valid',
+            'author2_valid',
+            'production_valid',
+        ];
+
+        $request->validate([
+            'submission_id' => 'required|exists:submissions,id',
+            'field' => 'required|in:' . implode(',', $allowedFields),
+        ]);
+
+        $submission = Submission::findOrFail($request->submission_id);
+        $field = $request->field;
+        
+        // Toggle the value
+        $submission->{$field} = !$submission->{$field};
+        $submission->save();
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'Berhasil disimpan',
+            'is_valid' => $submission->{$field}
+        ]);
+    }
+
     // ==================== FASTTRACK SUBMISSIONS ====================
     
     /**

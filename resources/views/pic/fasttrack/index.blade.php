@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Monitoring Fasttrack - {{ $appSettings['app_name'] ?? 'SIPERA' }}</title>
     @if(isset($appSettings['favicon']) && $appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">
@@ -543,35 +544,70 @@
                                         <!-- Editor 1 -->
                                         <td>{{ $s->petugasEditor1->name ?? '-' }}</td>
                                         <td>@if($s->username_editor)<code>{{ $s->username_editor }}/{{ $s->password_editor ?? '-' }}</code>@else - @endif</td>
-                                        <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'editor1_valid', {{ $s->editor1_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Author 1 -->
                                         <td>{{ $s->petugasAuthor1->name ?? '-' }}</td>
-                                        <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'author1_valid', {{ $s->author1_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Editor 2 -->
                                         <td>{{ $s->petugasEditor2->name ?? '-' }}</td>
-                                        <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'editor2_valid', {{ $s->editor2_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Reviewer 1 -->
                                         <td>{{ $s->petugasReviewer1->name ?? '-' }}</td>
                                         <td>@if($s->username_reviewer1)<code>{{ $s->username_reviewer1 }}/{{ $s->password_reviewer1 ?? '-' }}</code>@else - @endif</td>
                                         <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 10) ?? '-' }}</td>
-                                        <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'reviewer1_valid', {{ $s->reviewer1_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Reviewer 2 -->
                                         <td>{{ $s->petugasReviewer2->name ?? '-' }}</td>
                                         <td>@if($s->username_reviewer2)<code>{{ $s->username_reviewer2 }}/{{ $s->password_reviewer2 ?? '-' }}</code>@else - @endif</td>
                                         <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 10) ?? '-' }}</td>
-                                        <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'reviewer2_valid', {{ $s->reviewer2_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Editor 3 -->
                                         <td>{{ $s->petugasEditor3->name ?? '-' }}</td>
-                                        <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'editor3_valid', {{ $s->editor3_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Author 2 -->
                                         <td>{{ $s->petugasAuthor2->name ?? '-' }}</td>
-                                        <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                        <td class="text-center">
+                                            <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                               style="cursor: pointer;" 
+                                               onclick="toggleValid(this, {{ $s->id }}, 'author2_valid', {{ $s->author2_valid ? 'true' : 'false' }})"
+                                               title="Klik untuk toggle valid"></i>
+                                        </td>
                                         
                                         <!-- Production -->
                                         <td>{{ $s->petugasProduction->name ?? ($s->petugasSubmit->name ?? ($s->marketing->name ?? '-')) }}</td>
@@ -708,6 +744,58 @@
         
         updateScrollPosition();
     });
+    
+    // Toggle Valid Function
+    function toggleValid(icon, submissionId, field, currentValue) {
+        const newValue = !currentValue;
+        
+        // Extract stage from field (e.g., 'editor1_valid' -> 'editor1')
+        const stage = field.replace('_valid', '');
+        
+        // Visual feedback
+        icon.style.opacity = '0.5';
+        
+        fetch('/pic/toggle-valid', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                submission_id: submissionId,
+                stage: stage
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            icon.style.opacity = '1';
+            if (data.success) {
+                // Update icon based on server response
+                const isValid = data.is_valid;
+                if (isValid) {
+                    icon.classList.remove('bi-circle', 'text-muted');
+                    icon.classList.add('bi-check-circle-fill', 'text-success');
+                } else {
+                    icon.classList.remove('bi-check-circle-fill', 'text-success');
+                    icon.classList.add('bi-circle', 'text-muted');
+                }
+                // Update onclick with new value
+                icon.setAttribute('onclick', `toggleValid(this, ${submissionId}, '${field}', ${isValid})`);
+            } else {
+                alert('Gagal: ' + (data.message || 'Error'));
+            }
+        })
+        .catch(error => {
+            icon.style.opacity = '1';
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
+        });
+    }
     </script>
 </body>
 </html>

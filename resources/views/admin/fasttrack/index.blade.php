@@ -599,7 +599,12 @@
                                                onblur="quickUpdateCredential(this, {{ $s->id }}, 'password_editor')">
                                     </div>
                                 </td>
-                                <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'editor1_valid', {{ $s->editor1_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Author 1: Petugas, Valid -->
                                 <td>
@@ -614,7 +619,12 @@
                                         @endforeach
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'author1_valid', {{ $s->author1_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Editor 2: Petugas, Valid -->
                                 <td>
@@ -629,7 +639,12 @@
                                         @endforeach
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'editor2_valid', {{ $s->editor2_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Reviewer 1: Petugas, User/Pass, Catatan, Valid -->
                                 <td>
@@ -660,7 +675,12 @@
                                     </div>
                                 </td>
                                 <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
-                                <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'reviewer1_valid', {{ $s->reviewer1_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Reviewer 2: Petugas, User/Pass, Catatan, Valid -->
                                 <td>
@@ -691,7 +711,12 @@
                                     </div>
                                 </td>
                                 <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
-                                <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'reviewer2_valid', {{ $s->reviewer2_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Editor 3: Petugas, Valid -->
                                 <td>
@@ -706,7 +731,12 @@
                                         @endforeach
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'editor3_valid', {{ $s->editor3_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Author 2: Petugas, Valid -->
                                 <td>
@@ -721,7 +751,12 @@
                                         @endforeach
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValidField(this, {{ $s->id }}, 'author2_valid', {{ $s->author2_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
                                 
                                 <!-- Production: Petugas, Link Publish, Valid -->
                                 <td>
@@ -1047,6 +1082,55 @@ function quickUpdateCredential(input, submissionId, field) {
         input.classList.add('error');
         setTimeout(() => input.classList.remove('error'), 2000);
         console.error('Error:', error);
+    });
+}
+
+// Toggle Valid Field Function
+function toggleValidField(icon, submissionId, field, currentValue) {
+    // Visual feedback
+    icon.style.opacity = '0.5';
+    
+    fetch('/admin/submissions/toggle-valid-field', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            submission_id: parseInt(submissionId),
+            field: field
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error('HTTP ' + response.status + ': ' + text);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        icon.style.opacity = '1';
+        if (data.success) {
+            // Update icon based on server response
+            const isValid = data.is_valid;
+            if (isValid) {
+                icon.classList.remove('bi-circle', 'text-muted');
+                icon.classList.add('bi-check-circle-fill', 'text-success');
+            } else {
+                icon.classList.remove('bi-check-circle-fill', 'text-success');
+                icon.classList.add('bi-circle', 'text-muted');
+            }
+            // Update onclick with new value
+            icon.setAttribute('onclick', `toggleValidField(this, ${submissionId}, '${field}', ${isValid})`);
+        } else {
+            alert('Gagal: ' + (data.message || 'Error'));
+        }
+    })
+    .catch(error => {
+        icon.style.opacity = '1';
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
     });
 }
 </script>
