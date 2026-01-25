@@ -612,7 +612,15 @@
                                         @endforeach
                                     </select>
                                 </td>
-                                <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasSubmit)
+                                        {{ $s->petugasSubmit->name }}
+                                    @elseif($s->marketing)
+                                        <span class="text-success" title="Disubmit oleh Marketing">{{ $s->marketing->name }}</span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
