@@ -178,8 +178,6 @@ class DashboardController extends Controller
         
         $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
-            'kategori_id' => 'required|exists:kategoris,id',
-            'jenis_jurnal_id' => 'required|exists:jenis_jurnals,id',
             'id_artikel' => 'required|string|max:100',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
@@ -218,8 +216,6 @@ class DashboardController extends Controller
             $submission = Submission::create([
                 'kode_submit' => $kodeSubmit,
                 'journal_slot_id' => $request->journal_slot_id,
-                'kategori_id' => $request->kategori_id,
-                'jenis_jurnal_id' => $request->jenis_jurnal_id,
                 'marketing_id' => $marketing->id,
                 'id_artikel' => $request->id_artikel,
                 'judul_artikel' => $request->judul_artikel,
