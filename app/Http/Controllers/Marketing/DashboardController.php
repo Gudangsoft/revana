@@ -241,9 +241,21 @@ class DashboardController extends Controller
             // Increment slot terpakai
             $slot->increment('slot_terpakai');
             
+            // Award points to Marketing
+            $pointHistory = MarketingPointHistory::awardPoints(
+                $marketing->id,
+                $submission->id,
+                "Submit artikel: {$kodeSubmit} - {$submission->judul_artikel}"
+            );
+            
+            $pointMessage = '';
+            if ($pointHistory) {
+                $pointMessage = " Anda mendapatkan +{$pointHistory->points_earned} point!";
+            }
+            
             return redirect()
                 ->route('marketing.submissions', ['highlight' => $submission->id])
-                ->with('success', 'Artikel berhasil disubmit! Kode: ' . $kodeSubmit);
+                ->with('success', 'Artikel berhasil disubmit! Kode: ' . $kodeSubmit . $pointMessage);
                 
         } catch (\Exception $e) {
             \Log::error('Marketing submission error: ' . $e->getMessage());
