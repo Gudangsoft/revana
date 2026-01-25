@@ -278,9 +278,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     let selectedJournalName = '';
+    let isJournalSelected = false;
     
     // Search input
     searchInput.addEventListener('input', function() {
+        // Jika jurnal sudah dipilih dan user mulai edit (tidak dimulai dengan ✓), clear selection
+        if (isJournalSelected && this.value.indexOf('✓') !== 0) {
+            isJournalSelected = false;
+            hiddenInput.value = '';
+            this.classList.remove('is-valid');
+            slotSelect.innerHTML = '<option value="">-- Pilih Jurnal terlebih dahulu --</option>';
+            slotSelect.disabled = true;
+        }
+        
         const searchTerm = this.value.toLowerCase().trim();
         
         console.log('🔍 Searching for:', searchTerm);
@@ -339,6 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Klik hasil
     searchResults.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         const target = e.target.closest('.list-group-item-action');
         if (!target) return;
         
@@ -377,19 +388,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function selectJournal(journalId, journalName) {
         hiddenInput.value = journalId;
         selectedJournalName = journalName;
+        isJournalSelected = true;
         searchInput.value = '✓ ' + journalName;
         searchInput.classList.add('is-valid');
         searchResults.style.display = 'none';
+        
+        // Blur input to prevent keyboard staying open
+        searchInput.blur();
         
         console.log('✅ Selected ID:', journalId);
         loadSlots(journalId);
     }
     
-    // Edit selection
+    // Edit selection - saat focus pada field yang sudah berisi selection
     searchInput.addEventListener('focus', function() {
-        if (hiddenInput.value && this.value.indexOf('✓') === 0) {
+        if (isJournalSelected && this.value.indexOf('✓') === 0) {
+            // Jika user ingin edit, tampilkan nama jurnal tanpa ✓ dan select semua
             this.value = selectedJournalName;
             this.select();
+            // Dropdown tidak ditampilkan sampai user mulai mengetik
         }
     });
     
