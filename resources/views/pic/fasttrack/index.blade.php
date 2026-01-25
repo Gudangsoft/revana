@@ -755,7 +755,7 @@
         // Visual feedback
         icon.style.opacity = '0.5';
         
-        fetch('/pic/toggle-valid', {
+        fetch('/pic/submissions/toggle-valid', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
