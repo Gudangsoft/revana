@@ -498,9 +498,7 @@
                                 <th rowspan="2" class="align-middle">Link</th>
                                 <th rowspan="2" class="align-middle">Penulis</th>
                                 <th rowspan="2" class="align-middle">No HP</th>
-                                <th colspan="2" class="text-center">Author Access</th>
-                                <th rowspan="2" class="align-middle">PIC Marketing</th>
-                                <th rowspan="2" class="align-middle" id="colSubmit">Petugas Submit</th>
+                                <th colspan="4" class="text-center" id="colSubmit">Author Access</th>
                                 <th colspan="3" class="text-center bg-info" id="colEditor1">Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor2">Editor 2</th>
@@ -511,7 +509,9 @@
                                 <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
                             </tr>
                             <tr>
-                                <!-- Author Access sub-headers -->
+                                <!-- Author Access sub-headers (4 cols) -->
+                                <th class="bg-dark">PIC Marketing</th>
+                                <th class="bg-dark">Petugas Submit</th>
                                 <th class="bg-dark">Username</th>
                                 <th class="bg-dark">Password</th>
                                 <!-- Editor 1 sub-headers (3 cols) -->
@@ -596,8 +596,7 @@
                                         -
                                     @endif
                                 </td>
-                                <td><code>{{ $s->username_author ?? '-' }}</code></td>
-                                <td><code>{{ $s->password_author ?? '-' }}</code></td>
+                                <!-- Author Access: PIC Marketing, Petugas Submit, Username, Password -->
                                 <td>
                                     <select class="inline-assign-select {{ $s->marketing_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
@@ -611,6 +610,8 @@
                                     </select>
                                 </td>
                                 <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
+                                <td><code>{{ $s->username_author ?? '-' }}</code></td>
+                                <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1 -->
                                 <td>
