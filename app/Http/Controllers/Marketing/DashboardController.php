@@ -319,8 +319,9 @@ class DashboardController extends Controller
         }
         
         $journals = $query->orderBy('nama_jurnal')->paginate(20)->withQueryString();
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         
-        return view('marketing.journals.index', compact('marketing', 'journals'));
+        return view('marketing.journals.index', compact('marketing', 'journals', 'accreditations'));
     }
 
     /**
@@ -379,8 +380,9 @@ class DashboardController extends Controller
             ->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         
-        return view('marketing.journal-slots.index', compact('marketing', 'slots', 'journals'));
+        return view('marketing.journal-slots.index', compact('marketing', 'slots', 'journals', 'accreditations'));
     }
 
     /**

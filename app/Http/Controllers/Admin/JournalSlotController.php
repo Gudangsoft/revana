@@ -66,6 +66,7 @@ class JournalSlotController extends Controller
         
         $slots = $query->latest()->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
         $bulanOptions = JournalSlot::getBulanOptions();
         
         // If monitoring tab is active, load monitoring data
@@ -110,7 +111,7 @@ class JournalSlotController extends Controller
             });
         }
         
-        return view('admin.journal-slots.index', compact('slots', 'journals', 'bulanOptions', 'slotStats'));
+        return view('admin.journal-slots.index', compact('slots', 'journals', 'accreditations', 'bulanOptions', 'slotStats'));
     }
 
     public function create()

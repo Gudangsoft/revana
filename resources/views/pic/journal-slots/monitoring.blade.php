@@ -28,11 +28,9 @@
             <div class="col-md-2">
                 <select name="accreditation" class="form-select">
                     <option value="">Semua Akreditasi</option>
-                    <option value="SINTA 1" {{ request('accreditation') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
-                    <option value="SINTA 2" {{ request('accreditation') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
-                    <option value="SINTA 3" {{ request('accreditation') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
-                    <option value="SINTA 4" {{ request('accreditation') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
-                    <option value="SINTA 5" {{ request('accreditation') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                    @foreach($accreditations as $accreditation)
+                        <option value="{{ $accreditation->name }}" {{ request('accreditation') == $accreditation->name ? 'selected' : '' }}>{{ $accreditation->name }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="col-md-2">

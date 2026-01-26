@@ -37,7 +37,8 @@ class JournalManagementController extends Controller
         }
         
         $journals = $query->latest()->paginate(20)->withQueryString();
-        return view('pic.journals.index', compact('journals'));
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
+        return view('pic.journals.index', compact('journals', 'accreditations'));
     }
 
     public function journalsCreate()
@@ -214,8 +215,9 @@ class JournalManagementController extends Controller
 
         $slots = $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         
-        return view('pic.journal-slots.monitoring', compact('slots', 'journals'));
+        return view('pic.journal-slots.monitoring', compact('slots', 'journals', 'accreditations'));
     }
 
     // ==================== SUBMISSIONS ====================
