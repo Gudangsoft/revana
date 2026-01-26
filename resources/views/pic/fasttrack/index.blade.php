@@ -9,18 +9,47 @@
 @section('styles')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
-/* Override content width for this page */
+/* Override layout untuk halaman ini agar scroll di dalam tabel */
+html, body {
+    overflow: hidden !important;
+    height: 100vh;
+}
+
+.main-container {
+    height: calc(100vh - 56px) !important;
+    overflow: hidden !important;
+}
+
 .content {
     max-width: 100vw;
-    overflow-x: hidden;
+    overflow: hidden !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
 }
 
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
+    flex: 1;
     overflow-x: auto;
     overflow-y: auto;
-    max-height: calc(100vh - 400px);
-    min-height: 300px;
+    min-height: 200px;
     border: 1px solid #dee2e6;
     border-radius: 4px;
     scrollbar-width: thin;
