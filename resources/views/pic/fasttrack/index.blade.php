@@ -648,7 +648,17 @@ html, body {
                                         -
                                     @endif
                                 </td>
-                                <td class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                                <td class="text-center">
+                                    @if($s->petugas_production_id == $picId)
+                                    <i class="bi {{ $s->production_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'production_valid', {{ $s->production_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->production_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
+                                </td>
                                 
                                 <td class="text-center">
                                     <a href="{{ route('pic.fasttrack.show', $s) }}" class="btn btn-info btn-sm" style="padding: 2px 6px; font-size: 0.7rem;">
