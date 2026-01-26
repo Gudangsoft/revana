@@ -2,6 +2,21 @@
 
 @section('title', 'Input Fasttrack')
 
+@section('styles')
+<style>
+/* Style untuk slot penuh */
+#journal_slot_id option:disabled {
+    color: #dc3545 !important;
+    background-color: #f8d7da !important;
+    font-weight: bold;
+}
+
+#journal_slot_id option[disabled]::before {
+    content: '🚫 ';
+}
+</style>
+@endsection
+
 @section('content')
 <div class="card">
     <div class="card-header bg-warning text-dark">
@@ -259,7 +274,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     slotSelect.innerHTML = '<option value="">-- Tidak ada slot tersedia --</option>';
                 } else {
                     slotSelect.innerHTML = '<option value="">-- Pilih Slot --</option>' + 
-                        data.map(s => `<option value="${s.id}">${s.text}</option>`).join('');
+                        data.map(s => {
+                            const available = s.jumlah_slot - s.slot_terpakai;
+                            const isFull = available <= 0;
+                            const fullIndicator = isFull ? ' 🚫 PENUH' : ` - Sisa: ${available}/${s.jumlah_slot} slot`;
+                            const disabled = isFull ? ' disabled' : '';
+                            return `<option value="${s.id}"${disabled}>${s.text}${fullIndicator}</option>`;
+                        }).join('');
                 }
             })
             .catch(error => {
@@ -267,6 +288,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 slotSelect.innerHTML = '<option value="">-- Error memuat slot --</option>';
             });
     }
+    
+    // Add validation when form is submitted
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const selectedOption = slotSelect.options[slotSelect.selectedIndex];
+        if (selectedOption && selectedOption.disabled) {
+            e.preventDefault();
+            alert('⚠️ Slot yang Anda pilih sudah PENUH!\n\nSilakan pilih slot lain yang masih tersedia.');
+            slotSelect.value = '';
+            slotSelect.focus();
+            return false;
+        }
+    });
 });
 </script>
 @endsection

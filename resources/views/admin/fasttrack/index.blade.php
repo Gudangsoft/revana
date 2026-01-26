@@ -107,6 +107,28 @@
     background-color: #f8d7da;
 }
 
+/* Style untuk petugas belum ditugaskan */
+.petugas-kosong {
+    color: #dc3545;
+    font-style: italic;
+    font-size: 0.75rem;
+    display: block;
+    text-align: center;
+    padding: 4px 0;
+}
+
+.petugas-kosong i {
+    margin-right: 2px;
+}
+
+.petugas-opsional {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.75rem;
+    display: block;
+    text-align: center;
+}
+
 .table-monitoring {
     border-collapse: collapse;
     border-spacing: 0;
@@ -511,7 +533,28 @@
                                         <code class="text-warning">{{ $s->kode_submit }}</code>
                                     </a>
                                     <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
-                                    <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
+                                    <br>
+                                    @php
+                                        // Determine status badge
+                                        $statusBadge = '';
+                                        $statusIcon = '';
+                                        $statusClass = '';
+                                        
+                                        if ($s->status === 'PUBLISHED' || $s->production_valid) {
+                                            $statusBadge = 'SELESAI';
+                                            $statusIcon = 'check-circle-fill';
+                                            $statusClass = 'bg-success';
+                                        } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id) {
+                                            $statusBadge = 'PERLU PENUGASAN';
+                                            $statusIcon = 'exclamation-triangle-fill';
+                                            $statusClass = 'bg-warning text-dark';
+                                        } else {
+                                            $statusBadge = 'PROSES';
+                                            $statusIcon = 'arrow-repeat';
+                                            $statusClass = 'bg-info text-dark';
+                                        }
+                                    @endphp
+                                    <span class="badge {{ $statusClass }} mt-1"><i class="bi bi-{{ $statusIcon }}"></i> {{ $statusBadge }}</span>
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel ?? '-' }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>

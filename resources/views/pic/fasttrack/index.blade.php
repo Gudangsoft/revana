@@ -207,6 +207,17 @@ html, body {
     background-color: #f9fafb;
 }
 
+/* Style untuk petugas belum ditugaskan */
+.petugas-kosong {
+    color: #dc3545;
+    font-style: italic;
+    font-size: 0.75rem;
+}
+
+.petugas-kosong i {
+    margin-right: 2px;
+}
+
 /* Scroll controls */
 .scroll-controls {
     margin-bottom: 10px;
@@ -499,7 +510,28 @@ html, body {
                                         <code class="text-warning">{{ $s->kode_submit }}</code>
                                     </a>
                                     <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
-                                    <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
+                                    <br>
+                                    @php
+                                        // Determine status badge
+                                        $statusBadge = '';
+                                        $statusIcon = '';
+                                        $statusClass = '';
+                                        
+                                        if ($s->status === 'PUBLISHED' || $s->production_valid) {
+                                            $statusBadge = 'SELESAI';
+                                            $statusIcon = 'check-circle-fill';
+                                            $statusClass = 'bg-success';
+                                        } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id) {
+                                            $statusBadge = 'PERLU PENUGASAN';
+                                            $statusIcon = 'exclamation-triangle-fill';
+                                            $statusClass = 'bg-warning text-dark';
+                                        } else {
+                                            $statusBadge = 'PROSES';
+                                            $statusIcon = 'arrow-repeat';
+                                            $statusClass = 'bg-info text-dark';
+                                        }
+                                    @endphp
+                                    <span class="badge {{ $statusClass }} mt-1"><i class="bi bi-{{ $statusIcon }}"></i> {{ $statusBadge }}</span>
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel ?? '-' }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 20) }}</td>
@@ -535,7 +567,13 @@ html, body {
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1 -->
-                                <td>{{ $s->petugasEditor1->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasEditor1)
+                                        {{ $s->petugasEditor1->name }}
+                                    @else
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @endif
+                                </td>
                                 <td>@if($s->username_editor)<code>{{ $s->username_editor }}/{{ $s->password_editor ?? '-' }}</code>@else - @endif</td>
                                 <td class="text-center">
                                     @if($s->petugas_editor1_id == $picId)
@@ -550,7 +588,13 @@ html, body {
                                 </td>
                                 
                                 <!-- Author 1 -->
-                                <td>{{ $s->petugasAuthor1->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasAuthor1)
+                                        {{ $s->petugasAuthor1->name }}
+                                    @else
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if($s->petugas_author1_id == $picId)
                                     <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
@@ -564,7 +608,13 @@ html, body {
                                 </td>
                                 
                                 <!-- Editor 2 -->
-                                <td>{{ $s->petugasEditor2->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasEditor2)
+                                        {{ $s->petugasEditor2->name }}
+                                    @else
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if($s->petugas_editor2_id == $picId)
                                     <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
@@ -578,7 +628,13 @@ html, body {
                                 </td>
                                 
                                 <!-- Reviewer 1 -->
-                                <td>{{ $s->petugasReviewer1->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasReviewer1)
+                                        {{ $s->petugasReviewer1->name }}
+                                    @else
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @endif
+                                </td>
                                 <td>@if($s->username_reviewer1)<code>{{ $s->username_reviewer1 }}/{{ $s->password_reviewer1 ?? '-' }}</code>@else - @endif</td>
                                 <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 10) ?? '-' }}</td>
                                 <td class="text-center">
@@ -594,7 +650,13 @@ html, body {
                                 </td>
                                 
                                 <!-- Reviewer 2 -->
-                                <td>{{ $s->petugasReviewer2->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasReviewer2)
+                                        {{ $s->petugasReviewer2->name }}
+                                    @else
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @endif
+                                </td>
                                 <td>@if($s->username_reviewer2)<code>{{ $s->username_reviewer2 }}/{{ $s->password_reviewer2 ?? '-' }}</code>@else - @endif</td>
                                 <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 10) ?? '-' }}</td>
                                 <td class="text-center">
@@ -610,7 +672,13 @@ html, body {
                                 </td>
                                 
                                 <!-- Editor 3 -->
-                                <td>{{ $s->petugasEditor3->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasEditor3)
+                                        {{ $s->petugasEditor3->name }}
+                                    @else
+                                        <span class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-dash-circle"></i> Opsional</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if($s->petugas_editor3_id == $picId)
                                     <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
@@ -624,7 +692,13 @@ html, body {
                                 </td>
                                 
                                 <!-- Author 2 -->
-                                <td>{{ $s->petugasAuthor2->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->petugasAuthor2)
+                                        {{ $s->petugasAuthor2->name }}
+                                    @else
+                                        <span class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-dash-circle"></i> Opsional</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if($s->petugas_author2_id == $picId)
                                     <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
@@ -638,7 +712,17 @@ html, body {
                                 </td>
                                 
                                 <!-- Production -->
-                                <td>{{ $s->petugasProduction->name ?? ($s->petugasSubmit->name ?? ($s->marketing->name ?? '-')) }}</td>
+                                <td>
+                                    @if($s->petugasProduction)
+                                        {{ $s->petugasProduction->name }}
+                                    @elseif($s->petugasSubmit)
+                                        {{ $s->petugasSubmit->name }}
+                                    @elseif($s->marketing)
+                                        {{ $s->marketing->name }}
+                                    @else
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($s->link_publish)
                                         <a href="{{ $s->link_publish }}" target="_blank" class="btn btn-sm btn-success" style="padding: 2px 6px; font-size: 0.7rem;">

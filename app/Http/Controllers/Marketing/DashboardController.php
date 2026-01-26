@@ -455,13 +455,14 @@ class DashboardController extends Controller
                 return [
                     'id' => $slot->id,
                     'text' => sprintf(
-                        'Vol. %s No. %s (%s) - Sisa: %d/%d slot',
+                        'Vol. %s No. %s (%s)',
                         $slot->volume ?? '-',
                         $slot->nomor ?? '-',
-                        $slot->tahun,
-                        $sisa > 0 ? $sisa : 0,
-                        $slot->jumlah_slot
-                    )
+                        $slot->tahun
+                    ),
+                    'jumlah_slot' => $slot->jumlah_slot,
+                    'slot_terpakai' => $slot->slot_terpakai,
+                    'sisa' => $sisa > 0 ? $sisa : 0
                 ];
             });
         

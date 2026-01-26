@@ -245,15 +245,22 @@ class JournalSlotController extends Controller
     {
         $slots = JournalSlot::where('journal_master_id', $request->journal_master_id)
             ->where('is_active', true)
-            ->whereRaw('jumlah_slot > slot_terpakai')
             ->orderBy('tahun', 'desc')
             ->orderBy('nomor', 'desc')
             ->get()
             ->map(function($slot) {
                 return [
                     'id' => $slot->id,
-                    'text' => $slot->display_name . ' (Tersedia: ' . $slot->slot_tersedia . ')',
+                    'text' => sprintf(
+                        'Vol. %s No. %s (%s)',
+                        $slot->volume ?? '-',
+                        $slot->nomor ?? '-',
+                        $slot->tahun
+                    ),
                     'kode_slot' => $slot->kode_slot,
+                    'jumlah_slot' => $slot->jumlah_slot,
+                    'slot_terpakai' => $slot->slot_terpakai,
+                    'sisa' => $slot->slot_tersedia > 0 ? $slot->slot_tersedia : 0
                 ];
             });
             
