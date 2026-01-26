@@ -61,7 +61,7 @@
                                 <td>{{ $submission->no_hp_penulis ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <th>Link Artikel:</th>
+                                <th>Link Submit:</th>
                                 <td>
                                     @if($submission->link_artikel)
                                         <a href="{{ $submission->link_artikel }}" target="_blank" class="btn btn-sm btn-outline-primary">

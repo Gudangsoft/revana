@@ -77,7 +77,7 @@
                 </div>
                 @if($submission->link_artikel)
                 <div class="mb-3">
-                    <div class="info-label">Link Artikel</div>
+                    <div class="info-label">Link Submit</div>
                     <div class="info-value">
                         <a href="{{ $submission->link_artikel }}" target="_blank" class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-link-45deg"></i> Buka Artikel

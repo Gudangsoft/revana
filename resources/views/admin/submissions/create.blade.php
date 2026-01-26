@@ -82,7 +82,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="link_artikel" class="form-label">Link Artikel</label>
+                                <label for="link_artikel" class="form-label">Link Submit</label>
                                 <input type="url" class="form-control @error('link_artikel') is-invalid @enderror" id="link_artikel" name="link_artikel" value="{{ old('link_artikel') }}" placeholder="https://">
                                 @error('link_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>

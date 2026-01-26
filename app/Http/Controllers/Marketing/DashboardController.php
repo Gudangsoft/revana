@@ -545,7 +545,7 @@ class DashboardController extends Controller
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
             'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240',
-            'link_publish' => 'required|url|max:500',
+            'link_publish' => 'nullable|url|max:500',
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
@@ -587,6 +587,12 @@ class DashboardController extends Controller
             return back()->with('error', 'Error: Admin user tidak ditemukan.')->withInput();
         }
 
+        // Determine status based on link_publish availability
+        $status = !empty($validated['link_publish']) ? 'PUBLISHED' : 'PENDING_ASSIGNMENT';
+        $logMessage = !empty($validated['link_publish']) 
+            ? 'Submission fasttrack dibuat oleh Marketing dengan link publish' 
+            : 'Submission fasttrack dibuat oleh Marketing, menunggu penugasan admin';
+
         // Create submission
         $submission = Submission::create([
             'kode_submit' => $kodeSubmit,
@@ -597,23 +603,24 @@ class DashboardController extends Controller
             'judul_artikel' => $validated['judul_artikel'],
             'link_artikel' => $validated['link_artikel'] ?? null,
             'file_artikel' => $fileArtikel,
-            'link_publish' => $validated['link_publish'],
+            'link_publish' => $validated['link_publish'] ?? null,
             'nama_penulis' => $validated['nama_penulis'],
             'no_hp_penulis' => $validated['no_hp_penulis'] ?? null,
             'username_author' => $validated['username_author'] ?? null,
             'password_author' => $validated['password_author'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'tanggal_submit' => now(),
-            'status' => 'PUBLISHED',
+            'status' => $status,
             'process_type' => 'fasttrack',
             'created_by' => $adminUser->id,
         ]);
 
         // Log history
-        $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat oleh Marketing dengan link publish', [
-            'link_publish' => $validated['link_publish'],
+        $submission->logHistory('submit', 'submitted', $logMessage, [
+            'link_publish' => $validated['link_publish'] ?? null,
             'marketing_id' => $marketing->id,
-            'process_type' => 'fasttrack'
+            'process_type' => 'fasttrack',
+            'status' => $status
         ]);
 
         // Award points to Marketing
@@ -628,8 +635,12 @@ class DashboardController extends Controller
             $pointMessage = " Anda mendapatkan +{$pointHistory->points_earned} point!";
         }
 
+        $statusMessage = !empty($validated['link_publish']) 
+            ? '' 
+            : ' Status: Menunggu penugasan admin (Link publish belum diisi).';
+
         return redirect()->route('marketing.fasttrack.index')
-            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $kodeSubmit . $pointMessage);
+            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $kodeSubmit . $pointMessage . $statusMessage);
     }
 
     /**

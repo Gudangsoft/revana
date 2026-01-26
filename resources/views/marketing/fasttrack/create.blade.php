@@ -84,7 +84,7 @@
                     @enderror
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Link Artikel</label>
+                    <label class="form-label">Link Submit</label>
                     <input type="url" name="link_artikel" class="form-control @error('link_artikel') is-invalid @enderror" value="{{ old('link_artikel') }}" placeholder="https://">
                     @error('link_artikel')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -115,9 +115,9 @@
 
             <div class="row mb-3">
                 <div class="col-md-12">
-                    <label class="form-label">Link Publish <span class="text-danger">*</span></label>
-                    <input type="url" name="link_publish" class="form-control @error('link_publish') is-invalid @enderror" value="{{ old('link_publish') }}" placeholder="https://..." required>
-                    <small class="text-muted"><i class="bi bi-link-45deg"></i> Masukkan link artikel yang sudah publish</small>
+                    <label class="form-label">Link Publish</label>
+                    <input type="url" name="link_publish" class="form-control @error('link_publish') is-invalid @enderror" value="{{ old('link_publish') }}" placeholder="https://...">
+                    <small class="text-muted"><i class="bi bi-link-45deg"></i> Link artikel yang sudah publish (Jika belum ada, artikel perlu penugasan oleh admin)</small>
                     @error('link_publish')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

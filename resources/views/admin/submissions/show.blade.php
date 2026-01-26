@@ -60,7 +60,7 @@
                                 <td>{{ $submission->judul_artikel }}</td>
                             </tr>
                             <tr>
-                                <th>Link Artikel</th>
+                                <th>Link Submit</th>
                                 <td>
                                     @if($submission->link_artikel)
                                         <a href="{{ $submission->link_artikel }}" target="_blank">

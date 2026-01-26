@@ -97,7 +97,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="link_artikel" class="form-label">Link Artikel</label>
+                                <label for="link_artikel" class="form-label">Link Submit</label>
                                 <input type="url" 
                                        class="form-control @error('link_artikel') is-invalid @enderror" 
                                        id="link_artikel" 
@@ -155,7 +155,7 @@
                                        placeholder="https://..." 
                                        value="{{ old('link_publish') }}"
                                        required>
-                                <small class="text-muted"><i class="bi bi-link-45deg"></i> Masukkan link artikel yang sudah publish</small>
+                                <small class="text-muted"><i class="bi bi-link-45deg"></i> Link artikel yang sudah publish (Opsional: Jika belum ada, artikel perlu penugasan)</small>
                                 @error('link_publish')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

@@ -82,7 +82,7 @@
         
         @if($submission->link_artikel)
         <div class="mb-3">
-            <strong>Link Artikel:</strong>
+            <strong>Link Submit:</strong>
             <div><a href="{{ $submission->link_artikel }}" target="_blank">{{ $submission->link_artikel }}</a></div>
         </div>
         @endif
