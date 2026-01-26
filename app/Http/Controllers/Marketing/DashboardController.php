@@ -238,9 +238,6 @@ class DashboardController extends Controller
                 'kode_submit' => $kodeSubmit,
             ]);
             
-            // Increment slot terpakai
-            $slot->increment('slot_terpakai');
-            
             // Award points to Marketing
             $pointHistory = MarketingPointHistory::awardPoints(
                 $marketing->id,
@@ -609,9 +606,6 @@ class DashboardController extends Controller
             'process_type' => 'fasttrack',
             'created_by' => $adminUser->id,
         ]);
-
-        // Increment slot terpakai
-        $slot->increment('slot_terpakai');
 
         // Log history
         $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat oleh Marketing dengan link publish', [

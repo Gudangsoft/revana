@@ -1316,9 +1316,6 @@ class SubmissionController extends Controller
 
         $submission = Submission::create($validated);
 
-        // Increase slot_terpakai
-        $slot->increment('slot_terpakai');
-
         // Log history
         $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat oleh Admin dengan link publish', [
             'link_publish' => $validated['link_publish'],

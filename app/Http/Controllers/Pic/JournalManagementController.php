@@ -345,12 +345,6 @@ class JournalManagementController extends Controller
 
         Submission::create($validated);
 
-        // Increase slot_terpakai
-        $slot = JournalSlot::find($validated['journal_slot_id']);
-        if ($slot && $slot->slot_terpakai < $slot->jumlah_slot) {
-            $slot->increment('slot_terpakai');
-        }
-
         return redirect()->route('pic.submissions.index')
             ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
     }
@@ -1354,12 +1348,6 @@ class JournalManagementController extends Controller
         }
 
         $submission = Submission::create($validated);
-
-        // Increase slot_terpakai
-        $slot = JournalSlot::find($validated['journal_slot_id']);
-        if ($slot && $slot->slot_terpakai < $slot->jumlah_slot) {
-            $slot->increment('slot_terpakai');
-        }
 
         // Log history
         $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat dengan link publish', [

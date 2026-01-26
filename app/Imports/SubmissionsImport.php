@@ -101,14 +101,6 @@ class SubmissionsImport implements ToModel, WithHeadingRow, WithValidation, Skip
             return null;
         }
 
-        // Update slot usage
-        if ($journalSlotId) {
-            $slot = JournalSlot::find($journalSlotId);
-            if ($slot) {
-                $slot->increment('slot_terpakai');
-            }
-        }
-
         // Create new
         $this->imported++;
         return new Submission([
