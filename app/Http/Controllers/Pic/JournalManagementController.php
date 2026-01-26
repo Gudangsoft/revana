@@ -1018,23 +1018,25 @@ class JournalManagementController extends Controller
         
         $submission = Submission::findOrFail($request->submission_id);
         $field = $request->stage . '_valid';
+        $stage = $request->stage;
         
-        // Check if PIC is assigned to this submission in any stage
-        $isAssigned = (
-            $submission->created_by == $picId ||
-            $submission->petugas_submit_id == $picId ||
-            $submission->petugas_editor1_id == $picId ||
-            $submission->petugas_author1_id == $picId ||
-            $submission->petugas_editor2_id == $picId ||
-            $submission->petugas_reviewer1_id == $picId ||
-            $submission->petugas_reviewer2_id == $picId ||
-            $submission->petugas_editor3_id == $picId ||
-            $submission->petugas_author2_id == $picId ||
-            $submission->petugas_production_id == $picId
-        );
+        // Check if PIC is assigned to THIS SPECIFIC stage only
+        $stageFieldMapping = [
+            'editor1' => 'petugas_editor1_id',
+            'author1' => 'petugas_author1_id',
+            'editor2' => 'petugas_editor2_id',
+            'reviewer1' => 'petugas_reviewer1_id',
+            'reviewer2' => 'petugas_reviewer2_id',
+            'editor3' => 'petugas_editor3_id',
+            'author2' => 'petugas_author2_id',
+            'production' => 'petugas_production_id',
+        ];
         
-        if (!$isAssigned) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses ke submission ini'], 403);
+        $petugasField = $stageFieldMapping[$stage] ?? null;
+        $isAssignedToStage = $petugasField && $submission->{$petugasField} == $picId;
+        
+        if (!$isAssignedToStage) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak ditugaskan untuk stage ini'], 403);
         }
         
         // Toggle the valid status
@@ -1275,7 +1277,7 @@ class JournalManagementController extends Controller
         
         $submissions = $query->latest()->paginate(20)->withQueryString();
         
-        return view('pic.fasttrack.index', compact('submissions'));
+        return view('pic.fasttrack.index', compact('submissions', 'picId'));
     }
 
     /**

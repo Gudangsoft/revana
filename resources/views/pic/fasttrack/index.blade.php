@@ -538,28 +538,43 @@ html, body {
                                 <td>{{ $s->petugasEditor1->name ?? '-' }}</td>
                                 <td>@if($s->username_editor)<code>{{ $s->username_editor }}/{{ $s->password_editor ?? '-' }}</code>@else - @endif</td>
                                 <td class="text-center">
+                                    @if($s->petugas_editor1_id == $picId)
                                     <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'editor1_valid', {{ $s->editor1_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Author 1 -->
                                 <td>{{ $s->petugasAuthor1->name ?? '-' }}</td>
                                 <td class="text-center">
+                                    @if($s->petugas_author1_id == $picId)
                                     <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'author1_valid', {{ $s->author1_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Editor 2 -->
                                 <td>{{ $s->petugasEditor2->name ?? '-' }}</td>
                                 <td class="text-center">
+                                    @if($s->petugas_editor2_id == $picId)
                                     <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'editor2_valid', {{ $s->editor2_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Reviewer 1 -->
@@ -567,10 +582,15 @@ html, body {
                                 <td>@if($s->username_reviewer1)<code>{{ $s->username_reviewer1 }}/{{ $s->password_reviewer1 ?? '-' }}</code>@else - @endif</td>
                                 <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 10) ?? '-' }}</td>
                                 <td class="text-center">
+                                    @if($s->petugas_reviewer1_id == $picId)
                                     <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'reviewer1_valid', {{ $s->reviewer1_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Reviewer 2 -->
@@ -578,28 +598,43 @@ html, body {
                                 <td>@if($s->username_reviewer2)<code>{{ $s->username_reviewer2 }}/{{ $s->password_reviewer2 ?? '-' }}</code>@else - @endif</td>
                                 <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 10) ?? '-' }}</td>
                                 <td class="text-center">
+                                    @if($s->petugas_reviewer2_id == $picId)
                                     <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'reviewer2_valid', {{ $s->reviewer2_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Editor 3 -->
                                 <td>{{ $s->petugasEditor3->name ?? '-' }}</td>
                                 <td class="text-center">
+                                    @if($s->petugas_editor3_id == $picId)
                                     <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'editor3_valid', {{ $s->editor3_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Author 2 -->
                                 <td>{{ $s->petugasAuthor2->name ?? '-' }}</td>
                                 <td class="text-center">
+                                    @if($s->petugas_author2_id == $picId)
                                     <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
                                        style="cursor: pointer;" 
                                        onclick="toggleValid(this, {{ $s->id }}, 'author2_valid', {{ $s->author2_valid ? 'true' : 'false' }})"
                                        title="Klik untuk toggle valid"></i>
+                                    @else
+                                    <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}" 
+                                       title="Hanya petugas yang ditugaskan yang bisa validasi"></i>
+                                    @endif
                                 </td>
                                 
                                 <!-- Production -->
