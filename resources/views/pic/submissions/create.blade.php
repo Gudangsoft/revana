@@ -7,6 +7,13 @@
     @include('pic.partials.sidebar')
 @endsection
 
+<style>
+    select option:disabled {
+        color: #999 !important;
+        font-style: italic;
+    }
+</style>
+
 @section('content')
 <div class="row">
     <div class="col-md-10 mx-auto">
@@ -432,7 +439,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 let html = '<option value="">-- Pilih Slot --</option>';
                 for (let i = 0; i < data.length; i++) {
-                    html += '<option value="' + data[i].id + '">' + data[i].text + '</option>';
+                    const slot = data[i];
+                    const sisa = slot.sisa !== undefined ? slot.sisa : (slot.jumlah_slot - slot.slot_terpakai);
+                    
+                    if (sisa <= 0) {
+                        html += '<option value="' + slot.id + '" disabled style="color: #999; font-style: italic;">🚫 PENUH - ' + slot.text + ' (Tidak dapat memilih slot penuh)</option>';
+                    } else {
+                        html += '<option value="' + slot.id + '">' + slot.text + '</option>';
+                    }
                 }
                 
                 slotSelect.innerHTML = html;
@@ -444,6 +458,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 slotSelect.innerHTML = '<option value="">❌ Error</option>';
                 slotSelect.disabled = false;
             });
+    }
+    
+    // Validasi form submit - cegah pemilihan slot penuh
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const slotSelect = document.getElementById('journal_slot_id');
+            const selectedOption = slotSelect.options[slotSelect.selectedIndex];
+            
+            if (selectedOption && selectedOption.disabled) {
+                e.preventDefault();
+                alert('⚠️ Slot yang Anda pilih sudah PENUH!\n\nSilakan pilih slot lain yang masih tersedia.');
+                slotSelect.focus();
+                return false;
+            }
+        });
     }
     
     // Restore old

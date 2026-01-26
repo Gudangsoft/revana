@@ -249,18 +249,21 @@ class JournalSlotController extends Controller
             ->orderBy('nomor', 'desc')
             ->get()
             ->map(function($slot) {
+                $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
                 return [
                     'id' => $slot->id,
                     'text' => sprintf(
-                        'Vol. %s No. %s (%s)',
+                        'Vol. %s No. %s (%s) - Sisa: %d/%d slot',
                         $slot->volume ?? '-',
                         $slot->nomor ?? '-',
-                        $slot->tahun
+                        $slot->tahun,
+                        $sisa > 0 ? $sisa : 0,
+                        $slot->jumlah_slot
                     ),
                     'kode_slot' => $slot->kode_slot,
                     'jumlah_slot' => $slot->jumlah_slot,
                     'slot_terpakai' => $slot->slot_terpakai,
-                    'sisa' => $slot->slot_tersedia > 0 ? $slot->slot_tersedia : 0
+                    'sisa' => $sisa > 0 ? $sisa : 0
                 ];
             });
             
