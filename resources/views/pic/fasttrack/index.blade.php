@@ -391,13 +391,20 @@
                     <div class="quick-nav">
                         <span class="text-muted me-2" style="font-size: 0.75rem;">Lompat ke:</span>
                         <button type="button" class="quick-nav-btn" data-target="submit">Submit</button>
+                        <button type="button" class="quick-nav-btn" data-target="editor1">Editor1</button>
+                        <button type="button" class="quick-nav-btn" data-target="author1">Author1</button>
+                        <button type="button" class="quick-nav-btn" data-target="editor2">Editor2</button>
+                        <button type="button" class="quick-nav-btn" data-target="reviewer1">Reviewer1</button>
+                        <button type="button" class="quick-nav-btn" data-target="reviewer2">Reviewer2</button>
+                        <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
+                        <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                         <button type="button" class="quick-nav-btn" data-target="production">Production</button>
                     </div>
                 </div>
 
                 <!-- Fasttrack Monitoring Table -->
                 <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
-                    <table class="table table-monitoring table-bordered">
+                    <table class="table table-monitoring table-bordered mb-0">
                         <thead>
                             <tr>
                                 <th rowspan="2" class="sticky-first">Kode Submit</th>
@@ -406,21 +413,53 @@
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
                                 <th rowspan="2">No HP</th>
-                                <th colspan="4" class="text-center bg-dark text-white" id="colAuthorAccess">Author Access</th>
-                                <th rowspan="2">PIC Marketing</th>
-                                <th rowspan="2" id="colSubmit">Petugas Submit</th>
-                                <th colspan="3" class="text-center bg-success text-white" id="colProduction">Production</th>
+                                <th colspan="4" class="text-center bg-dark text-white" id="colSubmit" data-section="submit">Author Access</th>
+                                <th colspan="3" class="text-center bg-info text-dark" id="colEditor1" data-section="editor1">Editor 1</th>
+                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1" data-section="author1">Author 1</th>
+                                <th colspan="2" class="text-center bg-info text-dark" id="colEditor2" data-section="editor2">Editor 2</th>
+                                <th colspan="4" class="text-center bg-primary text-white" id="colReviewer1" data-section="reviewer1">Reviewer 1</th>
+                                <th colspan="4" class="text-center bg-primary text-white" id="colReviewer2" data-section="reviewer2">Reviewer 2</th>
+                                <th colspan="2" class="text-center bg-info text-dark" id="colEditor3" data-section="editor3">Editor 3</th>
+                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2" data-section="author2">Author 2</th>
+                                <th colspan="3" class="text-center bg-success text-white" id="colProduction" data-section="production">Production</th>
+                                <th rowspan="2">Aksi</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers -->
-                                <th class="bg-dark text-white">Username</th>
-                                <th class="bg-dark text-white">Password</th>
-                                <th class="bg-dark text-white">Jurnal</th>
-                                <th class="bg-dark text-white">Slot</th>
+                                <th class="bg-dark text-white">Marketing</th>
+                                <th class="bg-dark text-white">Petugas</th>
+                                <th class="bg-dark text-white">User</th>
+                                <th class="bg-dark text-white">Pass</th>
+                                <!-- Editor 1 sub-headers -->
+                                <th class="bg-info text-dark">Petugas</th>
+                                <th class="bg-info text-dark">User/Pass</th>
+                                <th class="bg-info text-dark">Valid</th>
+                                <!-- Author 1 sub-headers -->
+                                <th class="bg-warning text-dark">Petugas</th>
+                                <th class="bg-warning text-dark">Valid</th>
+                                <!-- Editor 2 sub-headers -->
+                                <th class="bg-info text-dark">Petugas</th>
+                                <th class="bg-info text-dark">Valid</th>
+                                <!-- Reviewer 1 sub-headers -->
+                                <th class="bg-primary text-white">Petugas</th>
+                                <th class="bg-primary text-white">User/Pass</th>
+                                <th class="bg-primary text-white">Catatan</th>
+                                <th class="bg-primary text-white">Valid</th>
+                                <!-- Reviewer 2 sub-headers -->
+                                <th class="bg-primary text-white">Petugas</th>
+                                <th class="bg-primary text-white">User/Pass</th>
+                                <th class="bg-primary text-white">Catatan</th>
+                                <th class="bg-primary text-white">Valid</th>
+                                <!-- Editor 3 sub-headers -->
+                                <th class="bg-info text-dark">Petugas</th>
+                                <th class="bg-info text-dark">Valid</th>
+                                <!-- Author 2 sub-headers -->
+                                <th class="bg-warning text-dark">Petugas</th>
+                                <th class="bg-warning text-dark">Valid</th>
                                 <!-- Production sub-headers -->
-                                <th class="bg-success text-white">Link Publish</th>
-                                <th class="bg-success text-white">Tanggal</th>
-                                <th class="bg-success text-white">Aksi</th>
+                                <th class="bg-success text-white">Petugas</th>
+                                <th class="bg-success text-white">Link</th>
+                                <th class="bg-success text-white">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -434,7 +473,7 @@
                                     <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel ?? '-' }}</td>
-                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 30) }}</td>
+                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 20) }}</td>
                                 <td class="text-center">
                                     @if($s->link_artikel)
                                         <a href="{{ $s->link_artikel }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
@@ -442,7 +481,7 @@
                                         -
                                     @endif
                                 </td>
-                                <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
+                                <td>{{ Str::limit($s->nama_penulis, 12) }}</td>
                                 <td>
                                     @if($s->no_hp_penulis)
                                         @php
@@ -459,35 +498,108 @@
                                         -
                                     @endif
                                 </td>
+                                
                                 <!-- Author Access -->
+                                <td>{{ $s->marketing->name ?? '-' }}</td>
+                                <td>{{ $s->petugasSubmit->name ?? ($s->marketing->name ?? '-') }}</td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
-                                <td>{{ $s->journalSlot?->journalMaster?->nama_jurnal ? Str::limit($s->journalSlot->journalMaster->nama_jurnal, 20) : '-' }}</td>
-                                <td>{{ $s->journalSlot ? 'Vol.' . $s->journalSlot->volume . ' No.' . $s->journalSlot->nomor : '-' }}</td>
-                                <td>{{ $s->marketing?->name ?? '-' }}</td>
-                                <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
+                                
+                                <!-- Editor 1 -->
+                                <td>{{ $s->petugasEditor1->name ?? '-' }}</td>
+                                <td>@if($s->username_editor)<code>{{ $s->username_editor }}/{{ $s->password_editor ?? '-' }}</code>@else - @endif</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'editor1_valid', {{ $s->editor1_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
+                                <!-- Author 1 -->
+                                <td>{{ $s->petugasAuthor1->name ?? '-' }}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'author1_valid', {{ $s->author1_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
+                                <!-- Editor 2 -->
+                                <td>{{ $s->petugasEditor2->name ?? '-' }}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'editor2_valid', {{ $s->editor2_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
+                                <!-- Reviewer 1 -->
+                                <td>{{ $s->petugasReviewer1->name ?? '-' }}</td>
+                                <td>@if($s->username_reviewer1)<code>{{ $s->username_reviewer1 }}/{{ $s->password_reviewer1 ?? '-' }}</code>@else - @endif</td>
+                                <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 10) ?? '-' }}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'reviewer1_valid', {{ $s->reviewer1_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
+                                <!-- Reviewer 2 -->
+                                <td>{{ $s->petugasReviewer2->name ?? '-' }}</td>
+                                <td>@if($s->username_reviewer2)<code>{{ $s->username_reviewer2 }}/{{ $s->password_reviewer2 ?? '-' }}</code>@else - @endif</td>
+                                <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 10) ?? '-' }}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'reviewer2_valid', {{ $s->reviewer2_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
+                                <!-- Editor 3 -->
+                                <td>{{ $s->petugasEditor3->name ?? '-' }}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'editor3_valid', {{ $s->editor3_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
+                                <!-- Author 2 -->
+                                <td>{{ $s->petugasAuthor2->name ?? '-' }}</td>
+                                <td class="text-center">
+                                    <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }} valid-toggle" 
+                                       style="cursor: pointer;" 
+                                       onclick="toggleValid(this, {{ $s->id }}, 'author2_valid', {{ $s->author2_valid ? 'true' : 'false' }})"
+                                       title="Klik untuk toggle valid"></i>
+                                </td>
+                                
                                 <!-- Production -->
+                                <td>{{ $s->petugasProduction->name ?? ($s->petugasSubmit->name ?? ($s->marketing->name ?? '-')) }}</td>
                                 <td>
                                     @if($s->link_publish)
-                                        <a href="{{ $s->link_publish }}" target="_blank" class="btn btn-sm btn-outline-success" style="padding: 2px 6px; font-size: 0.7rem;">
-                                            <i class="bi bi-link-45deg"></i> Link
+                                        <a href="{{ $s->link_publish }}" target="_blank" class="btn btn-sm btn-success" style="padding: 2px 6px; font-size: 0.7rem;">
+                                            <i class="bi bi-box-arrow-up-right"></i>
                                         </a>
                                     @else
                                         -
                                     @endif
                                 </td>
-                                <td>{{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d/m/Y') : '-' }}</td>
-                                <td>
-                                    <a href="{{ route('pic.fasttrack.show', $s) }}" class="btn btn-sm btn-info" style="padding: 2px 6px; font-size: 0.7rem;">
+                                <td class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                                
+                                <td class="text-center">
+                                    <a href="{{ route('pic.fasttrack.show', $s) }}" class="btn btn-info btn-sm" style="padding: 2px 6px; font-size: 0.7rem;">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="15" class="text-center text-muted py-4">
+                                <td colspan="32" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox fs-1"></i>
                                     <p class="mb-0 mt-2">Belum ada data fasttrack</p>
+                                    <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-warning btn-sm mt-2">
+                                        <i class="bi bi-plus-circle"></i> Input Fasttrack
+                                    </a>
                                 </td>
                             </tr>
                             @endforelse
@@ -515,7 +627,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const columnPositions = {
         'submit': 0,
-        'production': 800
+        'editor1': 600,
+        'author1': 850,
+        'editor2': 1000,
+        'reviewer1': 1150,
+        'reviewer2': 1500,
+        'editor3': 1850,
+        'author2': 2000,
+        'production': 2150
     };
     
     function updateScrollPosition() {
@@ -587,5 +706,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateScrollPosition();
 });
+
+// Toggle Valid Function
+function toggleValid(icon, submissionId, field, currentValue) {
+    const stage = field.replace('_valid', '');
+    
+    icon.style.opacity = '0.5';
+    
+    fetch('/pic/submissions/toggle-valid', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            stage: stage
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        icon.style.opacity = '1';
+        if (data.success) {
+            const isValid = data.is_valid;
+            if (isValid) {
+                icon.classList.remove('bi-circle', 'text-muted');
+                icon.classList.add('bi-check-circle-fill', 'text-success');
+            } else {
+                icon.classList.remove('bi-check-circle-fill', 'text-success');
+                icon.classList.add('bi-circle', 'text-muted');
+            }
+            icon.setAttribute('onclick', `toggleValid(this, ${submissionId}, '${field}', ${isValid})`);
+        } else {
+            alert('Gagal: ' + (data.message || 'Error'));
+        }
+    })
+    .catch(error => {
+        icon.style.opacity = '1';
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+    });
+}
 </script>
 @endsection
