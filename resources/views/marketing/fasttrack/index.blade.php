@@ -405,7 +405,35 @@
                                 <code class="text-warning">{{ $s->kode_submit }}</code>
                             </a>
                             <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
-                            <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
+                            <br>
+                            @php
+                                // Determine status badge
+                                $statusBadge = '';
+                                $statusIcon = '';
+                                $statusClass = '';
+                                
+                                if (($s->status === 'PUBLISHED' || $s->production_valid) && $s->link_publish) {
+                                    $statusBadge = 'SELESAI';
+                                    $statusIcon = 'check-circle-fill';
+                                    $statusClass = 'bg-success';
+                                } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id || !$s->link_publish) {
+                                    // Jika link publish kosong, butuh penugasan
+                                    if (!$s->link_publish) {
+                                        $statusBadge = 'PROSES';
+                                        $statusIcon = 'arrow-repeat';
+                                        $statusClass = 'bg-info text-dark';
+                                    } else {
+                                        $statusBadge = 'PERLU PENUGASAN';
+                                        $statusIcon = 'exclamation-triangle-fill';
+                                        $statusClass = 'bg-warning text-dark';
+                                    }
+                                } else {
+                                    $statusBadge = 'PROSES';
+                                    $statusIcon = 'arrow-repeat';
+                                    $statusClass = 'bg-info text-dark';
+                                }
+                            @endphp
+                            <span class="badge {{ $statusClass }} mt-1"><i class="bi bi-{{ $statusIcon }}"></i> {{ $statusBadge }}</span>
                         </td>
                         <td class="sticky-second">{{ $s->id_artikel ?? '-' }}</td>
                         <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 20) }}</td>
@@ -474,7 +502,13 @@
                         <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                         
                         <!-- Production -->
-                        <td>{{ $s->petugasProduction->name ?? ($s->petugasSubmit->name ?? ($s->marketing->name ?? '-')) }}</td>
+                        <td>
+                            @if(!$s->link_publish)
+                                <span style="color: #dc3545; font-weight: 500;"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                            @else
+                                {{ $s->petugasProduction->name ?? ($s->petugasSubmit->name ?? ($s->marketing->name ?? '-')) }}
+                            @endif
+                        </td>
                         <td>
                             @if($s->link_publish)
                                 <a href="{{ $s->link_publish }}" target="_blank" class="btn btn-sm btn-success" style="padding: 2px 6px; font-size: 0.7rem;">

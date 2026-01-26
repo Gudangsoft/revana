@@ -540,14 +540,21 @@
                                         $statusIcon = '';
                                         $statusClass = '';
                                         
-                                        if ($s->status === 'PUBLISHED' || $s->production_valid) {
+                                        if (($s->status === 'PUBLISHED' || $s->production_valid) && $s->link_publish) {
                                             $statusBadge = 'SELESAI';
                                             $statusIcon = 'check-circle-fill';
                                             $statusClass = 'bg-success';
-                                        } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id) {
-                                            $statusBadge = 'PERLU PENUGASAN';
-                                            $statusIcon = 'exclamation-triangle-fill';
-                                            $statusClass = 'bg-warning text-dark';
+                                        } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id || !$s->link_publish) {
+                                            // Jika link publish kosong, butuh penugasan
+                                            if (!$s->link_publish) {
+                                                $statusBadge = 'PROSES';
+                                                $statusIcon = 'arrow-repeat';
+                                                $statusClass = 'bg-info text-dark';
+                                            } else {
+                                                $statusBadge = 'PERLU PENUGASAN';
+                                                $statusIcon = 'exclamation-triangle-fill';
+                                                $statusClass = 'bg-warning text-dark';
+                                            }
                                         } else {
                                             $statusBadge = 'PROSES';
                                             $statusIcon = 'arrow-repeat';
@@ -806,16 +813,20 @@
                                 
                                 <!-- Production: Petugas, Link Publish, Valid -->
                                 <td>
-                                    <select class="inline-assign-select" 
-                                            onchange="quickAssign(this, {{ $s->id }}, 'petugas_production_id')"
-                                            data-original="{{ $s->petugas_production_id }}">
-                                        <option value="">-- Pilih --</option>
-                                        @foreach($pics as $p)
-                                            <option value="{{ $p->id }}" {{ $s->petugas_production_id == $p->id ? 'selected' : '' }}>
-                                                {{ $p->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    @if(!$s->link_publish)
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @else
+                                        <select class="inline-assign-select" 
+                                                onchange="quickAssign(this, {{ $s->id }}, 'petugas_production_id')"
+                                                data-original="{{ $s->petugas_production_id }}">
+                                            <option value="">-- Pilih --</option>
+                                            @foreach($pics as $p)
+                                                <option value="{{ $p->id }}" {{ $s->petugas_production_id == $p->id ? 'selected' : '' }}>
+                                                    {{ $p->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($s->link_publish)

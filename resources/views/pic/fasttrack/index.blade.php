@@ -517,14 +517,21 @@ html, body {
                                         $statusIcon = '';
                                         $statusClass = '';
                                         
-                                        if ($s->status === 'PUBLISHED' || $s->production_valid) {
+                                        if (($s->status === 'PUBLISHED' || $s->production_valid) && $s->link_publish) {
                                             $statusBadge = 'SELESAI';
                                             $statusIcon = 'check-circle-fill';
                                             $statusClass = 'bg-success';
-                                        } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id) {
-                                            $statusBadge = 'PERLU PENUGASAN';
-                                            $statusIcon = 'exclamation-triangle-fill';
-                                            $statusClass = 'bg-warning text-dark';
+                                        } elseif ($s->status === 'PENDING_ASSIGNMENT' || !$s->petugas_editor1_id || !$s->link_publish) {
+                                            // Jika link publish kosong, butuh penugasan
+                                            if (!$s->link_publish) {
+                                                $statusBadge = 'PROSES';
+                                                $statusIcon = 'arrow-repeat';
+                                                $statusClass = 'bg-info text-dark';
+                                            } else {
+                                                $statusBadge = 'PERLU PENUGASAN';
+                                                $statusIcon = 'exclamation-triangle-fill';
+                                                $statusClass = 'bg-warning text-dark';
+                                            }
                                         } else {
                                             $statusBadge = 'PROSES';
                                             $statusIcon = 'arrow-repeat';
@@ -713,7 +720,9 @@ html, body {
                                 
                                 <!-- Production -->
                                 <td>
-                                    @if($s->petugasProduction)
+                                    @if(!$s->link_publish)
+                                        <span class="petugas-kosong"><i class="bi bi-exclamation-circle"></i> Belum ditugaskan</span>
+                                    @elseif($s->petugasProduction)
                                         {{ $s->petugasProduction->name }}
                                     @elseif($s->petugasSubmit)
                                         {{ $s->petugasSubmit->name }}
