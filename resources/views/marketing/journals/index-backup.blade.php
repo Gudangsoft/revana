@@ -27,55 +27,6 @@
                 </div>
                 @endif
 
-                <!-- Search & Filter Form -->
-                <form action="{{ route('pic.journals.index') }}" method="GET" class="mb-4">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="search" placeholder="🔍 Cari nama jurnal..." value="{{ request('search') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-select" name="akreditasi">
-                                <option value="">-- Akreditasi --</option>
-                                <option value="Sinta 1" {{ request('akreditasi') == 'Sinta 1' ? 'selected' : '' }}>Sinta 1</option>
-                                <option value="Sinta 2" {{ request('akreditasi') == 'Sinta 2' ? 'selected' : '' }}>Sinta 2</option>
-                                <option value="Sinta 3" {{ request('akreditasi') == 'Sinta 3' ? 'selected' : '' }}>Sinta 3</option>
-                                <option value="Sinta 4" {{ request('akreditasi') == 'Sinta 4' ? 'selected' : '' }}>Sinta 4</option>
-                                <option value="Sinta 5" {{ request('akreditasi') == 'Sinta 5' ? 'selected' : '' }}>Sinta 5</option>
-                                <option value="Sinta 6" {{ request('akreditasi') == 'Sinta 6' ? 'selected' : '' }}>Sinta 6</option>
-                                <option value="Non Sinta" {{ request('akreditasi') == 'Non Sinta' ? 'selected' : '' }}>Non Sinta</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-select" name="kategori">
-                                <option value="">-- Kategori --</option>
-                                <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
-                                <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-select" name="jenis">
-                                <option value="">-- Jenis --</option>
-                                <option value="Jurnal Nasional" {{ request('jenis') == 'Jurnal Nasional' ? 'selected' : '' }}>Nasional</option>
-                                <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Internasional</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-search"></i> Cari
-                            </button>
-                        </div>
-                    </div>
-                    @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis']))
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <a href="{{ route('pic.journals.index') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Reset Filter
-                            </a>
-                        </div>
-                    </div>
-                    @endif
-                </form>
-
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
