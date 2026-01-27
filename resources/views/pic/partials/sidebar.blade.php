@@ -142,20 +142,10 @@
         <span>Data Submit</span>
     </a>
     
-    <!-- Fasttrack Section -->
-    <div class="sidebar-section-header">
+    <!-- Fasttrack (Gabungan Data & Monitoring) -->
+    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.*') ? 'active' : '' }}" data-title="Monitoring Fasttrack">
         <i class="bi bi-lightning-charge text-warning"></i>
         <span>Fasttrack</span>
-    </div>
-    
-    <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.create', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Data Fasttrack">
-        <i class="bi bi-lightning-charge text-warning"></i>
-        <span>Data Fasttrack</span>
-    </a>
-    
-    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.monitoring') ? 'active' : '' }}" data-title="Monitoring Fasttrack">
-        <i class="bi bi-bar-chart text-warning"></i>
-        <span>Monitoring Fasttrack</span>
     </a>
     
     <div class="sidebar-divider"></div>
