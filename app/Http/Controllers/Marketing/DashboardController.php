@@ -318,6 +318,16 @@ class DashboardController extends Controller
             $query->where('accreditation', $request->akreditasi);
         }
         
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+        
+        // Filter by jenis
+        if ($request->filled('jenis')) {
+            $query->where('jenis_jurnal', $request->jenis);
+        }
+        
         $journals = $query->orderBy('nama_jurnal')->paginate(20)->withQueryString();
         $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         

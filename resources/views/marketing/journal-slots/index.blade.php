@@ -88,78 +88,65 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;">No</th>
-                            <th>Jurnal</th>
+                            <th style="width: 50px;">#</th>
+                            <th>Kode Slot</th>
+                            <th>Nama Jurnal</th>
                             <th>Publisher</th>
                             <th>Kategori</th>
                             <th>Jenis</th>
+                            <th>Akreditasi</th>
                             <th>Volume</th>
                             <th>Nomor</th>
-                            <th>Bulan/Tahun</th>
-                            <th>Slot</th>
+                            <th>Bulan</th>
+                            <th>Tahun</th>
+                            <th>Jumlah Slot</th>
+                            <th>Terpakai</th>
+                            <th>Tersedia</th>
                             <th>Status</th>
                             <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($slots as $index => $slot)
-                        @php
-                            $slotTersedia = $slot->jumlah_slot - $slot->slot_terpakai;
-                            $percentage = $slot->jumlah_slot > 0 ? ($slot->slot_terpakai / $slot->jumlah_slot) * 100 : 0;
-                        @endphp
+                        @forelse($slots as $slot)
                         <tr>
-                            <td>{{ $slots->firstItem() + $index }}</td>
-                            <td>
-                                <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
-                                @if($slot->journalMaster->accreditation)
-                                    <br><small class="badge bg-success">{{ $slot->journalMaster->accreditation }}</small>
-                                @endif
-                            </td>
-                            <td><small>{{ $slot->journalMaster->publisher ?? '-' }}</small></td>
+                            <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
+                            <td><code>{{ $slot->kode_slot }}</code></td>
+                            <td>{{ Str::limit($slot->journalMaster->nama_jurnal, 30) }}</td>
+                            <td>{{ Str::limit($slot->journalMaster->publisher, 20) }}</td>
                             <td>
                                 @if($slot->journalMaster->kategori)
-                                    <span class="badge bg-info">{{ $slot->journalMaster->kategori }}</span>
+                                    <span class="badge bg-{{ $slot->journalMaster->kategori == 'Penelitian' ? 'primary' : 'success' }}">{{ $slot->journalMaster->kategori }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
                             <td>
                                 @if($slot->journalMaster->jenis_jurnal)
-                                    <span class="badge bg-primary">{{ $slot->journalMaster->jenis_jurnal }}</span>
+                                    <span class="badge bg-{{ $slot->journalMaster->jenis_jurnal == 'Jurnal Internasional' ? 'warning' : 'secondary' }}">
+                                        {{ $slot->journalMaster->jenis_jurnal == 'Jurnal Internasional' ? 'Internasional' : 'Nasional' }}
+                                    </span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td><span class="badge bg-secondary">Vol. {{ $slot->volume }}</span></td>
-                            <td><span class="badge bg-secondary">No. {{ $slot->nomor }}</span></td>
-                            <td>{{ $slot->bulan }} {{ $slot->tahun }}</td>
                             <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress" style="width: 100px; height: 20px;">
-                                        <div class="progress-bar {{ $percentage >= 80 ? 'bg-danger' : ($percentage >= 50 ? 'bg-warning' : 'bg-success') }}" 
-                                             role="progressbar" 
-                                             style="width: {{ $percentage }}%"
-                                             aria-valuenow="{{ $slot->slot_terpakai }}" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="{{ $slot->jumlah_slot }}">
-                                        </div>
-                                    </div>
-                                    <small>
-                                        <strong>{{ $slot->slot_terpakai }}</strong> / {{ $slot->jumlah_slot }}
-                                    </small>
-                                </div>
-                                @if($slotTersedia > 0)
-                                    <small class="text-success">
-                                        <i class="bi bi-check-circle-fill"></i> {{ $slotTersedia }} tersedia
-                                    </small>
+                                @if($slot->journalMaster->accreditation)
+                                    <span class="badge bg-info">{{ $slot->journalMaster->accreditation }}</span>
                                 @else
-                                    <small class="text-danger">
-                                        <i class="bi bi-x-circle-fill"></i> Penuh
-                                    </small>
+                                    <span class="text-muted">-</span>
                                 @endif
                             </td>
+                            <td>{{ $slot->volume }}</td>
+                            <td>{{ $slot->nomor }}</td>
+                            <td>{{ $slot->bulan }}</td>
+                            <td>{{ $slot->tahun }}</td>
+                            <td><span class="badge bg-secondary">{{ $slot->jumlah_slot }}</span></td>
+                            <td><span class="badge bg-warning">{{ $slot->slot_terpakai }}</span></td>
+                            <td><span class="badge bg-success">{{ $slot->slot_tersedia }}</span></td>
                             <td>
-                                @if($slot->is_active)
+                                @if($slot->is_full)
+                                    <span class="badge bg-danger">Penuh</span>
+                                @elseif($slot->is_active)
                                     <span class="badge bg-success">Aktif</span>
                                 @else
                                     <span class="badge bg-secondary">Nonaktif</span>
@@ -177,9 +164,9 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="11" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-1"></i>
-                                <p class="mt-2 mb-0">Tidak ada data slot</p>
+                            <td colspan="16" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Belum ada data slot
                             </td>
                         </tr>
                         @endforelse

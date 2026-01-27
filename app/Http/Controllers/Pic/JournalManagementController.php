@@ -36,6 +36,16 @@ class JournalManagementController extends Controller
             $query->where('accreditation', $request->akreditasi);
         }
         
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+        
+        // Filter by jenis
+        if ($request->filled('jenis')) {
+            $query->where('jenis_jurnal', $request->jenis);
+        }
+        
         $journals = $query->latest()->paginate(20)->withQueryString();
         $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         return view('pic.journals.index', compact('journals', 'accreditations'));

@@ -84,16 +84,13 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Judul</th>
-                                <th>Volume</th>
-                                <th>Slot</th>
+                                <th>Nama Jurnal</th>
+                                <th>Kode Jurnal</th>
+                                <th>Publisher</th>
+                                <th>Kategori</th>
+                                <th>Jenis</th>
                                 <th>Akreditasi</th>
-                                <th>Points</th>
-                                <th class="hide-mobile">Terbitan</th>
-                                <th class="hide-mobile">Marketing</th>
-                                <th class="hide-mobile">PIC</th>
-                                <th>Dibuat Oleh</th>
-                                <th>Tanggal</th>
+                                <th>Status</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -102,56 +99,60 @@
                             <tr>
                                 <td>{{ $loop->iteration + ($journals->currentPage() - 1) * $journals->perPage() }}</td>
                                 <td>
-                                    <strong>{{ Str::limit($journal->title, 60) }}</strong><br>
-                                    <small class="text-muted">
-                                        <i class="bi bi-link-45deg"></i>
-                                        <a href="{{ $journal->link }}" target="_blank">Lihat Jurnal</a>
-                                    </small>
+                                    <strong>{{ $journal->nama_jurnal }}</strong>
+                                    @if($journal->link_jurnal)
+                                        <br><small class="text-muted">
+                                            <a href="{{ $journal->link_jurnal }}" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-link-45deg"></i> Link Jurnal
+                                            </a>
+                                        </small>
+                                    @endif
                                 </td>
                                 <td>
-                                    @if($journal->volume)
-                                        <span class="badge bg-secondary">{{ $journal->volume }}</span>
+                                    <code class="badge bg-light text-dark">{{ $journal->kode_jurnal }}</code>
+                                </td>
+                                <td>{{ $journal->publisher ?? '-' }}</td>
+                                <td>
+                                    @if($journal->kategori)
+                                        <span class="badge bg-info">{{ $journal->kategori }}</span>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
+                                <td>
+                                    @if($journal->jenis_jurnal)
+                                        <span class="badge bg-primary">{{ $journal->jenis_jurnal }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($journal->accreditation)
+                                        <span class="badge bg-success">{{ $journal->accreditation }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($journal->is_active)
+                                        <span class="badge bg-success">Aktif</span>
+                                    @else
+                                        <span class="badge bg-secondary">Nonaktif</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
-                                    <strong class="text-primary">{{ $journal->slot ?? 0 }}</strong>
-                                </td>
-                                <td><span class="badge bg-info">{{ $journal->accreditation }}</span></td>
-                                <td><span class="badge bg-success">{{ $journal->points }} pts</span></td>
-                                <td class="hide-mobile">
-                                    @if($journal->publisher)
-                                        <small>{{ Str::limit($journal->publisher, 25) }}</small>
+                                    @if($journal->link_jurnal)
+                                        <a href="{{ $journal->link_jurnal }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
                                     @else
-                                        <small class="text-muted">-</small>
+                                        <span class="text-muted">-</span>
                                     @endif
-                                </td>
-                                <td class="hide-mobile">
-                                    @if($journal->marketing)
-                                        <small>{{ Str::limit($journal->marketing, 25) }}</small>
-                                    @else
-                                        <small class="text-muted">-</small>
-                                    @endif
-                                </td>
-                                <td class="hide-mobile">
-                                    @if($journal->pic)
-                                        <small>{{ Str::limit($journal->pic, 25) }}</small>
-                                    @else
-                                        <small class="text-muted">-</small>
-                                    @endif
-                                </td>
-                                <td>{{ $journal->creator->name }}</td>
-                                <td>{{ $journal->created_at->format('d M Y') }}</td>
-                                <td class="text-center">
-                                    <a href="{{ $journal->link }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="12" class="text-center text-muted">Belum ada data jurnal</td>
+                                <td colspan="9" class="text-center text-muted">Belum ada data jurnal</td>
                             </tr>
                             @endforelse
                         </tbody>
