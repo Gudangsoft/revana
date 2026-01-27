@@ -98,6 +98,7 @@
                             <th>Bulan/Tahun</th>
                             <th>Slot</th>
                             <th>Status</th>
+                            <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,10 +165,19 @@
                                     <span class="badge bg-secondary">Nonaktif</span>
                                 @endif
                             </td>
+                            <td class="text-center">
+                                @if($slot->journalMaster && $slot->journalMaster->link_jurnal)
+                                    <a href="{{ $slot->journalMaster->link_jurnal }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center text-muted py-4">
+                            <td colspan="11" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data slot</p>
                             </td>

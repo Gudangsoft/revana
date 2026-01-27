@@ -79,6 +79,7 @@
                             <th>Jenis</th>
                             <th>Akreditasi</th>
                             <th>Status</th>
+                            <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -127,10 +128,19 @@
                                     <span class="badge bg-secondary">Nonaktif</span>
                                 @endif
                             </td>
+                            <td class="text-center">
+                                @if($journal->link_jurnal)
+                                    <a href="{{ $journal->link_jurnal }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data jurnal</p>
                             </td>

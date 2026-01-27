@@ -94,6 +94,7 @@
                                 <th class="hide-mobile">PIC</th>
                                 <th>Dibuat Oleh</th>
                                 <th>Tanggal</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,10 +143,15 @@
                                 </td>
                                 <td>{{ $journal->creator->name }}</td>
                                 <td>{{ $journal->created_at->format('d M Y') }}</td>
+                                <td class="text-center">
+                                    <a href="{{ $journal->link }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted">Belum ada data jurnal</td>
+                                <td colspan="12" class="text-center text-muted">Belum ada data jurnal</td>
                             </tr>
                             @endforelse
                         </tbody>
