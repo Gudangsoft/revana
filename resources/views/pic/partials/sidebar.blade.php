@@ -73,6 +73,58 @@
         border-top: 1px solid #dee2e6;
         opacity: 0.5;
     }
+    
+    .submit-buttons {
+        padding: 15px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .btn-submit i {
+        font-size: 1.1rem;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .btn-submit-regular {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        color: white;
+        border: none;
+    }
+    
+    .btn-submit-regular:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+        color: white;
+    }
+    
+    .btn-submit-fasttrack {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #000;
+        border: none;
+    }
+    
+    .btn-submit-fasttrack:hover {
+        background: linear-gradient(135deg, #ffb300 0%, #ffa000 100%);
+        color: #000;
+    }
 </style>
 
 <nav class="nav flex-column">
@@ -117,6 +169,20 @@
         }
         $totalPoints = $picUser ? $picUser->total_points : 0;
     @endphp
+    
+    <!-- Submit Artikel Section -->
+    <div class="submit-buttons">
+        <a href="{{ route('pic.submissions.create') }}" class="btn btn-submit btn-submit-regular">
+            <i class="bi bi-plus-circle"></i>
+            <span>Submit Reguler</span>
+        </a>
+        <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-submit btn-submit-fasttrack">
+            <i class="bi bi-lightning-charge"></i>
+            <span>Submit Fasttrack</span>
+        </a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
     
     <!-- Dashboard Section -->
     <div class="sidebar-section-header">
