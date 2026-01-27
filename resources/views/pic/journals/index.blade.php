@@ -29,7 +29,7 @@
 
                 <!-- Search & Filter Form -->
                 <form action="{{ route('pic.journals.index') }}" method="GET" class="mb-4">
-                    <div class="row g-3">
+                    <div class="row g-3 align-items-center">
                         <div class="col-md-4">
                             <input type="text" class="form-control" name="search" placeholder="🔍 Cari nama jurnal..." value="{{ request('search') }}">
                         </div>
@@ -59,21 +59,24 @@
                                 <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Internasional</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Cari
                             </button>
                         </div>
-                    </div>
-                    @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis']))
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <a href="{{ route('pic.journals.index') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Reset Filter
+                        <div class="col-auto">
+                            <a href="{{ route('pic.journals.index') }}" class="btn btn-outline-secondary" title="Reset Filter">
+                                <i class="bi bi-x-circle"></i> Reset
                             </a>
                         </div>
+                        @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis']))
+                        <div class="col-auto">
+                            <span class="badge bg-info py-2 px-3">
+                                <i class="bi bi-funnel"></i> {{ collect(request()->only(['search', 'akreditasi', 'kategori', 'jenis']))->filter()->count() }} filter aktif
+                            </span>
+                        </div>
+                        @endif
                     </div>
-                    @endif
                 </form>
 
                 <div class="table-responsive">

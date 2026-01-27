@@ -10,8 +10,8 @@
     <div class="card mb-3 shadow-sm border-0">
         <div class="card-body">
             <form action="{{ route('marketing.journal-slots.index') }}" method="GET">
-                <div class="row g-3 mb-2">
-                    <div class="col-md-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
                         <label class="form-label small mb-1">Cari Jurnal / Publisher</label>
                         <input type="text" name="search" class="form-control" 
                                placeholder="🔍 Ketik nama jurnal atau publisher..." value="{{ request('search') }}">
@@ -54,31 +54,27 @@
                             @endforeach
                         </select>
                     </div>
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label class="form-label small mb-1">Tahun</label>
                         <input type="number" name="tahun" class="form-control" value="{{ request('tahun') }}" placeholder="2026">
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label small mb-1">&nbsp;</label>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search"></i> Cari
-                            </button>
-                            <a href="{{ route('marketing.journal-slots.index') }}" class="btn btn-outline-secondary" title="Reset">
-                                <i class="bi bi-x-circle"></i>
-                            </a>
-                        </div>
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ route('marketing.journal-slots.index') }}" class="btn btn-outline-secondary" title="Reset Filter">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </a>
                     </div>
                     @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis', 'bulan', 'tahun']))
-                    <div class="col-md-8">
-                        <label class="form-label small mb-1">&nbsp;</label>
-                        <div>
-                            <span class="badge bg-info">
-                                <i class="bi bi-funnel"></i> Filter aktif: {{ collect(request()->only(['search', 'akreditasi', 'kategori', 'jenis', 'bulan', 'tahun']))->filter()->count() }} kriteria
-                            </span>
-                        </div>
+                    <div class="col-auto">
+                        <span class="badge bg-info py-2 px-3">
+                            <i class="bi bi-funnel"></i> {{ collect(request()->only(['search', 'akreditasi', 'kategori', 'jenis', 'bulan', 'tahun']))->filter()->count() }} filter aktif
+                        </span>
                     </div>
                     @endif
                 </div>

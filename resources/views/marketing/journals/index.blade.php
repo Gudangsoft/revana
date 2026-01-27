@@ -12,7 +12,7 @@
 <div class="card mb-3 shadow-sm border-0">
     <div class="card-body">
         <form method="GET" action="{{ route('marketing.journals.index') }}">
-            <div class="row g-3">
+            <div class="row g-3 align-items-center">
                 <div class="col-md-4">
                     <input type="text" name="search" class="form-control" 
                            placeholder="🔍 Cari nama jurnal atau publisher..." value="{{ request('search') }}">
@@ -43,24 +43,24 @@
                         <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Internasional</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search"></i> Cari
                     </button>
                 </div>
-            </div>
-            @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis']))
-            <div class="row mt-2">
-                <div class="col-md-12">
-                    <a href="{{ route('marketing.journals.index') }}" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-x-circle"></i> Reset Filter
+                <div class="col-auto">
+                    <a href="{{ route('marketing.journals.index') }}" class="btn btn-outline-secondary" title="Reset Filter">
+                        <i class="bi bi-x-circle"></i> Reset
                     </a>
-                    <span class="text-muted ms-2">
-                        <i class="bi bi-funnel"></i> Filter aktif
+                </div>
+                @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis']))
+                <div class="col-auto">
+                    <span class="badge bg-info py-2 px-3">
+                        <i class="bi bi-funnel"></i> {{ collect(request()->only(['search', 'akreditasi', 'kategori', 'jenis']))->filter()->count() }} filter aktif
                     </span>
                 </div>
+                @endif
             </div>
-            @endif
         </form>
     </div>
 </div>
