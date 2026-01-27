@@ -223,7 +223,8 @@ class JournalManagementController extends Controller
     // ==================== SUBMISSIONS ====================
     public function submissionsIndex(Request $request)
     {
-        $query = Submission::with(['journalSlot.journalMaster']);
+        $query = Submission::with(['journalSlot.journalMaster'])
+            ->where('process_type', 'regular'); // Hanya tampilkan regular submissions
         
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -708,6 +709,14 @@ class JournalManagementController extends Controller
             $allowed = $submission->petugas_editor2_id == $picId;
         } elseif ($request->field === 'link_publish') {
             $allowed = $submission->petugas_production_id == $picId;
+            
+            // Prevent editing link_publish if production is already validated
+            if ($submission->production_valid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link publish tidak dapat diedit karena sudah divalidasi. Matikan validasi terlebih dahulu.'
+                ], 403);
+            }
         }
         
         if (!$allowed) {

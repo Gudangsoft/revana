@@ -203,15 +203,15 @@
         @endif
     </a>
     
-    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit">
+    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit Reguler">
         <i class="bi bi-file-earmark-text"></i>
-        <span>Data Submit</span>
+        <span>Data Submit Reguler</span>
     </a>
     
     <!-- Fasttrack (Gabungan Data & Monitoring) -->
-    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.*') ? 'active' : '' }}" data-title="Monitoring Fasttrack">
+    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.*') ? 'active' : '' }}" data-title="Data Submit Fasttrack">
         <i class="bi bi-lightning-charge text-warning"></i>
-        <span>Fasttrack</span>
+        <span>Data Submit Fasttrack</span>
     </a>
     
     <div class="sidebar-divider"></div>

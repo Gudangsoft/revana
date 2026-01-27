@@ -508,6 +508,19 @@
                     </div>
                 </form>
 
+                <!-- Important Info Alert -->
+                <div class="alert alert-info d-flex align-items-start mb-3" style="font-size: 0.85rem;">
+                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                    <div>
+                        <strong>Info Penting:</strong>
+                        <ul class="mb-0 mt-1" style="font-size: 0.8rem;">
+                            <li><strong>Link Publish</strong> hanya bisa diedit jika validasi Production <strong>belum dicentang</strong>.</li>
+                            <li>Jika hendak mengubah Link Publish, <strong>matikan validasi Production</strong> terlebih dahulu dengan klik tombol centang hijau.</li>
+                            <li>Setelah selesai edit, centang kembali validasi Production untuk mengunci data.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <!-- Scroll Controls -->
                 <div class="scroll-controls">
                     <div class="d-flex align-items-center gap-3">
@@ -887,9 +900,11 @@
                                 </td>
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_production_id == $picId)
-                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.7rem; min-width: 150px;" 
+                                        <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;" 
                                                value="{{ $s->link_publish }}" placeholder="Link Publish" 
-                                               data-submission="{{ $s->id }}" data-field="link_publish">
+                                               data-submission="{{ $s->id }}" data-field="link_publish"
+                                               {{ $s->production_valid ? 'readonly' : '' }}
+                                               title="{{ $s->production_valid ? 'Link terkunci. Matikan validasi untuk mengedit.' : 'Masukkan link publish' }}">
                                     @else
                                         @if($s->link_publish)
                                             <a href="{{ $s->link_publish }}" target="_blank" title="Buka Link Publish">
@@ -1090,6 +1105,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Link publish editing
     document.querySelectorAll('input[data-field="link_publish"]').forEach(input => {
         input.addEventListener('blur', function() {
+            // Check if input is readonly (locked because of validation)
+            if (this.hasAttribute('readonly')) {
+                alert('Link publish terkunci karena sudah divalidasi. Matikan validasi Production terlebih dahulu.');
+                return;
+            }
+            
             const submissionId = this.dataset.submission;
             const value = this.value;
             saveCredential(submissionId, 'link_publish', value);
@@ -1204,6 +1225,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Update row data attribute (convert snake_case to camelCase)
                     const dataAttr = field.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
                     row.dataset[dataAttr] = newValue ? '1' : '0';
+                    
+                    // Toggle link_publish input readonly status when production_valid is toggled
+                    if (field === 'production_valid') {
+                        const linkInput = row.querySelector('input[data-field="link_publish"]');
+                        if (linkInput) {
+                            if (newValue) {
+                                linkInput.setAttribute('readonly', true);
+                                linkInput.classList.add('bg-light');
+                                linkInput.title = 'Link terkunci. Matikan validasi untuk mengedit.';
+                            } else {
+                                linkInput.removeAttribute('readonly');
+                                linkInput.classList.remove('bg-light');
+                                linkInput.title = 'Masukkan link publish';
+                            }
+                        }
+                    }
                 } else {
                     alert('Gagal update validasi: ' + (data.message || 'Unknown error'));
                 }

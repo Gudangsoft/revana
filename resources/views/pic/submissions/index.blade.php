@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Data Submission')
-@section('page-title', 'Data Submission')
+@section('title', 'Data Submit Reguler')
+@section('page-title', 'Data Submit Reguler')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -46,7 +46,7 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-file-earmark-plus"></i> Daftar Submission</span>
+        <span><i class="bi bi-file-earmark-plus"></i> Daftar Submit Reguler</span>
         <a href="{{ route('pic.submissions.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-circle"></i> Tambah Submission
         </a>

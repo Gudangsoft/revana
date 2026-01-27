@@ -1,6 +1,6 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Monitoring Fasttrack')
+@section('title', 'Data Submit Fasttrack')
 @section('page-title', '')
 @section('sidebar-class', 'auto-collapse')
 
@@ -49,7 +49,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
-        <i class="bi bi-bar-chart text-warning"></i> Monitoring Fasttrack
+        <i class="bi bi-bar-chart text-warning"></i> Data Submit Fasttrack
     </h4>
     <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-warning">
         <i class="bi bi-plus-circle"></i> Input Fasttrack

@@ -1,6 +1,6 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Data Fasttrack')
+@section('title', 'Data Submit Fasttrack')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -360,7 +360,7 @@ html, body {
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-lightning-charge text-warning"></i> Data Fasttrack</span>
+                <span><i class="bi bi-lightning-charge text-warning"></i> Data Submit Fasttrack</span>
                 <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-warning btn-sm">
                     <i class="bi bi-plus-circle"></i> Input Fasttrack
                 </a>
