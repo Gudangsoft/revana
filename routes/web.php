@@ -203,7 +203,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/points', [PointManagementController::class, 'store'])->name('points.store');
         Route::delete('/points/{point}', [PointManagementController::class, 'destroy'])->name('points.destroy');
         
-        // Reward Management
+
+        // Rewards
         Route::get('/rewards', [AdminRewardController::class, 'index'])->name('rewards.index');
         Route::get('/rewards/create', [AdminRewardController::class, 'create'])->name('rewards.create');
         Route::post('/rewards', [AdminRewardController::class, 'store'])->name('rewards.store');

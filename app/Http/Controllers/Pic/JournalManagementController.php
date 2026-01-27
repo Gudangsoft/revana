@@ -116,29 +116,83 @@ class JournalManagementController extends Controller
     {
         $query = JournalSlot::with(['journalMaster']);
         
-        // Search by nama jurnal
+        // Search by nama jurnal, publisher, or kode_slot
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('journalMaster', function($q) use ($search) {
-                $q->where('nama_jurnal', 'like', "%{$search}%")
-                  ->orWhere('publisher', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('kode_slot', 'like', "%{$search}%")
+                  ->orWhereHas('journalMaster', function($subq) use ($search) {
+                      $subq->where('nama_jurnal', 'like', "%{$search}%")
+                           ->orWhere('publisher', 'like', "%{$search}%");
+                  });
             });
         }
         
-        if ($request->filled('journal_id')) {
-            $query->where('journal_master_id', $request->journal_id);
+        // Filter by akreditasi
+        if ($request->filled('akreditasi')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('accreditation', $request->akreditasi);
+            });
         }
-        if ($request->filled('year')) {
-            $query->where('tahun', $request->year);
+        
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('kategori', $request->kategori);
+            });
         }
-        if ($request->filled('month')) {
-            $query->where('bulan', $request->month);
+        
+        // Filter by jenis jurnal
+        if ($request->filled('jenis')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('jenis_jurnal', $request->jenis);
+            });
+        }
+        
+        // Filter by bulan (nama bulan)
+        if ($request->filled('bulan')) {
+            $query->where('bulan', $request->bulan);
+        }
+        
+        // Filter by tahun
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status == 'inactive') {
+                $query->where('is_active', false);
+            }
         }
 
-        $slots = $query->latest()->paginate(20)->withQueryString();
+        // Bulan options for filter dropdown
+        $bulanOptions = [
+            'Januari' => 'Januari',
+            'Februari' => 'Februari',
+            'Maret' => 'Maret',
+            'April' => 'April',
+            'Mei' => 'Mei',
+            'Juni' => 'Juni',
+            'Juli' => 'Juli',
+            'Agustus' => 'Agustus',
+            'September' => 'September',
+            'Oktober' => 'Oktober',
+            'November' => 'November',
+            'Desember' => 'Desember',
+        ];
+
+        $slots = $query->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+            
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         
-        return view('pic.journal-slots.index', compact('slots', 'journals'));
+        return view('pic.journal-slots.index-new', compact('slots', 'journals', 'bulanOptions', 'accreditations'));
     }
 
     public function slotsCreate()

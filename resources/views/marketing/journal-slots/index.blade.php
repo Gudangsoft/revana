@@ -20,13 +20,13 @@
                         <label class="form-label small mb-1">Akreditasi</label>
                         <select name="akreditasi" class="form-select">
                             <option value="">-- Semua --</option>
-                            <option value="Sinta 1" {{ request('akreditasi') == 'Sinta 1' ? 'selected' : '' }}>Sinta 1</option>
-                            <option value="Sinta 2" {{ request('akreditasi') == 'Sinta 2' ? 'selected' : '' }}>Sinta 2</option>
-                            <option value="Sinta 3" {{ request('akreditasi') == 'Sinta 3' ? 'selected' : '' }}>Sinta 3</option>
-                            <option value="Sinta 4" {{ request('akreditasi') == 'Sinta 4' ? 'selected' : '' }}>Sinta 4</option>
-                            <option value="Sinta 5" {{ request('akreditasi') == 'Sinta 5' ? 'selected' : '' }}>Sinta 5</option>
-                            <option value="Sinta 6" {{ request('akreditasi') == 'Sinta 6' ? 'selected' : '' }}>Sinta 6</option>
-                            <option value="Non Sinta" {{ request('akreditasi') == 'Non Sinta' ? 'selected' : '' }}>Non Sinta</option>
+                            <option value="SINTA 1" {{ request('akreditasi') == 'SINTA 1' ? 'selected' : '' }}>SINTA 1</option>
+                            <option value="SINTA 2" {{ request('akreditasi') == 'SINTA 2' ? 'selected' : '' }}>SINTA 2</option>
+                            <option value="SINTA 3" {{ request('akreditasi') == 'SINTA 3' ? 'selected' : '' }}>SINTA 3</option>
+                            <option value="SINTA 4" {{ request('akreditasi') == 'SINTA 4' ? 'selected' : '' }}>SINTA 4</option>
+                            <option value="SINTA 5" {{ request('akreditasi') == 'SINTA 5' ? 'selected' : '' }}>SINTA 5</option>
+                            <option value="SINTA 6" {{ request('akreditasi') == 'SINTA 6' ? 'selected' : '' }}>SINTA 6</option>
+                            <option value="Non SINTA" {{ request('akreditasi') == 'Non SINTA' ? 'selected' : '' }}>Non SINTA</option>
                         </select>
                     </div>
                     <div class="col-md-2">
