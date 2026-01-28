@@ -53,7 +53,33 @@
         </div>
     </div>
 </div>
-
+{{-- Menu Pengalolaan Jurnal FS --}}
+<div class="accordion accordion-flush" id="accordionFastrackManagement">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapseFastrackManagement" 
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'true' : 'false' }}">
+                <i class="bi bi-rocket text-success"></i> Pengalolaan Jurnal FS
+            </button>
+        </h2>
+        <div id="collapseFastrackManagement" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'show' : '' }}" data-bs-parent="#accordionFastrackManagement">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot FS
+                </a>
+                <a href="{{ route('admin.fasttrack-management.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text"></i> Data Submit FS
+                </a>
+                <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Proses FS
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.assignments') ? 'active' : '' }}">
     <i class="bi bi-clipboard-check"></i> Penugasan Review
 </a>

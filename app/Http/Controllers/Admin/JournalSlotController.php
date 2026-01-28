@@ -354,4 +354,60 @@ class JournalSlotController extends Controller
             }
         }, 'template_slot.xlsx');
     }
+    
+    /**
+     * Display fasttrack slots for Pengalolaan Jurnal FS
+     */
+    public function fasttrackSlots(Request $request)
+    {
+        $query = JournalSlot::with(['journalMaster', 'creator', 'submissions'])
+            ->whereHas('journalMaster', function($q) {
+                // Filter hanya jurnal yang mendukung fasttrack (misal: kategori tertentu atau flag khusus)
+                // Untuk sementara kita ambil semua jurnal, bisa disesuaikan nanti
+                $q->where('is_active', true);
+            });
+        
+        // Search by journal name, publisher, or kode_slot
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_slot', 'like', "%{$search}%")
+                  ->orWhereHas('journalMaster', function($jq) use ($search) {
+                      $jq->where('nama_jurnal', 'like', "%{$search}%")
+                         ->orWhere('publisher', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Filter by year
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+        
+        // Filter by month
+        if ($request->filled('bulan')) {
+            $query->where('bulan', $request->bulan);
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+        
+        $slots = $query->orderBy('tahun', 'desc')
+                      ->orderBy('bulan', 'desc')
+                      ->paginate(20)
+                      ->withQueryString();
+        
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        
+        $bulanOptions = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
+            4 => 'April', 5 => 'Mei', 6 => 'Juni',
+            7 => 'Juli', 8 => 'Agustus', 9 => 'September',
+            10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        
+        return view('admin.fasttrack-management.slots.index', compact('slots', 'journals', 'bulanOptions'));
+    }
 }

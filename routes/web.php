@@ -128,6 +128,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/{submission}/update-reviewer-notes', [SubmissionController::class, 'updateReviewerNotes'])->name('submissions.update-reviewer-notes');
         Route::resource('submissions', SubmissionController::class);
         
+        // Pengalolaan Jurnal FS
+        Route::prefix('fasttrack-management')->name('fasttrack-management.')->group(function () {
+            Route::get('/slots', [JournalSlotController::class, 'fasttrackSlots'])->name('slots.index');
+            Route::get('/submissions', [SubmissionController::class, 'fasttrackSubmissions'])->name('submissions.index');
+            Route::get('/monitoring', [SubmissionController::class, 'fasttrackMonitoring'])->name('monitoring.index');
+        });
+        
         // Articles (temporarily commented out - controller missing)
         // Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
         // Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
