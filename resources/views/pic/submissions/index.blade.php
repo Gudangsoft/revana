@@ -70,7 +70,6 @@
                     <tr>
                         <th>#</th>
                         <th>Kode Submit</th>
-                        <th>ID Artikel</th>
                         <th>Judul</th>
                         <th>Jurnal</th>
                         <th>Penulis</th>
@@ -90,7 +89,6 @@
                                 <span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>
                             @endif
                         </td>
-                        <td>{{ $submission->id_artikel ?? '-' }}</td>
                         <td title="{{ $submission->judul_artikel }}">{{ Str::limit($submission->judul_artikel, 30) }}</td>
                         <td>
                             @if($submission->journalSlot && $submission->journalSlot->journalMaster)
@@ -126,7 +124,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted">Belum ada data submission</td>
+                        <td colspan="9" class="text-center text-muted">Belum ada data submission</td>
                     </tr>
                     @endforelse
                 </tbody>
