@@ -48,9 +48,14 @@
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0">
-        <i class="bi bi-bar-chart text-warning"></i> Data Submit Fasttrack
-    </h4>
+    <div class="d-flex align-items-center gap-3">
+        <h4 class="mb-0">
+            <i class="bi bi-bar-chart text-warning"></i> Data Submit Fasttrack
+        </h4>
+        <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-clock-history"></i> Lihat Normal
+        </a>
+    </div>
     <div class="d-flex align-items-center">
         <div class="alert alert-warning mb-0 me-3 py-2 px-3" style="font-size: 0.875rem;">
             <i class="bi bi-lightning-charge"></i> 
