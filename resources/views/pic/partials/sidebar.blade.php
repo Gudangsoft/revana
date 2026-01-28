@@ -181,17 +181,17 @@
     <!-- Kelola Jurnal Section -->
     <div class="sidebar-section-header">
         <i class="bi bi-journal-bookmark"></i>
-        <span>Kelola Jurnal</span>
+        <span>Data Jurnal</span>
     </div>
     
-    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Kelola Jurnal">
+    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Jurnal">
         <i class="bi bi-journal-text text-info"></i>
-        <span>Kelola Jurnal</span>
+        <span>Data Jurnal</span>
     </a>
     
-    <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.create', 'pic.fasttrack.edit', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Kelola Jurnal FS">
+    <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.create', 'pic.fasttrack.edit', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Data Jurnal FS">
         <i class="bi bi-lightning-charge text-warning"></i>
-        <span>Kelola Jurnal FS</span>
+        <span>Data Jurnal FS</span>
     </a>
     
     <!-- Monitoring Section -->
