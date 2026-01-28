@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Fasttrack - ' . $appSettings['app_name'])
-@section('page-title', 'Fasttrack')
+@section('title', 'Data Jurnal FS - ' . $appSettings['app_name'])
+@section('page-title', 'Data Jurnal FS')
 
 @section('sidebar')
     @include('admin.partials.sidebar')

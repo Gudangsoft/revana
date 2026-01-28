@@ -72,7 +72,7 @@
                     <i class="bi bi-list-check"></i> Fasttrack
                 </a>
                 <a href="{{ route('admin.fasttrack.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.index' ? 'active' : '' }}">
-                    <i class="bi bi-graph-up"></i> Monitoring Fasttrack
+                    <i class="bi bi-graph-up"></i> Data Jurnal FS
                 </a>
             </div>
         </div>
