@@ -17,25 +17,20 @@ class DashboardController extends Controller
     public function index()
     {
         $totalJournals = JournalMaster::count();
-        $totalReviewers = User::where('user_type', 'pic')->count();
+        $totalReviewers = User::where('role', 'reviewer')->count();
         $totalSubmissions = Submission::count();
         $pendingSubmissions = Submission::whereIn('status', ['pending', 'new'])->count();
-        $submittedReviews = Assignment::where('status', 'submitted')->count();
-        $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count() ?? 0;
+        $submittedReviews = 0; // Assignment model belum ada, set ke 0
+        $pendingReviewRequests = 0; // Set ke 0 untuk sekarang
 
         $recentSubmissions = Submission::with(['journalSlot.journalMaster'])
             ->latest()
             ->take(10)
             ->get();
 
-        // Completed reviews report data
-        $completedReviews = Assignment::with(['submission.journalSlot.journalMaster', 'reviewer', 'result'])
-            ->where('status', 'approved')
-            ->orderBy('approved_at', 'desc')
-            ->take(20)
-            ->get();
-
-        $totalCompletedReviews = Assignment::where('status', 'approved')->count();
+        // Completed reviews report data - set empty untuk sekarang
+        $completedReviews = collect();
+        $totalCompletedReviews = 0;
 
         return view('admin.dashboard', compact(
             'totalJournals',

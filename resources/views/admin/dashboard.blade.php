@@ -79,7 +79,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Total PICs</h6>
+                        <h6 class="text-muted mb-2">Total Reviewers</h6>
                         <h2 class="mb-0">{{ $totalReviewers }}</h2>
                     </div>
                     <div class="text-success" style="font-size: 2.5rem;">
