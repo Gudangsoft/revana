@@ -66,40 +66,6 @@
             font-size: 1.2rem;
         }
         
-        /* Toggle Button */
-        .sidebar-toggle {
-            position: absolute;
-            top: 10px;
-            right: -12px;
-            width: 24px;
-            height: 24px;
-            background: #667eea;
-            border: 2px solid white;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-            font-size: 0.7rem;
-            transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .sidebar-toggle:hover {
-            background: #764ba2;
-            transform: scale(1.1);
-        }
-        
-        .sidebar.collapsed .sidebar-toggle {
-            right: -12px;
-        }
-        
-        .sidebar.collapsed .sidebar-toggle i {
-            transform: rotate(180deg);
-        }
-        
         .sidebar .nav-link {
             color: #333;
             padding: 12px 20px;
@@ -206,9 +172,6 @@
 
     <div class="main-container">
         <div class="sidebar @yield('sidebar-class')" id="sidebar">
-            <div class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Menu">
-                <i class="bi bi-chevron-left"></i>
-            </div>
             @yield('sidebar')
         </div>
         <div class="content">
@@ -261,18 +224,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-            
-            // Save state to localStorage
-            if (sidebar.classList.contains('collapsed')) {
-                localStorage.setItem('sidebarCollapsed', 'true');
-            } else {
-                localStorage.setItem('sidebarCollapsed', 'false');
-            }
-        }
-        
         // Check if page should auto-collapse sidebar
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
@@ -280,12 +231,6 @@
             
             if (autoCollapse) {
                 sidebar.classList.add('collapsed');
-            } else {
-                // Restore from localStorage for other pages
-                const savedState = localStorage.getItem('sidebarCollapsed');
-                if (savedState === 'true') {
-                    sidebar.classList.add('collapsed');
-                }
             }
         });
     </script>
