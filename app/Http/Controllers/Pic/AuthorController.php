@@ -43,7 +43,7 @@ class AuthorController extends Controller
             'author_username' => 'required|string|max:255',
             'author_password' => 'required|string|max:255',
             'accreditation' => 'required|string|max:100',
-            'marketing_id' => 'required|exists:marketings,id',
+            'marketing_id' => 'nullable|exists:marketings,id',
         ]);
 
         $pic = Auth::guard('pic')->user();

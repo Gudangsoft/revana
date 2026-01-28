@@ -66,7 +66,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="marketing_id" class="form-label">PIC Marketing <span class="text-danger">*</span></label>
+                        <label for="marketing_id" class="form-label">PIC Marketing</label>
                         <select class="form-select @error('marketing_id') is-invalid @enderror" 
                                 id="marketing_id" name="marketing_id" required>
                             <option value="">Pilih PIC Marketing</option>

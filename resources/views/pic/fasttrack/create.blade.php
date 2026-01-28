@@ -147,7 +147,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="link_publish" class="form-label">Link Publish <span class="text-danger">*</span></label>
+                                <label for="link_publish" class="form-label">Link Publish</label>
                                 <input type="url" 
                                        class="form-control @error('link_publish') is-invalid @enderror" 
                                        id="link_publish" 

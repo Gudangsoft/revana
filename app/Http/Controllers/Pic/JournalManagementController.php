@@ -1396,7 +1396,7 @@ class JournalManagementController extends Controller
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
             'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240',
-            'link_publish' => 'required|url|max:500',
+            'link_publish' => 'nullable|url|max:500',
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
@@ -1425,7 +1425,8 @@ class JournalManagementController extends Controller
         
         // Set fasttrack specific fields
         $validated['process_type'] = 'fasttrack';
-        $validated['status'] = 'PUBLISHED'; // Langsung ke status published karena sudah ada link publish
+        // Set status based on whether link_publish is provided
+        $validated['status'] = !empty($validated['link_publish']) ? 'PUBLISHED' : 'SUBMITTED';
         $validated['tanggal_submit'] = now();
         
         // Set created_by to current PIC
@@ -1439,8 +1440,12 @@ class JournalManagementController extends Controller
         $submission = Submission::create($validated);
 
         // Log history
-        $submission->logHistory('submit', 'submitted', 'Submission fasttrack dibuat dengan link publish', [
-            'link_publish' => $validated['link_publish'],
+        $logMessage = 'Submission fasttrack dibuat';
+        if (!empty($validated['link_publish'])) {
+            $logMessage .= ' dengan link publish';
+        }
+        $submission->logHistory('submit', 'submitted', $logMessage, [
+            'link_publish' => $validated['link_publish'] ?? null,
             'process_type' => 'fasttrack'
         ]);
 
