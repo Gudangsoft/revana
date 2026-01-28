@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Monitoring Fasttrack')
-@section('page-title', 'Monitoring Fasttrack')
+@section('title', 'Monitoring')
+@section('page-title', 'Monitoring')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
