@@ -91,12 +91,28 @@
     </div>
 
     <div class="col-md-3">
+        <div class="card stats-card info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Submissions</h6>
+                        <h2 class="mb-0">{{ $totalSubmissions }}</h2>
+                    </div>
+                    <div class="text-info" style="font-size: 2.5rem;">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
         <div class="card stats-card warning">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Submissions Pending</h6>
-                        <h2 class="mb-0">{{ $pendingSubmissions }}</h2>
+                        <h6 class="text-muted mb-2">Perlu Review</h6>
+                        <h2 class="mb-0">{{ $pendingSubmissions + $newSubmissions }}</h2>
                     </div>
                     <div class="text-warning" style="font-size: 2.5rem;">
                         <i class="bi bi-hourglass-split"></i>
@@ -105,19 +121,39 @@
             </div>
         </div>
     </div>
+</div>
 
+<!-- Additional Stats -->
+<div class="row mt-4">
     <div class="col-md-3">
-        <div class="card stats-card danger">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">Perlu Validasi</h6>
-                        <h2 class="mb-0">{{ $submittedReviews }}</h2>
-                    </div>
-                    <div class="text-danger" style="font-size: 2.5rem;">
-                        <i class="bi bi-exclamation-circle"></i>
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="text-primary">{{ $approvedSubmissions }}</h5>
+                <small class="text-muted">Disetujui</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="text-info">{{ $inProgressSubmissions }}</h5>
+                <small class="text-muted">Sedang Diproses</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="text-success">{{ $regularSubmissions }}</h5>
+                <small class="text-muted">Regular</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="text-warning">{{ $fasttrackSubmissions }}</h5>
+                <small class="text-muted">Fasttrack</small>
             </div>
         </div>
     </div>
@@ -125,7 +161,7 @@
 
 <!-- Quick Actions -->
 <div class="row mt-4">
-    <div class="col-md-12">
+    <div class="col-md-8">
         <div class="card">
             <div class="card-header">
                 <i class="bi bi-lightning"></i> Quick Actions
@@ -140,6 +176,21 @@
                 <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-info me-2">
                     <i class="bi bi-lightning"></i> Fasttrack Jurnal
                 </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-award"></i> Jurnal by Akreditasi
+            </div>
+            <div class="card-body">
+                @foreach($journalsByAccreditation->take(5) as $accreditation)
+                <div class="d-flex justify-content-between mb-2">
+                    <span>{{ $accreditation->accreditation ?: 'Tidak Terakreditasi' }}</span>
+                    <span class="badge bg-primary">{{ $accreditation->count }}</span>
+                </div>
+                @endforeach
             </div>
         </div>
     </div>

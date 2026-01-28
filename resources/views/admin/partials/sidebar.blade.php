@@ -84,11 +84,7 @@
         </div>
     </div>
 </div>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+
 <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.assignments') ? 'active' : '' }}">
     <i class="bi bi-clipboard-check"></i> Penugasan Review
 </a>

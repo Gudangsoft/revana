@@ -15,50 +15,68 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Basic counts
         $totalJournals = JournalMaster::count();
         $totalReviewers = User::where('role', 'reviewer')->count();
         $totalSubmissions = Submission::count();
-        $pendingSubmissions = Submission::whereIn('status', ['pending', 'new'])->count();
+        
+        // Submission status counts
+        $pendingSubmissions = Submission::where('status', 'pending')->count();
+        $newSubmissions = Submission::where('status', 'new')->count();
+        $inProgressSubmissions = Submission::where('status', 'in_progress')->count();
         $submittedReviews = Submission::where('status', 'submitted')->count();
-        $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count() ?? 0;
-
+        $approvedSubmissions = Submission::where('status', 'approved')->count();
+        $rejectedSubmissions = Submission::where('status', 'rejected')->count();
+        
+        // Process type counts  
+        $regularSubmissions = Submission::where('process_type', 'regular')->orWhereNull('process_type')->count();
+        $fasttrackSubmissions = Submission::where('process_type', 'fasttrack')->count();
+        
+        // Journal statistics
+        $journalsByAccreditation = JournalMaster::selectRaw('accreditation, COUNT(*) as count')
+            ->groupBy('accreditation')
+            ->orderBy('count', 'desc')
+            ->get();
+            
+        // Recent submissions
         $recentSubmissions = Submission::with(['journalSlot.journalMaster'])
             ->latest()
             ->take(10)
             ->get();
 
-        // Completed submissions report data
+        // Completed submissions (approved)
         $completedReviews = Submission::with(['journalSlot.journalMaster'])
             ->where('status', 'approved')
             ->orderBy('updated_at', 'desc')
             ->take(20)
             ->get();
 
-        $totalCompletedReviews = Submission::where('status', 'approved')->count();
+        $totalCompletedReviews = $approvedSubmissions;
+        
+        // Monthly statistics
+        $monthlySubmissions = Submission::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
 
         return view('admin.dashboard', compact(
             'totalJournals',
-            'totalReviewers',
+            'totalReviewers', 
             'totalSubmissions',
             'pendingSubmissions',
+            'newSubmissions',
+            'inProgressSubmissions',
             'submittedReviews',
-            'pendingReviewRequests',
+            'approvedSubmissions',
+            'rejectedSubmissions',
+            'regularSubmissions',
+            'fasttrackSubmissions',
+            'journalsByAccreditation',
             'recentSubmissions',
             'completedReviews',
-            'totalCompletedReviews'
-        ));
-    }
-
-        return view('admin.dashboard', compact(
-            'totalJournals',
-            'totalReviewers',
-            'totalSubmissions',
-            'pendingSubmissions',
-            'submittedReviews',
-            'pendingReviewRequests',
-            'recentSubmissions',
-            'completedReviews',
-            'totalCompletedReviews'
+            'totalCompletedReviews',
+            'monthlySubmissions'
         ));
     }
 
