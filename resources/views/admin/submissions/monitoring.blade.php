@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', Request::route()->getName() === 'admin.fasttrack.index' ? 'Monitoring Proses FS - ' . $appSettings['app_name'] : 'Monitoring Proses - ' . $appSettings['app_name'])
-@section('page-title', Request::route()->getName() === 'admin.fasttrack.index' ? 'Monitoring Proses FS' : 'Monitoring Proses Submit')
+@section('title', 'Monitoring Proses - ' . $appSettings['app_name'])
+@section('page-title', 'Monitoring Proses Submit')
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -365,14 +365,14 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-bar-chart"></i> {{ Request::route()->getName() === 'admin.fasttrack.index' ? 'Monitoring Proses FS' : 'Monitoring Proses Submit' }} (Filter Tanggal)</span>
-                <a href="{{ Request::route()->getName() === 'admin.fasttrack.index' ? route('admin.fasttrack.monitoring') : route('admin.submissions.index') }}" class="btn btn-secondary">
+                <span><i class="bi bi-bar-chart"></i> Monitoring Proses Submit (Filter Tanggal)</span>
+                <a href="{{ route('admin.submissions.index') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Kembali
                 </a>
             </div>
             <div class="card-body">
                 <!-- Filter -->
-                <form action="{{ Request::route()->getName() === 'admin.fasttrack.index' ? route('admin.fasttrack.index') : route('admin.submissions.monitoring') }}" method="GET" class="mb-4">
+                <form action="{{ route('admin.submissions.monitoring') }}" method="GET" class="mb-4">
                     <div class="row g-2 align-items-end">
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
@@ -826,9 +826,6 @@
 </div>
 
 <script>
-// Define dynamic routes based on current route
-const isFasttrack = '{{ Request::route()->getName() }}' === 'admin.fasttrack.index';
-
 // Quick Assign Marketing function
 function quickAssignMarketing(selectEl) {
     const submissionId = selectEl.dataset.submission;
@@ -836,11 +833,7 @@ function quickAssignMarketing(selectEl) {
     
     selectEl.classList.add('saving');
     
-    const routeUrl = isFasttrack ? 
-        '{{ url("/admin/fasttrack/quick-assign-marketing") }}' : 
-        '{{ url("/admin/submissions/quick-assign-marketing") }}';
-    
-    fetch(routeUrl, {
+    fetch('{{ route("admin.submissions.quick-assign-marketing") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -890,11 +883,7 @@ function quickAssign(selectEl) {
     
     selectEl.classList.add('saving');
     
-    const quickAssignRouteUrl = isFasttrack ? 
-        '{{ url("/admin/fasttrack/quick-assign") }}' : 
-        '{{ url("/admin/submissions/quick-assign") }}';
-    
-    fetch(quickAssignRouteUrl, {
+    fetch('{{ route("admin.submissions.quick-assign") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -943,11 +932,7 @@ function quickUpdateCredential(inputEl) {
     
     inputEl.classList.add('saving');
     
-    const quickUpdateCredentialUrl = isFasttrack ? 
-        '{{ url("/admin/fasttrack/quick-update-credential") }}' : 
-        '{{ url("/admin/submissions/quick-update-credential") }}';
-    
-    fetch(quickUpdateCredentialUrl, {
+    fetch('{{ route("admin.submissions.quick-update-credential") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1206,7 +1191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h5 class="modal-title"><i class="bi bi-people"></i> Penugasan Massal Editor</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ Request::route()->getName() === 'admin.fasttrack.index' ? route('admin.fasttrack.bulk-assign-with-credentials') : route('admin.submissions.bulk-assign-with-credentials') }}" method="POST">
+            <form action="{{ route('admin.submissions.bulk-assign-with-credentials') }}" method="POST">
                 @csrf
                 <input type="hidden" name="submission_ids" class="bulk-submission-ids">
                 <div class="modal-body">
@@ -1268,7 +1253,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h5 class="modal-title"><i class="bi bi-person-check"></i> Penugasan Massal Author</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ Request::route()->getName() === 'admin.fasttrack.index' ? route('admin.fasttrack.bulk-assign') : route('admin.submissions.bulk-assign') }}" method="POST">
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
                 @csrf
                 <input type="hidden" name="submission_ids" class="bulk-submission-ids">
                 <div class="modal-body">
@@ -1317,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h5 class="modal-title"><i class="bi bi-journal-check"></i> Penugasan Massal Reviewer</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ Request::route()->getName() === 'admin.fasttrack.index' ? route('admin.fasttrack.bulk-assign-with-credentials') : route('admin.submissions.bulk-assign-with-credentials') }}" method="POST">
+            <form action="{{ route('admin.submissions.bulk-assign-with-credentials') }}" method="POST">
                 @csrf
                 <input type="hidden" name="submission_ids" class="bulk-submission-ids">
                 <div class="modal-body">
@@ -1378,7 +1363,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h5 class="modal-title"><i class="bi bi-gear"></i> Penugasan Massal Production</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ Request::route()->getName() === 'admin.fasttrack.index' ? route('admin.fasttrack.bulk-assign') : route('admin.submissions.bulk-assign') }}" method="POST">
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
                 @csrf
                 <input type="hidden" name="submission_ids" class="bulk-submission-ids">
                 <input type="hidden" name="assignment_type" value="production">

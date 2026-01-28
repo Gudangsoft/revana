@@ -129,23 +129,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/{submission}/update-reviewer-notes', [SubmissionController::class, 'updateReviewerNotes'])->name('submissions.update-reviewer-notes');
         Route::resource('submissions', SubmissionController::class);
         
-        // Fasttrack Submissions
-        Route::prefix('fasttrack')->name('fasttrack.')->group(function () {
-            Route::get('/', [SubmissionController::class, 'fasttrackMonitoring'])->name('index');
-            Route::get('/create', [SubmissionController::class, 'fasttrackCreate'])->name('create');
-            Route::post('/', [SubmissionController::class, 'fasttrackStore'])->name('store');
-            Route::get('/monitoring', [SubmissionController::class, 'fasttrackIndex'])->name('monitoring');
-            Route::post('/bulk-assign', [SubmissionController::class, 'bulkAssign'])->name('bulk-assign');
-            Route::post('/bulk-assign-with-credentials', [SubmissionController::class, 'bulkAssignWithCredentials'])->name('bulk-assign-with-credentials');
-            Route::post('/quick-assign', [SubmissionController::class, 'quickAssign'])->name('quick-assign');
-            Route::post('/quick-assign-marketing', [SubmissionController::class, 'quickAssignMarketing'])->name('quick-assign-marketing');
-            Route::post('/quick-update-credential', [SubmissionController::class, 'quickUpdateCredential'])->name('quick-update-credential');
-            Route::get('/{submission}', [SubmissionController::class, 'fasttrackShow'])->name('show');
-            Route::get('/{submission}/edit', [SubmissionController::class, 'fasttrackEdit'])->name('edit');
-            Route::put('/{submission}', [SubmissionController::class, 'fasttrackUpdate'])->name('update');
-            Route::delete('/{submission}', [SubmissionController::class, 'fasttrackDestroy'])->name('destroy');
-        });
-        
         // Articles (temporarily commented out - controller missing)
         // Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
         // Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
