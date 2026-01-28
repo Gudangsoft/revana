@@ -178,6 +178,28 @@
         <span>Dashboard</span>
     </a>
     
+    <!-- Kelola Jurnal Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-journal-bookmark"></i>
+        <span>Kelola Jurnal</span>
+    </div>
+    
+    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Kelola Jurnal">
+        <i class="bi bi-journal-text text-info"></i>
+        <span>Kelola Jurnal</span>
+    </a>
+    
+    <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.create', 'pic.fasttrack.edit', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Kelola Jurnal FS">
+        <i class="bi bi-lightning-charge text-warning"></i>
+        <span>Kelola Jurnal FS</span>
+    </a>
+    
+    <!-- Monitoring Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-graph-up"></i>
+        <span>Monitoring</span>
+    </div>
+    
     <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring', 'pic.my-tasks.*') ? 'active' : '' }}" data-title="Monitoring & Tugas">
         <i class="bi bi-list-check"></i>
         <span>Monitoring & Tugas Saya</span>
@@ -187,9 +209,9 @@
     </a>
     
     <!-- Fasttrack (Gabungan Data & Monitoring) -->
-    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.*') ? 'active' : '' }}" data-title="Fasttrack">
-        <i class="bi bi-lightning-charge text-warning"></i>
-        <span>Fasttrack</span>
+    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.monitoring') ? 'active' : '' }}" data-title="Fasttrack">
+        <i class="bi bi-graph-up text-warning"></i>
+        <span>Monitoring Fasttrack</span>
     </a>
     
     <div class="sidebar-divider"></div>
