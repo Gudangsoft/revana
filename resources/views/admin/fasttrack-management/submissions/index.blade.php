@@ -17,7 +17,7 @@
                     <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-info">
                         <i class="bi bi-download"></i> Export
                     </a>
-                    <a href="{{ route('admin.submissions.create') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.fasttrack.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah Submit
                     </a>
                 </div>
