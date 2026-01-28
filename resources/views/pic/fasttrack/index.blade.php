@@ -74,163 +74,94 @@
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="bi bi-search"></i> Filter
                                 </button>
-    line-height: 1;
-    vertical-align: middle;
-    height: 32px;
-}
+                                <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
-.table-monitoring thead tr:nth-child(2) th {
-    position: sticky;
-    top: 32px;
-    z-index: 20;
-    line-height: 1;
-    vertical-align: middle;
-    height: 32px;
-}
+                <!-- Data Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-sm">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Kode Submit</th>
+                                <th>ID Artikel</th>
+                                <th>Judul</th>
+                                <th>Jurnal</th>
+                                <th>Penulis</th>
+                                <th>Marketing</th>
+                                <th>Petugas Submit</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th style="width: 150px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($submissions as $s)
+                            <tr>
+                                <td>{{ $loop->iteration + ($submissions->currentPage() - 1) * $submissions->perPage() }}</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-lightning-charge"></i> {{ $s->kode_submit }}
+                                    </span>
+                                </td>
+                                <td>{{ $s->id_artikel ?? '-' }}</td>
+                                <td>{{ Str::limit($s->judul_artikel, 50) }}</td>
+                                <td><small>{{ $s->journalSlot->journalMaster->name ?? '-' }}</small></td>
+                                <td>{{ Str::limit($s->nama_penulis, 30) }}</td>
+                                <td>{{ $s->marketing->name ?? '-' }}</td>
+                                <td>{{ $s->petugasSubmit->name ?? '-' }}</td>
+                                <td>
+                                    @if($s->status == 'PUBLISHED' || $s->production_valid)
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Published</span>
+                                    @elseif($s->link_publish)
+                                        <span class="badge bg-info"><i class="bi bi-hourglass-half"></i> Proses</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Perlu Penugasan</span>
+                                    @endif
+                                </td>
+                                <td><small>{{ $s->tanggal_submit ? date('d/m/Y', strtotime($s->tanggal_submit)) : ($s->created_at ? $s->created_at->format('d/m/Y') : '-') }}</small></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ route('pic.fasttrack.show', $s) }}" class="btn btn-info btn-sm" title="Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ route('pic.fasttrack.edit', $s) }}" class="btn btn-warning btn-sm" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="11" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0 mt-2">Belum ada data fasttrack submission</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
 
-.table-monitoring thead th.bg-info {
-    background-color: #0dcaf0 !important;
-    color: #000 !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-primary {
-    background-color: #0d6efd !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-success {
-    background-color: #198754 !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-dark {
-    background-color: #212529 !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-/* Sticky first column */
-.table-monitoring th.sticky-first,
-.table-monitoring td.sticky-first {
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: #fff;
-    min-width: 110px;
-    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1);
-}
-
-.table-monitoring thead th.sticky-first {
-    z-index: 21;
-    background-color: #212529 !important;
-    color: #fff !important;
-}
-
-/* Sticky second column */
-.table-monitoring th.sticky-second,
-.table-monitoring td.sticky-second {
-    position: sticky;
-    left: 110px;
-    z-index: 3;
-    background: #fff;
-    min-width: 90px;
-    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1);
-}
-
-.table-monitoring thead th.sticky-second {
-    z-index: 21;
-    background-color: #212529 !important;
-    color: #fff !important;
-}
-
-.table-monitoring tbody td {
-    padding: 4px;
-    border: 1px solid #dee2e6;
-    white-space: nowrap;
-    line-height: 1;
-    vertical-align: middle;
-    height: 30px;
-}
-
-.table-monitoring tbody tr:hover td {
-    background-color: #f1f3f5;
-}
-
-.table-monitoring tbody tr:hover td.sticky-first,
-.table-monitoring tbody tr:hover td.sticky-second {
-    background-color: #e9ecef;
-}
-
-.table-monitoring tbody tr:nth-child(even) td {
-    background-color: #f9fafb;
-}
-
-.table-monitoring tbody tr:nth-child(even) td.sticky-first,
-.table-monitoring tbody tr:nth-child(even) td.sticky-second {
-    background-color: #f9fafb;
-}
-
-/* Style untuk petugas belum ditugaskan */
-.petugas-kosong {
-    color: #dc3545;
-    font-style: italic;
-    font-size: 0.75rem;
-}
-
-.petugas-kosong i {
-    margin-right: 2px;
-}
-
-/* Scroll controls */
-.scroll-controls {
-    margin-bottom: 10px;
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    position: relative;
-    z-index: 20;
-}
-
-.scroll-nav-btn {
-    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: relative;
-    z-index: 21;
-}
-
-.scroll-nav-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #0b5ed7, #0a58ca);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    transform: translateY(-1px);
-}
-
-.scroll-nav-btn:disabled {
-    background: linear-gradient(135deg, #6c757d, #5a6268);
-    cursor: not-allowed;
-    opacity: 0.5;
+                <!-- Pagination -->
+                @if($submissions->hasPages())
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted small">
+                        Menampilkan {{ $submissions->firstItem() }} - {{ $submissions->lastItem() }} dari {{ $submissions->total() }} data
+                    </div>
+                    {{ $submissions->links() }}
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
 }
 
 .scroll-position-indicator {
