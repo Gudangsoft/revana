@@ -10,7 +10,13 @@
 
 @section('content')
 <style>
-/* Scrollbar Styles for Table */
+/* Override content width for this page */
+.content {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
     overflow-y: auto;
