@@ -649,7 +649,8 @@
                                 data-reviewer2-valid="{{ $s->reviewer2_valid ? '1' : '0' }}"
                                 data-editor3-valid="{{ $s->editor3_valid ? '1' : '0' }}"
                                 data-author2-valid="{{ $s->author2_valid ? '1' : '0' }}"
-                                data-production-valid="{{ $s->production_valid ? '1' : '0' }}">
+                                data-production-valid="{{ $s->production_valid ? '1' : '0' }}"
+                                data-process-type="{{ $s->process_type ?? 'regular' }}">
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
@@ -1134,10 +1135,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const current = this.dataset.current === '1';
             const newValue = !current;
             
+            // Get process type from row
+            const row = this.closest('tr');
+            const processType = row.dataset.processType || 'regular';
+            
+            // For FASTTRACK: Skip sequential validation (allow jumping)
+            if (processType === 'fasttrack') {
+                // Direct toggle without checking previous stages
+                toggleValidation(submissionId, field, newValue);
+                return;
+            }
+            
+            // For REGULAR: Check sequential validation
             // Check if previous stages are valid (sequential validation)
             // EXCEPTION 1: Reviewer 1 and Reviewer 2 can work in parallel
             // EXCEPTION 2: Editor 3 and Author 2 are OPTIONAL (can be skipped)
-            const row = this.closest('tr');
             const stageOrder = ['editor1_valid', 'author1_valid', 'editor2_valid', 'reviewer1_valid', 'reviewer2_valid', 'editor3_valid', 'author2_valid', 'production_valid'];
             const currentStageIndex = stageOrder.indexOf(field);
             
