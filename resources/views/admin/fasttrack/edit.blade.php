@@ -23,7 +23,7 @@
                 </div>
                 @endif
 
-                <form action="{{ route('admin.fasttrack.update', $submission->id) }}" method="POST">
+                <form action="{{ route('admin.fasttrack.update', $submission) }}" method="POST" novalidate>
                     @csrf
                     @method('PUT')
 

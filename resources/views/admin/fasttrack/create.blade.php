@@ -27,7 +27,7 @@
                     <br><small>Artikel akan langsung berstatus "Published" tanpa melalui workflow normal.</small>
                 </div>
 
-                <form action="{{ route('admin.fasttrack.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.fasttrack.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
 
                     <div class="alert alert-info mb-3">
