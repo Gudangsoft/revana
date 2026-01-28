@@ -1372,66 +1372,65 @@ class SubmissionController extends Controller
      */
     public function fasttrackMonitoring(Request $request)
     {
+        $query = Submission::with([
+            'journalSlot.journalMaster',
+            'marketing',
+            'petugasSubmit',
+            'petugasEditor1',
+            'petugasAuthor1',
+            'petugasEditor2',
+            'petugasReviewer1',
+            'petugasReviewer2',
+            'petugasEditor3',
+            'petugasAuthor2',
+            'petugasProduction',
+        ])->where('process_type', 'fasttrack');
+        
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Filter by journal
+        if ($request->filled('journal_master_id')) {
+            $query->whereHas('journalSlot', function($q) use ($request) {
+                $q->where('journal_master_id', $request->journal_master_id);
+            });
+        }
+        
+        $submissions = $query->latest('tanggal_submit')->get();
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $statusOptions = Submission::getStatusOptions();
+        
+        // Get PICs and Users for inline assignment dropdowns
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
+        $users = User::where('role', 'admin')->orderBy('name')->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        
         // Statistics
-        $totalFasttrack = Submission::where('process_type', 'fasttrack')->count();
-        $publishedCount = Submission::where('process_type', 'fasttrack')
-            ->where('status', 'PUBLISHED')
-            ->count();
-        $thisMonthCount = Submission::where('process_type', 'fasttrack')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
-        $thisYearCount = Submission::where('process_type', 'fasttrack')
-            ->whereYear('created_at', now()->year)
-            ->count();
+        $stats = [
+            'total' => $submissions->count(),
+            'submitted' => $submissions->where('status', 'SUBMITTED')->count(),
+            'in_process' => $submissions->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
+            'published' => $submissions->where('status', 'PUBLISHED')->count(),
+            'rejected' => $submissions->where('status', 'REJECTED')->count(),
+        ];
         
-        // Marketing stats
-        $marketingStats = Marketing::where('is_active', true)
-            ->withCount([
-                'submissions as total_fasttrack' => function($q) {
-                    $q->where('process_type', 'fasttrack');
-                },
-                'submissions as month_fasttrack' => function($q) {
-                    $q->where('process_type', 'fasttrack')
-                      ->whereMonth('created_at', now()->month)
-                      ->whereYear('created_at', now()->year);
-                },
-                'submissions as year_fasttrack' => function($q) {
-                    $q->where('process_type', 'fasttrack')
-                      ->whereYear('created_at', now()->year);
-                }
-            ])
-            ->having('total_fasttrack', '>', 0)
-            ->orderByDesc('total_fasttrack')
-            ->get();
+        // Count pending validations (status contains _SUBMITTED)
+        $pendingValidations = $submissions->filter(function($s) {
+            return str_contains($s->status, '_SUBMITTED');
+        });
+        $pendingCount = $pendingValidations->count();
         
-        // PIC stats - using raw query since Pic model doesn't have submissions relationship
-        $picStats = \DB::table('pics')
-            ->select('pics.id', 'pics.name')
-            ->selectRaw("(SELECT COUNT(*) FROM submissions WHERE submissions.petugas_submit_id = pics.id AND submissions.process_type = 'fasttrack') as total_fasttrack")
-            ->selectRaw("(SELECT COUNT(*) FROM submissions WHERE submissions.petugas_submit_id = pics.id AND submissions.process_type = 'fasttrack' AND MONTH(submissions.created_at) = ? AND YEAR(submissions.created_at) = ?) as month_fasttrack", [now()->month, now()->year])
-            ->selectRaw("(SELECT COUNT(*) FROM submissions WHERE submissions.petugas_submit_id = pics.id AND submissions.process_type = 'fasttrack' AND YEAR(submissions.created_at) = ?) as year_fasttrack", [now()->year])
-            ->where('pics.is_active', true)
-            ->havingRaw('total_fasttrack > 0')
-            ->orderByDesc('total_fasttrack')
-            ->get();
-        
-        // Recent fasttrack
-        $recentFasttrack = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
-            ->where('process_type', 'fasttrack')
-            ->latest()
-            ->take(10)
-            ->get();
-        
-        return view('admin.fasttrack.monitoring', compact(
-            'totalFasttrack', 
-            'publishedCount', 
-            'thisMonthCount', 
-            'thisYearCount',
-            'marketingStats',
-            'picStats',
-            'recentFasttrack'
-        ));
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
     }
 
     /**
