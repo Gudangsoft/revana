@@ -89,6 +89,17 @@
                             </div>
                         </a>
                     </div>
+                    <div class="col-md-4">
+                        <a href="{{ route('pic.journal-slots.index') }}" class="text-decoration-none">
+                            <div class="card h-100 border-danger">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-rocket text-danger" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Data Jurnal FS</h5>
+                                    <p class="card-text text-muted">Kelola data jurnal fasttrack</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
