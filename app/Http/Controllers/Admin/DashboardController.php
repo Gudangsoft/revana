@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\JournalMaster;
 use App\Models\Submission;
 use App\Models\User;
-use App\Models\Assignment;
 use App\Models\ReviewRequest;
 use App\Exports\CompletedReviewsExport;
 use Illuminate\Http\Request;
@@ -20,17 +19,35 @@ class DashboardController extends Controller
         $totalReviewers = User::where('role', 'reviewer')->count();
         $totalSubmissions = Submission::count();
         $pendingSubmissions = Submission::whereIn('status', ['pending', 'new'])->count();
-        $submittedReviews = 0; // Assignment model belum ada, set ke 0
-        $pendingReviewRequests = 0; // Set ke 0 untuk sekarang
+        $submittedReviews = Submission::where('status', 'submitted')->count();
+        $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count() ?? 0;
 
         $recentSubmissions = Submission::with(['journalSlot.journalMaster'])
             ->latest()
             ->take(10)
             ->get();
 
-        // Completed reviews report data - set empty untuk sekarang
-        $completedReviews = collect();
-        $totalCompletedReviews = 0;
+        // Completed submissions report data
+        $completedReviews = Submission::with(['journalSlot.journalMaster'])
+            ->where('status', 'approved')
+            ->orderBy('updated_at', 'desc')
+            ->take(20)
+            ->get();
+
+        $totalCompletedReviews = Submission::where('status', 'approved')->count();
+
+        return view('admin.dashboard', compact(
+            'totalJournals',
+            'totalReviewers',
+            'totalSubmissions',
+            'pendingSubmissions',
+            'submittedReviews',
+            'pendingReviewRequests',
+            'recentSubmissions',
+            'completedReviews',
+            'totalCompletedReviews'
+        ));
+    }
 
         return view('admin.dashboard', compact(
             'totalJournals',

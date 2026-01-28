@@ -150,7 +150,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-spreadsheet"></i> Laporan Jurnal Selesai Direview</span>
+                <span><i class="bi bi-file-earmark-spreadsheet"></i> Submissions yang Sudah Disetujui</span>
                 <div>
                     <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
                         <i class="bi bi-file-earmark-excel"></i> Export Excel
@@ -159,7 +159,7 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info mb-3">
-                    <i class="bi bi-info-circle"></i> Total <strong>{{ $totalCompletedReviews }}</strong> jurnal telah selesai direview dan disetujui.
+                    <i class="bi bi-info-circle"></i> Total <strong>{{ $totalCompletedReviews }}</strong> submissions telah disetujui.
                     Menampilkan 20 data terbaru.
                 </div>
                 <div class="table-responsive">
@@ -170,35 +170,35 @@
                                 <th>Kode Submit</th>
                                 <th>Judul Artikel</th>
                                 <th>Jurnal</th>
-                                <th>PIC</th>
+                                <th>Penulis</th>
                                 <th class="hide-mobile">Institusi</th>
-                                <th>Hasil</th>
-                                <th>Tanggal Selesai</th>
+                                <th>File</th>
+                                <th>Tanggal</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($completedReviews as $review)
+                            @forelse($completedReviews as $submission)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td><strong>{{ $review->submission->kode_submit ?? 'N/A' }}</strong></td>
+                                <td><strong>{{ $submission->kode_submit ?? 'N/A' }}</strong></td>
                                 <td>
-                                    <strong>{{ Str::limit($review->submission->judul_artikel ?? 'N/A', 40) }}</strong>
+                                    <strong>{{ Str::limit($submission->judul_artikel ?? 'N/A', 40) }}</strong>
                                 </td>
-                                <td><span class="badge bg-secondary">{{ $review->submission->journalSlot->journalMaster->name ?? 'N/A' }}</span></td>
-                                <td>{{ Str::limit($review->reviewer->name ?? 'N/A', 25) }}</td>
+                                <td><span class="badge bg-secondary">{{ $submission->journalSlot->journalMaster->name ?? 'N/A' }}</span></td>
+                                <td>{{ Str::limit($submission->nama_penulis ?? 'N/A', 25) }}</td>
                                 <td class="hide-mobile">
-                                    <small>{{ Str::limit($review->reviewer->affiliation ?? '-', 25) }}</small>
+                                    <small>{{ Str::limit($submission->institusi_penulis ?? '-', 25) }}</small>
                                 </td>
                                 <td>
-                                    @if($review->result && $review->result->google_drive_link)
-                                        <a href="{{ $review->result->google_drive_link }}" target="_blank" class="btn btn-sm btn-success">
+                                    @if($submission->file_pdf)
+                                        <a href="{{ Storage::url($submission->file_pdf) }}" target="_blank" class="btn btn-sm btn-success">
                                             <i class="bi bi-file-earmark-check"></i> Lihat
                                         </a>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
-                                <td><small>{{ $review->approved_at ? $review->approved_at->format('d M Y') : '-' }}</small></td>
+                                <td><small>{{ $submission->updated_at ? $submission->updated_at->format('d M Y') : '-' }}</small></td>
                             </tr>
                             @empty
                             <tr>
