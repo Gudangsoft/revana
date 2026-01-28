@@ -120,11 +120,6 @@
         color: #000;
         border: none;
     }
-    
-    .btn-submit-fasttrack:hover {
-        background: linear-gradient(135deg, #ffb300 0%, #ffa000 100%);
-        color: #000;
-    }
 </style>
 
 <nav class="nav flex-column">
@@ -170,18 +165,6 @@
         $totalPoints = $picUser ? $picUser->total_points : 0;
     @endphp
     
-    <!-- Submit Artikel Section -->
-    <div class="submit-buttons">
-        <a href="{{ route('pic.submissions.create') }}" class="btn btn-submit btn-submit-regular">
-            <i class="bi bi-plus-circle"></i>
-            <span>Submit Reguler</span>
-        </a>
-        <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-submit btn-submit-fasttrack">
-            <i class="bi bi-lightning-charge"></i>
-            <span>Submit Fasttrack</span>
-        </a>
-    </div>
-    
     <div class="sidebar-divider"></div>
     
     <!-- Dashboard Section -->
@@ -201,11 +184,6 @@
         @if($pendingTasks > 0)
             <span class="badge bg-danger">{{ $pendingTasks }}</span>
         @endif
-    </a>
-    
-    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Submit Reguler">
-        <i class="bi bi-file-earmark-text"></i>
-        <span>Data Submit Reguler</span>
     </a>
     
     <!-- Fasttrack (Gabungan Data & Monitoring) -->
