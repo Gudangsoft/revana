@@ -1,8 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Data Submit Fasttrack')
-@section('page-title', '')
-@section('sidebar-class', '')
+@section('title', 'Monitoring Fasttrack')
+@section('page-title', 'Monitoring Fasttrack')
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -52,71 +51,211 @@
     background: #dee2e6;
 }
 
-.table-monitoring {
-    width: max-content;
-    min-width: 100%;
-    margin-bottom: 0;
-    white-space: nowrap;
-    font-size: 12px;
-    background: white;
-    table-layout: fixed;
+/* Summary cards */
+.summary-cards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
-.table-monitoring th,
-.table-monitoring td {
-    padding: 8px 10px;
-    vertical-align: middle;
+.summary-card {
+    flex: 0 0 auto;
+    min-width: 120px;
+    max-width: 180px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    padding: 12px 15px;
+    border-radius: 8px;
     border: 1px solid #dee2e6;
-    background: white;
-    position: relative;
-    min-width: 100px;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Sticky columns for better navigation */
-.table-monitoring .sticky-col:first-child {
+.summary-card h6 {
+    font-size: 0.7rem;
+    color: #6c757d;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.summary-card .value {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #212529;
+}
+
+.summary-card.my-tasks {
+    border-left: 4px solid #ffc107;
+}
+
+.summary-card.all-tasks {
+    border-left: 4px solid #0d6efd;
+}
+
+/* Scroll controls */
+.scroll-controls {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 20;
+}
+
+.scroll-nav-btn {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 21;
+}
+
+.scroll-nav-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0b5ed7, #0a58ca);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.scroll-nav-btn:disabled {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.scroll-position-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 300px;
+}
+
+.scroll-position-bar {
+    width: 100px;
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.scroll-position-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    border-radius: 2px;
+    transition: width 0.1s ease;
+}
+
+/* Jump button styling */
+.jump-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    margin: 1px;
+}
+
+.table-monitoring {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin: 0;
+    border-spacing: 0;
+}
+
+.table-monitoring thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    font-size: 0.7rem;
+    padding: 4px;
+    border: 1px solid #dee2e6;
+    white-space: nowrap;
+    background-color: #212529 !important;
+    color: #fff !important;
+    line-height: 1;
+    vertical-align: middle;
+    height: 32px;
+}
+
+.table-monitoring thead tr:nth-child(2) th {
+    position: sticky;
+    top: 32px;
+    z-index: 20;
+    line-height: 1;
+    vertical-align: middle;
+    height: 32px;
+}
+
+.table-monitoring thead th.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-primary {
+    background-color: #6f42c1 !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-success {
+    background-color: #198754 !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+.table-monitoring thead th.bg-dark {
+    background-color: #212529 !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
+/* Sticky columns */
+.table-monitoring th.sticky-first,
+.table-monitoring td.sticky-first {
     position: sticky;
     left: 0;
-    background: #f8f9fa !important;
-    z-index: 10;
-    border-right: 2px solid #007bff;
-    min-width: 60px;
-    max-width: 60px;
-}
-
-.table-monitoring .sticky-col:nth-child(2) {
-    position: sticky;
-    left: 60px;
-    background: #f8f9fa !important;
-    z-index: 10;
-    border-right: 2px solid #007bff;
+    z-index: 2;
+    background: #fff;
     min-width: 120px;
-    max-width: 120px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
-.table-monitoring .sticky-col:nth-child(3) {
+.table-monitoring thead th.sticky-first {
+    z-index: 5;
+    background: #212529 !important;
+}
+
+.table-monitoring th.sticky-second,
+.table-monitoring td.sticky-second {
     position: sticky;
-    left: 180px;
-    background: #f8f9fa !important;
-    z-index: 10;
-    border-right: 2px solid #007bff;
-    min-width: 150px;
-    max-width: 150px;
+    left: 120px;
+    z-index: 2;
+    background: #fff;
+    min-width: 100px;
+    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
 }
 
-.table-monitoring th.sticky-col {
-    background: #e9ecef !important;
-    font-weight: 600;
-    z-index: 11;
+.table-monitoring thead th.sticky-second {
+    z-index: 5;
+    background: #212529 !important;
 }
-
-/* Responsive adjustments */
-.table-monitoring th {
-    font-weight: 600;
-    background-color: #e9ecef;
-    text-align: center;
     font-size: 11px;
     line-height: 1.3;
     color: #495057;
@@ -228,99 +367,117 @@
 }
 </style>
 
-<div class="page-header">
-    <h4><i class="fas fa-rocket mr-2"></i> Data Submit Fasttrack</h4>
-</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <span><i class="bi bi-lightning-charge text-warning"></i> Monitoring Proses Submit Fasttrack</span>
+                    <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-clipboard-data"></i> Lihat Normal
+                    </a>
+                </div>
+                <div class="alert alert-warning mb-0 py-2 px-3" style="font-size: 0.875rem;">
+                    <i class="bi bi-lightning-charge"></i> 
+                    Halaman ini menampilkan data <strong>submissions fasttrack</strong> saja.
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Summary Cards -->
+                <div class="summary-cards mb-3">
+                    <div class="summary-card my-tasks">
+                        <h6>Total Fasttrack</h6>
+                        <div class="value">{{ $totalFasttrack }}</div>
+                    </div>
+                    <div class="summary-card all-tasks">
+                        <h6>Bulan Ini</h6>
+                        <div class="value">{{ $thisMonthFasttrack }}</div>
+                    </div>
+                </div>
+                <!-- Filter Form -->
+                <form action="{{ route('pic.fasttrack.monitoring') }}" method="GET" class="mb-3" id="filterForm">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-auto">
+                            <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
+                            <input type="date" class="form-control form-control-sm" style="width: 150px;" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
+                        </div>
+                        <div class="col-auto">
+                            <label for="tanggal_sampai" class="form-label small mb-1">Tanggal Sampai</label>
+                            <input type="date" class="form-control form-control-sm" style="width: 150px;" id="tanggal_sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
+                        </div>
+                        <div class="col-auto">
+                            <label for="journal_id" class="form-label small mb-1">Jurnal</label>
+                            <select class="form-select form-select-sm" style="width: 180px;" id="journal_id" name="journal_id">
+                                <option value="">-- Semua --</option>
+                                @foreach($journals as $journal)
+                                    <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
+                                        {{ Str::limit($journal->nama_jurnal, 20) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Filter
+                                </button>
+                                <a href="{{ route('pic.fasttrack.monitoring') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
-<div class="navigation-buttons">
-    <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-primary">
-        <i class="fas fa-list mr-2"></i>
-        Monitoring Submit Normal
-    </a>
-    <span class="text-muted">|</span>
-    <span class="btn btn-primary">
-        <i class="fas fa-rocket mr-2"></i>
-        Monitoring Submit Fasttrack
-    </span>
-</div>
+                <!-- Important Info Alert -->
+                <div class="alert alert-info d-flex align-items-start mb-3" style="font-size: 0.85rem;">
+                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                    <div>
+                        <strong>Info Penting:</strong>
+                        <ul class="mb-0 mt-1" style="font-size: 0.8rem;">
+                            <li><strong>Link Publish</strong> hanya bisa diedit jika validasi Production <strong>belum dicentang</strong>.</li>
+                            <li>Jika hendak mengubah Link Publish, <strong>matikan validasi Production</strong> terlebih dahulu dengan klik tombol centang hijau.</li>
+                            <li>Setelah selesai edit, centang kembali validasi Production untuk mengunci data.</li>
+                        </ul>
+                    </div>
+                </div>
 
-<div class="card">
-    <div class="card-header bg-primary text-white">
-        <h5 class="card-title mb-0">
-            <i class="fas fa-tachometer-alt mr-2"></i>
-            Monitoring Submit Fasttrack
-        </h5>
-    </div>
-    <div class="card-body">
-        <!-- Stats Summary -->
-        <div class="row mb-4">
-            <div class="col-lg-2 col-md-4 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h4>{{ $submissions->count() }}</h4>
-                        <p>Total Submit</p>
+                <!-- Scroll Controls -->
+                <div class="scroll-controls">
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="button" class="scroll-nav-btn" id="scrollStartBtn" title="Ke Awal">
+                            <i class="bi bi-chevron-bar-left"></i>
+                        </button>
+                        <button type="button" class="scroll-nav-btn" id="scrollLeftBtn" title="Scroll Kiri">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <div class="scroll-position-indicator">
+                            <div class="scroll-position-bar">
+                                <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="scrollPositionText">0%</small>
+                        </div>
+                        <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                        <button type="button" class="scroll-nav-btn" id="scrollEndBtn" title="Ke Akhir">
+                            <i class="bi bi-chevron-bar-right"></i>
+                        </button>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h4>{{ $submissions->where('is_validated', false)->count() }}</h4>
-                        <p>Belum Validasi</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h4>{{ $submissions->where('is_validated', true)->count() }}</h4>
-                        <p>Sudah Validasi</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-check-circle"></i>
+                    <div class="mt-2">
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary jump-btn" data-target="Submit">Submit</button>
+                            <button type="button" class="btn btn-outline-warning jump-btn" data-target="Editor1">Editor1</button>
+                            <button type="button" class="btn btn-outline-info jump-btn" data-target="Author1">Author1</button>
+                            <button type="button" class="btn btn-outline-warning jump-btn" data-target="Editor2">Editor2</button>
+                            <button type="button" class="btn btn-outline-primary jump-btn" data-target="Reviewer1">Reviewer1</button>
+                            <button type="button" class="btn btn-outline-primary jump-btn" data-target="Reviewer2">Reviewer2</button>
+                            <button type="button" class="btn btn-outline-warning jump-btn" data-target="Editor3">Editor3</button>
+                            <button type="button" class="btn btn-outline-info jump-btn" data-target="Author2">Author2</button>
+                            <button type="button" class="btn btn-outline-success jump-btn" data-target="Production">Production</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h4>{{ $submissions->whereNotNull('petugas_editor1_id')->count() }}</h4>
-                        <p>Ada Editor</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-user-edit"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-6">
-                <div class="small-box bg-secondary">
-                    <div class="inner">
-                        <h4>{{ $submissions->whereNotNull('petugas_reviewer1_id')->count() }}</h4>
-                        <p>Ada Reviewer</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-6">
-                <div class="small-box bg-dark">
-                    <div class="inner">
-                        <h4>{{ $submissions->whereNotNull('petugas_production_id')->count() }}</h4>
-                        <p>Ada Production</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Main Monitoring Table -->
         <div class="monitoring-scroll-wrapper">
@@ -586,12 +743,66 @@
                 </tbody>
             </table>
         </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+// Scroll controls functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollContainer = document.querySelector('.monitoring-scroll-wrapper');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const scrollStartBtn = document.getElementById('scrollStartBtn');
+    const scrollEndBtn = document.getElementById('scrollEndBtn');
+    const scrollPositionFill = document.getElementById('scrollPositionFill');
+    const scrollPositionText = document.getElementById('scrollPositionText');
+    const jumpBtns = document.querySelectorAll('.jump-btn');
+
+    function updateScrollPosition() {
+        if (scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+            const scrollPercentage = (scrollContainer.scrollLeft / (scrollContainer.scrollWidth - scrollContainer.clientWidth)) * 100;
+            scrollPositionFill.style.width = scrollPercentage + '%';
+            scrollPositionText.textContent = Math.round(scrollPercentage) + '%';
+        }
+    }
+
+    scrollLeftBtn.addEventListener('click', () => {
+        scrollContainer.scrollLeft -= 200;
+    });
+
+    scrollRightBtn.addEventListener('click', () => {
+        scrollContainer.scrollLeft += 200;
+    });
+
+    scrollStartBtn.addEventListener('click', () => {
+        scrollContainer.scrollLeft = 0;
+    });
+
+    scrollEndBtn.addEventListener('click', () => {
+        scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    });
+
+    scrollContainer.addEventListener('scroll', updateScrollPosition);
+
+    // Jump to specific sections
+    jumpBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = this.dataset.target;
+            const targetElement = document.querySelector(`th:contains('${target}')`);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            }
+        });
+    });
+
+    // Initial position update
+    updateScrollPosition();
+});
+
 // Toggle validation status
-function toggleValidation(submissionId, isValidated) {
+function toggleValidation(submissionId, field, button) {
     fetch(`{{ route('pic.fasttrack.toggle-validation') }}`, {
         method: 'POST',
         headers: {
@@ -600,40 +811,39 @@ function toggleValidation(submissionId, isValidated) {
         },
         body: JSON.stringify({
             submission_id: submissionId,
-            is_validated: isValidated
+            field: field
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update label
-            const label = document.querySelector(`label[for="validation_${submissionId}"]`);
-            label.textContent = isValidated ? 'Valid' : 'Pending';
-            
-            // Show success message
-            showNotification('Status validasi berhasil diupdate', 'success');
+            // Update button appearance
+            if (data.is_valid) {
+                button.className = 'validation-toggle btn btn-success btn-sm';
+                button.innerHTML = '<i class="bi bi-check"></i>';
+                button.title = 'Valid - Klik untuk batalkan';
+            } else {
+                button.className = 'validation-toggle btn btn-outline-secondary btn-sm';
+                button.innerHTML = '<i class="bi bi-x"></i>';
+                button.title = 'Belum Valid - Klik untuk validasi';
+            }
+            showAlert('success', data.message);
         } else {
-            // Revert checkbox
-            const checkbox = document.getElementById(`validation_${submissionId}`);
-            checkbox.checked = !isValidated;
-            showNotification('Gagal update status validasi', 'error');
+            showAlert('danger', data.message || 'Terjadi kesalahan');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        // Revert checkbox
-        const checkbox = document.getElementById(`validation_${submissionId}`);
-        checkbox.checked = !isValidated;
-        showNotification('Terjadi kesalahan', 'error');
+        showAlert('danger', 'Terjadi kesalahan sistem');
     });
 }
 
 // Update PIC assignment
 function updatePicAssignment(submissionId, field, picId) {
-    // Show loading state
-    const select = event.target;
-    select.classList.add('loading-assignments');
-    
+    const selectElement = event.target;
+    selectElement.disabled = true;
+    selectElement.classList.add('saving');
+
     fetch(`{{ route('pic.fasttrack.update-assignment') }}`, {
         method: 'POST',
         headers: {
@@ -648,38 +858,36 @@ function updatePicAssignment(submissionId, field, picId) {
     })
     .then(response => response.json())
     .then(data => {
-        select.classList.remove('loading-assignments');
+        selectElement.disabled = false;
+        selectElement.classList.remove('saving');
+        
         if (data.success) {
-            showNotification(`Berhasil update ${field.replace('pic_', '').replace('_', ' ')}`, 'success');
+            selectElement.classList.add('success');
+            showAlert('success', data.message);
+            setTimeout(() => {
+                selectElement.classList.remove('success');
+            }, 2000);
         } else {
-            showNotification('Gagal update assignment', 'error');
+            showAlert('danger', data.message || 'Terjadi kesalahan');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        select.classList.remove('loading-assignments');
-        showNotification('Terjadi kesalahan', 'error');
+        selectElement.disabled = false;
+        selectElement.classList.remove('saving');
+        showAlert('danger', 'Terjadi kesalahan sistem');
     });
 }
 
-// Show notification
-function showNotification(message, type = 'info') {
-    // You can implement your preferred notification system here
-    // For now, we'll use a simple alert (you might want to use toast notifications)
-    const alertClass = type === 'success' ? 'alert-success' : 
-                      type === 'error' ? 'alert-danger' : 'alert-info';
-    
-    const notification = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert" 
-             style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-            ${message}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+// Show alert messages
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
-    
-    document.body.insertAdjacentHTML('beforeend', notification);
+    document.body.insertAdjacentHTML('beforeend', alertHtml);
     
     // Auto-remove after 3 seconds
     setTimeout(() => {
@@ -689,10 +897,5 @@ function showNotification(message, type = 'info') {
         }
     }, 3000);
 }
-
-// Initialize tooltips if using Bootstrap
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip();
-});
 </script>
 @endsection
