@@ -490,6 +490,11 @@
                     </div>
                 </div>
 
+                <!-- Info Alert -->
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>Submissions Monitoring:</strong> Halaman ini menampilkan data submissions dengan workflow normal. Untuk monitoring Fasttrack, silakan kunjungi <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="text-decoration-none"><strong>Monitoring Fasttrack</strong></a>.
+                </div>
+
                 <!-- Data Table with Full Process Columns -->
                 <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
                     <table class="table table-monitoring table-bordered">
@@ -566,9 +571,6 @@
                                     <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
-                                    @if($s->process_type === 'fasttrack')
-                                        <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
-                                    @endif
                                     @if($isCompleted)
                                         <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
                                     @endif

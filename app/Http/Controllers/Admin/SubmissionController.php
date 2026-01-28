@@ -630,7 +630,12 @@ class SubmissionController extends Controller
             'petugasEditor3',
             'petugasAuthor2',
             'petugasProduction',
-        ]);
+        ])
+        // Exclude fasttrack submissions from regular submissions monitoring
+        ->where(function($q) {
+            $q->where('process_type', '!=', 'fasttrack')
+              ->orWhereNull('process_type');
+        });
         
         // Filter by date range
         if ($request->filled('tanggal_dari')) {
