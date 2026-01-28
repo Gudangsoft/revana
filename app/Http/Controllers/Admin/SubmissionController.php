@@ -1370,69 +1370,6 @@ class SubmissionController extends Controller
     /**
      * Display fasttrack monitoring
      */
-    public function fasttrackMonitoring(Request $request)
-    {
-        $query = Submission::with([
-            'journalSlot.journalMaster',
-            'marketing',
-            'petugasSubmit',
-            'petugasEditor1',
-            'petugasAuthor1',
-            'petugasEditor2',
-            'petugasReviewer1',
-            'petugasReviewer2',
-            'petugasEditor3',
-            'petugasAuthor2',
-            'petugasProduction',
-        ])->where('process_type', 'fasttrack');
-        
-        // Filter by date range
-        if ($request->filled('tanggal_dari')) {
-            $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
-        }
-        if ($request->filled('tanggal_sampai')) {
-            $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
-        }
-        
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        
-        // Filter by journal
-        if ($request->filled('journal_master_id')) {
-            $query->whereHas('journalSlot', function($q) use ($request) {
-                $q->where('journal_master_id', $request->journal_master_id);
-            });
-        }
-        
-        $submissions = $query->latest('tanggal_submit')->get();
-        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
-        $statusOptions = Submission::getStatusOptions();
-        
-        // Get PICs and Users for inline assignment dropdowns
-        $pics = Pic::where('is_active', true)->orderBy('name')->get();
-        $users = User::where('role', 'admin')->orderBy('name')->get();
-        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
-        
-        // Statistics
-        $stats = [
-            'total' => $submissions->count(),
-            'submitted' => $submissions->where('status', 'SUBMITTED')->count(),
-            'in_process' => $submissions->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
-            'published' => $submissions->where('status', 'PUBLISHED')->count(),
-            'rejected' => $submissions->where('status', 'REJECTED')->count(),
-        ];
-        
-        // Count pending validations (status contains _SUBMITTED)
-        $pendingValidations = $submissions->filter(function($s) {
-            return str_contains($s->status, '_SUBMITTED');
-        });
-        $pendingCount = $pendingValidations->count();
-        
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
-    }
-
     /**
      * Show fasttrack submission detail
      */
