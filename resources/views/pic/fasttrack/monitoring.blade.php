@@ -57,45 +57,57 @@
     min-width: 100%;
     margin-bottom: 0;
     white-space: nowrap;
-    font-size: 11px;
+    font-size: 12px;
     background: white;
+    table-layout: fixed;
 }
 
 .table-monitoring th,
 .table-monitoring td {
-    padding: 6px 8px;
+    padding: 8px 10px;
     vertical-align: middle;
     border: 1px solid #dee2e6;
     background: white;
     position: relative;
-    word-wrap: break-word;
-    min-width: 70px;
+    min-width: 100px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Sticky columns for better navigation */
-.table-monitoring .sticky-col:first-child,
-.table-monitoring .sticky-col:nth-child(2),
-.table-monitoring .sticky-col:nth-child(3) {
+.table-monitoring .sticky-col:first-child {
     position: sticky;
-    background: #f8f9fa;
+    left: 0;
+    background: #f8f9fa !important;
     z-index: 10;
     border-right: 2px solid #007bff;
-}
-
-.table-monitoring .sticky-col:first-child {
-    left: 0;
+    min-width: 60px;
+    max-width: 60px;
 }
 
 .table-monitoring .sticky-col:nth-child(2) {
-    left: 70px;
+    position: sticky;
+    left: 60px;
+    background: #f8f9fa !important;
+    z-index: 10;
+    border-right: 2px solid #007bff;
+    min-width: 120px;
+    max-width: 120px;
 }
 
 .table-monitoring .sticky-col:nth-child(3) {
-    left: 190px;
+    position: sticky;
+    left: 180px;
+    background: #f8f9fa !important;
+    z-index: 10;
+    border-right: 2px solid #007bff;
+    min-width: 150px;
+    max-width: 150px;
 }
 
 .table-monitoring th.sticky-col {
-    background: #e9ecef;
+    background: #e9ecef !important;
     font-weight: 600;
     z-index: 11;
 }
@@ -105,36 +117,37 @@
     font-weight: 600;
     background-color: #e9ecef;
     text-align: center;
-    font-size: 10px;
-    line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #495057;
 }
 
 .table-monitoring .no-wrap {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px;
 }
 
 .table-monitoring .btn {
-    font-size: 10px;
-    padding: 2px 6px;
+    font-size: 11px;
+    padding: 3px 8px;
     margin: 1px;
     border-radius: 3px;
     white-space: nowrap;
 }
 
 .table-monitoring select {
-    font-size: 10px;
-    padding: 2px 4px;
-    border-radius: 3px;
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 4px;
     border: 1px solid #ced4da;
     background-color: white;
-    min-width: 80px;
+    min-width: 90px;
+    max-width: 140px;
 }
 
 .table-monitoring input[type="checkbox"] {
-    transform: scale(1.1);
+    transform: scale(1.2);
 }
 
 /* Status indicators */
@@ -277,7 +290,7 @@
             <div class="col-lg-2 col-md-4 col-6">
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h4>{{ $submissions->whereNotNull('pic_editor1')->count() }}</h4>
+                        <h4>{{ $submissions->whereNotNull('petugas_editor1_id')->count() }}</h4>
                         <p>Ada Editor</p>
                     </div>
                     <div class="icon">
@@ -288,7 +301,7 @@
             <div class="col-lg-2 col-md-4 col-6">
                 <div class="small-box bg-secondary">
                     <div class="inner">
-                        <h4>{{ $submissions->whereNotNull('pic_reviewer1')->count() }}</h4>
+                        <h4>{{ $submissions->whereNotNull('petugas_reviewer1_id')->count() }}</h4>
                         <p>Ada Reviewer</p>
                     </div>
                     <div class="icon">
@@ -299,7 +312,7 @@
             <div class="col-lg-2 col-md-4 col-6">
                 <div class="small-box bg-dark">
                     <div class="inner">
-                        <h4>{{ $submissions->whereNotNull('pic_production')->count() }}</h4>
+                        <h4>{{ $submissions->whereNotNull('petugas_production_id')->count() }}</h4>
                         <p>Ada Production</p>
                     </div>
                     <div class="icon">
@@ -343,21 +356,21 @@
                     <tr>
                         <td class="sticky-col">{{ $index + 1 }}</td>
                         <td class="sticky-col">
-                            <strong class="text-primary">{{ $submission->submission_code }}</strong>
+                            <strong class="text-primary">{{ $submission->kode_submit ?? $submission->submission_code }}</strong>
                         </td>
                         <td class="sticky-col">
-                            <div class="no-wrap" title="{{ $submission->journal_name }}">
-                                {{ Str::limit($submission->journal_name, 20) }}
+                            <div class="no-wrap" title="{{ $submission->journalSlot->journalMaster->nama_jurnal ?? 'N/A' }}">
+                                {{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal ?? 'N/A', 20) }}
                             </div>
                         </td>
                         <td>
-                            <div class="no-wrap" title="{{ $submission->title }}">
-                                {{ Str::limit($submission->title, 30) }}
+                            <div class="no-wrap" title="{{ $submission->judul_artikel ?? $submission->title }}">
+                                {{ Str::limit($submission->judul_artikel ?? $submission->title, 30) }}
                             </div>
                         </td>
                         <td>
-                            <div class="no-wrap" title="{{ $submission->authors }}">
-                                {{ Str::limit($submission->authors, 25) }}
+                            <div class="no-wrap" title="{{ $submission->nama_penulis ?? $submission->authors }}">
+                                {{ Str::limit($submission->nama_penulis ?? $submission->authors, 25) }}
                             </div>
                         </td>
                         <td>
@@ -390,7 +403,7 @@
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td>{{ $submission->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $submission->tanggal_submit ? \Carbon\Carbon::parse($submission->tanggal_submit)->format('d/m/Y') : $submission->created_at->format('d/m/Y') }}</td>
                         
                         <!-- Validasi Column -->
                         <td>
@@ -411,11 +424,11 @@
                         <!-- Editor 1 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_editor1', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_editor1_id', this.value)">
                                 <option value="">Pilih Editor 1</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_editor1 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_editor1_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -425,11 +438,11 @@
                         <!-- Editor 2 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_editor2', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_editor2_id', this.value)">
                                 <option value="">Pilih Editor 2</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_editor2 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_editor2_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -439,11 +452,11 @@
                         <!-- Editor 3 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_editor3', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_editor3_id', this.value)">
                                 <option value="">Pilih Editor 3</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_editor3 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_editor3_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -453,11 +466,11 @@
                         <!-- Author 1 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_author1', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_author1_id', this.value)">
                                 <option value="">Pilih Author 1</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_author1 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_author1_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -467,11 +480,11 @@
                         <!-- Author 2 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_author2', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_author2_id', this.value)">
                                 <option value="">Pilih Author 2</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_author2 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_author2_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -481,11 +494,11 @@
                         <!-- Reviewer 1 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_reviewer1', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_reviewer1_id', this.value)">
                                 <option value="">Pilih Reviewer 1</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_reviewer1 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_reviewer1_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -495,11 +508,11 @@
                         <!-- Reviewer 2 -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_reviewer2', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_reviewer2_id', this.value)">
                                 <option value="">Pilih Reviewer 2</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_reviewer2 == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_reviewer2_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -509,11 +522,11 @@
                         <!-- Production -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_production', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_production_id', this.value)">
                                 <option value="">Pilih Production</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_production == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_production_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -523,11 +536,11 @@
                         <!-- Upload Proof -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_upload_proof', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_upload_proof_id', this.value)">
                                 <option value="">Pilih Upload</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_upload_proof == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_upload_proof_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
@@ -537,11 +550,11 @@
                         <!-- Finalisasi -->
                         <td class="assignment-column">
                             <select class="form-control form-control-sm pic-assignment-select" 
-                                    onchange="updatePicAssignment({{ $submission->id }}, 'pic_finalisasi', this.value)">
+                                    onchange="updatePicAssignment({{ $submission->id }}, 'petugas_finalisasi_id', this.value)">
                                 <option value="">Pilih Finalisasi</option>
                                 @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}" 
-                                            {{ $submission->pic_finalisasi == $pic->id ? 'selected' : '' }}>
+                                            {{ $submission->petugas_finalisasi_id == $pic->id ? 'selected' : '' }}>
                                         {{ $pic->name }}
                                     </option>
                                 @endforeach
