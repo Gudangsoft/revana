@@ -1222,22 +1222,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
             }
-
-            fetch('{{ route("pic.fasttrack.toggle-validation") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    submission_id: submissionId,
-                    field: field,
-                    value: newValue
-                })
+            
+            // Call toggle validation function
+            toggleValidation(submissionId, field, newValue);
+        });
+    });
+    
+    // Toggle validation function
+    function toggleValidation(submissionId, field, newValue) {
+        fetch('{{ route("pic.fasttrack.toggle-validation") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                submission_id: submissionId,
+                field: field,
+                value: newValue
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                     // Update button appearance
                     this.dataset.current = newValue ? '1' : '0';
                     this.className = newValue ? 'btn btn-sm validation-toggle btn-success' : 'btn btn-sm validation-toggle btn-outline-secondary';
@@ -1270,8 +1277,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 alert('Terjadi kesalahan saat update validasi');
             });
-        });
-    });
+    }
 
     function saveCredential(submissionId, field, value) {
         fetch('{{ route("pic.fasttrack.update-credential") }}', {
