@@ -11,19 +11,19 @@
     <i class="bi bi-graph-up"></i> Monitoring Review
 </a>
 
-{{-- Menu Pengelolaan Jurnal Baru --}}
-<div class="accordion accordion-flush" id="accordionJournalNew">
+{{-- Menu Pengelolaan Jurnal --}}
+<div class="accordion accordion-flush" id="accordionJournalManagement">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
             <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}" 
                     type="button" 
                     data-bs-toggle="collapse" 
-                    data-bs-target="#collapseJournalNew" 
+                    data-bs-target="#collapseJournalManagement" 
                     aria-expanded="{{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'true' : 'false' }}">
-                <i class="bi bi-journal-bookmark-fill"></i> Pengelolaan Jurnal
+                <i class="bi bi-journal-bookmark-fill text-primary"></i> Pengelolaan Jurnal
             </button>
         </h2>
-        <div id="collapseJournalNew" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'show' : '' }}" data-bs-parent="#accordionJournalNew">
+        <div id="collapseJournalManagement" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'show' : '' }}" data-bs-parent="#accordionJournalManagement">
             <div class="accordion-body p-0">
                 <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i> Data Jurnal
@@ -49,35 +49,41 @@
                 <a href="{{ route('admin.jenis-jurnals.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}">
                     <i class="bi bi-journal-bookmark"></i> Jenis Jurnal
                 </a>
-                <a href="{{ route('admin.fasttrack.create') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.fasttrack') ? 'active' : '' }}">
-                    <i class="bi bi-lightning-charge text-warning"></i> Input Fasttrack
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Menu Pengelolaan Jurnal Fasttrack --}}
+<div class="accordion accordion-flush" id="accordionFastrackManagement">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.fasttrack-management') || str_starts_with($currentRoute, 'admin.fasttrack') ? 'active' : '' }}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapseFastrackManagement" 
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.fasttrack-management') || str_starts_with($currentRoute, 'admin.fasttrack') ? 'true' : 'false' }}">
+                <i class="bi bi-lightning-charge text-warning"></i> Pengelolaan Jurnal Fasttrack
+            </button>
+        </h2>
+        <div id="collapseFastrackManagement" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.fasttrack-management') || str_starts_with($currentRoute, 'admin.fasttrack') ? 'show' : '' }}" data-bs-parent="#accordionFastrackManagement">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.fasttrack.create') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.fasttrack') && !str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle text-warning"></i> Input Fasttrack
+                </a>
+                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot Fasttrack
+                </a>
+                <a href="{{ route('admin.fasttrack-management.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text"></i> Data Submit Fasttrack
+                </a>
+                <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Proses Fasttrack
                 </a>
             </div>
         </div>
     </div>
 </div>
-{{-- Menu Pengalolaan Jurnal FS --}}
-<div class="accordion accordion-flush" id="accordionFastrackManagement">
-    <div class="accordion-item bg-transparent border-0">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#collapseFastrackManagement" 
-                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'true' : 'false' }}">
-                <i class="bi bi-rocket text-success"></i> Pengalolaan Jurnal FS
-            </button>
-        </h2>
-        <div id="collapseFastrackManagement" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'show' : '' }}" data-bs-parent="#accordionFastrackManagement">
-            <div class="accordion-body p-0">
-                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
-                    <i class="bi bi-calendar3"></i> Data Slot FS
-                </a>
-                <a href="{{ route('admin.fasttrack-management.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i> Data Submit FS
-                </a>
-                <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
-                    <i class="bi bi-graph-up"></i> Monitoring Proses FS
                 </a>
             </div>
         </div>
