@@ -109,7 +109,7 @@
                                     </span>
                                 </td>
                                 <td>{{ Str::limit($s->judul_artikel, 50) }}</td>
-                                <td><small>{{ $s->journalSlot->journalMaster->name ?? '-' }}</small></td>
+                                <td><small>{{ $s->journalSlot->journalMaster->nama_jurnal ?? '-' }}</small></td>
                                 <td>{{ Str::limit($s->nama_penulis, 30) }}</td>
                                 <td>{{ $s->marketing->name ?? '-' }}</td>
                                 <td>{{ $s->petugasSubmit->name ?? '-' }}</td>
