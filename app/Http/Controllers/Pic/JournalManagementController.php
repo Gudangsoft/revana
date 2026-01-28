@@ -1523,6 +1523,7 @@ class JournalManagementController extends Controller
         
         $submissions = $query->latest()->paginate(20)->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
         
         // Statistics - hanya hitung yang terkait dengan PIC ini
         $totalFasttrack = Submission::where('process_type', 'fasttrack')
@@ -1554,7 +1555,7 @@ class JournalManagementController extends Controller
             ->whereYear('created_at', now()->year)
             ->count();
         
-        return view('pic.fasttrack.monitoring', compact('submissions', 'journals', 'totalFasttrack', 'thisMonthFasttrack'));
+        return view('pic.fasttrack.monitoring', compact('submissions', 'journals', 'pics', 'totalFasttrack', 'thisMonthFasttrack'));
     }
 
     /**
