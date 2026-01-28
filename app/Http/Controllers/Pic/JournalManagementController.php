@@ -1346,19 +1346,7 @@ class JournalManagementController extends Controller
                 'petugasAuthor2',
                 'petugasProduction'
             ])
-            ->where('process_type', 'fasttrack')
-            ->where(function($q) use ($picId) {
-                // Filter: hanya tampilkan submission yang PIC ini terlibat
-                $q->where('petugas_submit_id', $picId)
-                  ->orWhere('petugas_editor1_id', $picId)
-                  ->orWhere('petugas_author1_id', $picId)
-                  ->orWhere('petugas_editor2_id', $picId)
-                  ->orWhere('petugas_reviewer1_id', $picId)
-                  ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_editor3_id', $picId)
-                  ->orWhere('petugas_author2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
-            });
+            ->where('process_type', 'fasttrack');
         
         // Search
         if ($request->filled('search')) {
