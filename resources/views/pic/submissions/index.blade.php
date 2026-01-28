@@ -19,15 +19,27 @@
 <div class="card mb-3">
     <div class="card-body">
         <form method="GET" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" name="search" class="form-control" placeholder="Cari kode/judul/penulis..." value="{{ request('search') }}">
             </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">Semua Status</option>
-                    <option value="new" {{ request('status') == 'new' ? 'selected' : '' }}>New</option>
-                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                    <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+            <div class="col-md-2">
+                <select name="akreditasi" class="form-select">
+                    <option value="">Semua Akreditasi</option>
+                    @foreach($accreditations as $accreditation)
+                        <option value="{{ $accreditation->name }}" {{ request('akreditasi') == $accreditation->name ? 'selected' : '' }}>
+                            {{ $accreditation->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="jenis" class="form-select">
+                    <option value="">Semua Jenis</option>
+                    @foreach($jenisJurnals as $jenis)
+                        <option value="{{ $jenis->name }}" {{ request('jenis') == $jenis->name ? 'selected' : '' }}>
+                            {{ $jenis->name }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
             <div class="col-md-2">
@@ -35,7 +47,7 @@
                     <i class="bi bi-search"></i> Cari
                 </button>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <a href="{{ route('pic.submissions.index') }}" class="btn btn-secondary w-100">
                     <i class="bi bi-x-circle"></i> Reset
                 </a>
@@ -62,7 +74,8 @@
                         <th>Judul</th>
                         <th>Jurnal</th>
                         <th>Penulis</th>
-                        <th>Status</th>
+                        <th>Akreditasi</th>
+                        <th>Jenis</th>
                         <th>Tanggal</th>
                         <th>Aksi</th>
                     </tr>
@@ -91,16 +104,18 @@
                         </td>
                         <td>{{ Str::limit($submission->nama_penulis, 20) }}</td>
                         <td>
-                            @php
-                                $statusColors = [
-                                    'new' => 'secondary',
-                                    'in_progress' => 'info',
-                                    'published' => 'success',
-                                ];
-                            @endphp
-                            <span class="badge bg-{{ $statusColors[$submission->status] ?? 'secondary' }}">
-                                {{ ucfirst(str_replace('_', ' ', $submission->status)) }}
-                            </span>
+                            @if($submission->journalSlot && $submission->journalSlot->journalMaster)
+                                <span class="badge bg-primary">{{ $submission->journalSlot->journalMaster->accreditation ?? '-' }}</span>
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            @if($submission->journalSlot && $submission->journalSlot->journalMaster)
+                                <span class="badge bg-info">{{ $submission->journalSlot->journalMaster->jenis_jurnal ?? '-' }}</span>
+                            @else
+                                -
+                            @endif
                         </td>
                         <td>{{ $submission->tanggal_submit ? \Carbon\Carbon::parse($submission->tanggal_submit)->format('d/m/Y') : $submission->created_at->format('d/m/Y') }}</td>
                         <td>
@@ -111,7 +126,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center text-muted">Belum ada data submission</td>
+                        <td colspan="10" class="text-center text-muted">Belum ada data submission</td>
                     </tr>
                     @endforelse
                 </tbody>

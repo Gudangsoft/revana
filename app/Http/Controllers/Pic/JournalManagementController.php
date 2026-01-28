@@ -293,9 +293,18 @@ class JournalManagementController extends Controller
                   ->orWhereNull('process_type');
             }); // Tampilkan semua submissions kecuali fasttrack
         
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if ($request->filled('akreditasi')) {
+            $query->whereHas('journalSlot.journalMaster', function($q) use ($request) {
+                $q->where('accreditation', $request->akreditasi);
+            });
         }
+        
+        if ($request->filled('jenis')) {
+            $query->whereHas('journalSlot.journalMaster', function($q) use ($request) {
+                $q->where('jenis_jurnal', $request->jenis);
+            });
+        }
+        
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -308,7 +317,11 @@ class JournalManagementController extends Controller
 
         $submissions = $query->latest()->paginate(20);
         
-        return view('pic.submissions.index', compact('submissions'));
+        // Get data for filters
+        $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
+        $jenisJurnals = \App\Models\JenisJurnal::where('is_active', true)->orderBy('name')->get();
+        
+        return view('pic.submissions.index', compact('submissions', 'accreditations', 'jenisJurnals'));
     }
 
     public function submissionsCreate()
