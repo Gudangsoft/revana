@@ -135,6 +135,16 @@ Route::middleware('auth')->group(function () {
             Route::get('/monitoring', [SubmissionController::class, 'fasttrackMonitoring'])->name('monitoring.index');
         });
         
+        // Admin Fasttrack Input
+        Route::prefix('fasttrack')->name('fasttrack.')->group(function () {
+            Route::get('/', [SubmissionController::class, 'fasttrackIndex'])->name('index');
+            Route::get('/create', [SubmissionController::class, 'fasttrackCreate'])->name('create');
+            Route::post('/', [SubmissionController::class, 'fasttrackStore'])->name('store');
+            Route::get('/{submission}', [SubmissionController::class, 'fasttrackShow'])->name('show');
+            Route::get('/{submission}/edit', [SubmissionController::class, 'fasttrackEdit'])->name('edit');
+            Route::put('/{submission}', [SubmissionController::class, 'fasttrackUpdate'])->name('update');
+        });
+        
         // Articles (temporarily commented out - controller missing)
         // Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
         // Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);

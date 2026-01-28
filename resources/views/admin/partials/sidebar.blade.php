@@ -49,6 +49,9 @@
                 <a href="{{ route('admin.jenis-jurnals.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}">
                     <i class="bi bi-journal-bookmark"></i> Jenis Jurnal
                 </a>
+                <a href="{{ route('admin.fasttrack.create') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.fasttrack') ? 'active' : '' }}">
+                    <i class="bi bi-lightning-charge text-warning"></i> Input Fasttrack
+                </a>
             </div>
         </div>
     </div>

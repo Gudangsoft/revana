@@ -12,7 +12,7 @@
     <div class="col-md-10 mx-auto">
         <div class="card">
             <div class="card-header bg-warning text-dark">
-                <i class="bi bi-lightning-charge"></i> Input Submission Fasttrack
+                <i class="bi bi-lightning-charge"></i> Input Submission Fasttrack - Admin
             </div>
             <div class="card-body">
                 @if(session('error'))
