@@ -8,9 +8,9 @@ use App\Http\Controllers\Admin\JournalSlotController;
 use App\Http\Controllers\Admin\SubmissionController;
 use App\Http\Controllers\Admin\ReviewAssignmentController as AdminReviewAssignmentController;
 use App\Http\Controllers\Admin\ReviewerController;
-use App\Http\Controllers\Admin\RewardRedemptionController as AdminRewardRedemptionController;
+// use App\Http\Controllers\Admin\RewardRedemptionController as AdminRewardRedemptionController;
 use App\Http\Controllers\Admin\PointManagementController;
-use App\Http\Controllers\Admin\RewardController as AdminRewardController;
+// use App\Http\Controllers\Admin\RewardController as AdminRewardController;
 use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Admin\MarketingController;
 use App\Http\Controllers\Admin\PicController;
@@ -18,7 +18,7 @@ use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
-use App\Http\Controllers\Reviewer\RewardController;
+// use App\Http\Controllers\Reviewer\RewardController;
 use App\Http\Controllers\Reviewer\ProfileController;
 use App\Http\Controllers\Reviewer\LeaderboardController as ReviewerLeaderboardController;
 use App\Http\Controllers\Reviewer\CertificateController;
@@ -183,12 +183,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/reviewers/{reviewer}/reset-password', [ReviewerController::class, 'resetPassword'])->name('reviewers.reset-password');
         Route::post('/reviewers/{reviewer}/login-as', [ReviewerController::class, 'loginAs'])->name('reviewers.login-as');
         
-        // Reward Redemptions
-        Route::get('/redemptions', [AdminRewardRedemptionController::class, 'index'])->name('redemptions.index');
-        Route::get('/redemptions/{redemption}', [AdminRewardRedemptionController::class, 'show'])->name('redemptions.show');
-        Route::post('/redemptions/{redemption}/approve', [AdminRewardRedemptionController::class, 'approve'])->name('redemptions.approve');
-        Route::post('/redemptions/{redemption}/complete', [AdminRewardRedemptionController::class, 'complete'])->name('redemptions.complete');
-        Route::post('/redemptions/{redemption}/reject', [AdminRewardRedemptionController::class, 'reject'])->name('redemptions.reject');
+        // Redemptions (controller missing - commented out)
+        // Route::get('/redemptions', [AdminRewardRedemptionController::class, 'index'])->name('redemptions.index');
+        // Route::get('/redemptions/{redemption}', [AdminRewardRedemptionController::class, 'show'])->name('redemptions.show');
+        // Route::post('/redemptions/{redemption}/approve', [AdminRewardRedemptionController::class, 'approve'])->name('redemptions.approve');
+        // Route::post('/redemptions/{redemption}/complete', [AdminRewardRedemptionController::class, 'complete'])->name('redemptions.complete');
+        // Route::post('/redemptions/{redemption}/reject', [AdminRewardRedemptionController::class, 'reject'])->name('redemptions.reject');
         
         // Point Management
         Route::get('/points', [PointManagementController::class, 'index'])->name('points.index');
@@ -197,14 +197,14 @@ Route::middleware('auth')->group(function () {
         Route::delete('/points/{point}', [PointManagementController::class, 'destroy'])->name('points.destroy');
         
 
-        // Rewards
-        Route::get('/rewards', [AdminRewardController::class, 'index'])->name('rewards.index');
-        Route::get('/rewards/create', [AdminRewardController::class, 'create'])->name('rewards.create');
-        Route::post('/rewards', [AdminRewardController::class, 'store'])->name('rewards.store');
-        Route::get('/rewards/{reward}/edit', [AdminRewardController::class, 'edit'])->name('rewards.edit');
-        Route::put('/rewards/{reward}', [AdminRewardController::class, 'update'])->name('rewards.update');
-        Route::delete('/rewards/{reward}', [AdminRewardController::class, 'destroy'])->name('rewards.destroy');
-        Route::post('/rewards/{reward}/toggle', [AdminRewardController::class, 'toggleStatus'])->name('rewards.toggle');
+        // Rewards (controller missing - commented out)
+        // Route::get('/rewards', [AdminRewardController::class, 'index'])->name('rewards.index');
+        // Route::get('/rewards/create', [AdminRewardController::class, 'create'])->name('rewards.create');
+        // Route::post('/rewards', [AdminRewardController::class, 'store'])->name('rewards.store');
+        // Route::get('/rewards/{reward}/edit', [AdminRewardController::class, 'edit'])->name('rewards.edit');
+        // Route::put('/rewards/{reward}', [AdminRewardController::class, 'update'])->name('rewards.update');
+        // Route::delete('/rewards/{reward}', [AdminRewardController::class, 'destroy'])->name('rewards.destroy');
+        // Route::post('/rewards/{reward}/toggle', [AdminRewardController::class, 'toggleStatus'])->name('rewards.toggle');
         
         // Leaderboard
         Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
@@ -300,9 +300,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/tasks/{assignment}/download-pdf', [ReviewResultController::class, 'downloadPdf'])->name('results.downloadPdf');
         Route::post('/tasks/{assignment}/upload-revision', [ReviewResultController::class, 'uploadRevision'])->name('results.uploadRevision');
         
-        // Rewards
-        Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
-        Route::post('/rewards/{reward}/redeem', [RewardController::class, 'redeem'])->name('rewards.redeem');
+        // Rewards (controller missing - commented out)
+        // Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
+        // Route::post('/rewards/{reward}/redeem', [RewardController::class, 'redeem'])->name('rewards.redeem');
         
         // Profile
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
