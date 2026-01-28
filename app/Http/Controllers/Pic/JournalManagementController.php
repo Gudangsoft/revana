@@ -288,7 +288,10 @@ class JournalManagementController extends Controller
     public function submissionsIndex(Request $request)
     {
         $query = Submission::with(['journalSlot.journalMaster'])
-            ->where('process_type', 'regular'); // Hanya tampilkan regular submissions
+            ->where(function($q) {
+                $q->whereNotIn('process_type', ['fasttrack'])
+                  ->orWhereNull('process_type');
+            }); // Tampilkan semua submissions kecuali fasttrack
         
         if ($request->filled('status')) {
             $query->where('status', $request->status);
