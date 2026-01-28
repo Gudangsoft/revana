@@ -89,7 +89,6 @@
                             <tr>
                                 <th style="width: 50px;">#</th>
                                 <th>Kode Submit</th>
-                                <th>ID Artikel</th>
                                 <th>Judul</th>
                                 <th>Jurnal</th>
                                 <th>Penulis</th>
@@ -109,7 +108,6 @@
                                         <i class="bi bi-lightning-charge"></i> {{ $s->kode_submit }}
                                     </span>
                                 </td>
-                                <td>{{ $s->id_artikel ?? '-' }}</td>
                                 <td>{{ Str::limit($s->judul_artikel, 50) }}</td>
                                 <td><small>{{ $s->journalSlot->journalMaster->name ?? '-' }}</small></td>
                                 <td>{{ Str::limit($s->nama_penulis, 30) }}</td>
@@ -138,7 +136,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0 mt-2">Belum ada data fasttrack submission</p>
                                 </td>
