@@ -67,6 +67,28 @@
                             </div>
                         </a>
                     </div>
+                    <div class="col-md-4">
+                        <a href="{{ route('pic.submissions.index') }}" class="text-decoration-none">
+                            <div class="card h-100 border-info">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-journal-bookmark text-info" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Kelola Jurnal</h5>
+                                    <p class="card-text text-muted">Kelola submission jurnal normal</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ route('pic.fasttrack.index') }}" class="text-decoration-none">
+                            <div class="card h-100 border-warning">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-lightning-charge text-warning" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Kelola Jurnal FS</h5>
+                                    <p class="card-text text-muted">Kelola submission jurnal fasttrack</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
