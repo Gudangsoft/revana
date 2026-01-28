@@ -94,6 +94,7 @@
                                 <th>Penulis</th>
                                 <th>Akreditasi</th>
                                 <th>Jenis</th>
+                                <th>Link Submit</th>
                                 <th>Tanggal</th>
                                 <th style="width: 100px;">Aksi</th>
                             </tr>
@@ -133,6 +134,15 @@
                                         -
                                     @endif
                                 </td>
+                                <td>
+                                    @if($s->link_artikel)
+                                        <a href="{{ $s->link_artikel }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Buka Link Submit">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>{{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d/m/Y') : $s->created_at->format('d/m/Y') }}</td>
                                 <td>
                                     <a href="{{ route('pic.fasttrack.show', $s) }}" class="btn btn-info btn-sm" title="Detail">
@@ -142,7 +152,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0 mt-2">Belum ada data fasttrack submission</p>
                                 </td>

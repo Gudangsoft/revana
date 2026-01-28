@@ -75,6 +75,7 @@
                         <th>Penulis</th>
                         <th>Akreditasi</th>
                         <th>Jenis</th>
+                        <th>Link Submit</th>
                         <th>Tanggal</th>
                         <th>Aksi</th>
                     </tr>
@@ -115,6 +116,15 @@
                                 -
                             @endif
                         </td>
+                        <td>
+                            @if($submission->link_artikel)
+                                <a href="{{ $submission->link_artikel }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Buka Link Submit">
+                                    <i class="bi bi-link-45deg"></i>
+                                </a>
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $submission->tanggal_submit ? \Carbon\Carbon::parse($submission->tanggal_submit)->format('d/m/Y') : $submission->created_at->format('d/m/Y') }}</td>
                         <td>
                             <a href="{{ route('pic.submissions.show', $submission) }}" class="btn btn-sm btn-info">
@@ -124,7 +134,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center text-muted">Belum ada data submission</td>
+                        <td colspan="10" class="text-center text-muted">Belum ada data submission</td>
                     </tr>
                     @endforelse
                 </tbody>
