@@ -76,8 +76,7 @@
                                        id="link_publish" 
                                        name="link_publish" 
                                        placeholder="https://..." 
-                                       value="{{ old('link_publish', $submission->link_publish) }}"
-                                       required>
+                                       value="{{ old('link_publish', $submission->link_publish) }}">
                                 <small class="text-muted"><i class="bi bi-link-45deg"></i> Link artikel yang sudah publish (Opsional: Jika belum ada, artikel perlu penugasan)</small>
                                 @error('link_publish')
                                     <div class="invalid-feedback">{{ $message }}</div>
