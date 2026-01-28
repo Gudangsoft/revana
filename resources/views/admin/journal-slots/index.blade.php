@@ -46,13 +46,8 @@
                 <!-- Tab Navigation -->
                 <ul class="nav nav-tabs mb-3" id="slotTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link {{ request('tab') != 'monitoring' ? 'active' : '' }}" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-panel" type="button" role="tab">
+                        <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-panel" type="button" role="tab">
                             <i class="bi bi-table"></i> Data Slot
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {{ request('tab') == 'monitoring' ? 'active' : '' }}" id="monitoring-tab" data-bs-toggle="tab" data-bs-target="#monitoring-panel" type="button" role="tab">
-                            <i class="bi bi-bar-chart"></i> Monitoring Slot
                         </button>
                     </li>
                 </ul>
@@ -60,7 +55,7 @@
                 <!-- Tab Content -->
                 <div class="tab-content" id="slotTabsContent">
                     <!-- Data Slot Tab -->
-                    <div class="tab-pane fade {{ request('tab') != 'monitoring' ? 'show active' : '' }}" id="data-panel" role="tabpanel">
+                    <div class="tab-pane fade show active" id="data-panel" role="tabpanel">
                         <!-- Search & Filter Form -->
                         <form action="{{ route('admin.journal-slots.index') }}" method="GET" class="mb-4">
                             <input type="hidden" name="tab" value="data">
@@ -242,95 +237,6 @@
                 </div>
                     </div>
                     <!-- End Data Slot Tab -->
-
-                    <div class="tab-pane fade {{ request('tab') == 'monitoring' ? 'show active' : '' }}" id="monitoring-panel" role="tabpanel">
-                        <!-- Filter -->
-                        <form action="{{ route('admin.journal-slots.index') }}" method="GET" class="mb-4">
-                            <input type="hidden" name="tab" value="monitoring">
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label">Filter Jurnal</label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="search_journal_monitoring" 
-                                           list="journals_list_monitoring"
-                                           placeholder="🔍 Ketik untuk mencari jurnal..." 
-                                           value="{{ request('journal_master_id') ? ($journals->firstWhere('id', request('journal_master_id'))->nama_jurnal ?? '') : '' }}"
-                                           autocomplete="off">
-                                    <input type="hidden" name="journal_master_id" id="journal_master_id_monitoring" value="{{ request('journal_master_id') }}">
-                                    <datalist id="journals_list_monitoring">
-                                        @if(isset($journals))
-                                        @foreach($journals as $journal)
-                                            <option value="{{ $journal->nama_jurnal }}" data-id="{{ $journal->id }}">{{ $journal->publisher }}</option>
-                                        @endforeach
-                                        @endif
-                                    </datalist>
-                                    <small class="text-muted">Ketik nama jurnal atau kosongkan untuk semua</small>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="tahun_monitoring" class="form-label">Tahun</label>
-                                    <select class="form-select" id="tahun_monitoring" name="tahun">
-                                        <option value="">-- Semua Tahun --</option>
-                                        @for($y = date('Y') + 1; $y >= 2020; $y--)
-                                            <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary me-2">
-                                        <i class="bi bi-search"></i> Filter
-                                    </button>
-                                    <a href="{{ route('admin.journal-slots.index', ['tab' => 'monitoring']) }}" class="btn btn-secondary">
-                                        <i class="bi bi-x-circle"></i> Reset
-                                    </a>
-                                </div>
-                            </div>
-                        </form>
-
-                        @if(request('tab') == 'monitoring' && isset($slotStats))
-                        <!-- Slot List with Progress -->
-                        @forelse($slotStats as $item)
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-4">
-                                        <h6 class="mb-1">
-                                            <a href="{{ route('admin.journal-slots.show', $item['slot']) }}">
-                                                {{ $item['slot']->journalMaster->nama_jurnal }}
-                                            </a>
-                                        </h6>
-                                        <small class="text-muted">
-                                            Vol. {{ $item['slot']->volume }} No. {{ $item['slot']->nomor }} - {{ $item['slot']->bulan }} {{ $item['slot']->tahun }}
-                                        </small><br>
-                                        <code>{{ $item['slot']->kode_slot }}</code>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <div class="progress" style="height: 25px;">
-                                            <div class="progress-bar bg-{{ $item['status'] }}" role="progressbar" style="width: {{ $item['percentage'] }}%">
-                                                {{ $item['percentage'] }}%
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 text-end">
-                                        <span class="badge bg-secondary">{{ $item['total_slots'] }} Total</span>
-                                        <span class="badge bg-warning">{{ $item['used_slots'] }} Terpakai</span>
-                                        <span class="badge bg-success">{{ $item['available_slots'] }} Tersedia</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @empty
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle"></i> Tidak ada data slot yang ditemukan
-                        </div>
-                        @endforelse
-                        @else
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle"></i> Klik tombol Filter untuk melihat monitoring slot
-                        </div>
-                        @endif
-                    </div>
-                    <!-- End Monitoring Slot Tab -->
                 </div>
                 <!-- End Tab Content -->
             </div>
@@ -375,47 +281,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Monitoring Tab - Journal search
-    const searchInputMonitoring = document.getElementById('search_journal_monitoring');
-    const hiddenInputMonitoring = document.getElementById('journal_master_id_monitoring');
-    
-    if (searchInputMonitoring) {
-        const journalsMonitoring = @json($journals->map(function($j) {
-            return ['id' => $j->id, 'nama' => $j->nama_jurnal];
-        })->values()->all());
-        
-        searchInputMonitoring.addEventListener('input', function() {
-            const searchTerm = this.value.trim().toLowerCase();
-            
-            if (!searchTerm) {
-                hiddenInputMonitoring.value = '';
-                return;
-            }
-            
-            // Find matching journal
-            const found = journalsMonitoring.find(j => j.nama.toLowerCase() === searchTerm);
-            if (found) {
-                hiddenInputMonitoring.value = found.id;
-            } else {
-                hiddenInputMonitoring.value = '';
-            }
-        });
-        
-        searchInputMonitoring.addEventListener('change', function() {
-            const searchTerm = this.value.trim().toLowerCase();
-            const found = journalsMonitoring.find(j => j.nama.toLowerCase() === searchTerm);
-            if (found) {
-                hiddenInputMonitoring.value = found.id;
-            } else {
-                hiddenInputMonitoring.value = '';
-            }
-        });
-    }
-});
-</script>
-@endpush
 @endsection
