@@ -24,7 +24,7 @@
 </div>
 @endif
 
-<!-- Notification Alert for Pending Redemptions -->
+{{-- <!-- Notification Alert for Pending Redemptions -->
 @if($pendingRedemptions > 0)
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
     <div class="d-flex align-items-center">
@@ -38,7 +38,7 @@
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-@endif
+@endif --}}
 
 <!-- Notification Alert for Pending Review Requests -->
 @if($pendingReviewRequests > 0)
@@ -137,12 +137,12 @@
                 <a href="{{ route('admin.assignments.create') }}" class="btn btn-success me-2">
                     <i class="bi bi-person-plus"></i> Tugaskan Reviewer
                 </a>
-                <a href="{{ route('admin.redemptions.index') }}" class="btn btn-warning me-2">
+                {{-- <a href="{{ route('admin.redemptions.index') }}" class="btn btn-warning me-2">
                     <i class="bi bi-gift"></i> Kelola Reward
                     @if($pendingRedemptions > 0)
                     <span class="badge bg-danger">{{ $pendingRedemptions }}</span>
                     @endif
-                </a>
+                </a> --}}
             </div>
         </div>
     </div>

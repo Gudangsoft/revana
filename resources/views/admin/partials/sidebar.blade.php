@@ -95,23 +95,23 @@
 <a href="{{ route('admin.leaderboard.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.leaderboard') ? 'active' : '' }}">
     <i class="bi bi-trophy-fill"></i> Papan Peringkat
 </a>
-<a href="{{ route('admin.redemptions.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.redemptions') ? 'active' : '' }}">
+{{-- <a href="{{ route('admin.redemptions.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.redemptions') ? 'active' : '' }}">
     <i class="bi bi-gift"></i> Penukaran Reward
-</a>
+</a> --}}
 
 {{-- Menu Point & Reward dengan Accordion --}}
 <div class="accordion accordion-flush" id="accordionPointReward">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.rewards') || str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}" 
+            <button class="accordion-button collapsed nav-link text-white {{ str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}" 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapsePointReward" 
-                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.rewards') || str_starts_with($currentRoute, 'admin.point-settings') ? 'true' : 'false' }}">
+                    aria-expanded="{{ str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.point-settings') ? 'true' : 'false' }}">
                 <i class="bi bi-coin"></i> Point & Reward
             </button>
         </h2>
-        <div id="collapsePointReward" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.rewards') || str_starts_with($currentRoute, 'admin.point-settings') ? 'show' : '' }}" data-bs-parent="#accordionPointReward">
+        <div id="collapsePointReward" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.point-settings') ? 'show' : '' }}" data-bs-parent="#accordionPointReward">
             <div class="accordion-body p-0">
                 <a href="{{ route('admin.point-settings.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}">
                     <i class="bi bi-gear"></i> Pengaturan Point
@@ -119,9 +119,9 @@
                 <a href="{{ route('admin.points.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.points') ? 'active' : '' }}">
                     <i class="bi bi-list-check"></i> Riwayat Point
                 </a>
-                <a href="{{ route('admin.rewards.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.rewards') ? 'active' : '' }}">
+                {{-- <a href="{{ route('admin.rewards.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.rewards') ? 'active' : '' }}">
                     <i class="bi bi-trophy"></i> Kelola Reward
-                </a>
+                </a> --}}
             </div>
         </div>
     </div>
