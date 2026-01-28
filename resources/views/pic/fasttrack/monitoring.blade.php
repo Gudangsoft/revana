@@ -1230,6 +1230,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Toggle validation function
     function toggleValidation(submissionId, field, newValue) {
+        // Find the button element
+        const btn = document.querySelector(`.validation-toggle[data-submission="${submissionId}"][data-field="${field}"]`);
+        const row = btn ? btn.closest('tr') : null;
+        
         fetch('{{ route("pic.fasttrack.toggle-validation") }}', {
             method: 'POST',
             headers: {
@@ -1246,16 +1250,20 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                     // Update button appearance
-                    this.dataset.current = newValue ? '1' : '0';
-                    this.className = newValue ? 'btn btn-sm validation-toggle btn-success' : 'btn btn-sm validation-toggle btn-outline-secondary';
-                    this.querySelector('i').className = newValue ? 'bi bi-check-circle-fill' : 'bi bi-circle';
+                    if (btn) {
+                        btn.dataset.current = newValue ? '1' : '0';
+                        btn.className = newValue ? 'btn btn-sm validation-toggle btn-success' : 'btn btn-sm validation-toggle btn-outline-secondary';
+                        btn.querySelector('i').className = newValue ? 'bi bi-check-circle-fill' : 'bi bi-circle';
+                    }
                     
                     // Update row data attribute (convert snake_case to camelCase)
-                    const dataAttr = field.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
-                    row.dataset[dataAttr] = newValue ? '1' : '0';
+                    if (row) {
+                        const dataAttr = field.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
+                        row.dataset[dataAttr] = newValue ? '1' : '0';
+                    }
                     
                     // Toggle link_publish input readonly status when production_valid is toggled
-                    if (field === 'production_valid') {
+                    if (field === 'production_valid' && row) {
                         const linkInput = row.querySelector('input[data-field="link_publish"]');
                         if (linkInput) {
                             if (newValue) {
