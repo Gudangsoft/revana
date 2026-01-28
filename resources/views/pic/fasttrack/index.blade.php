@@ -92,11 +92,10 @@
                                 <th>Judul</th>
                                 <th>Jurnal</th>
                                 <th>Penulis</th>
-                                <th>Marketing</th>
-                                <th>Petugas Submit</th>
-                                <th>Status</th>
+                                <th>Akreditasi</th>
+                                <th>Jenis</th>
                                 <th>Tanggal</th>
-                                <th style="width: 150px;">Aksi</th>
+                                <th style="width: 100px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -108,21 +107,33 @@
                                         <i class="bi bi-lightning-charge"></i> {{ $s->kode_submit }}
                                     </span>
                                 </td>
-                                <td>{{ Str::limit($s->judul_artikel, 50) }}</td>
-                                <td><small>{{ $s->journalSlot->journalMaster->nama_jurnal ?? '-' }}</small></td>
-                                <td>{{ Str::limit($s->nama_penulis, 30) }}</td>
-                                <td>{{ $s->marketing->name ?? '-' }}</td>
-                                <td>{{ $s->petugasSubmit->name ?? '-' }}</td>
+                                <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 30) }}</td>
                                 <td>
-                                    @if($s->status == 'PUBLISHED' || $s->production_valid)
-                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Published</span>
-                                    @elseif($s->link_publish)
-                                        <span class="badge bg-info"><i class="bi bi-hourglass-half"></i> Proses</span>
+                                    @if($s->journalSlot && $s->journalSlot->journalMaster)
+                                        <strong>{{ Str::limit($s->journalSlot->journalMaster->nama_jurnal, 25) }}</strong>
+                                        @if($s->journalSlot->journalMaster->publisher)
+                                            <br><small class="text-muted"><i class="bi bi-building"></i> {{ Str::limit($s->journalSlot->journalMaster->publisher, 20) }}</small>
+                                        @endif
                                     @else
-                                        <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Perlu Penugasan</span>
+                                        -
                                     @endif
                                 </td>
-                                <td><small>{{ $s->tanggal_submit ? date('d/m/Y', strtotime($s->tanggal_submit)) : ($s->created_at ? $s->created_at->format('d/m/Y') : '-') }}</small></td>
+                                <td>{{ Str::limit($s->nama_penulis, 20) }}</td>
+                                <td>
+                                    @if($s->journalSlot && $s->journalSlot->journalMaster)
+                                        <span class="badge bg-primary">{{ $s->journalSlot->journalMaster->accreditation ?? '-' }}</span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($s->journalSlot && $s->journalSlot->journalMaster)
+                                        <span class="badge bg-info">{{ $s->journalSlot->journalMaster->jenis_jurnal ?? '-' }}</span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>{{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d/m/Y') : $s->created_at->format('d/m/Y') }}</td>
                                 <td>
                                     <a href="{{ route('pic.fasttrack.show', $s) }}" class="btn btn-info btn-sm" title="Detail">
                                         <i class="bi bi-eye"></i>
@@ -131,7 +142,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted py-4">
+                                <td colspan="9" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0 mt-2">Belum ada data fasttrack submission</p>
                                 </td>
