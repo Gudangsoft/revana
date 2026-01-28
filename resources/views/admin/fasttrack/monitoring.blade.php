@@ -157,7 +157,7 @@
 <div class="card">
     <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
         <span><i class="bi bi-clock-history"></i> Fasttrack Terbaru</span>
-        <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-sm btn-light">
+        <a href="{{ route('admin.fasttrack.monitoring') }}" class="btn btn-sm btn-light">
             <i class="bi bi-list"></i> Lihat Semua
         </a>
     </div>

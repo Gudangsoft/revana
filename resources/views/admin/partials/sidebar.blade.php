@@ -68,10 +68,10 @@
         </h2>
         <div id="collapseFasttrack" class="accordion-collapse collapse {{ str_starts_with($currentRoute, 'admin.fasttrack') ? 'show' : '' }}" data-bs-parent="#accordionFasttrack">
             <div class="accordion-body p-0">
-                <a href="{{ route('admin.fasttrack.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.index' || $currentRoute == 'admin.fasttrack.create' || $currentRoute == 'admin.fasttrack.show' || $currentRoute == 'admin.fasttrack.edit' ? 'active' : '' }}">
-                    <i class="bi bi-list-check"></i> Data Fasttrack
+                <a href="{{ route('admin.fasttrack.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.monitoring' || $currentRoute == 'admin.fasttrack.create' || $currentRoute == 'admin.fasttrack.show' || $currentRoute == 'admin.fasttrack.edit' ? 'active' : '' }}">
+                    <i class="bi bi-list-check"></i> Fasttrack
                 </a>
-                <a href="{{ route('admin.fasttrack.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.monitoring' ? 'active' : '' }}">
+                <a href="{{ route('admin.fasttrack.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack.index' ? 'active' : '' }}">
                     <i class="bi bi-graph-up"></i> Monitoring Fasttrack
                 </a>
             </div>

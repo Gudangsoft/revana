@@ -209,9 +209,9 @@
     </a>
     
     <!-- Fasttrack (Gabungan Data & Monitoring) -->
-    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.*') ? 'active' : '' }}" data-title="Data Submit Fasttrack">
+    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.*') ? 'active' : '' }}" data-title="Fasttrack">
         <i class="bi bi-lightning-charge text-warning"></i>
-        <span>Data Submit Fasttrack</span>
+        <span>Fasttrack</span>
     </a>
     
     <div class="sidebar-divider"></div>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Monitoring Fasttrack - ' . $appSettings['app_name'])
-@section('page-title', 'Monitoring Fasttrack')
+@section('title', 'Fasttrack - ' . $appSettings['app_name'])
+@section('page-title', 'Fasttrack')
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -350,7 +350,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-lightning-charge text-warning"></i> Monitoring Fasttrack (Proses Cepat)</span>
+                <span><i class="bi bi-lightning-charge text-warning"></i> Fasttrack (Proses Cepat)</span>
                 <div class="btn-group">
                     <a href="{{ route('admin.fasttrack.create') }}" class="btn btn-warning btn-sm">
                         <i class="bi bi-plus-circle"></i> Input Fasttrack
@@ -382,7 +382,7 @@
                 </div>
 
                 <!-- Filter -->
-                <form action="{{ route('admin.fasttrack.index') }}" method="GET" class="mb-3">
+                <form action="{{ route('admin.fasttrack.monitoring') }}" method="GET" class="mb-3">
                     <div class="row g-2 align-items-end">
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
@@ -412,7 +412,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i> Filter
                                 </button>
-                                <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-outline-secondary">
+                                <a href="{{ route('admin.fasttrack.monitoring') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-clockwise"></i> Refresh
                                 </a>
                             </div>

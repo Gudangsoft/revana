@@ -1,6 +1,6 @@
 @extends('marketing.layouts.app')
 
-@section('title', 'Monitoring Fasttrack')
+@section('title', 'Fasttrack')
 
 @section('content')
 <style>
@@ -206,7 +206,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
-        <i class="bi bi-lightning-charge text-warning"></i> Monitoring Fasttrack
+        <i class="bi bi-lightning-charge text-warning"></i> Fasttrack
     </h4>
     <div>
         <a href="{{ route('marketing.fasttrack.create') }}" class="btn btn-warning">

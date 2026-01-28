@@ -1363,7 +1363,7 @@ class SubmissionController extends Controller
             }
         }
 
-        return redirect()->route('admin.fasttrack.index')
+        return redirect()->route('admin.fasttrack.monitoring')
             ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
     }
 
@@ -1512,7 +1512,7 @@ class SubmissionController extends Controller
         // Log history
         $submission->logHistory('fasttrack', 'updated', 'Submission fasttrack diupdate oleh Admin');
 
-        return redirect()->route('admin.fasttrack.index')
+        return redirect()->route('admin.fasttrack.monitoring')
             ->with('success', 'Fasttrack submission berhasil diupdate');
     }
 
@@ -1534,7 +1534,7 @@ class SubmissionController extends Controller
         $kode = $submission->kode_submit;
         $submission->delete();
         
-        return redirect()->route('admin.fasttrack.index')
+        return redirect()->route('admin.fasttrack.monitoring')
             ->with('success', "Fasttrack submission {$kode} berhasil dihapus");
     }
 }

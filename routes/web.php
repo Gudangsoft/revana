@@ -132,10 +132,10 @@ Route::middleware('auth')->group(function () {
         
         // Fasttrack Submissions
         Route::prefix('fasttrack')->name('fasttrack.')->group(function () {
-            Route::get('/', [SubmissionController::class, 'fasttrackIndex'])->name('index');
+            Route::get('/', [SubmissionController::class, 'fasttrackMonitoring'])->name('index');
             Route::get('/create', [SubmissionController::class, 'fasttrackCreate'])->name('create');
             Route::post('/', [SubmissionController::class, 'fasttrackStore'])->name('store');
-            Route::get('/monitoring', [SubmissionController::class, 'fasttrackMonitoring'])->name('monitoring');
+            Route::get('/monitoring', [SubmissionController::class, 'fasttrackIndex'])->name('monitoring');
             Route::get('/{submission}', [SubmissionController::class, 'fasttrackShow'])->name('show');
             Route::get('/{submission}/edit', [SubmissionController::class, 'fasttrackEdit'])->name('edit');
             Route::put('/{submission}', [SubmissionController::class, 'fasttrackUpdate'])->name('update');

@@ -106,11 +106,8 @@
                     <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
                 </a>
                 <hr style="margin: 15px 0; opacity: 0.2;">
-                <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 20px; color: #6c757d; text-transform: uppercase;">
-                    <i class="bi bi-lightning-charge text-warning"></i> Fasttrack
-                </div>
                 <a href="{{ route('marketing.fasttrack.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.fasttrack') && !str_contains($currentRoute, 'monitoring') ? 'active' : '' }}">
-                    <i class="bi bi-lightning-charge text-warning"></i> Data Fasttrack
+                    <i class="bi bi-lightning-charge text-warning"></i> Fasttrack
                 </a>
                 <a href="{{ route('marketing.fasttrack.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.fasttrack.monitoring') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart text-warning"></i> Monitoring Fasttrack

@@ -184,7 +184,7 @@
                 @endif
             </div>
             <div class="card-footer d-flex justify-content-between">
-                <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.fasttrack.monitoring') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Kembali
                 </a>
                 <div>

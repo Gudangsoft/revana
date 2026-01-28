@@ -282,7 +282,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.fasttrack.monitoring') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
                         <button type="submit" class="btn btn-warning">
