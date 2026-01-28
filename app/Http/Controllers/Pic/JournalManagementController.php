@@ -1570,4 +1570,78 @@ class JournalManagementController extends Controller
         
         return view('pic.fasttrack.show', compact('submission'));
     }
+
+    /**
+     * Show fasttrack submission edit form
+     */
+    public function fasttrackEdit(Submission $submission)
+    {
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('pic.submissions.edit', $submission);
+        }
+        
+        $submission->load(['journalSlot.journalMaster', 'marketing', 'petugasSubmit']);
+        $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
+        $slots = JournalSlot::with('journalMaster')->where('journal_master_id', $submission->journalSlot->journal_master_id)->get();
+        
+        return view('pic.fasttrack.edit', compact('submission', 'journals', 'slots'));
+    }
+
+    /**
+     * Update fasttrack submission
+     */
+    public function fasttrackUpdate(Request $request, Submission $submission)
+    {
+        if ($submission->process_type !== 'fasttrack') {
+            return redirect()->route('pic.submissions.edit', $submission);
+        }
+        
+        $request->validate([
+            'journal_slot_id' => 'required|exists:journal_slots,id',
+            'title' => 'required|string|max:500',
+            'authors' => 'required|string|max:500',
+            'abstract' => 'nullable|string',
+            'keywords' => 'nullable|string|max:255',
+            'volume_number' => 'nullable|integer|min:1',
+            'issue_number' => 'nullable|integer|min:1',
+            'start_page' => 'nullable|integer|min:1',
+            'end_page' => 'nullable|integer|min:1',
+            'marketing' => 'nullable|string|max:255',
+            'link_publish' => 'nullable|url|max:500',
+            'file_artikel' => 'nullable|file|mimes:pdf|max:10240'
+        ]);
+
+        // Update submission data
+        $submission->update([
+            'journal_slot_id' => $request->journal_slot_id,
+            'title' => $request->title,
+            'authors' => $request->authors,
+            'abstract' => $request->abstract,
+            'keywords' => $request->keywords,
+            'volume_number' => $request->volume_number,
+            'issue_number' => $request->issue_number,
+            'start_page' => $request->start_page,
+            'end_page' => $request->end_page,
+            'marketing' => $request->marketing,
+            'link_publish' => $request->link_publish,
+        ]);
+
+        // Handle file upload
+        if ($request->hasFile('file_artikel')) {
+            // Delete old file if exists
+            if ($submission->file_artikel && Storage::exists($submission->file_artikel)) {
+                Storage::delete($submission->file_artikel);
+            }
+
+            // Store new file
+            $file = $request->file('file_artikel');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('submissions/articles', $filename, 'public');
+            
+            $submission->update(['file_artikel' => $path]);
+        }
+
+        return redirect()->route('pic.fasttrack.monitoring')
+            ->with('success', 'Submit fasttrack berhasil diupdate');
+    }
 }

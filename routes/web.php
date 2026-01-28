@@ -390,7 +390,11 @@ Route::prefix('pic')->group(function () {
             Route::get('/create', [PicJournalController::class, 'fasttrackCreate'])->name('create');
             Route::post('/', [PicJournalController::class, 'fasttrackStore'])->name('store');
             Route::get('/monitoring', [PicJournalController::class, 'fasttrackMonitoring'])->name('monitoring');
+            Route::post('/toggle-validation', [PicJournalController::class, 'toggleValidation'])->name('toggle-validation');
+            Route::post('/update-assignment', [PicJournalController::class, 'updatePicAssignment'])->name('update-assignment');
             Route::get('/{submission}', [PicJournalController::class, 'fasttrackShow'])->name('show');
+            Route::get('/{submission}/edit', [PicJournalController::class, 'fasttrackEdit'])->name('edit');
+            Route::put('/{submission}', [PicJournalController::class, 'fasttrackUpdate'])->name('update');
         });
         
         // Akreditasi
