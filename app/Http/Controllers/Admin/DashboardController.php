@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Journal;
-use App\Models\ReviewAssignment;
+use App\Models\JournalMaster;
+use App\Models\Submission;
 use App\Models\User;
-use App\Models\RewardRedemption;
+use App\Models\Assignment;
 use App\Models\ReviewRequest;
 use App\Exports\CompletedReviewsExport;
 use Illuminate\Http\Request;
@@ -16,37 +16,35 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalJournals = Journal::count();
-        $totalReviewers = User::where('role', 'reviewer')->count();
-        $totalReviews = ReviewAssignment::count();
-        $pendingReviews = ReviewAssignment::where('status', 'PENDING')->count();
-        $submittedReviews = ReviewAssignment::where('status', 'SUBMITTED')->count();
-        $pendingRedemptions = RewardRedemption::where('status', 'PENDING')->count();
-        $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count();
+        $totalJournals = JournalMaster::count();
+        $totalReviewers = User::where('user_type', 'pic')->count();
+        $totalSubmissions = Submission::count();
+        $pendingSubmissions = Submission::whereIn('status', ['pending', 'new'])->count();
+        $submittedReviews = Assignment::where('status', 'submitted')->count();
+        $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count() ?? 0;
 
-        $recentAssignments = ReviewAssignment::with(['journal', 'reviewer'])
+        $recentSubmissions = Submission::with(['journalSlot.journalMaster'])
             ->latest()
             ->take(10)
             ->get();
 
         // Completed reviews report data
-        $completedReviews = ReviewAssignment::with(['journal', 'reviewer', 'reviewResult'])
-            ->where('status', 'APPROVED')
+        $completedReviews = Assignment::with(['submission.journalSlot.journalMaster', 'reviewer', 'result'])
+            ->where('status', 'approved')
             ->orderBy('approved_at', 'desc')
             ->take(20)
             ->get();
 
-        $totalCompletedReviews = ReviewAssignment::where('status', 'APPROVED')->count();
+        $totalCompletedReviews = Assignment::where('status', 'approved')->count();
 
         return view('admin.dashboard', compact(
             'totalJournals',
             'totalReviewers',
-            'totalReviews',
-            'pendingReviews',
+            'totalSubmissions',
+            'pendingSubmissions',
             'submittedReviews',
-            'pendingRedemptions',
             'pendingReviewRequests',
-            'recentAssignments',
+            'recentSubmissions',
             'completedReviews',
             'totalCompletedReviews'
         ));
@@ -57,11 +55,11 @@ class DashboardController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_date;
 
-        $fileName = 'laporan-review-selesai-' . date('Y-m-d-His') . '.xlsx';
+        $fileName = 'laporan-submissions-' . date('Y-m-d-His') . '.xlsx';
 
-        return Excel::download(
-            new CompletedReviewsExport($startDate, $endDate),
-            $fileName
-        );
+        // For now, return a simple response since CompletedReviewsExport needs to be updated
+        return response()->json([
+            'message' => 'Export akan tersedia setelah sistem review assignment diimplementasikan.'
+        ]);
     }
 }

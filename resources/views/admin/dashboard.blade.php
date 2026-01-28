@@ -79,7 +79,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Total Reviewers</h6>
+                        <h6 class="text-muted mb-2">Total PICs</h6>
                         <h2 class="mb-0">{{ $totalReviewers }}</h2>
                     </div>
                     <div class="text-success" style="font-size: 2.5rem;">
@@ -95,8 +95,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Review Pending</h6>
-                        <h2 class="mb-0">{{ $pendingReviews }}</h2>
+                        <h6 class="text-muted mb-2">Submissions Pending</h6>
+                        <h2 class="mb-0">{{ $pendingSubmissions }}</h2>
                     </div>
                     <div class="text-warning" style="font-size: 2.5rem;">
                         <i class="bi bi-hourglass-split"></i>
@@ -134,15 +134,12 @@
                 <a href="{{ route('admin.journals.create') }}" class="btn btn-primary me-2">
                     <i class="bi bi-plus-circle"></i> Tambah Jurnal
                 </a>
-                <a href="{{ route('admin.assignments.create') }}" class="btn btn-success me-2">
-                    <i class="bi bi-person-plus"></i> Tugaskan Reviewer
+                <a href="{{ route('admin.submissions.index') }}" class="btn btn-success me-2">
+                    <i class="bi bi-file-earmark-text"></i> Kelola Submissions
                 </a>
-                {{-- <a href="{{ route('admin.redemptions.index') }}" class="btn btn-warning me-2">
-                    <i class="bi bi-gift"></i> Kelola Reward
-                    @if($pendingRedemptions > 0)
-                    <span class="badge bg-danger">{{ $pendingRedemptions }}</span>
-                    @endif
-                </a> --}}
+                <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-info me-2">
+                    <i class="bi bi-lightning"></i> Fasttrack Jurnal
+                </a>
             </div>
         </div>
     </div>
@@ -170,9 +167,10 @@
                         <thead class="table-light">
                             <tr>
                                 <th>No</th>
+                                <th>Kode Submit</th>
                                 <th>Judul Artikel</th>
-                                <th>Bahasa</th>
-                                <th>Reviewer</th>
+                                <th>Jurnal</th>
+                                <th>PIC</th>
                                 <th class="hide-mobile">Institusi</th>
                                 <th>Hasil</th>
                                 <th>Tanggal Selesai</th>
@@ -182,11 +180,12 @@
                             @forelse($completedReviews as $review)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <td><strong>{{ $review->submission->kode_submit ?? 'N/A' }}</strong></td>
                                 <td>
-                                    <strong>{{ Str::limit($review->article_title ?? 'N/A', 40) }}</strong>
+                                    <strong>{{ Str::limit($review->submission->judul_artikel ?? 'N/A', 40) }}</strong>
                                 </td>
-                                <td><span class="badge bg-secondary">{{ $review->language ?? 'N/A' }}</span></td>
-                                <td>{{ Str::limit($review->reviewer->name, 25) }}</td>
+                                <td><span class="badge bg-secondary">{{ $review->submission->journalSlot->journalMaster->name ?? 'N/A' }}</span></td>
+                                <td>{{ Str::limit($review->reviewer->name ?? 'N/A', 25) }}</td>
                                 <td class="hide-mobile">
                                     <small>{{ Str::limit($review->reviewer->affiliation ?? '-', 25) }}</small>
                                 </td>
@@ -203,7 +202,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0">Belum ada artikel yang selesai direview</p>
                                 </td>
@@ -222,8 +221,8 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history"></i> Review Terbaru</span>
-                <a href="{{ route('admin.assignments.index') }}" class="btn btn-sm btn-outline-primary">
+                <span><i class="bi bi-clock-history"></i> Submissions Terbaru</span>
+                <a href="{{ route('admin.submissions.index') }}" class="btn btn-sm btn-outline-primary">
                     Lihat Semua
                 </a>
             </div>
@@ -232,51 +231,50 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Artikel</th>
-                                <th>Reviewer</th>
+                                <th>Kode Submit</th>
+                                <th>Judul Artikel</th>
+                                <th>Jurnal</th>
+                                <th>Penulis</th>
                                 <th>Status</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($recentAssignments as $assignment)
+                            @forelse($recentSubmissions as $submission)
                             <tr>
+                                <td><strong>{{ $submission->kode_submit }}</strong></td>
                                 <td>
-                                    <strong>{{ Str::limit($assignment->article_title ?? 'N/A', 50) }}</strong><br>
+                                    <strong>{{ Str::limit($submission->judul_artikel ?? 'N/A', 50) }}</strong><br>
                                     <small class="text-muted">
-                                        <span class="badge bg-secondary">{{ $assignment->language ?? 'N/A' }}</span>
-                                        @if($assignment->deadline)
-                                            | Deadline: {{ $assignment->deadline->format('d M Y') }}
-                                        @endif
+                                        <span class="badge bg-secondary">{{ $submission->process_type ?? 'Regular' }}</span>
                                     </small>
                                 </td>
-                                <td>{{ $assignment->reviewer->name }}</td>
+                                <td>{{ $submission->journalSlot->journalMaster->name ?? 'N/A' }}</td>
+                                <td>{{ Str::limit($submission->nama_penulis, 25) }}</td>
                                 <td>
                                     @php
                                         $statusColors = [
-                                            'PENDING' => 'warning',
-                                            'ACCEPTED' => 'info',
-                                            'REJECTED' => 'danger',
-                                            'ON_PROGRESS' => 'primary',
-                                            'SUBMITTED' => 'success',
-                                            'APPROVED' => 'success',
-                                            'REVISION' => 'secondary'
+                                            'new' => 'info',
+                                            'pending' => 'warning',
+                                            'approved' => 'success',
+                                            'rejected' => 'danger',
+                                            'in_progress' => 'primary'
                                         ];
-                                        $color = $statusColors[$assignment->status] ?? 'secondary';
+                                        $color = $statusColors[$submission->status] ?? 'secondary';
                                     @endphp
-                                    <span class="badge bg-{{ $color }}">{{ $assignment->status }}</span>
+                                    <span class="badge bg-{{ $color }}">{{ ucfirst($submission->status) }}</span>
                                 </td>
-                                <td>{{ $assignment->created_at->format('d M Y') }}</td>
+                                <td>{{ $submission->created_at->format('d M Y') }}</td>
                                 <td>
-                                    <a href="{{ route('admin.assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('admin.submissions.show', $submission) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted">Belum ada assignment</td>
+                                <td colspan="7" class="text-center text-muted">Belum ada submission</td>
                             </tr>
                             @endforelse
                         </tbody>
