@@ -73,6 +73,7 @@
                         <th>Judul</th>
                         <th>Jurnal</th>
                         <th>Penulis</th>
+                        <th>No HP</th>
                         <th>Akreditasi</th>
                         <th>Jenis</th>
                         <th>Link Submit</th>
@@ -102,6 +103,15 @@
                             @endif
                         </td>
                         <td>{{ Str::limit($submission->nama_penulis, 20) }}</td>
+                        <td>
+                            @if($submission->no_hp_penulis)
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $submission->no_hp_penulis) }}" target="_blank" class="text-decoration-none" title="Chat WhatsApp">
+                                    <i class="bi bi-whatsapp text-success"></i> {{ $submission->no_hp_penulis }}
+                                </a>
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>
                             @if($submission->journalSlot && $submission->journalSlot->journalMaster)
                                 <span class="badge bg-primary">{{ $submission->journalSlot->journalMaster->accreditation ?? '-' }}</span>
@@ -134,7 +144,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted">Belum ada data submission</td>
+                        <td colspan="11" class="text-center text-muted">Belum ada data submission</td>
                     </tr>
                     @endforelse
                 </tbody>
