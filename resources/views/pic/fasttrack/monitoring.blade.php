@@ -2,7 +2,7 @@
 
 @section('title', 'Data Submit Fasttrack')
 @section('page-title', '')
-@section('sidebar-class', 'auto-collapse')
+@section('sidebar-class', '')
 
 @section('sidebar')
     @include('pic.partials.sidebar')

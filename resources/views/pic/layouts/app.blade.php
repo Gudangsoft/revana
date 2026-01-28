@@ -38,32 +38,7 @@
             padding: 20px 0;
             overflow-y: auto;
             overflow-x: hidden;
-            transition: all 0.3s ease;
             position: relative;
-        }
-        
-        /* Collapsed Sidebar */
-        .sidebar.collapsed {
-            width: 60px;
-            min-width: 60px;
-            max-width: 60px;
-        }
-        
-        .sidebar.collapsed .nav-link {
-            padding: 12px 18px;
-            justify-content: center;
-        }
-        
-        .sidebar.collapsed .nav-link span,
-        .sidebar.collapsed .nav-link .badge,
-        .sidebar.collapsed .sidebar-section-header span,
-        .sidebar.collapsed .sidebar-section-header {
-            display: none !important;
-        }
-        
-        .sidebar.collapsed .nav-link i {
-            margin-right: 0 !important;
-            font-size: 1.2rem;
         }
         
         .sidebar .nav-link {
@@ -86,11 +61,10 @@
             border-left-color: #764ba2;
         }
         
-        /* Content area adjusts when sidebar collapsed */
+        /* Content area */
         .content {
             flex: 1;
             padding: 30px;
-            transition: all 0.3s ease;
         }
         
         .page-header {
@@ -100,24 +74,16 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
+        
         .card {
             border: none;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-radius: 10px;
         }
+        
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
-        /* Tooltip for collapsed sidebar */
-        .sidebar.collapsed .nav-link {
-            position: relative;
-        }
-        
-        .sidebar.collapsed .nav-link:hover::after {
-            content: attr(data-title);
-            position: absolute;
-            left: 100%;
             top: 50%;
             transform: translateY(-50%);
             background: #333;
@@ -171,7 +137,7 @@
     </nav>
 
     <div class="main-container">
-        <div class="sidebar @yield('sidebar-class')" id="sidebar">
+        <div class="sidebar @yield('sidebar-class')">
             @yield('sidebar')
         </div>
         <div class="content">
@@ -224,15 +190,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Check if page should auto-collapse sidebar
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const autoCollapse = sidebar.classList.contains('auto-collapse');
-            
-            if (autoCollapse) {
-                sidebar.classList.add('collapsed');
-            }
-        });
+        // No sidebar collapse functionality
     </script>
     @yield('scripts')
 </body>
