@@ -443,7 +443,22 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clipboard-data"></i> Monitoring Proses Submit</span>
+                <div class="d-flex align-items-center">
+                    <span><i class="bi bi-clipboard-data"></i> Monitoring Proses Submit</span>
+                    <div class="ms-3">
+                        <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-clock-history"></i> Normal Submissions
+                        </a>
+                        <a href="{{ route('pic.fasttrack.monitoring') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-lightning"></i> Fasttrack Submissions
+                        </a>
+                    </div>
+                </div>
+                <div class="alert alert-info mb-0 py-2 px-3" style="font-size: 0.875rem;">
+                    <i class="bi bi-info-circle"></i> 
+                    Halaman ini menampilkan data <strong>submissions normal</strong> saja. 
+                    Untuk fasttrack submissions, gunakan tab <strong>Fasttrack Submissions</strong>.
+                </div>
             </div>
             <div class="card-body">
                 <!-- Summary Cards -->
