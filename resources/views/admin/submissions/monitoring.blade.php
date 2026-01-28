@@ -828,8 +828,6 @@
 <script>
 // Define dynamic routes based on current route
 const isFasttrack = '{{ Request::route()->getName() }}' === 'admin.fasttrack.index';
-const quickAssignMarketingRoute = isFasttrack ? '{{ route("admin.fasttrack.quick-assign-marketing") }}' : '{{ route("admin.submissions.quick-assign-marketing") }}';
-const quickAssignRoute = isFasttrack ? '{{ route("admin.fasttrack.quick-assign") }}' : '{{ route("admin.submissions.quick-assign") }}';
 
 // Quick Assign Marketing function
 function quickAssignMarketing(selectEl) {
@@ -838,7 +836,11 @@ function quickAssignMarketing(selectEl) {
     
     selectEl.classList.add('saving');
     
-    fetch(quickAssignMarketingRoute, {
+    const routeUrl = isFasttrack ? 
+        '{{ url("/admin/fasttrack/quick-assign-marketing") }}' : 
+        '{{ url("/admin/submissions/quick-assign-marketing") }}';
+    
+    fetch(routeUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -888,7 +890,11 @@ function quickAssign(selectEl) {
     
     selectEl.classList.add('saving');
     
-    fetch(quickAssignRoute, {
+    const quickAssignRouteUrl = isFasttrack ? 
+        '{{ url("/admin/fasttrack/quick-assign") }}' : 
+        '{{ url("/admin/submissions/quick-assign") }}';
+    
+    fetch(quickAssignRouteUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -937,7 +943,11 @@ function quickUpdateCredential(inputEl) {
     
     inputEl.classList.add('saving');
     
-    fetch('{{ route("admin.submissions.quick-update-credential") }}', {
+    const quickUpdateCredentialUrl = isFasttrack ? 
+        '{{ url("/admin/fasttrack/quick-update-credential") }}' : 
+        '{{ url("/admin/submissions/quick-update-credential") }}';
+    
+    fetch(quickUpdateCredentialUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

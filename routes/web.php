@@ -25,8 +25,7 @@ use App\Http\Controllers\Reviewer\CertificateController;
 use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
 use App\Http\Controllers\Pic\AuthorController;
 use App\Http\Controllers\Pic\JournalManagementController as PicJournalController;
-use App\Http\Controllers\ReviewerRegistrationController;
-use App\Http\Controllers\Admin\ReviewerRegistrationController as AdminReviewerRegistrationController;
+use App\Http\Controllers\Admin\ReviewerRegistrationController;
 use App\Http\Controllers\ReviewRequestController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
@@ -147,16 +146,16 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{submission}', [SubmissionController::class, 'fasttrackDestroy'])->name('destroy');
         });
         
-        // Articles
-        Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
-        Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
-        Route::put('/articles/{article}/submission', [\App\Http\Controllers\Admin\ArticleController::class, 'updateSubmission'])->name('articles.update-submission');
-        Route::put('/articles/{article}/review', [\App\Http\Controllers\Admin\ArticleController::class, 'updateReview'])->name('articles.update-review');
-        Route::put('/articles/{article}/revision', [\App\Http\Controllers\Admin\ArticleController::class, 'updateRevision'])->name('articles.update-revision');
-        Route::put('/articles/{article}/acceptance', [\App\Http\Controllers\Admin\ArticleController::class, 'updateAcceptance'])->name('articles.update-acceptance');
-        Route::put('/articles/{article}/copyediting', [\App\Http\Controllers\Admin\ArticleController::class, 'updateCopyediting'])->name('articles.update-copyediting');
-        Route::put('/articles/{article}/production', [\App\Http\Controllers\Admin\ArticleController::class, 'updateProduction'])->name('articles.update-production');
-        Route::put('/articles/{article}/publication', [\App\Http\Controllers\Admin\ArticleController::class, 'updatePublication'])->name('articles.update-publication');
+        // Articles (temporarily commented out - controller missing)
+        // Route::get('/articles/monitoring', [\App\Http\Controllers\Admin\ArticleController::class, 'monitoring'])->name('articles.monitoring');
+        // Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+        // Route::put('/articles/{article}/submission', [\App\Http\Controllers\Admin\ArticleController::class, 'updateSubmission'])->name('articles.update-submission');
+        // Route::put('/articles/{article}/review', [\App\Http\Controllers\Admin\ArticleController::class, 'updateReview'])->name('articles.update-review');
+        // Route::put('/articles/{article}/revision', [\App\Http\Controllers\Admin\ArticleController::class, 'updateRevision'])->name('articles.update-revision');
+        // Route::put('/articles/{article}/acceptance', [\App\Http\Controllers\Admin\ArticleController::class, 'updateAcceptance'])->name('articles.update-acceptance');
+        // Route::put('/articles/{article}/copyediting', [\App\Http\Controllers\Admin\ArticleController::class, 'updateCopyediting'])->name('articles.update-copyediting');
+        // Route::put('/articles/{article}/production', [\App\Http\Controllers\Admin\ArticleController::class, 'updateProduction'])->name('articles.update-production');
+        // Route::put('/articles/{article}/publication', [\App\Http\Controllers\Admin\ArticleController::class, 'updatePublication'])->name('articles.update-publication');
         
         // Accreditations
         Route::get('/accreditations/export', [\App\Http\Controllers\Admin\AccreditationController::class, 'export'])->name('accreditations.export');
