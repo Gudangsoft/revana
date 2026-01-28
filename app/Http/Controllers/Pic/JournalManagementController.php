@@ -1485,20 +1485,20 @@ class JournalManagementController extends Controller
         $pic = Auth::guard('pic')->user();
         $picId = $pic->id;
         
-        $query = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
-            ->where('process_type', 'fasttrack')
-            ->where(function($q) use ($picId) {
-                // Filter: hanya tampilkan submission yang PIC ini terlibat
-                $q->where('petugas_submit_id', $picId)
-                  ->orWhere('petugas_editor1_id', $picId)
-                  ->orWhere('petugas_author1_id', $picId)
-                  ->orWhere('petugas_editor2_id', $picId)
-                  ->orWhere('petugas_reviewer1_id', $picId)
-                  ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_editor3_id', $picId)
-                  ->orWhere('petugas_author2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
-            });
+        $query = Submission::with([
+                'journalSlot.journalMaster', 
+                'marketing', 
+                'petugasSubmit',
+                'petugasEditor1',
+                'petugasAuthor1',
+                'petugasEditor2',
+                'petugasReviewer1',
+                'petugasReviewer2',
+                'petugasEditor3',
+                'petugasAuthor2',
+                'petugasProduction'
+            ])
+            ->where('process_type', 'fasttrack');
         
         // Search
         if ($request->filled('search')) {
@@ -1529,37 +1529,14 @@ class JournalManagementController extends Controller
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
         
-        // Statistics - hanya hitung yang terkait dengan PIC ini
-        $totalFasttrack = Submission::where('process_type', 'fasttrack')
-            ->where(function($q) use ($picId) {
-                $q->where('petugas_submit_id', $picId)
-                  ->orWhere('petugas_editor1_id', $picId)
-                  ->orWhere('petugas_author1_id', $picId)
-                  ->orWhere('petugas_editor2_id', $picId)
-                  ->orWhere('petugas_reviewer1_id', $picId)
-                  ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_editor3_id', $picId)
-                  ->orWhere('petugas_author2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
-            })
-            ->count();
+        // Statistics - semua fasttrack
+        $totalFasttrack = Submission::where('process_type', 'fasttrack')->count();
         $thisMonthFasttrack = Submission::where('process_type', 'fasttrack')
-            ->where(function($q) use ($picId) {
-                $q->where('petugas_submit_id', $picId)
-                  ->orWhere('petugas_editor1_id', $picId)
-                  ->orWhere('petugas_author1_id', $picId)
-                  ->orWhere('petugas_editor2_id', $picId)
-                  ->orWhere('petugas_reviewer1_id', $picId)
-                  ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_editor3_id', $picId)
-                  ->orWhere('petugas_author2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
-            })
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
         
-        return view('pic.fasttrack.monitoring', compact('submissions', 'journals', 'pics', 'totalFasttrack', 'thisMonthFasttrack'));
+        return view('pic.fasttrack.monitoring', compact('submissions', 'journals', 'pics', 'totalFasttrack', 'thisMonthFasttrack', 'picId'));
     }
 
     /**

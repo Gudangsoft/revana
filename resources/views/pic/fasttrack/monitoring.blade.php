@@ -444,9 +444,9 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <span><i class="bi bi-clipboard-data"></i> Monitoring Proses Submit</span>
-                    <a href="{{ route('pic.fasttrack.monitoring') }}" class="btn btn-warning btn-sm">
-                        <i class="bi bi-lightning"></i> Lihat Fasttrack
+                    <span><i class="bi bi-lightning-charge"></i> Monitoring Fasttrack</span>
+                    <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-info btn-sm">
+                        <i class="bi bi-speedometer2"></i> Lihat Reguler
                     </a>
                 </div>
                 <div class="alert alert-info mb-0 py-2 px-3" style="font-size: 0.875rem;">
@@ -458,16 +458,16 @@
                 <!-- Summary Cards -->
                 <div class="summary-cards mb-3">
                     <div class="summary-card my-tasks">
-                        <h6>Tugas Saya</h6>
-                        <div class="value">{{ $myTaskCount }}</div>
+                        <h6>Bulan Ini</h6>
+                        <div class="value">{{ $thisMonthFasttrack }}</div>
                     </div>
                     <div class="summary-card all-tasks">
-                        <h6>Total Submit</h6>
-                        <div class="value">{{ $totalSubmissions }}</div>
+                        <h6>Total Fasttrack</h6>
+                        <div class="value">{{ $totalFasttrack }}</div>
                     </div>
                 </div>
                     <!-- Filter Form -->
-                <form action="{{ route('pic.submissions.monitoring') }}" method="GET" class="mb-3" id="filterForm">
+                <form action="{{ route('pic.fasttrack.monitoring') }}" method="GET" class="mb-3" id="filterForm">
                     <div class="row g-2 align-items-end">
                         <div class="col-auto">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
@@ -509,7 +509,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i> Filter
                                 </button>
-                                <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-outline-secondary">
+                                <a href="{{ route('pic.fasttrack.monitoring') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-circle"></i> Reset
                                 </a>
                             </div>
@@ -666,7 +666,7 @@
                                             <i class="bi bi-star-fill"></i>
                                         </span>
                                     @endif
-                                    <a href="{{ route('pic.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
+                                    <a href="{{ route('pic.fasttrack.show', $s) }}" class="text-decoration-none" title="Klik untuk detail">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
                                 </td>
@@ -1211,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            fetch('{{ route("pic.submissions.toggle-validation") }}', {
+            fetch('{{ route("pic.fasttrack.toggle-validation") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1262,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function saveCredential(submissionId, field, value) {
-        fetch('{{ route("pic.submissions.update-credential") }}', {
+        fetch('{{ route("pic.fasttrack.update-credential") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
