@@ -269,10 +269,10 @@
                     </div>
                     <div class="col-md-2">
                         <select name="tahun" class="form-select">
-                            <option value="">-- Tahun --</option>
+                            <option value="">-- Pilih Tahun --</option>
                             @foreach($tahunOptions as $tahun)
-                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
-                                    {{ $tahun }}
+                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun || (!request('tahun') && $tahun == date('Y')) ? 'selected' : '' }}>
+                                    {{ $tahun }}{{ $tahun == date('Y') ? ' (Sekarang)' : '' }}
                                 </option>
                             @endforeach
                         </select>
