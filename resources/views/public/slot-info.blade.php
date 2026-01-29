@@ -250,35 +250,6 @@
             <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
         </div>
 
-        <!-- Statistics -->
-        <div class="stats-section">
-            <div class="row g-3">
-                <div class="col-12 col-md-4">
-                    <div class="stat-card">
-                        <i class="bi bi-calendar-check text-primary"></i>
-                        <h3 class="text-primary">{{ number_format($stats['total_slots']) }}</h3>
-                        <p class="mb-0 fw-bold">Total Slot Jurnal</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div class="stat-card">
-                        <i class="bi bi-check-circle text-success"></i>
-                        <h3 class="text-success">{{ number_format($stats['slot_terpakai']) }}</h3>
-                        <p class="mb-0 fw-bold">Slot Terpakai</p>
-                        <small class="text-muted">{{ $stats['persentase_terpakai'] }}% dari total</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div class="stat-card">
-                        <i class="bi bi-circle text-warning"></i>
-                        <h3 class="text-warning">{{ number_format($stats['slot_tersedia']) }}</h3>
-                        <p class="mb-0 fw-bold">Slot Tersedia</p>
-                        <small class="text-muted">{{ round(100 - $stats['persentase_terpakai'], 1) }}% dari total</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Filter Section -->
         <div class="filter-section">
             <h5 class="mb-3"><i class="bi bi-funnel"></i> Cari Slot Jurnal</h5>
