@@ -167,28 +167,3 @@
     </div>
 </div>
 @endsection
-                            @endif
-                        </td>
-                        <td>
-                            @if($journal->is_active)
-                                <span class="badge bg-success">Aktif</span>
-                            @else
-                                <span class="badge bg-secondary">Nonaktif</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">Belum ada data jurnal</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="mt-3">
-            {{ $journals->links() }}
-        </div>
-    </div>
-</div>
-@endsection
