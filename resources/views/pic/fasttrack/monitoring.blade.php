@@ -580,6 +580,7 @@
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
                                 <th rowspan="2">No HP</th>
+                                <th rowspan="2">Status</th>
                                 <th colspan="2" class="text-center bg-dark text-white" id="colAuthorAccess">Author Access</th>
                                 <th rowspan="2">PIC Marketing</th>
                                 <th rowspan="2" id="colSubmit">Petugas Submit</th>
@@ -703,6 +704,13 @@
                                         </a>
                                     @else
                                         -
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($s->link_publish && $s->production_valid)
+                                        <span class="badge bg-success">Selesai</span>
+                                    @else
+                                        <span class="badge bg-danger">Butuh Penugasan</span>
                                     @endif
                                 </td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
@@ -939,7 +947,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="29" class="text-center text-muted py-4">
+                                <td colspan="30" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mt-2">Tidak ada data submissions</p>
                                 </td>
