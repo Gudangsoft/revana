@@ -805,6 +805,11 @@ class JournalManagementController extends Controller
             if (!$submission->petugas_production_id && !empty($request->value)) {
                 $submission->petugas_production_id = $picId;
             }
+            
+            // Auto-validate production when link publish is filled
+            if (!empty($request->value) && trim($request->value) !== '') {
+                $submission->production_valid = true;
+            }
         }
         
         if (!$allowed) {
