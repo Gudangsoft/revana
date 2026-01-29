@@ -325,17 +325,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select name="journal_id" class="form-select">
-                            <option value="">-- Pilih Jurnal --</option>
-                            @foreach($journals as $journal)
-                                <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
-                                    {{ $journal->nama_jurnal }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+                    
                 
                 @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher']))
                 <div class="mt-2">
