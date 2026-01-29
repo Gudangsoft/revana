@@ -253,26 +253,16 @@
         <div class="filter-section">
             <h5 class="mb-3"><i class="bi bi-funnel"></i> Cari Slot Jurnal</h5>
             <form method="GET" action="{{ route('public.slot.info') }}">
-                <div class="row g-3">
+                <div class="row g-2">
                     <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Cari nama jurnal..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="Cari jurnal / kode slot..." value="{{ request('search') }}">
                     </div>
                     <div class="col-md-2">
-                        <select name="journal_id" class="form-select">
-                            <option value="">-- Semua Jurnal --</option>
-                            @foreach($journals as $journal)
-                                <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
-                                    {{ $journal->nama_jurnal }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="indexasi" class="form-select">
-                            <option value="">-- Indexasi --</option>
-                            @foreach($indexations as $idx)
-                                <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
-                                    {{ $idx }}
+                        <select name="bulan" class="form-select">
+                            <option value="">-- Bulan --</option>
+                            @foreach($bulanOptions as $value => $label)
+                                <option value="{{ $value }}" {{ request('bulan') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
                                 </option>
                             @endforeach
                         </select>
@@ -288,28 +278,99 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <select name="bulan" class="form-select">
-                            <option value="">-- Bulan --</option>
-                            @foreach($bulanOptions as $value => $label)
-                                <option value="{{ $value }}" {{ request('bulan') == $value ? 'selected' : '' }}>
-                                    {{ $label }}
+                        <select name="status" class="form-select">
+                            <option value="">-- Status --</option>
+                            <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                            <option value="penuh" {{ request('status') == 'penuh' ? 'selected' : '' }}>Penuh</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="kategori" class="form-select">
+                            <option value="">-- Kategori --</option>
+                            @foreach($kategoriOptions as $kategori)
+                                <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
+                                    {{ $kategori }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-1">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i>
+                            <i class="bi bi-search"></i> Cari
                         </button>
                     </div>
                 </div>
-                @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan']))
+                
+                <div class="row g-2 mt-1">
+                    <div class="col-md-2">
+                        <select name="jenis" class="form-select">
+                            <option value="">-- Jenis --</option>
+                            @foreach($jenisOptions as $jenis)
+                                <option value="{{ $jenis }}" {{ request('jenis') == $jenis ? 'selected' : '' }}>
+                                    {{ $jenis }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="indexasi" class="form-select">
+                            <option value="">-- Akreditasi --</option>
+                            @foreach($indexations as $idx)
+                                <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
+                                    {{ $idx }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="publisher" class="form-select">
+                            <option value="">-- Penerbit --</option>
+                            @foreach($publisherOptions as $publisher)
+                                <option value="{{ $publisher }}" {{ request('publisher') == $publisher ? 'selected' : '' }}>
+                                    {{ $publisher }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <select name="volume" class="form-select">
+                            <option value="">-- Vol --</option>
+                            @foreach($volumeOptions as $vol)
+                                <option value="{{ $vol }}" {{ request('volume') == $vol ? 'selected' : '' }}>
+                                    {{ $vol }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <select name="nomor" class="form-select">
+                            <option value="">-- No --</option>
+                            @foreach($nomorOptions as $no)
+                                <option value="{{ $no }}" {{ request('nomor') == $no ? 'selected' : '' }}>
+                                    {{ $no }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="journal_id" class="form-select">
+                            <option value="">-- Pilih Jurnal --</option>
+                            @foreach($journals as $journal)
+                                <option value="{{ $journal->id }}" {{ request('journal_id') == $journal->id ? 'selected' : '' }}>
+                                    {{ $journal->nama_jurnal }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
+                @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'status', 'volume', 'nomor', 'publisher']))
                 <div class="mt-2">
                     <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-secondary">
                         <i class="bi bi-arrow-counterclockwise"></i> Reset Filter
                     </a>
                     <span class="badge bg-info ms-2">
-                        {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan']))->filter()->count() }} filter aktif
+                        {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'status', 'volume', 'nomor', 'publisher']))->filter()->count() }} filter aktif
                     </span>
                 </div>
                 @endif

@@ -38,6 +38,46 @@ class PublicLoaController extends Controller
             $query->where('bulan', $request->bulan);
         }
         
+        // Filter by kategori
+        if ($request->filled('kategori')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('kategori', $request->kategori);
+            });
+        }
+        
+        // Filter by jenis
+        if ($request->filled('jenis')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('jenis_jurnal', $request->jenis);
+            });
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->status === 'tersedia') {
+                $query->whereRaw('slot_terpakai < jumlah_slot');
+            } elseif ($request->status === 'penuh') {
+                $query->whereRaw('slot_terpakai >= jumlah_slot');
+            }
+        }
+        
+        // Filter by volume
+        if ($request->filled('volume')) {
+            $query->where('volume', $request->volume);
+        }
+        
+        // Filter by nomor
+        if ($request->filled('nomor')) {
+            $query->where('nomor', $request->nomor);
+        }
+        
+        // Filter by publisher
+        if ($request->filled('publisher')) {
+            $query->whereHas('journalMaster', function($q) use ($request) {
+                $q->where('publisher', 'like', "%{$request->publisher}%");
+            });
+        }
+        
         // Search by journal name or code
         if ($request->filled('search')) {
             $search = $request->search;
@@ -45,7 +85,8 @@ class PublicLoaController extends Controller
                 $q->where('kode_slot', 'like', "%{$search}%")
                   ->orWhereHas('journalMaster', function($q2) use ($search) {
                       $q2->where('nama_jurnal', 'like', "%{$search}%")
-                         ->orWhere('publisher', 'like', "%{$search}%");
+                         ->orWhere('publisher', 'like', "%{$search}%")
+                         ->orWhere('rumpun_ilmu', 'like', "%{$search}%");
                   });
             });
         }
@@ -91,6 +132,41 @@ class PublicLoaController extends Controller
         // Get month options
         $bulanOptions = JournalSlot::getBulanOptions();
         
+        // Get kategori options
+        $kategoriOptions = JournalMaster::select('kategori')
+            ->distinct()
+            ->whereNotNull('kategori')
+            ->orderBy('kategori')
+            ->pluck('kategori');
+        
+        // Get jenis options
+        $jenisOptions = JournalMaster::select('jenis_jurnal')
+            ->distinct()
+            ->whereNotNull('jenis_jurnal')
+            ->orderBy('jenis_jurnal')
+            ->pluck('jenis_jurnal');
+        
+        // Get volume options
+        $volumeOptions = JournalSlot::select('volume')
+            ->distinct()
+            ->whereNotNull('volume')
+            ->orderBy('volume')
+            ->pluck('volume');
+        
+        // Get nomor options
+        $nomorOptions = JournalSlot::select('nomor')
+            ->distinct()
+            ->whereNotNull('nomor')
+            ->orderBy('nomor')
+            ->pluck('nomor');
+        
+        // Get publisher options
+        $publisherOptions = JournalMaster::select('publisher')
+            ->distinct()
+            ->whereNotNull('publisher')
+            ->orderBy('publisher')
+            ->pluck('publisher');
+        
         // Get settings for favicon
         $settings = [
             'favicon' => Setting::get('favicon', ''),
@@ -98,7 +174,7 @@ class PublicLoaController extends Controller
             'app_name' => env('APP_NAME', 'SIPERA'),
         ];
         
-        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings', 'tahunOptions', 'bulanOptions'));
+        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings', 'tahunOptions', 'bulanOptions', 'kategoriOptions', 'jenisOptions', 'volumeOptions', 'nomorOptions', 'publisherOptions'));
     }
     
     public function show(JournalSlot $slot)
