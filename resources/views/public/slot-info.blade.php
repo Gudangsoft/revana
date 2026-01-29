@@ -278,13 +278,6 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <select name="status" class="form-select">
-                            <option value="">-- Status --</option>
-                            <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="penuh" {{ request('status') == 'penuh' ? 'selected' : '' }}>Penuh</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
                         <select name="kategori" class="form-select">
                             <option value="">-- Kategori --</option>
                             @foreach($kategoriOptions as $kategori)
@@ -332,26 +325,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-1">
-                        <select name="volume" class="form-select">
-                            <option value="">-- Vol --</option>
-                            @foreach($volumeOptions as $vol)
-                                <option value="{{ $vol }}" {{ request('volume') == $vol ? 'selected' : '' }}>
-                                    {{ $vol }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <select name="nomor" class="form-select">
-                            <option value="">-- No --</option>
-                            @foreach($nomorOptions as $no)
-                                <option value="{{ $no }}" {{ request('nomor') == $no ? 'selected' : '' }}>
-                                    {{ $no }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="col-md-2">
                         <select name="journal_id" class="form-select">
                             <option value="">-- Pilih Jurnal --</option>
@@ -364,13 +337,13 @@
                     </div>
                 </div>
                 
-                @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'status', 'volume', 'nomor', 'publisher']))
+                @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher']))
                 <div class="mt-2">
                     <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-secondary">
                         <i class="bi bi-arrow-counterclockwise"></i> Reset Filter
                     </a>
                     <span class="badge bg-info ms-2">
-                        {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'status', 'volume', 'nomor', 'publisher']))->filter()->count() }} filter aktif
+                        {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher']))->filter()->count() }} filter aktif
                     </span>
                 </div>
                 @endif
@@ -390,8 +363,6 @@
                             <th style="width: 8%;">Kategori</th>
                             <th style="width: 10%;">Jenis</th>
                             <th style="width: 9%;">Akreditasi</th>
-                            <th style="width: 6%;" class="text-center">Volume</th>
-                            <th style="width: 6%;" class="text-center">Nomor</th>
                             <th style="width: 8%;" class="text-center">Bulan</th>
                             <th style="width: 8%;" class="text-center">Tahun</th>
                         </tr>
@@ -446,12 +417,6 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <strong>{{ $slot->volume ?? '-' }}</strong>
-                            </td>
-                            <td class="text-center">
-                                <strong>{{ $slot->nomor ?? '-' }}</strong>
-                            </td>
-                            <td class="text-center">
                                 <strong>{{ $slot->bulan ?? '-' }}</strong>
                             </td>
                             <td class="text-center">
@@ -460,7 +425,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="11" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
                                 <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
                             </td>
