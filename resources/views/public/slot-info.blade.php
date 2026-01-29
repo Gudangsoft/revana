@@ -323,15 +323,17 @@
                 <table class="table journal-table">
                     <thead>
                         <tr>
-                            <th style="width: 4%;">No</th>
-                            <th style="width: 12%;">Kode Slot</th>
-                            <th style="width: 25%;">Nama Jurnal</th>
-                            <th style="width: 13%;">Penerbit</th>
-                            <th style="width: 8%;" class="text-center">Periode</th>
-                            <th style="width: 8%;" class="text-center">Total Slot</th>
-                            <th style="width: 10%;" class="text-center">Terpakai</th>
-                            <th style="width: 10%;" class="text-center">Tersedia</th>
-                            <th style="width: 10%;" class="text-center">Status</th>
+                            <th style="width: 3%;">No</th>
+                            <th style="width: 10%;">Kode Slot</th>
+                            <th style="width: 20%;">Nama Jurnal</th>
+                            <th style="width: 12%;">Penerbit</th>
+                            <th style="width: 8%;">Kategori</th>
+                            <th style="width: 10%;">Jenis</th>
+                            <th style="width: 9%;">Akreditasi</th>
+                            <th style="width: 6%;" class="text-center">Volume</th>
+                            <th style="width: 6%;" class="text-center">Nomor</th>
+                            <th style="width: 8%;" class="text-center">Bulan</th>
+                            <th style="width: 8%;" class="text-center">Tahun</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -340,19 +342,6 @@
                             <td class="text-center">{{ $slots->firstItem() + $index }}</td>
                             <td>
                                 <strong class="text-primary">{{ $slot->kode_slot }}</strong>
-                                @if($slot->journalMaster && $slot->journalMaster->accreditation)
-                                    <br>
-                                    @php
-                                        $accreditation = $slot->journalMaster->accreditation;
-                                        $badgeClass = 'bg-success';
-                                        if (str_contains($accreditation, 'SINTA 4')) $badgeClass = 'bg-info';
-                                        elseif (str_contains($accreditation, 'SINTA 5')) $badgeClass = 'bg-warning';
-                                        elseif (str_contains($accreditation, 'INTERNASIONAL')) $badgeClass = 'bg-danger';
-                                    @endphp
-                                    <span class="badge {{ $badgeClass }} mt-1" style="font-size: 0.65rem;">
-                                        {{ $accreditation }}
-                                    </span>
-                                @endif
                             </td>
                             <td>
                                 <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
@@ -361,43 +350,50 @@
                                 @endif
                             </td>
                             <td>{{ $slot->journalMaster->publisher ?? '-' }}</td>
-                            <td class="text-center">
-                                <small>
-                                    <strong>{{ $slot->bulan }}/{{ $slot->tahun }}</strong>
-                                </small>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-primary fs-6">{{ number_format($slot->jumlah_slot) }}</span>
-                            </td>
-                            <td class="text-center">
-                                @php
-                                    $terpakai = max(0, $slot->slot_terpakai);
-                                    $percentage = $slot->jumlah_slot > 0 ? round(($terpakai / $slot->jumlah_slot) * 100, 1) : 0;
-                                @endphp
-                                <span class="badge bg-info fs-6">{{ number_format($terpakai) }}</span>
-                                <br><small class="text-muted">{{ $percentage }}%</small>
-                            </td>
-                            <td class="text-center">
-                                @php
-                                    $tersedia = max(0, $slot->jumlah_slot - $slot->slot_terpakai);
-                                @endphp
-                                <span class="badge bg-{{ $tersedia > 0 ? 'success' : 'secondary' }} fs-6">{{ number_format($tersedia) }}</span>
-                            </td>
-                            <td class="text-center">
-                                @if($slot->slot_terpakai >= $slot->jumlah_slot || $slot->jumlah_slot <= 0)
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle"></i> Penuh
-                                    </span>
+                            <td>
+                                @if($slot->journalMaster && $slot->journalMaster->kategori)
+                                    <span class="badge bg-info">{{ $slot->journalMaster->kategori }}</span>
                                 @else
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> Tersedia
-                                    </span>
+                                    <span class="text-muted">-</span>
                                 @endif
+                            </td>
+                            <td>
+                                @if($slot->journalMaster && $slot->journalMaster->jenis_jurnal)
+                                    <span class="badge bg-primary">{{ $slot->journalMaster->jenis_jurnal }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($slot->journalMaster && $slot->journalMaster->accreditation)
+                                    @php
+                                        $accreditation = $slot->journalMaster->accreditation;
+                                        $badgeClass = 'bg-success';
+                                        if (str_contains($accreditation, 'SINTA 4')) $badgeClass = 'bg-info';
+                                        elseif (str_contains($accreditation, 'SINTA 5')) $badgeClass = 'bg-warning';
+                                        elseif (str_contains($accreditation, 'INTERNASIONAL')) $badgeClass = 'bg-danger';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ $accreditation }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ $slot->volume ?? '-' }}</strong>
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ $slot->nomor ?? '-' }}</strong>
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ $slot->bulan ?? '-' }}</strong>
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ $slot->tahun ?? '-' }}</strong>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center py-5">
+                            <td colspan="11" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
                                 <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
                             </td>
