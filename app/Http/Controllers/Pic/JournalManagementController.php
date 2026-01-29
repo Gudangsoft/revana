@@ -790,7 +790,8 @@ class JournalManagementController extends Controller
             // Editor2 can edit reviewer credentials
             $allowed = $submission->petugas_editor2_id == $picId;
         } elseif ($request->field === 'link_publish') {
-            $allowed = $submission->petugas_production_id == $picId;
+            // Allow if already assigned OR if no one is assigned yet
+            $allowed = $submission->petugas_production_id == $picId || !$submission->petugas_production_id;
             
             // Prevent editing link_publish if production is already validated
             if ($submission->production_valid) {
@@ -798,6 +799,11 @@ class JournalManagementController extends Controller
                     'success' => false,
                     'message' => 'Link publish tidak dapat diedit karena sudah divalidasi. Matikan validasi terlebih dahulu.'
                 ], 403);
+            }
+            
+            // Auto-assign current PIC as production officer if not assigned yet
+            if (!$submission->petugas_production_id && !empty($request->value)) {
+                $submission->petugas_production_id = $picId;
             }
         }
         

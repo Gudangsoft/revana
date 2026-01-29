@@ -917,12 +917,13 @@
                                     @endif
                                 </td>
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
-                                    @if($s->petugas_production_id == $picId)
+                                    @if($s->petugas_production_id == $picId || !$s->petugas_production_id)
+                                        {{-- Show input if assigned to current PIC OR if no one is assigned yet --}}
                                         <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;" 
                                                value="{{ $s->link_publish }}" placeholder="Link Publish" 
                                                data-submission="{{ $s->id }}" data-field="link_publish"
                                                {{ $s->production_valid ? 'readonly' : '' }}
-                                               title="{{ $s->production_valid ? 'Link terkunci. Matikan validasi untuk mengedit.' : 'Masukkan link publish' }}">
+                                               title="{{ $s->production_valid ? 'Link terkunci. Matikan validasi untuk mengedit.' : 'Masukkan link publish (Anda akan otomatis menjadi petugas)' }}">
                                     @else
                                         @if($s->link_publish)
                                             <a href="{{ $s->link_publish }}" target="_blank" title="Buka Link Publish">
@@ -1131,7 +1132,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const submissionId = this.dataset.submission;
             const value = this.value;
-            saveCredential(submissionId, 'link_publish', value);
+            
+            // Save and reload page if link publish is filled (to show assigned PIC name)
+            if (value && value.trim() !== '') {
+                saveCredentialAndReload(submissionId, 'link_publish', value);
+            } else {
+                saveCredential(submissionId, 'link_publish', value);
+            }
         });
     });
 
@@ -1311,6 +1318,34 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (!data.success) {
+                alert('Gagal menyimpan: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyimpan');
+        });
+    }
+    
+    function saveCredentialAndReload(submissionId, field, value) {
+        fetch('{{ route("pic.fasttrack.update-credential") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                submission_id: submissionId,
+                field: field,
+                value: value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated PIC name
+                window.location.reload();
+            } else {
                 alert('Gagal menyimpan: ' + (data.message || 'Unknown error'));
             }
         })
