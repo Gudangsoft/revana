@@ -344,7 +344,14 @@
                                 <strong class="text-primary">{{ $slot->kode_slot }}</strong>
                             </td>
                             <td>
-                                <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
+                                @if($slot->journalMaster && $slot->journalMaster->link_jurnal)
+                                    <a href="{{ $slot->journalMaster->link_jurnal }}" target="_blank" class="text-decoration-none">
+                                        <strong>{{ $slot->journalMaster->nama_jurnal }}</strong>
+                                        <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                    </a>
+                                @else
+                                    <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
+                                @endif
                                 @if($slot->journalMaster && $slot->journalMaster->rumpun_ilmu)
                                     <br><small class="text-muted">{{ $slot->journalMaster->rumpun_ilmu }}</small>
                                 @endif
