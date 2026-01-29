@@ -184,7 +184,7 @@
         <span>Data Jurnal</span>
     </div>
     
-    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index', 'pic.submissions.create', 'pic.submissions.edit', 'pic.submissions.show') ? 'active' : '' }}" data-title="Data Jurnal">
+    <a href="https://portal.apji.org/pic/submissions" class="nav-link" data-title="Data Jurnal">
         <i class="bi bi-journal-text text-info"></i>
         <span>Data Jurnal</span>
     </a>
