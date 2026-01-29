@@ -253,62 +253,27 @@
         <!-- Statistics -->
         <div class="stats-section">
             <div class="row g-3">
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-md-4">
                     <div class="stat-card">
-                        <i class="bi bi-journals text-primary"></i>
-                        <h3 class="text-primary">{{ $stats['total_journals'] }}</h3>
-                        <p class="mb-0">Journals</p>
+                        <i class="bi bi-calendar-check text-primary"></i>
+                        <h3 class="text-primary">{{ number_format($stats['total_slots']) }}</h3>
+                        <p class="mb-0 fw-bold">Total Slot Jurnal</p>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
                     <div class="stat-card">
-                        <i class="bi bi-calendar-check text-success"></i>
-                        <h3 class="text-success">{{ $stats['total_slots'] }}</h3>
-                        <p class="mb-0">Slots Ready</p>
+                        <i class="bi bi-check-circle text-success"></i>
+                        <h3 class="text-success">{{ number_format($stats['slot_terpakai']) }}</h3>
+                        <p class="mb-0 fw-bold">Slot Terpakai</p>
+                        <small class="text-muted">{{ $stats['persentase_terpakai'] }}% dari total</small>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card">
-                        <i class="bi bi-check-circle text-info"></i>
-                        <h3 class="text-info">{{ $stats['slot_terisi'] }}</h3>
-                        <p class="mb-0">Terisi</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
                     <div class="stat-card">
                         <i class="bi bi-circle text-warning"></i>
-                        <h3 class="text-warning">{{ max(0, $stats['total_slots'] - $stats['slot_terisi']) }}</h3>
-                        <p class="mb-0">Tersedia</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Indexasi Stats -->
-        <div class="stats-section">
-            <div class="row g-3">
-                <div class="col-6 col-md-3">
-                    <div class="stat-card">
-                        <h3 class="text-success">{{ $stats['nasional'] }}</h3>
-                        <p class="mb-0">NASIONAL</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card">
-                        <h3 class="text-info">{{ $stats['sinta4'] }}</h3>
-                        <p class="mb-0">SINTA 4</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card">
-                        <h3 class="text-warning">{{ $stats['sinta5'] }}</h3>
-                        <p class="mb-0">SINTA 5</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card">
-                        <h3 class="text-danger">{{ $stats['internasional'] }}</h3>
-                        <p class="mb-0">INTERNASIONAL</p>
+                        <h3 class="text-warning">{{ number_format($stats['slot_tersedia']) }}</h3>
+                        <p class="mb-0 fw-bold">Slot Tersedia</p>
+                        <small class="text-muted">{{ round(100 - $stats['persentase_terpakai'], 1) }}% dari total</small>
                     </div>
                 </div>
             </div>
@@ -316,13 +281,13 @@
 
         <!-- Filter Section -->
         <div class="filter-section">
-            <h5 class="mb-3"><i class="bi bi-funnel"></i> Cari Jurnal</h5>
+            <h5 class="mb-3"><i class="bi bi-funnel"></i> Cari Slot Jurnal</h5>
             <form method="GET" action="{{ route('public.slot.info') }}">
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" name="search" class="form-control" placeholder="Cari nama jurnal atau rumpun ilmu..." value="{{ request('search') }}">
-                    </div>
                     <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Cari nama jurnal..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
                         <select name="journal_id" class="form-select">
                             <option value="">-- Semua Jurnal --</option>
                             @foreach($journals as $journal)
@@ -332,9 +297,9 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <select name="indexasi" class="form-select">
-                            <option value="">-- Semua Indexasi --</option>
+                            <option value="">-- Indexasi --</option>
                             @foreach($indexations as $idx)
                                 <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
                                     {{ $idx }}
@@ -343,16 +308,39 @@
                         </select>
                     </div>
                     <div class="col-md-2">
+                        <select name="tahun" class="form-select">
+                            <option value="">-- Tahun --</option>
+                            @foreach($tahunOptions as $tahun)
+                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                                    {{ $tahun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="bulan" class="form-select">
+                            <option value="">-- Bulan --</option>
+                            @foreach($bulanOptions as $value => $label)
+                                <option value="{{ $value }}" {{ request('bulan') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-1">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i> Cari
+                            <i class="bi bi-search"></i>
                         </button>
                     </div>
                 </div>
-                @if(request()->hasAny(['search', 'journal_id', 'indexasi']))
+                @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan']))
                 <div class="mt-2">
                     <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-secondary">
                         <i class="bi bi-arrow-counterclockwise"></i> Reset Filter
                     </a>
+                    <span class="badge bg-info ms-2">
+                        {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan']))->filter()->count() }} filter aktif
+                    </span>
                 </div>
                 @endif
             </form>
@@ -364,13 +352,14 @@
                 <table class="table journal-table">
                     <thead>
                         <tr>
-                            <th style="width: 5%;">No</th>
-                            <th style="width: 15%;">Kode LOA</th>
-                            <th style="width: 35%;">Nama Jurnal</th>
-                            <th style="width: 15%;">Penerbit</th>
-                            <th style="width: 10%;" class="text-center">Jumlah Slot</th>
-                            <th style="width: 10%;" class="text-center">Slot Terpakai</th>
-                            <th style="width: 10%;" class="text-center">Sisa</th>
+                            <th style="width: 4%;">No</th>
+                            <th style="width: 12%;">Kode Slot</th>
+                            <th style="width: 25%;">Nama Jurnal</th>
+                            <th style="width: 13%;">Penerbit</th>
+                            <th style="width: 8%;" class="text-center">Periode</th>
+                            <th style="width: 8%;" class="text-center">Total Slot</th>
+                            <th style="width: 10%;" class="text-center">Terpakai</th>
+                            <th style="width: 10%;" class="text-center">Tersedia</th>
                             <th style="width: 10%;" class="text-center">Status</th>
                         </tr>
                     </thead>
@@ -389,30 +378,39 @@
                                         elseif (str_contains($accreditation, 'SINTA 5')) $badgeClass = 'bg-warning';
                                         elseif (str_contains($accreditation, 'INTERNASIONAL')) $badgeClass = 'bg-danger';
                                     @endphp
-                                    <span class="badge {{ $badgeClass }} mt-1">
+                                    <span class="badge {{ $badgeClass }} mt-1" style="font-size: 0.65rem;">
                                         {{ $accreditation }}
                                     </span>
                                 @endif
                             </td>
                             <td>
                                 <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
-                                @if($slot->journalMaster)
-                                    <br><small class="text-muted">{{ $slot->journalMaster->rumpun_ilmu ?? '' }}</small>
+                                @if($slot->journalMaster && $slot->journalMaster->rumpun_ilmu)
+                                    <br><small class="text-muted">{{ $slot->journalMaster->rumpun_ilmu }}</small>
                                 @endif
                             </td>
                             <td>{{ $slot->journalMaster->publisher ?? '-' }}</td>
                             <td class="text-center">
-                                <span class="badge bg-primary fs-6">{{ max(0, $slot->jumlah_slot) }}</span>
+                                <small>
+                                    <strong>{{ $slot->bulan }}/{{ $slot->tahun }}</strong>
+                                </small>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-info fs-6">{{ max(0, $slot->slot_terpakai) }}</span>
+                                <span class="badge bg-primary fs-6">{{ number_format($slot->jumlah_slot) }}</span>
                             </td>
                             <td class="text-center">
                                 @php
-                                    $sisa = max(0, $slot->jumlah_slot - $slot->slot_terpakai);
-                                    $badgeClass = $sisa > 0 ? 'success' : 'secondary';
+                                    $terpakai = max(0, $slot->slot_terpakai);
+                                    $percentage = $slot->jumlah_slot > 0 ? round(($terpakai / $slot->jumlah_slot) * 100, 1) : 0;
                                 @endphp
-                                <span class="badge bg-{{ $badgeClass }} fs-6">{{ $sisa }}</span>
+                                <span class="badge bg-info fs-6">{{ number_format($terpakai) }}</span>
+                                <br><small class="text-muted">{{ $percentage }}%</small>
+                            </td>
+                            <td class="text-center">
+                                @php
+                                    $tersedia = max(0, $slot->jumlah_slot - $slot->slot_terpakai);
+                                @endphp
+                                <span class="badge bg-{{ $tersedia > 0 ? 'success' : 'secondary' }} fs-6">{{ number_format($tersedia) }}</span>
                             </td>
                             <td class="text-center">
                                 @if($slot->slot_terpakai >= $slot->jumlah_slot || $slot->jumlah_slot <= 0)
@@ -428,7 +426,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
                                 <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
                             </td>
