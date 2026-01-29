@@ -472,7 +472,6 @@ class DashboardController extends Controller
                         $sisa > 0 ? $sisa : 0,
                         $slot->jumlah_slot
                     ),
-                    'kode_slot' => $slot->kode_slot,
                     'jumlah_slot' => $slot->jumlah_slot,
                     'slot_terpakai' => $slot->slot_terpakai,
                     'sisa' => $sisa > 0 ? $sisa : 0
