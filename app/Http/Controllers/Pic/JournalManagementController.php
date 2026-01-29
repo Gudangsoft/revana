@@ -800,16 +800,6 @@ class JournalManagementController extends Controller
                     'message' => 'Link publish tidak dapat diedit karena sudah divalidasi. Matikan validasi terlebih dahulu.'
                 ], 403);
             }
-            
-            // Auto-assign current PIC as production officer if not assigned yet
-            if (!$submission->petugas_production_id && !empty($request->value)) {
-                $submission->petugas_production_id = $picId;
-            }
-            
-            // Auto-validate production when link publish is filled
-            if (!empty($request->value) && trim($request->value) !== '') {
-                $submission->production_valid = true;
-            }
         }
         
         if (!$allowed) {
@@ -819,7 +809,25 @@ class JournalManagementController extends Controller
             ], 403);
         }
         
+        // Update the field value
         $submission->{$request->field} = $request->value;
+        
+        // Special handling for link_publish field
+        if ($request->field === 'link_publish') {
+            // Auto-assign current PIC as production officer if not assigned yet
+            if (!$submission->petugas_production_id && !empty($request->value) && trim($request->value) !== '') {
+                $submission->petugas_production_id = $picId;
+            }
+            
+            // Auto-validate production when link publish is filled
+            if (!empty($request->value) && trim($request->value) !== '') {
+                $submission->production_valid = true;
+            } else {
+                // Clear validation if link is removed
+                $submission->production_valid = false;
+            }
+        }
+        
         $submission->save();
         
         return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);

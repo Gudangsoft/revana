@@ -934,8 +934,9 @@
                                         @endif
                                     @endif
                                 </td>
-                                <td class="text-center {{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
-                                    @if($s->petugas_production_id == $picId)
+                                <td class="text-center {{ $s->petugas_production_id == $picId || (!$s->petugas_production_id && $s->link_publish) ? 'my-task' : '' }}">
+                                    @if($s->petugas_production_id == $picId || (!$s->petugas_production_id && $s->link_publish))
+                                        {{-- Show button if assigned to current PIC OR if has link but no assigned PIC yet --}}
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->production_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
                                                 data-submission="{{ $s->id }}" data-field="production_valid" data-current="{{ $s->production_valid ? '1' : '0' }}"
                                                 data-stage-index="7">
