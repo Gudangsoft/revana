@@ -355,6 +355,7 @@
                             <th style="width: 9%;">Akreditasi</th>
                             <th style="width: 8%;" class="text-center">Bulan</th>
                             <th style="width: 8%;" class="text-center">Tahun</th>
+                            <th style="width: 8%;" class="text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -412,10 +413,21 @@
                             <td class="text-center">
                                 <strong>{{ $slot->tahun ?? '-' }}</strong>
                             </td>
+                            <td class="text-center">
+                                @php
+                                    $slotTersisa = ($slot->kapasitas ?? 0) - ($slot->terisi ?? 0);
+                                @endphp
+                                @if($slotTersisa > 0)
+                                    <span class="badge bg-success">Tersedia</span>
+                                    <br><small class="text-muted">{{ $slotTersisa }} slot</small>
+                                @else
+                                    <span class="badge bg-danger">Slot Penuh</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center py-5">
+                            <td colspan="10" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
                                 <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
                             </td>
