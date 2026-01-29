@@ -139,7 +139,6 @@
         <div class="header-card">
             <div class="logo-section">
                 <h1><i class="bi bi-journal-bookmark-fill"></i> SIPERA</h1>
-                <p class="lead">Sistem Insentif dan Penghargaan Reviewer APJI</p>
                 <p class="text-muted">Pencarian Kode LOA (Letter of Acceptance) Jurnal</p>
             </div>
         </div>

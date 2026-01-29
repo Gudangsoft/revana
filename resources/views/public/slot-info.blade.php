@@ -246,7 +246,6 @@
             @if(isset($settings['logo']) && $settings['logo'])
                 <h1 class="mt-2">{{ $settings['app_name'] ?? 'SIPERA' }}</h1>
             @endif
-            <p class="lead mb-1">Sistem Insentif dan Penghargaan Reviewer APJI</p>
             <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
         </div>
 
