@@ -10,6 +10,10 @@
 <a href="{{ route('admin.monitoring') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.monitoring') ? 'active' : '' }}">
     <i class="bi bi-graph-up"></i> Monitoring Review
 </a>
+<a href="{{ route('public.slot.info') }}" class="nav-link" target="_blank">
+    <i class="bi bi-calendar-check text-info"></i> Info Slot
+    <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.75rem;"></i>
+</a>
 
 {{-- Menu Pengelolaan Jurnal --}}
 <div class="accordion accordion-flush" id="accordionJournalManagement">
