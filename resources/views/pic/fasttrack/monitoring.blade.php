@@ -707,8 +707,10 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    @if($s->link_publish && $s->production_valid)
-                                        <span class="badge bg-success">Selesai</span>
+                                    @if($s->production_valid)
+                                        <span class="badge bg-success">Selesai Dikerjakan</span>
+                                    @elseif($s->link_publish)
+                                        <span class="badge bg-warning text-dark">Menunggu Validasi</span>
                                     @else
                                         <span class="badge bg-danger">Butuh Penugasan</span>
                                     @endif
