@@ -415,13 +415,19 @@
                             </td>
                             <td class="text-center">
                                 @php
-                                    $slotTersisa = ($slot->kapasitas ?? 0) - ($slot->terisi ?? 0);
+                                    // Hitung slot terisi dari submissions yang terkait
+                                    $terisi = $slot->submissions ? $slot->submissions->count() : 0;
+                                    $kapasitas = $slot->kapasitas ?? 0;
+                                    $slotTersisa = $kapasitas - $terisi;
                                 @endphp
-                                @if($slotTersisa > 0)
+                                @if($kapasitas > 0 && $slotTersisa > 0)
                                     <span class="badge bg-success">Tersedia</span>
-                                    <br><small class="text-muted">{{ $slotTersisa }} slot</small>
-                                @else
+                                    <br><small class="text-muted">{{ $slotTersisa }} dari {{ $kapasitas }} slot</small>
+                                @elseif($kapasitas > 0 && $slotTersisa <= 0)
                                     <span class="badge bg-danger">Slot Penuh</span>
+                                    <br><small class="text-muted">{{ $kapasitas }} slot</small>
+                                @else
+                                    <span class="badge bg-secondary">Tidak Ada Info</span>
                                 @endif
                             </td>
                         </tr>
