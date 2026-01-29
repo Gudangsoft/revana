@@ -147,14 +147,23 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="link_publish" class="form-label">Link Publish</label>
+                                <label for="link_publish" class="form-label">
+                                    Link Publish 
+                                    <span class="badge bg-success">Auto-Valid</span>
+                                </label>
                                 <input type="url" 
                                        class="form-control @error('link_publish') is-invalid @enderror" 
                                        id="link_publish" 
                                        name="link_publish" 
                                        placeholder="https://..." 
                                        value="{{ old('link_publish') }}">
-                                <small class="text-muted"><i class="bi bi-link-45deg"></i> Link artikel yang sudah publish (Opsional: Jika belum ada, artikel perlu penugasan)</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-check-circle-fill text-success"></i> 
+                                    Jika link publish sudah ada, otomatis tervalidasi dan status <strong>"Selesai Dikerjakan"</strong>. 
+                                    <br>
+                                    <i class="bi bi-info-circle"></i> 
+                                    Proses lain (Editor, Author, Reviewer) bersifat opsional dan bisa dikerjakan menyusul.
+                                </small>
                                 @error('link_publish')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

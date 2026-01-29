@@ -1459,6 +1459,12 @@ class JournalManagementController extends Controller
         if (!isset($validated['petugas_submit_id'])) {
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
         }
+        
+        // Auto-assign production and validate if link_publish is provided
+        if (!empty($validated['link_publish'])) {
+            $validated['petugas_production_id'] = auth()->guard('pic')->id();
+            $validated['production_valid'] = true;
+        }
 
         $submission = Submission::create($validated);
 
