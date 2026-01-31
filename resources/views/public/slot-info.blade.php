@@ -347,24 +347,20 @@
                     <thead>
                         <tr>
                             <th style="width: 3%;">No</th>
-                            <th style="width: 10%;">Kode Slot</th>
-                            <th style="width: 20%;">Nama Jurnal</th>
-                            <th style="width: 12%;">Penerbit</th>
-                            <th style="width: 8%;">Kategori</th>
-                            <th style="width: 10%;">Jenis</th>
-                            <th style="width: 9%;">Akreditasi</th>
-                            <th style="width: 8%;" class="text-center">Bulan</th>
-                            <th style="width: 8%;" class="text-center">Tahun</th>
-                            <th style="width: 8%;" class="text-center">Status</th>
+                            <th style="width: 22%;">Nama Jurnal</th>
+                            <th style="width: 13%;">Penerbit</th>
+                            <th style="width: 9%;">Kategori</th>
+                            <th style="width: 11%;">Jenis</th>
+                            <th style="width: 10%;">Akreditasi</th>
+                            <th style="width: 9%;" class="text-center">Bulan</th>
+                            <th style="width: 9%;" class="text-center">Tahun</th>
+                            <th style="width: 9%;" class="text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($slots as $index => $slot)
                         <tr>
                             <td class="text-center">{{ $slots->firstItem() + $index }}</td>
-                            <td>
-                                <strong class="text-primary">{{ $slot->kode_slot }}</strong>
-                            </td>
                             <td>
                                 @if($slot->journalMaster && $slot->journalMaster->link_jurnal)
                                     <a href="{{ $slot->journalMaster->link_jurnal }}" target="_blank" class="text-decoration-none">
@@ -436,7 +432,7 @@
                             <td colspan="10" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
                                 <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
-                            </td>
+                            </td>9
                         </tr>
                         @endforelse
                     </tbody>
