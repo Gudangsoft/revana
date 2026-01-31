@@ -432,7 +432,7 @@
                             <td colspan="10" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
                                 <p class="mt-3 text-muted">Belum ada slot jurnal yang tersedia</p>
-                            </td>9
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>
