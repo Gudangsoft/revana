@@ -110,11 +110,21 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="sort_by">
+                                <option value="">-- Urutkan --</option>
+                                <option value="volume_asc" {{ request('sort_by') == 'volume_asc' ? 'selected' : '' }}>Volume (Asc)</option>
+                                <option value="volume_desc" {{ request('sort_by') == 'volume_desc' ? 'selected' : '' }}>Volume (Desc)</option>
+                                <option value="nomor_asc" {{ request('sort_by') == 'nomor_asc' ? 'selected' : '' }}>Nomor (Asc)</option>
+                                <option value="nomor_desc" {{ request('sort_by') == 'nomor_desc' ? 'selected' : '' }}>Nomor (Desc)</option>
+                                <option value="latest" {{ request('sort_by') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+                            </select>
+                        </div>
                         <div class="col-md-3">
                             <button class="btn btn-outline-primary" type="submit">
                                 <i class="bi bi-search"></i> Cari
                             </button>
-                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status', 'kategori', 'jenis', 'akreditasi']))
+                            @if(request()->hasAny(['search', 'bulan', 'tahun', 'status', 'kategori', 'jenis', 'akreditasi', 'sort_by']))
                             <a href="{{ route('admin.journal-slots.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle"></i> Reset
                             </a>

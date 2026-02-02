@@ -64,7 +64,32 @@ class JournalSlotController extends Controller
             });
         }
         
-        $slots = $query->latest()->paginate(20);
+        // Sorting
+        if ($request->filled('sort_by')) {
+            switch ($request->sort_by) {
+                case 'volume_asc':
+                    $query->orderBy('volume', 'asc');
+                    break;
+                case 'volume_desc':
+                    $query->orderBy('volume', 'desc');
+                    break;
+                case 'nomor_asc':
+                    $query->orderBy('nomor', 'asc');
+                    break;
+                case 'nomor_desc':
+                    $query->orderBy('nomor', 'desc');
+                    break;
+                case 'latest':
+                    $query->latest();
+                    break;
+                default:
+                    $query->latest();
+            }
+        } else {
+            $query->latest();
+        }
+        
+        $slots = $query->paginate(20);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
         $bulanOptions = JournalSlot::getBulanOptions();
@@ -394,10 +419,32 @@ class JournalSlotController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
         
-        $slots = $query->orderBy('tahun', 'desc')
-                      ->orderBy('bulan', 'desc')
-                      ->paginate(20)
-                      ->withQueryString();
+        // Sorting
+        if ($request->filled('sort_by')) {
+            switch ($request->sort_by) {
+                case 'volume_asc':
+                    $query->orderBy('volume', 'asc');
+                    break;
+                case 'volume_desc':
+                    $query->orderBy('volume', 'desc');
+                    break;
+                case 'nomor_asc':
+                    $query->orderBy('nomor', 'asc');
+                    break;
+                case 'nomor_desc':
+                    $query->orderBy('nomor', 'desc');
+                    break;
+                case 'latest':
+                    $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc');
+                    break;
+                default:
+                    $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc');
+            }
+        } else {
+            $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc');
+        }
+        
+        $slots = $query->paginate(20)->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         

@@ -115,6 +115,8 @@
                     <div class="input-group">
                         <select name="sort_by" class="form-select">
                             <option value="kode_slot" {{ request('sort_by') == 'kode_slot' ? 'selected' : '' }}>Kode Slot</option>
+                            <option value="volume" {{ request('sort_by') == 'volume' ? 'selected' : '' }}>Volume</option>
+                            <option value="nomor" {{ request('sort_by') == 'nomor' ? 'selected' : '' }}>Nomor</option>
                             <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Tanggal</option>
                             <option value="jumlah_slot" {{ request('sort_by') == 'jumlah_slot' ? 'selected' : '' }}>Jumlah Slot</option>
                         </select>

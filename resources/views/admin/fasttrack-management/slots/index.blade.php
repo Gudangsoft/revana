@@ -73,7 +73,17 @@
                                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <select class="form-select" name="sort_by">
+                                <option value="">-- Urutkan --</option>
+                                <option value="volume_asc" {{ request('sort_by') == 'volume_asc' ? 'selected' : '' }}>Volume (Asc)</option>
+                                <option value="volume_desc" {{ request('sort_by') == 'volume_desc' ? 'selected' : '' }}>Volume (Desc)</option>
+                                <option value="nomor_asc" {{ request('sort_by') == 'nomor_asc' ? 'selected' : '' }}>Nomor (Asc)</option>
+                                <option value="nomor_desc" {{ request('sort_by') == 'nomor_desc' ? 'selected' : '' }}>Nomor (Desc)</option>
+                                <option value="latest" {{ request('sort_by') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
                             <div class="btn-group w-100">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i> Cari
