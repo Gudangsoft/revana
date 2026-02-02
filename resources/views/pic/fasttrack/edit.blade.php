@@ -284,13 +284,23 @@
 @endsection
 
 @section('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== SCRIPT LOADED ===');
+    
     const searchInput = document.getElementById('search_journal');
     const searchResults = document.getElementById('search_results');
     const journalMasterIdInput = document.getElementById('journal_master_id');
     const slotSelect = document.getElementById('journal_slot_id');
+    const editForm = document.getElementById('editForm');
+    
+    console.log('Elements found:', {
+        searchInput: !!searchInput,
+        searchResults: !!searchResults,
+        journalMasterIdInput: !!journalMasterIdInput,
+        slotSelect: !!slotSelect,
+        editForm: !!editForm
+    });
     
     // All journals data
     const allJournals = @json($journals);
@@ -298,7 +308,12 @@ $(document).ready(function() {
     
     console.log('Total journals:', allJournals.length);
     console.log('Current slot ID:', currentSlotId);
-    console.log('Journal Master ID:', journalMasterIdInput.value);
+    console.log('Journal Master ID:', journalMasterIdInput ? journalMasterIdInput.value : 'NOT FOUND');
+    
+    if (!searchInput || !searchResults || !journalMasterIdInput || !slotSelect) {
+        console.error('Required elements not found!');
+        return;
+    }
     
     // Load initial slots if journal is selected
     if (journalMasterIdInput.value) {
@@ -309,6 +324,8 @@ $(document).ready(function() {
     // Search functionality
     searchInput.addEventListener('input', function() {
         const query = this.value.toLowerCase().trim();
+        
+        console.log('Search query:', query);
         
         if (query.length === 0) {
             searchResults.style.display = 'none';
@@ -399,76 +416,113 @@ $(document).ready(function() {
     }
     
     // Confirmation before submit
-    $('#editForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        let hasError = false;
-        
-        // Required field validation
-        $(this).find('[required]').each(function() {
-            if (!$(this).val().trim()) {
-                hasError = true;
-                $(this).addClass('is-invalid');
-                if (!$(this).next('.text-danger').length) {
-                    $(this).after('<div class="text-danger small mt-1">Field ini wajib diisi</div>');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('Form submit triggered');
+            
+            let hasError = false;
+            
+            // Required field validation
+            const requiredFields = this.querySelectorAll('[required]');
+            requiredFields.forEach(function(field) {
+                if (!field.value.trim()) {
+                    hasError = true;
+                    field.classList.add('is-invalid');
+                    const existingError = field.nextElementSibling;
+                    if (!existingError || !existingError.classList.contains('text-danger')) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-danger small mt-1';
+                        errorDiv.textContent = 'Field ini wajib diisi';
+                        field.parentNode.insertBefore(errorDiv, field.nextSibling);
+                    }
+                } else {
+                    field.classList.remove('is-invalid');
+                    const errorDiv = field.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('text-danger')) {
+                        errorDiv.remove();
+                    }
                 }
+            });
+            
+            if (hasError) {
+                alert('Mohon lengkapi semua field yang wajib diisi');
+                return false;
+            }
+            
+            // Check if slot is full
+            const selectedOption = slotSelect.options[slotSelect.selectedIndex];
+            if (selectedOption && selectedOption.disabled) {
+                alert('⚠️ Slot yang Anda pilih sudah PENUH!\\n\\nSilakan pilih slot lain yang masih tersedia.');
+                slotSelect.value = '';
+                slotSelect.focus();
+                return false;
+            }
+            
+            // Confirmation dialog
+            const remainingEdits = {{ $remainingEdits ?? 3 }};
+            let confirmMessage = '⚠️ KONFIRMASI PERUBAHAN ⚠️\\n\\n';
+            confirmMessage += 'Apakah Anda yakin data yang diinput sudah BENAR dan SESUAI?\\n\\n';
+            confirmMessage += '📝 Pastikan:\\n';
+            confirmMessage += '✓ Jurnal & Slot sudah benar\\n';
+            confirmMessage += '✓ Judul artikel sudah benar\\n';
+            confirmMessage += '✓ Nama penulis sudah sesuai\\n';
+            confirmMessage += '✓ Link publish sudah dicek\\n\\n';
+            
+            if (remainingEdits <= 2) {
+                confirmMessage += '⚠️ PERHATIAN: Ini edit ke-{{ $submission->edit_count + 1 }}, sisa kesempatan: ' + (remainingEdits - 1) + 'x\\n\\n';
+            }
+            
+            confirmMessage += 'Tekan OK untuk menyimpan atau Cancel untuk memeriksa kembali.';
+            
+            if (confirm(confirmMessage)) {
+                console.log('Form confirmed, submitting...');
+                // Submit the form
+                this.submit();
             } else {
-                $(this).removeClass('is-invalid');
-                $(this).next('.text-danger').remove();
+                console.log('Form submission cancelled by user');
             }
         });
-        
-        if (hasError) {
-            alert('Mohon lengkapi semua field yang wajib diisi');
-            return false;
-        }
-        
-        // Check if slot is full
-        const selectedOption = slotSelect.options[slotSelect.selectedIndex];
-        if (selectedOption && selectedOption.disabled) {
-            alert('⚠️ Slot yang Anda pilih sudah PENUH!\\n\\nSilakan pilih slot lain yang masih tersedia.');
-            slotSelect.value = '';
-            slotSelect.focus();
-            return false;
-        }
-        
-        // Confirmation dialog
-        const remainingEdits = {{ $remainingEdits ?? 3 }};
-        let confirmMessage = '⚠️ KONFIRMASI PERUBAHAN ⚠️\\n\\n';
-        confirmMessage += 'Apakah Anda yakin data yang diinput sudah BENAR dan SESUAI?\\n\\n';
-        confirmMessage += '📝 Pastikan:\\n';
-        confirmMessage += '✓ Jurnal & Slot sudah benar\\n';
-        confirmMessage += '✓ Judul artikel sudah benar\\n';
-        confirmMessage += '✓ Nama penulis sudah sesuai\\n';
-        confirmMessage += '✓ Link publish sudah dicek\\n\\n';
-        
-        if (remainingEdits <= 2) {
-            confirmMessage += '⚠️ PERHATIAN: Ini edit ke-{{ $submission->edit_count + 1 }}, sisa kesempatan: ' + (remainingEdits - 1) + 'x\\n\\n';
-        }
-        
-        confirmMessage += 'Tekan OK untuk menyimpan atau Cancel untuk memeriksa kembali.';
-        
-        if (confirm(confirmMessage)) {
-            // Submit the form
-            this.submit();
-        }
-    });
+    }
     
     // Auto-resize textareas
-    $('textarea').each(function() {
-        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
-    }).on('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(function(textarea) {
+        textarea.style.height = textarea.scrollHeight + 'px';
+        textarea.style.overflowY = 'hidden';
+        
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
     });
     
     // Remove validation error on input
-    $('[required]').on('input change', function() {
-        if ($(this).val().trim()) {
-            $(this).removeClass('is-invalid');
-            $(this).next('.text-danger').remove();
-        }
+    const allRequiredFields = document.querySelectorAll('[required]');
+    allRequiredFields.forEach(function(field) {
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('text-danger')) {
+                    errorDiv.remove();
+                }
+            }
+        });
+        
+        field.addEventListener('change', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('text-danger')) {
+                    errorDiv.remove();
+                }
+            }
+        });
     });
+    
+    console.log('=== SCRIPT INITIALIZATION COMPLETE ===');
 });
 </script>
 @endsection
