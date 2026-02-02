@@ -50,7 +50,7 @@
                 <strong>Jurnal:</strong>
                 <div>
                     @if($submission->journalSlot && $submission->journalSlot->journalMaster)
-                        {{ $submission->journalSlot->journalMaster->name }}
+                        {{ $submission->journalSlot->journalMaster->nama_jurnal }}
                     @else
                         -
                     @endif

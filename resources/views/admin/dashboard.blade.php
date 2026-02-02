@@ -235,7 +235,7 @@
                                 <td>
                                     <strong>{{ Str::limit($submission->judul_artikel ?? 'N/A', 40) }}</strong>
                                 </td>
-                                <td><span class="badge bg-secondary">{{ $submission->journalSlot->journalMaster->name ?? 'N/A' }}</span></td>
+                                <td><span class="badge bg-secondary">{{ $submission->journalSlot->journalMaster->nama_jurnal ?? 'N/A' }}</span></td>
                                 <td>{{ Str::limit($submission->nama_penulis ?? 'N/A', 25) }}</td>
                                 <td class="hide-mobile">
                                     <small>{{ Str::limit($submission->institusi_penulis ?? '-', 25) }}</small>
@@ -301,7 +301,7 @@
                                         <span class="badge bg-secondary">{{ $submission->process_type ?? 'Regular' }}</span>
                                     </small>
                                 </td>
-                                <td>{{ $submission->journalSlot->journalMaster->name ?? 'N/A' }}</td>
+                                <td>{{ $submission->journalSlot->journalMaster->nama_jurnal ?? 'N/A' }}</td>
                                 <td>{{ Str::limit($submission->nama_penulis, 25) }}</td>
                                 <td>
                                     @php

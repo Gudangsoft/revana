@@ -159,7 +159,7 @@
                     <i class="bi bi-person"></i> {{ $submission->nama_penulis }}<br>
                     <i class="bi bi-journal"></i> 
                     @if($submission->journalSlot && $submission->journalSlot->journalMaster)
-                        {{ $submission->journalSlot->journalMaster->name }}
+                        {{ $submission->journalSlot->journalMaster->nama_jurnal }}
                     @else
                         -
                     @endif
