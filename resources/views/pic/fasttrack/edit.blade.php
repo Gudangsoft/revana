@@ -295,8 +295,13 @@ $(document).ready(function() {
     const allJournals = @json($journals);
     const currentSlotId = {{ $submission->journal_slot_id ?? 'null' }};
     
+    console.log('Total journals:', allJournals.length);
+    console.log('Current slot ID:', currentSlotId);
+    console.log('Journal Master ID:', journalMasterIdInput.value);
+    
     // Load initial slots if journal is selected
     if (journalMasterIdInput.value) {
+        console.log('Loading initial slots for journal:', journalMasterIdInput.value);
         loadSlots(journalMasterIdInput.value, currentSlotId);
     }
     
@@ -314,6 +319,8 @@ $(document).ready(function() {
             j.nama_jurnal.toLowerCase().includes(query) || 
             (j.publisher && j.publisher.toLowerCase().includes(query))
         ).slice(0, 15);
+        
+        console.log('Filtered journals:', filtered.length);
         
         if (filtered.length === 0) {
             searchResults.innerHTML = '<div class="list-group-item text-muted">Tidak ada hasil</div>';
@@ -338,6 +345,7 @@ $(document).ready(function() {
             searchInput.value = item.dataset.name;
             searchResults.style.display = 'none';
             
+            console.log('Selected journal:', item.dataset.id);
             // Load slots
             loadSlots(item.dataset.id);
         }
@@ -352,11 +360,22 @@ $(document).ready(function() {
     
     // Load slots by journal
     function loadSlots(journalId, selectedSlotId = null) {
+        console.log('loadSlots called with journalId:', journalId, 'selectedSlotId:', selectedSlotId);
         slotSelect.innerHTML = '<option value="">Memuat slot...</option>';
         
-        fetch(`{{ route('pic.journal-slots.get-by-journal') }}?journal_master_id=${journalId}`)
-            .then(response => response.json())
+        const url = `{{ route('pic.journal-slots.get-by-journal') }}?journal_master_id=${journalId}`;
+        console.log('Fetching from URL:', url);
+        
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Slots received:', data);
                 if (data.length === 0) {
                     slotSelect.innerHTML = '<option value="">-- Tidak ada slot tersedia --</option>';
                 } else {
@@ -372,8 +391,9 @@ $(document).ready(function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error loading slots:', error);
                 slotSelect.innerHTML = '<option value="">-- Error memuat slot --</option>';
+                alert('Error memuat slot: ' + error.message);
             });
     }
     
