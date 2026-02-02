@@ -706,7 +706,7 @@
                                 </td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
-                                <td>{{ $s->picMarketing?->name ?? '-' }}</td>
+                                <td>{{ $s->marketing?->name ?? '-' }}</td>
                                 <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
                                 
                                 <!-- Editor 1 -->
