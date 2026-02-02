@@ -30,7 +30,25 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form action="{{ route('pic.fasttrack.update', $submission->id) }}" method="POST" enctype="multipart/form-data" novalidate>
+                <!-- Edit Count Warning -->
+                @php
+                    $maxEditCount = 3;
+                    $remainingEdits = $maxEditCount - ($submission->edit_count ?? 0);
+                @endphp
+                
+                @if($remainingEdits <= 2)
+                    <div class="alert {{ $remainingEdits == 1 ? 'alert-danger' : 'alert-warning' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Perhatian!</strong> 
+                        Submission ini sudah diedit <strong>{{ $submission->edit_count ?? 0 }}x</strong>. 
+                        Sisa kesempatan edit: <strong>{{ $remainingEdits }}x</strong> lagi.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+                
+                <form action="{{ route('pic.fasttrack.update', $submission->id) }}" method="POST" enctype="multipart/form-data" id="editForm" novalidate>
                     @csrf
                     @method('PUT')
                     
@@ -66,37 +84,45 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="title">
+                                <label for="judul_artikel">
                                     <i class="fas fa-heading mr-1"></i>
                                     Judul Artikel <span class="text-danger">*</span>
                                 </label>
-                                <textarea name="title" id="title" class="form-control" rows="3" required>{{ old('title', $submission->title) }}</textarea>
-                                @error('title')
+                                <textarea name="judul_artikel" id="judul_artikel" class="form-control" rows="3" required>{{ old('judul_artikel', $submission->judul_artikel) }}</textarea>
+                                @error('judul_artikel')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="authors">
+                                <label for="nama_penulis">
                                     <i class="fas fa-users mr-1"></i>
                                     Penulis <span class="text-danger">*</span>
                                 </label>
-                                <textarea name="authors" id="authors" class="form-control" rows="3" required>{{ old('authors', $submission->authors) }}</textarea>
-                                <small class="form-text text-muted">
-                                    Pisahkan nama penulis dengan koma
-                                </small>
-                                @error('authors')
+                                <input type="text" name="nama_penulis" id="nama_penulis" class="form-control" value="{{ old('nama_penulis', $submission->nama_penulis) }}" required>
+                                @error('nama_penulis')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="abstract">
-                                    <i class="fas fa-file-alt mr-1"></i>
-                                    Abstract
+                                <label for="no_hp_penulis">
+                                    <i class="fas fa-phone mr-1"></i>
+                                    No HP Penulis
                                 </label>
-                                <textarea name="abstract" id="abstract" class="form-control" rows="5">{{ old('abstract', $submission->abstract) }}</textarea>
-                                @error('abstract')
+                                <input type="text" name="no_hp_penulis" id="no_hp_penulis" class="form-control" value="{{ old('no_hp_penulis', $submission->no_hp_penulis) }}">
+                                @error('no_hp_penulis')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="notes">
+                                    <i class="fas fa-file-alt mr-1"></i>
+                                    Catatan
+                                </label>
+                                <textarea name="notes" id="notes" class="form-control" rows="5">{{ old('notes', $submission->notes) }}</textarea>
+                                @error('notes')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -105,88 +131,22 @@
                         <!-- Right Column -->
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="keywords">
-                                    <i class="fas fa-tags mr-1"></i>
-                                    Keywords
-                                </label>
-                                <textarea name="keywords" id="keywords" class="form-control" rows="2">{{ old('keywords', $submission->keywords) }}</textarea>
-                                <small class="form-text text-muted">
-                                    Pisahkan keyword dengan koma
-                                </small>
-                                @error('keywords')
-                                    <div class="text-danger small mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="volume_number">
-                                            <i class="fas fa-book-open mr-1"></i>
-                                            Volume
-                                        </label>
-                                        <input type="number" name="volume_number" id="volume_number" 
-                                               class="form-control" value="{{ old('volume_number', $submission->volume_number) }}">
-                                        @error('volume_number')
-                                            <div class="text-danger small mt-1">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="issue_number">
-                                            <i class="fas fa-bookmark mr-1"></i>
-                                            Issue
-                                        </label>
-                                        <input type="number" name="issue_number" id="issue_number" 
-                                               class="form-control" value="{{ old('issue_number', $submission->issue_number) }}">
-                                        @error('issue_number')
-                                            <div class="text-danger small mt-1">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="start_page">
-                                            <i class="fas fa-file-alt mr-1"></i>
-                                            Halaman Awal
-                                        </label>
-                                        <input type="number" name="start_page" id="start_page" 
-                                               class="form-control" value="{{ old('start_page', $submission->start_page) }}">
-                                        @error('start_page')
-                                            <div class="text-danger small mt-1">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="end_page">
-                                            <i class="fas fa-file-alt mr-1"></i>
-                                            Halaman Akhir
-                                        </label>
-                                        <input type="number" name="end_page" id="end_page" 
-                                               class="form-control" value="{{ old('end_page', $submission->end_page) }}">
-                                        @error('end_page')
-                                            <div class="text-danger small mt-1">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="marketing">
+                                <label for="marketing_id">
                                     <i class="fas fa-bullhorn mr-1"></i>
                                     Marketing
                                 </label>
-                                <input type="text" name="marketing" id="marketing" 
-                                       class="form-control" value="{{ old('marketing', $submission->marketing) }}">
+                                <select name="marketing_id" id="marketing_id" class="form-control">
+                                    <option value="">Pilih Marketing (Opsional)</option>
+                                    @foreach($marketings as $marketing)
+                                        <option value="{{ $marketing->id }}" {{ old('marketing_id', $submission->marketing_id) == $marketing->id ? 'selected' : '' }}>
+                                            {{ $marketing->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 <small class="form-text text-muted">
                                     Opsional - Tidak wajib diisi
                                 </small>
-                                @error('marketing')
+                                @error('marketing_id')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -312,16 +272,10 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Auto-resize textareas
-    $('textarea').each(function() {
-        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
-    }).on('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-
-    // Form validation
-    $('form').on('submit', function(e) {
+    // Confirmation before submit
+    $('#editForm').on('submit', function(e) {
+        e.preventDefault();
+        
         let hasError = false;
         
         // Required field validation
@@ -339,9 +293,38 @@ $(document).ready(function() {
         });
         
         if (hasError) {
-            e.preventDefault();
             alert('Mohon lengkapi semua field yang wajib diisi');
+            return false;
         }
+        
+        // Confirmation dialog
+        const remainingEdits = {{ $remainingEdits ?? 3 }};
+        let confirmMessage = '⚠️ KONFIRMASI PERUBAHAN ⚠️\n\n';
+        confirmMessage += 'Apakah Anda yakin data yang diinput sudah BENAR dan SESUAI?\n\n';
+        confirmMessage += '📝 Pastikan:\n';
+        confirmMessage += '✓ Jurnal & Slot sudah benar\n';
+        confirmMessage += '✓ Judul artikel sudah benar\n';
+        confirmMessage += '✓ Nama penulis sudah sesuai\n';
+        confirmMessage += '✓ Link publish sudah dicek\n\n';
+        
+        if (remainingEdits <= 2) {
+            confirmMessage += '⚠️ PERHATIAN: Ini edit ke-{{ $submission->edit_count + 1 }}, sisa kesempatan: ' + (remainingEdits - 1) + 'x\n\n';
+        }
+        
+        confirmMessage += 'Tekan OK untuk menyimpan atau Cancel untuk memeriksa kembali.';
+        
+        if (confirm(confirmMessage)) {
+            // Submit the form
+            this.submit();
+        }
+    });
+    
+    // Auto-resize textareas
+    $('textarea').each(function() {
+        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+    }).on('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
     });
     
     // Remove validation error on input

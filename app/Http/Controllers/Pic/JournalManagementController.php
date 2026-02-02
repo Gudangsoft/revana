@@ -14,6 +14,7 @@ use App\Models\PicPointHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class JournalManagementController extends Controller
 {
@@ -1587,11 +1588,29 @@ class JournalManagementController extends Controller
             return redirect()->route('pic.submissions.edit', $submission);
         }
         
+        // Check edit limit
+        $maxEditCount = 3;
+        if ($submission->edit_count >= $maxEditCount) {
+            return redirect()->route('pic.fasttrack.show', $submission)
+                ->with('error', "Submission ini sudah mencapai batas maksimal edit ({$maxEditCount}x). Tidak dapat diedit lagi.");
+        }
+        
         $submission->load(['journalSlot.journalMaster', 'marketing', 'petugasSubmit']);
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
-        $slots = JournalSlot::with('journalMaster')->where('journal_master_id', $submission->journalSlot->journal_master_id)->get();
+        // Load all active slots for all journals so user can change journal
+        $slots = JournalSlot::with('journalMaster')
+            ->whereHas('journalMaster', function($q) {
+                $q->where('is_active', true);
+            })
+            ->orderBy('journal_master_id')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('nomor', 'desc')
+            ->get();
         
-        return view('pic.fasttrack.edit', compact('submission', 'journals', 'slots'));
+        // Load marketings for dropdown
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
+        
+        return view('pic.fasttrack.edit', compact('submission', 'journals', 'slots', 'marketings'));
     }
 
     /**
@@ -1605,32 +1624,57 @@ class JournalManagementController extends Controller
         
         $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
-            'title' => 'required|string|max:500',
-            'authors' => 'required|string|max:500',
-            'abstract' => 'nullable|string',
-            'keywords' => 'nullable|string|max:255',
-            'volume_number' => 'nullable|integer|min:1',
-            'issue_number' => 'nullable|integer|min:1',
-            'start_page' => 'nullable|integer|min:1',
-            'end_page' => 'nullable|integer|min:1',
-            'marketing' => 'nullable|string|max:255',
+            'judul_artikel' => 'required|string|max:500',
+            'nama_penulis' => 'required|string|max:500',
+            'no_hp_penulis' => 'nullable|string|max:20',
+            'notes' => 'nullable|string',
+            'marketing_id' => 'nullable|exists:marketings,id',
             'link_publish' => 'nullable|url|max:500',
             'file_artikel' => 'nullable|file|mimes:pdf|max:10240'
         ]);
 
-        // Update submission data
+        // Check if slot changed
+        $oldSlotId = $submission->journal_slot_id;
+        $newSlotId = $request->journal_slot_id;
+        $slotChanged = $oldSlotId != $newSlotId;
+
+        // If slot changed, update slot counters
+        if ($slotChanged) {
+            // Decrease counter on old slot
+            if ($oldSlotId) {
+                $oldSlot = JournalSlot::find($oldSlotId);
+                if ($oldSlot && $oldSlot->current_articles > 0) {
+                    $oldSlot->decrement('current_articles');
+                }
+            }
+
+            // Increase counter on new slot
+            if ($newSlotId) {
+                $newSlot = JournalSlot::find($newSlotId);
+                if ($newSlot) {
+                    $newSlot->increment('current_articles');
+                }
+            }
+        }
+
+        // Update submission data and increment edit count
         $submission->update([
             'journal_slot_id' => $request->journal_slot_id,
-            'title' => $request->title,
-            'authors' => $request->authors,
-            'abstract' => $request->abstract,
-            'keywords' => $request->keywords,
-            'volume_number' => $request->volume_number,
-            'issue_number' => $request->issue_number,
-            'start_page' => $request->start_page,
-            'end_page' => $request->end_page,
-            'marketing' => $request->marketing,
+            'judul_artikel' => $request->judul_artikel,
+            'nama_penulis' => $request->nama_penulis,
+            'no_hp_penulis' => $request->no_hp_penulis,
+            'notes' => $request->notes,
+            'marketing_id' => $request->marketing_id,
             'link_publish' => $request->link_publish,
+        ]);
+        
+        // Increment edit count
+        $submission->increment('edit_count');
+        
+        // Log edit action
+        $submission->logHistory('update', 'edited', 'Submission diedit oleh PIC (Edit ke-' . $submission->edit_count . ')', [
+            'edit_count' => $submission->edit_count,
+            'slot_changed' => $slotChanged
         ]);
 
         // Handle file upload
@@ -1645,7 +1689,18 @@ class JournalManagementController extends Controller
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('submissions/articles', $filename, 'public');
             
-            $submission->update(['file_artikel' => $path]);
+            $submission->update([
+                'file_artikel' => $path,
+                'file_artikel_original_name' => $file->getClientOriginalName()
+            ]);
+        }
+
+        // Log history if slot changed
+        if ($slotChanged) {
+            $submission->logHistory('update', 'slot_changed', 'Slot jurnal diubah oleh PIC', [
+                'old_slot_id' => $oldSlotId,
+                'new_slot_id' => $newSlotId
+            ]);
         }
 
         return redirect()->route('pic.fasttrack.monitoring')

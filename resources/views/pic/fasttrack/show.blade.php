@@ -13,15 +13,41 @@
         <div class="card">
             <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-lightning-charge"></i> Detail Submission Fasttrack</span>
-                <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-outline-dark btn-sm">
-                    <i class="bi bi-arrow-left"></i> Kembali
-                </a>
+                <div>
+                    @php
+                        $editCount = $submission->edit_count ?? 0;
+                        $maxEditCount = 3;
+                        $canEdit = $editCount < $maxEditCount;
+                    @endphp
+                    @if($canEdit)
+                        <a href="{{ route('pic.fasttrack.edit', $submission) }}" class="btn btn-primary btn-sm me-2">
+                            <i class="bi bi-pencil-square"></i> Edit ({{ $maxEditCount - $editCount }}x tersisa)
+                        </a>
+                    @else
+                        <button class="btn btn-secondary btn-sm me-2" disabled title="Batas edit sudah tercapai">
+                            <i class="bi bi-lock"></i> Edit Terkunci
+                        </button>
+                    @endif
+                    <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-left"></i> Kembali
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- Info Badge -->
                 <div class="mb-4">
                     <span class="badge bg-warning text-dark fs-6"><i class="bi bi-lightning-charge"></i> Fasttrack</span>
                     <span class="badge bg-success fs-6">Published</span>
+                    @php
+                        $editCount = $submission->edit_count ?? 0;
+                        $maxEditCount = 3;
+                        $remainingEdits = $maxEditCount - $editCount;
+                    @endphp
+                    @if($editCount > 0)
+                        <span class="badge {{ $remainingEdits == 0 ? 'bg-danger' : ($remainingEdits == 1 ? 'bg-warning text-dark' : 'bg-info') }} fs-6">
+                            <i class="bi bi-pencil"></i> Diedit {{ $editCount }}x
+                        </span>
+                    @endif
                 </div>
 
                 <!-- Kode Submit -->

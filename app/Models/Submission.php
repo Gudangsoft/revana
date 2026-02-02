@@ -89,6 +89,7 @@ class Submission extends Model
         'tanggal_submit',
         'notes',
         'created_by',
+        'edit_count',
     ];
 
     protected $casts = [
