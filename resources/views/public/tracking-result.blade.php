@@ -163,19 +163,6 @@
                             @endif
                         </div>
                     </div>
-                    @if($submission->marketing)
-                    <div class="info-row">
-                        <div class="info-label">
-                            <i class="bi bi-briefcase"></i> Marketing
-                        </div>
-                        <div class="info-value">
-                            {{ $submission->marketing->nama }}
-                            @if($submission->marketing->telp)
-                            <br><small class="text-muted"><i class="bi bi-telephone"></i> {{ $submission->marketing->telp }}</small>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
                     @if($submission->link_publish)
                     <div class="info-row">
                         <div class="info-label">

@@ -28,7 +28,6 @@ class TrackingController extends Controller
 
         $submission = Submission::with([
             'journalSlot.journalMaster', 
-            'marketing',
             'petugasSubmit',
             'petugasEditor1',
             'petugasAuthor1',
