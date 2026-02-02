@@ -1706,4 +1706,35 @@ class JournalManagementController extends Controller
         return redirect()->route('pic.fasttrack.monitoring')
             ->with('success', 'Submit fasttrack berhasil diupdate');
     }
-}
+    
+    /**
+     * Get slots by journal for AJAX request
+     */
+    public function getSlotsByJournal(Request $request)
+    {
+        $journalMasterId = $request->get('journal_master_id');
+        
+        if (!$journalMasterId) {
+            return response()->json([]);
+        }
+        
+        $slots = JournalSlot::where('journal_master_id', $journalMasterId)
+            ->where('is_active', true)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('nomor', 'desc')
+            ->get()
+            ->map(function($slot) {
+                return [
+                    'id' => $slot->id,
+                    'text' => "Vol {$slot->volume}, No {$slot->nomor} - {$slot->bulan}/{$slot->tahun}",
+                    'volume' => $slot->volume,
+                    'nomor' => $slot->nomor,
+                    'bulan' => $slot->bulan,
+                    'tahun' => $slot->tahun,
+                    'jumlah_slot' => $slot->jumlah_slot ?? 0,
+                    'slot_terpakai' => $slot->current_articles ?? 0,
+                ];
+            });
+        
+        return response()->json($slots);
+    }

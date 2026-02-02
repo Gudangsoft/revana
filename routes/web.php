@@ -409,6 +409,9 @@ Route::prefix('pic')->group(function () {
             Route::put('/{submission}', [PicJournalController::class, 'fasttrackUpdate'])->name('update');
         });
         
+        // Journal Slots API for PIC
+        Route::get('/journal-slots/get-by-journal', [PicJournalController::class, 'getSlotsByJournal'])->name('pic.journal-slots.get-by-journal');
+        
         // Akreditasi
         Route::prefix('accreditations')->name('pic.accreditations.')->group(function () {
             Route::get('/', [PicJournalController::class, 'accreditationsIndex'])->name('index');
