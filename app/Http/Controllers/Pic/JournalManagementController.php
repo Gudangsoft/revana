@@ -362,24 +362,19 @@ class JournalManagementController extends Controller
         $slots = JournalSlot::where('journal_master_id', $journalId)
             ->where('is_active', true)
             ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
+            ->orderBy('nomor', 'desc')
             ->get()
             ->map(function($slot) {
-                $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
+                $available = ($slot->jumlah_slot ?? 0) - ($slot->current_articles ?? 0);
                 return [
                     'id' => $slot->id,
-                    'text' => sprintf(
-                        'Vol. %s No. %s (%s) - Sisa: %d/%d slot',
-                        $slot->volume ?? '-',
-                        $slot->nomor ?? '-',
-                        $slot->tahun,
-                        $sisa > 0 ? $sisa : 0,
-                        $slot->jumlah_slot
-                    ),
-                    'kode_slot' => $slot->kode_slot,
-                    'jumlah_slot' => $slot->jumlah_slot,
-                    'slot_terpakai' => $slot->slot_terpakai,
-                    'sisa' => $sisa > 0 ? $sisa : 0
+                    'text' => "Vol {$slot->volume}, No {$slot->nomor} - {$slot->bulan}/{$slot->tahun}",
+                    'volume' => $slot->volume,
+                    'nomor' => $slot->nomor,
+                    'bulan' => $slot->bulan,
+                    'tahun' => $slot->tahun,
+                    'jumlah_slot' => $slot->jumlah_slot ?? 0,
+                    'slot_terpakai' => $slot->current_articles ?? 0,
                 ];
             });
         
@@ -1706,35 +1701,4 @@ class JournalManagementController extends Controller
         return redirect()->route('pic.fasttrack.monitoring')
             ->with('success', 'Submit fasttrack berhasil diupdate');
     }
-    
-    /**
-     * Get slots by journal for AJAX request
-     */
-    public function getSlotsByJournal(Request $request)
-    {
-        $journalMasterId = $request->get('journal_master_id');
-        
-        if (!$journalMasterId) {
-            return response()->json([]);
-        }
-        
-        $slots = JournalSlot::where('journal_master_id', $journalMasterId)
-            ->where('is_active', true)
-            ->orderBy('tahun', 'desc')
-            ->orderBy('nomor', 'desc')
-            ->get()
-            ->map(function($slot) {
-                return [
-                    'id' => $slot->id,
-                    'text' => "Vol {$slot->volume}, No {$slot->nomor} - {$slot->bulan}/{$slot->tahun}",
-                    'volume' => $slot->volume,
-                    'nomor' => $slot->nomor,
-                    'bulan' => $slot->bulan,
-                    'tahun' => $slot->tahun,
-                    'jumlah_slot' => $slot->jumlah_slot ?? 0,
-                    'slot_terpakai' => $slot->current_articles ?? 0,
-                ];
-            });
-        
-        return response()->json($slots);
-    }
+}
