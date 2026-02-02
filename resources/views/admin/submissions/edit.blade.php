@@ -7,7 +7,7 @@
     @include('admin.partials.sidebar')
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== ADMIN SUBMISSIONS EDIT SCRIPT LOADED ===');
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('=== ADMIN SUBMISSIONS EDIT SCRIPT COMPLETE ===');
 });
 </script>
-@endsection
+@endpush
 
 @section('content')
 <div class="row">
