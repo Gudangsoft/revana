@@ -33,6 +33,7 @@ return new class extends Migration
             ['task_key' => 'editor3', 'task_label' => 'Editor 3', 'points' => 1],
             ['task_key' => 'author2', 'task_label' => 'Author 2', 'points' => 1],
             ['task_key' => 'production', 'task_label' => 'Production', 'points' => 1],
+            ['task_key' => 'submit', 'task_label' => 'Submit Artikel', 'points' => 1],
         ];
 
         $marketingTasks = [
