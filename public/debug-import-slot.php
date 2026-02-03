@@ -110,6 +110,18 @@ header('Content-Type: text/html; charset=utf-8');
             ->orderBy('nomor', 'desc')
             ->get();
         
+        // Expected slots from Excel
+        $expectedSlots = [
+            ['volume' => 1, 'nomor' => 1, 'bulan' => 'Februari', 'tahun' => 2023, 'jumlah_slot' => 30],
+            ['volume' => 1, 'nomor' => 2, 'bulan' => 'Mei', 'tahun' => 2023, 'jumlah_slot' => 30],
+            ['volume' => 1, 'nomor' => 3, 'bulan' => 'Agustus', 'tahun' => 2023, 'jumlah_slot' => 30],
+            ['volume' => 1, 'nomor' => 4, 'bulan' => 'November', 'tahun' => 2023, 'jumlah_slot' => 30],
+            ['volume' => 2, 'nomor' => 1, 'bulan' => 'Februari', 'tahun' => 2024, 'jumlah_slot' => 27],
+            ['volume' => 2, 'nomor' => 2, 'bulan' => 'Mei', 'tahun' => 2024, 'jumlah_slot' => 23],
+            ['volume' => 2, 'nomor' => 3, 'bulan' => 'Agustus', 'tahun' => 2024, 'jumlah_slot' => 16],
+            ['volume' => 2, 'nomor' => 4, 'bulan' => 'November', 'tahun' => 2024, 'jumlah_slot' => 12],
+        ];
+        
         if ($slots->count() > 0) {
             echo '<p class="success">✓ Ditemukan ' . $slots->count() . ' slot</p>';
             echo '<table>';
@@ -128,6 +140,68 @@ header('Content-Type: text/html; charset=utf-8');
                 echo '</tr>';
             }
             echo '</table>';
+            
+            // Check missing slots
+            echo '<h3>Cek Data dari Excel (Vol 1-2, Tahun 2023-2024)</h3>';
+            $missing = [];
+            foreach ($expectedSlots as $expected) {
+                $exists = $slots->first(function($slot) use ($expected) {
+                    return $slot->volume == $expected['volume'] 
+                        && $slot->nomor == $expected['nomor'] 
+                        && $slot->tahun == $expected['tahun'];
+                });
+                
+                if (!$exists) {
+                    $missing[] = $expected;
+                }
+            }
+            
+            if (count($missing) > 0) {
+                echo '<p class="error">✗ Data Excel yang BELUM ada di database (' . count($missing) . ' slot):</p>';
+                echo '<table>';
+                echo '<tr><th>Vol</th><th>No</th><th>Bulan</th><th>Tahun</th><th>Jumlah Slot</th></tr>';
+                foreach ($missing as $m) {
+                    echo '<tr style="background: #ffe6e6;">';
+                    echo '<td>' . $m['volume'] . '</td>';
+                    echo '<td>' . $m['nomor'] . '</td>';
+                    echo '<td>' . $m['bulan'] . '</td>';
+                    echo '<td>' . $m['tahun'] . '</td>';
+                    echo '<td>' . $m['jumlah_slot'] . '</td>';
+                    echo '</tr>';
+                }
+                echo '</table>';
+                
+                if ($action === 'add_missing') {
+                    $added = 0;
+                    foreach ($missing as $data) {
+                        try {
+                            JournalSlot::create([
+                                'journal_master_id' => $journal->id,
+                                'volume' => $data['volume'],
+                                'nomor' => $data['nomor'],
+                                'bulan' => $data['bulan'],
+                                'tahun' => $data['tahun'],
+                                'jumlah_slot' => $data['jumlah_slot'],
+                                'slot_terpakai' => 0,
+                                'is_active' => true,
+                                'created_by' => 1,
+                            ]);
+                            $added++;
+                        } catch (Exception $e) {
+                            echo '<p class="error">Error: ' . $e->getMessage() . '</p>';
+                        }
+                    }
+                    echo '<p class="success">✓ Berhasil menambahkan ' . $added . ' slot yang hilang</p>';
+                    echo '<script>setTimeout(function(){ location.href = "debug-import-slot.php"; }, 2000);</script>';
+                } else {
+                    echo '<form method="get">';
+                    echo '<input type="hidden" name="action" value="add_missing">';
+                    echo '<button type="submit" class="btn btn-success">+ Tambahkan ' . count($missing) . ' Slot yang Hilang</button>';
+                    echo '</form>';
+                }
+            } else {
+                echo '<p class="success">✓ Semua data Excel sudah ada di database</p>';
+            }
         } else {
             echo '<p class="warning">⚠ Belum ada slot untuk jurnal ini</p>';
             
