@@ -76,9 +76,13 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
 
         // Check if slot already exists
         $existing = null;
+        
+        // First check by kode_slot if provided
         if (!empty($kodeSlot)) {
             $existing = JournalSlot::where('kode_slot', $kodeSlot)->first();
         }
+        
+        // Then check by combination of journal + volume + nomor + tahun
         if (!$existing) {
             $existing = JournalSlot::where('journal_master_id', $journalMaster->id)
                 ->where('volume', $volume)
@@ -88,7 +92,7 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
         }
 
         if ($existing) {
-            // Update existing
+            // Update existing slot
             $existing->update([
                 'bulan' => $bulan,
                 'jumlah_slot' => max((int) $jumlahSlot, $existing->slot_terpakai),
@@ -98,10 +102,10 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
             return null;
         }
 
-        // Create new
+        // Create new slot - let model auto-generate kode_slot if not provided
         $this->imported++;
         return new JournalSlot([
-            'kode_slot' => $kodeSlot, // Will auto-generate if null
+            'kode_slot' => null, // Will auto-generate in model boot
             'journal_master_id' => $journalMaster->id,
             'volume' => $volume,
             'nomor' => $nomor,

@@ -45,13 +45,33 @@ class JournalSlot extends Model
     {
         $prefix = 'SLT';
         $year = $slot->tahun ?? date('Y');
-        $lastSlot = self::where('tahun', $year)
-            ->orderBy('id', 'desc')
+        
+        // Try to get the last slot for this year
+        $lastSlot = self::where('kode_slot', 'like', $prefix . $year . '%')
+            ->orderBy('kode_slot', 'desc')
             ->first();
         
-        $number = $lastSlot ? (int) substr($lastSlot->kode_slot, -4) + 1 : 1;
+        if ($lastSlot) {
+            // Extract number from last kode_slot
+            $lastNumber = (int) substr($lastSlot->kode_slot, -4);
+            $number = $lastNumber + 1;
+        } else {
+            $number = 1;
+        }
         
-        return $prefix . $year . str_pad($number, 4, '0', STR_PAD_LEFT);
+        // Generate and check if exists (retry up to 100 times to avoid collision)
+        $attempts = 0;
+        do {
+            $kodeSlot = $prefix . $year . str_pad($number, 4, '0', STR_PAD_LEFT);
+            $exists = self::where('kode_slot', $kodeSlot)->exists();
+            
+            if ($exists) {
+                $number++;
+                $attempts++;
+            }
+        } while ($exists && $attempts < 100);
+        
+        return $kodeSlot;
     }
 
     public function journalMaster()

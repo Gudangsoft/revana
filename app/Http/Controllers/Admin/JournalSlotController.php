@@ -364,19 +364,43 @@ class JournalSlotController extends Controller
      */
     public function downloadTemplate()
     {
-        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings, \Maatwebsite\Excel\Concerns\WithStyles {
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings, \Maatwebsite\Excel\Concerns\WithStyles, \Maatwebsite\Excel\Concerns\WithColumnWidths {
             public function array(): array
             {
                 return [
-                    ['', 'Nama Jurnal Contoh', '1', '1', 'Januari', date('Y'), 10, 'Aktif'],
-                    ['', 'Nama Jurnal Contoh', '1', '2', 'Februari', date('Y'), 10, 'Aktif'],
-                    ['', 'Nama Jurnal Lain', '2', '1', 'Maret', date('Y'), 15, 'Aktif'],
+                    ['', 'FUNDAMENTUM : Jurnal Pengabdian Multidisiplin', '1', '1', 'Januari', date('Y'), 30, 'Aktif'],
+                    ['', 'FUNDAMENTUM : Jurnal Pengabdian Multidisiplin', '1', '2', 'Februari', date('Y'), 30, 'Aktif'],
+                    ['', 'Jurnal Sains dan Kesehatan (JU...', '2', '1', 'Maret', date('Y'), 15, 'Aktif'],
+                    ['', '', '', '', '', '', '', ''],
+                    ['CATATAN:', '', '', '', '', '', '', ''],
+                    ['- kode_slot: Kosongkan, akan auto-generate', '', '', '', '', '', '', ''],
+                    ['- nama_jurnal: HARUS SESUAI dengan nama di database (copy-paste dari data jurnal)', '', '', '', '', '', '', ''],
+                    ['- volume: Angka volume', '', '', '', '', '', '', ''],
+                    ['- nomor: Angka nomor', '', '', '', '', '', '', ''],
+                    ['- bulan: Nama bulan (Januari, Februari, dst)', '', '', '', '', '', '', ''],
+                    ['- tahun: Tahun dalam angka', '', '', '', '', '', '', ''],
+                    ['- jumlah_slot: Total slot tersedia', '', '', '', '', '', '', ''],
+                    ['- status: Aktif / Tidak Aktif', '', '', '', '', '', '', ''],
                 ];
             }
 
             public function headings(): array
             {
                 return ['kode_slot', 'nama_jurnal', 'volume', 'nomor', 'bulan', 'tahun', 'jumlah_slot', 'status'];
+            }
+
+            public function columnWidths(): array
+            {
+                return [
+                    'A' => 15,
+                    'B' => 50,
+                    'C' => 10,
+                    'D' => 10,
+                    'E' => 15,
+                    'F' => 10,
+                    'G' => 15,
+                    'H' => 15,
+                ];
             }
 
             public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
