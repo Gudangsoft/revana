@@ -173,9 +173,15 @@ header('Content-Type: text/html; charset=utf-8');
                 
                 if ($action === 'add_missing') {
                     $added = 0;
+                    $errors = [];
+                    
                     foreach ($missing as $data) {
                         try {
-                            JournalSlot::create([
+                            // Generate kode_slot
+                            $kodeSlot = 'SLT' . $data['tahun'] . str_pad($data['volume'], 2, '0', STR_PAD_LEFT) . str_pad($data['nomor'], 2, '0', STR_PAD_LEFT);
+                            
+                            $slot = JournalSlot::create([
+                                'kode_slot' => $kodeSlot,
                                 'journal_master_id' => $journal->id,
                                 'volume' => $data['volume'],
                                 'nomor' => $data['nomor'],
@@ -187,12 +193,26 @@ header('Content-Type: text/html; charset=utf-8');
                                 'created_by' => 1,
                             ]);
                             $added++;
+                            echo '<p class="success">✓ Berhasil: Vol ' . $data['volume'] . ' No ' . $data['nomor'] . ' - ' . $slot->kode_slot . '</p>';
                         } catch (Exception $e) {
-                            echo '<p class="error">Error: ' . $e->getMessage() . '</p>';
+                            $errors[] = 'Vol ' . $data['volume'] . ' No ' . $data['nomor'] . ': ' . $e->getMessage();
+                            echo '<p class="error">✗ Error Vol ' . $data['volume'] . ' No ' . $data['nomor'] . ': ' . $e->getMessage() . '</p>';
                         }
                     }
-                    echo '<p class="success">✓ Berhasil menambahkan ' . $added . ' slot yang hilang</p>';
-                    echo '<script>setTimeout(function(){ location.href = "debug-import-slot.php"; }, 2000);</script>';
+                    
+                    if ($added > 0) {
+                        echo '<p class="success"><strong>✓ TOTAL: Berhasil menambahkan ' . $added . ' slot</strong></p>';
+                    }
+                    if (count($errors) > 0) {
+                        echo '<p class="error"><strong>✗ GAGAL: ' . count($errors) . ' slot</strong></p>';
+                        foreach ($errors as $err) {
+                            echo '<p class="error">- ' . $err . '</p>';
+                        }
+                    }
+                    
+                    if ($added > 0) {
+                        echo '<script>setTimeout(function(){ location.href = "debug-import-slot.php"; }, 3000);</script>';
+                    }
                 } else {
                     echo '<form method="get">';
                     echo '<input type="hidden" name="action" value="add_missing">';
