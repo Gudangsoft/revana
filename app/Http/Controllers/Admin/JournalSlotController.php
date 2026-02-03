@@ -83,10 +83,10 @@ class JournalSlotController extends Controller
                     $query->latest();
                     break;
                 default:
-                    $query->latest();
+                    $query->orderBy('volume', 'desc')->orderBy('nomor', 'desc');
             }
         } else {
-            $query->latest();
+            $query->orderBy('volume', 'desc')->orderBy('nomor', 'desc');
         }
         
         $slots = $query->paginate(20);
