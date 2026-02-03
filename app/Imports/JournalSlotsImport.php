@@ -126,11 +126,38 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
         }
 
         $journal = null;
+        
+        // 1. Try exact kode_jurnal match
         if (!empty($kodeJurnal)) {
             $journal = JournalMaster::where('kode_jurnal', $kodeJurnal)->first();
         }
+        
+        // 2. Try exact nama_jurnal match
         if (!$journal && !empty($namaJurnal)) {
-            $journal = JournalMaster::where('nama_jurnal', 'like', '%' . $namaJurnal . '%')->first();
+            $journal = JournalMaster::where('nama_jurnal', $namaJurnal)->first();
+        }
+        
+        // 3. Try LIKE match (case insensitive)
+        if (!$journal && !empty($namaJurnal)) {
+            // Remove special characters for better matching
+            $searchName = trim($namaJurnal);
+            $journal = JournalMaster::whereRaw('LOWER(nama_jurnal) LIKE ?', ['%' . strtolower($searchName) . '%'])->first();
+        }
+        
+        // 4. Try partial word match (split by spaces and search for main words)
+        if (!$journal && !empty($namaJurnal)) {
+            $words = explode(' ', $namaJurnal);
+            $mainWords = array_filter($words, function($word) {
+                return strlen($word) > 3 && !in_array(strtolower($word), ['jurnal', 'journal', 'the', 'dan', 'and']);
+            });
+            
+            if (count($mainWords) > 0) {
+                $query = JournalMaster::query();
+                foreach ($mainWords as $word) {
+                    $query->whereRaw('LOWER(nama_jurnal) LIKE ?', ['%' . strtolower($word) . '%']);
+                }
+                $journal = $query->first();
+            }
         }
 
         if ($journal) {
