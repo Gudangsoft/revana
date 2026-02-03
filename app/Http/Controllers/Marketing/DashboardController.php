@@ -384,8 +384,8 @@ class DashboardController extends Controller
             $query->where('bulan', $request->bulan);
         }
         
-        $slots = $query->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
+        $slots = $query->orderBy('volume', 'desc')
+            ->orderBy('nomor', 'desc')
             ->paginate(20)
             ->withQueryString();
         
