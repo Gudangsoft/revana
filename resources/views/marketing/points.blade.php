@@ -12,17 +12,46 @@
     </button>
 </div>
 
-<!-- Point Summary -->
-<div class="card mb-4" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-    <div class="card-body text-white">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h5>Total Point Anda</h5>
-                <div class="display-3 fw-bold">{{ $marketing->total_points }}</div>
-                <p class="mb-0 opacity-75">Point didapatkan dari setiap artikel yang berhasil disubmit</p>
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Total Point</h6>
+                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points']) }}</h2>
+                    </div>
+                    <i class="bi bi-trophy fs-1 opacity-50"></i>
+                </div>
             </div>
-            <div class="col-md-4 text-end">
-                <i class="bi bi-star-fill" style="font-size: 5rem; opacity: 0.3;"></i>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Point Hari Ini</h6>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today']) }}</h2>
+                    </div>
+                    <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Point Bulan Ini</h6>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month']) }}</h2>
+                    </div>
+                    <i class="bi bi-calendar-month fs-1 opacity-50"></i>
+                </div>
             </div>
         </div>
     </div>

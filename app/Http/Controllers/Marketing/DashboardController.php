@@ -141,12 +141,35 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
+        // Calculate total points from history
+        $totalPoints = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');
+        
+        // Sync total_points in database
+        $marketing->update(['total_points' => $totalPoints]);
+        
         $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
             ->with('submission.journalSlot.journalMaster')
             ->latest()
             ->paginate(20);
         
-        return view('marketing.points', compact('marketing', 'pointHistories'));
+        // Statistics
+        $pointsToday = MarketingPointHistory::where('marketing_id', $marketing->id)
+            ->whereDate('created_at', today())
+            ->sum('points_earned');
+            
+        $pointsThisMonth = MarketingPointHistory::where('marketing_id', $marketing->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('points_earned');
+        
+        $stats = [
+            'total_points' => $totalPoints,
+            'points_today' => $pointsToday,
+            'points_this_month' => $pointsThisMonth,
+            'total_tasks' => $pointHistories->total(),
+        ];
+        
+        return view('marketing.points', compact('marketing', 'pointHistories', 'stats'));
     }
 
     /**

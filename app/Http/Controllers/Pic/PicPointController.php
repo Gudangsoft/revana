@@ -35,7 +35,9 @@ class PicPointController extends Controller
         
         $pointHistories = $query->latest()->paginate(20);
         
-        // Statistics - calculate real-time
+        // Statistics - calculate real-time from point histories
+        $totalPoints = $pic->pointHistories()->sum('points_earned');
+        
         $pointsToday = $pic->pointHistories()
             ->whereDate('created_at', today())
             ->sum('points_earned');
@@ -47,8 +49,11 @@ class PicPointController extends Controller
             
         $totalTasks = $pic->pointHistories()->count();
         
+        // Sync total_points in database
+        $pic->update(['total_points' => $totalPoints]);
+        
         $stats = [
-            'total_points' => $pic->total_points ?? 0,
+            'total_points' => $totalPoints,
             'points_today' => $pointsToday,
             'points_this_month' => $pointsThisMonth,
             'total_tasks' => $totalTasks,
