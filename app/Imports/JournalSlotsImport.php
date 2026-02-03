@@ -20,6 +20,8 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
     protected $updated = 0;
     protected $userId;
     protected $journalCache = [];
+    protected $skipped = [];
+    protected $errors = [];
 
     public function __construct($userId = null)
     {
@@ -55,10 +57,12 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
 
         // Skip if required fields are empty
         if (empty($namaJurnal) && empty($kodeJurnal)) {
+            $this->skipped[] = "Baris kosong atau tidak ada nama jurnal";
             return null;
         }
 
         if (empty($volume) || empty($nomor) || empty($bulan)) {
+            $this->skipped[] = "Data tidak lengkap: volume={$volume}, nomor={$nomor}, bulan={$bulan}";
             return null;
         }
 
@@ -66,6 +70,7 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
         $journalMaster = $this->findJournal($kodeJurnal, $namaJurnal);
         
         if (!$journalMaster) {
+            $this->errors[] = "Jurnal tidak ditemukan: {$namaJurnal} (kode: {$kodeJurnal})";
             return null; // Skip if journal not found
         }
 
@@ -151,5 +156,15 @@ class JournalSlotsImport implements ToModel, WithHeadingRow, WithValidation, Ski
     public function getUpdatedCount(): int
     {
         return $this->updated;
+    }
+
+    public function getSkipped(): array
+    {
+        return $this->skipped;
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 }

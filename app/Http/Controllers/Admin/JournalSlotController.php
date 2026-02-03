@@ -330,16 +330,24 @@ class JournalSlotController extends Controller
 
             $imported = $import->getImportedCount();
             $updated = $import->getUpdatedCount();
+            $errors = $import->getErrors();
+            $skipped = $import->getSkipped();
 
             $message = "Import berhasil! ";
             if ($imported > 0) {
                 $message .= "{$imported} data slot baru ditambahkan. ";
             }
             if ($updated > 0) {
-                $message .= "{$updated} data slot diperbarui.";
+                $message .= "{$updated} data slot diperbarui. ";
             }
             if ($imported == 0 && $updated == 0) {
-                $message = "Tidak ada data yang diimport atau diperbarui. Pastikan nama jurnal sudah ada di database.";
+                $message = "Tidak ada data yang diimport atau diperbarui. ";
+                if (count($errors) > 0) {
+                    $message .= "\n\nJurnal tidak ditemukan:\n" . implode("\n", array_slice($errors, 0, 5));
+                    if (count($errors) > 5) {
+                        $message .= "\n... dan " . (count($errors) - 5) . " error lainnya.";
+                    }
+                }
             }
 
             return redirect()->route('admin.journal-slots.index')
