@@ -78,6 +78,8 @@
                             <th>Kategori</th>
                             <th>Jenis</th>
                             <th>Akreditasi</th>
+                            <th class="text-center">Total Submission</th>
+                            <th class="text-center">Sudah Diedit</th>
                             <th>Status</th>
                             <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
@@ -121,6 +123,26 @@
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
+                            <td class="text-center">
+                                @php
+                                    $totalSubmissions = $journal->slots->sum(function($slot) {
+                                        return $slot->submissions->count();
+                                    });
+                                @endphp
+                                <span class="badge bg-primary">{{ $totalSubmissions }}</span>
+                            </td>
+                            <td class="text-center">
+                                @php
+                                    $editedSubmissions = $journal->slots->sum(function($slot) {
+                                        return $slot->submissions->where('edit_count', '>', 0)->count();
+                                    });
+                                @endphp
+                                @if($editedSubmissions > 0)
+                                    <span class="badge bg-warning text-dark">{{ $editedSubmissions }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($journal->is_active)
                                     <span class="badge bg-success">Aktif</span>
@@ -140,7 +162,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-4">
+                            <td colspan="11" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1"></i>
                                 <p class="mt-2 mb-0">Tidak ada data jurnal</p>
                             </td>

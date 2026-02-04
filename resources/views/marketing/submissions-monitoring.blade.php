@@ -42,12 +42,20 @@
                     <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Dari Tanggal</label>
+                <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Sampai Tanggal</label>
+                <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+            </div>
+            <div class="col-md-12">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-search"></i> Filter
                 </button>
                 <a href="{{ route('marketing.submissions.monitoring') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                    <i class="bi bi-arrow-clockwise"></i> Reset
                 </a>
             </div>
         </form>
@@ -123,6 +131,7 @@
                         <th>Tanggal Submit</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Progress</th>
+                        <th class="text-center">Edit Count</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -199,6 +208,20 @@
                                 </div>
                                 <small class="text-muted" style="min-width: 35px;">{{ $progress }}%</small>
                             </div>
+                        </td>
+                        <td class="text-center">
+                            @php
+                                $editCount = $submission->edit_count ?? 0;
+                                $maxEditCount = 3;
+                                $remainingEdits = $maxEditCount - $editCount;
+                            @endphp
+                            @if($editCount > 0)
+                                <span class="badge {{ $remainingEdits == 0 ? 'bg-danger' : ($remainingEdits == 1 ? 'bg-warning text-dark' : 'bg-info') }}">
+                                    {{ $editCount }}x
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </td>
                         <td class="text-center">
                             <a href="{{ route('marketing.submissions.show', $submission) }}" 

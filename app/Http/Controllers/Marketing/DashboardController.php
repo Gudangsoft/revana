@@ -332,7 +332,10 @@ class DashboardController extends Controller
         $marketing = Auth::guard('marketing')->user();
         
         $query = JournalMaster::with(['slots' => function($q) {
-                $q->where('is_active', true);
+                $q->where('is_active', true)
+                  ->with(['submissions' => function($sq) {
+                      $sq->select('id', 'journal_slot_id', 'edit_count');
+                  }]);
             }])
             ->where('is_active', true);
         
@@ -457,7 +460,16 @@ class DashboardController extends Controller
             });
         }
         
-        $submissions = $query->latest('tanggal_submit')->paginate(20);
+        // Filter by date range
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_submit', '>=', $request->start_date);
+        }
+        
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_submit', '<=', $request->end_date);
+        }
+        
+        $submissions = $query->latest('tanggal_submit')->paginate(20)->withQueryString();
         $slots = JournalSlot::with('journalMaster')->where('is_active', true)->get();
         
         return view('marketing.submissions-monitoring', compact('marketing', 'submissions', 'slots'));

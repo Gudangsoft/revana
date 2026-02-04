@@ -85,6 +85,7 @@
                         <th>Penulis</th>
                         <th>Tanggal Submit</th>
                         <th>Progress</th>
+                        <th class="text-center">Edit Count</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -137,6 +138,20 @@
                                     {{ $progress }}%
                                 </small>
                             </div>
+                        </td>
+                        <td class="text-center">
+                            @php
+                                $editCount = $submission->edit_count ?? 0;
+                                $maxEditCount = 3;
+                                $remainingEdits = $maxEditCount - $editCount;
+                            @endphp
+                            @if($editCount > 0)
+                                <span class="badge {{ $remainingEdits == 0 ? 'bg-danger' : ($remainingEdits == 1 ? 'bg-warning text-dark' : 'bg-info') }}">
+                                    {{ $editCount }}x
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </td>
                         <td class="text-center">
                             <a href="{{ route('marketing.submissions.show', $submission) }}" 
