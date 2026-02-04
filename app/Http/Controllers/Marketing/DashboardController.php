@@ -126,6 +126,15 @@ class DashboardController extends Controller
             $query->where('status', 'like', $request->status . '%');
         }
         
+        // Filter by date range
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_submit', '>=', $request->start_date);
+        }
+        
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_submit', '<=', $request->end_date);
+        }
+        
         $submissions = $query->latest('tanggal_submit')->paginate(10);
         
         // Debug log

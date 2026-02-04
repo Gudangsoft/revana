@@ -50,11 +50,21 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <input type="date" name="start_date" class="form-control form-control-sm" 
+                       placeholder="Dari Tanggal" value="{{ request('start_date') }}" 
+                       title="Dari Tanggal">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="end_date" class="form-control form-control-sm" 
+                       placeholder="Sampai Tanggal" value="{{ request('end_date') }}" 
+                       title="Sampai Tanggal">
+            </div>
+            <div class="col-md-3">
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="bi bi-search"></i> Filter
                 </button>
                 <a href="{{ route('marketing.submissions') }}" class="btn btn-sm btn-secondary">
-                    <i class="bi bi-x"></i>
+                    <i class="bi bi-x"></i> Reset
                 </a>
             </div>
         </form>
