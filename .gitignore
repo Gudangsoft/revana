@@ -5,6 +5,8 @@
 /storage/*.key
 /vendor
 /storage
+bootstrap/cache/*.php
+!bootstrap/cache/.gitignore
 .env
 .env.backup
 .env.production
