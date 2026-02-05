@@ -577,6 +577,7 @@
                                 <th rowspan="2" class="sticky-first">Kode Submit</th>
                                 <th rowspan="2" class="sticky-second">ID Artikel</th>
                                 <th rowspan="2">Judul</th>
+                                <th rowspan="2">Volume</th>
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
                                 <th rowspan="2">No HP</th>
@@ -672,6 +673,7 @@
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 30) }}</td>
+                                <td title="{{ $s->journalSlot?->display_name }}">{{ $s->journalSlot ? 'Vol.' . $s->journalSlot->volume . ' No.' . $s->journalSlot->nomor : '-' }}</td>
                                 <td class="text-center">
                                     @if($s->link_artikel)
                                         <a href="{{ $s->link_artikel }}" target="_blank" title="Buka Link Artikel">
