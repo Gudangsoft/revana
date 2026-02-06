@@ -1500,7 +1500,7 @@ class JournalManagementController extends Controller
         $submission->logHistory('submit', 'submitted', $logMessage, [
             'link_publish' => $validated['link_publish'] ?? null,
             'process_type' => 'fasttrack'
-        ]);
+        ], $adminUser->id);
 
         // Award points to PIC
         $pic = auth()->guard('pic')->user();
@@ -1691,6 +1691,9 @@ class JournalManagementController extends Controller
             'link_publish' => $request->link_publish,
         ]);
         
+        // Get admin user for logHistory
+        $adminUser = \App\Models\User::orderBy('id')->first();
+        
         // Increment edit count
         $submission->increment('edit_count');
         
@@ -1698,7 +1701,7 @@ class JournalManagementController extends Controller
         $submission->logHistory('update', 'edited', 'Submission diedit oleh PIC (Edit ke-' . $submission->edit_count . ')', [
             'edit_count' => $submission->edit_count,
             'slot_changed' => $slotChanged
-        ]);
+        ], $adminUser ? $adminUser->id : null);
 
         // Handle file upload
         if ($request->hasFile('file_artikel')) {
@@ -1723,7 +1726,7 @@ class JournalManagementController extends Controller
             $submission->logHistory('update', 'slot_changed', 'Slot jurnal diubah oleh PIC', [
                 'old_slot_id' => $oldSlotId,
                 'new_slot_id' => $newSlotId
-            ]);
+            ], $adminUser ? $adminUser->id : null);
         }
 
         return redirect()->route('pic.fasttrack.monitoring')

@@ -704,7 +704,7 @@ class DashboardController extends Controller
             'marketing_id' => $marketing->id,
             'process_type' => 'fasttrack',
             'status' => $status
-        ]);
+        ], $adminUser->id);
 
         // Award points to Marketing
         $pointHistory = MarketingPointHistory::awardPoints(
