@@ -596,7 +596,7 @@
                                     // Ambil data dari field jumlah_slot dan slot_terpakai
                                     $jumlahSlot = $slot->jumlah_slot ?? 0;
                                     $slotTerpakai = $slot->slot_terpakai ?? 0;
-                                    $slotTersedia = $jumlahSlot - $slotTerpakai;
+                                    $slotTersedia = max(0, $jumlahSlot - $slotTerpakai); // Prevent negative values
                                 @endphp
                                 @if($jumlahSlot > 0 && $slotTersedia > 0)
                                     <span class="badge bg-success mb-1">Tersedia</span>

@@ -355,9 +355,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const sisa = slot.sisa !== undefined ? slot.sisa : (slot.jumlah_slot - slot.slot_terpakai);
                     
                     if (sisa <= 0) {
-                        html += '<option value="' + slot.id + '" disabled style="color: #999; font-style: italic;">🚫 PENUH - ' + slot.text + ' (Tidak dapat memilih slot penuh)</option>';
+                        html += '<option value="' + slot.id + '" disabled style="color: #dc3545; font-weight: bold;">🚫 SLOT PENUH - ' + slot.text + ' (0/' + slot.jumlah_slot + ')</option>';
+                    } else if (sisa <= 2) {
+                        html += '<option value="' + slot.id + '" style="color: #fd7e14; font-weight: bold;">⚠️ HAMPIR PENUH - ' + slot.text + ' (' + sisa + '/' + slot.jumlah_slot + ' tersisa)</option>';
                     } else {
-                        html += '<option value="' + slot.id + '">' + slot.text + '</option>';
+                        html += '<option value="' + slot.id + '" style="color: #28a745;">✅ ' + slot.text + ' (' + sisa + '/' + slot.jumlah_slot + ' tersisa)</option>';
                     }
                 }
                 
@@ -379,10 +381,41 @@ document.addEventListener('DOMContentLoaded', function() {
             const slotSelect = document.getElementById('journal_slot_id');
             const selectedOption = slotSelect.options[slotSelect.selectedIndex];
             
+            // Cek jika tidak ada slot yang dipilih
+            if (!slotSelect.value) {
+                e.preventDefault();
+                alert('⚠️ Harap pilih slot jurnal terlebih dahulu!');
+                slotSelect.focus();
+                return false;
+            }
+            
+            // Cek jika slot yang dipilih disabled (penuh)
             if (selectedOption && selectedOption.disabled) {
                 e.preventDefault();
-                alert('⚠️ Slot yang Anda pilih sudah PENUH!\n\nSilakan pilih slot lain yang masih tersedia.');
+                alert('🚫 SLOT SUDAH PENUH!\n\nSlot yang Anda pilih sudah tidak tersedia.\nSilakan pilih slot lain yang masih memiliki sisa kuota.');
                 slotSelect.focus();
+                return false;
+            }
+            
+            // Peringatan untuk slot yang hampir penuh (<=2)
+            const optionText = selectedOption.text;
+            if (optionText.includes('⚠️ HAMPIR PENUH')) {
+                const confirmed = confirm('⚠️ PERINGATAN: Slot Hampir Penuh!\n\n' + 
+                    'Slot yang Anda pilih hanya memiliki sisa slot terbatas.\n' +
+                    'Apakah Anda yakin ingin melanjutkan?\n\n' +
+                    'Klik OK untuk melanjutkan atau Cancel untuk memilih slot lain.');
+                if (!confirmed) {
+                    return false;
+                }
+            }
+            
+            // Konfirmasi final sebelum submit
+            const journalName = document.getElementById('search_journal').value;
+            const finalConfirm = confirm('📝 KONFIRMASI SUBMISSION\n\n' +
+                'Jurnal: ' + journalName + '\n' +
+                'Slot: ' + optionText.replace(/[🚫⚠️✅]/g, '').trim() + '\n\n' +
+                'Apakah data sudah benar dan yakin ingin submit?');
+            if (!finalConfirm) {
                 return false;
             }
         });

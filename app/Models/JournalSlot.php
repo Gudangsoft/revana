@@ -92,7 +92,7 @@ class JournalSlot extends Model
     // Get available slots
     public function getSlotTersediaAttribute()
     {
-        return $this->jumlah_slot - $this->slot_terpakai;
+        return max(0, $this->jumlah_slot - $this->slot_terpakai);
     }
 
     // Check if slot is full

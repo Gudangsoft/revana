@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class JournalManagementController extends Controller
 {
@@ -398,6 +399,22 @@ class JournalManagementController extends Controller
             'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // 10MB
         ]);
 
+        // Validasi slot tersedia dengan database locking
+        $slot = JournalSlot::lockForUpdate()->findOrFail($validated['journal_slot_id']);
+        if ($slot->slot_tersedia <= 0) {
+            return back()->withErrors([
+                'journal_slot_id' => 'Slot jurnal sudah penuh! Sisa slot: ' . $slot->slot_tersedia . '/' . $slot->jumlah_slot
+            ])->withInput();
+        }
+        
+        // Double check dengan fresh data
+        $slot->refresh();
+        if ($slot->slot_tersedia <= 0) {
+            return back()->withErrors([
+                'journal_slot_id' => 'Slot jurnal sudah penuh saat akan menyimpan data!'
+            ])->withInput();
+        }
+
         // Handle file upload
         if ($request->hasFile('file_artikel')) {
             $file = $request->file('file_artikel');
@@ -426,7 +443,10 @@ class JournalManagementController extends Controller
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
         }
 
-        Submission::create($validated);
+        // Wrap dalam database transaction
+        \DB::transaction(function() use ($validated) {
+            Submission::create($validated);
+        });
 
         return redirect()->route('pic.submissions.index')
             ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
@@ -1452,6 +1472,9 @@ class JournalManagementController extends Controller
         if (!isset($validated['petugas_submit_id'])) {
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
         }
+        
+        // Set created_by to current PIC
+        $validated['created_by'] = auth()->guard('pic')->id();
         
         // Auto-assign production and validate if link_publish is provided
         if (!empty($validated['link_publish'])) {

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -224,6 +225,22 @@ class DashboardController extends Controller
             // Get slot info
             $slot = JournalSlot::findOrFail($request->journal_slot_id);
             
+            // Validasi slot tersedia dengan database locking
+            $slot = JournalSlot::lockForUpdate()->findOrFail($request->journal_slot_id);
+            if ($slot->slot_tersedia <= 0) {
+                return back()->withErrors([
+                    'journal_slot_id' => 'Slot jurnal sudah penuh! Sisa slot: ' . $slot->slot_tersedia . '/' . $slot->jumlah_slot
+                ])->withInput();
+            }
+            
+            // Double check dengan fresh data
+            $slot->refresh();
+            if ($slot->slot_tersedia <= 0) {
+                return back()->withErrors([
+                    'journal_slot_id' => 'Slot jurnal sudah penuh saat akan menyimpan data!'
+                ])->withInput();
+            }
+            
             // Generate kode submit
             $lastSubmission = Submission::where('kode_submit', 'like', 'SUB' . date('Y') . '%')
                 ->orderBy('kode_submit', 'desc')
@@ -244,24 +261,35 @@ class DashboardController extends Controller
                 return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.')->withInput();
             }
             
-            // Create submission
-            $submission = Submission::create([
-                'kode_submit' => $kodeSubmit,
-                'journal_slot_id' => $request->journal_slot_id,
-                'marketing_id' => $marketing->id,
-                'id_artikel' => $request->id_artikel,
-                'judul_artikel' => $request->judul_artikel,
-                'link_artikel' => $request->link_artikel,
-                'nama_penulis' => $request->nama_penulis,
-                'no_hp_penulis' => $request->no_hp_penulis,
-                'username_author' => $request->username_author,
-                'password_author' => $request->password_author,
-                'notes' => $request->notes,
-                'tanggal_submit' => now(),
-                'status' => 'SUBMITTED',
-                'created_by' => $adminUser->id,
-            ]);
-            
+            // Create submission dalam database transaction
+            $submission = \DB::transaction(function() use ($kodeSubmit, $request, $marketing, $adminUser) {
+                // Create submission
+                $submission = Submission::create([
+                    'kode_submit' => $kodeSubmit,
+                    'journal_slot_id' => $request->journal_slot_id,
+                    'marketing_id' => $marketing->id,
+                    'id_artikel' => $request->id_artikel,
+                    'judul_artikel' => $request->judul_artikel,
+                    'link_artikel' => $request->link_artikel,
+                    'nama_penulis' => $request->nama_penulis,
+                    'no_hp_penulis' => $request->no_hp_penulis,
+                    'username_author' => $request->username_author,
+                    'password_author' => $request->password_author,
+                    'notes' => $request->notes,
+                    'tanggal_submit' => now(),
+                    'status' => 'SUBMITTED',
+                    'created_by' => $adminUser->id,
+                ]);
+                
+                // Award points to Marketing within transaction
+                MarketingPointHistory::awardPoints(
+                    $marketing->id,
+                    $submission->id,
+                    "Submit artikel: {$kodeSubmit} - {$submission->judul_artikel}"
+                );
+                
+                return $submission;
+            });
             // Log for debugging
             \Log::info('Marketing submission created', [
                 'submission_id' => $submission->id,
@@ -270,12 +298,10 @@ class DashboardController extends Controller
                 'kode_submit' => $kodeSubmit,
             ]);
             
-            // Award points to Marketing
-            $pointHistory = MarketingPointHistory::awardPoints(
-                $marketing->id,
-                $submission->id,
-                "Submit artikel: {$kodeSubmit} - {$submission->judul_artikel}"
-            );
+            // Get point history untuk message
+            $pointHistory = MarketingPointHistory::where('submission_id', $submission->id)
+                ->where('marketing_id', $marketing->id)
+                ->first();
             
             $pointMessage = '';
             if ($pointHistory) {
