@@ -368,6 +368,35 @@
             <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
         </div>
 
+        <!-- Stats Cards Section - Moved to top -->
+        <div class="stats-section mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <i class="bi bi-journal-bookmark text-primary"></i>
+                        <h3>{{ number_format($stats['total_slots']) }}</h3>
+                        <p class="mb-0" style="font-size: 0.9rem;">Total Slot</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <h3>{{ number_format($stats['slot_tersedia']) }}</h3>
+                        <p class="mb-0" style="font-size: 0.9rem;">Slot Tersedia</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <i class="bi bi-hourglass-split text-warning"></i>
+                        <h3>{{ number_format($stats['slot_terpakai']) }}</h3>
+                        <p class="mb-0" style="font-size: 0.9rem;">Slot Terpakai</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content Wrapper -->
         <div class="main-content-wrapper">
             <!-- Sidebar -->
@@ -469,35 +498,6 @@
                         </div>
                         @endif
                     </form>
-                </div>
-
-                <!-- Stats Cards -->
-                <div class="stats-section">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <div class="stat-card">
-                                <i class="bi bi-journal-bookmark text-primary"></i>
-                                <h3>{{ number_format($stats['total_slots']) }}</h3>
-                                <p class="mb-0" style="font-size: 0.85rem;">Total Slot</p>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12">
-                            <div class="stat-card">
-                                <i class="bi bi-check-circle text-success"></i>
-                                <h3>{{ number_format($stats['slot_tersedia']) }}</h3>
-                                <p class="mb-0" style="font-size: 0.85rem;">Slot Tersedia</p>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12">
-                            <div class="stat-card">
-                                <i class="bi bi-hourglass-split text-warning"></i>
-                                <h3>{{ number_format($stats['slot_terpakai']) }}</h3>
-                                <p class="mb-0" style="font-size: 0.85rem;">Slot Terpakai</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
