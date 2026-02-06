@@ -64,6 +64,22 @@
             margin-bottom: 10px;
         }
         
+        .main-content-wrapper {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+        }
+        
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        
+        .content-area {
+            flex: 1;
+            min-width: 0;
+        }
+        
         .stats-section {
             margin-bottom: 25px;
         }
@@ -99,6 +115,7 @@
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             border: 1px solid #e9ecef;
+            margin-bottom: 20px;
         }
         
         .filter-section h6 {
@@ -109,12 +126,15 @@
         .filter-section .form-label {
             font-weight: 500;
             margin-bottom: 5px;
+            color: #495057;
+            font-size: 0.9rem;
         }
         
         .filter-section .form-select,
         .filter-section .form-control {
             border: 1px solid #ddd;
             border-radius: 8px;
+            font-size: 0.9rem;
         }
         
         .filter-section .form-select:focus,
@@ -127,10 +147,56 @@
             background: linear-gradient(45deg, #667eea, #764ba2) !important;
         }
         
-        #advancedFilterContent {
-            border-top: 1px solid #e9ecef;
-            padding-top: 20px;
-            margin-top: 15px;
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-apply {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .btn-apply:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            color: white;
+        }
+        
+        .btn-reset {
+            background: #6c757d;
+            border: none;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-reset:hover {
+            background: #5a6268;
+            color: white;
+        }
+        
+        .result-summary {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content-wrapper {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
         }
         
         .table-section {
@@ -282,116 +348,65 @@
             <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
         </div>
 
-        <!-- Search Section -->
-        <div class="filter-section mb-3">
-            <div class="d-flex align-items-center mb-3">
-                <i class="bi bi-search me-2" style="font-size: 1.2rem; color: #667eea;"></i>
-                <h6 class="mb-0 fw-bold">Pencarian</h6>
-            </div>
-            <form method="GET" action="{{ route('public.slot.info') }}" id="searchForm">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control form-control-lg" 
-                           placeholder="Cari berdasarkan nama jurnal, bidang ilmu, penerbit, atau kode slot..." 
-                           value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i>
-                    </button>
+        <!-- Main Content Wrapper -->
+        <div class="main-content-wrapper">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Search Section -->
+                <div class="filter-section">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-search me-2" style="font-size: 1.2rem; color: #667eea;"></i>
+                        <h6 class="mb-0 fw-bold">Pencarian</h6>
+                    </div>
+                    <form method="GET" action="{{ route('public.slot.info') }}" id="searchForm">
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Cari nama jurnal..." 
+                               value="{{ request('search') }}">
+                        <p class="form-text small mt-2 text-muted">
+                            Cari berdasarkan nama jurnal, bidang ilmu, atau kata kunci
+                        </p>
+                    </form>
                 </div>
-            </form>
-        </div>
 
-        <!-- Basic Filter Section -->
-        <div class="filter-section mb-3">
-            <div class="d-flex align-items-center mb-3">
-                <i class="bi bi-funnel me-2" style="font-size: 1.2rem; color: #667eea;"></i>
-                <h6 class="mb-0 fw-bold">Filter Slot</h6>
-            </div>
-            <form method="GET" action="{{ route('public.slot.info') }}" id="basicFilterForm">
-                <input type="hidden" name="search" value="{{ request('search') }}">
-                
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted">📜 Akreditasi</label>
-                        <select name="indexasi" class="form-select" onchange="this.form.submit()">
-                            <option value="">Semua Akreditasi</option>
-                            @foreach($indexations as $idx)
-                                <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
-                                    {{ $idx }}
-                                </option>
-                            @endforeach
-                        </select>
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-funnel me-2" style="font-size: 1.2rem; color: #667eea;"></i>
+                        <h6 class="mb-0 fw-bold">Filter Jurnal</h6>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted">🎓 Bidang Ilmu</label>
-                        <select name="kategori" class="form-select" onchange="this.form.submit()">
-                            <option value="">Semua Bidang Ilmu</option>
-                            @foreach($kategoriOptions as $kategori)
-                                <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
-                                    {{ $kategori }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted">📅 Tahun Terbit</label>
-                        <select name="tahun" class="form-select" onchange="this.form.submit()">
-                            <option value="">Semua Tahun</option>
-                            @foreach($tahunOptions as $tahun)
-                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
-                                    {{ $tahun }}{{ $tahun == date('Y') ? ' (Tahun Ini)' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <div class="w-100">
-                            <button type="button" class="btn btn-primary w-100" onclick="this.form.submit()">
-                                Terapkan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row g-3 mt-1">
-                    <div class="col-md-9">
-                        @if(request()->hasAny(['indexasi', 'kategori', 'tahun']))
-                        <a href="{{ route('public.slot.info', request()->only('search')) }}" 
-                           class="btn btn-outline-secondary btn-sm">
-                            Reset
-                        </a>
-                        @endif
-                    </div>
-                    <div class="col-md-3 text-end">
-                        <span class="small text-muted">
-                            Menampilkan {{ $slots->count() }} dari {{ $slots->total() }} slot
-                        </span>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Advanced Filter Section -->
-        <div class="filter-section">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-sliders me-2" style="font-size: 1.2rem; color: #667eea;"></i>
-                    <h6 class="mb-0 fw-bold">Filter Lanjutan</h6>
-                </div>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAdvancedFilter()">
-                    <i class="bi bi-chevron-down" id="advancedToggleIcon"></i>
-                </button>
-            </div>
-            
-            <div id="advancedFilterContent" style="display: none;">
-                <form method="GET" action="{{ route('public.slot.info') }}" id="advancedFilterForm">
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                    <input type="hidden" name="indexasi" value="{{ request('indexasi') }}">
-                    <input type="hidden" name="kategori" value="{{ request('kategori') }}">
-                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
                     
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">🏷️ Jenis Jurnal</label>
+                    <form method="GET" action="{{ route('public.slot.info') }}" id="filterForm">
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                        
+                        <!-- Akreditasi -->
+                        <div class="mb-3">
+                            <label class="form-label">📜 Akreditasi</label>
+                            <select name="indexasi" class="form-select">
+                                <option value="">Semua Akreditasi</option>
+                                @foreach($indexations as $idx)
+                                    <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
+                                        {{ $idx }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Bidang Ilmu -->
+                        <div class="mb-3">
+                            <label class="form-label">🎓 Bidang Ilmu</label>
+                            <select name="kategori" class="form-select">
+                                <option value="">Semua Bidang</option>
+                                @foreach($kategoriOptions as $kategori)
+                                    <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
+                                        {{ $kategori }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Jenis -->
+                        <div class="mb-3">
+                            <label class="form-label">🏷️ Jenis</label>
                             <select name="jenis" class="form-select">
                                 <option value="">Semua Jenis</option>
                                 @foreach($jenisOptions as $jenis)
@@ -401,82 +416,103 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">🏢 Penerbit</label>
-                            <select name="publisher" class="form-select">
-                                <option value="">Semua Penerbit</option>
-                                @foreach($publisherOptions as $publisher)
-                                    <option value="{{ $publisher }}" {{ request('publisher') == $publisher ? 'selected' : '' }}>
-                                        {{ strlen($publisher) > 30 ? substr($publisher, 0, 30) . '...' : $publisher }}
+
+                        <!-- Tahun -->
+                        <div class="mb-3">
+                            <label class="form-label">📅 Tahun</label>
+                            <select name="tahun" class="form-select">
+                                <option value="">Semua Tahun</option>
+                                @foreach($tahunOptions as $tahun)
+                                    <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                                        {{ $tahun }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">📆 Bulan Terbit</label>
-                            <select name="bulan" class="form-select">
-                                <option value="">Semua Bulan</option>
-                                @foreach($bulanOptions as $value => $label)
-                                    <option value="{{ $value }}" {{ request('bulan') == $value ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">📊 Status Slot</label>
-                            <select name="status" class="form-select">
-                                <option value="">Semua Status</option>
-                                <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Slot Tersedia</option>
-                                <option value="penuh" {{ request('status') == 'penuh' ? 'selected' : '' }}>Slot Penuh</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-6">
-                            <button type="submit" class="btn btn-primary">
+
+                        <!-- Action Buttons -->
+                        <div class="filter-buttons">
+                            <button type="submit" class="btn btn-apply">
                                 Terapkan
                             </button>
-                            @if(request()->hasAny(['jenis', 'publisher', 'bulan', 'status']))
-                            <button type="button" class="btn btn-outline-secondary ms-2" 
-                                    onclick="resetAdvancedFilter()">
+                            <a href="{{ route('public.slot.info') }}" class="btn btn-reset">
                                 Reset
-                            </button>
-                            @endif
-                        </div>
-                        <div class="col-md-6 text-end">
-                            @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher', 'status']))
-                            <span class="badge bg-info">
-                                {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher', 'status']))->filter()->count() }} filter aktif
-                            </span>
-                            <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-outline-danger ms-2">
-                                <i class="bi bi-x-circle"></i> Reset Semua
                             </a>
-                            @endif
+                        </div>
+                        
+                        <!-- Filter Summary -->
+                        @if($slots->total() > 0)
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">
+                                Menampilkan <strong>{{ $slots->total() }}</strong> jurnal
+                            </small>
+                        </div>
+                        @endif
+                    </form>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-section">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="stat-card">
+                                <i class="bi bi-journal-bookmark text-primary"></i>
+                                <h3>{{ number_format($stats['total_slots']) }}</h3>
+                                <p class="mb-0" style="font-size: 0.85rem;">Total Slot</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="stat-card">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <h3>{{ number_format($stats['slot_tersedia']) }}</h3>
+                                <p class="mb-0" style="font-size: 0.85rem;">Slot Tersedia</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="stat-card">
+                                <i class="bi bi-hourglass-split text-warning"></i>
+                                <h3>{{ number_format($stats['slot_terpakai']) }}</h3>
+                                <p class="mb-0" style="font-size: 0.85rem;">Slot Terpakai</p>
+                            </div>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Table Section -->
-        <div class="table-section">
-            <div class="table-responsive">
-                <table class="table journal-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 3%;">No</th>
-                            <th style="width: 22%;">Nama Jurnal</th>
-                            <th style="width: 13%;">Penerbit</th>
-                            <th style="width: 9%;">Kategori</th>
-                            <th style="width: 11%;">Jenis</th>
-                            <th style="width: 10%;">Akreditasi</th>
-                            <th style="width: 9%;" class="text-center">Bulan</th>
-                            <th style="width: 9%;" class="text-center">Tahun</th>
-                            <th style="width: 9%;" class="text-center">Status</th>
-                        </tr>
-                    </thead>
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <!-- Result Summary -->
+                <div class="result-summary">
+                    <div>
+                        <span class="fw-bold">Menampilkan {{ $slots->firstItem() ?? 0 }}-{{ $slots->lastItem() ?? 0 }} dari {{ $slots->total() }}</span>
+                    </div>
+                    <div>
+                        <label for="sortSelect" class="form-label mb-0 me-2">Urutkan:</label>
+                        <select id="sortSelect" class="form-select form-select-sm" style="width: auto;">
+                            <option>Terbaru</option>
+                            <option>Nama A-Z</option>
+                            <option>Slot Tersedia</option>
+                        </select>
+                    </div>
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-responsive">
+                        <table class="table journal-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 3%;">No</th>
+                                    <th style="width: 22%;">Nama Jurnal</th>
+                                    <th style="width: 13%;">Penerbit</th>
+                                    <th style="width: 9%;">Kategori</th>
+                                    <th style="width: 11%;">Jenis</th>
+                                    <th style="width: 10%;">Akreditasi</th>
+                                    <th style="width: 9%;" class="text-center">Bulan</th>
+                                    <th style="width: 9%;" class="text-center">Tahun</th>
+                                    <th style="width: 9%;" class="text-center">Status</th>
+                                </tr>
+                            </thead>
                     <tbody>
                         @forelse($slots as $index => $slot)
                         <tr>
@@ -557,19 +593,21 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
+                    </div>
 
-            <!-- Pagination -->
-            @if($slots->hasPages())
-            <div class="d-flex justify-content-between align-items-center px-3 pb-3">
-                <div class="text-muted">
-                    Menampilkan {{ $slots->firstItem() ?? 0 }} - {{ $slots->lastItem() ?? 0 }} dari {{ $slots->total() }} slot
-                </div>
-                <div>
-                    {{ $slots->links() }}
+                    <!-- Pagination -->
+                    @if($slots->hasPages())
+                    <div class="d-flex justify-content-between align-items-center px-3 pb-3">
+                        <div class="text-muted">
+                            Menampilkan {{ $slots->firstItem() ?? 0 }} - {{ $slots->lastItem() ?? 0 }} dari {{ $slots->total() }} slot
+                        </div>
+                        <div>
+                            {{ $slots->links() }}
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
-            @endif
         </div>
 
         <!-- Login Link -->
@@ -599,48 +637,40 @@
     
     <!-- Custom JavaScript -->
     <script>
-        function toggleAdvancedFilter() {
-            const content = document.getElementById('advancedFilterContent');
-            const icon = document.getElementById('advancedToggleIcon');
-            
-            if (content.style.display === 'none' || content.style.display === '') {
-                content.style.display = 'block';
-                icon.className = 'bi bi-chevron-up';
-            } else {
-                content.style.display = 'none';
-                icon.className = 'bi bi-chevron-down';
-            }
-        }
-        
-        function resetAdvancedFilter() {
-            const form = document.getElementById('advancedFilterForm');
-            const selects = form.querySelectorAll('select[name="jenis"], select[name="publisher"], select[name="bulan"], select[name="status"]');
-            
-            selects.forEach(select => {
-                select.value = '';
-            });
-            
-            form.submit();
-        }
-        
-        // Auto-expand advanced filter if any advanced filters are active
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const advancedFilters = ['jenis', 'publisher', 'bulan', 'status'];
-            const hasAdvancedFilter = advancedFilters.some(filter => urlParams.get(filter));
-            
-            if (hasAdvancedFilter) {
-                document.getElementById('advancedFilterContent').style.display = 'block';
-                document.getElementById('advancedToggleIcon').className = 'bi bi-chevron-up';
-            }
-        });
-        
         // Auto-submit search form on Enter
         document.querySelector('input[name="search"]').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 document.getElementById('searchForm').submit();
             }
+        });
+        
+        // Auto-submit search form on input change (with debounce)
+        let searchTimeout;
+        document.querySelector('input[name="search"]').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                // Auto-submit after 500ms of no typing
+                if (e.target.value.length > 2 || e.target.value.length === 0) {
+                    document.getElementById('searchForm').submit();
+                }
+            }, 500);
+        });
+        
+        // Auto-submit filter form on change
+        document.querySelectorAll('#filterForm select').forEach(select => {
+            select.addEventListener('change', function() {
+                // Copy search value to filter form
+                const searchValue = document.querySelector('#searchForm input[name="search"]').value;
+                document.querySelector('#filterForm input[name="search"]').value = searchValue;
+                document.getElementById('filterForm').submit();
+            });
+        });
+        
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            // You can implement sorting logic here
+            console.log('Sort by:', this.value);
         });
     </script>
 </body>
