@@ -98,7 +98,39 @@
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .filter-section h6 {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .filter-section .form-label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .filter-section .form-select,
+        .filter-section .form-control {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .filter-section .form-select:focus,
+        .filter-section .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .badge-info {
+            background: linear-gradient(45deg, #667eea, #764ba2) !important;
+        }
+        
+        #advancedFilterContent {
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+            margin-top: 15px;
         }
         
         .table-section {
@@ -107,6 +139,7 @@
             padding: 0;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            margin-top: 25px;
         }
         
         .table-responsive {
@@ -249,65 +282,38 @@
             <p class="text-muted">Sistem Informasi Pencarian Dan Ketersediaan Slot Jurnal</p>
         </div>
 
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <h5 class="mb-3"><i class="bi bi-funnel"></i> Cari Slot Jurnal</h5>
-            <form method="GET" action="{{ route('public.slot.info') }}">
-                <div class="row g-2">
-                    <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Cari jurnal / kode slot..." value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <select name="bulan" class="form-select">
-                            <option value="">-- Bulan --</option>
-                            @foreach($bulanOptions as $value => $label)
-                                <option value="{{ $value }}" {{ request('bulan') == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="tahun" class="form-select">
-                            <option value="">-- Pilih Tahun --</option>
-                            @foreach($tahunOptions as $tahun)
-                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun || (!request('tahun') && $tahun == date('Y')) ? 'selected' : '' }}>
-                                    {{ $tahun }}{{ $tahun == date('Y') ? ' (Sekarang)' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="kategori" class="form-select">
-                            <option value="">-- Kategori --</option>
-                            @foreach($kategoriOptions as $kategori)
-                                <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
-                                    {{ $kategori }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i> Cari
-                        </button>
-                    </div>
+        <!-- Search Section -->
+        <div class="filter-section mb-3">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-search me-2" style="font-size: 1.2rem; color: #667eea;"></i>
+                <h6 class="mb-0 fw-bold">Pencarian</h6>
+            </div>
+            <form method="GET" action="{{ route('public.slot.info') }}" id="searchForm">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control form-control-lg" 
+                           placeholder="Cari berdasarkan nama jurnal, bidang ilmu, penerbit, atau kode slot..." 
+                           value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
+            </form>
+        </div>
+
+        <!-- Basic Filter Section -->
+        <div class="filter-section mb-3">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-funnel me-2" style="font-size: 1.2rem; color: #667eea;"></i>
+                <h6 class="mb-0 fw-bold">Filter Slot</h6>
+            </div>
+            <form method="GET" action="{{ route('public.slot.info') }}" id="basicFilterForm">
+                <input type="hidden" name="search" value="{{ request('search') }}">
                 
-                <div class="row g-2 mt-1">
-                    <div class="col-md-2">
-                        <select name="jenis" class="form-select">
-                            <option value="">-- Jenis --</option>
-                            @foreach($jenisOptions as $jenis)
-                                <option value="{{ $jenis }}" {{ request('jenis') == $jenis ? 'selected' : '' }}>
-                                    {{ $jenis }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="indexasi" class="form-select">
-                            <option value="">-- Akreditasi --</option>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted">📜 Akreditasi</label>
+                        <select name="indexasi" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Akreditasi</option>
                             @foreach($indexations as $idx)
                                 <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
                                     {{ $idx }}
@@ -315,29 +321,143 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select name="publisher" class="form-select">
-                            <option value="">-- Penerbit --</option>
-                            @foreach($publisherOptions as $publisher)
-                                <option value="{{ $publisher }}" {{ request('publisher') == $publisher ? 'selected' : '' }}>
-                                    {{ $publisher }}
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted">🎓 Bidang Ilmu</label>
+                        <select name="kategori" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Bidang Ilmu</option>
+                            @foreach($kategoriOptions as $kategori)
+                                <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
+                                    {{ $kategori }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
-                    
-                
-                @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher']))
-                <div class="mt-2">
-                    <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-secondary">
-                        <i class="bi bi-arrow-counterclockwise"></i> Reset Filter
-                    </a>
-                    <span class="badge bg-info ms-2">
-                        {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher']))->filter()->count() }} filter aktif
-                    </span>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted">📅 Tahun Terbit</label>
+                        <select name="tahun" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Tahun</option>
+                            @foreach($tahunOptions as $tahun)
+                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                                    {{ $tahun }}{{ $tahun == date('Y') ? ' (Tahun Ini)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="w-100">
+                            <button type="button" class="btn btn-primary w-100" onclick="this.form.submit()">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                @endif
+                
+                <div class="row g-3 mt-1">
+                    <div class="col-md-9">
+                        @if(request()->hasAny(['indexasi', 'kategori', 'tahun']))
+                        <a href="{{ route('public.slot.info', request()->only('search')) }}" 
+                           class="btn btn-outline-secondary btn-sm">
+                            Reset
+                        </a>
+                        @endif
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <span class="small text-muted">
+                            Menampilkan {{ $slots->count() }} dari {{ $slots->total() }} slot
+                        </span>
+                    </div>
+                </div>
             </form>
+        </div>
+
+        <!-- Advanced Filter Section -->
+        <div class="filter-section">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-sliders me-2" style="font-size: 1.2rem; color: #667eea;"></i>
+                    <h6 class="mb-0 fw-bold">Filter Lanjutan</h6>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAdvancedFilter()">
+                    <i class="bi bi-chevron-down" id="advancedToggleIcon"></i>
+                </button>
+            </div>
+            
+            <div id="advancedFilterContent" style="display: none;">
+                <form method="GET" action="{{ route('public.slot.info') }}" id="advancedFilterForm">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                    <input type="hidden" name="indexasi" value="{{ request('indexasi') }}">
+                    <input type="hidden" name="kategori" value="{{ request('kategori') }}">
+                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">🏷️ Jenis Jurnal</label>
+                            <select name="jenis" class="form-select">
+                                <option value="">Semua Jenis</option>
+                                @foreach($jenisOptions as $jenis)
+                                    <option value="{{ $jenis }}" {{ request('jenis') == $jenis ? 'selected' : '' }}>
+                                        {{ $jenis }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">🏢 Penerbit</label>
+                            <select name="publisher" class="form-select">
+                                <option value="">Semua Penerbit</option>
+                                @foreach($publisherOptions as $publisher)
+                                    <option value="{{ $publisher }}" {{ request('publisher') == $publisher ? 'selected' : '' }}>
+                                        {{ strlen($publisher) > 30 ? substr($publisher, 0, 30) . '...' : $publisher }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">📆 Bulan Terbit</label>
+                            <select name="bulan" class="form-select">
+                                <option value="">Semua Bulan</option>
+                                @foreach($bulanOptions as $value => $label)
+                                    <option value="{{ $value }}" {{ request('bulan') == $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">📊 Status Slot</label>
+                            <select name="status" class="form-select">
+                                <option value="">Semua Status</option>
+                                <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Slot Tersedia</option>
+                                <option value="penuh" {{ request('status') == 'penuh' ? 'selected' : '' }}>Slot Penuh</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary">
+                                Terapkan
+                            </button>
+                            @if(request()->hasAny(['jenis', 'publisher', 'bulan', 'status']))
+                            <button type="button" class="btn btn-outline-secondary ms-2" 
+                                    onclick="resetAdvancedFilter()">
+                                Reset
+                            </button>
+                            @endif
+                        </div>
+                        <div class="col-md-6 text-end">
+                            @if(request()->hasAny(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher', 'status']))
+                            <span class="badge bg-info">
+                                {{ collect(request()->only(['search', 'journal_id', 'indexasi', 'tahun', 'bulan', 'kategori', 'jenis', 'publisher', 'status']))->filter()->count() }} filter aktif
+                            </span>
+                            <a href="{{ route('public.slot.info') }}" class="btn btn-sm btn-outline-danger ms-2">
+                                <i class="bi bi-x-circle"></i> Reset Semua
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Table Section -->
@@ -476,5 +596,52 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        function toggleAdvancedFilter() {
+            const content = document.getElementById('advancedFilterContent');
+            const icon = document.getElementById('advancedToggleIcon');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                icon.className = 'bi bi-chevron-up';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'bi bi-chevron-down';
+            }
+        }
+        
+        function resetAdvancedFilter() {
+            const form = document.getElementById('advancedFilterForm');
+            const selects = form.querySelectorAll('select[name="jenis"], select[name="publisher"], select[name="bulan"], select[name="status"]');
+            
+            selects.forEach(select => {
+                select.value = '';
+            });
+            
+            form.submit();
+        }
+        
+        // Auto-expand advanced filter if any advanced filters are active
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const advancedFilters = ['jenis', 'publisher', 'bulan', 'status'];
+            const hasAdvancedFilter = advancedFilters.some(filter => urlParams.get(filter));
+            
+            if (hasAdvancedFilter) {
+                document.getElementById('advancedFilterContent').style.display = 'block';
+                document.getElementById('advancedToggleIcon').className = 'bi bi-chevron-up';
+            }
+        });
+        
+        // Auto-submit search form on Enter
+        document.querySelector('input[name="search"]').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchForm').submit();
+            }
+        });
+    </script>
 </body>
 </html>
