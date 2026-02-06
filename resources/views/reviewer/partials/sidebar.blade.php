@@ -14,9 +14,9 @@
 <a href="{{ route('reviewer.certificates.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'reviewer.certificates') ? 'active' : '' }}">
     <i class="bi bi-award-fill"></i> Sertifikat
 </a>
-<a href="{{ route('reviewer.rewards.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'reviewer.rewards') ? 'active' : '' }}">
+{{-- <a href="{{ route('reviewer.rewards.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'reviewer.rewards') ? 'active' : '' }}">
     <i class="bi bi-gift"></i> Rewards
-</a>
+</a> --}}
 <a href="{{ route('reviewer.leaderboard.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'reviewer.leaderboard') ? 'active' : '' }}">
     <i class="bi bi-trophy-fill"></i> Leaderboard
 </a>
