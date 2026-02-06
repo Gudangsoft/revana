@@ -197,6 +197,21 @@
             .sidebar {
                 width: 100%;
             }
+            
+            .journal-table {
+                font-size: 0.75rem;
+            }
+            
+            .journal-table th,
+            .journal-table td {
+                padding: 8px 4px;
+            }
+            
+            .result-summary {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
         }
         
         .table-section {
@@ -205,15 +220,17 @@
             padding: 0;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            margin-top: 25px;
         }
         
         .table-responsive {
             border-radius: 15px;
+            overflow-x: auto;
         }
         
         .journal-table {
             margin-bottom: 0;
+            width: 100%;
+            table-layout: fixed;
         }
         
         .journal-table thead {
@@ -223,16 +240,19 @@
         
         .journal-table thead th {
             border: none;
-            padding: 15px 10px;
+            padding: 15px 8px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             vertical-align: middle;
+            word-wrap: break-word;
         }
         
         .journal-table tbody td {
-            padding: 12px 10px;
+            padding: 12px 8px;
             vertical-align: middle;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         .journal-table tbody tr {
@@ -495,22 +515,22 @@
                             <option>Nama A-Z</option>
                             <option>Slot Tersedia</option>
                         </select>
-                    </div>
+                    </div>                </div>
                 <!-- Table Section -->
                 <div class="table-section">
                     <div class="table-responsive">
                         <table class="table journal-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 3%;">No</th>
-                                    <th style="width: 22%;">Nama Jurnal</th>
-                                    <th style="width: 13%;">Penerbit</th>
-                                    <th style="width: 9%;">Kategori</th>
-                                    <th style="width: 11%;">Jenis</th>
-                                    <th style="width: 10%;">Akreditasi</th>
-                                    <th style="width: 9%;" class="text-center">Bulan</th>
-                                    <th style="width: 9%;" class="text-center">Tahun</th>
-                                    <th style="width: 9%;" class="text-center">Status</th>
+                                    <th style="width: 4%;">No</th>
+                                    <th style="width: 25%;">Nama Jurnal</th>
+                                    <th style="width: 18%;">Penerbit</th>
+                                    <th style="width: 12%;">Kategori</th>
+                                    <th style="width: 10%;">Jenis</th>
+                                    <th style="width: 12%;">Akreditasi</th>
+                                    <th style="width: 6%;">Bulan</th>
+                                    <th style="width: 6%;">Tahun</th>
+                                    <th style="width: 12%;">Status</th>
                                 </tr>
                             </thead>
                     <tbody>
@@ -520,17 +540,23 @@
                             <td>
                                 @if($slot->journalMaster && $slot->journalMaster->link_jurnal)
                                     <a href="{{ $slot->journalMaster->link_jurnal }}" target="_blank" class="text-decoration-none">
-                                        <strong>{{ $slot->journalMaster->nama_jurnal }}</strong>
+                                        <strong class="journal-name">{{ strlen($slot->journalMaster->nama_jurnal) > 40 ? substr($slot->journalMaster->nama_jurnal, 0, 40) . '...' : $slot->journalMaster->nama_jurnal }}</strong>
                                         <i class="bi bi-box-arrow-up-right ms-1"></i>
                                     </a>
                                 @else
-                                    <strong>{{ $slot->journalMaster->nama_jurnal ?? '-' }}</strong>
+                                    @php $namaJurnal = $slot->journalMaster->nama_jurnal ?? '-'; @endphp
+                                    <strong class="journal-name">{{ strlen($namaJurnal) > 40 ? substr($namaJurnal, 0, 40) . '...' : $namaJurnal }}</strong>
                                 @endif
                                 @if($slot->journalMaster && $slot->journalMaster->rumpun_ilmu)
-                                    <br><small class="text-muted">{{ $slot->journalMaster->rumpun_ilmu }}</small>
+                                    <br><small class="text-muted journal-info">{{ strlen($slot->journalMaster->rumpun_ilmu) > 30 ? substr($slot->journalMaster->rumpun_ilmu, 0, 30) . '...' : $slot->journalMaster->rumpun_ilmu }}</small>
                                 @endif
                             </td>
-                            <td>{{ $slot->journalMaster->publisher ?? '-' }}</td>
+                            <td>
+                                @php $publisher = $slot->journalMaster->publisher ?? '-'; @endphp
+                                <span title="{{ $publisher }}">
+                                    {{ strlen($publisher) > 25 ? substr($publisher, 0, 25) . '...' : $publisher }}
+                                </span>
+                            </td>
                             <td>
                                 @if($slot->journalMaster && $slot->journalMaster->kategori)
                                     <span class="badge bg-info">{{ $slot->journalMaster->kategori }}</span>
@@ -573,13 +599,13 @@
                                     $slotTersedia = $jumlahSlot - $slotTerpakai;
                                 @endphp
                                 @if($jumlahSlot > 0 && $slotTersedia > 0)
-                                    <span class="badge bg-success">Tersedia</span>
-                                    <br><small class="text-muted">{{ $slotTersedia }} dari {{ $jumlahSlot }} slot</small>
+                                    <span class="badge bg-success mb-1">Tersedia</span>
+                                    <br><small class="text-muted">{{ $slotTersedia }}/{{ $jumlahSlot }}</small>
                                 @elseif($jumlahSlot > 0 && $slotTersedia <= 0)
-                                    <span class="badge bg-danger">Slot Penuh</span>
+                                    <span class="badge bg-danger mb-1">Penuh</span>
                                     <br><small class="text-muted">{{ $jumlahSlot }} slot</small>
                                 @else
-                                    <span class="badge bg-secondary">Tidak Ada Info</span>
+                                    <span class="badge bg-secondary">N/A</span>
                                 @endif
                             </td>
                         </tr>
