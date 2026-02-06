@@ -435,8 +435,12 @@ class JournalManagementController extends Controller
         $validated['status'] = 'submitted';
         $validated['tanggal_submit'] = now();
         
-        // Set created_by to current PIC
-        $validated['created_by'] = auth()->guard('pic')->id();
+        // Get admin user for created_by (foreign key constraint requires users table ID)
+        $adminUser = \App\Models\User::orderBy('id')->first();
+        if (!$adminUser) {
+            return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.')->withInput();
+        }
+        $validated['created_by'] = $adminUser->id;
         
         // Set petugas_submit_id to current PIC if not provided
         if (!isset($validated['petugas_submit_id'])) {
@@ -1473,8 +1477,12 @@ class JournalManagementController extends Controller
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
         }
         
-        // Set created_by to current PIC
-        $validated['created_by'] = auth()->guard('pic')->id();
+        // Get admin user for created_by (foreign key constraint requires users table ID)
+        $adminUser = \App\Models\User::orderBy('id')->first();
+        if (!$adminUser) {
+            return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.')->withInput();
+        }
+        $validated['created_by'] = $adminUser->id;
         
         // Auto-assign production and validate if link_publish is provided
         if (!empty($validated['link_publish'])) {
