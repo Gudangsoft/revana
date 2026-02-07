@@ -128,6 +128,7 @@
                         <th>Judul Artikel</th>
                         <th>No HP</th>
                         <th>Jurnal / Slot</th>
+                        <th>Akreditasi</th>
                         <th>Tanggal Submit</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Progress</th>
@@ -191,6 +192,13 @@
                             <small class="text-muted">
                                 {{ $submission->journalSlot ? $submission->journalSlot->bulan . '/' . $submission->journalSlot->tahun : '-' }}
                             </small>
+                        </td>
+                        <td>
+                            @if($submission->journalSlot?->journalMaster?->accreditation)
+                                <span class="badge bg-info">{{ $submission->journalSlot->journalMaster->accreditation }}</span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </td>
                         <td>
                             <small>{{ $submission->tanggal_submit?->format('d M Y') ?? '-' }}</small>
