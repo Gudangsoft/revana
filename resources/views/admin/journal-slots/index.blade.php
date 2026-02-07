@@ -67,7 +67,9 @@
                             <select class="form-select" id="bulan" name="bulan">
                                 <option value="">-- Bulan --</option>
                                 @foreach($bulanOptions as $key => $value)
-                                    <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                    @if(isset($filterCounts['bulan'][$key]))
+                                    <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>{{ $value }} (sisa: {{ $filterCounts['bulan'][$key]['sisa'] }})</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -75,7 +77,7 @@
                             <select class="form-select" id="tahun" name="tahun">
                                 <option value="">-- Tahun --</option>
                                 @for($y = date('Y') + 1; $y >= 2020; $y--)
-                                    <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                    <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}{{ isset($filterCounts['tahun'][$y]) ? ' (sisa: '.$filterCounts['tahun'][$y]['sisa'].')' : '' }}</option>
                                 @endfor
                             </select>
                         </div>
@@ -91,22 +93,22 @@
                         <div class="col-md-2">
                             <select class="form-select" name="kategori">
                                 <option value="">-- Kategori --</option>
-                                <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
-                                <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM</option>
+                                <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }}>Penelitian (sisa: {{ $filterCounts['kategori']['Penelitian']['sisa'] ?? 0 }})</option>
+                                <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }}>PKM (sisa: {{ $filterCounts['kategori']['PKM']['sisa'] ?? 0 }})</option>
                             </select>
                         </div>
                         <div class="col-md-2">
                             <select class="form-select" name="jenis">
                                 <option value="">-- Jenis --</option>
-                                <option value="Jurnal Nasional" {{ request('jenis') == 'Jurnal Nasional' ? 'selected' : '' }}>Jurnal Nasional</option>
-                                <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional</option>
+                                <option value="Jurnal Nasional" {{ request('jenis') == 'Jurnal Nasional' ? 'selected' : '' }}>Jurnal Nasional (sisa: {{ $filterCounts['jenis']['Jurnal Nasional']['sisa'] ?? 0 }})</option>
+                                <option value="Jurnal Internasional" {{ request('jenis') == 'Jurnal Internasional' ? 'selected' : '' }}>Jurnal Internasional (sisa: {{ $filterCounts['jenis']['Jurnal Internasional']['sisa'] ?? 0 }})</option>
                             </select>
                         </div>
                         <div class="col-md-2">
                             <select class="form-select" name="akreditasi">
                                 <option value="">-- Akreditasi --</option>
                                 @foreach($accreditations as $accreditation)
-                                    <option value="{{ $accreditation->name }}" {{ request('akreditasi') == $accreditation->name ? 'selected' : '' }}>{{ $accreditation->name }}</option>
+                                    <option value="{{ $accreditation->name }}" {{ request('akreditasi') == $accreditation->name ? 'selected' : '' }}>{{ $accreditation->name }} (sisa: {{ $filterCounts['akreditasi'][$accreditation->name]['sisa'] ?? 0 }})</option>
                                 @endforeach
                             </select>
                         </div>

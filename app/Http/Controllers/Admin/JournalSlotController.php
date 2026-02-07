@@ -94,6 +94,67 @@ class JournalSlotController extends Controller
         $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
         $bulanOptions = JournalSlot::getBulanOptions();
         
+        // Calculate sisa slot counts per filter option
+        $filterCounts = [];
+        
+        // Akreditasi counts (sisa slot)
+        $filterCounts['akreditasi'] = [];
+        foreach ($accreditations as $acc) {
+            $accSlots = JournalSlot::whereHas('journalMaster', fn($q) => $q->where('accreditation', $acc->name))->get();
+            $filterCounts['akreditasi'][$acc->name] = [
+                'total' => $accSlots->sum('jumlah_slot'),
+                'terpakai' => $accSlots->sum('slot_terpakai'),
+                'sisa' => $accSlots->sum('jumlah_slot') - $accSlots->sum('slot_terpakai'),
+            ];
+        }
+        
+        // Kategori counts
+        $filterCounts['kategori'] = [];
+        foreach (['Penelitian', 'PKM'] as $kat) {
+            $katSlots = JournalSlot::whereHas('journalMaster', fn($q) => $q->where('kategori', $kat))->get();
+            $filterCounts['kategori'][$kat] = [
+                'total' => $katSlots->sum('jumlah_slot'),
+                'terpakai' => $katSlots->sum('slot_terpakai'),
+                'sisa' => $katSlots->sum('jumlah_slot') - $katSlots->sum('slot_terpakai'),
+            ];
+        }
+        
+        // Jenis counts
+        $filterCounts['jenis'] = [];
+        foreach (['Jurnal Nasional', 'Jurnal Internasional'] as $jen) {
+            $jenSlots = JournalSlot::whereHas('journalMaster', fn($q) => $q->where('jenis_jurnal', $jen))->get();
+            $filterCounts['jenis'][$jen] = [
+                'total' => $jenSlots->sum('jumlah_slot'),
+                'terpakai' => $jenSlots->sum('slot_terpakai'),
+                'sisa' => $jenSlots->sum('jumlah_slot') - $jenSlots->sum('slot_terpakai'),
+            ];
+        }
+        
+        // Bulan counts
+        $filterCounts['bulan'] = [];
+        foreach ($bulanOptions as $key => $val) {
+            $blnSlots = JournalSlot::where('bulan', $key)->get();
+            if ($blnSlots->count() > 0) {
+                $filterCounts['bulan'][$key] = [
+                    'total' => $blnSlots->sum('jumlah_slot'),
+                    'terpakai' => $blnSlots->sum('slot_terpakai'),
+                    'sisa' => $blnSlots->sum('jumlah_slot') - $blnSlots->sum('slot_terpakai'),
+                ];
+            }
+        }
+        
+        // Tahun counts
+        $filterCounts['tahun'] = [];
+        $tahunList = JournalSlot::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+        foreach ($tahunList as $thn) {
+            $thnSlots = JournalSlot::where('tahun', $thn)->get();
+            $filterCounts['tahun'][$thn] = [
+                'total' => $thnSlots->sum('jumlah_slot'),
+                'terpakai' => $thnSlots->sum('slot_terpakai'),
+                'sisa' => $thnSlots->sum('jumlah_slot') - $thnSlots->sum('slot_terpakai'),
+            ];
+        }
+        
         // If monitoring tab is active, load monitoring data
         $slotStats = null;
         if ($request->tab == 'monitoring') {
@@ -136,7 +197,7 @@ class JournalSlotController extends Controller
             });
         }
         
-        return view('admin.journal-slots.index', compact('slots', 'journals', 'accreditations', 'bulanOptions', 'slotStats'));
+        return view('admin.journal-slots.index', compact('slots', 'journals', 'accreditations', 'bulanOptions', 'slotStats', 'filterCounts'));
     }
 
     public function create()
