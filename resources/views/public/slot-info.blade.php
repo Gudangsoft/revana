@@ -479,6 +479,19 @@
                             </select>
                         </div>
 
+                        <!-- Bulan -->
+                        <div class="mb-3">
+                            <label class="form-label">📆 Bulan</label>
+                            <select name="bulan" class="form-select">
+                                <option value="">Semua Bulan</option>
+                                @foreach($bulanOptions as $key => $bulan)
+                                    <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>
+                                        {{ $bulan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div class="filter-buttons">
                             <button type="submit" class="btn btn-apply">
