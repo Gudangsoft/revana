@@ -102,18 +102,21 @@ class PublicLoaController extends Controller
             ->orderBy('nama_jurnal')
             ->get();
         
-        // Get unique indexations - only those with active slots
-        $indexations = JournalMaster::select('journal_masters.accreditation')
-            ->distinct()
-            ->whereNotNull('accreditation')
-            ->whereHas('slots', fn($q) => $q->where('is_active', true))
-            ->orderBy('accreditation')
-            ->pluck('accreditation');
+        // Get all active slots with journal data for deriving filter options
+        $activeSlots = JournalSlot::where('is_active', true)
+            ->with('journalMaster')
+            ->get();
+        
+        // Get unique indexations - derived from actual active slot data
+        $indexations = $activeSlots->pluck('journalMaster.accreditation')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
         
         // Calculate total slots and usage
-        $allSlots = JournalSlot::where('is_active', true)->get();
-        $totalSlots = $allSlots->sum('jumlah_slot');
-        $totalTerpakai = $allSlots->sum('slot_terpakai');
+        $totalSlots = $activeSlots->sum('jumlah_slot');
+        $totalTerpakai = $activeSlots->sum('slot_terpakai');
         $totalTersedia = max(0, $totalSlots - $totalTerpakai);
         
         // Statistics - focus on slot availability only
@@ -124,19 +127,14 @@ class PublicLoaController extends Controller
             'persentase_terpakai' => $totalSlots > 0 ? round(($totalTerpakai / $totalSlots) * 100, 1) : 0,
         ];
         
-        // Get year options for filter - only years with active slots
-        $tahunOptions = JournalSlot::where('is_active', true)
-            ->select('tahun')
-            ->distinct()
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
+        // Get year options - derived from actual active slot data
+        $tahunOptions = $activeSlots->pluck('tahun')
+            ->unique()
+            ->sortDesc()
+            ->values();
         
         // Get month options - only months with active slots
-        $bulanActive = JournalSlot::where('is_active', true)
-            ->select('bulan')
-            ->distinct()
-            ->pluck('bulan')
-            ->toArray();
+        $bulanActive = $activeSlots->pluck('bulan')->unique()->toArray();
         $allBulan = JournalSlot::getBulanOptions();
         $bulanOptions = [];
         foreach ($allBulan as $key => $val) {
@@ -145,45 +143,40 @@ class PublicLoaController extends Controller
             }
         }
         
-        // Get kategori options - only those with active slots
-        $kategoriOptions = JournalMaster::select('kategori')
-            ->distinct()
-            ->whereNotNull('kategori')
-            ->whereHas('slots', fn($q) => $q->where('is_active', true))
-            ->orderBy('kategori')
-            ->pluck('kategori');
+        // Get kategori options - derived from actual active slot data
+        $kategoriOptions = $activeSlots->pluck('journalMaster.kategori')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
         
-        // Get jenis options - only those with active slots
-        $jenisOptions = JournalMaster::select('jenis_jurnal')
-            ->distinct()
-            ->whereNotNull('jenis_jurnal')
-            ->whereHas('slots', fn($q) => $q->where('is_active', true))
-            ->orderBy('jenis_jurnal')
-            ->pluck('jenis_jurnal');
+        // Get jenis options - derived from actual active slot data
+        $jenisOptions = $activeSlots->pluck('journalMaster.jenis_jurnal')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
         
-        // Get volume options
-        $volumeOptions = JournalSlot::where('is_active', true)
-            ->select('volume')
-            ->distinct()
-            ->whereNotNull('volume')
-            ->orderBy('volume')
-            ->pluck('volume');
+        // Get volume options - derived from actual active slot data
+        $volumeOptions = $activeSlots->pluck('volume')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
         
-        // Get nomor options
-        $nomorOptions = JournalSlot::where('is_active', true)
-            ->select('nomor')
-            ->distinct()
-            ->whereNotNull('nomor')
-            ->orderBy('nomor')
-            ->pluck('nomor');
+        // Get nomor options - derived from actual active slot data
+        $nomorOptions = $activeSlots->pluck('nomor')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
         
-        // Get publisher options - only those with active slots
-        $publisherOptions = JournalMaster::select('publisher')
-            ->distinct()
-            ->whereNotNull('publisher')
-            ->whereHas('slots', fn($q) => $q->where('is_active', true))
-            ->orderBy('publisher')
-            ->pluck('publisher');
+        // Get publisher options - derived from actual active slot data
+        $publisherOptions = $activeSlots->pluck('journalMaster.publisher')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
         
         // Get settings for favicon
         $settings = [
