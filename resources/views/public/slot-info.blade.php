@@ -434,7 +434,7 @@
                                 <option value="">Semua Akreditasi</option>
                                 @foreach($indexations as $idx)
                                     <option value="{{ $idx }}" {{ request('indexasi') == $idx ? 'selected' : '' }}>
-                                        {{ $idx }} ({{ $filterCounts['indexasi'][$idx] ?? 0 }} slot)
+                                        {{ $idx }}
                                     </option>
                                 @endforeach
                             </select>
@@ -447,7 +447,7 @@
                                 <option value="">Semua Bidang</option>
                                 @foreach($kategoriOptions as $kategori)
                                     <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
-                                        {{ $kategori }} ({{ $filterCounts['kategori'][$kategori] ?? 0 }} slot)
+                                        {{ $kategori }}
                                     </option>
                                 @endforeach
                             </select>
@@ -460,7 +460,7 @@
                                 <option value="">Semua Jenis</option>
                                 @foreach($jenisOptions as $jenis)
                                     <option value="{{ $jenis }}" {{ request('jenis') == $jenis ? 'selected' : '' }}>
-                                        {{ $jenis }} ({{ $filterCounts['jenis'][$jenis] ?? 0 }} slot)
+                                        {{ $jenis }}
                                     </option>
                                 @endforeach
                             </select>
@@ -473,7 +473,7 @@
                                 <option value="">Semua Tahun</option>
                                 @foreach($tahunOptions as $tahun)
                                     <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
-                                        {{ $tahun }} ({{ $filterCounts['tahun'][$tahun] ?? 0 }} slot)
+                                        {{ $tahun }}
                                     </option>
                                 @endforeach
                             </select>
@@ -485,11 +485,9 @@
                             <select name="bulan" class="form-select">
                                 <option value="">Semua Bulan</option>
                                 @foreach($bulanOptions as $key => $bulan)
-                                    @if(isset($filterCounts['bulan'][$key]) && $filterCounts['bulan'][$key] > 0)
                                     <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>
-                                        {{ $bulan }} ({{ $filterCounts['bulan'][$key] }} slot)
+                                        {{ $bulan }}
                                     </option>
-                                    @endif
                                 @endforeach
                             </select>
                         </div>
