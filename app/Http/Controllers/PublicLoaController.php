@@ -102,7 +102,7 @@ class PublicLoaController extends Controller
             ->orderBy('nama_jurnal')
             ->get();
         
-        // Get unique indexations
+        // Get unique indexations with slot counts
         $indexations = JournalMaster::select('accreditation')
             ->distinct()
             ->whereNotNull('accreditation')
@@ -167,6 +167,47 @@ class PublicLoaController extends Controller
             ->orderBy('publisher')
             ->pluck('publisher');
         
+        // Calculate slot counts per filter option
+        $filterCounts = [];
+        
+        // Akreditasi counts
+        $filterCounts['indexasi'] = [];
+        foreach ($indexations as $idx) {
+            $filterCounts['indexasi'][$idx] = JournalSlot::where('is_active', true)
+                ->whereHas('journalMaster', fn($q) => $q->where('accreditation', $idx))
+                ->count();
+        }
+        
+        // Kategori counts
+        $filterCounts['kategori'] = [];
+        foreach ($kategoriOptions as $kategori) {
+            $filterCounts['kategori'][$kategori] = JournalSlot::where('is_active', true)
+                ->whereHas('journalMaster', fn($q) => $q->where('kategori', $kategori))
+                ->count();
+        }
+        
+        // Jenis counts
+        $filterCounts['jenis'] = [];
+        foreach ($jenisOptions as $jenis) {
+            $filterCounts['jenis'][$jenis] = JournalSlot::where('is_active', true)
+                ->whereHas('journalMaster', fn($q) => $q->where('jenis_jurnal', $jenis))
+                ->count();
+        }
+        
+        // Tahun counts
+        $filterCounts['tahun'] = JournalSlot::where('is_active', true)
+            ->selectRaw('tahun, count(*) as total')
+            ->groupBy('tahun')
+            ->pluck('total', 'tahun')
+            ->toArray();
+        
+        // Bulan counts
+        $filterCounts['bulan'] = JournalSlot::where('is_active', true)
+            ->selectRaw('bulan, count(*) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan')
+            ->toArray();
+        
         // Get settings for favicon
         $settings = [
             'favicon' => Setting::get('favicon', ''),
@@ -174,7 +215,7 @@ class PublicLoaController extends Controller
             'app_name' => env('APP_NAME', 'SIPERA'),
         ];
         
-        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings', 'tahunOptions', 'bulanOptions', 'kategoriOptions', 'jenisOptions', 'volumeOptions', 'nomorOptions', 'publisherOptions'));
+        return view('public.slot-info', compact('slots', 'journals', 'indexations', 'stats', 'settings', 'tahunOptions', 'bulanOptions', 'kategoriOptions', 'jenisOptions', 'volumeOptions', 'nomorOptions', 'publisherOptions', 'filterCounts'));
     }
     
     public function show(JournalSlot $slot)
