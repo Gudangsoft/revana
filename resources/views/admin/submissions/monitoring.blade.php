@@ -822,6 +822,16 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        Menampilkan {{ $submissions->firstItem() ?? 0 }} - {{ $submissions->lastItem() ?? 0 }} dari {{ $submissions->total() }} data
+                    </div>
+                    <div>
+                        {{ $submissions->links() }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
