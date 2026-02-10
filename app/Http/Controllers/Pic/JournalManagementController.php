@@ -448,12 +448,29 @@ class JournalManagementController extends Controller
         }
 
         // Wrap dalam database transaction
-        \DB::transaction(function() use ($validated) {
-            Submission::create($validated);
+        $submission = \DB::transaction(function() use ($validated) {
+            return Submission::create($validated);
         });
 
+        // Award points to Marketing if assigned
+        $pointMessage = '';
+        if (!empty($validated['marketing_id'])) {
+            $pointHistory = MarketingPointHistory::awardPoints(
+                $validated['marketing_id'],
+                $submission->id,
+                "Submit artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
+            );
+            
+            if ($pointHistory) {
+                $marketing = \App\Models\Marketing::find($validated['marketing_id']);
+                if ($marketing) {
+                    $pointMessage = " Marketing {$marketing->name} mendapatkan +{$pointHistory->points_earned} point!";
+                }
+            }
+        }
+
         return redirect()->route('pic.submissions.index')
-            ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit']);
+            ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
     }
 
     public function submissionsShow(Submission $submission)
@@ -1520,6 +1537,22 @@ class JournalManagementController extends Controller
             ]);
             
             $pointMessage = " Anda mendapatkan +{$pointsToAdd} point!";
+        }
+
+        // Award points to Marketing if assigned
+        if (!empty($validated['marketing_id'])) {
+            $marketingPointHistory = MarketingPointHistory::awardPoints(
+                $validated['marketing_id'],
+                $submission->id,
+                "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
+            );
+            
+            if ($marketingPointHistory) {
+                $marketing = \App\Models\Marketing::find($validated['marketing_id']);
+                if ($marketing) {
+                    $pointMessage .= " Marketing {$marketing->name} mendapatkan +{$marketingPointHistory->points_earned} point!";
+                }
+            }
         }
 
         return redirect()->route('pic.fasttrack.index')

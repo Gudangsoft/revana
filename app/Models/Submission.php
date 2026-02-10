@@ -191,6 +191,11 @@ class Submission extends Model
         return $this->belongsTo(Marketing::class, 'marketing_id');
     }
 
+    public function marketingPointHistory()
+    {
+        return $this->hasMany(MarketingPointHistory::class, 'submission_id');
+    }
+
     public function petugasSubmit()
     {
         return $this->belongsTo(Pic::class, 'petugas_submit_id');
