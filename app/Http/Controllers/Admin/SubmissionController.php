@@ -658,7 +658,7 @@ class SubmissionController extends Controller
         }
         
         // Get paginated submissions
-        $submissions = $query->latest('tanggal_submit')->paginate(50)->withQueryString();
+        $submissions = $query->latest('tanggal_submit')->paginate(200)->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
