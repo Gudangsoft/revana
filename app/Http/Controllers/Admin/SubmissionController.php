@@ -1611,7 +1611,9 @@ class SubmissionController extends Controller
             });
         }
         
-        $submissions = $query->latest('tanggal_submit')->get();
+        // Get paginated submissions
+        $submissions = $query->latest('tanggal_submit')->paginate(200)->withQueryString();
+        
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
         
@@ -1620,20 +1622,48 @@ class SubmissionController extends Controller
         $users = User::where('role', 'admin')->orderBy('name')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         
-        // Statistics
+        // Statistics - use single optimized query with conditional aggregation
+        $statsQuery = Submission::query()
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "SUBMITTED" THEN 1 ELSE 0 END) as submitted,
+                SUM(CASE WHEN status NOT IN ("SUBMITTED", "PUBLISHED", "REJECTED") THEN 1 ELSE 0 END) as in_process,
+                SUM(CASE WHEN status = "PUBLISHED" THEN 1 ELSE 0 END) as published,
+                SUM(CASE WHEN status = "REJECTED" THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN status LIKE "%_SUBMITTED%" THEN 1 ELSE 0 END) as pending_validations
+            ')
+            ->where('process_type', 'fasttrack');
+        
+        // Apply same filters for statistics
+        if ($request->filled('tanggal_dari')) {
+            $statsQuery->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $statsQuery->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
+        }
+        if ($request->filled('status')) {
+            $statsQuery->where('status', $request->status);
+        }
+        if ($request->filled('journal_master_id')) {
+            $statsQuery->whereHas('journalSlot', function($q) use ($request) {
+                $q->where('journal_master_id', $request->journal_master_id);
+            });
+        }
+        
+        $statsResult = $statsQuery->first();
+        
         $stats = [
-            'total' => $submissions->count(),
-            'submitted' => $submissions->where('status', 'SUBMITTED')->count(),
-            'in_process' => $submissions->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
-            'published' => $submissions->where('status', 'PUBLISHED')->count(),
-            'rejected' => $submissions->where('status', 'REJECTED')->count(),
+            'total' => $statsResult->total ?? 0,
+            'submitted' => $statsResult->submitted ?? 0,
+            'in_process' => $statsResult->in_process ?? 0,
+            'published' => $statsResult->published ?? 0,
+            'rejected' => $statsResult->rejected ?? 0,
         ];
         
-        // Count pending validations (status contains _SUBMITTED)
+        $pendingCount = $statsResult->pending_validations ?? 0;
         $pendingValidations = $submissions->filter(function($s) {
             return str_contains($s->status, '_SUBMITTED');
         });
-        $pendingCount = $pendingValidations->count();
         
         return view('admin.fasttrack-management.monitoring.index', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
     }
