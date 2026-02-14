@@ -95,7 +95,12 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
-            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // Max 10MB
+            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+                $ext = strtolower($value->getClientOriginalExtension());
+                if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
+                    $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
+                }
+            }],
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
@@ -207,7 +212,12 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
-            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240', // Max 10MB
+            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+                $ext = strtolower($value->getClientOriginalExtension());
+                if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
+                    $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
+                }
+            }],
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:255',
@@ -1312,7 +1322,12 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
-            'file_artikel' => 'nullable|file|mimes:doc,docx,pdf|max:10240',
+            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+                $ext = strtolower($value->getClientOriginalExtension());
+                if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
+                    $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
+                }
+            }],
             'link_publish' => 'nullable|url|max:500',
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
