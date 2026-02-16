@@ -55,8 +55,8 @@ class FeatureSettingService
             'role_marketing_points'              => 'yes',
 
             // ===== Role Capabilities: PIC =====
-            'role_pic_kelola_jurnal'         => 'read-only',
-            'role_pic_kelola_slot'           => 'read-only',
+            'role_pic_kelola_jurnal'         => 'yes',
+            'role_pic_kelola_slot'           => 'yes',
             'role_pic_buat_submission'       => 'yes',
             'role_pic_proses_submission'     => 'yes',
             'role_pic_validasi_review'       => 'yes',
