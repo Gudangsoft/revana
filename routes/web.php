@@ -82,6 +82,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/export-completed-reviews', [AdminDashboard::class, 'exportCompletedReviews'])->name('export.completed.reviews');
         Route::get('/component-overview', [AdminDashboard::class, 'componentOverview'])->name('component-overview');
+        Route::post('/component-overview', [AdminDashboard::class, 'saveComponentSettings'])->name('component-overview.save');
+        Route::post('/component-overview/reset', [AdminDashboard::class, 'resetComponentSettings'])->name('component-overview.reset');
         
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');

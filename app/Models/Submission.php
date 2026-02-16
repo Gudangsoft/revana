@@ -307,27 +307,13 @@ class Submission extends Model
     {
         // Determine real status from validation flags
         $realStatus = $this->getRealStatus();
-        $statuses = self::getStatusOptions();
-        return $statuses[$realStatus] ?? $realStatus;
+        return \App\Services\ComponentSettingService::badgeLabel($realStatus);
     }
 
     public function getStatusBadgeClassAttribute()
     {
         $realStatus = $this->getRealStatus();
-        return match($realStatus) {
-            'SUBMITTED' => 'bg-secondary',
-            'EDITOR1_PROCESS' => 'bg-info',
-            'AUTHOR1_PROCESS' => 'bg-info',
-            'EDITOR2_PROCESS' => 'bg-info',
-            'REVIEWER1_PROCESS' => 'bg-warning',
-            'REVIEWER2_PROCESS' => 'bg-warning',
-            'EDITOR3_PROCESS' => 'bg-info',
-            'AUTHOR2_PROCESS' => 'bg-info',
-            'PRODUCTION_PROCESS' => 'bg-primary',
-            'PUBLISHED' => 'bg-success',
-            'REJECTED' => 'bg-danger',
-            default => 'bg-secondary',
-        };
+        return \App\Services\ComponentSettingService::badgeColor($realStatus);
     }
 
     // Get current step number (1-10) based on real progress

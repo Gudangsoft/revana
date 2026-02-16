@@ -94,12 +94,10 @@ class DashboardController extends Controller
     }
 
     /**
-     * Component Overview - Admin interface to monitor what PIC and Marketing users access.
-     * Shows shared Blade Components preview and access mapping.
+     * Component Overview - Admin visual editor for shared components.
      */
     public function componentOverview()
     {
-        // Get a sample submission for component preview
         $sampleSubmission = Submission::with([
             'journalSlot.journalMaster',
             'marketing',
@@ -108,65 +106,135 @@ class DashboardController extends Controller
             'petugasEditor3', 'petugasAuthor2', 'petugasProduction'
         ])->latest()->first();
 
-        // Marketing pages and their descriptions
-        $marketingPages = [
-            ['name' => 'Dashboard', 'route' => 'marketing.dashboard', 'icon' => 'bi-speedometer2', 'description' => 'Ringkasan submissions, statistik, progress terbaru', 'components' => ['submission-status', 'submission-progress']],
-            ['name' => 'Daftar Submissions', 'route' => 'marketing.submissions.index', 'icon' => 'bi-file-earmark-text', 'description' => 'List semua submission marketing + status & progress', 'components' => ['submission-status', 'submission-progress']],
-            ['name' => 'Monitoring Artikel', 'route' => 'marketing.submissions.monitoring', 'icon' => 'bi-bar-chart-line', 'description' => 'Monitoring status & progress semua artikel', 'components' => ['submission-status', 'submission-progress']],
-            ['name' => 'Detail Submission', 'route' => 'marketing.submissions.index', 'icon' => 'bi-eye', 'description' => 'Detail submission + Tracking Proses Review + Catatan', 'components' => ['tracking-table']],
-            ['name' => 'Daftar Jurnal', 'route' => 'marketing.journals.index', 'icon' => 'bi-journal-text', 'description' => 'List jurnal + kode slot yang bisa diklik', 'components' => ['slot-link']],
-            ['name' => 'Slot Jurnal', 'route' => 'marketing.journal-slots.index', 'icon' => 'bi-calendar3', 'description' => 'List slot jurnal + kode slot clickable', 'components' => ['slot-link']],
-            ['name' => 'Detail Slot', 'route' => 'marketing.journal-slots.index', 'icon' => 'bi-calendar-check', 'description' => 'Detail slot + submissions di slot tersebut', 'components' => ['submission-status', 'submission-progress']],
+        $settings = \App\Services\ComponentSettingService::all();
+        $colorOptions = \App\Services\ComponentSettingService::colorOptions();
+        $rowColorOptions = \App\Services\ComponentSettingService::rowColorOptions();
+        $statuses = \App\Services\ComponentSettingService::statuses();
+        $trackingSteps = \App\Services\ComponentSettingService::trackingSteps();
+
+        // Complete Marketing menu/function mapping
+        $marketingMenus = [
+            [
+                'group' => 'Utama',
+                'items' => [
+                    ['name' => 'Dashboard', 'icon' => 'bi-speedometer2', 'route' => 'marketing.dashboard', 'type' => 'GET', 'description' => 'Ringkasan statistik, progress submission terbaru', 'components' => ['submission-status', 'submission-progress']],
+                    ['name' => 'Artikel (Submissions)', 'icon' => 'bi-file-earmark-text', 'route' => 'marketing.submissions', 'type' => 'GET', 'description' => 'Daftar semua submission, status & progress', 'components' => ['submission-status', 'submission-progress']],
+                    ['name' => 'Buat Artikel Baru', 'icon' => 'bi-plus-circle', 'route' => 'marketing.submissions.create', 'type' => 'GET/POST', 'description' => 'Form input submission baru', 'components' => []],
+                    ['name' => 'Detail Submission', 'icon' => 'bi-eye', 'route' => 'marketing.submissions.show', 'type' => 'GET', 'description' => 'Detail submission + tracking proses review + catatan', 'components' => ['tracking-table']],
+                    ['name' => 'Monitoring Artikel', 'icon' => 'bi-bar-chart-line', 'route' => 'marketing.submissions.monitoring', 'type' => 'GET', 'description' => 'Monitoring status & progress semua artikel', 'components' => ['submission-status', 'submission-progress']],
+                ],
+            ],
+            [
+                'group' => 'Fasttrack',
+                'items' => [
+                    ['name' => 'Fasttrack', 'icon' => 'bi-lightning-charge', 'route' => 'marketing.fasttrack.index', 'type' => 'GET', 'description' => 'Daftar submission fasttrack', 'components' => []],
+                    ['name' => 'Buat Fasttrack Baru', 'icon' => 'bi-plus-circle', 'route' => 'marketing.fasttrack.create', 'type' => 'GET/POST', 'description' => 'Form input fasttrack baru', 'components' => []],
+                    ['name' => 'Monitoring Fasttrack', 'icon' => 'bi-bar-chart', 'route' => 'marketing.fasttrack.monitoring', 'type' => 'GET', 'description' => 'Monitoring status fasttrack submissions', 'components' => []],
+                    ['name' => 'Detail Fasttrack', 'icon' => 'bi-eye', 'route' => 'marketing.fasttrack.show', 'type' => 'GET', 'description' => 'Detail submission fasttrack', 'components' => []],
+                ],
+            ],
+            [
+                'group' => 'Pengelolaan Jurnal',
+                'items' => [
+                    ['name' => 'Data Jurnal', 'icon' => 'bi-journal-text', 'route' => 'marketing.journals.index', 'type' => 'GET', 'description' => 'List jurnal master + kode slot (read-only)', 'components' => ['slot-link']],
+                    ['name' => 'Data Slot', 'icon' => 'bi-calendar3', 'route' => 'marketing.journal-slots.index', 'type' => 'GET', 'description' => 'List slot jurnal + kode slot (read-only)', 'components' => ['slot-link']],
+                    ['name' => 'Detail Slot', 'icon' => 'bi-calendar-check', 'route' => 'marketing.journal-slots.show', 'type' => 'GET', 'description' => 'Detail slot + submissions di slot tersebut', 'components' => ['submission-status', 'submission-progress']],
+                ],
+            ],
+            [
+                'group' => 'Lainnya',
+                'items' => [
+                    ['name' => 'Point Saya', 'icon' => 'bi-trophy', 'route' => 'marketing.points', 'type' => 'GET', 'description' => 'Riwayat point marketing', 'components' => []],
+                    ['name' => 'Laporan Jurnal', 'icon' => 'bi-file-earmark-bar-graph', 'route' => 'marketing.reports.journal-articles', 'type' => 'GET', 'description' => 'Laporan statistik jurnal', 'components' => []],
+                    ['name' => 'Profile Saya', 'icon' => 'bi-person-circle', 'route' => 'marketing.profile.edit', 'type' => 'GET/POST', 'description' => 'Edit profil dan ubah password', 'components' => []],
+                ],
+            ],
         ];
 
-        // PIC pages and their descriptions
-        $picPages = [
-            ['name' => 'Dashboard', 'route' => '#', 'icon' => 'bi-speedometer2', 'description' => 'Dashboard PIC dengan task overview', 'components' => []],
-            ['name' => 'My Tasks', 'route' => '#', 'icon' => 'bi-clipboard-check', 'description' => 'Daftar tugas PIC + progress workflow', 'components' => []],
-            ['name' => 'Slot Jurnal', 'route' => '#', 'icon' => 'bi-calendar3', 'description' => 'Kelola slot jurnal + kode slot clickable', 'components' => ['slot-link']],
-            ['name' => 'Slot Jurnal (Baru)', 'route' => '#', 'icon' => 'bi-calendar3', 'description' => 'Tampilan baru slot jurnal', 'components' => ['slot-link']],
-            ['name' => 'Monitoring Slot', 'route' => '#', 'icon' => 'bi-graph-up', 'description' => 'Monitoring penggunaan slot jurnal', 'components' => ['slot-link']],
-            ['name' => 'Detail Slot', 'route' => '#', 'icon' => 'bi-calendar-check', 'description' => 'Detail slot + semua submissions', 'components' => ['submission-status', 'submission-progress']],
-            ['name' => 'Fasttrack', 'route' => '#', 'icon' => 'bi-lightning-charge', 'description' => 'Input dan monitoring fasttrack submissions', 'components' => []],
-        ];
-
-        // Shared components list
-        $sharedComponents = [
+        // Complete PIC menu/function mapping
+        $picMenus = [
             [
-                'name' => 'submission-status',
-                'file' => 'components/submission-status.blade.php',
-                'description' => 'Badge status submission (Published, In Progress, Pending, dll)',
-                'usage' => '<x-submission-status :submission="$submission" size="small" />',
-                'usedIn' => ['marketing/dashboard', 'marketing/submissions', 'marketing/submissions-monitoring', 'marketing/journal-slots/show'],
+                'group' => 'Utama',
+                'items' => [
+                    ['name' => 'Dashboard', 'icon' => 'bi-house-door', 'route' => 'pic.dashboard', 'type' => 'GET', 'description' => 'Dashboard PIC overview', 'components' => []],
+                    ['name' => 'Author Dashboard', 'icon' => 'bi-person-workspace', 'route' => 'pic.author.dashboard', 'type' => 'GET', 'description' => 'Dashboard PIC sebagai Author', 'components' => []],
+                ],
             ],
             [
-                'name' => 'submission-progress',
-                'file' => 'components/submission-progress.blade.php',
-                'description' => 'Progress bar submission dengan persentase',
-                'usage' => '<x-submission-progress :submission="$submission" :height="8" />',
-                'usedIn' => ['marketing/dashboard', 'marketing/submissions', 'marketing/submissions-monitoring', 'marketing/journal-slots/show'],
+                'group' => 'Submissions & Monitoring',
+                'items' => [
+                    ['name' => 'Data Submissions', 'icon' => 'bi-file-earmark-text', 'route' => 'pic.submissions.index', 'type' => 'GET', 'description' => 'List semua submission yang ditangani', 'components' => []],
+                    ['name' => 'Buat Submission', 'icon' => 'bi-plus-circle', 'route' => 'pic.submissions.create', 'type' => 'GET/POST', 'description' => 'Form input submission baru', 'components' => []],
+                    ['name' => 'Monitoring & Tugas Saya', 'icon' => 'bi-list-check', 'route' => 'pic.submissions.monitoring', 'type' => 'GET', 'description' => 'Monitoring submission + daftar tugas PIC', 'components' => []],
+                    ['name' => 'My Tasks', 'icon' => 'bi-clipboard-check', 'route' => 'pic.my-tasks.index', 'type' => 'GET', 'description' => 'Daftar tugas yang ditugaskan ke PIC', 'components' => []],
+                    ['name' => 'Proses Submission', 'icon' => 'bi-gear', 'route' => 'pic.submissions.process', 'type' => 'GET/POST', 'description' => 'Proses/kerjakan submission (submit work, revision)', 'components' => []],
+                    ['name' => 'Toggle Validasi', 'icon' => 'bi-check2-square', 'route' => 'pic.submissions.toggle-validation', 'type' => 'POST', 'description' => 'Validasi/toggle status tahap review', 'components' => []],
+                    ['name' => 'Update Credential', 'icon' => 'bi-key', 'route' => 'pic.submissions.update-credential', 'type' => 'POST', 'description' => 'Update credential (username/password) submission', 'components' => []],
+                    ['name' => 'Update Petugas', 'icon' => 'bi-person-plus', 'route' => 'pic.submissions.update-petugas', 'type' => 'POST', 'description' => 'Assign petugas ke tahap review', 'components' => []],
+                ],
             ],
             [
-                'name' => 'tracking-table',
-                'file' => 'components/tracking-table.blade.php',
-                'description' => 'Tabel lengkap tracking proses review (9 tahap) dengan petugas, credentials, dan status',
-                'usage' => '<x-tracking-table :submission="$submission" />',
-                'usedIn' => ['marketing/show-submission'],
+                'group' => 'Pengelolaan Jurnal',
+                'items' => [
+                    ['name' => 'Data Jurnal (CRUD)', 'icon' => 'bi-journal-text', 'route' => 'pic.journals.index', 'type' => 'GET/POST/PUT/DELETE', 'description' => 'Kelola jurnal master (buat, edit, hapus)', 'components' => []],
+                    ['name' => 'Data Slot (CRUD)', 'icon' => 'bi-calendar3', 'route' => 'pic.journal-slots.index', 'type' => 'GET/POST/PUT/DELETE', 'description' => 'Kelola slot jurnal (buat, edit, hapus)', 'components' => ['slot-link']],
+                    ['name' => 'Monitoring Slot', 'icon' => 'bi-graph-up', 'route' => 'pic.journal-slots.monitoring', 'type' => 'GET', 'description' => 'Monitoring penggunaan slot jurnal', 'components' => ['slot-link']],
+                    ['name' => 'Detail Slot', 'icon' => 'bi-calendar-check', 'route' => 'pic.journal-slots.show', 'type' => 'GET', 'description' => 'Detail slot + semua submissions di slot', 'components' => ['submission-status', 'submission-progress']],
+                    ['name' => 'Akreditasi (Read)', 'icon' => 'bi-award', 'route' => 'pic.accreditations.index', 'type' => 'GET', 'description' => 'Lihat daftar akreditasi', 'components' => []],
+                ],
             ],
             [
-                'name' => 'slot-link',
-                'file' => 'components/slot-link.blade.php',
-                'description' => 'Link kode slot yang bisa diklik ke halaman detail slot',
-                'usage' => '<x-slot-link :journal-slot="$slot" guard="marketing" />',
-                'usedIn' => ['marketing/journal-slots/index', 'marketing/journals/index', 'pic/journal-slots/index', 'pic/journal-slots/index-new', 'pic/journal-slots/monitoring'],
+                'group' => 'Fasttrack',
+                'items' => [
+                    ['name' => 'Data Fasttrack', 'icon' => 'bi-lightning-charge', 'route' => 'pic.fasttrack.index', 'type' => 'GET', 'description' => 'List semua submission fasttrack', 'components' => []],
+                    ['name' => 'Buat Fasttrack', 'icon' => 'bi-plus-circle', 'route' => 'pic.fasttrack.create', 'type' => 'GET/POST', 'description' => 'Input submission fasttrack baru', 'components' => []],
+                    ['name' => 'Edit Fasttrack', 'icon' => 'bi-pencil-square', 'route' => 'pic.fasttrack.edit', 'type' => 'GET/PUT', 'description' => 'Edit data submission fasttrack', 'components' => []],
+                    ['name' => 'Monitoring Fasttrack', 'icon' => 'bi-graph-up', 'route' => 'pic.fasttrack.monitoring', 'type' => 'GET', 'description' => 'Monitoring status fasttrack + validasi', 'components' => []],
+                    ['name' => 'Update Assignment FT', 'icon' => 'bi-person-plus', 'route' => 'pic.fasttrack.update-assignment', 'type' => 'POST', 'description' => 'Assign petugas fasttrack', 'components' => []],
+                ],
+            ],
+            [
+                'group' => 'Lainnya',
+                'items' => [
+                    ['name' => 'Daftar Reviewer', 'icon' => 'bi-people', 'route' => 'pic.reviewers.index', 'type' => 'GET', 'description' => 'List reviewer + login as reviewer', 'components' => []],
+                    ['name' => 'Point Saya', 'icon' => 'bi-trophy-fill', 'route' => 'pic.points.index', 'type' => 'GET', 'description' => 'Riwayat point PIC', 'components' => []],
+                    ['name' => 'Laporan Jurnal', 'icon' => 'bi-file-earmark-bar-graph', 'route' => 'pic.reports.journal-articles', 'type' => 'GET', 'description' => 'Laporan statistik jurnal', 'components' => []],
+                    ['name' => 'Profile Saya', 'icon' => 'bi-person-circle', 'route' => 'pic.profile.edit', 'type' => 'GET/POST', 'description' => 'Edit profil dan ubah password', 'components' => []],
+                ],
             ],
         ];
 
         return view('admin.component-overview', compact(
             'sampleSubmission',
-            'marketingPages',
-            'picPages',
-            'sharedComponents'
+            'settings',
+            'colorOptions',
+            'rowColorOptions',
+            'statuses',
+            'trackingSteps',
+            'marketingMenus',
+            'picMenus'
         ));
+    }
+
+    /**
+     * Save component visual settings.
+     */
+    public function saveComponentSettings(Request $request)
+    {
+        \App\Services\ComponentSettingService::save($request->except('_token'));
+        
+        return redirect()->route('admin.component-overview')
+            ->with('success', 'Pengaturan komponen berhasil disimpan! Perubahan langsung berlaku di semua halaman.');
+    }
+
+    /**
+     * Reset component settings to defaults.
+     */
+    public function resetComponentSettings()
+    {
+        \App\Services\ComponentSettingService::resetToDefaults();
+        
+        return redirect()->route('admin.component-overview')
+            ->with('success', 'Semua pengaturan komponen telah dikembalikan ke default.');
     }
 }

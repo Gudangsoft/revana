@@ -4,9 +4,132 @@
     Optional: <x-tracking-table :submission="$submission" show-credentials="false" />
     
     This component shows the review workflow tracking table.
+    Reads visual settings from ComponentSettingService (editable via admin panel).
     Shared across admin, PIC, and marketing views.
 --}}
-@props(['submission', 'showCredentials' => true])
+@props(['submission', 'showCredentials' => null])
+
+@php
+    use App\Services\ComponentSettingService;
+    $s = ComponentSettingService::all();
+    
+    // Allow prop override, otherwise use setting
+    $showCreds = $showCredentials ?? (bool)($s['tracking_show_credentials'] ?? true);
+    
+    $validColor = $s['tracking_valid_color'] ?? 'bg-success';
+    $progressColor = $s['tracking_progress_color'] ?? 'bg-warning';
+    $pendingColor = $s['tracking_pending_color'] ?? 'bg-secondary';
+    
+    // Build steps config
+    $steps = [
+        [
+            'key' => 'submit',
+            'label' => 'Submit',
+            'show' => $s['tracking_show_submit'] ?? '1',
+            'rowClass' => $s['tracking_row_submit'] ?? '',
+            'petugas' => $submission->petugasSubmit,
+            'petugasFallback' => $submission->marketing,
+            'petugasFallbackLabel' => '(Marketing)',
+            'isValid' => $submission->petugasSubmit || $submission->marketing,
+            'hasAssignment' => $submission->petugasSubmit || $submission->marketing,
+            'credential' => ($submission->username_author && $submission->password_author) 
+                ? $submission->username_author . ' / ' . $submission->password_author : null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'editor1',
+            'label' => 'Editor 1 (E1)',
+            'show' => $s['tracking_show_editor1'] ?? '1',
+            'rowClass' => $s['tracking_row_editor1'] ?? 'table-info',
+            'petugas' => $submission->petugasEditor1,
+            'isValid' => $submission->editor1_valid,
+            'hasAssignment' => $submission->petugasEditor1,
+            'credential' => ($submission->username_editor && $submission->password_editor) 
+                ? $submission->username_editor . ' / ' . $submission->password_editor : null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'author1',
+            'label' => 'Author 1 (A1)',
+            'show' => $s['tracking_show_author1'] ?? '1',
+            'rowClass' => $s['tracking_row_author1'] ?? 'table-warning',
+            'petugas' => $submission->petugasAuthor1,
+            'isValid' => $submission->author1_valid,
+            'hasAssignment' => $submission->petugasAuthor1,
+            'credential' => null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'editor2',
+            'label' => 'Editor 2 (E2)',
+            'show' => $s['tracking_show_editor2'] ?? '1',
+            'rowClass' => $s['tracking_row_editor2'] ?? 'table-info',
+            'petugas' => $submission->petugasEditor2,
+            'isValid' => $submission->editor2_valid,
+            'hasAssignment' => $submission->petugasEditor2,
+            'credential' => null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'reviewer1',
+            'label' => 'Reviewer 1 (R1)',
+            'show' => $s['tracking_show_reviewer1'] ?? '1',
+            'rowClass' => $s['tracking_row_reviewer1'] ?? 'table-primary',
+            'petugas' => $submission->petugasReviewer1,
+            'isValid' => $submission->reviewer1_valid,
+            'hasAssignment' => $submission->petugasReviewer1,
+            'credential' => ($submission->username_reviewer1 && $submission->password_reviewer1) 
+                ? $submission->username_reviewer1 . ' / ' . $submission->password_reviewer1 : null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'reviewer2',
+            'label' => 'Reviewer 2 (R2)',
+            'show' => $s['tracking_show_reviewer2'] ?? '1',
+            'rowClass' => $s['tracking_row_reviewer2'] ?? 'table-primary',
+            'petugas' => $submission->petugasReviewer2,
+            'isValid' => $submission->reviewer2_valid,
+            'hasAssignment' => $submission->petugasReviewer2,
+            'credential' => ($submission->username_reviewer2 && $submission->password_reviewer2) 
+                ? $submission->username_reviewer2 . ' / ' . $submission->password_reviewer2 : null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'editor3',
+            'label' => 'Editor 3 (E3)',
+            'show' => $s['tracking_show_editor3'] ?? '1',
+            'rowClass' => $s['tracking_row_editor3'] ?? 'table-info',
+            'petugas' => $submission->petugasEditor3,
+            'isValid' => $submission->editor3_valid,
+            'hasAssignment' => $submission->petugasEditor3,
+            'credential' => null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'author2',
+            'label' => 'Author 2 (A2)',
+            'show' => $s['tracking_show_author2'] ?? '1',
+            'rowClass' => $s['tracking_row_author2'] ?? 'table-warning',
+            'petugas' => $submission->petugasAuthor2,
+            'isValid' => $submission->author2_valid,
+            'hasAssignment' => $submission->petugasAuthor2,
+            'credential' => null,
+            'validLabel' => 'Valid',
+        ],
+        [
+            'key' => 'production',
+            'label' => 'Production (P)',
+            'show' => $s['tracking_show_production'] ?? '1',
+            'rowClass' => $s['tracking_row_production'] ?? 'table-success',
+            'petugas' => $submission->petugasProduction,
+            'isValid' => $submission->production_valid || !empty($submission->link_publish),
+            'hasAssignment' => $submission->petugasProduction,
+            'credential' => null,
+            'isProduction' => true,
+            'validLabel' => 'Published',
+        ],
+    ];
+@endphp
 
 <div class="card mb-4">
     <div class="card-header bg-light">
@@ -19,213 +142,52 @@
                     <tr>
                         <th>Tahap</th>
                         <th>Petugas</th>
-                        @if($showCredentials)
+                        @if($showCreds)
                         <th>Credential</th>
                         @endif
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Submit -->
-                    <tr>
-                        <td><strong>Submit</strong></td>
-                        <td>
-                            @if($submission->petugasSubmit)
-                                {{ $submission->petugasSubmit->name }}
-                            @elseif($submission->marketing)
-                                {{ $submission->marketing->name }}
-                                <small class="text-muted">(Marketing)</small>
-                            @else
-                                -
+                    @foreach($steps as $step)
+                        @if($step['show'])
+                        <tr class="{{ $step['rowClass'] }}">
+                            <td><strong>{{ $step['label'] }}</strong></td>
+                            <td>
+                                @if($step['petugas'])
+                                    {{ $step['petugas']->name }}
+                                @elseif(isset($step['petugasFallback']) && $step['petugasFallback'])
+                                    {{ $step['petugasFallback']->name }}
+                                    <small class="text-muted">{{ $step['petugasFallbackLabel'] ?? '' }}</small>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            @if($showCreds)
+                            <td>
+                                @if(isset($step['isProduction']) && $submission->link_publish)
+                                    <a href="{{ $submission->link_publish }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-link-45deg"></i> Link Publish
+                                    </a>
+                                @elseif($step['credential'])
+                                    <code>{{ $step['credential'] }}</code>
+                                @else
+                                    -
+                                @endif
+                            </td>
                             @endif
-                        </td>
-                        @if($showCredentials)
-                        <td>
-                            @if($submission->username_author && $submission->password_author)
-                                <code>{{ $submission->username_author }} / {{ $submission->password_author }}</code>
-                            @else
-                                -
-                            @endif
-                        </td>
+                            <td>
+                                @if($step['isValid'])
+                                    <span class="badge {{ $validColor }}"><i class="bi bi-check-circle"></i> {{ $step['validLabel'] }}</span>
+                                @elseif($step['hasAssignment'])
+                                    <span class="badge {{ $progressColor }}">In Progress</span>
+                                @else
+                                    <span class="badge {{ $pendingColor }}">Pending</span>
+                                @endif
+                            </td>
+                        </tr>
                         @endif
-                        <td>
-                            @if($submission->petugasSubmit || $submission->marketing)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Editor 1 -->
-                    <tr class="table-info">
-                        <td><strong>Editor 1 (E1)</strong></td>
-                        <td>{{ $submission->petugasEditor1->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>
-                            @if($submission->username_editor && $submission->password_editor)
-                                <code>{{ $submission->username_editor }} / {{ $submission->password_editor }}</code>
-                            @else
-                                -
-                            @endif
-                        </td>
-                        @endif
-                        <td>
-                            @if($submission->editor1_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasEditor1)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Author 1 -->
-                    <tr class="table-warning">
-                        <td><strong>Author 1 (A1)</strong></td>
-                        <td>{{ $submission->petugasAuthor1->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>-</td>
-                        @endif
-                        <td>
-                            @if($submission->author1_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasAuthor1)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Editor 2 -->
-                    <tr class="table-info">
-                        <td><strong>Editor 2 (E2)</strong></td>
-                        <td>{{ $submission->petugasEditor2->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>-</td>
-                        @endif
-                        <td>
-                            @if($submission->editor2_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasEditor2)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Reviewer 1 -->
-                    <tr class="table-primary">
-                        <td><strong>Reviewer 1 (R1)</strong></td>
-                        <td>{{ $submission->petugasReviewer1->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>
-                            @if($submission->username_reviewer1 && $submission->password_reviewer1)
-                                <code>{{ $submission->username_reviewer1 }} / {{ $submission->password_reviewer1 }}</code>
-                            @else
-                                -
-                            @endif
-                        </td>
-                        @endif
-                        <td>
-                            @if($submission->reviewer1_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasReviewer1)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Reviewer 2 -->
-                    <tr class="table-primary">
-                        <td><strong>Reviewer 2 (R2)</strong></td>
-                        <td>{{ $submission->petugasReviewer2->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>
-                            @if($submission->username_reviewer2 && $submission->password_reviewer2)
-                                <code>{{ $submission->username_reviewer2 }} / {{ $submission->password_reviewer2 }}</code>
-                            @else
-                                -
-                            @endif
-                        </td>
-                        @endif
-                        <td>
-                            @if($submission->reviewer2_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasReviewer2)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Editor 3 -->
-                    <tr class="table-info">
-                        <td><strong>Editor 3 (E3)</strong></td>
-                        <td>{{ $submission->petugasEditor3->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>-</td>
-                        @endif
-                        <td>
-                            @if($submission->editor3_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasEditor3)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Author 2 -->
-                    <tr class="table-warning">
-                        <td><strong>Author 2 (A2)</strong></td>
-                        <td>{{ $submission->petugasAuthor2->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>-</td>
-                        @endif
-                        <td>
-                            @if($submission->author2_valid)
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
-                            @elseif($submission->petugasAuthor2)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
-                    
-                    <!-- Production -->
-                    <tr class="table-success">
-                        <td><strong>Production (P)</strong></td>
-                        <td>{{ $submission->petugasProduction->name ?? '-' }}</td>
-                        @if($showCredentials)
-                        <td>
-                            @if($submission->link_publish)
-                                <a href="{{ $submission->link_publish }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-link-45deg"></i> Link Publish
-                                </a>
-                            @else
-                                -
-                            @endif
-                        </td>
-                        @endif
-                        <td>
-                            @if($submission->production_valid || !empty($submission->link_publish))
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Published</span>
-                            @elseif($submission->petugasProduction)
-                                <span class="badge bg-warning">In Progress</span>
-                            @else
-                                <span class="badge bg-secondary">Pending</span>
-                            @endif
-                        </td>
-                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -234,9 +196,9 @@
         <div class="alert alert-info mt-3 mb-0">
             <strong><i class="bi bi-info-circle"></i> Keterangan:</strong>
             <ul class="mb-0 mt-1">
-                <li><span class="badge bg-secondary">Pending</span> - Belum ada petugas yang ditugaskan</li>
-                <li><span class="badge bg-warning">In Progress</span> - Petugas sedang mengerjakan</li>
-                <li><span class="badge bg-success">Valid/Published</span> - Tahap sudah selesai</li>
+                <li><span class="badge {{ $pendingColor }}">Pending</span> - Belum ada petugas yang ditugaskan</li>
+                <li><span class="badge {{ $progressColor }}">In Progress</span> - Petugas sedang mengerjakan</li>
+                <li><span class="badge {{ $validColor }}">Valid/Published</span> - Tahap sudah selesai</li>
             </ul>
         </div>
     </div>
