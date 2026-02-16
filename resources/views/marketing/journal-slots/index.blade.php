@@ -151,13 +151,19 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($slot->journalMaster && $slot->journalMaster->link_jurnal)
-                                    <a href="{{ $slot->journalMaster->link_jurnal }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
+                                <div class="d-flex gap-1 justify-content-center">
+                                    @if(!$slot->is_full && $slot->is_active)
+                                        <a href="{{ route('marketing.submissions.create', ['journal_master_id' => $slot->journal_master_id, 'journal_slot_id' => $slot->id]) }}" 
+                                           class="btn btn-sm btn-success" title="Submit Artikel ke Slot Ini">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </a>
+                                    @endif
+                                    @if($slot->journalMaster && $slot->journalMaster->link_jurnal)
+                                        <a href="{{ $slot->journalMaster->link_jurnal }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Jurnal">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

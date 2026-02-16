@@ -136,7 +136,7 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
         
-        $submissions = $query->latest('tanggal_submit')->paginate(10);
+        $submissions = $query->latest('tanggal_submit')->paginate(10)->withQueryString();
         
         // Debug log
         \Log::info('Submissions found: ' . $submissions->total());
@@ -185,7 +185,7 @@ class DashboardController extends Controller
     /**
      * Show Create Submission Form
      */
-    public function createSubmission()
+    public function createSubmission(Request $request)
     {
         $marketing = Auth::guard('marketing')->user();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
@@ -198,8 +198,12 @@ class DashboardController extends Controller
         // Data Kategori dan Jenis Jurnal
         $kategoris = \App\Models\Kategori::where('is_active', true)->orderBy('name')->get();
         $jenisJurnals = \App\Models\JenisJurnal::where('is_active', true)->orderBy('name')->get();
+
+        // Pre-select journal and slot when coming from Data Slot page
+        $preselectedJournalId = $request->query('journal_master_id');
+        $preselectedSlotId = $request->query('journal_slot_id');
         
-        return view('marketing.create-submission', compact('marketing', 'journals', 'slots', 'kategoris', 'jenisJurnals'));
+        return view('marketing.create-submission', compact('marketing', 'journals', 'slots', 'kategoris', 'jenisJurnals', 'preselectedJournalId', 'preselectedSlotId'));
     }
 
     /**

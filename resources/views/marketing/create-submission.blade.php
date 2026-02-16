@@ -428,6 +428,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (oldJournal) {
             selectJournal(oldJournal.id, oldJournal.nama);
         }
+    @elseif(isset($preselectedJournalId) && $preselectedJournalId)
+        const preselectedJournalId = '{{ $preselectedJournalId }}';
+        const preselectedSlotId = '{{ $preselectedSlotId ?? "" }}';
+        const preJournal = journals.find(function(j) { return j.id == preselectedJournalId; });
+        if (preJournal) {
+            selectJournal(preJournal.id, preJournal.nama);
+            // Auto-select the slot after loading
+            if (preselectedSlotId) {
+                const origLoadSlots = loadSlots;
+                const checkSlotInterval = setInterval(function() {
+                    if (!slotSelect.disabled && slotSelect.options.length > 1) {
+                        slotSelect.value = preselectedSlotId;
+                        clearInterval(checkSlotInterval);
+                    }
+                }, 200);
+                // Safety timeout
+                setTimeout(function() { clearInterval(checkSlotInterval); }, 5000);
+            }
+        }
     @endif
     
     searchInput.focus();
