@@ -87,6 +87,7 @@
                             <th>Jenis</th>
                             <th>Akreditasi</th>
                             <th class="text-center">Total Submission</th>
+                            <th>Kode Slot</th>
                             <th>Status</th>
                             <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
@@ -137,6 +138,15 @@
                                     });
                                 @endphp
                                 <span class="badge bg-primary">{{ $totalSubmissions }}</span>
+                            </td>
+                            <td>
+                                @forelse($journal->slots as $slot)
+                                    <a href="{{ route('marketing.journal-slots.show', $slot) }}" class="text-decoration-none">
+                                        <code class="d-block">{{ $slot->kode_slot }}</code>
+                                    </a>
+                                @empty
+                                    <span class="text-muted">-</span>
+                                @endforelse
                             </td>
                             <td>
                                 @if($journal->is_active)
