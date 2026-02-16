@@ -111,11 +111,26 @@
                             <!-- Submit -->
                             <tr>
                                 <td><strong>Submit</strong></td>
-                                <td>{{ $submission->petugasSubmit->name ?? '-' }}</td>
-                                <td>-</td>
                                 <td>
                                     @if($submission->petugasSubmit)
-                                        <span class="badge bg-success">Assigned</span>
+                                        {{ $submission->petugasSubmit->name }}
+                                    @elseif($submission->marketing)
+                                        {{ $submission->marketing->name }}
+                                        <small class="text-muted">(Marketing)</small>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($submission->username_author && $submission->password_author)
+                                        <code>{{ $submission->username_author }} / {{ $submission->password_author }}</code>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($submission->petugasSubmit || $submission->marketing)
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Valid</span>
                                     @else
                                         <span class="badge bg-secondary">Pending</span>
                                     @endif

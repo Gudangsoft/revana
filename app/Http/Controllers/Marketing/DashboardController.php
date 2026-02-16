@@ -343,6 +343,7 @@ class DashboardController extends Controller
         
         $submission->load([
             'journalSlot.journalMaster',
+            'marketing',
             'petugasSubmit',
             'petugasEditor1',
             'petugasAuthor1',
