@@ -243,6 +243,9 @@ class DashboardController extends Controller
      */
     public function featureManagement()
     {
+        // Check scheduled maintenance
+        \App\Services\FeatureSettingService::checkScheduledMaintenance();
+
         $featureSettings = \App\Services\FeatureSettingService::all();
         $groupedFeatures = \App\Services\FeatureSettingService::groupedFeatures();
         $limitMeta = \App\Services\FeatureSettingService::limitMeta();
@@ -251,6 +254,8 @@ class DashboardController extends Controller
         $capabilityOptions = \App\Services\FeatureSettingService::capabilityOptions();
         $systemInfo = \App\Services\FeatureSettingService::systemInfo();
         $changelogs = \App\Services\FeatureSettingService::changelogs();
+        $auditLogs = \App\Services\FeatureSettingService::auditLogs(30);
+        $envOverrides = \App\Services\FeatureSettingService::envOverrides();
 
         return view('admin.feature-management', compact(
             'featureSettings',
@@ -260,16 +265,19 @@ class DashboardController extends Controller
             'capabilityDefs',
             'capabilityOptions',
             'systemInfo',
-            'changelogs'
+            'changelogs',
+            'auditLogs',
+            'envOverrides'
         ));
     }
 
     /**
-     * Save feature settings.
+     * Save feature settings with notification for critical changes.
      */
     public function saveFeatureSettings(Request $request)
     {
         $data = $request->except('_token');
+        $oldSettings = \App\Services\FeatureSettingService::all();
 
         // Convert checkboxes: present = '1', absent = '0'
         $featureMeta = \App\Services\FeatureSettingService::featureMeta();
@@ -280,7 +288,10 @@ class DashboardController extends Controller
         $data['maintenance_mode'] = $request->has('maintenance_mode') ? '1' : '0';
 
         \App\Services\FeatureSettingService::save($data);
-        
+
+        // Send notification for critical changes
+        $this->notifyCriticalChanges($oldSettings, $data);
+
         return redirect()->route('admin.feature-management')
             ->with('success', 'Pengaturan fitur berhasil disimpan!');
     }
@@ -291,8 +302,100 @@ class DashboardController extends Controller
     public function resetFeatureSettings()
     {
         \App\Services\FeatureSettingService::resetToDefaults();
-        
+
+        // Notify admins
+        $this->sendSettingNotification('reset');
+
         return redirect()->route('admin.feature-management')
             ->with('success', 'Semua pengaturan fitur telah dikembalikan ke default.');
+    }
+
+    /**
+     * Export settings as JSON download.
+     */
+    public function exportFeatureSettings()
+    {
+        $json = \App\Services\FeatureSettingService::exportAsJson();
+        $filename = 'sipera-settings-' . date('Y-m-d_His') . '.json';
+
+        return response($json, 200, [
+            'Content-Type'        => 'application/json',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Import settings from uploaded JSON file.
+     */
+    public function importFeatureSettings(Request $request)
+    {
+        $request->validate([
+            'settings_file' => 'required|file|mimes:json,txt|max:1024',
+        ]);
+
+        try {
+            $json = file_get_contents($request->file('settings_file')->getRealPath());
+            $changes = \App\Services\FeatureSettingService::importFromJson($json);
+
+            $this->sendSettingNotification('import', $changes);
+
+            return redirect()->route('admin.feature-management')
+                ->with('success', 'Berhasil import ' . count($changes) . ' pengaturan dari file JSON.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.feature-management')
+                ->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify admins of critical setting changes.
+     */
+    private function notifyCriticalChanges(array $oldSettings, array $newData): void
+    {
+        try {
+            $adminName = auth()->user()->name ?? 'Admin';
+
+            // Maintenance mode changed?
+            $oldMaint = $oldSettings['maintenance_mode'] ?? '0';
+            $newMaint = $newData['maintenance_mode'] ?? '0';
+            if ($oldMaint !== $newMaint) {
+                $action = $newMaint === '1' ? 'maintenance_on' : 'maintenance_off';
+                $this->sendSettingNotification($action);
+            }
+
+            // Role capability changes?
+            $roleChanges = [];
+            foreach ($newData as $key => $value) {
+                if (str_starts_with($key, 'role_') && isset($oldSettings[$key]) && $oldSettings[$key] !== $value) {
+                    $roleChanges[$key] = ['old' => $oldSettings[$key], 'new' => $value];
+                }
+            }
+            if (!empty($roleChanges)) {
+                $this->sendSettingNotification('role_change', $roleChanges);
+            }
+        } catch (\Exception $e) {
+            // Don't fail the save if notification fails
+        }
+    }
+
+    /**
+     * Send notification to all admin users.
+     */
+    private function sendSettingNotification(string $action, array $changes = []): void
+    {
+        try {
+            if (!\App\Services\FeatureSettingService::isEnabled('email_notifications')) {
+                return;
+            }
+
+            $adminName = auth()->user()->name ?? 'Admin';
+            $admins = \App\Models\User::where('role', 'admin')->get();
+
+            foreach ($admins as $admin) {
+                $admin->notify(new \App\Notifications\SettingChangedNotification($action, $adminName, $changes));
+            }
+        } catch (\Exception $e) {
+            // Silently fail - don't break the flow
+        }
     }
 }

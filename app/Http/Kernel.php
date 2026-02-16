@@ -47,6 +47,7 @@ class Kernel extends HttpKernel
         'reviewer' => \App\Http\Middleware\ReviewerMiddleware::class,
         'pic' => \App\Http\Middleware\PicMiddleware::class,
         'feature' => \App\Http\Middleware\CheckFeature::class,
+        'rolecap' => \App\Http\Middleware\CheckRoleCapability::class,
         'maintenance.custom' => \App\Http\Middleware\CheckMaintenance::class,
     ];
 }

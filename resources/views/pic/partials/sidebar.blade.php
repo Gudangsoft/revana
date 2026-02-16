@@ -184,10 +184,12 @@
         <span>Data Jurnal</span>
     </div>
     
+    @rolecap('pic', 'proses_submission')
     <a href="https://portal.apji.org/pic/submissions" class="nav-link" data-title="Data Jurnal">
         <i class="bi bi-journal-text text-info"></i>
         <span>Data Jurnal</span>
     </a>
+    @endrolecap
     
     @feature('fasttrack')
     @rolecap('pic', 'fasttrack')

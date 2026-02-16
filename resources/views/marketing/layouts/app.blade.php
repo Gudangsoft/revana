@@ -99,12 +99,14 @@
                 <a href="{{ route('marketing.dashboard') }}" class="nav-link {{ $currentRoute == 'marketing.dashboard' ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
+                @rolecap('marketing', 'buat_submission')
                 <a href="{{ route('marketing.submissions') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i> Artikel
                 </a>
                 <a href="{{ route('marketing.submissions.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
                 </a>
+                @endrolecap
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 @feature('fasttrack')
                 @rolecap('marketing', 'fasttrack')
@@ -120,12 +122,16 @@
                 <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 20px; color: #6c757d; text-transform: uppercase;">
                     <i class="bi bi-journal-bookmark"></i> Pengelolaan Jurnal
                 </div>
+                @rolecap('marketing', 'kelola_jurnal')
                 <a href="{{ route('marketing.journals.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.journals') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i> Data Jurnal
                 </a>
+                @endrolecap
+                @rolecap('marketing', 'kelola_slot')
                 <a href="{{ route('marketing.journal-slots.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.journal-slots') ? 'active' : '' }}">
                     <i class="bi bi-calendar3"></i> Data Slot
                 </a>
+                @endrolecap
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 @feature('points')
                 @rolecap('marketing', 'points')

@@ -30,6 +30,12 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
 
 <!-- QUICK NAV TABS -->
 <ul class="nav nav-pills mb-4 flex-wrap gap-1" id="featureTab" role="tablist">
@@ -63,6 +69,16 @@
             <i class="bi bi-journal-code"></i> Changelog
         </button>
     </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#auditPanel" type="button" role="tab">
+            <i class="bi bi-clock-history"></i> Audit Log
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="importexport-tab" data-bs-toggle="pill" data-bs-target="#importexportPanel" type="button" role="tab">
+            <i class="bi bi-arrow-left-right"></i> Import/Export
+        </button>
+    </li>
 </ul>
 
 <form action="{{ route('admin.feature-management.save') }}" method="POST">
@@ -92,12 +108,16 @@
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="small">{{ $meta['label'] }}</strong>
+                            @if(isset($envOverrides[$key]))
+                                <span class="badge bg-dark" title="Diatur oleh .env, tidak bisa diubah dari UI"><i class="bi bi-lock-fill me-1"></i>ENV</span>
+                            @else
                             <div class="form-check form-switch mb-0">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        name="{{ $key }}" id="switch-{{ $key }}" value="1"
                                        {{ $featureSettings[$key] === '1' ? 'checked' : '' }}
                                        onchange="toggleCardOpacity('{{ $key }}', this.checked)">
                             </div>
+                            @endif
                         </div>
                         <small class="text-muted">{{ $meta['desc'] }}</small>
                     </div>
@@ -317,9 +337,46 @@
                         <div class="form-text">Pesan yang ditampilkan ke user saat maintenance aktif.</div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i> Simpan Pengaturan Maintenance
-                    </button>
+                    <hr>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-calendar-event me-1"></i> Jadwal Maintenance Otomatis</h6>
+                    <p class="text-muted small">Set jadwal untuk mengaktifkan dan menonaktifkan maintenance mode secara otomatis.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Mulai Maintenance</label>
+                            <input type="datetime-local" class="form-control" name="maintenance_scheduled_start"
+                                   value="{{ $featureSettings['maintenance_scheduled_start'] ?? '' }}">
+                            <div class="form-text">Kosongkan jika tidak ingin menjadwalkan.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Selesai Maintenance</label>
+                            <input type="datetime-local" class="form-control" name="maintenance_scheduled_end"
+                                   value="{{ $featureSettings['maintenance_scheduled_end'] ?? '' }}">
+                            <div class="form-text">Sistem akan otomatis kembali normal.</div>
+                        </div>
+                    </div>
+                    @if(!empty($featureSettings['maintenance_scheduled_start']) || !empty($featureSettings['maintenance_scheduled_end']))
+                    <div class="alert alert-info mt-3 small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        @if(!empty($featureSettings['maintenance_scheduled_start']))
+                            Dijadwalkan mulai: <strong>{{ $featureSettings['maintenance_scheduled_start'] }}</strong>
+                        @endif
+                        @if(!empty($featureSettings['maintenance_scheduled_end']))
+                            | Selesai: <strong>{{ $featureSettings['maintenance_scheduled_end'] }}</strong>
+                        @endif
+                    </div>
+                    @endif
+
+                    @if(isset($envOverrides['maintenance_mode']))
+                    <div class="alert alert-dark mt-3">
+                        <i class="bi bi-lock-fill me-1"></i> Maintenance mode dikontrol oleh <code>.env</code> (FORCE_MAINTENANCE). Toggle UI dinonaktifkan.
+                    </div>
+                    @endif
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i> Simpan Pengaturan Maintenance
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -486,6 +543,184 @@
             </div>
             @endforeach
         </div>
+    @endif
+</div>
+
+<!-- ============================== -->
+<!-- TAB 7: AUDIT LOG                -->
+<!-- ============================== -->
+<div class="tab-pane fade" id="auditPanel" role="tabpanel">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-clock-history me-1"></i> Riwayat Perubahan Pengaturan</h6>
+            <small class="text-muted">{{ count($auditLogs) }} entri terakhir</small>
+        </div>
+        <div class="card-body p-0">
+            @if($auditLogs->isEmpty())
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Belum ada riwayat perubahan. Jalankan <code>php artisan migrate</code> terlebih dahulu untuk membuat tabel audit log.
+                </div>
+            @else
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-sm table-striped table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th style="width: 160px;">Waktu</th>
+                            <th style="width: 100px;">Aksi</th>
+                            <th>Admin</th>
+                            <th>Detail</th>
+                            <th style="width: 120px;">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($auditLogs as $log)
+                        <tr>
+                            <td class="small">
+                                <span title="{{ $log->created_at->format('d M Y H:i:s') }}">
+                                    {{ $log->created_at->diffForHumans() }}
+                                </span>
+                            </td>
+                            <td>
+                                @php
+                                    $actionBadge = match($log->action) {
+                                        'update'   => 'bg-primary',
+                                        'reset'    => 'bg-danger',
+                                        'import'   => 'bg-success',
+                                        'export'   => 'bg-info',
+                                        'schedule' => 'bg-warning text-dark',
+                                        default    => 'bg-secondary',
+                                    };
+                                @endphp
+                                <span class="badge {{ $actionBadge }}">{{ $log->action_label }}</span>
+                            </td>
+                            <td class="small">{{ $log->admin_name }} <span class="text-muted">({{ $log->admin_guard }})</span></td>
+                            <td class="small">
+                                @if($log->setting_key)
+                                    <code>{{ $log->setting_key }}</code>:
+                                    <span class="text-danger">{{ Str::limit($log->old_value ?? '-', 30) }}</span>
+                                    <i class="bi bi-arrow-right text-muted mx-1"></i>
+                                    <span class="text-success">{{ Str::limit($log->new_value ?? '-', 30) }}</span>
+                                @elseif($log->batch_changes)
+                                    <a href="#" class="text-decoration-none" data-bs-toggle="collapse" data-bs-target="#batch-{{ $log->id }}">
+                                        <i class="bi bi-list-ul me-1"></i>{{ count($log->batch_changes) }} perubahan
+                                    </a>
+                                    <div class="collapse mt-1" id="batch-{{ $log->id }}">
+                                        <div class="bg-light p-2 rounded small" style="max-height: 200px; overflow-y: auto;">
+                                            @foreach($log->batch_changes as $bKey => $bVal)
+                                            <div class="mb-1">
+                                                <code>{{ $bKey }}</code>:
+                                                @if(is_array($bVal))
+                                                    <span class="text-danger">{{ $bVal['old'] ?? '-' }}</span>
+                                                    <i class="bi bi-arrow-right mx-1"></i>
+                                                    <span class="text-success">{{ $bVal['new'] ?? '-' }}</span>
+                                                @else
+                                                    <span class="text-success">{{ $bVal }}</span>
+                                                @endif
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td class="small text-muted">{{ $log->ip_address ?? '-' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- ============================== -->
+<!-- TAB 8: IMPORT / EXPORT          -->
+<!-- ============================== -->
+<div class="tab-pane fade" id="importexportPanel" role="tabpanel">
+    <div class="row g-4">
+        <!-- Export -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="bi bi-download me-1"></i> Export Settings</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Download semua pengaturan fitur sebagai file JSON. Berguna untuk backup atau deploy ke server lain.</p>
+                    <ul class="list-unstyled small text-muted mb-3">
+                        <li><i class="bi bi-check text-success me-1"></i> Feature toggles</li>
+                        <li><i class="bi bi-check text-success me-1"></i> Configurable limits</li>
+                        <li><i class="bi bi-check text-success me-1"></i> Role capabilities</li>
+                        <li><i class="bi bi-check text-success me-1"></i> Maintenance settings</li>
+                    </ul>
+                    <a href="{{ route('admin.feature-management.export') }}" class="btn btn-success">
+                        <i class="bi bi-download me-1"></i> Download JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-upload me-1"></i> Import Settings</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Upload file JSON yang di-export sebelumnya untuk menerapkan pengaturan. Setting yang di-override oleh <code>.env</code> akan dilewati.</p>
+                    <form action="{{ route('admin.feature-management.import') }}" method="POST" enctype="multipart/form-data"
+                          onsubmit="return confirm('Import akan menimpa pengaturan saat ini. Lanjutkan?')">
+                        @csrf
+                        <div class="mb-3">
+                            <input type="file" class="form-control" name="settings_file" accept=".json,.txt" required>
+                            <div class="form-text">File JSON maksimum 1MB.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload me-1"></i> Import JSON
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Environment Overrides Info -->
+    @if(!empty($envOverrides))
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-dark text-white">
+            <h6 class="mb-0"><i class="bi bi-lock-fill me-1"></i> Environment Overrides (.env)</h6>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">Setting berikut dikontrol oleh file <code>.env</code> dan tidak bisa diubah dari UI maupun import.</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Setting Key</th>
+                            <th>Forced Value</th>
+                            <th>ENV Variable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($envOverrides as $key => $value)
+                        <tr>
+                            <td><code>{{ $key }}</code></td>
+                            <td><span class="badge {{ $value === '1' ? 'bg-success' : 'bg-danger' }}">{{ $value === '1' ? 'ON' : 'OFF' }}</span></td>
+                            <td class="text-muted small">
+                                @php
+                                    $envNames = ['maintenance_mode' => 'FORCE_MAINTENANCE', 'fasttrack_enabled' => 'DISABLE_FASTTRACK', 'points_enabled' => 'DISABLE_POINTS', 'leaderboard_enabled' => 'DISABLE_LEADERBOARD', 'email_notifications_enabled' => 'DISABLE_EMAIL'];
+                                @endphp
+                                <code>{{ $envNames[$key] ?? '?' }}</code>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     @endif
 </div>
 

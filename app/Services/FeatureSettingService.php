@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Models\SettingAuditLog;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 
 class FeatureSettingService
 {
@@ -38,6 +40,8 @@ class FeatureSettingService
             // ===== Maintenance =====
             'maintenance_mode'              => '0',
             'maintenance_message'           => 'Sistem sedang dalam pemeliharaan. Silakan coba beberapa saat lagi.',
+            'maintenance_scheduled_start'   => '',  // Y-m-d H:i format or empty
+            'maintenance_scheduled_end'     => '',  // Y-m-d H:i format or empty
 
             // ===== Role Capabilities: Marketing =====
             // Values: 'yes', 'no', 'read-only', 'partial'
@@ -342,11 +346,11 @@ class FeatureSettingService
     }
 
     /**
-     * Get all feature settings (merged with defaults).
+     * Get all feature settings (merged with defaults, then env overrides).
      */
     public static function all(): array
     {
-        return Cache::remember('feature_settings', 300, function () {
+        $settings = Cache::remember('feature_settings', 300, function () {
             $defaults = self::defaults();
             $stored = Setting::where('key', 'like', 'feat_%')->pluck('value', 'key')->toArray();
 
@@ -357,6 +361,16 @@ class FeatureSettingService
             }
             return $result;
         });
+
+        // Apply env overrides (always on top, not cached so .env changes take effect immediately)
+        $envOverrides = self::envOverrides();
+        foreach ($envOverrides as $key => $value) {
+            if (array_key_exists($key, $settings)) {
+                $settings[$key] = $value;
+            }
+        }
+
+        return $settings;
     }
 
     /**
@@ -385,25 +399,199 @@ class FeatureSettingService
     }
 
     /**
-     * Save feature settings.
+     * Environment override keys.
+     * If set in .env, these override DB values and cannot be changed from UI.
+     */
+    public static function envOverrides(): array
+    {
+        $overrides = [];
+        $envMap = [
+            'FORCE_MAINTENANCE'    => 'maintenance_mode',
+            'FORCE_DEBUG'          => 'debug_mode',
+            'DISABLE_FASTTRACK'    => 'fasttrack_enabled',
+            'DISABLE_POINTS'       => 'points_enabled',
+            'DISABLE_LEADERBOARD'  => 'leaderboard_enabled',
+            'DISABLE_EMAIL'        => 'email_notifications_enabled',
+        ];
+
+        foreach ($envMap as $envKey => $settingKey) {
+            $envVal = env($envKey);
+            if ($envVal !== null) {
+                // FORCE_MAINTENANCE=true means maintenance_mode=1
+                // DISABLE_*=true means *_enabled=0
+                if (str_starts_with($envKey, 'DISABLE_')) {
+                    $overrides[$settingKey] = filter_var($envVal, FILTER_VALIDATE_BOOLEAN) ? '0' : '1';
+                } else {
+                    $overrides[$settingKey] = filter_var($envVal, FILTER_VALIDATE_BOOLEAN) ? '1' : '0';
+                }
+            }
+        }
+
+        return $overrides;
+    }
+
+    /**
+     * Check if a key is overridden by .env (non-editable from UI).
+     */
+    public static function isEnvOverridden(string $key): bool
+    {
+        return array_key_exists($key, self::envOverrides());
+    }
+
+    /**
+     * Save feature settings with audit logging.
      */
     public static function save(array $settings): void
     {
+        $current = self::all();
+        $changes = [];
+
         foreach ($settings as $key => $value) {
             if (array_key_exists($key, self::defaults())) {
+                // Skip env-overridden keys
+                if (self::isEnvOverridden($key)) {
+                    continue;
+                }
+                $oldVal = $current[$key] ?? null;
+                if ($oldVal !== $value) {
+                    $changes[$key] = ['old' => $oldVal, 'new' => $value];
+                }
                 Setting::set('feat_' . $key, $value);
             }
         }
+
+        Cache::forget('feature_settings');
+
+        // Audit log
+        if (!empty($changes)) {
+            try {
+                SettingAuditLog::logBatch('update', $changes);
+            } catch (\Exception $e) {
+                // Table may not exist yet
+            }
+        }
+    }
+
+    /**
+     * Reset all feature settings to defaults with audit logging.
+     */
+    public static function resetToDefaults(): void
+    {
+        try {
+            SettingAuditLog::logChange('reset');
+        } catch (\Exception $e) {
+            // Table may not exist yet
+        }
+
+        Setting::where('key', 'like', 'feat_%')->delete();
         Cache::forget('feature_settings');
     }
 
     /**
-     * Reset all feature settings to defaults.
+     * Export all settings as JSON string.
      */
-    public static function resetToDefaults(): void
+    public static function exportAsJson(): string
     {
-        Setting::where('key', 'like', 'feat_%')->delete();
+        $data = [
+            'exported_at' => now()->toIso8601String(),
+            'app_name'    => config('app.name'),
+            'settings'    => self::all(),
+        ];
+
+        try {
+            SettingAuditLog::logChange('export');
+        } catch (\Exception $e) {}
+
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Import settings from JSON string.
+     * Returns array of changes made.
+     */
+    public static function importFromJson(string $json): array
+    {
+        $data = json_decode($json, true);
+        if (!$data || !isset($data['settings'])) {
+            throw new \InvalidArgumentException('Format JSON tidak valid. Harus berisi key "settings".');
+        }
+
+        $imported = $data['settings'];
+        $defaults = self::defaults();
+        $changes = [];
+
+        foreach ($imported as $key => $value) {
+            if (array_key_exists($key, $defaults) && !self::isEnvOverridden($key)) {
+                Setting::set('feat_' . $key, $value);
+                $changes[$key] = $value;
+            }
+        }
+
         Cache::forget('feature_settings');
+
+        try {
+            SettingAuditLog::logBatch('import', $changes);
+        } catch (\Exception $e) {}
+
+        return $changes;
+    }
+
+    /**
+     * Check and apply scheduled maintenance.
+     * Returns true if maintenance state was changed.
+     */
+    public static function checkScheduledMaintenance(): bool
+    {
+        $settings = self::all();
+        $start = $settings['maintenance_scheduled_start'] ?? '';
+        $end = $settings['maintenance_scheduled_end'] ?? '';
+        $currentMode = $settings['maintenance_mode'] ?? '0';
+
+        if (empty($start) && empty($end)) {
+            return false;
+        }
+
+        $now = Carbon::now();
+        $changed = false;
+
+        // If scheduled start has arrived and maintenance is not already on
+        if (!empty($start) && $now->gte(Carbon::parse($start)) && $currentMode !== '1') {
+            Setting::set('feat_maintenance_mode', '1');
+            $changed = true;
+            try {
+                SettingAuditLog::logChange('schedule', 'maintenance_mode', '0', '1');
+            } catch (\Exception $e) {}
+        }
+
+        // If scheduled end has arrived and maintenance is still on
+        if (!empty($end) && $now->gte(Carbon::parse($end)) && $currentMode === '1') {
+            Setting::set('feat_maintenance_mode', '0');
+            // Clear schedule
+            Setting::set('feat_maintenance_scheduled_start', '');
+            Setting::set('feat_maintenance_scheduled_end', '');
+            $changed = true;
+            try {
+                SettingAuditLog::logChange('schedule', 'maintenance_mode', '1', '0');
+            } catch (\Exception $e) {}
+        }
+
+        if ($changed) {
+            Cache::forget('feature_settings');
+        }
+
+        return $changed;
+    }
+
+    /**
+     * Get recent audit logs.
+     */
+    public static function auditLogs(int $limit = 50): \Illuminate\Database\Eloquent\Collection
+    {
+        try {
+            return SettingAuditLog::recent($limit)->get();
+        } catch (\Exception $e) {
+            return new \Illuminate\Database\Eloquent\Collection();
+        }
     }
 
     /**

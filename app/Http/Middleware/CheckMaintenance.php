@@ -12,9 +12,17 @@ class CheckMaintenance
     /**
      * Handle an incoming request.
      * Blocks non-admin users when maintenance mode is enabled via admin UI.
+     * Also checks scheduled maintenance.
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Check scheduled maintenance (auto on/off)
+        try {
+            FeatureSettingService::checkScheduledMaintenance();
+        } catch (\Exception $e) {
+            // Fail silently
+        }
+
         if (FeatureSettingService::get('maintenance_mode', '0') === '1') {
             // Allow admins through
             if (auth()->check() && method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin()) {

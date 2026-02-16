@@ -87,6 +87,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/feature-management', [AdminDashboard::class, 'featureManagement'])->name('feature-management');
         Route::post('/feature-management', [AdminDashboard::class, 'saveFeatureSettings'])->name('feature-management.save');
         Route::post('/feature-management/reset', [AdminDashboard::class, 'resetFeatureSettings'])->name('feature-management.reset');
+        Route::get('/feature-management/export', [AdminDashboard::class, 'exportFeatureSettings'])->name('feature-management.export');
+        Route::post('/feature-management/import', [AdminDashboard::class, 'importFeatureSettings'])->name('feature-management.import');
         
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
@@ -406,7 +408,7 @@ Route::prefix('pic')->group(function () {
         });
         
         // Fasttrack Submissions
-        Route::prefix('fasttrack')->name('pic.fasttrack.')->middleware('feature:fasttrack')->group(function () {
+        Route::prefix('fasttrack')->name('pic.fasttrack.')->middleware(['feature:fasttrack', 'rolecap:pic,fasttrack'])->group(function () {
             Route::get('/', [PicJournalController::class, 'fasttrackIndex'])->name('index');
             Route::get('/create', [PicJournalController::class, 'fasttrackCreate'])->name('create');
             Route::post('/', [PicJournalController::class, 'fasttrackStore'])->name('store');
@@ -479,11 +481,11 @@ Route::prefix('marketing')->group(function () {
         Route::get('/journal-slots/{slot}', [MarketingDashboardController::class, 'journalSlotsShow'])->name('marketing.journal-slots.show');
         
         // Fasttrack Submissions (feature-gated)
-        Route::get('/fasttrack', [MarketingDashboardController::class, 'fasttrackIndex'])->name('marketing.fasttrack.index')->middleware('feature:fasttrack');
-        Route::get('/fasttrack/create', [MarketingDashboardController::class, 'fasttrackCreate'])->name('marketing.fasttrack.create')->middleware('feature:fasttrack');
-        Route::post('/fasttrack', [MarketingDashboardController::class, 'fasttrackStore'])->name('marketing.fasttrack.store')->middleware('feature:fasttrack');
-        Route::get('/fasttrack/monitoring', [MarketingDashboardController::class, 'fasttrackMonitoring'])->name('marketing.fasttrack.monitoring')->middleware('feature:fasttrack');
-        Route::get('/fasttrack/{submission}', [MarketingDashboardController::class, 'fasttrackShow'])->name('marketing.fasttrack.show')->middleware('feature:fasttrack');
+        Route::get('/fasttrack', [MarketingDashboardController::class, 'fasttrackIndex'])->name('marketing.fasttrack.index')->middleware(['feature:fasttrack', 'rolecap:marketing,fasttrack']);
+        Route::get('/fasttrack/create', [MarketingDashboardController::class, 'fasttrackCreate'])->name('marketing.fasttrack.create')->middleware(['feature:fasttrack', 'rolecap:marketing,fasttrack']);
+        Route::post('/fasttrack', [MarketingDashboardController::class, 'fasttrackStore'])->name('marketing.fasttrack.store')->middleware(['feature:fasttrack', 'rolecap:marketing,fasttrack']);
+        Route::get('/fasttrack/monitoring', [MarketingDashboardController::class, 'fasttrackMonitoring'])->name('marketing.fasttrack.monitoring')->middleware(['feature:fasttrack', 'rolecap:marketing,fasttrack']);
+        Route::get('/fasttrack/{submission}', [MarketingDashboardController::class, 'fasttrackShow'])->name('marketing.fasttrack.show')->middleware(['feature:fasttrack', 'rolecap:marketing,fasttrack']);
         
         // Laporan
         Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('marketing.reports.journal-articles');
