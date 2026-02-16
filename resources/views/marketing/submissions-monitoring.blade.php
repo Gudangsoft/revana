@@ -166,16 +166,22 @@
                             'REJECTED' => 0,
                         ];
                         $progress = $progressMap[$submission->status] ?? 10;
+
+                        // Fasttrack with link_publish = final 100%
+                        if ($submission->process_type === 'fasttrack' && !empty($submission->link_publish)) {
+                            $progress = 100;
+                        }
                         
-                        $badgeColor = match($submission->status) {
-                            'SUBMITTED' => 'secondary',
-                            'EDITOR1_PROCESS', 'AUTHOR1_PROCESS' => 'info',
-                            'EDITOR2_PROCESS' => 'primary',
-                            'REVIEWER1_PROCESS', 'REVIEWER2_PROCESS' => 'warning',
-                            'EDITOR3_PROCESS', 'AUTHOR2_PROCESS' => 'info',
-                            'PRODUCTION_PROCESS' => 'dark',
-                            'PUBLISHED' => 'success',
-                            'REJECTED' => 'danger',
+                        $badgeColor = match(true) {
+                            $submission->process_type === 'fasttrack' && !empty($submission->link_publish) => 'success',
+                            $submission->status === 'SUBMITTED' => 'secondary',
+                            in_array($submission->status, ['EDITOR1_PROCESS', 'AUTHOR1_PROCESS']) => 'info',
+                            $submission->status === 'EDITOR2_PROCESS' => 'primary',
+                            in_array($submission->status, ['REVIEWER1_PROCESS', 'REVIEWER2_PROCESS']) => 'warning',
+                            in_array($submission->status, ['EDITOR3_PROCESS', 'AUTHOR2_PROCESS']) => 'info',
+                            $submission->status === 'PRODUCTION_PROCESS' => 'dark',
+                            $submission->status === 'PUBLISHED' => 'success',
+                            $submission->status === 'REJECTED' => 'danger',
                             default => 'secondary'
                         };
                     @endphp
@@ -214,7 +220,11 @@
                         </td>
                         <td class="text-center">
                             <span class="badge bg-{{ $badgeColor }} small">
-                                {{ str_replace('_', ' ', $submission->status) }}
+                                @if($submission->process_type === 'fasttrack' && !empty($submission->link_publish))
+                                    PUBLISHED
+                                @else
+                                    {{ str_replace('_', ' ', $submission->status) }}
+                                @endif
                             </span>
                         </td>
                         <td>
