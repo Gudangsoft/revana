@@ -116,6 +116,14 @@
             <div class="text-muted">{{ $submission->notes }}</div>
         </div>
         @endif
+
+        @if($submission->catatan_marketing)
+        <hr>
+        <div class="mb-3">
+            <strong><i class="bi bi-chat-left-text text-warning"></i> Catatan dari Marketing:</strong>
+            <div class="alert alert-warning mt-1 mb-0">{{ $submission->catatan_marketing }}</div>
+        </div>
+        @endif
         
         @if($submission->link_publish)
         <hr>

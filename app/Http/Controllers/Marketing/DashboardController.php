@@ -457,6 +457,29 @@ class DashboardController extends Controller
     }
 
     /**
+     * Update catatan marketing for a submission
+     */
+    public function updateCatatan(Request $request, Submission $submission)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        // Verify this submission belongs to the marketing user
+        if ($submission->marketing_id !== $marketing->id) {
+            abort(403, 'Anda tidak memiliki akses ke submission ini.');
+        }
+        
+        $request->validate([
+            'catatan_marketing' => 'nullable|string|max:2000',
+        ]);
+        
+        $submission->update([
+            'catatan_marketing' => $request->catatan_marketing,
+        ]);
+        
+        return redirect()->back()->with('catatan_success', 'Catatan berhasil disimpan.');
+    }
+
+    /**
      * Submissions Monitoring for Marketing
      */
     public function submissionsMonitoring(Request $request)

@@ -88,6 +88,7 @@ class Submission extends Model
         'process_type',
         'tanggal_submit',
         'notes',
+        'catatan_marketing',
         'created_by',
         'edit_count',
     ];

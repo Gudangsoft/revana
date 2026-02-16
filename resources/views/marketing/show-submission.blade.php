@@ -289,6 +289,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Catatan Marketing -->
+        <div class="card mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Catatan Marketing</h5>
+            </div>
+            <div class="card-body">
+                @if(session('catatan_success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>{{ session('catatan_success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                <form action="{{ route('marketing.submissions.update-catatan', $submission) }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="catatan_marketing" class="form-label">Catatan dari Marketing <small class="text-muted">(jika ada revisi setelah di submit/proses)</small></label>
+                        <textarea name="catatan_marketing" id="catatan_marketing" class="form-control" rows="4"
+                                  placeholder="Tulis catatan di sini...">{{ old('catatan_marketing', $submission->catatan_marketing) }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save"></i> Simpan Catatan
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

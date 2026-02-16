@@ -178,6 +178,15 @@
                     <p>{{ $submission->notes }}</p>
                 </div>
                 @endif
+
+                @if($submission->catatan_marketing)
+                <div class="mt-3">
+                    <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-chat-left-text text-warning"></i> Catatan dari Marketing</h6>
+                    <div class="alert alert-warning mb-0">
+                        {{ $submission->catatan_marketing }}
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </div>
