@@ -107,7 +107,7 @@
                             </div>
                         </td>
                         <td>
-                            <x-slot-link :slot="$slot" guard="pic" />
+                            <x-slot-link :journal-slot="$slot" guard="pic" />
                         </td>
                     </tr>
                     @empty

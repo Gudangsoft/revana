@@ -112,7 +112,7 @@
                             @endif
                         </td>
                         <td>
-                            <x-slot-link :slot="$slot" guard="pic" />
+                            <x-slot-link :journal-slot="$slot" guard="pic" />
                         </td>
                         <td>
                             <a href="{{ route('pic.journal-slots.edit', $slot) }}" class="btn btn-sm btn-warning">

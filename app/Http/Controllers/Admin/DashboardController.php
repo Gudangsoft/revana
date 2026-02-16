@@ -157,7 +157,7 @@ class DashboardController extends Controller
                 'name' => 'slot-link',
                 'file' => 'components/slot-link.blade.php',
                 'description' => 'Link kode slot yang bisa diklik ke halaman detail slot',
-                'usage' => '<x-slot-link :slot="$slot" guard="marketing" />',
+                'usage' => '<x-slot-link :journal-slot="$slot" guard="marketing" />',
                 'usedIn' => ['marketing/journal-slots/index', 'marketing/journals/index', 'pic/journal-slots/index', 'pic/journal-slots/index-new', 'pic/journal-slots/monitoring'],
             ],
         ];

@@ -118,13 +118,13 @@
                     <div class="card-body">
                         @if($sampleSubmission->journalSlot)
                             <p class="small text-muted mb-2">Marketing guard:</p>
-                            <x-slot-link :slot="$sampleSubmission->journalSlot" guard="marketing" />
+                            <x-slot-link :journal-slot="$sampleSubmission->journalSlot" guard="marketing" />
                             <hr>
                             <p class="small text-muted mb-2">PIC guard:</p>
-                            <x-slot-link :slot="$sampleSubmission->journalSlot" guard="pic" />
+                            <x-slot-link :journal-slot="$sampleSubmission->journalSlot" guard="pic" />
                             <hr>
                             <p class="small text-muted mb-2">Admin guard:</p>
-                            <x-slot-link :slot="$sampleSubmission->journalSlot" guard="admin" />
+                            <x-slot-link :journal-slot="$sampleSubmission->journalSlot" guard="admin" />
                         @else
                             <p class="text-muted small">Submission ini tidak punya slot jurnal untuk preview</p>
                         @endif

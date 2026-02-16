@@ -141,7 +141,7 @@
                             </td>
                             <td>
                                 @forelse($journal->slots as $slot)
-                                    <x-slot-link :slot="$slot" guard="marketing" />
+                                    <x-slot-link :journal-slot="$slot" guard="marketing" />
                                 @empty
                                     <span class="text-muted">-</span>
                                 @endforelse

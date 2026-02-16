@@ -134,7 +134,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
                                         <td>
-                                            <x-slot-link :slot="$slot" guard="pic" />
+                                            <x-slot-link :journal-slot="$slot" guard="pic" />
                                         </td>
                                         <td>{{ Str::limit($slot->journalMaster->nama_jurnal, 30) }}</td>
                                         <td>{{ Str::limit($slot->journalMaster->publisher, 20) }}</td>
