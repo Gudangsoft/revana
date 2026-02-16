@@ -35,9 +35,14 @@
                 <select name="status" class="form-select">
                     <option value="">Semua Status</option>
                     <option value="SUBMITTED" {{ request('status') == 'SUBMITTED' ? 'selected' : '' }}>Submitted</option>
-                    <option value="UNDER_REVIEW" {{ request('status') == 'UNDER_REVIEW' ? 'selected' : '' }}>Under Review</option>
-                    <option value="EDITING" {{ request('status') == 'EDITING' ? 'selected' : '' }}>Editing</option>
-                    <option value="PRODUCTION" {{ request('status') == 'PRODUCTION' ? 'selected' : '' }}>Production</option>
+                    <option value="EDITOR1_PROCESS" {{ request('status') == 'EDITOR1_PROCESS' ? 'selected' : '' }}>Editor 1</option>
+                    <option value="AUTHOR1_PROCESS" {{ request('status') == 'AUTHOR1_PROCESS' ? 'selected' : '' }}>Author 1</option>
+                    <option value="EDITOR2_PROCESS" {{ request('status') == 'EDITOR2_PROCESS' ? 'selected' : '' }}>Editor 2</option>
+                    <option value="REVIEWER1_PROCESS" {{ request('status') == 'REVIEWER1_PROCESS' ? 'selected' : '' }}>Reviewer 1</option>
+                    <option value="REVIEWER2_PROCESS" {{ request('status') == 'REVIEWER2_PROCESS' ? 'selected' : '' }}>Reviewer 2</option>
+                    <option value="EDITOR3_PROCESS" {{ request('status') == 'EDITOR3_PROCESS' ? 'selected' : '' }}>Editor 3</option>
+                    <option value="AUTHOR2_PROCESS" {{ request('status') == 'AUTHOR2_PROCESS' ? 'selected' : '' }}>Author 2</option>
+                    <option value="PRODUCTION_PROCESS" {{ request('status') == 'PRODUCTION_PROCESS' ? 'selected' : '' }}>Production</option>
                     <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>
                     <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
                 </select>
@@ -68,8 +73,8 @@
     @php
         $stats = [
             'submitted' => $submissions->where('status', 'SUBMITTED')->count(),
-            'in_review' => $submissions->whereIn('status', ['REVIEW_ASSIGNED', 'UNDER_REVIEW', 'REVISION_REQUIRED', 'REVISED'])->count(),
-            'in_process' => $submissions->whereIn('status', ['EDITING', 'EDITING_SUBMITTED', 'EDITING_COMPLETED', 'LAYOUT', 'LAYOUT_SUBMITTED', 'LAYOUT_COMPLETED', 'PRODUCTION', 'PRODUCTION_SUBMITTED'])->count(),
+            'in_review' => $submissions->whereIn('status', ['EDITOR1_PROCESS', 'AUTHOR1_PROCESS', 'EDITOR2_PROCESS', 'REVIEWER1_PROCESS', 'REVIEWER2_PROCESS'])->count(),
+            'in_process' => $submissions->whereIn('status', ['EDITOR3_PROCESS', 'AUTHOR2_PROCESS', 'PRODUCTION_PROCESS'])->count(),
             'published' => $submissions->where('status', 'PUBLISHED')->count(),
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
         ];
@@ -141,18 +146,14 @@
                     @php
                         $progressMap = [
                             'SUBMITTED' => 10,
-                            'REVIEW_ASSIGNED' => 20,
-                            'UNDER_REVIEW' => 30,
-                            'REVISION_REQUIRED' => 35,
-                            'REVISED' => 45,
-                            'EDITING' => 55,
-                            'EDITING_SUBMITTED' => 60,
-                            'EDITING_COMPLETED' => 65,
-                            'LAYOUT' => 70,
-                            'LAYOUT_SUBMITTED' => 75,
-                            'LAYOUT_COMPLETED' => 80,
-                            'PRODUCTION' => 85,
-                            'PRODUCTION_SUBMITTED' => 90,
+                            'EDITOR1_PROCESS' => 20,
+                            'AUTHOR1_PROCESS' => 30,
+                            'EDITOR2_PROCESS' => 40,
+                            'REVIEWER1_PROCESS' => 50,
+                            'REVIEWER2_PROCESS' => 60,
+                            'EDITOR3_PROCESS' => 70,
+                            'AUTHOR2_PROCESS' => 80,
+                            'PRODUCTION_PROCESS' => 90,
                             'PUBLISHED' => 100,
                             'REJECTED' => 0,
                         ];
@@ -160,11 +161,11 @@
                         
                         $badgeColor = match($submission->status) {
                             'SUBMITTED' => 'secondary',
-                            'REVIEW_ASSIGNED', 'UNDER_REVIEW' => 'primary',
-                            'REVISION_REQUIRED', 'REVISED' => 'warning',
-                            'EDITING', 'EDITING_SUBMITTED', 'EDITING_COMPLETED' => 'info',
-                            'LAYOUT', 'LAYOUT_SUBMITTED', 'LAYOUT_COMPLETED' => 'info',
-                            'PRODUCTION', 'PRODUCTION_SUBMITTED' => 'dark',
+                            'EDITOR1_PROCESS', 'AUTHOR1_PROCESS' => 'info',
+                            'EDITOR2_PROCESS' => 'primary',
+                            'REVIEWER1_PROCESS', 'REVIEWER2_PROCESS' => 'warning',
+                            'EDITOR3_PROCESS', 'AUTHOR2_PROCESS' => 'info',
+                            'PRODUCTION_PROCESS' => 'dark',
                             'PUBLISHED' => 'success',
                             'REJECTED' => 'danger',
                             default => 'secondary'

@@ -196,18 +196,14 @@
                                 // Calculate progress percentage based on status
                                 $statusProgress = [
                                     'SUBMITTED' => 10,
-                                    'REVIEW_ASSIGNED' => 20,
-                                    'UNDER_REVIEW' => 30,
-                                    'REVISION_REQUIRED' => 40,
-                                    'REVISED' => 50,
-                                    'EDITING' => 60,
-                                    'EDITING_SUBMITTED' => 65,
-                                    'EDITING_COMPLETED' => 70,
-                                    'LAYOUT' => 75,
-                                    'LAYOUT_SUBMITTED' => 80,
-                                    'LAYOUT_COMPLETED' => 85,
-                                    'PRODUCTION' => 90,
-                                    'PRODUCTION_SUBMITTED' => 95,
+                                    'EDITOR1_PROCESS' => 20,
+                                    'AUTHOR1_PROCESS' => 30,
+                                    'EDITOR2_PROCESS' => 40,
+                                    'REVIEWER1_PROCESS' => 50,
+                                    'REVIEWER2_PROCESS' => 60,
+                                    'EDITOR3_PROCESS' => 70,
+                                    'AUTHOR2_PROCESS' => 80,
+                                    'PRODUCTION_PROCESS' => 90,
                                     'PUBLISHED' => 100,
                                     'REJECTED' => 0,
                                 ];
@@ -233,11 +229,11 @@
                                     @php
                                         $badgeColor = match($submission->status) {
                                             'SUBMITTED' => 'secondary',
-                                            'REVIEW_ASSIGNED', 'UNDER_REVIEW' => 'primary',
-                                            'REVISION_REQUIRED', 'REVISED' => 'warning',
-                                            'EDITING', 'EDITING_SUBMITTED', 'EDITING_COMPLETED' => 'info',
-                                            'LAYOUT', 'LAYOUT_SUBMITTED', 'LAYOUT_COMPLETED' => 'info',
-                                            'PRODUCTION', 'PRODUCTION_SUBMITTED' => 'dark',
+                                            'EDITOR1_PROCESS', 'AUTHOR1_PROCESS' => 'info',
+                                            'EDITOR2_PROCESS' => 'primary',
+                                            'REVIEWER1_PROCESS', 'REVIEWER2_PROCESS' => 'warning',
+                                            'EDITOR3_PROCESS', 'AUTHOR2_PROCESS' => 'info',
+                                            'PRODUCTION_PROCESS' => 'dark',
                                             'PUBLISHED' => 'success',
                                             'REJECTED' => 'danger',
                                             default => 'secondary'
