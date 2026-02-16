@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/export-completed-reviews', [AdminDashboard::class, 'exportCompletedReviews'])->name('export.completed.reviews');
+        Route::get('/component-overview', [AdminDashboard::class, 'componentOverview'])->name('component-overview');
         
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');

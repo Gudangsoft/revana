@@ -141,9 +141,7 @@
                             </td>
                             <td>
                                 @forelse($journal->slots as $slot)
-                                    <a href="{{ route('marketing.journal-slots.show', $slot) }}" class="text-decoration-none">
-                                        <code class="d-block">{{ $slot->kode_slot }}</code>
-                                    </a>
+                                    <x-slot-link :slot="$slot" guard="marketing" />
                                 @empty
                                     <span class="text-muted">-</span>
                                 @endforelse

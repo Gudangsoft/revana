@@ -150,11 +150,6 @@
                 </thead>
                 <tbody>
                     @foreach($submissions as $submission)
-                    @php
-                        $progress = $submission->progress_percentage;
-                        $badgeClass = $submission->status_badge_class;
-                        $badgeColor = str_replace('bg-', '', $badgeClass);
-                    @endphp
                     <tr>
                         <td class="px-3">
                             <code class="badge bg-light text-dark">{{ $submission->kode_submit }}</code>
@@ -189,18 +184,10 @@
                             <small>{{ $submission->tanggal_submit?->format('d M Y') ?? '-' }}</small>
                         </td>
                         <td class="text-center">
-                            <span class="badge {{ $badgeClass }} small">
-                                {{ $submission->status_label }}
-                            </span>
+                            <x-submission-status :submission="$submission" size="small" />
                         </td>
                         <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="progress flex-grow-1" style="height: 8px; min-width: 80px;">
-                                    <div class="progress-bar {{ $badgeClass }}" 
-                                         style="width: {{ $progress }}%"></div>
-                                </div>
-                                <small class="text-muted" style="min-width: 35px;">{{ $progress }}%</small>
-                            </div>
+                            <x-submission-progress :submission="$submission" :height="8" :min-width="80" />
                         </td>
                         <td class="text-center">
                             <a href="{{ route('marketing.submissions.show', $submission) }}" 

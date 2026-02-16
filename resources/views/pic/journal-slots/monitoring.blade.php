@@ -107,9 +107,7 @@
                             </div>
                         </td>
                         <td>
-                            <a href="{{ route('pic.journal-slots.show', $slot) }}" class="text-decoration-none">
-                                <code>{{ $slot->kode_slot }}</code>
-                            </a>
+                            <x-slot-link :slot="$slot" guard="pic" />
                         </td>
                     </tr>
                     @empty

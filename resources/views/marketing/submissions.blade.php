@@ -103,11 +103,6 @@
                 </thead>
                 <tbody>
                     @foreach($submissions as $submission)
-                    @php
-                        $progress = $submission->progress_percentage;
-                        $badgeClass = $submission->status_badge_class;
-                        $badgeColor = str_replace('bg-', '', $badgeClass);
-                    @endphp
                     <tr class="{{ request('highlight') == $submission->id ? 'table-success' : '' }}">
                         <td>
                             <code class="text-primary">{{ $submission->kode_submit }}</code>
@@ -129,20 +124,10 @@
                             <small>{{ $submission->tanggal_submit?->format('d/m/Y') ?? '-' }}</small>
                         </td>
                         <td class="text-center">
-                            <span class="badge {{ $badgeClass }} small">
-                                {{ $submission->status_label }}
-                            </span>
+                            <x-submission-status :submission="$submission" size="small" />
                         </td>
                         <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="progress flex-fill" style="height: 8px; min-width: 60px;">
-                                    <div class="progress-bar bg-{{ $badgeColor }}" 
-                                         style="width: {{ $progress }}%"></div>
-                                </div>
-                                <small class="text-{{ $badgeColor }} fw-bold" style="min-width: 35px;">
-                                    {{ $progress }}%
-                                </small>
-                            </div>
+                            <x-submission-progress :submission="$submission" />
                         </td>
                         <td class="text-center">
                             @php

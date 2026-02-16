@@ -192,3 +192,6 @@
 <a href="{{ route('admin.email-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-envelope-at-fill"></i> Pengaturan Email
 </a>
+<a href="{{ route('admin.component-overview') }}" class="nav-link {{ $currentRoute == 'admin.component-overview' ? 'active' : '' }}">
+    <i class="bi bi-puzzle-fill text-info"></i> Component Overview
+</a>

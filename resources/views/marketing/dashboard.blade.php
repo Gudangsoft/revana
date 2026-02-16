@@ -192,26 +192,6 @@
                         </thead>
                         <tbody>
                             @foreach($submissions->take(5) as $submission)
-                            @php
-                                // Calculate progress percentage based on status
-                                $statusProgress = [
-                                    'SUBMITTED' => 10,
-                                    'EDITOR1_PROCESS' => 20,
-                                    'AUTHOR1_PROCESS' => 30,
-                                    'EDITOR2_PROCESS' => 40,
-                                    'REVIEWER1_PROCESS' => 50,
-                                    'REVIEWER2_PROCESS' => 60,
-                                    'EDITOR3_PROCESS' => 70,
-                                    'AUTHOR2_PROCESS' => 80,
-                                    'PRODUCTION_PROCESS' => 90,
-                                    'PUBLISHED' => 100,
-                                    'REJECTED' => 0,
-                                ];
-                                $progress = $statusProgress[$submission->status] ?? 15;
-                                $progressColor = $submission->status == 'PUBLISHED' ? 'success' : 
-                                               ($submission->status == 'REJECTED' ? 'danger' : 
-                                               ($progress < 50 ? 'warning' : 'info'));
-                            @endphp
                             <tr>
                                 <td class="px-3">
                                     <code class="badge bg-light text-dark">{{ $submission->kode_submit }}</code>
@@ -226,29 +206,10 @@
                                     <small class="text-muted">{{ Str::limit($submission->journalSlot?->journalMaster?->nama_jurnal ?? '-', 20) }}</small>
                                 </td>
                                 <td class="text-center">
-                                    @php
-                                        $badgeColor = match($submission->status) {
-                                            'SUBMITTED' => 'secondary',
-                                            'EDITOR1_PROCESS', 'AUTHOR1_PROCESS' => 'info',
-                                            'EDITOR2_PROCESS' => 'primary',
-                                            'REVIEWER1_PROCESS', 'REVIEWER2_PROCESS' => 'warning',
-                                            'EDITOR3_PROCESS', 'AUTHOR2_PROCESS' => 'info',
-                                            'PRODUCTION_PROCESS' => 'dark',
-                                            'PUBLISHED' => 'success',
-                                            'REJECTED' => 'danger',
-                                            default => 'secondary'
-                                        };
-                                    @endphp
-                                    <span class="badge bg-{{ $badgeColor }} small">{{ str_replace('_', ' ', $submission->status) }}</span>
+                                    <x-submission-status :submission="$submission" size="small" />
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress flex-grow-1" style="height: 10px;">
-                                            <div class="progress-bar bg-{{ $progressColor }}" role="progressbar" 
-                                                 style="width: {{ $progress }}%" title="{{ $progress }}%"></div>
-                                        </div>
-                                        <small class="text-muted" style="min-width: 35px;">{{ $progress }}%</small>
-                                    </div>
+                                    <x-submission-progress :submission="$submission" :height="10" />
                                 </td>
                             </tr>
                             @endforeach

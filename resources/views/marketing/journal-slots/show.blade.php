@@ -147,15 +147,9 @@
                             <td>{{ Str::limit($submission->judul_artikel, 40) }}</td>
                             <td>{{ $submission->nama_penulis }}</td>
                             <td>{{ $submission->tanggal_submit?->format('d M Y') ?? '-' }}</td>
-                            <td><span class="badge {{ $submission->status_badge_class }}">{{ $submission->status_label }}</span></td>
+                            <td><x-submission-status :submission="$submission" /></td>
                             <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress flex-grow-1" style="height: 8px; min-width: 60px;">
-                                        <div class="progress-bar {{ $submission->status_badge_class }}" 
-                                             style="width: {{ $submission->progress_percentage }}%"></div>
-                                    </div>
-                                    <small class="text-muted">{{ $submission->progress_percentage }}%</small>
-                                </div>
+                                <x-submission-progress :submission="$submission" />
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('marketing.submissions.show', $submission) }}" 

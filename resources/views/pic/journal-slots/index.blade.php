@@ -112,9 +112,7 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('pic.journal-slots.show', $slot) }}" class="text-decoration-none">
-                                {{ $slot->kode_slot ?? '-' }}
-                            </a>
+                            <x-slot-link :slot="$slot" guard="pic" />
                         </td>
                         <td>
                             <a href="{{ route('pic.journal-slots.edit', $slot) }}" class="btn btn-sm btn-warning">
