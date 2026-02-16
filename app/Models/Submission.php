@@ -350,6 +350,12 @@ class Submission extends Model
     public function getProgressPercentageAttribute()
     {
         if ($this->status === 'REJECTED') return 0;
+        
+        // Fasttrack with link_publish = 100%
+        if ($this->process_type === 'fasttrack' && $this->link_publish) {
+            return 100;
+        }
+        
         return ($this->current_step / 10) * 100;
     }
 

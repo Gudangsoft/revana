@@ -266,7 +266,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($submission->production_valid)
+                                    @if($submission->production_valid || ($submission->process_type === 'fasttrack' && $submission->link_publish))
                                         <span class="badge bg-success"><i class="bi bi-check-circle"></i> Published</span>
                                     @elseif($submission->petugasProduction)
                                         <span class="badge bg-warning">In Progress</span>
