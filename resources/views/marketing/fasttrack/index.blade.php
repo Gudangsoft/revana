@@ -565,6 +565,8 @@
         {{ $submissions->withQueryString()->links() }}
     </div>
 </div>
+
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const wrapper = document.getElementById('monitoringScrollWrapper');
     const positionFill = document.getElementById('scrollPositionFill');
