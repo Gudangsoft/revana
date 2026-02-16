@@ -376,11 +376,12 @@ Route::prefix('pic')->group(function () {
             Route::get('/', [PicJournalController::class, 'slotsIndex'])->name('index');
             Route::get('/monitoring', [PicJournalController::class, 'slotsMonitoring'])->name('monitoring');
             Route::get('/create', [PicJournalController::class, 'slotsCreate'])->name('create');
+            Route::get('/get-by-journal', [PicJournalController::class, 'getSlotsByJournal'])->name('get-by-journal');
             Route::post('/', [PicJournalController::class, 'slotsStore'])->name('store');
+            Route::get('/{slot}', [PicJournalController::class, 'slotsShow'])->name('show');
             Route::get('/{slot}/edit', [PicJournalController::class, 'slotsEdit'])->name('edit');
             Route::put('/{slot}', [PicJournalController::class, 'slotsUpdate'])->name('update');
             Route::delete('/{slot}', [PicJournalController::class, 'slotsDestroy'])->name('destroy');
-            Route::get('/get-by-journal', [PicJournalController::class, 'getSlotsByJournal'])->name('get-by-journal');
         });
         
         Route::prefix('submissions')->name('pic.submissions.')->group(function () {
@@ -469,6 +470,7 @@ Route::prefix('marketing')->group(function () {
         // Journal Management
         Route::get('/journals', [MarketingDashboardController::class, 'journalsIndex'])->name('marketing.journals.index');
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
+        Route::get('/journal-slots/{slot}', [MarketingDashboardController::class, 'journalSlotsShow'])->name('marketing.journal-slots.show');
         
         // Fasttrack Submissions
         Route::get('/fasttrack', [MarketingDashboardController::class, 'fasttrackIndex'])->name('marketing.fasttrack.index');

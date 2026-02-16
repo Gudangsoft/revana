@@ -97,6 +97,7 @@
                     <thead class="table-light">
                         <tr>
                             <th style="width: 50px;">#</th>
+                            <th>Kode Slot</th>
                             <th>Nama Jurnal</th>
                             <th>Publisher</th>
                             <th>Kategori</th>
@@ -117,6 +118,11 @@
                         @forelse($slots as $slot)
                         <tr>
                             <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
+                            <td>
+                                <a href="{{ route('marketing.journal-slots.show', $slot) }}" class="text-decoration-none">
+                                    <code>{{ $slot->kode_slot }}</code>
+                                </a>
+                            </td>
                             <td>{{ Str::limit($slot->journalMaster->nama_jurnal, 30) }}</td>
                             <td>{{ Str::limit($slot->journalMaster->publisher, 20) }}</td>
                             <td>
@@ -176,7 +182,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="15" class="text-center text-muted py-4">
+                                <td colspan="16" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 Belum ada data slot
                             </td>

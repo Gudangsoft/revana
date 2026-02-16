@@ -107,7 +107,9 @@
                             </div>
                         </td>
                         <td>
-                            <code>{{ $slot->kode_slot }}</code>
+                            <a href="{{ route('pic.journal-slots.show', $slot) }}" class="text-decoration-none">
+                                <code>{{ $slot->kode_slot }}</code>
+                            </a>
                         </td>
                     </tr>
                     @empty

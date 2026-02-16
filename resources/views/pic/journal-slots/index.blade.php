@@ -111,7 +111,11 @@
                                 <span class="badge bg-danger">Penuh</span>
                             @endif
                         </td>
-                        <td>{{ $slot->kode_slot ?? '-' }}</td>
+                        <td>
+                            <a href="{{ route('pic.journal-slots.show', $slot) }}" class="text-decoration-none">
+                                {{ $slot->kode_slot ?? '-' }}
+                            </a>
+                        </td>
                         <td>
                             <a href="{{ route('pic.journal-slots.edit', $slot) }}" class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil"></i>

@@ -87,7 +87,6 @@
                             <th>Jenis</th>
                             <th>Akreditasi</th>
                             <th class="text-center">Total Submission</th>
-                            <th class="text-center">Sudah Diedit</th>
                             <th>Status</th>
                             <th class="text-center" style="width: 100px;">Aksi</th>
                         </tr>
@@ -138,18 +137,6 @@
                                     });
                                 @endphp
                                 <span class="badge bg-primary">{{ $totalSubmissions }}</span>
-                            </td>
-                            <td class="text-center">
-                                @php
-                                    $editedSubmissions = $journal->slots->sum(function($slot) {
-                                        return $slot->submissions->where('edit_count', '>', 0)->count();
-                                    });
-                                @endphp
-                                @if($editedSubmissions > 0)
-                                    <span class="badge bg-warning text-dark">{{ $editedSubmissions }}</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
                             </td>
                             <td>
                                 @if($journal->is_active)

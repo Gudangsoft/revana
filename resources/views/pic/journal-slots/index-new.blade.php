@@ -133,7 +133,11 @@
                                     @forelse($slots as $slot)
                                     <tr>
                                         <td>{{ $loop->iteration + ($slots->currentPage() - 1) * $slots->perPage() }}</td>
-                                        <td><code>{{ $slot->kode_slot }}</code></td>
+                                        <td>
+                                            <a href="{{ route('pic.journal-slots.show', $slot) }}" class="text-decoration-none">
+                                                <code>{{ $slot->kode_slot }}</code>
+                                            </a>
+                                        </td>
                                         <td>{{ Str::limit($slot->journalMaster->nama_jurnal, 30) }}</td>
                                         <td>{{ Str::limit($slot->journalMaster->publisher, 20) }}</td>
                                         <td>

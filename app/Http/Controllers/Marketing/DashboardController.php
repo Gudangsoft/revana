@@ -468,6 +468,21 @@ class DashboardController extends Controller
     }
 
     /**
+     * Show Journal Slot Detail for Marketing
+     */
+    public function journalSlotsShow(JournalSlot $slot)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        
+        $slot->load(['journalMaster', 'submissions' => function($q) use ($marketing) {
+            $q->where('marketing_id', $marketing->id)
+              ->orderBy('tanggal_submit', 'desc');
+        }]);
+        
+        return view('marketing.journal-slots.show', compact('marketing', 'slot'));
+    }
+
+    /**
      * Update catatan marketing for a submission
      */
     public function updateCatatan(Request $request, Submission $submission)

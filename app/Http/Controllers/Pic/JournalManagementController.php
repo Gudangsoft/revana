@@ -224,6 +224,15 @@ class JournalManagementController extends Controller
             ->with('success', 'Slot jurnal berhasil ditambahkan');
     }
 
+    public function slotsShow(JournalSlot $slot)
+    {
+        $slot->load(['journalMaster', 'submissions' => function($q) {
+            $q->orderBy('tanggal_submit', 'desc');
+        }]);
+        
+        return view('pic.journal-slots.show', compact('slot'));
+    }
+
     public function slotsEdit(JournalSlot $slot)
     {
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
