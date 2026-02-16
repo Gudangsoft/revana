@@ -23,6 +23,9 @@ class RedirectIfAuthenticated
                     }
                     return redirect()->route('pic.author.dashboard');
                 }
+                if ($guard === 'marketing') {
+                    return redirect()->route('marketing.dashboard');
+                }
                 if ($request->user()->role === 'admin') {
                     return redirect('/admin/dashboard');
                 } elseif ($request->user()->role === 'reviewer') {

@@ -14,6 +14,11 @@ class Authenticate extends Middleware
                 return route('pic.login');
             }
             
+            // Check if request is for Marketing routes
+            if ($request->is('marketing/*')) {
+                return route('marketing.login');
+            }
+            
             return route('login');
         }
     }

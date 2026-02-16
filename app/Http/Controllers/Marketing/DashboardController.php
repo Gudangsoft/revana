@@ -60,9 +60,11 @@ class DashboardController extends Controller
     /**
      * Handle Marketing Logout
      */
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::guard('marketing')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect()->route('marketing.login');
     }
 
