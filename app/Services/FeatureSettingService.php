@@ -398,7 +398,7 @@ class FeatureSettingService
         // Database stats (wrapped in try-catch for safety)
         try {
             $info['total_submissions'] = \App\Models\Submission::count();
-            $info['total_reviewers'] = \App\Models\Reviewer::count();
+            $info['total_reviewers'] = \App\Models\User::where('role', 'reviewer')->count();
             $info['total_marketing'] = \App\Models\Marketing::count();
             $info['total_pic'] = \App\Models\Pic::count();
             $info['total_journals'] = \App\Models\JournalMaster::count();
