@@ -425,6 +425,57 @@ class Submission extends Model
         ]);
     }
 
+    /**
+     * Recalculate status based on current validation flags.
+     * Call this after toggling any validation field to keep status in sync.
+     */
+    public function recalculateStatus()
+    {
+        if ($this->status === 'REJECTED') {
+            return; // Don't change rejected status
+        }
+
+        if ($this->production_valid) {
+            $this->status = 'PUBLISHED';
+        } elseif ($this->author2_valid) {
+            $this->status = 'PRODUCTION_PROCESS';
+        } elseif ($this->editor3_valid) {
+            // If author2 is not assigned, skip to production
+            if (!$this->petugas_author2_id) {
+                $this->status = 'PRODUCTION_PROCESS';
+            } else {
+                $this->status = 'AUTHOR2_PROCESS';
+            }
+        } elseif ($this->reviewer1_valid && $this->reviewer2_valid) {
+            // Both reviewers done
+            if (!$this->petugas_editor3_id) {
+                // Editor3 not assigned, skip
+                if (!$this->petugas_author2_id) {
+                    $this->status = 'PRODUCTION_PROCESS';
+                } else {
+                    $this->status = 'AUTHOR2_PROCESS';
+                }
+            } else {
+                $this->status = 'EDITOR3_PROCESS';
+            }
+        } elseif ($this->editor2_valid) {
+            // In reviewer stage - determine which reviewer is being processed
+            if ($this->reviewer1_valid && !$this->reviewer2_valid) {
+                $this->status = 'REVIEWER2_PROCESS';
+            } elseif (!$this->reviewer1_valid && $this->reviewer2_valid) {
+                $this->status = 'REVIEWER1_PROCESS';
+            } else {
+                $this->status = 'REVIEWER1_PROCESS';
+            }
+        } elseif ($this->author1_valid) {
+            $this->status = 'EDITOR2_PROCESS';
+        } elseif ($this->editor1_valid) {
+            $this->status = 'AUTHOR1_PROCESS';
+        } else {
+            $this->status = 'SUBMITTED';
+        }
+    }
+
     // Process Type Helpers
     public function isNormal()
     {

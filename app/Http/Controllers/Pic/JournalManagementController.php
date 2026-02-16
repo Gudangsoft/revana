@@ -755,9 +755,9 @@ class JournalManagementController extends Controller
         
         $stats = [
             'total' => (clone $statsQuery)->count(),
-            'new' => (clone $statsQuery)->where('status', 'new')->count(),
-            'in_progress' => (clone $statsQuery)->whereNotIn('status', ['new', 'published', 'rejected'])->count(),
-            'published' => (clone $statsQuery)->where('status', 'published')->count(),
+            'new' => (clone $statsQuery)->where('status', 'SUBMITTED')->count(),
+            'in_progress' => (clone $statsQuery)->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
+            'published' => (clone $statsQuery)->where('status', 'PUBLISHED')->count(),
         ];
         
         // Count urgent tasks (tasks that require current PIC's action) - exclude fasttrack
@@ -772,7 +772,7 @@ class JournalManagementController extends Controller
                   ->orWhere('petugas_reviewer1_id', $picId)
                   ->orWhere('petugas_reviewer2_id', $picId)
                   ->orWhere('petugas_production_id', $picId);
-            })->whereNotIn('status', ['PUBLISHED', 'published', 'rejected'])->get();
+            })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->get();
         
         $urgentMappings = [
             'EDITOR1' => ['petugas_editor1_id'],
@@ -868,6 +868,9 @@ class JournalManagementController extends Controller
                 // Clear validation if link is removed
                 $submission->production_valid = false;
             }
+            
+            // Recalculate status based on current validation flags
+            $submission->recalculateStatus();
         }
         
         $submission->save();
@@ -1033,6 +1036,10 @@ class JournalManagementController extends Controller
         $oldValue = $submission->{$request->field};
         
         $submission->{$request->field} = $request->value;
+        
+        // Recalculate status based on current validation flags
+        $submission->recalculateStatus();
+        
         $submission->save();
         
         // Add points when validation is set to true (and was previously false to prevent duplicate points)
@@ -1205,6 +1212,10 @@ class JournalManagementController extends Controller
         
         // Toggle the valid status
         $submission->{$field} = !$submission->{$field};
+        
+        // Recalculate status based on current validation flags
+        $submission->recalculateStatus();
+        
         $submission->save();
         
         return response()->json([
@@ -1276,14 +1287,14 @@ class JournalManagementController extends Controller
         
         $stats = [
             'total' => $baseQuery()->count(),
-            'new' => $baseQuery()->where('status', 'new')->count(),
-            'in_progress' => $baseQuery()->whereNotIn('status', ['new', 'PUBLISHED', 'published'])->count(),
-            'published' => $baseQuery()->whereIn('status', ['PUBLISHED', 'published'])->count(),
+            'new' => $baseQuery()->where('status', 'SUBMITTED')->count(),
+            'in_progress' => $baseQuery()->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
+            'published' => $baseQuery()->where('status', 'PUBLISHED')->count(),
         ];
         
         // Count urgent tasks - tasks where status matches PIC's assigned role
         $urgentCount = 0;
-        $allSubmissions = $baseQuery()->whereNotIn('status', ['PUBLISHED', 'published'])->get();
+        $allSubmissions = $baseQuery()->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->get();
         foreach ($allSubmissions as $sub) {
             if ($this->isUrgentForPic($sub, $picId)) {
                 $urgentCount++;

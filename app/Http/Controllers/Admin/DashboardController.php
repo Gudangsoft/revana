@@ -21,12 +21,12 @@ class DashboardController extends Controller
         $totalSubmissions = Submission::count();
         
         // Submission status counts
-        $pendingSubmissions = Submission::where('status', 'pending')->count();
-        $newSubmissions = Submission::where('status', 'new')->count();
-        $inProgressSubmissions = Submission::where('status', 'in_progress')->count();
-        $submittedReviews = Submission::where('status', 'submitted')->count();
-        $approvedSubmissions = Submission::where('status', 'approved')->count();
-        $rejectedSubmissions = Submission::where('status', 'rejected')->count();
+        $pendingSubmissions = Submission::where('status', 'SUBMITTED')->count();
+        $newSubmissions = Submission::where('status', 'SUBMITTED')->count();
+        $inProgressSubmissions = Submission::whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count();
+        $submittedReviews = Submission::where('status', 'SUBMITTED')->count();
+        $approvedSubmissions = Submission::where('status', 'PUBLISHED')->count();
+        $rejectedSubmissions = Submission::where('status', 'REJECTED')->count();
         
         // Process type counts  
         $regularSubmissions = Submission::where('process_type', 'regular')->orWhereNull('process_type')->count();
@@ -46,7 +46,7 @@ class DashboardController extends Controller
 
         // Completed submissions (approved)
         $completedReviews = Submission::with(['journalSlot.journalMaster'])
-            ->where('status', 'approved')
+            ->where('status', 'PUBLISHED')
             ->orderBy('updated_at', 'desc')
             ->take(20)
             ->get();

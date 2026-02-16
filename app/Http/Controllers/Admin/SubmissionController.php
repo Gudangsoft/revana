@@ -1231,6 +1231,10 @@ class SubmissionController extends Controller
         
         // Toggle the value
         $submission->{$field} = !$submission->{$field};
+        
+        // Recalculate status based on current validation flags
+        $submission->recalculateStatus();
+        
         $submission->save();
         
         return response()->json([
