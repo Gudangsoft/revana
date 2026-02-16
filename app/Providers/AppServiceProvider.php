@@ -26,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('feature', function (string $feature) {
             return FeatureSettingService::isEnabled($feature);
         });
+
+        // Role capability directive
+        // Usage: @rolecap('marketing', 'fasttrack') ... @endrolecap
+        Blade::if('rolecap', function (string $role, string $capability) {
+            return FeatureSettingService::roleHasCapability($role, $capability);
+        });
         
         // Share settings to all views
         View::composer('*', function ($view) {

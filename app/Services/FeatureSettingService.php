@@ -38,6 +38,35 @@ class FeatureSettingService
             // ===== Maintenance =====
             'maintenance_mode'              => '0',
             'maintenance_message'           => 'Sistem sedang dalam pemeliharaan. Silakan coba beberapa saat lagi.',
+
+            // ===== Role Capabilities: Marketing =====
+            // Values: 'yes', 'no', 'read-only', 'partial'
+            'role_marketing_kelola_jurnal'      => 'read-only',
+            'role_marketing_kelola_slot'         => 'read-only',
+            'role_marketing_buat_submission'     => 'yes',
+            'role_marketing_proses_submission'   => 'no',
+            'role_marketing_validasi_review'     => 'no',
+            'role_marketing_assign_petugas'      => 'no',
+            'role_marketing_update_credential'   => 'no',
+            'role_marketing_fasttrack'           => 'partial',  // Create + View
+            'role_marketing_my_tasks'            => 'no',
+            'role_marketing_daftar_reviewer'     => 'no',
+            'role_marketing_catatan'             => 'yes',
+            'role_marketing_points'              => 'yes',
+
+            // ===== Role Capabilities: PIC =====
+            'role_pic_kelola_jurnal'         => 'read-only',
+            'role_pic_kelola_slot'           => 'read-only',
+            'role_pic_buat_submission'       => 'yes',
+            'role_pic_proses_submission'     => 'yes',
+            'role_pic_validasi_review'       => 'yes',
+            'role_pic_assign_petugas'        => 'yes',
+            'role_pic_update_credential'     => 'yes',
+            'role_pic_fasttrack'             => 'yes',
+            'role_pic_my_tasks'              => 'yes',
+            'role_pic_daftar_reviewer'       => 'yes',
+            'role_pic_catatan'               => 'no',
+            'role_pic_points'                => 'yes',
         ];
     }
 
@@ -183,61 +212,93 @@ class FeatureSettingService
     }
 
     /**
-     * Role system definitions.
+     * Capability definitions for role editing.
+     */
+    public static function capabilityDefinitions(): array
+    {
+        return [
+            'kelola_jurnal'     => ['label' => 'Kelola Jurnal (CRUD)', 'icon' => 'bi-journal-text'],
+            'kelola_slot'       => ['label' => 'Kelola Slot Jurnal (CRUD)', 'icon' => 'bi-calendar3'],
+            'buat_submission'   => ['label' => 'Buat Submission', 'icon' => 'bi-file-earmark-plus'],
+            'proses_submission' => ['label' => 'Proses/Kerjakan Submission', 'icon' => 'bi-gear'],
+            'validasi_review'   => ['label' => 'Validasi Tahap Review', 'icon' => 'bi-check2-square'],
+            'assign_petugas'    => ['label' => 'Assign Petugas', 'icon' => 'bi-person-plus'],
+            'update_credential' => ['label' => 'Update Credential', 'icon' => 'bi-key'],
+            'fasttrack'         => ['label' => 'Fasttrack', 'icon' => 'bi-lightning-charge'],
+            'my_tasks'          => ['label' => 'My Tasks', 'icon' => 'bi-clipboard-check'],
+            'daftar_reviewer'   => ['label' => 'Daftar Reviewer', 'icon' => 'bi-people'],
+            'catatan'           => ['label' => 'Catatan Marketing', 'icon' => 'bi-sticky'],
+            'points'            => ['label' => 'Point & Laporan', 'icon' => 'bi-trophy'],
+        ];
+    }
+
+    /**
+     * Available capability values for dropdown.
+     */
+    public static function capabilityOptions(): array
+    {
+        return [
+            'yes'       => 'Ya (Full)',
+            'no'        => 'Tidak',
+            'read-only' => 'Read Only',
+            'partial'   => 'Sebagian',
+        ];
+    }
+
+    /**
+     * Get role capability value from settings.
+     */
+    public static function roleCapability(string $role, string $capability): string
+    {
+        return self::get('role_' . $role . '_' . $capability, 'no');
+    }
+
+    /**
+     * Check if a role has a capability enabled (yes or partial).
+     */
+    public static function roleHasCapability(string $role, string $capability): bool
+    {
+        $val = self::roleCapability($role, $capability);
+        return in_array($val, ['yes', 'partial', 'read-only']);
+    }
+
+    /**
+     * Role system definitions (now reads capabilities from DB).
      */
     public static function roleDefinitions(): array
     {
+        $settings = self::all();
+        $caps = self::capabilityDefinitions();
+
+        // Build capabilities per role from DB
+        $buildCaps = function(string $role) use ($settings, $caps) {
+            $result = [];
+            foreach ($caps as $key => $meta) {
+                $result[$meta['label']] = $settings['role_' . $role . '_' . $key] ?? 'no';
+            }
+            return $result;
+        };
+
         return [
             'admin' => [
                 'label' => 'Administrator',
                 'icon'  => 'bi-shield-lock-fill',
                 'color' => 'danger',
                 'desc'  => 'Akses penuh ke semua fitur sistem, termasuk pengelolaan user dan pengaturan.',
+                'editable' => false,
                 'capabilities' => [
-                    'Kelola Jurnal (CRUD)' => true,
-                    'Kelola Slot Jurnal (CRUD)' => true,
-                    'Buat Submission' => true,
-                    'Proses Submission' => true,
-                    'Validasi Tahap Review' => true,
-                    'Assign Petugas & Reviewer' => true,
-                    'Update Credential' => true,
-                    'Fasttrack (Full CRUD)' => true,
-                    'My Tasks' => false,
-                    'Kelola Reviewer' => true,
-                    'Login-as Impersonation' => 'feat_impersonation_enabled',
-                    'Point & Reward' => 'feat_points_enabled',
-                    'Leaderboard' => 'feat_leaderboard_enabled',
-                    'Sertifikat' => 'feat_certificates_enabled',
-                    'Import/Export Bulk' => 'feat_bulk_import_export_enabled',
-                    'Kelola Marketing & PIC' => true,
-                    'Setting Sistem' => true,
-                    'Laporan' => true,
-                ],
-            ],
-            'pic' => [
-                'label' => 'PIC (Person in Charge)',
-                'icon'  => 'bi-person-badge',
-                'color' => 'primary',
-                'desc'  => 'Mengelola proses review jurnal, assign petugas, update credential, validasi tahap.',
-                'capabilities' => [
-                    'Kelola Jurnal (CRUD)' => 'read-only',
-                    'Kelola Slot Jurnal (CRUD)' => 'read-only',
-                    'Buat Submission' => true,
-                    'Proses Submission' => true,
-                    'Validasi Tahap Review' => true,
-                    'Assign Petugas & Reviewer' => true,
-                    'Update Credential' => true,
-                    'Fasttrack (Full CRUD)' => 'feat_fasttrack_enabled',
-                    'My Tasks' => true,
-                    'Kelola Reviewer' => true,
-                    'Login-as Impersonation' => false,
-                    'Point & Reward' => 'feat_points_enabled',
-                    'Leaderboard' => false,
-                    'Sertifikat' => false,
-                    'Import/Export Bulk' => false,
-                    'Kelola Marketing & PIC' => false,
-                    'Setting Sistem' => false,
-                    'Laporan' => true,
+                    'Kelola Jurnal (CRUD)' => 'yes',
+                    'Kelola Slot Jurnal (CRUD)' => 'yes',
+                    'Buat Submission' => 'yes',
+                    'Proses/Kerjakan Submission' => 'yes',
+                    'Validasi Tahap Review' => 'yes',
+                    'Assign Petugas' => 'yes',
+                    'Update Credential' => 'yes',
+                    'Fasttrack' => 'yes',
+                    'My Tasks' => 'no',
+                    'Daftar Reviewer' => 'yes',
+                    'Catatan Marketing' => 'no',
+                    'Point & Laporan' => 'yes',
                 ],
             ],
             'marketing' => [
@@ -245,51 +306,36 @@ class FeatureSettingService
                 'icon'  => 'bi-megaphone',
                 'color' => 'success',
                 'desc'  => 'Membuat submission, melihat status dan tracking, menambahkan catatan.',
-                'capabilities' => [
-                    'Kelola Jurnal (CRUD)' => 'read-only',
-                    'Kelola Slot Jurnal (CRUD)' => 'read-only',
-                    'Buat Submission' => true,
-                    'Proses Submission' => false,
-                    'Validasi Tahap Review' => false,
-                    'Assign Petugas & Reviewer' => false,
-                    'Update Credential' => false,
-                    'Fasttrack (Full CRUD)' => 'feat_fasttrack_enabled',
-                    'My Tasks' => false,
-                    'Kelola Reviewer' => false,
-                    'Login-as Impersonation' => false,
-                    'Point & Reward' => 'feat_points_enabled',
-                    'Leaderboard' => false,
-                    'Sertifikat' => false,
-                    'Import/Export Bulk' => false,
-                    'Kelola Marketing & PIC' => false,
-                    'Setting Sistem' => false,
-                    'Laporan' => true,
-                ],
+                'editable' => true,
+                'capabilities' => $buildCaps('marketing'),
+            ],
+            'pic' => [
+                'label' => 'PIC (Person in Charge)',
+                'icon'  => 'bi-person-badge',
+                'color' => 'primary',
+                'desc'  => 'Mengelola proses review jurnal, assign petugas, update credential, validasi tahap.',
+                'editable' => true,
+                'capabilities' => $buildCaps('pic'),
             ],
             'reviewer' => [
                 'label' => 'Reviewer',
                 'icon'  => 'bi-person-check',
                 'color' => 'warning',
                 'desc'  => 'Melakukan review artikel jurnal sesuai penugasan, download PDF, upload hasil review.',
+                'editable' => false,
                 'capabilities' => [
-                    'Kelola Jurnal (CRUD)' => false,
-                    'Kelola Slot Jurnal (CRUD)' => false,
-                    'Buat Submission' => false,
-                    'Proses Submission' => false,
-                    'Validasi Tahap Review' => false,
-                    'Assign Petugas & Reviewer' => false,
-                    'Update Credential' => false,
-                    'Fasttrack (Full CRUD)' => false,
-                    'My Tasks' => true,
-                    'Kelola Reviewer' => false,
-                    'Login-as Impersonation' => false,
-                    'Point & Reward' => 'feat_points_enabled',
-                    'Leaderboard' => 'feat_leaderboard_enabled',
-                    'Sertifikat' => 'feat_certificates_enabled',
-                    'Import/Export Bulk' => false,
-                    'Kelola Marketing & PIC' => false,
-                    'Setting Sistem' => false,
-                    'Laporan' => false,
+                    'Kelola Jurnal (CRUD)' => 'no',
+                    'Kelola Slot Jurnal (CRUD)' => 'no',
+                    'Buat Submission' => 'no',
+                    'Proses/Kerjakan Submission' => 'no',
+                    'Validasi Tahap Review' => 'no',
+                    'Assign Petugas' => 'no',
+                    'Update Credential' => 'no',
+                    'Fasttrack' => 'no',
+                    'My Tasks' => 'yes',
+                    'Daftar Reviewer' => 'no',
+                    'Catatan Marketing' => 'no',
+                    'Point & Laporan' => 'yes',
                 ],
             ],
         ];

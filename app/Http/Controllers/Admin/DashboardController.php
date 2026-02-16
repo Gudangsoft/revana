@@ -247,6 +247,8 @@ class DashboardController extends Controller
         $groupedFeatures = \App\Services\FeatureSettingService::groupedFeatures();
         $limitMeta = \App\Services\FeatureSettingService::limitMeta();
         $roleDefinitions = \App\Services\FeatureSettingService::roleDefinitions();
+        $capabilityDefs = \App\Services\FeatureSettingService::capabilityDefinitions();
+        $capabilityOptions = \App\Services\FeatureSettingService::capabilityOptions();
         $systemInfo = \App\Services\FeatureSettingService::systemInfo();
         $changelogs = \App\Services\FeatureSettingService::changelogs();
 
@@ -255,6 +257,8 @@ class DashboardController extends Controller
             'groupedFeatures',
             'limitMeta',
             'roleDefinitions',
+            'capabilityDefs',
+            'capabilityOptions',
             'systemInfo',
             'changelogs'
         ));

@@ -107,12 +107,14 @@
                 </a>
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 @feature('fasttrack')
+                @rolecap('marketing', 'fasttrack')
                 <a href="{{ route('marketing.fasttrack.index') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.fasttrack') && !str_contains($currentRoute, 'monitoring') ? 'active' : '' }}">
                     <i class="bi bi-lightning-charge text-warning"></i> Fasttrack
                 </a>
                 <a href="{{ route('marketing.fasttrack.monitoring') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.fasttrack.monitoring') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart text-warning"></i> Monitoring Fasttrack
                 </a>
+                @endrolecap
                 @endfeature
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 20px; color: #6c757d; text-transform: uppercase;">
@@ -126,9 +128,11 @@
                 </a>
                 <hr style="margin: 15px 0; opacity: 0.2;">
                 @feature('points')
+                @rolecap('marketing', 'points')
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">
                     <i class="bi bi-trophy"></i> Point Saya
                 </a>
+                @endrolecap
                 @endfeature
                 <a href="{{ route('marketing.reports.journal-articles') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.reports') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-bar-graph"></i> Laporan Jurnal

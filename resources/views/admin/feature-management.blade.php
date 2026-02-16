@@ -163,72 +163,84 @@
                 </div>
                 <div class="card-body">
                     <small class="text-muted">{{ $role['desc'] }}</small>
+                    @if($role['editable'])
+                        <div class="mt-2"><span class="badge bg-success bg-opacity-75"><i class="bi bi-pencil-square me-1"></i>Editable</span></div>
+                    @else
+                        <div class="mt-2"><span class="badge bg-secondary bg-opacity-50"><i class="bi bi-lock me-1"></i>Fixed</span></div>
+                    @endif
                 </div>
             </div>
         </div>
         @endforeach
     </div>
 
-    <!-- Capability Matrix -->
+    <!-- Editable Capability Matrix -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-dark text-white">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h6 class="mb-0"><i class="bi bi-grid-3x3-gap me-1"></i> Capability Matrix per Role</h6>
+            <small class="text-warning"><i class="bi bi-pencil-square me-1"></i> Marketing &amp; PIC bisa diedit</small>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="bg-light" style="min-width: 200px;">Capability</th>
+                            <th class="bg-light" style="min-width: 220px;">Capability</th>
                             @foreach($roleDefinitions as $roleKey => $role)
-                            <th class="text-center bg-{{ $role['color'] }} bg-opacity-10" style="min-width: 100px;">
+                            <th class="text-center bg-{{ $role['color'] }} bg-opacity-10" style="min-width: {{ $role['editable'] ? '130px' : '100px' }};">
                                 <i class="bi {{ $role['icon'] }} text-{{ $role['color'] }}"></i><br>
                                 <small class="fw-bold">{{ $role['label'] }}</small>
+                                @if($role['editable'])
+                                    <br><span class="badge bg-success" style="font-size: 0.55rem;">EDIT</span>
+                                @endif
                             </th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            // Collect all capabilities
-                            $allCapabilities = [];
-                            foreach ($roleDefinitions as $role) {
-                                foreach (array_keys($role['capabilities']) as $cap) {
-                                    if (!in_array($cap, $allCapabilities)) {
-                                        $allCapabilities[] = $cap;
-                                    }
-                                }
-                            }
-                        @endphp
-                        @foreach($allCapabilities as $capability)
+                        @foreach($capabilityDefs as $capKey => $capMeta)
                         <tr>
-                            <td><small>{{ $capability }}</small></td>
+                            <td>
+                                <i class="bi {{ $capMeta['icon'] }} text-muted me-1"></i>
+                                <small class="fw-semibold">{{ $capMeta['label'] }}</small>
+                            </td>
                             @foreach($roleDefinitions as $roleKey => $role)
                             @php
-                                $val = $role['capabilities'][$capability] ?? false;
-                                // If value is a string starting with 'feat_', it's a dynamic toggle
-                                $isDynamic = is_string($val) && str_starts_with($val, 'feat_');
-                                $featureKey = $isDynamic ? str_replace('feat_', '', $val) : null;
-                                $isOn = $isDynamic ? ($featureSettings[$featureKey] ?? '0') === '1' : $val;
+                                $val = $role['capabilities'][$capMeta['label']] ?? 'no';
                             @endphp
-                            <td class="text-center" style="background: {{ $val === true ? '#e8f5e9' : ($val === false ? '#fce4ec' : ($val === 'read-only' ? '#fff8e1' : ($isOn ? '#e3f2fd' : '#f3e5f5'))) }};">
-                                @if($val === true)
-                                    <i class="bi bi-check-circle-fill text-success"></i>
-                                @elseif($val === false)
-                                    <i class="bi bi-x-circle text-danger"></i>
-                                @elseif($val === 'read-only')
-                                    <i class="bi bi-eye text-warning"></i>
-                                    <br><small class="text-muted" style="font-size: 0.65rem;">Read Only</small>
-                                @elseif($isDynamic)
-                                    @if($isOn)
-                                        <i class="bi bi-toggle-on text-primary fs-5"></i>
-                                        <br><small class="text-primary" style="font-size: 0.6rem;">ON</small>
-                                    @else
-                                        <i class="bi bi-toggle-off text-muted fs-5"></i>
-                                        <br><small class="text-danger" style="font-size: 0.6rem;">OFF</small>
+                            @if($role['editable'])
+                                {{-- Editable dropdown for Marketing & PIC --}}
+                                <td class="text-center p-1">
+                                    <select name="role_{{ $roleKey }}_{{ $capKey }}"
+                                            class="form-select form-select-sm text-center capability-select"
+                                            data-role="{{ $roleKey }}" data-cap="{{ $capKey }}"
+                                            style="font-size: 0.75rem; min-width: 110px;"
+                                            onchange="updateCapBg(this)">
+                                        @foreach($capabilityOptions as $optVal => $optLabel)
+                                        <option value="{{ $optVal }}" {{ $val === $optVal ? 'selected' : '' }}>
+                                            {{ $optLabel }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                            @else
+                                {{-- Read-only badge for Admin & Reviewer --}}
+                                @php
+                                    $bgMap = ['yes' => '#e8f5e9', 'no' => '#fce4ec', 'read-only' => '#fff8e1', 'partial' => '#e3f2fd'];
+                                    $bgColor = $bgMap[$val] ?? '#f5f5f5';
+                                @endphp
+                                <td class="text-center" style="background: {{ $bgColor }};">
+                                    @if($val === 'yes')
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    @elseif($val === 'no')
+                                        <i class="bi bi-x-circle text-danger"></i>
+                                    @elseif($val === 'read-only')
+                                        <i class="bi bi-eye text-warning"></i>
+                                    @elseif($val === 'partial')
+                                        <i class="bi bi-dash-circle text-info"></i>
                                     @endif
-                                @endif
-                            </td>
+                                </td>
+                            @endif
                             @endforeach
                         </tr>
                         @endforeach
@@ -236,12 +248,30 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-light small">
-            <span class="me-3"><i class="bi bi-check-circle-fill text-success"></i> Selalu aktif</span>
-            <span class="me-3"><i class="bi bi-x-circle text-danger"></i> Tidak tersedia</span>
-            <span class="me-3"><i class="bi bi-eye text-warning"></i> Read Only</span>
-            <span class="me-3"><i class="bi bi-toggle-on text-primary"></i> Dynamic (bisa diubah di Feature Toggles)</span>
+        <div class="card-footer bg-light">
+            <div class="d-flex flex-wrap gap-3 small mb-2">
+                <span><i class="bi bi-check-circle-fill text-success"></i> Ya (Full)</span>
+                <span><i class="bi bi-x-circle text-danger"></i> Tidak</span>
+                <span><i class="bi bi-eye text-warning"></i> Read Only</span>
+                <span><i class="bi bi-dash-circle text-info"></i> Sebagian</span>
+            </div>
+
+            {{-- Quick action: Samakan PIC = Marketing --}}
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="copyCapabilities('marketing', 'pic')">
+                    <i class="bi bi-arrow-right me-1"></i> Samakan PIC = Marketing
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyCapabilities('pic', 'marketing')">
+                    <i class="bi bi-arrow-left me-1"></i> Samakan Marketing = PIC
+                </button>
+            </div>
         </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i> Simpan Pengaturan Role
+        </button>
     </div>
 </div>
 
@@ -478,5 +508,34 @@ function toggleMaintenanceWarning(isChecked) {
         warning.classList.toggle('d-none', !isChecked);
     }
 }
+
+// Update dropdown background based on selected value
+function updateCapBg(select) {
+    const colorMap = {
+        'yes': '#e8f5e9',
+        'no': '#fce4ec',
+        'read-only': '#fff8e1',
+        'partial': '#e3f2fd'
+    };
+    select.style.backgroundColor = colorMap[select.value] || '#fff';
+}
+
+// Copy capabilities from source role to target role
+function copyCapabilities(fromRole, toRole) {
+    const sourceSelects = document.querySelectorAll(`select[data-role="${fromRole}"]`);
+    sourceSelects.forEach(src => {
+        const cap = src.dataset.cap;
+        const target = document.querySelector(`select[data-role="${toRole}"][data-cap="${cap}"]`);
+        if (target) {
+            target.value = src.value;
+            updateCapBg(target);
+        }
+    });
+}
+
+// Initialize dropdown backgrounds on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.capability-select').forEach(updateCapBg);
+});
 </script>
 @endsection

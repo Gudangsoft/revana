@@ -338,85 +338,61 @@
     </div>
 </div>
 
-<!-- PERBEDAAN AKSES -->
+<!-- PERBEDAAN AKSES (Dynamic from DB) -->
+@php
+    $capDefs = \App\Services\FeatureSettingService::capabilityDefinitions();
+    $capOptions = \App\Services\FeatureSettingService::capabilityOptions();
+    $bgMap = ['yes' => '#e8f5e9', 'no' => '#fce4ec', 'read-only' => '#fff8e1', 'partial' => '#e3f2fd'];
+    $iconMap = [
+        'yes'       => '<i class="bi bi-check-circle-fill text-success"></i>',
+        'no'        => '<i class="bi bi-x-circle text-danger"></i>',
+        'read-only' => '<i class="bi bi-eye text-warning"></i>',
+        'partial'   => '<i class="bi bi-dash-circle text-info"></i>',
+    ];
+@endphp
 <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-dark text-white">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Perbandingan Akses Marketing vs PIC</h5>
+        <a href="{{ route('admin.feature-management') }}" class="btn btn-sm btn-outline-light">
+            <i class="bi bi-pencil-square me-1"></i> Edit di Feature Management
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-sm table-bordered align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Fitur</th>
-                        <th class="text-center" style="background: #e8f5e9;">Marketing</th>
-                        <th class="text-center" style="background: #ede7f6;">PIC</th>
+                        <th style="min-width: 200px;">Fitur</th>
+                        <th class="text-center" style="background: #e8f5e9; min-width: 120px;"><i class="bi bi-megaphone text-success me-1"></i> Marketing</th>
+                        <th class="text-center" style="background: #ede7f6; min-width: 120px;"><i class="bi bi-person-badge text-primary me-1"></i> PIC</th>
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach($capDefs as $capKey => $capMeta)
+                    @php
+                        $mktVal = \App\Services\FeatureSettingService::roleCapability('marketing', $capKey);
+                        $picVal = \App\Services\FeatureSettingService::roleCapability('pic', $capKey);
+                    @endphp
                     <tr>
-                        <td>Kelola Jurnal (CRUD)</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Read Only</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Full CRUD</td>
+                        <td><i class="bi {{ $capMeta['icon'] }} text-muted me-1"></i> {{ $capMeta['label'] }}</td>
+                        <td class="text-center" style="background: {{ $bgMap[$mktVal] ?? '#f5f5f5' }};">
+                            {!! $iconMap[$mktVal] ?? '' !!} <small>{{ $capOptions[$mktVal] ?? $mktVal }}</small>
+                        </td>
+                        <td class="text-center" style="background: {{ $bgMap[$picVal] ?? '#f5f5f5' }};">
+                            {!! $iconMap[$picVal] ?? '' !!} <small>{{ $capOptions[$picVal] ?? $picVal }}</small>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>Kelola Slot Jurnal (CRUD)</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Read Only</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Full CRUD</td>
-                    </tr>
-                    <tr>
-                        <td>Buat Submission</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
-                    <tr>
-                        <td>Proses/Kerjakan Submission</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
-                    <tr>
-                        <td>Validasi Tahap Review</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
-                    <tr>
-                        <td>Assign Petugas</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
-                    <tr>
-                        <td>Update Credential</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
-                    <tr>
-                        <td>Fasttrack (Full)</td>
-                        <td class="text-center" style="background: #fff8e1;"><i class="bi bi-dash-circle text-warning"></i> Create + View</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Full CRUD + Assignment</td>
-                    </tr>
-                    <tr>
-                        <td>My Tasks</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
-                    <tr>
-                        <td>Daftar Reviewer</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya + Login As</td>
-                    </tr>
-                    <tr>
-                        <td>Catatan Marketing</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                        <td class="text-center" style="background: #fce4ec;"><i class="bi bi-x-circle text-danger"></i> Tidak</td>
-                    </tr>
-                    <tr>
-                        <td>Point & Laporan</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                        <td class="text-center" style="background: #e8f5e9;"><i class="bi bi-check-circle text-success"></i> Ya</td>
-                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
+    </div>
+    <div class="card-footer bg-light small">
+        <span class="me-3"><i class="bi bi-check-circle-fill text-success"></i> Ya (Full)</span>
+        <span class="me-3"><i class="bi bi-x-circle text-danger"></i> Tidak</span>
+        <span class="me-3"><i class="bi bi-eye text-warning"></i> Read Only</span>
+        <span class="me-3"><i class="bi bi-dash-circle text-info"></i> Sebagian</span>
+        <span class="text-muted float-end"><i class="bi bi-info-circle"></i> Data dibaca dari database, bisa diedit di Feature Management → Role System</span>
     </div>
 </div>
 
