@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Services\FeatureSettingService;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,6 +20,12 @@ class AppServiceProvider extends ServiceProvider
     {
         // Use Bootstrap pagination style (numbers instead of arrows)
         Paginator::useBootstrapFive();
+
+        // Custom Blade directives for feature toggles
+        // Usage: @feature('fasttrack') ... @endfeature
+        Blade::if('feature', function (string $feature) {
+            return FeatureSettingService::isEnabled($feature);
+        });
         
         // Share settings to all views
         View::composer('*', function ($view) {

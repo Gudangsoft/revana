@@ -60,6 +60,7 @@
 </div>
 
 {{-- Menu Pengelolaan Jurnal Fasttrack --}}
+@feature('fasttrack')
 <div class="accordion accordion-flush" id="accordionFastrackManagement">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
@@ -89,6 +90,7 @@
         </div>
     </div>
 </div>
+@endfeature
 
 <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.assignments') ? 'active' : '' }}">
     <i class="bi bi-clipboard-check"></i> Penugasan Review
@@ -96,15 +98,19 @@
 <a href="{{ route('admin.reviewers.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewers') ? 'active' : '' }}">
     <i class="bi bi-people"></i> Daftar Reviewer
 </a>
+@feature('review_requests')
 <a href="{{ route('admin.review-requests.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.review-requests') ? 'active' : '' }}">
     <i class="bi bi-file-earmark-text"></i> Permintaan Review
     @if(isset($pendingReviewRequests) && $pendingReviewRequests > 0)
         <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingReviewRequests }}</span>
     @endif
 </a>
+@endfeature
+@feature('leaderboard')
 <a href="{{ route('admin.leaderboard.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.leaderboard') ? 'active' : '' }}">
     <i class="bi bi-trophy-fill"></i> Papan Peringkat
 </a>
+@endfeature
 {{-- <a href="{{ route('admin.redemptions.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.redemptions') ? 'active' : '' }}">
     <i class="bi bi-gift"></i> Penukaran Reward
 </a> --}}
@@ -173,9 +179,11 @@
     </div>
 </div>
 
+@feature('certificates')
 <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.certificates') ? 'active' : '' }}">
     <i class="bi bi-award-fill"></i> Kelola Sertifikat
 </a>
+@endfeature
 <a href="{{ route('admin.users.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.users') ? 'active' : '' }}">
     <i class="bi bi-person-gear"></i> Pengelolaan Pengguna
 </a>
@@ -194,4 +202,7 @@
 </a>
 <a href="{{ route('admin.component-overview') }}" class="nav-link {{ $currentRoute == 'admin.component-overview' ? 'active' : '' }}">
     <i class="bi bi-puzzle-fill text-info"></i> Component Overview
+</a>
+<a href="{{ route('admin.feature-management') }}" class="nav-link {{ $currentRoute == 'admin.feature-management' ? 'active' : '' }}">
+    <i class="bi bi-toggles text-warning"></i> Feature Management
 </a>

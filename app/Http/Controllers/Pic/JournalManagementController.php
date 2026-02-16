@@ -1675,7 +1675,7 @@ class JournalManagementController extends Controller
         }
         
         // Check edit limit
-        $maxEditCount = 3;
+        $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
         if ($submission->edit_count >= $maxEditCount) {
             return redirect()->route('pic.fasttrack.show', $submission)
                 ->with('error', "Submission ini sudah mencapai batas maksimal edit ({$maxEditCount}x). Tidak dapat diedit lagi.");

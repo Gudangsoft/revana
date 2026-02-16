@@ -237,4 +237,58 @@ class DashboardController extends Controller
         return redirect()->route('admin.component-overview')
             ->with('success', 'Semua pengaturan komponen telah dikembalikan ke default.');
     }
+
+    /**
+     * Feature Management - Admin page for feature toggles, limits, roles, system info.
+     */
+    public function featureManagement()
+    {
+        $featureSettings = \App\Services\FeatureSettingService::all();
+        $groupedFeatures = \App\Services\FeatureSettingService::groupedFeatures();
+        $limitMeta = \App\Services\FeatureSettingService::limitMeta();
+        $roleDefinitions = \App\Services\FeatureSettingService::roleDefinitions();
+        $systemInfo = \App\Services\FeatureSettingService::systemInfo();
+        $changelogs = \App\Services\FeatureSettingService::changelogs();
+
+        return view('admin.feature-management', compact(
+            'featureSettings',
+            'groupedFeatures',
+            'limitMeta',
+            'roleDefinitions',
+            'systemInfo',
+            'changelogs'
+        ));
+    }
+
+    /**
+     * Save feature settings.
+     */
+    public function saveFeatureSettings(Request $request)
+    {
+        $data = $request->except('_token');
+
+        // Convert checkboxes: present = '1', absent = '0'
+        $featureMeta = \App\Services\FeatureSettingService::featureMeta();
+        foreach ($featureMeta as $key => $_) {
+            $data[$key] = $request->has($key) ? '1' : '0';
+        }
+        // Maintenance mode checkbox
+        $data['maintenance_mode'] = $request->has('maintenance_mode') ? '1' : '0';
+
+        \App\Services\FeatureSettingService::save($data);
+        
+        return redirect()->route('admin.feature-management')
+            ->with('success', 'Pengaturan fitur berhasil disimpan!');
+    }
+
+    /**
+     * Reset feature settings to defaults.
+     */
+    public function resetFeatureSettings()
+    {
+        \App\Services\FeatureSettingService::resetToDefaults();
+        
+        return redirect()->route('admin.feature-management')
+            ->with('success', 'Semua pengaturan fitur telah dikembalikan ke default.');
+    }
 }

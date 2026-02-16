@@ -189,10 +189,12 @@
         <span>Data Jurnal</span>
     </a>
     
+    @feature('fasttrack')
     <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.create', 'pic.fasttrack.edit', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Data Jurnal FS">
         <i class="bi bi-lightning-charge text-warning"></i>
         <span>Data Jurnal FS</span>
     </a>
+    @endfeature
     
     <!-- Monitoring Section -->
     <div class="sidebar-section-header">
@@ -209,13 +211,16 @@
     </a>
     
     <!-- Fasttrack (Gabungan Data & Monitoring) -->
+    @feature('fasttrack')
     <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.monitoring') ? 'active' : '' }}" data-title="Fasttrack">
         <i class="bi bi-graph-up text-warning"></i>
         <span>Monitoring Fasttrack</span>
     </a>
+    @endfeature
     
     <div class="sidebar-divider"></div>
     
+    @feature('points')
     <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}" data-title="Point Saya">
         <i class="bi bi-trophy-fill"></i>
         <span>Point Saya</span>
@@ -223,6 +228,7 @@
             <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
         @endif
     </a>
+    @endfeature
     
     <a href="{{ route('pic.reports.journal-articles') }}" class="nav-link {{ request()->routeIs('pic.reports.*') ? 'active' : '' }}" data-title="Laporan">
         <i class="bi bi-file-earmark-bar-graph"></i>

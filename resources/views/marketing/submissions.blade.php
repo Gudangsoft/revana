@@ -132,7 +132,7 @@
                         <td class="text-center">
                             @php
                                 $editCount = $submission->edit_count ?? 0;
-                                $maxEditCount = 3;
+                                $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
                                 $remainingEdits = $maxEditCount - $editCount;
                             @endphp
                             @if($editCount > 0)

@@ -32,7 +32,7 @@
             <div class="card-body">
                 <!-- Edit Count Warning -->
                 @php
-                    $maxEditCount = 3;
+                    $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
                     $remainingEdits = $maxEditCount - ($submission->edit_count ?? 0);
                 @endphp
                 

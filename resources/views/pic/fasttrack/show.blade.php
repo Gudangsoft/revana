@@ -16,7 +16,7 @@
                 <div>
                     @php
                         $editCount = $submission->edit_count ?? 0;
-                        $maxEditCount = 3;
+                        $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
                         $canEdit = $editCount < $maxEditCount;
                     @endphp
                     @if($canEdit)
@@ -40,7 +40,7 @@
                     <span class="badge bg-success fs-6">Published</span>
                     @php
                         $editCount = $submission->edit_count ?? 0;
-                        $maxEditCount = 3;
+                        $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
                         $remainingEdits = $maxEditCount - $editCount;
                     @endphp
                     @if($editCount > 0)

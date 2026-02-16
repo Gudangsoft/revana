@@ -84,6 +84,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/component-overview', [AdminDashboard::class, 'componentOverview'])->name('component-overview');
         Route::post('/component-overview', [AdminDashboard::class, 'saveComponentSettings'])->name('component-overview.save');
         Route::post('/component-overview/reset', [AdminDashboard::class, 'resetComponentSettings'])->name('component-overview.reset');
+        Route::get('/feature-management', [AdminDashboard::class, 'featureManagement'])->name('feature-management');
+        Route::post('/feature-management', [AdminDashboard::class, 'saveFeatureSettings'])->name('feature-management.save');
+        Route::post('/feature-management/reset', [AdminDashboard::class, 'resetFeatureSettings'])->name('feature-management.reset');
         
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
@@ -133,14 +136,14 @@ Route::middleware('auth')->group(function () {
         Route::resource('submissions', SubmissionController::class);
         
         // Pengalolaan Jurnal FS
-        Route::prefix('fasttrack-management')->name('fasttrack-management.')->group(function () {
+        Route::prefix('fasttrack-management')->name('fasttrack-management.')->middleware('feature:fasttrack')->group(function () {
             Route::get('/slots', [JournalSlotController::class, 'fasttrackSlots'])->name('slots.index');
             Route::get('/submissions', [SubmissionController::class, 'fasttrackSubmissions'])->name('submissions.index');
             Route::get('/monitoring', [SubmissionController::class, 'fasttrackMonitoring'])->name('monitoring.index');
         });
         
         // Admin Fasttrack Input
-        Route::prefix('fasttrack')->name('fasttrack.')->group(function () {
+        Route::prefix('fasttrack')->name('fasttrack.')->middleware('feature:fasttrack')->group(function () {
             Route::get('/', [SubmissionController::class, 'fasttrackIndex'])->name('index');
             Route::get('/create', [SubmissionController::class, 'fasttrackCreate'])->name('create');
             Route::post('/', [SubmissionController::class, 'fasttrackStore'])->name('store');
@@ -192,7 +195,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reviewers/export', [ReviewerController::class, 'export'])->name('reviewers.export');
         Route::get('/reviewers/{reviewer}', [ReviewerController::class, 'show'])->name('reviewers.show');        
         // Certificates
-        Route::resource('certificates', \App\Http\Controllers\Admin\CertificateController::class);        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');
+        Route::resource('certificates', \App\Http\Controllers\Admin\CertificateController::class)->middleware('feature:certificates');        Route::get('/reviewers/{reviewer}/edit', [ReviewerController::class, 'edit'])->name('reviewers.edit');
         Route::put('/reviewers/{reviewer}', [ReviewerController::class, 'update'])->name('reviewers.update');
         Route::post('/reviewers/{reviewer}/reset-password', [ReviewerController::class, 'resetPassword'])->name('reviewers.reset-password');
         Route::post('/reviewers/{reviewer}/login-as', [ReviewerController::class, 'loginAs'])->name('reviewers.login-as');
@@ -221,7 +224,7 @@ Route::middleware('auth')->group(function () {
         // Route::post('/rewards/{reward}/toggle', [AdminRewardController::class, 'toggleStatus'])->name('rewards.toggle');
         
         // Leaderboard
-        Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+        Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index')->middleware('feature:leaderboard');
         
         // Marketing Management
         Route::resource('marketings', MarketingController::class)->except(['show']);
@@ -403,7 +406,7 @@ Route::prefix('pic')->group(function () {
         });
         
         // Fasttrack Submissions
-        Route::prefix('fasttrack')->name('pic.fasttrack.')->group(function () {
+        Route::prefix('fasttrack')->name('pic.fasttrack.')->middleware('feature:fasttrack')->group(function () {
             Route::get('/', [PicJournalController::class, 'fasttrackIndex'])->name('index');
             Route::get('/create', [PicJournalController::class, 'fasttrackCreate'])->name('create');
             Route::post('/', [PicJournalController::class, 'fasttrackStore'])->name('store');
@@ -475,12 +478,12 @@ Route::prefix('marketing')->group(function () {
         Route::get('/journal-slots', [MarketingDashboardController::class, 'journalSlotsIndex'])->name('marketing.journal-slots.index');
         Route::get('/journal-slots/{slot}', [MarketingDashboardController::class, 'journalSlotsShow'])->name('marketing.journal-slots.show');
         
-        // Fasttrack Submissions
-        Route::get('/fasttrack', [MarketingDashboardController::class, 'fasttrackIndex'])->name('marketing.fasttrack.index');
-        Route::get('/fasttrack/create', [MarketingDashboardController::class, 'fasttrackCreate'])->name('marketing.fasttrack.create');
-        Route::post('/fasttrack', [MarketingDashboardController::class, 'fasttrackStore'])->name('marketing.fasttrack.store');
-        Route::get('/fasttrack/monitoring', [MarketingDashboardController::class, 'fasttrackMonitoring'])->name('marketing.fasttrack.monitoring');
-        Route::get('/fasttrack/{submission}', [MarketingDashboardController::class, 'fasttrackShow'])->name('marketing.fasttrack.show');
+        // Fasttrack Submissions (feature-gated)
+        Route::get('/fasttrack', [MarketingDashboardController::class, 'fasttrackIndex'])->name('marketing.fasttrack.index')->middleware('feature:fasttrack');
+        Route::get('/fasttrack/create', [MarketingDashboardController::class, 'fasttrackCreate'])->name('marketing.fasttrack.create')->middleware('feature:fasttrack');
+        Route::post('/fasttrack', [MarketingDashboardController::class, 'fasttrackStore'])->name('marketing.fasttrack.store')->middleware('feature:fasttrack');
+        Route::get('/fasttrack/monitoring', [MarketingDashboardController::class, 'fasttrackMonitoring'])->name('marketing.fasttrack.monitoring')->middleware('feature:fasttrack');
+        Route::get('/fasttrack/{submission}', [MarketingDashboardController::class, 'fasttrackShow'])->name('marketing.fasttrack.show')->middleware('feature:fasttrack');
         
         // Laporan
         Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('marketing.reports.journal-articles');

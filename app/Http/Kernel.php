@@ -46,5 +46,7 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'reviewer' => \App\Http\Middleware\ReviewerMiddleware::class,
         'pic' => \App\Http\Middleware\PicMiddleware::class,
+        'feature' => \App\Http\Middleware\CheckFeature::class,
+        'maintenance.custom' => \App\Http\Middleware\CheckMaintenance::class,
     ];
 }
