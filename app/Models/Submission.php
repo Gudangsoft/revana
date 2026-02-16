@@ -305,13 +305,16 @@ class Submission extends Model
 
     public function getStatusLabelAttribute()
     {
+        // Determine real status from validation flags
+        $realStatus = $this->getRealStatus();
         $statuses = self::getStatusOptions();
-        return $statuses[$this->status] ?? $this->status;
+        return $statuses[$realStatus] ?? $realStatus;
     }
 
     public function getStatusBadgeClassAttribute()
     {
-        return match($this->status) {
+        $realStatus = $this->getRealStatus();
+        return match($realStatus) {
             'SUBMITTED' => 'bg-secondary',
             'EDITOR1_PROCESS' => 'bg-info',
             'AUTHOR1_PROCESS' => 'bg-info',
@@ -327,10 +330,11 @@ class Submission extends Model
         };
     }
 
-    // Get current step number (1-10)
+    // Get current step number (1-10) based on real progress
     public function getCurrentStepAttribute()
     {
-        return match($this->status) {
+        $realStatus = $this->getRealStatus();
+        return match($realStatus) {
             'SUBMITTED' => 1,
             'EDITOR1_PROCESS' => 2,
             'AUTHOR1_PROCESS' => 3,
@@ -349,14 +353,61 @@ class Submission extends Model
     // Calculate progress percentage
     public function getProgressPercentageAttribute()
     {
-        if ($this->status === 'REJECTED') return 0;
-        
-        // Fasttrack with link_publish = 100%
-        if ($this->process_type === 'fasttrack' && $this->link_publish) {
-            return 100;
-        }
+        $realStatus = $this->getRealStatus();
+        if ($realStatus === 'REJECTED') return 0;
+        if ($realStatus === 'PUBLISHED') return 100;
         
         return ($this->current_step / 10) * 100;
+    }
+
+    /**
+     * Determine real status from actual validation flags,
+     * because the status field may not always be updated correctly.
+     */
+    public function getRealStatus()
+    {
+        if ($this->status === 'REJECTED') return 'REJECTED';
+        
+        // If link_publish exists, it's published
+        if (!empty($this->link_publish)) {
+            return 'PUBLISHED';
+        }
+        
+        // Check production_valid
+        if ($this->production_valid) {
+            return 'PUBLISHED';
+        }
+        
+        // Check from the latest validated step backwards
+        if ($this->author2_valid) {
+            return 'PRODUCTION_PROCESS';
+        }
+        if ($this->editor3_valid) {
+            return 'AUTHOR2_PROCESS';
+        }
+        if ($this->reviewer2_valid) {
+            return 'EDITOR3_PROCESS';
+        }
+        if ($this->reviewer1_valid) {
+            return 'REVIEWER2_PROCESS';
+        }
+        if ($this->editor2_valid) {
+            return 'REVIEWER1_PROCESS';
+        }
+        if ($this->author1_valid) {
+            return 'EDITOR2_PROCESS';
+        }
+        if ($this->editor1_valid) {
+            return 'AUTHOR1_PROCESS';
+        }
+        
+        // If petugas_editor1 is assigned but not validated, it's in editor1 process
+        if ($this->petugas_editor1_id) {
+            return 'EDITOR1_PROCESS';
+        }
+        
+        // Fall back to database status
+        return $this->status ?? 'SUBMITTED';
     }
 
     // Validate step methods
