@@ -41,14 +41,14 @@
                 <select name="status" class="form-select form-select-sm">
                     <option value="">Semua Status</option>
                     <option value="SUBMITTED" {{ request('status') == 'SUBMITTED' ? 'selected' : '' }}>Submitted</option>
-                    <option value="EDITOR1" {{ request('status') == 'EDITOR1' ? 'selected' : '' }}>Editor 1</option>
-                    <option value="AUTHOR1" {{ request('status') == 'AUTHOR1' ? 'selected' : '' }}>Author 1</option>
-                    <option value="EDITOR2" {{ request('status') == 'EDITOR2' ? 'selected' : '' }}>Editor 2</option>
-                    <option value="REVIEWER1" {{ request('status') == 'REVIEWER1' ? 'selected' : '' }}>Reviewer 1</option>
-                    <option value="REVIEWER2" {{ request('status') == 'REVIEWER2' ? 'selected' : '' }}>Reviewer 2</option>
-                    <option value="EDITOR3" {{ request('status') == 'EDITOR3' ? 'selected' : '' }}>Editor 3</option>
-                    <option value="AUTHOR2" {{ request('status') == 'AUTHOR2' ? 'selected' : '' }}>Author 2</option>
-                    <option value="PRODUCTION" {{ request('status') == 'PRODUCTION' ? 'selected' : '' }}>Production</option>
+                    <option value="EDITOR1_PROCESS" {{ request('status') == 'EDITOR1_PROCESS' ? 'selected' : '' }}>Editor 1</option>
+                    <option value="AUTHOR1_PROCESS" {{ request('status') == 'AUTHOR1_PROCESS' ? 'selected' : '' }}>Author 1</option>
+                    <option value="EDITOR2_PROCESS" {{ request('status') == 'EDITOR2_PROCESS' ? 'selected' : '' }}>Editor 2</option>
+                    <option value="REVIEWER1_PROCESS" {{ request('status') == 'REVIEWER1_PROCESS' ? 'selected' : '' }}>Reviewer 1</option>
+                    <option value="REVIEWER2_PROCESS" {{ request('status') == 'REVIEWER2_PROCESS' ? 'selected' : '' }}>Reviewer 2</option>
+                    <option value="EDITOR3_PROCESS" {{ request('status') == 'EDITOR3_PROCESS' ? 'selected' : '' }}>Editor 3</option>
+                    <option value="AUTHOR2_PROCESS" {{ request('status') == 'AUTHOR2_PROCESS' ? 'selected' : '' }}>Author 2</option>
+                    <option value="PRODUCTION_PROCESS" {{ request('status') == 'PRODUCTION_PROCESS' ? 'selected' : '' }}>Production</option>
                     <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>
                     <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
                 </select>
@@ -63,7 +63,14 @@
                        placeholder="Sampai Tanggal" value="{{ request('end_date') }}" 
                        title="Sampai Tanggal">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-1">
+                <select name="per_page" class="form-select form-select-sm" title="Jumlah data per halaman">
+                    @foreach([10, 50, 100, 150, 1000] as $pp)
+                        <option value="{{ $pp }}" {{ request('per_page', 10) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="bi bi-search"></i> Filter
                 </button>
@@ -88,6 +95,7 @@
                         <th>Jurnal</th>
                         <th>Penulis</th>
                         <th>Tanggal Submit</th>
+                        <th class="text-center">Status</th>
                         <th>Progress</th>
                         <th class="text-center">Edit Count</th>
                         <th class="text-center">Aksi</th>
@@ -96,21 +104,9 @@
                 <tbody>
                     @foreach($submissions as $submission)
                     @php
-                        // Calculate progress based on workflow
-                        $progress = 0;
-                        if ($submission->petugas_submit_id) $progress += 10;
-                        if ($submission->editor1_valid) $progress += 10;
-                        if ($submission->author1_valid) $progress += 10;
-                        if ($submission->editor2_valid) $progress += 15;
-                        if ($submission->reviewer1_valid) $progress += 15;
-                        if ($submission->reviewer2_valid) $progress += 15;
-                        if ($submission->editor3_valid || !$submission->petugas_editor3_id) $progress += 10;
-                        if ($submission->author2_valid || !$submission->petugas_author2_id) $progress += 5;
-                        if ($submission->production_valid) $progress += 10;
-                        
-                        // Status badge color
-                        $badgeColor = $submission->production_valid ? 'success' : 'warning';
-                        $statusText = $submission->production_valid ? 'TERBIT' : 'PROSES';
+                        $progress = $submission->progress_percentage;
+                        $badgeClass = $submission->status_badge_class;
+                        $badgeColor = str_replace('bg-', '', $badgeClass);
                     @endphp
                     <tr class="{{ request('highlight') == $submission->id ? 'table-success' : '' }}">
                         <td>
@@ -131,6 +127,11 @@
                         <td>{{ $submission->nama_penulis }}</td>
                         <td>
                             <small>{{ $submission->tanggal_submit?->format('d/m/Y') ?? '-' }}</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge {{ $badgeClass }} small">
+                                {{ $submission->status_label }}
+                            </span>
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">

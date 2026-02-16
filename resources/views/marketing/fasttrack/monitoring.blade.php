@@ -53,7 +53,7 @@
             <div class="col-md-2">
                 <input type="date" name="to_date" class="form-control form-control-sm" value="{{ request('to_date') }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 d-flex align-items-center gap-2">
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="bi bi-search"></i> Filter
                 </button>
@@ -62,6 +62,14 @@
                     <i class="bi bi-x-circle"></i> Reset
                 </a>
                 @endif
+                <div class="ms-auto d-flex align-items-center gap-1">
+                    <small class="text-muted">Tampilkan:</small>
+                    <select name="per_page" class="form-select form-select-sm" style="width: auto;">
+                        @foreach([20, 50, 100, 150, 1000] as $pp)
+                            <option value="{{ $pp }}" {{ request('per_page', 20) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         </form>
     </div>

@@ -126,7 +126,7 @@ class DashboardController extends Controller
         
         // Filter by status
         if ($request->filled('status')) {
-            $query->where('status', 'like', $request->status . '%');
+            $query->where('status', $request->status);
         }
         
         // Filter by date range
@@ -138,7 +138,8 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
         
-        $submissions = $query->latest('tanggal_submit')->paginate(10)->withQueryString();
+        $perPage = in_array($request->input('per_page'), [10, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 10;
+        $submissions = $query->latest('tanggal_submit')->paginate($perPage)->withQueryString();
         
         // Debug log
         \Log::info('Submissions found: ' . $submissions->total());
@@ -395,7 +396,9 @@ class DashboardController extends Controller
             $query->where('jenis_jurnal', $request->jenis);
         }
         
-        $journals = $query->orderBy('nama_jurnal')->paginate(20)->withQueryString();
+        $journals = $query->orderBy('nama_jurnal')->paginate(
+            in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20
+        )->withQueryString();
         $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         
         return view('marketing.journals.index', compact('marketing', 'journals', 'accreditations'));
@@ -451,9 +454,10 @@ class DashboardController extends Controller
             $query->where('bulan', $request->bulan);
         }
         
+        $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
         $slots = $query->orderBy('volume', 'desc')
             ->orderBy('nomor', 'desc')
-            ->paginate(20)
+            ->paginate($perPage)
             ->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
@@ -524,7 +528,8 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
         
-        $submissions = $query->latest('tanggal_submit')->paginate(20)->withQueryString();
+        $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
+        $submissions = $query->latest('tanggal_submit')->paginate($perPage)->withQueryString();
         $slots = JournalSlot::with('journalMaster')->where('is_active', true)->get();
         
         return view('marketing.submissions-monitoring', compact('marketing', 'submissions', 'slots'));
@@ -623,7 +628,8 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
         
-        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
+        $submissions = $query->latest()->paginate($perPage)->withQueryString();
         
         return view('marketing.fasttrack.index', compact('marketing', 'submissions'));
     }
@@ -789,7 +795,8 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
-        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
+        $submissions = $query->latest()->paginate($perPage)->withQueryString();
         
         // Statistics
         $totalFasttrack = Submission::where('process_type', 'fasttrack')

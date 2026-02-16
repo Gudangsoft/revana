@@ -294,7 +294,7 @@
                 <label class="form-label small mb-1">Cari</label>
                 <input type="text" name="search" class="form-control form-control-sm" placeholder="Kode/Judul/Penulis..." value="{{ request('search') }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 d-flex align-items-end gap-2">
                 <div class="btn-group btn-group-sm" role="group">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search"></i> Filter
@@ -302,6 +302,14 @@
                     <a href="{{ route('marketing.fasttrack.index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-clockwise"></i> Refresh
                     </a>
+                </div>
+                <div class="ms-auto d-flex align-items-center gap-1">
+                    <small class="text-muted">Tampilkan:</small>
+                    <select name="per_page" class="form-select form-select-sm" style="width: auto;">
+                        @foreach([20, 50, 100, 150, 1000] as $pp)
+                            <option value="{{ $pp }}" {{ request('per_page', 20) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </form>

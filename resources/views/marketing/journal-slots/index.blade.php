@@ -70,6 +70,14 @@
                             <i class="bi bi-x-circle"></i> Reset
                         </a>
                     </div>
+                    <div class="col-auto ms-auto d-flex align-items-center gap-1">
+                        <small class="text-muted">Tampilkan:</small>
+                        <select name="per_page" class="form-select form-select-sm" style="width: auto;">
+                            @foreach([20, 50, 100, 150, 1000] as $pp)
+                                <option value="{{ $pp }}" {{ request('per_page', 20) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     @if(request()->hasAny(['search', 'akreditasi', 'kategori', 'jenis', 'bulan', 'tahun']))
                     <div class="col-auto">
                         <span class="badge bg-info py-2 px-3">

@@ -55,13 +55,21 @@
                 <label class="form-label small mb-1">Sampai Tanggal</label>
                 <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
             </div>
-            <div class="col-md-12">
+            <div class="col-md-12 d-flex align-items-center gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-search"></i> Filter
                 </button>
                 <a href="{{ route('marketing.submissions.monitoring') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-clockwise"></i> Reset
                 </a>
+                <div class="ms-auto d-flex align-items-center gap-1">
+                    <small class="text-muted">Tampilkan:</small>
+                    <select name="per_page" class="form-select form-select-sm" style="width: auto;">
+                        @foreach([20, 50, 100, 150, 1000] as $pp)
+                            <option value="{{ $pp }}" {{ request('per_page', 20) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         </form>
     </div>
