@@ -152,38 +152,9 @@
                 <tbody>
                     @foreach($submissions as $submission)
                     @php
-                        $progressMap = [
-                            'SUBMITTED' => 10,
-                            'EDITOR1_PROCESS' => 20,
-                            'AUTHOR1_PROCESS' => 30,
-                            'EDITOR2_PROCESS' => 40,
-                            'REVIEWER1_PROCESS' => 50,
-                            'REVIEWER2_PROCESS' => 60,
-                            'EDITOR3_PROCESS' => 70,
-                            'AUTHOR2_PROCESS' => 80,
-                            'PRODUCTION_PROCESS' => 90,
-                            'PUBLISHED' => 100,
-                            'REJECTED' => 0,
-                        ];
-                        $progress = $progressMap[$submission->status] ?? 10;
-
-                        // Fasttrack with link_publish = final 100%
-                        if ($submission->process_type === 'fasttrack' && !empty($submission->link_publish)) {
-                            $progress = 100;
-                        }
-                        
-                        $badgeColor = match(true) {
-                            $submission->process_type === 'fasttrack' && !empty($submission->link_publish) => 'success',
-                            $submission->status === 'SUBMITTED' => 'secondary',
-                            in_array($submission->status, ['EDITOR1_PROCESS', 'AUTHOR1_PROCESS']) => 'info',
-                            $submission->status === 'EDITOR2_PROCESS' => 'primary',
-                            in_array($submission->status, ['REVIEWER1_PROCESS', 'REVIEWER2_PROCESS']) => 'warning',
-                            in_array($submission->status, ['EDITOR3_PROCESS', 'AUTHOR2_PROCESS']) => 'info',
-                            $submission->status === 'PRODUCTION_PROCESS' => 'dark',
-                            $submission->status === 'PUBLISHED' => 'success',
-                            $submission->status === 'REJECTED' => 'danger',
-                            default => 'secondary'
-                        };
+                        $progress = $submission->progress_percentage;
+                        $badgeClass = $submission->status_badge_class;
+                        $badgeColor = str_replace('bg-', '', $badgeClass);
                     @endphp
                     <tr>
                         <td class="px-3">
@@ -219,18 +190,14 @@
                             <small>{{ $submission->tanggal_submit?->format('d M Y') ?? '-' }}</small>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-{{ $badgeColor }} small">
-                                @if($submission->process_type === 'fasttrack' && !empty($submission->link_publish))
-                                    PUBLISHED
-                                @else
-                                    {{ str_replace('_', ' ', $submission->status) }}
-                                @endif
+                            <span class="badge {{ $badgeClass }} small">
+                                {{ $submission->status_label }}
                             </span>
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="progress flex-grow-1" style="height: 8px; min-width: 80px;">
-                                    <div class="progress-bar bg-{{ $badgeColor }}" 
+                                    <div class="progress-bar {{ $badgeClass }}" 
                                          style="width: {{ $progress }}%"></div>
                                 </div>
                                 <small class="text-muted" style="min-width: 35px;">{{ $progress }}%</small>
