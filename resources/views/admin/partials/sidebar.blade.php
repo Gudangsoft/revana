@@ -179,6 +179,9 @@
 <a href="{{ route('admin.users.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.users') ? 'active' : '' }}">
     <i class="bi bi-person-gear"></i> Pengelolaan Pengguna
 </a>
+<a href="{{ route('admin.reports.journal-articles') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reports') ? 'active' : '' }}">
+    <i class="bi bi-file-earmark-bar-graph"></i> Laporan Jurnal
+</a>
 <hr>
 <a href="{{ route('admin.profile.edit') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.profile') ? 'active' : '' }}">
     <i class="bi bi-person-circle"></i> Edit Profile

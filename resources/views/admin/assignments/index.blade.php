@@ -166,7 +166,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="text-warning">Pending</h5>
-                <h2>{{ $assignments->where('status', 'pending')->count() }}</h2>
+                <h2>{{ $assignments->where('status', 'PENDING')->count() }}</h2>
             </div>
         </div>
     </div>
@@ -174,7 +174,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="text-info">Accepted</h5>
-                <h2>{{ $assignments->where('status', 'accepted')->count() }}</h2>
+                <h2>{{ $assignments->where('status', 'ACCEPTED')->count() }}</h2>
             </div>
         </div>
     </div>
@@ -182,7 +182,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="text-success">Completed</h5>
-                <h2>{{ $assignments->where('status', 'approved')->count() }}</h2>
+                <h2>{{ $assignments->where('status', 'APPROVED')->count() }}</h2>
             </div>
         </div>
     </div>

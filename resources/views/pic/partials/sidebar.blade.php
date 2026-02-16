@@ -137,7 +137,7 @@
                   ->orWhere('petugas_editor3_id', $picId)
                   ->orWhere('petugas_author2_id', $picId)
                   ->orWhere('petugas_production_id', $picId);
-            })->whereNotIn('status', ['PUBLISHED', 'published'])->get();
+            })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->get();
             
             // Count only tasks where status matches PIC's role
             $urgentMappings = [
@@ -222,6 +222,11 @@
         @if($totalPoints > 0)
             <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
         @endif
+    </a>
+    
+    <a href="{{ route('pic.reports.journal-articles') }}" class="nav-link {{ request()->routeIs('pic.reports.*') ? 'active' : '' }}" data-title="Laporan">
+        <i class="bi bi-file-earmark-bar-graph"></i>
+        <span>Laporan Jurnal</span>
     </a>
     
     <div class="sidebar-divider"></div>

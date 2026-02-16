@@ -154,7 +154,7 @@
             <div class="col-md-3">
                 <select name="status" class="form-select">
                     <option value="">Semua Status</option>
-                    <option value="new" {{ request('status') == 'new' ? 'selected' : '' }}>Baru</option>
+                    <option value="SUBMITTED" {{ request('status') == 'SUBMITTED' ? 'selected' : '' }}>Baru</option>
                     <option value="EDITOR1_PROCESS" {{ request('status') == 'EDITOR1_PROCESS' ? 'selected' : '' }}>Editor 1</option>
                     <option value="REVIEWER1_PROCESS" {{ request('status') == 'REVIEWER1_PROCESS' ? 'selected' : '' }}>Review</option>
                     <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>

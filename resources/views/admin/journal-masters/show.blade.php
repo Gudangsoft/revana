@@ -117,7 +117,11 @@
                         <tbody>
                             @forelse($journalMaster->slots as $slot)
                             <tr>
-                                <td><code>{{ $slot->kode_slot }}</code></td>
+                                <td>
+                                    <a href="{{ route('admin.journal-slots.show', $slot) }}" class="text-decoration-none">
+                                        <code>{{ $slot->kode_slot }}</code>
+                                    </a>
+                                </td>
                                 <td>{{ $slot->volume }}</td>
                                 <td>{{ $slot->nomor }}</td>
                                 <td>{{ $slot->bulan }}</td>

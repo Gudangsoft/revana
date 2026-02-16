@@ -23,8 +23,8 @@
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-file-earmark-text"></i> Detail Submission</span>
-        <span class="badge bg-{{ $submission->status == 'published' ? 'success' : ($submission->status == 'in_progress' ? 'info' : 'secondary') }}">
-            {{ ucfirst(str_replace('_', ' ', $submission->status)) }}
+        <span class="badge {{ $submission->status_badge_class }}">
+            {{ $submission->status_label }}
         </span>
     </div>
     <div class="card-body">

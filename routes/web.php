@@ -28,6 +28,7 @@ use App\Http\Controllers\Pic\JournalManagementController as PicJournalController
 use App\Http\Controllers\Admin\ReviewerRegistrationController;
 use App\Http\Controllers\ReviewRequestController;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -291,6 +292,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/review-requests/{reviewRequest}', [ReviewRequestController::class, 'show'])->name('review-requests.show');
         Route::post('/review-requests/{reviewRequest}/approve', [ReviewRequestController::class, 'approve'])->name('review-requests.approve');
         Route::post('/review-requests/{reviewRequest}/reject', [ReviewRequestController::class, 'reject'])->name('review-requests.reject');
+        
+        // Laporan
+        Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('reports.journal-articles');
     });
 
     // Reviewer routes
@@ -431,6 +435,9 @@ Route::prefix('pic')->group(function () {
         // Reviewers
         Route::get('/reviewers', [PicJournalController::class, 'reviewersIndex'])->name('pic.reviewers.index');
         Route::post('/reviewers/{reviewer}/login-as', [PicJournalController::class, 'loginAsReviewer'])->name('pic.reviewers.login-as');
+        
+        // Laporan
+        Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('pic.reports.journal-articles');
     });
 });
 
@@ -469,6 +476,9 @@ Route::prefix('marketing')->group(function () {
         Route::post('/fasttrack', [MarketingDashboardController::class, 'fasttrackStore'])->name('marketing.fasttrack.store');
         Route::get('/fasttrack/monitoring', [MarketingDashboardController::class, 'fasttrackMonitoring'])->name('marketing.fasttrack.monitoring');
         Route::get('/fasttrack/{submission}', [MarketingDashboardController::class, 'fasttrackShow'])->name('marketing.fasttrack.show');
+        
+        // Laporan
+        Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('marketing.reports.journal-articles');
         
         // Profile
         Route::get('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'edit'])->name('marketing.profile.edit');
