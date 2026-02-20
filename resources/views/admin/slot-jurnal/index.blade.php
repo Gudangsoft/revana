@@ -66,6 +66,7 @@
 <div class="card shadow-sm">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="bi bi-search"></i> Pencarian Slot Jurnal</h5>
+        @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Kode LOA', 'Nama Jurnal', 'Penerbit', 'Jumlah Slot', 'Slot Terpakai', 'Sisa', 'Status'], 'columnOffset' => 1])
     </div>
     <div class="card-body">
         <form method="GET" action="{{ route('admin.slot-jurnal.index') }}" class="mb-4">
@@ -158,7 +159,7 @@
         @endif
 
         <div class="table-responsive">
-            <table class="table table-hover table-bordered">
+            <table class="table table-hover table-bordered" id="dataTable">
                 <thead class="table-dark">
                     <tr>
                         <th style="width: 5%">No</th>

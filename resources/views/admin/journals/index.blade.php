@@ -20,6 +20,7 @@
                     <a href="{{ route('admin.journals.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah Jurnal
                     </a>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Judul', 'Volume', 'Slot', 'Akreditasi', 'Points', 'Terbitan', 'Marketing', 'PIC', 'Dibuat Oleh', 'Tanggal', 'Aksi'], 'columnOffset' => 1])
                 </div>
             </div>
             <div class="card-body">
@@ -31,7 +32,7 @@
                 @endif
 
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="dataTable">
                         <thead>
                             <tr>
                                 <th>#</th>

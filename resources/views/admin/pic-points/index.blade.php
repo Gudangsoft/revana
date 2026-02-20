@@ -129,6 +129,7 @@
                     <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
                         <i class="bi bi-download"></i> Export Excel
                     </a>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Belum Selesai', 'Total Point', 'Bulan Ini', 'Tugas', 'Aksi'], 'columnOffset' => 1])
                 </div>
             </div>
             <div class="card-body">
@@ -148,7 +149,7 @@
                 </form>
                 
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped">
+                    <table class="table table-hover table-striped" id="dataTable">
                         <thead class="table-dark">
                             <tr>
                                 <th class="text-center" style="width: 60px;">Rank</th>

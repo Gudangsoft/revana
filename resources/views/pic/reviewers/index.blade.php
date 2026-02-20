@@ -39,11 +39,14 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-person-check"></i> Daftar Reviewer</span>
-        <span class="badge bg-primary">Total: {{ $reviewers->total() }} Reviewer</span>
+        <div class="d-flex align-items-center gap-2">
+            @include('partials.column-toggle', ['tableId' => 'picReviewersTable', 'columns' => ['Nama', 'Email', 'No. HP', 'Institusi', 'Total Review', 'Aksi'], 'columnOffset' => 1])
+            <span class="badge bg-primary">Total: {{ $reviewers->total() }} Reviewer</span>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="picReviewersTable">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>

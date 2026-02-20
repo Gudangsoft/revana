@@ -202,6 +202,7 @@
                     <a href="{{ route('admin.submissions.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah
                     </a>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Kode Submit', 'ID Artikel', 'Judul Artikel', 'Nama Penulis', 'No HP', 'Username', 'Password', 'Submit By', 'PIC Marketing', 'Petugas Submit', 'Tanggal', 'Status', 'Aksi'], 'columnOffset' => 1])
                 </div>
             </div>
             <div class="card-body">
@@ -295,7 +296,7 @@
 
                 <div class="table-scroll-container">
                     <div class="table-scroll-wrapper" id="tableScrollWrapper">
-                        <table class="table table-hover table-sm table-sticky">
+                        <table class="table table-hover table-sm table-sticky" id="dataTable">
                             <thead>
                                 <tr>
                                     <th class="sticky-col-1">#</th>

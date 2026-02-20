@@ -70,8 +70,9 @@
     </div>
     <div class="card-body">
         @if($pointHistories->count() > 0)
+        @include('partials.column-toggle', ['tableId' => 'mktPointsTable', 'columns' => ['Tanggal', 'Point', 'Keterangan', 'Artikel'], 'columnOffset' => 0])
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table id="mktPointsTable" class="table table-hover">
                 <thead class="table-light">
                     <tr>
                         <th>Tanggal</th>

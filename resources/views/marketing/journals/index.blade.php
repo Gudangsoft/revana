@@ -75,8 +75,9 @@
 
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
+        @include('partials.column-toggle', ['tableId' => 'mktJournalsTable', 'columns' => ['Nama Jurnal', 'Kode Jurnal', 'Publisher', 'Kategori', 'Jenis', 'Akreditasi', 'Total Submission', 'Kode Slot', 'Status', 'Aksi'], 'columnOffset' => 1])
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table id="mktJournalsTable" class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 50px;">No</th>

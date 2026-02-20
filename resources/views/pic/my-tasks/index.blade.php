@@ -176,12 +176,13 @@
 
 <!-- Table -->
 <div class="card">
-    <div class="card-header bg-white py-3">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h6 class="mb-0"><i class="bi bi-list-check"></i> Daftar Tugas Saya</h6>
+        @include('partials.column-toggle', ['tableId' => 'picMyTasksTable', 'columns' => ['Kode', 'Artikel', 'Peran', 'Progress', 'Status', 'Aksi'], 'columnOffset' => 1])
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0" id="picMyTasksTable">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px">#</th>

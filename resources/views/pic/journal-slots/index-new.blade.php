@@ -13,6 +13,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-calendar3"></i> Data Slot & Monitoring</span>
+                @include('partials.column-toggle', ['tableId' => 'picSlotNewTable', 'columns' => ['Kode Slot', 'Nama Jurnal', 'Publisher', 'Kategori', 'Jenis', 'Akreditasi', 'Volume', 'Nomor', 'Bulan', 'Tahun', 'Jumlah Slot', 'Terpakai', 'Tersedia', 'Status', 'Aksi'], 'columnOffset' => 1])
             </div>
             <div class="card-body">
                 @if(session('success'))
@@ -108,7 +109,7 @@
                         </form>
 
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover" id="picSlotNewTable">
                                 <thead>
                                     <tr>
                                         <th>#</th>

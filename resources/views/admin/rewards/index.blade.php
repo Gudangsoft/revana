@@ -31,8 +31,9 @@
 @endif
 
 <div class="card">
-    <div class="card-header">
-        <i class="bi bi-trophy"></i> Daftar Reward
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-trophy"></i> Daftar Reward</span>
+        @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama Reward', 'Tipe', 'Peringkat', 'Points Required', 'Value', 'Total Redeemed', 'Status', 'Aksi'], 'columnOffset' => 1])
     </div>
     <div class="card-body">
         @if($rewards->isEmpty())
@@ -42,7 +43,7 @@
         </div>
         @else
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="dataTable">
                 <thead>
                     <tr>
                         <th>#</th>

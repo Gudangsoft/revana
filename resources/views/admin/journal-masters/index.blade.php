@@ -35,6 +35,7 @@
                     <a href="{{ route('admin.journal-masters.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah
                     </a>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Kode Jurnal', 'Nama Jurnal', 'Publisher', 'Kategori', 'Jenis', 'Akreditasi', 'Status', 'Aksi'], 'columnOffset' => 2])
                 </div>
             </div>
             <div class="card-body">
@@ -107,7 +108,7 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="dataTable">
                         <thead>
                             <tr>
                                 <th width="40">

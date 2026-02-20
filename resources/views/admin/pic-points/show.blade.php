@@ -133,9 +133,12 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-clock-history"></i> Riwayat Perolehan Point</span>
-                <a href="{{ route('admin.pic-points.export-show', array_merge(['pic' => $pic->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'step']))) }}" class="btn btn-sm btn-success">
-                    <i class="bi bi-file-earmark-excel"></i> Export Excel
-                </a>
+                <div class="d-flex gap-2">
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Kode Submit', 'Tugas', 'Deskripsi', 'Point']])
+                    <a href="{{ route('admin.pic-points.export-show', array_merge(['pic' => $pic->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'step']))) }}" class="btn btn-sm btn-success">
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- Filter Form -->
@@ -168,7 +171,7 @@
                 </form>
                 
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped">
+                    <table class="table table-hover table-striped" id="dataTable">
                         <thead class="table-dark">
                             <tr>
                                 <th>Tanggal</th>

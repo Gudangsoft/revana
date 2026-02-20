@@ -56,12 +56,13 @@
 </div>
 
 <div class="card">
-    <div class="card-header">
-        <i class="bi bi-bar-chart"></i> Monitoring Pengisian Slot
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-bar-chart"></i> Monitoring Pengisian Slot</span>
+        @include('partials.column-toggle', ['tableId' => 'picSlotMonitoringTable', 'columns' => ['Jurnal', 'Publisher', 'Akreditasi', 'Periode', 'Volume/Issue', 'Kapasitas', 'Progress', 'Kode Slot'], 'columnOffset' => 1])
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="picSlotMonitoringTable">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>

@@ -84,6 +84,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-clock-history"></i> Riwayat Point</span>
                     <div class="d-flex gap-2">
+                        @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Submission', 'Deskripsi', 'Point']])
                         <a href="{{ route('admin.marketing-points.export', array_merge(['marketing' => $marketing->id], request()->only(['tanggal_dari', 'tanggal_sampai']))) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-file-earmark-excel"></i> Export Excel
                         </a>
@@ -115,7 +116,7 @@
                 </form>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0" id="dataTable">
                     <thead class="table-light">
                         <tr>
                             <th>Tanggal</th>

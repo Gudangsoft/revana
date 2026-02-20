@@ -132,8 +132,9 @@
 <!-- Submissions Table -->
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
+        @include('partials.column-toggle', ['tableId' => 'mktSubmMonTable', 'columns' => ['Kode Submit', 'ID Artikel', 'Judul Artikel', 'No HP', 'Jurnal / Slot', 'Akreditasi', 'Tanggal Submit', 'Status', 'Progress', 'Aksi'], 'columnOffset' => 0])
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table id="mktSubmMonTable" class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th class="px-3">Kode Submit</th>

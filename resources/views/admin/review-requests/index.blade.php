@@ -19,9 +19,12 @@
     <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Daftar Permintaan Review dari Reviewer</h5>
-            <a href="{{ route('admin.review-requests.export', request()->query()) }}" class="btn btn-success btn-sm">
-                <i class="bi bi-file-earmark-excel"></i> Export Excel
-            </a>
+            <div class="d-flex gap-2">
+                @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Reviewer', 'Bidang Ilmu', 'Bahasa', 'Jumlah Jurnal', 'Lama Hari', 'Status', 'Aksi']])
+                <a href="{{ route('admin.review-requests.export', request()->query()) }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel"></i> Export Excel
+                </a>
+            </div>
         </div>
     </div>
     <div class="card-body">
@@ -76,7 +79,7 @@
 
         @if($reviewRequests->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="dataTable">
                     <thead>
                         <tr>
                             <th>Tanggal</th>

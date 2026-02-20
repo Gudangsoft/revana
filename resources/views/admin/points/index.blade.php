@@ -31,8 +31,9 @@
 @endif
 
 <div class="card">
-    <div class="card-header">
-        <i class="bi bi-clock-history"></i> Riwayat Point
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history"></i> Riwayat Point</span>
+        @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Reviewer', 'Tipe', 'Deskripsi', 'Points', 'Aksi'], 'columnOffset' => 1])
     </div>
     <div class="card-body">
         @if($pointHistories->isEmpty())
@@ -41,7 +42,7 @@
         </div>
         @else
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="dataTable">
                 <thead>
                     <tr>
                         <th>#</th>

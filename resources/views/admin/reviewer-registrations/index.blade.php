@@ -20,7 +20,8 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-person-plus"></i> Daftar Pendaftaran Reviewer</span>
-                <div>
+                <div class="d-flex gap-2 align-items-center">
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Nama Lengkap', 'Email', 'Afiliasi', 'Bidang Ilmu', 'Bahasa', 'Status', 'Aksi'], 'columnOffset' => 1])
                     <span class="badge bg-warning text-dark">Pending: {{ $registrations->where('status', 'pending')->count() }}</span>
                     <span class="badge bg-danger">Rejected: {{ $registrations->where('status', 'rejected')->count() }}</span>
                 </div>
@@ -41,7 +42,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="dataTable">
                             <thead>
                                 <tr>
                                     <th width="30">

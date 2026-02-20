@@ -42,6 +42,7 @@
                     <a href="{{ route('admin.pics.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah PIC
                     </a>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'Telepon', 'Status', 'Aksi'], 'columnOffset' => 1])
                 </div>
             </div>
             <div class="card-body">
@@ -53,7 +54,7 @@
                     @endif
                 </form>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="dataTable">
                         <thead>
                             <tr>
                                 <th>#</th>

@@ -12,9 +12,12 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center bg-warning">
                 <span><i class="bi bi-lightning-charge text-dark"></i> <strong>Data Submit Fasttrack</strong></span>
-                <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-dark btn-sm">
-                    <i class="bi bi-plus-circle"></i> Input Fasttrack
-                </a>
+                <div class="d-flex align-items-center gap-2">
+                    @include('partials.column-toggle', ['tableId' => 'picFasttrackTable', 'columns' => ['Kode Submit', 'Judul', 'Jurnal', 'Penulis', 'No HP', 'Akreditasi', 'Jenis', 'Link Submit', 'Tanggal', 'Aksi'], 'columnOffset' => 1])
+                    <a href="{{ route('pic.fasttrack.create') }}" class="btn btn-dark btn-sm">
+                        <i class="bi bi-plus-circle"></i> Input Fasttrack
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- Summary Cards -->
@@ -84,7 +87,7 @@
 
                 <!-- Data Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-sm">
+                    <table class="table table-bordered table-hover table-sm" id="picFasttrackTable">
                         <thead class="table-dark">
                             <tr>
                                 <th style="width: 50px;">#</th>

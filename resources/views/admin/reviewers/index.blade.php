@@ -70,6 +70,7 @@
                        class="btn btn-success btn-sm">
                         <i class="bi bi-file-earmark-excel"></i> Download Excel
                     </a>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'No. HP / WhatsApp', 'Total Points', 'Available Points', 'Completed Reviews', 'Active Tasks', 'Badges', 'Aksi']])
                     <span class="badge bg-primary">Total: {{ $reviewers->total() }} Reviewer</span>
                 </div>
             </div>
@@ -92,7 +93,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="dataTable">
                         <thead>
                             <tr>
                                 <th>Nama</th>

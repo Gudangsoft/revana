@@ -19,9 +19,12 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Pengguna</h5>
-            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Tambah Pengguna
-            </a>
+            <div class="d-flex gap-2">
+                @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'Role', 'Tanggal Dibuat', 'Aksi'], 'columnOffset' => 1])
+                <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Tambah Pengguna
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <div class="row mb-3">
@@ -42,7 +45,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="dataTable">
                     <thead>
                         <tr>
                             <th>No</th>

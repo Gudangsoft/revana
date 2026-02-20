@@ -14,6 +14,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-calendar3"></i> Data Slot & Monitoring</span>
                 <div class="btn-group">
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Kode Slot', 'Nama Jurnal', 'Publisher', 'Kategori', 'Jenis', 'Akreditasi', 'Volume', 'Nomor', 'Bulan', 'Tahun', 'Jumlah Slot', 'Terpakai', 'Tersedia', 'Status', 'Aksi'], 'columnOffset' => 1])
                     <a href="{{ route('admin.journal-slots.template') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-file-earmark-arrow-down"></i> Template
                     </a>
@@ -134,7 +135,7 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="dataTable">
                         <thead>
                             <tr>
                                 <th>#</th>

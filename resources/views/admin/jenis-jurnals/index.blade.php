@@ -11,9 +11,12 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-journal-bookmark"></i> Data Jenis Jurnal</span>
-        <a href="{{ route('admin.jenis-jurnals.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle"></i> Tambah
-        </a>
+        <div class="d-flex gap-2">
+            @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Deskripsi', 'Status', 'Aksi'], 'columnOffset' => 1])
+            <a href="{{ route('admin.jenis-jurnals.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Tambah
+            </a>
+        </div>
     </div>
     <div class="card-body">
         @if(session('success'))
@@ -24,7 +27,7 @@
         @endif
 
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="dataTable">
                 <thead>
                     <tr>
                         <th>#</th>

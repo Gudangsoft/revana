@@ -13,7 +13,8 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-journal-text"></i> Daftar Jurnal</span>
-                <div>
+                <div class="d-flex align-items-center gap-2">
+                    @include('partials.column-toggle', ['tableId' => 'picJournalsTable', 'columns' => ['Nama Jurnal', 'Kode Jurnal', 'Publisher', 'Kategori', 'Jenis', 'Akreditasi', 'Status', 'Aksi'], 'columnOffset' => 1])
                     <a href="{{ route('pic.journal-slots.monitoring') }}" class="btn btn-info">
                         <i class="bi bi-bar-chart"></i> Pemantauan Slot
                     </a>
@@ -80,7 +81,7 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="picJournalsTable">
                         <thead>
                             <tr>
                                 <th>#</th>

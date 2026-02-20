@@ -78,8 +78,9 @@
 <!-- Table -->
 <div class="card">
     <div class="card-body p-0">
+        @include('partials.column-toggle', ['tableId' => 'mktFtMonTable', 'columns' => ['Kode Submit', 'Jurnal', 'Judul Artikel', 'Penulis', 'Link Publish', 'Tanggal', 'Aksi'], 'columnOffset' => 1])
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table id="mktFtMonTable" class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>#</th>

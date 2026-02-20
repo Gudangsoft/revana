@@ -66,13 +66,16 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-calendar3"></i> Daftar Slot Jurnal</span>
-        <a href="{{ route('pic.journal-slots.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle"></i> Tambah Slot
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            @include('partials.column-toggle', ['tableId' => 'picJournalSlotsTable', 'columns' => ['Jurnal', 'Periode', 'Volume/Issue', 'Total Slot', 'Tersedia', 'Kode Slot', 'Aksi'], 'columnOffset' => 1])
+            <a href="{{ route('pic.journal-slots.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Tambah Slot
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="picJournalSlotsTable">
                 <thead>
                     <tr>
                         <th>#</th>

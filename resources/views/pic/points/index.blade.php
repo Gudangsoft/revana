@@ -127,6 +127,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-clock-history"></i> Riwayat Perolehan Point</span>
+        @include('partials.column-toggle', ['tableId' => 'picPointsTable', 'columns' => ['Tanggal', 'Kode Submit', 'Tugas', 'Deskripsi', 'Point'], 'columnOffset' => 0])
     </div>
     <div class="card-body">
         <!-- Filter Form -->
@@ -160,7 +161,7 @@
         
         <!-- History Table -->
         <div class="table-responsive">
-            <table class="table table-hover table-striped">
+            <table class="table table-hover table-striped" id="picPointsTable">
                 <thead class="table-dark">
                     <tr>
                         <th>Tanggal</th>

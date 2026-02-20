@@ -94,6 +94,7 @@
                             <i class="bi bi-arrow-repeat"></i> Sinkronkan Point
                         </button>
                     </form>
+                    @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'Phone', 'Total Submission', 'Total Point', 'Aksi'], 'columnOffset' => 1])
                 <form method="GET" class="d-flex gap-2">
                     <input type="text" name="search" class="form-control form-control-sm" 
                            placeholder="Cari nama/email..." value="{{ request('search') }}" style="width: 200px;">
@@ -110,7 +111,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0" id="dataTable">
                         <thead class="table-light">
                             <tr>
                                 <th width="60">Rank</th>
