@@ -153,7 +153,7 @@
                             <tr>
                                 <th class="text-center" style="width: 60px;">Rank</th>
                                 <th>Nama</th>
-                                <th>Role</th>
+                                <th class="text-center">Belum Selesai</th>
                                 <th class="text-end">Total Point</th>
                                 <th class="text-end">Bulan Ini</th>
                                 <th class="text-end">Tugas</th>
@@ -180,7 +180,13 @@
                                     <strong>{{ $pic->name }}</strong><br>
                                     <small class="text-muted">{{ $pic->username }}</small>
                                 </td>
-                                <td><span class="badge bg-info">{{ $pic->role }}</span></td>
+                                <td class="text-center">
+                                    @if($pic->pending_tasks_count > 0)
+                                        <span class="badge bg-danger fs-6">{{ $pic->pending_tasks_count }}</span>
+                                    @else
+                                        <span class="badge bg-success">0</span>
+                                    @endif
+                                </td>
                                 <td class="text-end">
                                     <span class="fw-bold text-success fs-5">{{ number_format($pic->total_points) }}</span>
                                 </td>

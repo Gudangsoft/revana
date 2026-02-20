@@ -70,6 +70,41 @@ class Pic extends Authenticatable
         return $this->pointHistories()->count();
     }
 
+    /**
+     * Get total pending/unfinished tasks count
+     * A task is pending when PIC is assigned (petugas_X_id) but X_valid is still false/null
+     */
+    public function getPendingTasksCountAttribute()
+    {
+        $picId = $this->id;
+        $steps = [
+            ['field' => 'petugas_submit_id',     'valid' => null], // submit has no valid field
+            ['field' => 'petugas_editor1_id',     'valid' => 'editor1_valid'],
+            ['field' => 'petugas_author1_id',     'valid' => 'author1_valid'],
+            ['field' => 'petugas_editor2_id',     'valid' => 'editor2_valid'],
+            ['field' => 'petugas_reviewer1_id',   'valid' => 'reviewer1_valid'],
+            ['field' => 'petugas_reviewer2_id',   'valid' => 'reviewer2_valid'],
+            ['field' => 'petugas_editor3_id',     'valid' => 'editor3_valid'],
+            ['field' => 'petugas_author2_id',     'valid' => 'author2_valid'],
+            ['field' => 'petugas_production_id',  'valid' => 'production_valid'],
+        ];
+
+        $count = 0;
+        foreach ($steps as $step) {
+            $query = Submission::where($step['field'], $picId)
+                ->where('status', '!=', 'PUBLISHED')
+                ->where('status', '!=', 'REJECTED');
+            if ($step['valid']) {
+                $query->where(function ($q) use ($step) {
+                    $q->whereNull($step['valid'])->orWhere($step['valid'], false);
+                });
+            }
+            $count += $query->count();
+        }
+
+        return $count;
+    }
+
     public function isAuthor()
     {
         return $this->role === 'AUTOR 1';
