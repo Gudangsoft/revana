@@ -127,9 +127,7 @@
             </table>
         </div>
         
-        <div class="mt-3">
-            {{ $journals->links() }}
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $journals])
     </div>
 </div>
 @endsection

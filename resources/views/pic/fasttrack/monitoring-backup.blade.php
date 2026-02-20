@@ -949,16 +949,7 @@
                 </div>
 
                 <!-- Pagination -->
-                @if($submissions->hasPages())
-                <div class="mt-3 d-flex justify-content-between align-items-center">
-                    <div class="text-muted small">
-                        Menampilkan {{ $submissions->firstItem() ?? 0 }} - {{ $submissions->lastItem() ?? 0 }} dari {{ $submissions->total() }} tugas
-                    </div>
-                    <div>
-                        {{ $submissions->links() }}
-                    </div>
-                </div>
-                @endif
+                @include('partials.per-page-selector', ['paginator' => $submissions])
             </div>
         </div>
     </div>

@@ -103,9 +103,7 @@
             </table>
         </div>
         
-        <div class="d-flex justify-content-center mt-3">
-            {{ $pointHistories->links() }}
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $pointHistories])
         @else
         <div class="text-center text-muted py-5">
             <i class="bi bi-star" style="font-size: 4rem;"></i>

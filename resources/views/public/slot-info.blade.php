@@ -635,16 +635,9 @@
                     </div>
 
                     <!-- Pagination -->
-                    @if($slots->hasPages())
-                    <div class="d-flex justify-content-between align-items-center px-3 pb-3">
-                        <div class="text-muted">
-                            Menampilkan {{ $slots->firstItem() ?? 0 }} - {{ $slots->lastItem() ?? 0 }} dari {{ $slots->total() }} slot
-                        </div>
-                        <div>
-                            {{ $slots->links() }}
-                        </div>
+                    <div class="px-3 pb-3">
+                        @include('partials.per-page-selector', ['paginator' => $slots, 'default' => 15])
                     </div>
-                    @endif
                 </div>
             </div>
         </div>

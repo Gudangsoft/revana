@@ -199,9 +199,7 @@
                             </table>
                         </div>
 
-                        <div class="mt-3">
-                            {{ $slots->appends(request()->except('page'))->links() }}
-                        </div>
+                        @include('partials.per-page-selector', ['paginator' => $slots])
                     </div>
                     <!-- End Data Slot Tab -->
 

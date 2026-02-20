@@ -117,11 +117,7 @@
             </table>
         </div>
         
-        @if($reviewers->hasPages())
-        <div class="mt-3">
-            {{ $reviewers->appends(request()->query())->links() }}
-        </div>
-        @endif
+        @include('partials.per-page-selector', ['paginator' => $reviewers])
     </div>
 </div>
 @endsection

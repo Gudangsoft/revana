@@ -62,7 +62,7 @@
     </div>
     @if($accreditations->count() > 0)
     <div class="card-footer bg-white">
-        {{ $accreditations->links() }}
+        @include('partials.per-page-selector', ['paginator' => $accreditations])
     </div>
     @endif
 </div>

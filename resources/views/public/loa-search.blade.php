@@ -318,14 +318,7 @@
                 </table>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>
-                    Menampilkan {{ $results->firstItem() ?? 0 }} - {{ $results->lastItem() ?? 0 }} dari {{ $results->total() }} hasil
-                </div>
-                <div>
-                    {{ $results->links() }}
-                </div>
-            </div>
+            @include('partials.per-page-selector', ['paginator' => $results, 'default' => 15])
             @else
             <div class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle"></i> 

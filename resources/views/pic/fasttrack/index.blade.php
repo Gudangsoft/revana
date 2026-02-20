@@ -173,14 +173,7 @@
                 </div>
 
                 <!-- Pagination -->
-                @if($submissions->hasPages())
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="text-muted small">
-                        Menampilkan {{ $submissions->firstItem() }} - {{ $submissions->lastItem() }} dari {{ $submissions->total() }} data
-                    </div>
-                    {{ $submissions->links() }}
-                </div>
-                @endif
+                @include('partials.per-page-selector', ['paginator' => $submissions])
             </div>
         </div>
     </div>

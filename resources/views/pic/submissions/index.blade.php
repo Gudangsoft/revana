@@ -151,9 +151,7 @@
             </table>
         </div>
         
-        <div class="mt-3">
-            {{ $submissions->appends(request()->query())->links() }}
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $submissions])
     </div>
 </div>
 @endsection

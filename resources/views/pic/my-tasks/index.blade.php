@@ -329,10 +329,6 @@
             </table>
         </div>
     </div>
-    @if($submissions->hasPages())
-    <div class="card-footer bg-white">
-        {{ $submissions->appends(request()->query())->links() }}
-    </div>
-    @endif
+    @include('partials.per-page-selector', ['paginator' => $submissions])
 </div>
 @endsection
