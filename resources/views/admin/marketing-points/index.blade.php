@@ -87,6 +87,13 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard Marketing</span>
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="POST" action="{{ route('admin.marketing-points.sync-all') }}" class="d-inline" onsubmit="return confirm('Sinkronkan semua point marketing dari data submission?')">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-warning">
+                            <i class="bi bi-arrow-repeat"></i> Sinkronkan Point
+                        </button>
+                    </form>
                 <form method="GET" class="d-flex gap-2">
                     <input type="text" name="search" class="form-control form-control-sm" 
                            placeholder="Cari nama/email..." value="{{ request('search') }}" style="width: 200px;">
@@ -99,6 +106,7 @@
                     </a>
                     @endif
                 </form>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">

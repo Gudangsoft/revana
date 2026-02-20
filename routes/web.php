@@ -242,6 +242,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketing-points/{marketing}', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'show'])->name('marketing-points.show');
         Route::post('/marketing-points/{marketing}/adjust', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'adjustPoints'])->name('marketing-points.adjust');
         Route::get('/marketing-points/{marketing}/export', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'exportExcel'])->name('marketing-points.export');
+        Route::post('/marketing-points/sync-all', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'syncAllPoints'])->name('marketing-points.sync-all');
         
         // PIC Management
         Route::resource('pics', PicController::class)->except(['show']);

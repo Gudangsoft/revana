@@ -111,6 +111,44 @@ class MarketingPointReportController extends Controller
     }
 
     /**
+     * Sync all marketing points (1 submission = 1 point)
+     */
+    public function syncAllPoints()
+    {
+        $marketings = Marketing::all();
+        $synced = 0;
+        $created = 0;
+
+        foreach ($marketings as $marketing) {
+            $submissionCount = \App\Models\Submission::where('marketing_id', $marketing->id)->count();
+            $oldTotal = $marketing->total_points ?? 0;
+
+            if ($submissionCount != $oldTotal) {
+                $marketing->update(['total_points' => $submissionCount]);
+                $synced++;
+            }
+
+            // Create missing point history records
+            $submissions = \App\Models\Submission::where('marketing_id', $marketing->id)
+                ->whereDoesntHave('marketingPointHistory')
+                ->get();
+
+            foreach ($submissions as $submission) {
+                MarketingPointHistory::create([
+                    'marketing_id' => $marketing->id,
+                    'submission_id' => $submission->id,
+                    'points_earned' => 1,
+                    'description' => "Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}",
+                ]);
+                $created++;
+            }
+        }
+
+        return redirect()->back()
+            ->with('success', "Sinkronisasi selesai! {$synced} marketing point diperbarui, {$created} riwayat point baru dibuat.");
+    }
+
+    /**
      * Adjust points manually
      */
     public function adjustPoints(Request $request, Marketing $marketing)
