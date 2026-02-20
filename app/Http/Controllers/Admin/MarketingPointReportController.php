@@ -138,7 +138,7 @@ class MarketingPointReportController extends Controller
                     'marketing_id' => $marketing->id,
                     'submission_id' => $submission->id,
                     'points_earned' => 1,
-                    'description' => "Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}",
+                    'description' => mb_substr("Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}", 0, 255),
                 ]);
                 $created++;
             }

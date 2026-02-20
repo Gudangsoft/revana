@@ -50,7 +50,7 @@ foreach ($submissions as $submission) {
         $pointHistory = MarketingPointHistory::awardPoints(
             $submission->marketing_id,
             $submission->id,
-            "Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}"
+            "Sinkronisasi: " . mb_substr("{$submission->kode_submit} - {$submission->judul_artikel}", 0, 240)
         );
 
         if ($pointHistory) {
