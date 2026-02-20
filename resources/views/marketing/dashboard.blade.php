@@ -24,7 +24,7 @@
                 <div class="display-3 mb-2 opacity-75">
                     <i class="bi bi-trophy-fill"></i>
                 </div>
-                <h2 class="mb-0 fw-bold">{{ number_format($marketing->total_points ?? 0) }}</h2>
+                <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points']) }}</h2>
                 <small class="opacity-75">Total Point</small>
             </div>
         </div>
@@ -242,7 +242,7 @@
                         <div>
                             <i class="bi bi-coin"></i> <strong>Total Point</strong>
                         </div>
-                        <div class="fs-3 fw-bold">{{ number_format($marketing->total_points ?? 0) }}</div>
+                        <div class="fs-3 fw-bold">{{ number_format($stats['total_points']) }}</div>
                     </div>
                 </div>
                 

@@ -83,9 +83,14 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-clock-history"></i> Riwayat Point</span>
-                    <a href="{{ route('admin.marketing-points.index') }}" class="btn btn-sm btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Kembali
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('admin.marketing-points.export', array_merge(['marketing' => $marketing->id], request()->only(['tanggal_dari', 'tanggal_sampai']))) }}" class="btn btn-sm btn-success">
+                            <i class="bi bi-file-earmark-excel"></i> Export Excel
+                        </a>
+                        <a href="{{ route('admin.marketing-points.index') }}" class="btn btn-sm btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="card-body">

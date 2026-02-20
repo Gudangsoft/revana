@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
+use App\Exports\MarketingPointHistoryExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class MarketingPointReportController extends Controller
@@ -17,7 +19,7 @@ class MarketingPointReportController extends Controller
         $query = Marketing::where('is_active', true)
             ->withCount('submissions')
             ->with('submissions')
-            ->orderBy('total_points', 'desc');
+            ->orderByDesc('submissions_count');
         
         // Filter by search
         if ($request->filled('search')) {
@@ -90,6 +92,22 @@ class MarketingPointReportController extends Controller
             'pointHistories',
             'stats'
         ));
+    }
+
+    /**
+     * Export point history to Excel
+     */
+    public function exportExcel(Request $request, Marketing $marketing)
+    {
+        $tanggalDari = $request->tanggal_dari;
+        $tanggalSampai = $request->tanggal_sampai;
+        
+        $filename = 'point-history-' . str_replace(' ', '-', strtolower($marketing->name)) . '-' . now()->format('Y-m-d') . '.xlsx';
+        
+        return Excel::download(
+            new MarketingPointHistoryExport($marketing, $tanggalDari, $tanggalSampai),
+            $filename
+        );
     }
 
     /**

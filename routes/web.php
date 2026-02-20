@@ -241,6 +241,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketing-points', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'index'])->name('marketing-points.index');
         Route::get('/marketing-points/{marketing}', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'show'])->name('marketing-points.show');
         Route::post('/marketing-points/{marketing}/adjust', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'adjustPoints'])->name('marketing-points.adjust');
+        Route::get('/marketing-points/{marketing}/export', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'exportExcel'])->name('marketing-points.export');
         
         // PIC Management
         Route::resource('pics', PicController::class)->except(['show']);
@@ -471,6 +472,7 @@ Route::prefix('marketing')->group(function () {
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
+        Route::get('/refresh-points', [MarketingDashboardController::class, 'refreshPoints'])->name('marketing.refresh-points');
         
         // AJAX: Get slots by journal
         Route::get('/journal-slots/get-by-journal', [MarketingDashboardController::class, 'getSlotsByJournal'])->name('marketing.journal-slots.get-by-journal');

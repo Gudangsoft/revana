@@ -75,6 +75,9 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
+        // Sync total_points = submission count (1 submission = 1 point)
+        $marketing->syncPoints();
+        
         $submissions = Submission::where('marketing_id', $marketing->id)
             ->with('journalSlot.journalMaster')
             ->latest('tanggal_submit')
@@ -92,7 +95,7 @@ class DashboardController extends Controller
             'in_process' => $submissions->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
             'published' => $submissions->where('status', 'PUBLISHED')->count(),
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
-            'total_points' => $submissions->count(), // 1 submission = 1 point
+            'total_points' => $marketing->total_points,
         ];
         
         return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats'));
@@ -150,15 +153,24 @@ class DashboardController extends Controller
     /**
      * Marketing Point History
      */
+    /**
+     * Refresh/sync marketing points
+     */
+    public function refreshPoints()
+    {
+        $marketing = Auth::guard('marketing')->user();
+        $actualPoints = $marketing->syncPoints();
+        
+        return redirect()->back()
+            ->with('success', 'Point berhasil di-refresh! Total point Anda: ' . $actualPoints);
+    }
+
     public function points()
     {
         $marketing = Auth::guard('marketing')->user();
         
-        // Calculate total points from submission count (1 submission = 1 point)
-        $totalPoints = Submission::where('marketing_id', $marketing->id)->count();
-        
-        // Sync total_points in database
-        $marketing->update(['total_points' => $totalPoints]);
+        // Sync total_points = submission count (1 submission = 1 point)
+        $totalPoints = $marketing->syncPoints();
         
         $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
             ->with('submission.journalSlot.journalMaster')
