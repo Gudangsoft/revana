@@ -308,15 +308,18 @@ class SubmissionController extends Controller
                 ->first();
             
             if ($pointHistory) {
-                // Decrease marketing total points
-                $marketing = Marketing::find($submission->marketing_id);
-                if ($marketing) {
-                    $marketing->total_points = max(0, ($marketing->total_points ?? 0) - $pointHistory->points_earned);
-                    $marketing->save();
-                }
-                
                 // Delete the point history record
                 $pointHistory->delete();
+            }
+            
+            // Recalculate total_points from actual submission count (minus this one being deleted)
+            $marketing = Marketing::find($submission->marketing_id);
+            if ($marketing) {
+                $remainingSubmissions = Submission::where('marketing_id', $submission->marketing_id)
+                    ->where('id', '!=', $submission->id)
+                    ->count();
+                $marketing->total_points = $remainingSubmissions;
+                $marketing->save();
             }
         }
         
@@ -1408,15 +1411,17 @@ class SubmissionController extends Controller
             if ($marketing) {
                 $marketingPoints = MarketingPointHistory::getPointsForSubmission();
                 if ($marketingPoints > 0) {
-                    $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
-                    $marketing->save();
-                    
                     MarketingPointHistory::create([
                         'marketing_id' => $marketing->id,
                         'submission_id' => $submission->id,
                         'points_earned' => $marketingPoints,
                         'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
                     ]);
+                    
+                    // Sync total_points from actual submission count (1 submission = 1 point)
+                    $submissionCount = Submission::where('marketing_id', $marketing->id)->count();
+                    $marketing->total_points = $submissionCount;
+                    $marketing->save();
                 }
             }
         }

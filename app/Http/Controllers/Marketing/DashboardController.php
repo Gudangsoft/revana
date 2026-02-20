@@ -92,7 +92,7 @@ class DashboardController extends Controller
             'in_process' => $submissions->whereNotIn('status', ['SUBMITTED', 'PUBLISHED', 'REJECTED'])->count(),
             'published' => $submissions->where('status', 'PUBLISHED')->count(),
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
-            'total_points' => $marketing->total_points ?? 0,
+            'total_points' => $submissions->count(), // 1 submission = 1 point
         ];
         
         return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats'));
@@ -154,8 +154,8 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
-        // Calculate total points from history
-        $totalPoints = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');
+        // Calculate total points from submission count (1 submission = 1 point)
+        $totalPoints = Submission::where('marketing_id', $marketing->id)->count();
         
         // Sync total_points in database
         $marketing->update(['total_points' => $totalPoints]);

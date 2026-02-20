@@ -137,10 +137,10 @@
                                 <td>{{ $marketing->email ?? '-' }}</td>
                                 <td>{{ $marketing->phone ?? '-' }}</td>
                                 <td class="text-center">
-                                    <span class="badge bg-info">{{ $marketing->submissions->count() }}</span>
+                                    <span class="badge bg-info">{{ $marketing->submissions_count ?? $marketing->submissions->count() }}</span>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-success fs-6">{{ number_format($marketing->total_points ?? 0) }}</span>
+                                    <span class="badge bg-success fs-6">{{ $marketing->submissions_count ?? $marketing->submissions->count() }}</span>
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.marketing-points.show', $marketing) }}" 

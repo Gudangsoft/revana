@@ -15,6 +15,7 @@ class MarketingPointReportController extends Controller
     public function index(Request $request)
     {
         $query = Marketing::where('is_active', true)
+            ->withCount('submissions')
             ->with('submissions')
             ->orderBy('total_points', 'desc');
         
@@ -31,8 +32,9 @@ class MarketingPointReportController extends Controller
         
         // Get overall statistics
         $totalMarketings = Marketing::where('is_active', true)->count();
-        $totalPoints = Marketing::where('is_active', true)->sum('total_points');
-        $totalSubmissions = MarketingPointHistory::count();
+        // Use submission count as the source of truth (1 submission = 1 point)
+        $totalSubmissions = \App\Models\Submission::whereNotNull('marketing_id')->count();
+        $totalPoints = $totalSubmissions;
         
         // Top performer this month
         $topPerformerThisMonth = Marketing::where('is_active', true)

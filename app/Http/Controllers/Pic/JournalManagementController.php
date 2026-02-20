@@ -1124,8 +1124,6 @@ class JournalManagementController extends Controller
                         $marketing = Marketing::find($submission->marketing_id);
                         if ($marketing) {
                             $marketingPoints = MarketingPointHistory::getPointsForSubmission();
-                            $marketing->total_points = ($marketing->total_points ?? 0) + $marketingPoints;
-                            $marketing->save();
                             
                             // Log marketing point history
                             MarketingPointHistory::create([
@@ -1134,6 +1132,11 @@ class JournalManagementController extends Controller
                                 'points_earned' => $marketingPoints,
                                 'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
                             ]);
+                            
+                            // Sync total_points from actual submission count (1 submission = 1 point)
+                            $submissionCount = \App\Models\Submission::where('marketing_id', $marketing->id)->count();
+                            $marketing->total_points = $submissionCount;
+                            $marketing->save();
                         }
                     }
                 } catch (\Exception $e) {

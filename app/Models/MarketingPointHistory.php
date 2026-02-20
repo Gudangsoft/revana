@@ -79,8 +79,9 @@ class MarketingPointHistory extends Model
             'description' => $description ?? "Submit artikel berhasil",
         ]);
 
-        // Update total points on Marketing
-        Marketing::where('id', $marketingId)->increment('total_points', $points);
+        // Sync total_points from actual submission count (1 submission = 1 point)
+        $submissionCount = \App\Models\Submission::where('marketing_id', $marketingId)->count();
+        Marketing::where('id', $marketingId)->update(['total_points' => $submissionCount]);
 
         return $history;
     }

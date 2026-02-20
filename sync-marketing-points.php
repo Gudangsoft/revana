@@ -72,19 +72,22 @@ echo "Berhasil disinkronkan: {$synced} submission\n";
 echo "Gagal: {$failed} submission\n";
 echo "Total point diberikan: {$totalPointsAwarded}\n";
 
-// Recalculate total points for all marketings to ensure accuracy
-echo "\n=== RECALCULATE TOTAL POINTS ===\n";
+// Recalculate total points for all marketings based on actual submission count (1 submission = 1 point)
+echo "\n=== RECALCULATE TOTAL POINTS (1 submission = 1 point) ===\n";
 $marketings = Marketing::all();
+$fixedCount = 0;
 foreach ($marketings as $marketing) {
-    $totalPoints = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');
+    $submissionCount = Submission::where('marketing_id', $marketing->id)->count();
     $oldTotal = $marketing->total_points ?? 0;
     
-    if ($totalPoints != $oldTotal) {
-        $marketing->update(['total_points' => $totalPoints]);
-        echo "✓ Marketing: {$marketing->name} - Updated: {$oldTotal} → {$totalPoints}\n";
+    if ($submissionCount != $oldTotal) {
+        $marketing->update(['total_points' => $submissionCount]);
+        echo "✓ Marketing: {$marketing->name} - Updated: {$oldTotal} → {$submissionCount} (submissions: {$submissionCount})\n";
+        $fixedCount++;
     } else {
-        echo "✓ Marketing: {$marketing->name} - OK ({$totalPoints} points)\n";
+        echo "✓ Marketing: {$marketing->name} - OK ({$submissionCount} points)\n";
     }
 }
+echo "\nTotal marketing yang difix: {$fixedCount}\n";
 
 echo "\n✓ Sinkronisasi selesai!\n";
