@@ -156,6 +156,28 @@ class PicPointReportController extends Controller
     }
 
     /**
+     * Sync all PIC points from point history
+     */
+    public function syncAllPoints()
+    {
+        $pics = Pic::all();
+        $synced = 0;
+
+        foreach ($pics as $pic) {
+            $actualPoints = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+            $oldTotal = $pic->total_points ?? 0;
+
+            if ($actualPoints != $oldTotal) {
+                $pic->update(['total_points' => $actualPoints]);
+                $synced++;
+            }
+        }
+
+        return redirect()->back()
+            ->with('success', "Sinkronisasi selesai! {$synced} PIC point diperbarui.");
+    }
+
+    /**
      * Export points report
      */
     public function export(Request $request)

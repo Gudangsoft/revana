@@ -258,6 +258,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pic-points/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'export'])->name('pic-points.export');
         Route::get('/pic-points/{pic}', [\App\Http\Controllers\Admin\PicPointReportController::class, 'show'])->name('pic-points.show');
         Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
+        Route::post('/pic-points/sync-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllPoints'])->name('pic-points.sync-all');
         Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
         
         // Field of Study Management

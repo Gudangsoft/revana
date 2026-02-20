@@ -119,9 +119,17 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard PIC</span>
-                <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
-                    <i class="bi bi-download"></i> Export Excel
-                </a>
+                <div class="d-flex gap-2">
+                    <form method="POST" action="{{ route('admin.pic-points.sync-all') }}" class="d-inline" onsubmit="return confirm('Sinkronkan semua point PIC dari riwayat point?')">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm">
+                            <i class="bi bi-arrow-repeat"></i> Sinkronkan Point
+                        </button>
+                    </form>
+                    <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-download"></i> Export Excel
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- Search -->
