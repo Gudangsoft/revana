@@ -256,9 +256,10 @@ Route::middleware('auth')->group(function () {
         // PIC Point Report
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
         Route::get('/pic-points/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'export'])->name('pic-points.export');
-        Route::get('/pic-points/{pic}', [\App\Http\Controllers\Admin\PicPointReportController::class, 'show'])->name('pic-points.show');
-        Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
         Route::post('/pic-points/sync-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllPoints'])->name('pic-points.sync-all');
+        Route::get('/pic-points/{pic}', [\App\Http\Controllers\Admin\PicPointReportController::class, 'show'])->name('pic-points.show');
+        Route::get('/pic-points/{pic}/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'exportShow'])->name('pic-points.export-show');
+        Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
         Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
         
         // Field of Study Management

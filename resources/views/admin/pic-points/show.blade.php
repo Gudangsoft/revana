@@ -131,8 +131,11 @@
     <!-- History Table -->
     <div class="col-md-8 mb-4">
         <div class="card">
-            <div class="card-header">
-                <i class="bi bi-clock-history"></i> Riwayat Perolehan Point
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history"></i> Riwayat Perolehan Point</span>
+                <a href="{{ route('admin.pic-points.export-show', array_merge(['pic' => $pic->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'step']))) }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-file-earmark-excel"></i> Export Excel
+                </a>
             </div>
             <div class="card-body">
                 <!-- Filter Form -->

@@ -9,6 +9,7 @@ use App\Models\TaskPointSetting;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PicPointsExport;
+use App\Exports\PicPointHistoryExport;
 
 class PicPointReportController extends Controller
 {
@@ -184,5 +185,23 @@ class PicPointReportController extends Controller
     {
         $filename = 'laporan-point-pic-' . now()->format('Y-m-d') . '.xlsx';
         return Excel::download(new PicPointsExport($request), $filename);
+    }
+
+    /**
+     * Export point history for a specific PIC
+     */
+    public function exportShow(Request $request, Pic $pic)
+    {
+        $filename = 'point-history-' . str_replace(' ', '-', strtolower($pic->name)) . '-' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new PicPointHistoryExport(
+                $pic,
+                $request->tanggal_dari,
+                $request->tanggal_sampai,
+                $request->step
+            ),
+            $filename
+        );
     }
 }
