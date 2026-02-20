@@ -34,7 +34,7 @@ class ReviewRequestController extends Controller
             });
         }
 
-        $reviewRequests = $query->paginate(20)->withQueryString();
+        $reviewRequests = $query->paginate(request()->input('per_page', 20))->withQueryString();
 
         return view('admin.review-requests.index', compact('reviewRequests'));
     }
@@ -117,7 +117,7 @@ class ReviewRequestController extends Controller
         $reviewRequests = ReviewRequest::where('reviewer_id', Auth::id())
             ->with('approver')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(request()->input('per_page', 10));
 
         return view('reviewer.review-requests.index', compact('reviewRequests'));
     }

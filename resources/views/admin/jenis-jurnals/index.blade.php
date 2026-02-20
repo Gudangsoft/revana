@@ -78,9 +78,7 @@
             </table>
         </div>
 
-        <div class="mt-3">
-            {{ $jenisJurnals->links() }}
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $jenisJurnals])
     </div>
 </div>
 @endsection

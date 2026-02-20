@@ -873,7 +873,7 @@
                     </table>
                 </div>
 
-                {{ $submissions->withQueryString()->links() }}
+                @include('partials.per-page-selector', ['paginator' => $submissions])
             </div>
         </div>
     </div>

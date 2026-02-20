@@ -65,7 +65,7 @@ class SubmissionController extends Controller
             });
         }
         
-        $submissions = $query->latest('tanggal_submit')->paginate(20);
+        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 20));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
         
@@ -671,7 +671,7 @@ class SubmissionController extends Controller
         }
         
         // Get paginated submissions
-        $submissions = $query->latest('tanggal_submit')->paginate(200)->withQueryString();
+        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 200))->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
@@ -1294,7 +1294,7 @@ class SubmissionController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
         
-        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
@@ -1587,7 +1587,7 @@ class SubmissionController extends Controller
             $query->where('status', $request->status);
         }
         
-        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
@@ -1636,7 +1636,7 @@ class SubmissionController extends Controller
         }
         
         // Get paginated submissions
-        $submissions = $query->latest('tanggal_submit')->paginate(200)->withQueryString();
+        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 200))->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();

@@ -33,7 +33,7 @@ class MarketingController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
         
-        $marketings = $query->latest()->paginate(20)->withQueryString();
+        $marketings = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         return view('admin.marketings.index', compact('marketings'));
     }
 

@@ -251,10 +251,7 @@
                     </table>
                 </div>
                 
-                <!-- Pagination -->
-                <div class="d-flex justify-content-center">
-                    {{ $pics->withQueryString()->links() }}
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $pics])
             </div>
         </div>
     </div>

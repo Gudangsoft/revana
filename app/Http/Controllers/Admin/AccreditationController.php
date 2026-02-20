@@ -24,7 +24,7 @@ class AccreditationController extends Controller
             });
         }
 
-        $accreditations = $query->latest()->paginate(20);
+        $accreditations = $query->latest()->paginate(request()->input('per_page', 20));
         return view('admin.accreditations.index', compact('accreditations'));
     }
 

@@ -39,7 +39,7 @@ class SlotJurnalController extends Controller
         $sortOrder = $request->get('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
         
-        $slots = $query->paginate(20)->withQueryString();
+        $slots = $query->paginate(request()->input('per_page', 20))->withQueryString();
         
         // Get all journals for filter
         $journals = \App\Models\JournalMaster::orderBy('nama_jurnal')->get();

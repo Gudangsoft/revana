@@ -23,7 +23,7 @@ class TaskController extends Controller
             })
             ->with(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5'])
             ->latest()
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
 
         return view('reviewer.tasks.index', compact('assignments'));
     }

@@ -45,7 +45,7 @@ class JournalController extends Controller
 
     public function index()
     {
-        $journals = Journal::with('creator')->latest()->paginate(20);
+        $journals = Journal::with('creator')->latest()->paginate(request()->input('per_page', 20));
         return view('admin.journals.index', compact('journals'));
     }
 

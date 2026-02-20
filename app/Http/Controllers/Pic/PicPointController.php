@@ -33,7 +33,7 @@ class PicPointController extends Controller
             $query->where('step', $request->step);
         }
         
-        $pointHistories = $query->latest()->paginate(20);
+        $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Statistics - calculate real-time from point histories
         $totalPoints = $pic->pointHistories()->sum('points_earned');

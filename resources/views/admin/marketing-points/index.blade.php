@@ -169,11 +169,7 @@
                     </table>
                 </div>
             </div>
-            @if($marketings->hasPages())
-            <div class="card-footer">
-                {{ $marketings->links() }}
-            </div>
-            @endif
+            @include('partials.per-page-selector', ['paginator' => $marketings])
         </div>
     </div>
 </div>

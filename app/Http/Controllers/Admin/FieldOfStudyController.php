@@ -17,7 +17,7 @@ class FieldOfStudyController extends Controller
     {
         $fields = FieldOfStudy::withCount(['users', 'reviewerRegistrations'])
             ->ordered()
-            ->paginate(15);
+            ->paginate(request()->input('per_page', 15));
         
         return view('admin.field-of-studies.index', compact('fields'));
     }

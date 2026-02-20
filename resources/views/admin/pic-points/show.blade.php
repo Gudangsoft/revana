@@ -220,10 +220,7 @@
                     </table>
                 </div>
                 
-                <!-- Pagination -->
-                <div class="d-flex justify-content-center">
-                    {{ $pointHistories->withQueryString()->links() }}
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $pointHistories])
             </div>
         </div>
     </div>

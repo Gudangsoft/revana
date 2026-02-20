@@ -22,7 +22,7 @@ class MonitoringController extends Controller
         // Get review assignments
         $assignments = ReviewAssignment::with(['reviewer', 'assignedBy', 'result'])
             ->latest()
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
 
         return view('monitoring.index', compact('stats', 'assignments'));
     }

@@ -175,7 +175,7 @@ class DashboardController extends Controller
         $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
             ->with('submission.journalSlot.journalMaster')
             ->latest()
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
         
         // Statistics
         $pointsToday = MarketingPointHistory::where('marketing_id', $marketing->id)
@@ -571,7 +571,7 @@ class DashboardController extends Controller
         $marketing = Auth::guard('marketing')->user();
         $accreditations = Accreditation::where('is_active', true)
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
         
         return view('marketing.accreditations.index', compact('marketing', 'accreditations'));
     }

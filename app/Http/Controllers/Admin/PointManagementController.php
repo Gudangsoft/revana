@@ -13,7 +13,7 @@ class PointManagementController extends Controller
     {
         $pointHistories = PointHistory::with(['user'])
             ->latest()
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
 
         return view('admin.points.index', compact('pointHistories'));
     }

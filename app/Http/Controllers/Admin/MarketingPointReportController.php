@@ -30,7 +30,7 @@ class MarketingPointReportController extends Controller
             });
         }
         
-        $marketings = $query->paginate(20);
+        $marketings = $query->paginate(request()->input('per_page', 20));
         
         // Get overall statistics
         $totalMarketings = Marketing::where('is_active', true)->count();
@@ -75,7 +75,7 @@ class MarketingPointReportController extends Controller
             $query->whereDate('created_at', '<=', $request->tanggal_sampai);
         }
         
-        $pointHistories = $query->latest()->paginate(20);
+        $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Stats
         $stats = [

@@ -246,14 +246,7 @@
             </table>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <div>
-                Menampilkan {{ $slots->firstItem() ?? 0 }} - {{ $slots->lastItem() ?? 0 }} dari {{ $slots->total() }} slot
-            </div>
-            <div>
-                {{ $slots->links() }}
-            </div>
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $slots])
     </div>
 </div>
 @endsection

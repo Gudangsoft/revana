@@ -48,7 +48,7 @@ class JournalManagementController extends Controller
             $query->where('jenis_jurnal', $request->jenis);
         }
         
-        $journals = $query->latest()->paginate(20)->withQueryString();
+        $journals = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         return view('pic.journals.index', compact('journals', 'accreditations'));
     }
@@ -188,7 +188,7 @@ class JournalManagementController extends Controller
 
         $slots = $query->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
-            ->paginate(20)
+            ->paginate(request()->input('per_page', 20))
             ->withQueryString();
             
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
@@ -288,7 +288,7 @@ class JournalManagementController extends Controller
             });
         }
 
-        $slots = $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->paginate(20);
+        $slots = $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->paginate(request()->input('per_page', 20));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
         
@@ -326,7 +326,7 @@ class JournalManagementController extends Controller
             });
         }
 
-        $submissions = $query->latest()->paginate(20);
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Get data for filters
         $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
@@ -744,7 +744,7 @@ class JournalManagementController extends Controller
             });
         }
 
-        $submissions = $query->latest()->paginate(20);
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         
         // Statistics - based on PIC's assigned tasks (exclude fasttrack)
@@ -1239,7 +1239,7 @@ class JournalManagementController extends Controller
     // ==================== ACCREDITATIONS ====================
     public function accreditationsIndex()
     {
-        $accreditations = Accreditation::with('journals')->where('is_active', true)->orderBy('name')->paginate(20);
+        $accreditations = Accreditation::with('journals')->where('is_active', true)->orderBy('name')->paginate(request()->input('per_page', 20));
         return view('pic.accreditations.index', compact('accreditations'));
     }
 
@@ -1279,7 +1279,7 @@ class JournalManagementController extends Controller
             });
         }
 
-        $submissions = $query->latest()->paginate(20);
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Statistics for current PIC - all assigned submissions
         $baseQuery = function() use ($picId) {
@@ -1348,7 +1348,7 @@ class JournalManagementController extends Controller
             })
             ->withCount('reviewAssignments')
             ->latest()
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
 
         return view('pic.reviewers.index', compact('reviewers', 'search'));
     }
@@ -1450,7 +1450,7 @@ class JournalManagementController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
         
-        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         
         return view('pic.fasttrack.index', compact('submissions', 'picId'));
     }
@@ -1640,7 +1640,7 @@ class JournalManagementController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
-        $submissions = $query->latest()->paginate(20)->withQueryString();
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
         

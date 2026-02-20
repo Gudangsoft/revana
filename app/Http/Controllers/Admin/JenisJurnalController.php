@@ -10,7 +10,7 @@ class JenisJurnalController extends Controller
 {
     public function index()
     {
-        $jenisJurnals = JenisJurnal::latest()->paginate(20);
+        $jenisJurnals = JenisJurnal::latest()->paginate(request()->input('per_page', 20));
         return view('admin.jenis-jurnals.index', compact('jenisJurnals'));
     }
 

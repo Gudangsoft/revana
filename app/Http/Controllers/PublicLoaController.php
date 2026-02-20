@@ -94,7 +94,7 @@ class PublicLoaController extends Controller
         // Sort by latest
         $slots = $query->orderBy('tahun', 'desc')
                       ->orderBy('bulan', 'desc')
-                      ->paginate(15)
+                      ->paginate(request()->input('per_page', 15))
                       ->withQueryString();
         
         // Get all journals for filter

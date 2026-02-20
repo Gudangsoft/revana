@@ -29,7 +29,7 @@ class ReviewerController extends Controller
             ->with('badges')
             ->withCount('reviewAssignments')
             ->latest()
-            ->paginate(20)
+            ->paginate(request()->input('per_page', 20))
             ->appends(['search' => $search]);
 
         return view('admin.reviewers.index', compact('reviewers', 'search'));

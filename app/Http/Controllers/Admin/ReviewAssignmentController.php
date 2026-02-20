@@ -40,7 +40,7 @@ class ReviewAssignmentController extends Controller
     {
         $assignments = ReviewAssignment::with(['reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy'])
             ->latest()
-            ->paginate(20);
+            ->paginate(request()->input('per_page', 20));
 
         return view('admin.assignments.index', compact('assignments'));
     }

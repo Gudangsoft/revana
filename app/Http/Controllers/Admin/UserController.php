@@ -21,7 +21,7 @@ class UserController extends Controller
                       ->orWhere('role', 'like', "%{$search}%");
             })
             ->latest()
-            ->paginate(15)
+            ->paginate(request()->input('per_page', 15))
             ->appends(['search' => $search]);
             
         return view('admin.users.index', compact('users', 'search'));

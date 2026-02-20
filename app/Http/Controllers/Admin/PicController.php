@@ -25,7 +25,7 @@ class PicController extends Controller
                   ->orWhere('phone', 'like', "%$search%");
             });
         }
-        $pics = $query->orderBy('name')->paginate(20);
+        $pics = $query->orderBy('name')->paginate(request()->input('per_page', 20));
         return view('admin.pics.index', compact('pics'));
     }
 

@@ -11,7 +11,7 @@ class CertificateController extends Controller
 {
     public function index()
     {
-        $certificates = Certificate::latest()->paginate(10);
+        $certificates = Certificate::latest()->paginate(request()->input('per_page', 10));
         return view('admin.certificates.index', compact('certificates'));
     }
 

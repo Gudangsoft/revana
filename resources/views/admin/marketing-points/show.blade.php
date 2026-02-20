@@ -157,11 +157,7 @@
                     </tbody>
                 </table>
             </div>
-            @if($pointHistories->hasPages())
-            <div class="card-footer">
-                {{ $pointHistories->links() }}
-            </div>
-            @endif
+            @include('partials.per-page-selector', ['paginator' => $pointHistories])
         </div>
     </div>
 </div>

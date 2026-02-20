@@ -10,7 +10,7 @@ class KategoriController extends Controller
 {
     public function index()
     {
-        $kategoris = Kategori::latest()->paginate(20);
+        $kategoris = Kategori::latest()->paginate(request()->input('per_page', 20));
         return view('admin.kategoris.index', compact('kategoris'));
     }
 

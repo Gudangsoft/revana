@@ -31,7 +31,7 @@ class PicPointReportController extends Controller
             });
         }
         
-        $pics = $query->paginate(20);
+        $pics = $query->paginate(request()->input('per_page', 20));
         
         // Get overall statistics
         $totalPics = Pic::where('is_active', true)->count();
@@ -91,7 +91,7 @@ class PicPointReportController extends Controller
             $query->where('step', $request->step);
         }
         
-        $pointHistories = $query->latest()->paginate(20);
+        $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Stats
         $stats = [

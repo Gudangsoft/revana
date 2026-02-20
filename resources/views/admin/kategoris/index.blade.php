@@ -78,9 +78,7 @@
             </table>
         </div>
 
-        <div class="mt-3">
-            {{ $kategoris->links() }}
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $kategoris])
     </div>
 </div>
 @endsection

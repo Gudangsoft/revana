@@ -52,7 +52,7 @@ class JournalMasterController extends Controller
             $query->where('is_active', $request->status == 'active');
         }
 
-        $journals = $query->latest()->paginate(20);
+        $journals = $query->latest()->paginate(request()->input('per_page', 20));
         $accreditations = Accreditation::where('is_active', true)->orderBy('points', 'desc')->get();
             
         return view('admin.journal-masters.index', compact('journals', 'accreditations'));

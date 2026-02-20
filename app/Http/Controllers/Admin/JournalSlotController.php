@@ -89,7 +89,7 @@ class JournalSlotController extends Controller
             $query->orderBy('volume', 'desc')->orderBy('nomor', 'desc');
         }
         
-        $slots = $query->paginate(20);
+        $slots = $query->paginate(request()->input('per_page', 20));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
         $bulanOptions = JournalSlot::getBulanOptions();
@@ -476,7 +476,7 @@ class JournalSlotController extends Controller
             $query->orderBy('tahun', 'desc')->orderBy('bulan', 'desc');
         }
         
-        $slots = $query->paginate(20)->withQueryString();
+        $slots = $query->paginate(request()->input('per_page', 20))->withQueryString();
         
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         

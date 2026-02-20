@@ -16,7 +16,7 @@ class ReviewerRegistrationController extends Controller
         // Approved ones should be viewed in reviewers page
         $registrations = ReviewerRegistration::whereIn('status', ['pending', 'rejected'])
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(request()->input('per_page', 15));
         return view('admin.reviewer-registrations.index', compact('registrations'));
     }
 
