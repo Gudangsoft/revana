@@ -6,15 +6,10 @@ use App\Models\Accreditation;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Illuminate\Support\Str;
 
-class AccreditationsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure
+class AccreditationsImport implements ToModel, WithHeadingRow, WithValidation
 {
-    use SkipsErrors, SkipsFailures;
 
     protected $imported = 0;
     protected $updated = 0;

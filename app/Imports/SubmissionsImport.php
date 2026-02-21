@@ -7,14 +7,9 @@ use App\Models\JournalSlot;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
 
-class SubmissionsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure
+class SubmissionsImport implements ToModel, WithHeadingRow, WithValidation
 {
-    use SkipsErrors, SkipsFailures;
 
     protected $imported = 0;
     protected $updated = 0;
