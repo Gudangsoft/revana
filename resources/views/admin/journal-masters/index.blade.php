@@ -209,9 +209,7 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $journals->withQueryString()])
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $journals, 'default' => 20])
             </div>
         </div>
     </div>

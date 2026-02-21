@@ -168,9 +168,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $submissions->withQueryString()])
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 20])
             </div>
         </div>
     </div>

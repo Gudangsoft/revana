@@ -102,69 +102,7 @@
                 </table>
             </div>
 
-            @if($users->hasPages())
-            <div class="mt-3">
-                <nav>
-                    <ul class="pagination justify-content-center">
-                        <!-- Previous Button -->
-                        @if($users->onFirstPage())
-                            <li class="page-item disabled">
-                                <span class="page-link">Kembali</span>
-                            </li>
-                        @else
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $users->previousPageUrl() }}">Kembali</a>
-                            </li>
-                        @endif
-
-                        <!-- Page Numbers -->
-                        @php
-                            $currentPage = $users->currentPage();
-                            $lastPage = $users->lastPage();
-                            $range = 2; // Show 2 pages on each side of current page
-                        @endphp
-
-                        <!-- First Page -->
-                        @if($currentPage > $range + 1)
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $users->url(1) }}">1</a>
-                            </li>
-                            @if($currentPage > $range + 2)
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                            @endif
-                        @endif
-
-                        <!-- Pages around current page -->
-                        @for($i = max(1, $currentPage - $range); $i <= min($lastPage, $currentPage + $range); $i++)
-                            <li class="page-item {{ $i == $currentPage ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $users->url($i) }}">{{ $i }}</a>
-                            </li>
-                        @endfor
-
-                        <!-- Last Page -->
-                        @if($currentPage < $lastPage - $range)
-                            @if($currentPage < $lastPage - $range - 1)
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                            @endif
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $users->url($lastPage) }}">{{ $lastPage }}</a>
-                            </li>
-                        @endif
-
-                        <!-- Next Button -->
-                        @if($users->hasMorePages())
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $users->nextPageUrl() }}">Lanjut</a>
-                            </li>
-                        @else
-                            <li class="page-item disabled">
-                                <span class="page-link">Lanjut</span>
-                            </li>
-                        @endif
-                    </ul>
-                </nav>
-            </div>
-            @endif
+            @include('partials.per-page-selector', ['paginator' => $users, 'default' => 15])
         </div>
     </div>
 </div>

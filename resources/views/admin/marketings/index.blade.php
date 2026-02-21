@@ -144,9 +144,7 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $marketings])
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $marketings, 'default' => 20])
             </div>
         </div>
     </div>

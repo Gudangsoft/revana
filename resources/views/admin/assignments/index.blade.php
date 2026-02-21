@@ -146,9 +146,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-3">
-            @include('components.simple-pagination', ['paginator' => $assignments])
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $assignments, 'default' => 20])
         @endif
     </div>
 </div>

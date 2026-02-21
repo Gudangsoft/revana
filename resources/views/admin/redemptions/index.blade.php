@@ -164,9 +164,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-3">
-            @include('components.simple-pagination', ['paginator' => $redemptions])
-        </div>
+        @include('partials.per-page-selector', ['paginator' => $redemptions, 'default' => 20])
         @endif
     </div>
 </div>

@@ -151,11 +151,7 @@
                 </table>
             </div>
 
-            @if($reviewRequests->hasPages())
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $reviewRequests])
-                </div>
-            @endif
+            @include('partials.per-page-selector', ['paginator' => $reviewRequests, 'default' => 20])
         @else
             <div class="text-center py-5">
                 <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>

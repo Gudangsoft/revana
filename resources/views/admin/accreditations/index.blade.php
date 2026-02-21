@@ -117,11 +117,7 @@
             </table>
         </div>
 
-        @if($accreditations->hasPages())
-        <div class="mt-3">
-            @include('components.simple-pagination', ['paginator' => $accreditations])
-        </div>
-        @endif
+        @include('partials.per-page-selector', ['paginator' => $accreditations, 'default' => 20])
     </div>
 </div>
 

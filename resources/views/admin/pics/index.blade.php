@@ -117,9 +117,7 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $pics])
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $pics, 'default' => 20])
             </div>
         </div>
     </div>

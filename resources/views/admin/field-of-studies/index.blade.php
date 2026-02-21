@@ -177,11 +177,7 @@
                 </table>
             </div>
 
-            @if($fields->hasPages())
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $fields])
-                </div>
-            @endif
+            @include('partials.per-page-selector', ['paginator' => $fields, 'default' => 15])
         </div>
     </div>
 

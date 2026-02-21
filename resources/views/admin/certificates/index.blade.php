@@ -91,9 +91,7 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $certificates])
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $certificates, 'default' => 10])
             </div>
         </div>
     </div>

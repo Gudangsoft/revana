@@ -169,9 +169,7 @@
                 </form>
                 </div>
 
-                <div class="mt-3">
-                    @include('components.simple-pagination', ['paginator' => $registrations])
-                </div>
+                @include('partials.per-page-selector', ['paginator' => $registrations, 'default' => 15])
             </div>
         </div>
     </div>
