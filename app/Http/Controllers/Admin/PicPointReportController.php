@@ -283,4 +283,70 @@ class PicPointReportController extends Controller
             $filename
         );
     }
+
+    /**
+     * Sync all PIC points then logout admin
+     */
+    public function syncAllAndLogout()
+    {
+        // Run full sync inline (same logic as syncAllPoints)
+        $backfilled = 0;
+
+        $submitRows = \DB::table('submissions')->whereNotNull('petugas_submit_id')
+            ->select('id', 'petugas_submit_id', 'kode_submit', 'judul_artikel')->get();
+        foreach ($submitRows as $row) {
+            $exists = PicPointHistory::where('pic_id', $row->petugas_submit_id)
+                ->where('submission_id', $row->id)->where('step', 'submit')->exists();
+            if (!$exists) {
+                $pts = PicPointHistory::getPointsForStep('submit');
+                if ($pts > 0) {
+                    PicPointHistory::create(['pic_id' => $row->petugas_submit_id, 'submission_id' => $row->id,
+                        'step' => 'submit', 'points_earned' => $pts,
+                        'description' => "Submit artikel: {$row->kode_submit} - {$row->judul_artikel}"]);
+                    $backfilled++;
+                }
+            }
+        }
+
+        $workflowSteps = [
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production'],
+        ];
+        foreach ($workflowSteps as $ws) {
+            $rows = \DB::table('submissions')->whereNotNull($ws['field'])->where($ws['valid'], true)
+                ->select('id', $ws['field'].' as pic_id', 'kode_submit', 'judul_artikel')->get();
+            foreach ($rows as $row) {
+                $exists = PicPointHistory::where('pic_id', $row->pic_id)
+                    ->where('submission_id', $row->id)->where('step', $ws['step'])->exists();
+                if (!$exists) {
+                    $pts = PicPointHistory::getPointsForStep($ws['step']);
+                    if ($pts > 0) {
+                        PicPointHistory::create(['pic_id' => $row->pic_id, 'submission_id' => $row->id,
+                            'step' => $ws['step'], 'points_earned' => $pts,
+                            'description' => "Tugas {$ws['step']}: {$row->kode_submit}"]);
+                        $backfilled++;
+                    }
+                }
+            }
+        }
+
+        foreach (Pic::all() as $pic) {
+            $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+            if ($actual != ($pic->total_points ?? 0)) $pic->update(['total_points' => $actual]);
+        }
+
+        // Logout
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login')
+            ->with('success', "Sinkronisasi selesai ({$backfilled} data diperbarui). Anda telah logout.");
+    }
 }

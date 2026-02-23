@@ -405,7 +405,7 @@ class JournalManagementController extends Controller
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
-            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+            'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
@@ -1496,7 +1496,7 @@ class JournalManagementController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
-            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+            'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
@@ -1732,7 +1732,7 @@ class JournalManagementController extends Controller
             'notes' => 'nullable|string',
             'marketing_id' => 'nullable|exists:marketings,id',
             'link_publish' => 'nullable|url|max:500',
-            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+            'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');

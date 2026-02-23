@@ -1420,7 +1420,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="mb-3">
                         <label for="importFile" class="form-label">Pilih File <span class="text-danger">*</span></label>
                         <input type="file" class="form-control" id="importFile" name="file" accept=".xlsx,.xls,.csv" required>
-                        <div class="form-text">Maksimal 10MB</div>
+                        <div class="form-text">Maksimal 50MB</div>
                     </div>
                     
                     <div class="alert alert-warning small mb-0">

@@ -112,7 +112,7 @@
                                 @error('file_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
+                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 50MB</small>
                             </div>
                         </div>
                     </div>

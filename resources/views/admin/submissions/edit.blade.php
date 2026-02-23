@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 @error('file_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 10MB</small>
+                                <small class="text-muted">Format: DOC, DOCX, PDF. Maksimal 50MB</small>
                                 @if($submission->file_artikel)
                                 <div class="mt-2">
                                     <span class="badge bg-success"><i class="bi bi-file-earmark-check"></i> File sudah ada:</span>

@@ -709,12 +709,18 @@
                             @endif
                         </span>
                     </a>
+                    @if(auth()->user()->role === 'admin')
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                        <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
+                    </button>
+                    @else
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-outline-danger">
                             <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
                         </button>
                     </form>
+                    @endif
                 </div>
             </div>
         </nav>
@@ -810,5 +816,57 @@
     </script>
     
     @stack('scripts')
+
+    @if(auth()->check() && auth()->user()->role === 'admin')
+    <!-- Logout Modal for Admin -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h5 class="modal-title fw-bold" id="logoutModalLabel">
+                        <i class="bi bi-arrow-repeat me-2"></i> Sebelum Logout
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-database-check text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <p class="text-center mb-1 fw-semibold">Sinkronkan semua data point sebelum logout?</p>
+                    <p class="text-center text-muted small mb-0">
+                        Sinkronisasi memastikan semua riwayat tugas PIC tercatat dengan benar dan total point setiap PIC sesuai data real.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+                    <!-- Sync All + Logout -->
+                    <form method="POST" action="{{ route('admin.sync-and-logout') }}" id="syncLogoutForm">
+                        @csrf
+                        <button type="submit" class="btn btn-warning fw-semibold px-4" id="btnSyncLogout">
+                            <i class="bi bi-arrow-repeat me-1"></i> Sinkronkan & Logout
+                        </button>
+                    </form>
+                    <!-- Logout only -->
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger px-4">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout Saja
+                        </button>
+                    </form>
+                    <!-- Cancel -->
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x me-1"></i> Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('syncLogoutForm').addEventListener('submit', function() {
+            var btn = document.getElementById('btnSyncLogout');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyinkronkan...';
+        });
+    </script>
+    @endif
 </body>
 </html>

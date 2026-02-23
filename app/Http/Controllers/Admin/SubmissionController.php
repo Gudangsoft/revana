@@ -95,7 +95,7 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
-            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+            'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
@@ -226,7 +226,7 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url',
-            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+            'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
@@ -1343,7 +1343,7 @@ class SubmissionController extends Controller
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => 'nullable|url|max:500',
-            'file_artikel' => ['nullable', 'file', 'max:10240', function ($attribute, $value, $fail) {
+            'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
