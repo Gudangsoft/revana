@@ -56,6 +56,14 @@
 </div>
 @endif
 
+{{-- Sync Point Reminder --}}
+@include('partials.sync-point-reminder', [
+    'reminderId' => 'admin_sync_point',
+    'syncRoute'  => route('admin.pic-points.index'),
+    'syncLabel'  => 'Buka Halaman Sinkronisasi Point PIC',
+    'syncMethod' => 'GET',
+])
+
 <!-- Stats Cards -->
 <div class="row">
     <div class="col-md-3">

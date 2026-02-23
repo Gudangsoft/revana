@@ -3,6 +3,14 @@
 @section('title', 'Dashboard Marketing')
 
 @section('content')
+{{-- Sync Point Reminder --}}
+@include('partials.sync-point-reminder', [
+    'reminderId' => 'marketing_sync_point',
+    'syncRoute'  => route('marketing.refresh-points'),
+    'syncLabel'  => 'Refresh Point Marketing Saya',
+    'syncMethod' => 'GET',
+])
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
         <i class="bi bi-speedometer2"></i> Dashboard Marketing
