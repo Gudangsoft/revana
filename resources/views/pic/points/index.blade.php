@@ -9,6 +9,14 @@
 
 @section('content')
 <div class="row">
+    @if(session('success'))
+    <div class="col-12 mb-3">
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    @endif
     <!-- Stats Cards -->
     <div class="col-md-3 mb-4">
         <div class="card bg-primary text-white h-100">
@@ -127,7 +135,16 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-clock-history"></i> Riwayat Perolehan Point</span>
-        @include('partials.column-toggle', ['tableId' => 'picPointsTable', 'columns' => ['Tanggal', 'Kode Submit', 'Tugas', 'Deskripsi', 'Point'], 'columnOffset' => 0])
+        <div class="d-flex gap-2 align-items-center">
+            <form method="POST" action="{{ route('pic.points.sync') }}" class="d-inline" id="syncMyPointForm">
+                @csrf
+                <button type="submit" class="btn btn-warning btn-sm" id="btnSyncMyPoint">
+                    <i class="bi bi-arrow-repeat" id="syncMyIcon"></i>
+                    <span id="syncMyText"> Refresh Point</span>
+                </button>
+            </form>
+            @include('partials.column-toggle', ['tableId' => 'picPointsTable', 'columns' => ['Tanggal', 'Kode Submit', 'Tugas', 'Deskripsi', 'Point'], 'columnOffset' => 0])
+        </div>
     </div>
     <div class="card-body">
         <!-- Filter Form -->
@@ -213,9 +230,23 @@
 
 @section('scripts')
 <script>
-    // Auto refresh every 30 seconds
+    // Auto refresh every 60 seconds
     setTimeout(function() {
         location.reload();
-    }, 30000);
+    }, 60000);
+
+    // Refresh button loading state
+    document.getElementById('syncMyPointForm').addEventListener('submit', function() {
+        var btn  = document.getElementById('btnSyncMyPoint');
+        var icon = document.getElementById('syncMyIcon');
+        var text = document.getElementById('syncMyText');
+        btn.disabled = true;
+        icon.classList.add('spin-icon');
+        text.textContent = ' Menyinkronkan...';
+    });
 </script>
+<style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spin-icon { display: inline-block; animation: spin 0.8s linear infinite; }
+</style>
 @endsection

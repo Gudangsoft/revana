@@ -11,6 +11,21 @@ use Illuminate\Support\Facades\Auth;
 class PicPointController extends Controller
 {
     /**
+     * Sync point data for logged-in PIC and redirect back with fresh data
+     */
+    public function syncMyPoints()
+    {
+        $pic = Auth::guard('pic')->user();
+
+        // Recalculate total_points from actual point history records
+        $actualPoints = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+        $pic->update(['total_points' => $actualPoints]);
+
+        return redirect()->route('pic.points.index')
+            ->with('success', 'Data point berhasil disinkronkan. Total point terkini: ' . number_format($actualPoints));
+    }
+
+    /**
      * Display points dashboard for logged in PIC
      */
     public function index(Request $request)

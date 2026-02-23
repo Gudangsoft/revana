@@ -439,6 +439,7 @@ Route::prefix('pic')->group(function () {
         
         // Point Saya
         Route::get('/points', [\App\Http\Controllers\Pic\PicPointController::class, 'index'])->name('pic.points.index');
+        Route::post('/points/sync', [\App\Http\Controllers\Pic\PicPointController::class, 'syncMyPoints'])->name('pic.points.sync');
         
         // Profile
         Route::get('/profile', [\App\Http\Controllers\Pic\ProfileController::class, 'edit'])->name('pic.profile.edit');
