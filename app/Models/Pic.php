@@ -71,35 +71,36 @@ class Pic extends Authenticatable
     }
 
     /**
-     * Get total pending/unfinished tasks count
-     * A task is pending when PIC is assigned (petugas_X_id) but X_valid is still false/null
+     * Get total pending/unfinished tasks count.
+     * A task is pending when:
+     *  - the PIC is assigned to that step (petugas_X_id = this PIC)
+     *  - the submission is currently AT that step (status = X_PROCESS)
+     *  - the step is not yet validated (X_valid is null or false)
+     *
+     * petugas_submit_id is excluded — submission is a one-time action, not a validatable task.
      */
     public function getPendingTasksCountAttribute()
     {
         $picId = $this->id;
         $steps = [
-            ['field' => 'petugas_submit_id',     'valid' => null], // submit has no valid field
-            ['field' => 'petugas_editor1_id',     'valid' => 'editor1_valid'],
-            ['field' => 'petugas_author1_id',     'valid' => 'author1_valid'],
-            ['field' => 'petugas_editor2_id',     'valid' => 'editor2_valid'],
-            ['field' => 'petugas_reviewer1_id',   'valid' => 'reviewer1_valid'],
-            ['field' => 'petugas_reviewer2_id',   'valid' => 'reviewer2_valid'],
-            ['field' => 'petugas_editor3_id',     'valid' => 'editor3_valid'],
-            ['field' => 'petugas_author2_id',     'valid' => 'author2_valid'],
-            ['field' => 'petugas_production_id',  'valid' => 'production_valid'],
+            ['field' => 'petugas_editor1_id',    'valid' => 'editor1_valid',    'status' => 'EDITOR1_PROCESS'],
+            ['field' => 'petugas_author1_id',     'valid' => 'author1_valid',    'status' => 'AUTHOR1_PROCESS'],
+            ['field' => 'petugas_editor2_id',     'valid' => 'editor2_valid',    'status' => 'EDITOR2_PROCESS'],
+            ['field' => 'petugas_reviewer1_id',   'valid' => 'reviewer1_valid',  'status' => 'REVIEWER1_PROCESS'],
+            ['field' => 'petugas_reviewer2_id',   'valid' => 'reviewer2_valid',  'status' => 'REVIEWER2_PROCESS'],
+            ['field' => 'petugas_editor3_id',     'valid' => 'editor3_valid',    'status' => 'EDITOR3_PROCESS'],
+            ['field' => 'petugas_author2_id',     'valid' => 'author2_valid',    'status' => 'AUTHOR2_PROCESS'],
+            ['field' => 'petugas_production_id',  'valid' => 'production_valid', 'status' => 'PRODUCTION_PROCESS'],
         ];
 
         $count = 0;
         foreach ($steps as $step) {
-            $query = Submission::where($step['field'], $picId)
-                ->where('status', '!=', 'PUBLISHED')
-                ->where('status', '!=', 'REJECTED');
-            if ($step['valid']) {
-                $query->where(function ($q) use ($step) {
+            $count += Submission::where($step['field'], $picId)
+                ->where('status', $step['status'])
+                ->where(function ($q) use ($step) {
                     $q->whereNull($step['valid'])->orWhere($step['valid'], false);
-                });
-            }
-            $count += $query->count();
+                })
+                ->count();
         }
 
         return $count;
