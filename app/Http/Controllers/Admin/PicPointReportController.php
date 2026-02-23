@@ -157,20 +157,84 @@ class PicPointReportController extends Controller
     }
 
     /**
-     * Sync all PIC points from point history (comprehensive sync)
+     * Sync all PIC points from point history (comprehensive sync with backfill)
      */
     public function syncAllPoints()
     {
-        $pics = Pic::all();
-        $synced    = 0;
+        $backfilled = 0;
+
+        // --- BACKFILL step submit ---
+        $submitRows = \DB::table('submissions')
+            ->whereNotNull('petugas_submit_id')
+            ->select('id', 'petugas_submit_id', 'kode_submit', 'judul_artikel')
+            ->get();
+
+        foreach ($submitRows as $row) {
+            $exists = PicPointHistory::where('pic_id', $row->petugas_submit_id)
+                ->where('submission_id', $row->id)
+                ->where('step', 'submit')
+                ->exists();
+            if (!$exists) {
+                $points = PicPointHistory::getPointsForStep('submit');
+                if ($points > 0) {
+                    PicPointHistory::create([
+                        'pic_id'        => $row->petugas_submit_id,
+                        'submission_id' => $row->id,
+                        'step'          => 'submit',
+                        'points_earned' => $points,
+                        'description'   => "Submit artikel: {$row->kode_submit} - {$row->judul_artikel}",
+                    ]);
+                    $backfilled++;
+                }
+            }
+        }
+
+        // --- BACKFILL workflow steps (only validated) ---
+        $workflowSteps = [
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production'],
+        ];
+
+        foreach ($workflowSteps as $ws) {
+            $rows = \DB::table('submissions')
+                ->whereNotNull($ws['field'])
+                ->where($ws['valid'], true)
+                ->select('id', $ws['field'] . ' as pic_id', 'kode_submit', 'judul_artikel')
+                ->get();
+
+            foreach ($rows as $row) {
+                $exists = PicPointHistory::where('pic_id', $row->pic_id)
+                    ->where('submission_id', $row->id)
+                    ->where('step', $ws['step'])
+                    ->exists();
+                if (!$exists) {
+                    $points = PicPointHistory::getPointsForStep($ws['step']);
+                    if ($points > 0) {
+                        PicPointHistory::create([
+                            'pic_id'        => $row->pic_id,
+                            'submission_id' => $row->id,
+                            'step'          => $ws['step'],
+                            'points_earned' => $points,
+                            'description'   => "Menyelesaikan tugas {$ws['step']} untuk: {$row->kode_submit}",
+                        ]);
+                        $backfilled++;
+                    }
+                }
+            }
+        }
+
+        // Recalculate total_points for all PICs from histories
+        $synced = 0;
         $unchanged = 0;
-
-        foreach ($pics as $pic) {
-            // 1. Recalculate total_points from actual point history records
+        foreach (Pic::all() as $pic) {
             $actualPoints = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            $oldTotal     = $pic->total_points ?? 0;
-
-            if ($actualPoints != $oldTotal) {
+            if ($actualPoints != ($pic->total_points ?? 0)) {
                 $pic->update(['total_points' => $actualPoints]);
                 $synced++;
             } else {
@@ -178,15 +242,19 @@ class PicPointReportController extends Controller
             }
         }
 
-        // 2. Remove orphan point histories (histories whose pic no longer exists)
+        // Remove orphan point histories
         $validPicIds = Pic::pluck('id');
         $orphanCount = PicPointHistory::whereNotIn('pic_id', $validPicIds)->count();
         if ($orphanCount > 0) {
             PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
         }
 
-        return redirect()->route('admin.pic-points.index')
-            ->with('success', "Sinkronisasi selesai! {$synced} PIC diperbarui, {$unchanged} sudah sesuai" . ($orphanCount > 0 ? ", {$orphanCount} riwayat orphan dihapus" : "." ));
+        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$synced} PIC diperbarui, {$unchanged} sudah sesuai";
+        if ($orphanCount > 0) {
+            $msg .= ", {$orphanCount} riwayat orphan dihapus";
+        }
+
+        return redirect()->route('admin.pic-points.index')->with('success', $msg . '.');
     }
 
     /**
