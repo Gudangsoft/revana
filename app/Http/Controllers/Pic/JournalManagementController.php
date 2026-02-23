@@ -483,6 +483,19 @@ class JournalManagementController extends Controller
             }
         }
 
+        // Award points to PIC submit
+        $pic = auth()->guard('pic')->user();
+        $picHistory = PicPointHistory::awardPoints(
+            $pic->id,
+            $submission->id,
+            'submit',
+            "Submit artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
+        );
+        if ($picHistory) {
+            $pic->increment('total_points', $picHistory->points_earned);
+            $pointMessage .= " Anda mendapatkan +{$picHistory->points_earned} point!";
+        }
+
         return redirect()->route('pic.submissions.index')
             ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
     }

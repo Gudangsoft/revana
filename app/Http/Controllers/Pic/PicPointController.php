@@ -16,13 +16,55 @@ class PicPointController extends Controller
     public function syncMyPoints()
     {
         $pic = Auth::guard('pic')->user();
+        $picId = $pic->id;
+        $backfilled = 0;
 
-        // Recalculate total_points from actual point history records
-        $actualPoints = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+        // --- BACKFILL: step submit ---
+        // Award point for every submission where this PIC is petugas_submit but has no history
+        $submitSubmissions = \App\Models\Submission::where('petugas_submit_id', $picId)->get();
+        foreach ($submitSubmissions as $submission) {
+            $history = PicPointHistory::awardPoints(
+                $picId, $submission->id, 'submit',
+                "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
+            );
+            if ($history) $backfilled++;
+        }
+
+        // --- BACKFILL: workflow steps (only if step is validated / done) ---
+        $workflowSteps = [
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production'],
+        ];
+
+        foreach ($workflowSteps as $ws) {
+            $submissions = \App\Models\Submission::where($ws['field'], $picId)
+                ->where($ws['valid'], true)
+                ->get();
+            foreach ($submissions as $submission) {
+                $history = PicPointHistory::awardPoints(
+                    $picId, $submission->id, $ws['step'],
+                    "Menyelesaikan tugas {$ws['step']} untuk artikel: {$submission->kode_submit}"
+                );
+                if ($history) $backfilled++;
+            }
+        }
+
+        // Recalculate total_points from all history records
+        $actualPoints = PicPointHistory::where('pic_id', $picId)->sum('points_earned');
         $pic->update(['total_points' => $actualPoints]);
 
-        return redirect()->route('pic.points.index')
-            ->with('success', 'Data point berhasil disinkronkan. Total point terkini: ' . number_format($actualPoints));
+        $msg = 'Data point berhasil disinkronkan. Total point terkini: ' . number_format($actualPoints);
+        if ($backfilled > 0) {
+            $msg .= " ({$backfilled} riwayat baru ditemukan dan ditambahkan)";
+        }
+
+        return redirect()->route('pic.points.index')->with('success', $msg);
     }
 
     /**

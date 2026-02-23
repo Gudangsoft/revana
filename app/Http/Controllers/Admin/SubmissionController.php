@@ -162,6 +162,20 @@ class SubmissionController extends Controller
             }
         }
 
+        // Award points to PIC submit
+        if (!empty($validated['petugas_submit_id'])) {
+            $picHistory = PicPointHistory::awardPoints(
+                $validated['petugas_submit_id'],
+                $submission->id,
+                'submit',
+                "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
+            );
+            if ($picHistory) {
+                $pic = Pic::find($validated['petugas_submit_id']);
+                $pic->increment('total_points', $picHistory->points_earned);
+            }
+        }
+
         return redirect()->route('admin.submissions.index')
             ->with('success', 'Data Submit berhasil ditambahkan.' . $pointMessage);
     }
