@@ -113,7 +113,17 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    {{-- Tombol sync point strategis di navbar --}}
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('pic.points.sync') }}" class="d-inline" id="navSyncForm">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-warning fw-semibold" id="navSyncBtn" title="Sinkronkan Point Saya">
+                                <i class="bi bi-arrow-repeat" id="navSyncIcon"></i>
+                                <span class="d-none d-md-inline"> Sync Point</span>
+                            </button>
+                        </form>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{ auth()->guard('pic')->user()->name }}
@@ -122,12 +132,15 @@
                             <li><span class="dropdown-item-text small">Role: {{ auth()->guard('pic')->user()->role }}</span></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form method="POST" action="{{ route('pic.logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
-                                    </button>
-                                </form>
+                                <a href="{{ route('pic.points.index') }}" class="dropdown-item">
+                                    <i class="bi bi-trophy text-warning"></i> Point Saya
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#picLogoutModal">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
                             </li>
                         </ul>
                     </li>
@@ -191,6 +204,55 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // No sidebar collapse functionality
+        // Sync button loading state
+        var nsf = document.getElementById('navSyncForm');
+        if (nsf) nsf.addEventListener('submit', function() {
+            var btn = document.getElementById('navSyncBtn');
+            var ico = document.getElementById('navSyncIcon');
+            if (btn) { btn.disabled = true; ico.style.animation = 'spin .8s linear infinite'; }
+        });
+    </script>
+    <style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
+
+    <!-- PIC Logout Modal -->
+    <div class="modal fade" id="picLogoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-arrow-repeat me-2"></i> Sebelum Logout
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4 text-center">
+                    <i class="bi bi-trophy-fill text-warning" style="font-size:3rem"></i>
+                    <p class="fw-semibold mt-3 mb-1">Sinkronkan point sebelum logout?</p>
+                    <p class="text-muted small mb-0">Pastikan semua riwayat tugas dan total point Anda tersimpan dengan benar sebelum keluar.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+                    <form method="POST" action="{{ route('pic.points.sync') }}?redirect=logout" id="picSyncLogoutForm">
+                        @csrf
+                        <button type="submit" class="btn btn-warning fw-semibold px-4" id="btnPicSyncLogout">
+                            <i class="bi bi-arrow-repeat me-1"></i> Sync & Logout
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('pic.logout') }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger px-4">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout Saja
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var pslf = document.getElementById('picSyncLogoutForm');
+        if (pslf) pslf.addEventListener('submit', function() {
+            var btn = document.getElementById('btnPicSyncLogout');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyinkronkan...'; }
+        });
     </script>
     @yield('scripts')
 </body>

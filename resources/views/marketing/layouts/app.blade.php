@@ -82,12 +82,15 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <form method="POST" action="{{ route('marketing.logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                </button>
-                            </form>
+                            <a href="{{ route('marketing.refresh-points') }}" class="dropdown-item">
+                                <i class="bi bi-arrow-repeat text-warning"></i> Refresh Point
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#mktLogoutModal">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
                         </li>
                     </ul>
                 </li>
@@ -172,6 +175,37 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Marketing Logout Modal -->
+    <div class="modal fade" id="mktLogoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-arrow-repeat me-2"></i> Sebelum Logout
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4 text-center">
+                    <i class="bi bi-star-fill text-warning" style="font-size:3rem"></i>
+                    <p class="fw-semibold mt-3 mb-1">Refresh point sebelum logout?</p>
+                    <p class="text-muted small mb-0">Pastikan total point marketing Anda sudah tersinkronisasi dengan data submission terkini.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+                    <a href="{{ route('marketing.refresh-points') }}?logout=1" class="btn btn-warning fw-semibold px-4">
+                        <i class="bi bi-arrow-repeat me-1"></i> Refresh & Logout
+                    </a>
+                    <form method="POST" action="{{ route('marketing.logout') }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger px-4">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout Saja
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
     @yield('scripts')
 </body>
 </html>

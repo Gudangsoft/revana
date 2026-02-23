@@ -160,7 +160,16 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         $actualPoints = $marketing->syncPoints();
-        
+
+        // Jika dipanggil dari modal logout, logout setelah sync
+        if (request('logout') === '1') {
+            Auth::guard('marketing')->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            return redirect()->route('marketing.login')
+                ->with('success', 'Point berhasil di-refresh! Total point: ' . $actualPoints . '. Anda telah logout.');
+        }
+
         return redirect()->back()
             ->with('success', 'Point berhasil di-refresh! Total point Anda: ' . $actualPoints);
     }

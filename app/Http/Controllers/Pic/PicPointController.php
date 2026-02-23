@@ -64,6 +64,15 @@ class PicPointController extends Controller
             $msg .= " ({$backfilled} riwayat baru ditemukan dan ditambahkan)";
         }
 
+        // Jika dipanggil dari modal logout, logout setelah sync
+        if (request('redirect') === 'logout') {
+            Auth::guard('pic')->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            return redirect()->route('pic.login')
+                ->with('success', $msg . ' Anda telah logout.');
+        }
+
         return redirect()->route('pic.points.index')->with('success', $msg);
     }
 
