@@ -11,7 +11,7 @@
 <div class="row">
     @if(session('success'))
     <div class="col-md-12 mb-3">
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show" id="syncSuccessAlert">
             <i class="bi bi-check-circle"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -120,10 +120,11 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard PIC</span>
                 <div class="d-flex gap-2">
-                    <form method="POST" action="{{ route('admin.pic-points.sync-all') }}" class="d-inline" onsubmit="return confirm('Sinkronkan semua point PIC dari riwayat point?')">
+                    <form method="POST" action="{{ route('admin.pic-points.sync-all') }}" class="d-inline" id="syncPointForm">
                         @csrf
-                        <button type="submit" class="btn btn-warning btn-sm">
-                            <i class="bi bi-arrow-repeat"></i> Sinkronkan Point
+                        <button type="submit" class="btn btn-warning btn-sm" id="btnSyncPoint">
+                            <i class="bi bi-arrow-repeat" id="syncIcon"></i>
+                            <span id="syncText"> Sinkronkan Point</span>
                         </button>
                     </form>
                     <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
@@ -285,5 +286,23 @@
     setTimeout(function() {
         location.reload();
     }, 30000);
+
+    // Sync button: confirm → loading state → submit
+    document.getElementById('syncPointForm').addEventListener('submit', function(e) {
+        if (!confirm('Sinkronkan semua point PIC dari riwayat point?\n\nProses ini akan:\n• Memperbarui total point dari riwayat point\n• Menghapus riwayat orphan\n• Merefresh halaman otomatis')) {
+            e.preventDefault();
+            return;
+        }
+        var btn  = document.getElementById('btnSyncPoint');
+        var icon = document.getElementById('syncIcon');
+        var text = document.getElementById('syncText');
+        btn.disabled = true;
+        icon.classList.add('spin-icon');
+        text.textContent = ' Menyinkronkan...';
+    });
 </script>
+<style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spin-icon { display: inline-block; animation: spin 0.8s linear infinite; }
+</style>
 @endsection

@@ -157,25 +157,36 @@ class PicPointReportController extends Controller
     }
 
     /**
-     * Sync all PIC points from point history
+     * Sync all PIC points from point history (comprehensive sync)
      */
     public function syncAllPoints()
     {
         $pics = Pic::all();
-        $synced = 0;
+        $synced    = 0;
+        $unchanged = 0;
 
         foreach ($pics as $pic) {
+            // 1. Recalculate total_points from actual point history records
             $actualPoints = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            $oldTotal = $pic->total_points ?? 0;
+            $oldTotal     = $pic->total_points ?? 0;
 
             if ($actualPoints != $oldTotal) {
                 $pic->update(['total_points' => $actualPoints]);
                 $synced++;
+            } else {
+                $unchanged++;
             }
         }
 
-        return redirect()->back()
-            ->with('success', "Sinkronisasi selesai! {$synced} PIC point diperbarui.");
+        // 2. Remove orphan point histories (histories whose pic no longer exists)
+        $validPicIds = Pic::pluck('id');
+        $orphanCount = PicPointHistory::whereNotIn('pic_id', $validPicIds)->count();
+        if ($orphanCount > 0) {
+            PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
+        }
+
+        return redirect()->route('admin.pic-points.index')
+            ->with('success', "Sinkronisasi selesai! {$synced} PIC diperbarui, {$unchanged} sudah sesuai" . ($orphanCount > 0 ? ", {$orphanCount} riwayat orphan dihapus" : "." ));
     }
 
     /**
