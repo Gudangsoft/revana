@@ -250,22 +250,14 @@ class DashboardController extends Controller
         ]);
         
         try {
-            // Get slot info
-            $slot = JournalSlot::findOrFail($request->journal_slot_id);
-            
-            // Validasi slot tersedia dengan database locking
+            // Get slot info and sync actual count (anti-stale counter)
             $slot = JournalSlot::lockForUpdate()->findOrFail($request->journal_slot_id);
+            $slot->recalculate();
+            $slot->refresh();
+
             if ($slot->slot_tersedia <= 0) {
                 return back()->withErrors([
                     'journal_slot_id' => 'Slot jurnal sudah penuh! Sisa slot: ' . $slot->slot_tersedia . '/' . $slot->jumlah_slot
-                ])->withInput();
-            }
-            
-            // Double check dengan fresh data
-            $slot->refresh();
-            if ($slot->slot_tersedia <= 0) {
-                return back()->withErrors([
-                    'journal_slot_id' => 'Slot jurnal sudah penuh saat akan menyimpan data!'
                 ])->withInput();
             }
             

@@ -23,7 +23,7 @@
     <meta name="twitter:title" content="Pendaftaran Reviewer - SIPERA APJI">
     <meta name="twitter:description" content="Daftar sebagai reviewer jurnal ilmiah dan dapatkan insentif serta penghargaan">
     
-    <title>Pendaftaran Reviewer - {{ $appSettings['app_name'] }}</title>
+    <title>{{ __('reviewer.page_title') }} - {{ $appSettings['app_name'] }}</title>
     @if($appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">
     @endif
@@ -135,7 +135,7 @@
 <body>
     <div class="container">
         <a href="/" class="back-link">
-            <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+            <i class="bi bi-arrow-left"></i> {{ __('reviewer.back_home') }}
         </a>
 
         <div class="registration-card">
@@ -148,8 +148,8 @@
                     @endif
                     <br>{{ $appSettings['app_name'] }}
                 </div>
-                <h4 class="mb-0">Form Pendaftaran Reviewer</h4>
-                <p class="mb-0 mt-2">Bergabunglah bersama kami sebagai reviewer profesional</p>
+                <h4 class="mb-0">{{ __('reviewer.form_title') }}</h4>
+                <p class="mb-0 mt-2">{{ __('reviewer.form_tagline') }}</p>
             </div>
 
             <div class="card-body">
@@ -163,13 +163,13 @@
                     @if(session('whatsapp_url'))
                         <div class="alert alert-info alert-dismissible fade show" role="alert">
                             <i class="bi bi-whatsapp me-2"></i>
-                            <strong>Konfirmasi Pendaftaran</strong><br>
-                            Silakan klik tombol di bawah untuk mengirim konfirmasi pendaftaran melalui WhatsApp.
+                            <strong>{{ __('reviewer.confirm_registration') }}</strong><br>
+                            {{ __('reviewer.whatsapp_prompt') }}
                             <div class="mt-3">
                                 <a href="{{ session('whatsapp_url') }}" 
                                    target="_blank" 
                                    class="btn btn-success">
-                                    <i class="bi bi-whatsapp"></i> Konfirmasi via WhatsApp
+                                    <i class="bi bi-whatsapp"></i> {{ __('reviewer.confirm_whatsapp') }}
                                 </a>
                             </div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -180,7 +180,7 @@
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <strong>Terjadi kesalahan:</strong>
+                        <strong>{{ __('reviewer.error_title') }}</strong>
                         <ul class="mb-0 mt-2">
                             @foreach($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -197,20 +197,20 @@
                     <div class="row">
                         <div class="col-12 mb-3">
                             <h5 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="bi bi-person-circle"></i> Data Pribadi
+                                <i class="bi bi-person-circle"></i> {{ __('reviewer.section_personal') }}
                             </h5>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="full_name" class="form-label">
-                                Nama Lengkap dan Gelar <span class="required-mark">*</span>
+                                {{ __('reviewer.full_name') }} <span class="required-mark">*</span>
                             </label>
                             <input type="text" 
                                    class="form-control @error('full_name') is-invalid @enderror" 
                                    id="full_name" 
                                    name="full_name" 
                                    value="{{ old('full_name') }}"
-                                   placeholder="Dr. Ahmad Santoso, M.Si."
+                                   placeholder="{{ __('reviewer.full_name_placeholder') }}"
                                    required>
                             @error('full_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -219,7 +219,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">
-                                Email <span class="required-mark">*</span>
+                                {{ __('reviewer.email') }} <span class="required-mark">*</span>
                             </label>
                             <input type="email" 
                                    class="form-control @error('email') is-invalid @enderror" 
@@ -228,7 +228,7 @@
                                    value="{{ old('email') }}"
                                    placeholder="email@example.com"
                                    required>
-                            <small class="text-muted">Email akan digunakan untuk login</small>
+                            <small class="text-muted">{{ __('reviewer.email_hint') }}</small>
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -236,14 +236,14 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="affiliation" class="form-label">
-                                Institusi/Perguruan Tinggi <span class="required-mark">*</span>
+                                {{ __('reviewer.affiliation') }} <span class="required-mark">*</span>
                             </label>
                             <input type="text" 
                                    class="form-control @error('affiliation') is-invalid @enderror" 
                                    id="affiliation" 
                                    name="affiliation" 
                                    value="{{ old('affiliation') }}"
-                                   placeholder="Universitas Indonesia"
+                                   placeholder="{{ __('reviewer.affiliation_placeholder') }}"
                                    required>
                             @error('affiliation')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -252,7 +252,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="whatsapp" class="form-label">
-                                No WhatsApp <span class="required-mark">*</span>
+                                {{ __('reviewer.whatsapp') }} <span class="required-mark">*</span>
                             </label>
                             <input type="text" 
                                    class="form-control @error('whatsapp') is-invalid @enderror" 
@@ -271,22 +271,22 @@
                     <div class="row mt-4">
                         <div class="col-12 mb-3">
                             <h5 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="bi bi-shield-lock"></i> Keamanan Akun
+                                <i class="bi bi-shield-lock"></i> {{ __('reviewer.section_security') }}
                             </h5>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="password" class="form-label">
-                                Password <span class="required-mark">*</span>
+                                {{ __('reviewer.password') }} <span class="required-mark">*</span>
                             </label>
                             <input type="password" 
                                    class="form-control @error('password') is-invalid @enderror" 
                                    id="password" 
                                    name="password" 
-                                   placeholder="Minimal 8 karakter"
+                                   placeholder="{{ __('reviewer.password_placeholder') }}"
                                    required>
                             <div class="password-strength" id="strengthBar"></div>
-                            <small class="form-text" id="strengthText">Gunakan kombinasi huruf, angka, dan simbol</small>
+                            <small class="form-text" id="strengthText">{{ __('reviewer.password_hint') }}</small>
                             @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -294,13 +294,13 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="password_confirmation" class="form-label">
-                                Ulangi Password <span class="required-mark">*</span>
+                                {{ __('reviewer.password_confirm') }} <span class="required-mark">*</span>
                             </label>
                             <input type="password" 
                                    class="form-control @error('password_confirmation') is-invalid @enderror" 
                                    id="password_confirmation" 
                                    name="password_confirmation" 
-                                   placeholder="Ketik ulang password"
+                                   placeholder="{{ __('reviewer.password_confirm_placeholder') }}"
                                    required>
                             <div class="password-match" id="matchText"></div>
                             @error('password_confirmation')
@@ -313,19 +313,19 @@
                     <div class="row mt-4">
                         <div class="col-12 mb-3">
                             <h5 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="bi bi-mortarboard"></i> Data Akademik
+                                <i class="bi bi-mortarboard"></i> {{ __('reviewer.section_academic') }}
                             </h5>
                         </div>
 
                         <div class="col-md-12 mb-3">
                             <label for="field_of_study_id" class="form-label">
-                                Bidang Ilmu/Keahlian <span class="required-mark">*</span>
+                                {{ __('reviewer.field_of_study') }} <span class="required-mark">*</span>
                             </label>
                             <select class="form-select @error('field_of_study_id') is-invalid @enderror" 
                                     id="field_of_study_id" 
                                     name="field_of_study_id" 
                                     required>
-                                <option value="">-- Pilih Bidang Ilmu --</option>
+                                <option value="">{{ __('reviewer.select_field') }}</option>
                                 @foreach($fieldOfStudies as $field)
                                     <option value="{{ $field->id }}" {{ old('field_of_study_id') == $field->id ? 'selected' : '' }}>
                                         {{ $field->name }}
@@ -339,7 +339,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="sinta_id" class="form-label">
-                                ID SINTA <span class="required-mark">*</span>
+                                {{ __('reviewer.sinta_id') }} <span class="required-mark">*</span>
                             </label>
                             <input type="text" 
                                    class="form-control @error('sinta_id') is-invalid @enderror" 
@@ -355,14 +355,14 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="scopus_id" class="form-label">
-                                ID Scopus <small class="text-muted">(Opsional)</small>
+                                {{ __('reviewer.scopus_id') }} <small class="text-muted">({{ __('reviewer.optional') }})</small>
                             </label>
                             <input type="text" 
                                    class="form-control @error('scopus_id') is-invalid @enderror" 
                                    id="scopus_id" 
                                    name="scopus_id" 
                                    value="{{ old('scopus_id') }}"
-                                   placeholder="Kosongkan jika tidak ada">
+                                   placeholder="{{ __('reviewer.scopus_empty_placeholder') }}">
                             @error('scopus_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -370,7 +370,7 @@
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
-                                Bahasa Artikel yang Bisa Direview <span class="required-mark">*</span>
+                                {{ __('reviewer.article_languages') }} <span class="required-mark">*</span>
                             </label>
                             <div class="form-check">
                                 <input class="form-check-input @error('article_languages') is-invalid @enderror" 
@@ -380,7 +380,7 @@
                                        id="lang_indonesia"
                                        {{ in_array('Indonesia', old('article_languages', [])) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="lang_indonesia">
-                                    <i class="bi bi-flag-fill text-danger"></i> Indonesia
+                                    <i class="bi bi-flag-fill text-danger"></i> {{ __('reviewer.lang_indonesia') }}
                                 </label>
                             </div>
                             <div class="form-check">
@@ -391,28 +391,28 @@
                                        id="lang_english"
                                        {{ in_array('English', old('article_languages', [])) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="lang_english">
-                                    <i class="bi bi-flag-fill text-primary"></i> English (Inggris)
+                                    <i class="bi bi-flag-fill text-primary"></i> {{ __('reviewer.lang_english') }}
                                 </label>
                             </div>
                             @error('article_languages')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                             <small class="form-text text-muted">
-                                <i class="bi bi-info-circle"></i> Pilih minimal 1 bahasa artikel yang bisa Anda review
+                                <i class="bi bi-info-circle"></i> {{ __('reviewer.article_languages_hint') }}
                             </small>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-send-fill me-2"></i> Kirim Pendaftaran
+                            <i class="bi bi-send-fill me-2"></i> {{ __('reviewer.submit_btn') }}
                         </button>
                     </div>
 
                     <div class="text-center mt-3">
                         <small class="text-muted">
                             <i class="bi bi-info-circle me-1"></i>
-                            Dengan mendaftar, Anda menyetujui untuk menjadi reviewer kami
+                            {{ __('reviewer.disclaimer') }}
                         </small>
                     </div>
                 </form>
@@ -449,19 +449,19 @@
             
             if (password.length === 0) {
                 strengthBar.style.width = '0';
-                strengthText.textContent = 'Minimal 8 karakter, gunakan kombinasi huruf, angka, dan simbol';
+                strengthText.textContent = '{{ __('reviewer.min_chars_hint') }}';
                 strengthText.style.color = '#6b7280';
             } else if (strength <= 1) {
                 strengthBar.classList.add('strength-weak');
-                strengthText.textContent = 'Kekuatan Password: Lemah';
+                strengthText.textContent = '{{ __('reviewer.strength_weak') }}';
                 strengthText.style.color = '#dc2626';
             } else if (strength <= 3) {
                 strengthBar.classList.add('strength-medium');
-                strengthText.textContent = 'Kekuatan Password: Sedang';
+                strengthText.textContent = '{{ __('reviewer.strength_medium') }}';
                 strengthText.style.color = '#f59e0b';
             } else {
                 strengthBar.classList.add('strength-strong');
-                strengthText.textContent = 'Kekuatan Password: Kuat';
+                strengthText.textContent = '{{ __('reviewer.strength_strong') }}';
                 strengthText.style.color = '#10b981';
             }
 
@@ -484,10 +484,10 @@
             }
 
             if (password === confirm) {
-                matchText.innerHTML = '<i class="bi bi-check-circle-fill"></i> Password cocok';
+                matchText.innerHTML = '<i class="bi bi-check-circle-fill"></i> {{ __('reviewer.password_match') }}';
                 matchText.className = 'password-match match-success';
             } else {
-                matchText.innerHTML = '<i class="bi bi-x-circle-fill"></i> Password tidak cocok';
+                matchText.innerHTML = '<i class="bi bi-x-circle-fill"></i> {{ __('reviewer.password_mismatch') }}';
                 matchText.className = 'password-match match-error';
             }
         }

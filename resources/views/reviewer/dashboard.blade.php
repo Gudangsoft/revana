@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ' - ' . $appSettings['app_name'])
-@section('page-title', 'Dashboard Reviewer')
+@section('page-title', __('reviewer.dashboard_title'))
 
 @section('sidebar')
     @include('reviewer.partials.sidebar')
@@ -14,10 +14,10 @@
     <div class="d-flex align-items-center">
         <i class="bi bi-bell-fill me-2" style="font-size: 1.5rem;"></i>
         <div>
-            <strong>Ada Tugas Baru!</strong>
+            <strong>{{ __('reviewer.new_tasks_alert') }}</strong>
             <br>
-            Anda memiliki <strong>{{ $pendingTasks }}</strong> tugas review yang menunggu untuk dikerjakan.
-            <a href="{{ route('reviewer.tasks.index') }}" class="alert-link">Lihat Tugas</a>
+            {!! __('reviewer.pending_tasks_msg', ['count' => $pendingTasks]) !!}
+            <a href="{{ route('reviewer.tasks.index') }}" class="alert-link">{{ __('reviewer.view_tasks') }}</a>
         </div>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -36,15 +36,15 @@
                         <div class="d-flex gap-3 mt-3">
                             <div>
                                 <h4 class="mb-0" style="color: white !important;">{{ $user->total_points }}</h4>
-                                <small style="color: rgba(255,255,255,0.8) !important;">Total Points</small>
+                                <small style="color: rgba(255,255,255,0.8) !important;">{{ __('reviewer.total_points') }}</small>
                             </div>
                             <div>
                                 <h4 class="mb-0" style="color: white !important;">{{ $user->available_points }}</h4>
-                                <small style="color: rgba(255,255,255,0.8) !important;">Available Points</small>
+                                <small style="color: rgba(255,255,255,0.8) !important;">{{ __('reviewer.available_points') }}</small>
                             </div>
                             <div>
                                 <h4 class="mb-0" style="color: white !important;">{{ $user->completed_reviews }}</h4>
-                                <small style="color: rgba(255,255,255,0.8) !important;">Completed Reviews</small>
+                                <small style="color: rgba(255,255,255,0.8) !important;">{{ __('reviewer.completed_reviews') }}</small>
                             </div>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Pending Tasks</h6>
+                        <h6 class="text-muted mb-2">{{ __('reviewer.pending_tasks') }}</h6>
                         <h2 class="mb-0">{{ $pendingTasks }}</h2>
                     </div>
                     <div class="text-warning" style="font-size: 2.5rem;">
@@ -84,7 +84,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Active Tasks</h6>
+                        <h6 class="text-muted mb-2">{{ __('reviewer.active_tasks') }}</h6>
                         <h2 class="mb-0">{{ $activeTasks }}</h2>
                     </div>
                     <div class="text-primary" style="font-size: 2.5rem;">
@@ -100,7 +100,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-muted mb-2">Completed</h6>
+                        <h6 class="text-muted mb-2">{{ __('reviewer.completed') }}</h6>
                         <h2 class="mb-0">{{ $completedTasks }}</h2>
                     </div>
                     <div class="text-success" style="font-size: 2.5rem;">
@@ -117,9 +117,9 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history"></i> Tugas Terbaru</span>
+                <span><i class="bi bi-clock-history"></i> {{ __('reviewer.recent_tasks') }}</span>
                 <a href="{{ route('reviewer.tasks.index') }}" class="btn btn-sm btn-outline-primary">
-                    Lihat Semua
+                    {{ __('reviewer.view_all') }}
                 </a>
             </div>
             <div class="card-body">
@@ -127,12 +127,12 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Artikel</th>
-                                <th>Bahasa</th>
-                                <th>Deadline</th>
-                                <th>Status</th>
-                                <th>Tanggal</th>
-                                <th>Aksi</th>
+                                <th>{{ __('reviewer.col_article') }}</th>
+                                <th>{{ __('reviewer.col_language') }}</th>
+                                <th>{{ __('reviewer.col_deadline') }}</th>
+                                <th>{{ __('reviewer.col_status') }}</th>
+                                <th>{{ __('reviewer.col_date') }}</th>
+                                <th>{{ __('reviewer.col_action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -167,14 +167,14 @@
                                 <td>{{ $assignment->created_at->format('d M Y') }}</td>
                                 <td>
                                     <a href="{{ route('reviewer.tasks.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> Detail
+                                        <i class="bi bi-eye"></i> {{ __('reviewer.detail') }}
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="6" class="text-center text-muted">
-                                    <i class="bi bi-inbox"></i> Belum ada tugas
+                                    <i class="bi bi-inbox"></i> {{ __('reviewer.no_tasks') }}
                                 </td>
                             </tr>
                             @endforelse
@@ -192,7 +192,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <i class="bi bi-bar-chart-line"></i> Grafik Review per Bulan (6 Bulan Terakhir)
+                <i class="bi bi-bar-chart-line"></i> {{ __('reviewer.chart_reviews') }}
             </div>
             <div class="card-body">
                 <canvas id="reviewsChart" height="80"></canvas>
@@ -204,7 +204,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header bg-info text-white">
-                <i class="bi bi-pie-chart"></i> Distribusi Status Review
+                <i class="bi bi-pie-chart"></i> {{ __('reviewer.chart_status') }}
             </div>
             <div class="card-body">
                 <canvas id="statusChart"></canvas>
@@ -218,7 +218,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-success text-white">
-                <i class="bi bi-graph-up"></i> Grafik Points (6 Bulan Terakhir)
+                <i class="bi bi-graph-up"></i> {{ __('reviewer.chart_points') }}
             </div>
             <div class="card-body">
                 <canvas id="pointsChart" height="60"></canvas>
@@ -233,7 +233,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-success text-white">
-                <i class="bi bi-gift"></i> Rewards yang Bisa Ditukar
+                <i class="bi bi-gift"></i> {{ __('reviewer.rewards_title') }}
             </div>
             <div class="card-body">
                 <div class="row">
@@ -245,7 +245,7 @@
                                 <p class="text-muted">{{ $reward->description }}</p>
                                 <h4 class="text-success">{{ $reward->points_required }} Points</h4>
                                 <a href="{{ route('reviewer.rewards.index') }}" class="btn btn-success btn-sm">
-                                    Tukar Sekarang
+                                    {{ __('reviewer.redeem') }}
                                 </a>
                             </div>
                         </div>
@@ -272,7 +272,7 @@ const reviewsChart = new Chart(reviewsCtx, {
     data: {
         labels: {!! json_encode($chartLabels) !!},
         datasets: [{
-            label: 'Reviews Completed',
+            label: '{{ __('reviewer.dataset_reviews') }}',
             data: {!! json_encode($chartData) !!},
             backgroundColor: 'rgba(79, 70, 229, 0.1)',
             borderColor: 'rgba(79, 70, 229, 1)',
@@ -393,14 +393,14 @@ const pointsChart = new Chart(pointsCtx, {
         labels: {!! json_encode($chartLabels) !!},
         datasets: [
             {
-                label: 'Points Earned',
+                label: '{{ __('reviewer.dataset_points_earned') }}',
                 data: {!! json_encode($pointsEarned) !!},
                 backgroundColor: 'rgba(16, 185, 129, 0.8)',
                 borderColor: 'rgba(16, 185, 129, 1)',
                 borderWidth: 1
             },
             {
-                label: 'Points Spent',
+                label: '{{ __('reviewer.dataset_points_spent') }}',
                 data: {!! json_encode($pointsSpent) !!},
                 backgroundColor: 'rgba(239, 68, 68, 0.8)',
                 borderColor: 'rgba(239, 68, 68, 1)',

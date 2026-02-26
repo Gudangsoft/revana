@@ -114,6 +114,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/journal-slots/template', [JournalSlotController::class, 'downloadTemplate'])->name('journal-slots.template');
         Route::get('/journal-slots/get-by-journal', [JournalSlotController::class, 'getByJournal'])->name('journal-slots.get-by-journal');
         Route::patch('/journal-slots/{journalSlot}/toggle-active', [JournalSlotController::class, 'toggleActive'])->name('journal-slots.toggle-active');
+        Route::post('/journal-slots/sync-all', [JournalSlotController::class, 'syncAll'])->name('journal-slots.sync-all');
+        Route::post('/journal-slots/{journalSlot}/sync', [JournalSlotController::class, 'syncSlot'])->name('journal-slots.sync');
         Route::resource('journal-slots', JournalSlotController::class);
         
         // Submissions (Data Submit & Proses Workflow)

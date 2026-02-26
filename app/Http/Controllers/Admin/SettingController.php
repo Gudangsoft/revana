@@ -25,6 +25,7 @@ class SettingController extends Controller
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
             'certificate_template' => Setting::get('certificate_template', ''),
+            'app_language' => Setting::get('app_language', 'id'),
         ];
         
         return view('admin.settings.index', compact('settings'));
@@ -42,6 +43,7 @@ class SettingController extends Controller
             'address' => 'nullable|string|max:1000',
             'contact' => 'nullable|string|max:500',
             'whatsapp_confirmation_number' => 'nullable|string|max:20',
+            'app_language' => 'nullable|in:id,en',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,png,jpg,svg,ico|max:512',
             'certificate_template' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
@@ -103,6 +105,9 @@ class SettingController extends Controller
         // Simpan nomor WhatsApp konfirmasi (simpan juga jika kosong)
         $whatsappNumber = $request->input('whatsapp_confirmation_number', '');
         Setting::set('whatsapp_confirmation_number', $whatsappNumber);
+
+        // Simpan pengaturan bahasa
+        Setting::set('app_language', $validated['app_language'] ?? 'id');
         
         // Handle logo upload
         if ($request->hasFile('logo')) {

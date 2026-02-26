@@ -135,18 +135,42 @@ class Submission extends Model
         });
 
         static::created(function ($submission) {
-            // Increment slot_terpakai on journal_slot
-            $slot = $submission->journalSlot;
-            if ($slot) {
-                $slot->increment('slot_terpakai');
+            // Increment slot_terpakai on journal_slot (only if not immediately rejected)
+            if ($submission->status !== 'REJECTED') {
+                $slot = $submission->journalSlot;
+                if ($slot) {
+                    $slot->increment('slot_terpakai');
+                }
+            }
+        });
+
+        static::updated(function ($submission) {
+            // When status changes to REJECTED, free the slot
+            if ($submission->isDirty('status')) {
+                $oldStatus = $submission->getOriginal('status');
+                $newStatus = $submission->status;
+                $slot = $submission->journalSlot;
+                if ($slot) {
+                    if ($newStatus === 'REJECTED' && $oldStatus !== 'REJECTED') {
+                        // Submission rejected — free the slot
+                        if ($slot->slot_terpakai > 0) {
+                            $slot->decrement('slot_terpakai');
+                        }
+                    } elseif ($oldStatus === 'REJECTED' && $newStatus !== 'REJECTED') {
+                        // Submission un-rejected — consume the slot again
+                        $slot->increment('slot_terpakai');
+                    }
+                }
             }
         });
 
         static::deleted(function ($submission) {
-            // Decrement slot_terpakai on journal_slot
-            $slot = $submission->journalSlot;
-            if ($slot && $slot->slot_terpakai > 0) {
-                $slot->decrement('slot_terpakai');
+            // Decrement slot_terpakai on journal_slot (only if not already rejected)
+            if ($submission->status !== 'REJECTED') {
+                $slot = $submission->journalSlot;
+                if ($slot && $slot->slot_terpakai > 0) {
+                    $slot->decrement('slot_terpakai');
+                }
             }
         });
     }

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Setting;
 use App\Services\FeatureSettingService;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
         
         // Share settings to all views
         View::composer('*', function ($view) {
+            $language = Setting::get('app_language', 'id');
+            App::setLocale($language);
+
             $settings = [
                 'app_name' => Setting::get('app_name', env('APP_NAME', 'SIPERA')),
                 'full_name' => Setting::get('full_name', 'Sistem Informasi Peer Review Artikel'),
@@ -43,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
                 'contact' => Setting::get('contact', ''),
                 'logo' => Setting::get('logo', ''),
                 'favicon' => Setting::get('favicon', ''),
+                'language' => $language,
             ];
             
             // Share with both names for compatibility

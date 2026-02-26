@@ -71,6 +71,26 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-translate"></i> Bahasa Form Registrasi & Dashboard Peserta
+                            </label>
+                            <select class="form-select @error('app_language') is-invalid @enderror" name="app_language">
+                                <option value="id" {{ old('app_language', $settings['app_language'] ?? 'id') === 'id' ? 'selected' : '' }}>
+                                    🇮🇩 Indonesia (Bahasa Indonesia)
+                                </option>
+                                <option value="en" {{ old('app_language', $settings['app_language'] ?? 'id') === 'en' ? 'selected' : '' }}>
+                                    🇬🇧 English (Bahasa Inggris)
+                                </option>
+                            </select>
+                            @error('app_language')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">
+                                Bahasa yang digunakan pada form pendaftaran reviewer dan dashboard peserta (reviewer).
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">URL Aplikasi <span class="text-danger">*</span></label>
                             <input type="url" class="form-control @error('app_url') is-invalid @enderror" 
                                    name="app_url" value="{{ old('app_url', $settings['app_url'] ?? '') }}" 

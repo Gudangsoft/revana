@@ -415,17 +415,14 @@ class JournalManagementController extends Controller
 
         // Validasi slot tersedia dengan database locking
         $slot = JournalSlot::lockForUpdate()->findOrFail($validated['journal_slot_id']);
+
+        // Sinkronisasi slot_terpakai berdasarkan data submission aktual (anti-stale counter)
+        $slot->recalculate();
+        $slot->refresh();
+
         if ($slot->slot_tersedia <= 0) {
             return back()->withErrors([
                 'journal_slot_id' => 'Slot jurnal sudah penuh! Sisa slot: ' . $slot->slot_tersedia . '/' . $slot->jumlah_slot
-            ])->withInput();
-        }
-        
-        // Double check dengan fresh data
-        $slot->refresh();
-        if ($slot->slot_tersedia <= 0) {
-            return back()->withErrors([
-                'journal_slot_id' => 'Slot jurnal sudah penuh saat akan menyimpan data!'
             ])->withInput();
         }
 

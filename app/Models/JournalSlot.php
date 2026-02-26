@@ -101,6 +101,31 @@ class JournalSlot extends Model
         return $this->slot_terpakai >= $this->jumlah_slot;
     }
 
+    /**
+     * Recalculate slot_terpakai based on actual non-rejected submissions count.
+     * Returns the new value.
+     */
+    public function recalculate(): int
+    {
+        $actualCount = $this->submissions()
+            ->where('status', '!=', 'REJECTED')
+            ->count();
+        $this->update(['slot_terpakai' => $actualCount]);
+        return $actualCount;
+    }
+
+    /**
+     * Recalculate slot_terpakai for all slots.
+     */
+    public static function recalculateAll(): int
+    {
+        $slots = self::all();
+        foreach ($slots as $slot) {
+            $slot->recalculate();
+        }
+        return $slots->count();
+    }
+
     // Get display name
     public function getDisplayNameAttribute()
     {

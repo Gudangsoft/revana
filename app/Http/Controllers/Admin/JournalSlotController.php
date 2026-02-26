@@ -489,4 +489,25 @@ class JournalSlotController extends Controller
         
         return view('admin.fasttrack-management.slots.index', compact('slots', 'journals', 'bulanOptions'));
     }
+
+    /**
+     * Sync slot_terpakai for a single slot based on actual submission count.
+     */
+    public function syncSlot(JournalSlot $journalSlot)
+    {
+        $before = $journalSlot->slot_terpakai;
+        $after  = $journalSlot->recalculate();
+
+        return back()->with('success', "Sync berhasil untuk slot {$journalSlot->kode_slot}. slot_terpakai: {$before} → {$after}.");
+    }
+
+    /**
+     * Sync slot_terpakai for ALL slots based on actual submission counts.
+     */
+    public function syncAll()
+    {
+        $count = JournalSlot::recalculateAll();
+
+        return back()->with('success', "Sync berhasil untuk {$count} slot. Semua nilai slot_terpakai telah diperbarui berdasarkan data submission aktual.");
+    }
 }

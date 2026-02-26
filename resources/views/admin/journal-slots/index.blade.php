@@ -24,6 +24,12 @@
                     <a href="{{ route('admin.journal-slots.export', request()->query()) }}" class="btn btn-info">
                         <i class="bi bi-download"></i> Export
                     </a>
+                    <form method="POST" action="{{ route('admin.journal-slots.sync-all') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi slot_terpakai semua slot berdasarkan data submission aktual?\n\nProses ini akan memperbaiki counter slot yang tidak sinkron.')">
+                        @csrf
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-arrow-repeat"></i> Sync Semua Slot
+                        </button>
+                    </form>
                     <a href="{{ route('admin.journal-slots.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah
                     </a>
@@ -219,6 +225,12 @@
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm {{ $slot->is_active ? 'btn-secondary' : 'btn-success' }}" title="{{ $slot->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
                                                 <i class="bi {{ $slot->is_active ? 'bi-toggle-on' : 'bi-toggle-off' }}"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('admin.journal-slots.sync', $slot) }}" method="POST" class="d-inline" title="Sync counter slot dari data submission aktual">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                <i class="bi bi-arrow-repeat"></i>
                                             </button>
                                         </form>
                                         <form action="{{ route('admin.journal-slots.destroy', $slot) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus slot ini?')">
