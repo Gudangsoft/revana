@@ -765,6 +765,24 @@
         </div>
         @endif
 
+        {{-- Sync Warning (muncul saat login admin) --}}
+        @if(session('sync_warning'))
+        <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-arrow-repeat fs-4 me-3"></i>
+            <div>{!! session('sync_warning') !!}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        {{-- Sync OK (muncul saat login & semua data sinkron) --}}
+        @if(session('sync_info'))
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle fs-4 me-3"></i>
+            <div>{!! session('sync_info') !!}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
         @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle me-2"></i>

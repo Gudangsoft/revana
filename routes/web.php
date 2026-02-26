@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Admin\MarketingController;
 use App\Http\Controllers\Admin\PicController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\SyncController as AdminSyncController;
 use App\Http\Controllers\Reviewer\DashboardController as ReviewerDashboard;
 use App\Http\Controllers\Reviewer\TaskController;
 use App\Http\Controllers\Reviewer\ReviewResultController;
@@ -90,6 +91,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/feature-management/export', [AdminDashboard::class, 'exportFeatureSettings'])->name('feature-management.export');
         Route::post('/feature-management/import', [AdminDashboard::class, 'importFeatureSettings'])->name('feature-management.import');
         
+        // Data Synchronization
+        Route::get('/sync', [AdminSyncController::class, 'index'])->name('sync.index');
+        Route::post('/sync/all', [AdminSyncController::class, 'syncAll'])->name('sync.all');
+        Route::post('/sync/slots', [AdminSyncController::class, 'syncSlots'])->name('sync.slots');
+        Route::post('/sync/marketing-points', [AdminSyncController::class, 'syncMarketingPoints'])->name('sync.marketing-points');
+        Route::post('/sync/pic-points', [AdminSyncController::class, 'syncPicPoints'])->name('sync.pic-points');
+
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
         

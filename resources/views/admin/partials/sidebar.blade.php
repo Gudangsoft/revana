@@ -2,6 +2,12 @@
     $currentRoute = Route::currentRouteName();
     // Count pending validations
     $pendingValidationCount = \App\Models\Submission::where('status', 'like', '%_SUBMITTED')->count();
+    // Count out-of-sync items for sync badge
+    try {
+        $syncOutOfSyncCount = \App\Http\Controllers\Admin\SyncController::countOutOfSync();
+    } catch (\Exception $e) {
+        $syncOutOfSyncCount = 0;
+    }
 @endphp
 
 <a href="{{ route('admin.dashboard') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'active' : '' }}">
@@ -205,4 +211,10 @@
 </a>
 <a href="{{ route('admin.feature-management') }}" class="nav-link {{ $currentRoute == 'admin.feature-management' ? 'active' : '' }}">
     <i class="bi bi-toggles text-warning"></i> Feature Management
+</a>
+<a href="{{ route('admin.sync.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.sync') ? 'active' : '' }}">
+    <i class="bi bi-arrow-repeat text-info"></i> Sinkronisasi Data
+    @if($syncOutOfSyncCount > 0)
+        <span class="badge bg-warning text-dark ms-1 rounded-pill">{{ $syncOutOfSyncCount }}</span>
+    @endif
 </a>

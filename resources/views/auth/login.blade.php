@@ -99,6 +99,14 @@
                         <div class="col-md-7 login-right">
                             <h3 class="mb-4">Login</h3>
                             
+                            @if(session('logout_success'))
+                            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                                <i class="bi bi-box-arrow-right me-2 fs-5"></i>
+                                <div>{!! session('logout_success') !!}</div>
+                                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                            </div>
+                            @endif
+
                             @if($errors->any())
                             <div class="alert alert-danger">
                                 @foreach($errors->all() as $error)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -35,19 +36,28 @@ class LoginController extends Controller
 
             $user = Auth::user();
             
-            // Redirect based on user role
+            // Flash sync notification for admin after login
             if ($user->role === 'admin') {
+                try {
+                    $outOfSync = SyncController::countOutOfSync();
+                    if ($outOfSync > 0) {
+                        $request->session()->flash(
+                            'sync_warning',
+                            "⚠️ Terdapat <strong>{$outOfSync} item data yang tidak sinkron</strong>. " .
+                            "<a href=\"/admin/sync\" class=\"alert-link\">Klik di sini untuk memperbaiki →</a>"
+                        );
+                    } else {
+                        $request->session()->flash('sync_info', '✅ Semua data tersinkronisasi dengan baik.');
+                    }
+                } catch (\Exception $e) {
+                    // Silent — jangan ganggu proses login
+                }
+
                 return redirect()->intended('/admin/dashboard');
             } elseif ($user->role === 'reviewer') {
                 return redirect()->intended('/reviewer/dashboard');
             }
             
-            // Default redirect based on role
-            if ($user->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            } elseif ($user->role === 'reviewer') {
-                return redirect()->intended('/reviewer/dashboard');
-            }
             return redirect()->intended('/login');
         }
 
@@ -65,10 +75,14 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $userName = Auth::user()?->name ?? 'Admin';
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('/login')->with(
+            'logout_success',
+            "Sampai jumpa, <strong>{$userName}</strong>! Anda telah berhasil logout."
+        );
     }
 }
