@@ -7,6 +7,8 @@ use App\Models\JournalMaster;
 use App\Models\Submission;
 use App\Models\User;
 use App\Models\ReviewRequest;
+use App\Models\Pic;
+use App\Models\Marketing;
 use App\Exports\CompletedReviewsExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -60,6 +62,18 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
+        // PIC Point Rankings - Top 10 PIC dengan point tertinggi
+        $topPics = Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
+
+        // Marketing Point Rankings - Top 10 Marketing dengan point tertinggi
+        $topMarketings = Marketing::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
+
         return view('admin.dashboard', compact(
             'totalJournals',
             'totalReviewers', 
@@ -76,7 +90,9 @@ class DashboardController extends Controller
             'recentSubmissions',
             'completedReviews',
             'totalCompletedReviews',
-            'monthlySubmissions'
+            'monthlySubmissions',
+            'topPics',
+            'topMarketings'
         ));
     }
 

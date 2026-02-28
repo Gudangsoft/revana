@@ -275,6 +275,9 @@
     </div>
 </div>
 
+<!-- Point Rankings -->
+@include('admin.partials.point-rankings')
+
 <!-- Review Assignment History -->
 <div class="row mt-4">
     <div class="col-md-12">
