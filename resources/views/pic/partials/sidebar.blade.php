@@ -228,12 +228,16 @@
     
     @feature('points')
     @rolecap('pic', 'points')
-    <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.*') ? 'active' : '' }}" data-title="Point Saya">
+    <a href="{{ route('pic.points.index') }}" class="nav-link {{ request()->routeIs('pic.points.index') ? 'active' : '' }}" data-title="Point Saya">
         <i class="bi bi-trophy-fill"></i>
         <span>Point Saya</span>
         @if($totalPoints > 0)
             <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
         @endif
+    </a>
+    <a href="{{ route('pic.points.rankings') }}" class="nav-link {{ request()->routeIs('pic.points.rankings') ? 'active' : '' }}" data-title="Peringkat Point">
+        <i class="bi bi-bar-chart-fill text-warning"></i>
+        <span>Peringkat Point</span>
     </a>
     @endrolecap
     @endfeature

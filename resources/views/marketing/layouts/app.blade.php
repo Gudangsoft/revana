@@ -144,6 +144,9 @@
                 <a href="{{ route('marketing.points') }}" class="nav-link {{ $currentRoute == 'marketing.points' ? 'active' : '' }}">
                     <i class="bi bi-trophy"></i> Point Saya
                 </a>
+                <a href="{{ route('marketing.points.rankings') }}" class="nav-link {{ $currentRoute == 'marketing.points.rankings' ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-fill text-warning"></i> Peringkat Point
+                </a>
                 @endrolecap
                 @endfeature
                 <a href="{{ route('marketing.reports.journal-articles') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.reports') ? 'active' : '' }}">

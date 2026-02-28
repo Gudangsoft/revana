@@ -451,6 +451,7 @@ Route::prefix('pic')->group(function () {
         
         // Point Saya
         Route::get('/points', [\App\Http\Controllers\Pic\PicPointController::class, 'index'])->name('pic.points.index');
+        Route::get('/points/rankings', [\App\Http\Controllers\Pic\PicPointController::class, 'rankings'])->name('pic.points.rankings');
         Route::post('/points/sync', [\App\Http\Controllers\Pic\PicPointController::class, 'syncMyPoints'])->name('pic.points.sync');
         
         // Profile
@@ -488,6 +489,7 @@ Route::prefix('marketing')->group(function () {
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
+        Route::get('/points/rankings', [MarketingDashboardController::class, 'pointRankings'])->name('marketing.points.rankings');
         Route::get('/refresh-points', [MarketingDashboardController::class, 'refreshPoints'])->name('marketing.refresh-points');
         
         // AJAX: Get slots by journal

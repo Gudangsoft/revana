@@ -153,4 +153,50 @@ class PicPointController extends Controller
             'stepConfig'
         ));
     }
+
+    /**
+     * Display point rankings for PIC and Marketing
+     */
+    public function rankings()
+    {
+        $currentPic = Auth::guard('pic')->user();
+
+        // PIC Point Rankings - Semua PIC aktif diurutkan berdasarkan point
+        $picRankings = \App\Models\Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->get()
+            ->map(function ($pic, $index) {
+                $pic->rank = $index + 1;
+                return $pic;
+            });
+
+        // Marketing Point Rankings - Semua Marketing aktif diurutkan berdasarkan point
+        $marketingRankings = \App\Models\Marketing::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->get()
+            ->map(function ($marketing, $index) {
+                $marketing->rank = $index + 1;
+                return $marketing;
+            });
+
+        // Statistics
+        $totalPicPoints = \App\Models\Pic::where('is_active', true)->sum('total_points');
+        $totalMarketingPoints = \App\Models\Marketing::where('is_active', true)->sum('total_points');
+        $activePicCount = \App\Models\Pic::where('is_active', true)->count();
+        $activeMarketingCount = \App\Models\Marketing::where('is_active', true)->count();
+
+        // Current PIC rank
+        $currentPicRank = $picRankings->where('id', $currentPic->id)->first()->rank ?? null;
+
+        return view('pic.points.rankings', compact(
+            'currentPic',
+            'currentPicRank',
+            'picRankings',
+            'marketingRankings',
+            'totalPicPoints',
+            'totalMarketingPoints',
+            'activePicCount',
+            'activeMarketingCount'
+        ));
+    }
 }
