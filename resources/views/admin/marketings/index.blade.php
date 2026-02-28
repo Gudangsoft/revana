@@ -11,8 +11,11 @@
 {{-- Ranking Point Marketing --}}
 @if(isset($topMarketings) && $topMarketings->count() > 0)
 <div class="card mb-4">
-    <div class="card-header bg-success text-white">
-        <i class="bi bi-trophy-fill"></i> Peringkat Point Marketing
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-trophy-fill"></i> Peringkat Point Marketing</span>
+        <a href="{{ route('admin.point-rankings') }}" class="btn btn-sm btn-light">
+            <i class="bi bi-bar-chart-fill"></i> Lihat Semua Peringkat
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

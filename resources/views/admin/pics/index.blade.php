@@ -11,8 +11,11 @@
 {{-- Ranking Point PIC --}}
 @if(isset($topPics) && $topPics->count() > 0)
 <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-        <i class="bi bi-trophy-fill"></i> Peringkat Point PIC
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-trophy-fill"></i> Peringkat Point PIC</span>
+        <a href="{{ route('admin.point-rankings') }}" class="btn btn-sm btn-light">
+            <i class="bi bi-bar-chart-fill"></i> Lihat Semua Peringkat
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
