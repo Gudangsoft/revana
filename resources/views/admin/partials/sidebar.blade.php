@@ -184,14 +184,15 @@
             <a href="{{ route('admin.pics.activity-report') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics.activity') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart text-primary"></i> Aktivitas PIC
             </a>
-            <a href="{{ route('admin.team-submit-report') }}" class="nav-link {{ $currentRoute == 'admin.team-submit-report' ? 'active' : '' }}">
-                <i class="bi bi-send-fill text-success"></i> Tim Submit Terbanyak
+            <hr class="my-2 mx-3 border-secondary">
+            <span class="nav-link text-muted small">
+                <i class="bi bi-people-fill"></i> Laporan Tim Performa
+            </span>
+            <a href="{{ route('admin.team-performance', ['step' => 'submit']) }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.team-performance') ? 'active' : '' }}">
+                <i class="bi bi-graph-up-arrow text-success"></i> Performa Tim PIC
             </a>
-            <a href="{{ route('admin.team-reviewer-report') }}" class="nav-link {{ $currentRoute == 'admin.team-reviewer-report' ? 'active' : '' }}">
-                <i class="bi bi-person-check-fill text-info"></i> Tim Reviewer Terbanyak
-            </a>
-            <a href="{{ route('admin.team-marketing-report') }}" class="nav-link {{ $currentRoute == 'admin.team-marketing-report' ? 'active' : '' }}">
-                <i class="bi bi-megaphone-fill text-danger"></i> Tim Marketing Terbanyak
+            <a href="{{ route('admin.team-marketing-performance') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.team-marketing-performance') ? 'active' : '' }}">
+                <i class="bi bi-megaphone-fill text-danger"></i> Performa Tim Marketing
             </a>
         </div>
     </div>

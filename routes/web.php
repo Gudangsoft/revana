@@ -263,6 +263,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/team-submit-report', [PicController::class, 'teamSubmitReport'])->name('team-submit-report');
         Route::get('/team-reviewer-report', [PicController::class, 'teamReviewerReport'])->name('team-reviewer-report');
         Route::get('/team-marketing-report', [PicController::class, 'teamMarketingReport'])->name('team-marketing-report');
+        Route::get('/team-editor1-report', [PicController::class, 'teamEditor1Report'])->name('team-editor1-report');
+        Route::get('/team-author1-report', [PicController::class, 'teamAuthor1Report'])->name('team-author1-report');
+        Route::get('/team-production-report', [PicController::class, 'teamProductionReport'])->name('team-production-report');
+        
+        // New unified reports with Normal/Fasttrack filter
+        Route::get('/team-performance', [PicController::class, 'teamPerformanceReport'])->name('team-performance');
+        Route::get('/team-marketing-performance', [PicController::class, 'teamMarketingPerformance'])->name('team-marketing-performance');
+        
         Route::post('/pics/{pic}/reset-password', [PicController::class, 'resetPassword'])->name('pics.reset-password');
         Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         

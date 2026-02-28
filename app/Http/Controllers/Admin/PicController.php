@@ -458,6 +458,451 @@ class PicController extends Controller
     }
 
     /**
+     * Report - Tim Terbanyak Editor 1
+     */
+    public function teamEditor1Report(Request $request)
+    {
+        $query = Submission::query();
+        
+        // Filter tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('editor1_validated_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('editor1_validated_at', '<=', $request->tanggal_sampai);
+        }
+        
+        // Get PIC Editor 1 with count (validated only)
+        $picEditor1s = $query->clone()
+            ->select('petugas_editor1_id', DB::raw('COUNT(*) as total_task'))
+            ->whereNotNull('petugas_editor1_id')
+            ->where('editor1_valid', true)
+            ->groupBy('petugas_editor1_id')
+            ->orderByDesc('total_task')
+            ->get();
+        
+        // Add rank and get PIC names
+        $picEditor1s = $picEditor1s->map(function ($item, $index) {
+            $pic = Pic::find($item->petugas_editor1_id);
+            $item->rank = $index + 1;
+            $item->pic_name = $pic ? $pic->name : 'Unknown';
+            $item->pic = $pic;
+            return $item;
+        });
+        
+        // Statistics
+        $stats = [
+            'total_tasks' => $picEditor1s->sum('total_task'),
+            'total_pic' => $picEditor1s->count(),
+            'top_pic' => $picEditor1s->first(),
+        ];
+        
+        $generatedAt = now()->format('d M Y H:i');
+        $filterInfo = $this->getFilterInfo($request);
+        
+        // Export PDF
+        if ($request->has('export') && $request->export === 'pdf') {
+            $pdf = Pdf::loadView('admin.reports.team-editor1-pdf', compact('picEditor1s', 'stats', 'generatedAt', 'filterInfo'))
+                ->setPaper('a4', 'portrait');
+            return $pdf->download('Laporan_Tim_Editor1_Terbanyak_' . now()->format('Y-m-d') . '.pdf');
+        }
+        
+        return view('admin.reports.team-editor1', compact('picEditor1s', 'stats'));
+    }
+
+    /**
+     * Report - Tim Terbanyak Author 1
+     */
+    public function teamAuthor1Report(Request $request)
+    {
+        $query = Submission::query();
+        
+        // Filter tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('author1_validated_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('author1_validated_at', '<=', $request->tanggal_sampai);
+        }
+        
+        // Get PIC Author 1 with count (validated only)
+        $picAuthor1s = $query->clone()
+            ->select('petugas_author1_id', DB::raw('COUNT(*) as total_task'))
+            ->whereNotNull('petugas_author1_id')
+            ->where('author1_valid', true)
+            ->groupBy('petugas_author1_id')
+            ->orderByDesc('total_task')
+            ->get();
+        
+        // Add rank and get PIC names
+        $picAuthor1s = $picAuthor1s->map(function ($item, $index) {
+            $pic = Pic::find($item->petugas_author1_id);
+            $item->rank = $index + 1;
+            $item->pic_name = $pic ? $pic->name : 'Unknown';
+            $item->pic = $pic;
+            return $item;
+        });
+        
+        // Statistics
+        $stats = [
+            'total_tasks' => $picAuthor1s->sum('total_task'),
+            'total_pic' => $picAuthor1s->count(),
+            'top_pic' => $picAuthor1s->first(),
+        ];
+        
+        $generatedAt = now()->format('d M Y H:i');
+        $filterInfo = $this->getFilterInfo($request);
+        
+        // Export PDF
+        if ($request->has('export') && $request->export === 'pdf') {
+            $pdf = Pdf::loadView('admin.reports.team-author1-pdf', compact('picAuthor1s', 'stats', 'generatedAt', 'filterInfo'))
+                ->setPaper('a4', 'portrait');
+            return $pdf->download('Laporan_Tim_Author1_Terbanyak_' . now()->format('Y-m-d') . '.pdf');
+        }
+        
+        return view('admin.reports.team-author1', compact('picAuthor1s', 'stats'));
+    }
+
+    /**
+     * Report - Tim Terbanyak Production
+     */
+    public function teamProductionReport(Request $request)
+    {
+        $query = Submission::query();
+        
+        // Filter tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('production_validated_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('production_validated_at', '<=', $request->tanggal_sampai);
+        }
+        
+        // Get PIC Production with count (validated only)
+        $picProductions = $query->clone()
+            ->select('petugas_production_id', DB::raw('COUNT(*) as total_task'))
+            ->whereNotNull('petugas_production_id')
+            ->where('production_valid', true)
+            ->groupBy('petugas_production_id')
+            ->orderByDesc('total_task')
+            ->get();
+        
+        // Add rank and get PIC names
+        $picProductions = $picProductions->map(function ($item, $index) {
+            $pic = Pic::find($item->petugas_production_id);
+            $item->rank = $index + 1;
+            $item->pic_name = $pic ? $pic->name : 'Unknown';
+            $item->pic = $pic;
+            return $item;
+        });
+        
+        // Statistics
+        $stats = [
+            'total_tasks' => $picProductions->sum('total_task'),
+            'total_pic' => $picProductions->count(),
+            'top_pic' => $picProductions->first(),
+        ];
+        
+        $generatedAt = now()->format('d M Y H:i');
+        $filterInfo = $this->getFilterInfo($request);
+        
+        // Export PDF
+        if ($request->has('export') && $request->export === 'pdf') {
+            $pdf = Pdf::loadView('admin.reports.team-production-pdf', compact('picProductions', 'stats', 'generatedAt', 'filterInfo'))
+                ->setPaper('a4', 'portrait');
+            return $pdf->download('Laporan_Tim_Production_Terbanyak_' . now()->format('Y-m-d') . '.pdf');
+        }
+        
+        return view('admin.reports.team-production', compact('picProductions', 'stats'));
+    }
+
+    /**
+     * Unified Team Performance Report - All workflow steps with Normal/Fasttrack filter
+     */
+    public function teamPerformanceReport(Request $request)
+    {
+        $step = $request->get('step', 'submit');
+        $processType = $request->get('process_type', 'all'); // all, normal, fasttrack
+        
+        // Define step configurations
+        $stepConfigs = [
+            'submit' => [
+                'title' => 'Submit',
+                'field' => 'petugas_submit_id',
+                'date_field' => 'created_at',
+                'valid_field' => null,
+                'color' => 'success',
+                'icon' => 'send-fill',
+            ],
+            'editor1' => [
+                'title' => 'Editor 1',
+                'field' => 'petugas_editor1_id',
+                'date_field' => 'editor1_validated_at',
+                'valid_field' => 'editor1_valid',
+                'color' => 'primary',
+                'icon' => 'pencil-square',
+            ],
+            'author1' => [
+                'title' => 'Author 1',
+                'field' => 'petugas_author1_id',
+                'date_field' => 'author1_validated_at',
+                'valid_field' => 'author1_valid',
+                'color' => 'warning',
+                'icon' => 'person-fill',
+            ],
+            'editor2' => [
+                'title' => 'Editor 2',
+                'field' => 'petugas_editor2_id',
+                'date_field' => 'editor2_validated_at',
+                'valid_field' => 'editor2_valid',
+                'color' => 'info',
+                'icon' => 'pencil-square',
+            ],
+            'reviewer1' => [
+                'title' => 'Reviewer 1',
+                'field' => 'petugas_reviewer1_id',
+                'date_field' => 'reviewer1_validated_at',
+                'valid_field' => 'reviewer1_valid',
+                'color' => 'secondary',
+                'icon' => 'person-check-fill',
+            ],
+            'reviewer2' => [
+                'title' => 'Reviewer 2',
+                'field' => 'petugas_reviewer2_id',
+                'date_field' => 'reviewer2_validated_at',
+                'valid_field' => 'reviewer2_valid',
+                'color' => 'dark',
+                'icon' => 'person-check-fill',
+            ],
+            'editor3' => [
+                'title' => 'Editor 3',
+                'field' => 'petugas_editor3_id',
+                'date_field' => 'editor3_validated_at',
+                'valid_field' => 'editor3_valid',
+                'color' => 'primary',
+                'icon' => 'pencil-square',
+            ],
+            'author2' => [
+                'title' => 'Author 2',
+                'field' => 'petugas_author2_id',
+                'date_field' => 'author2_validated_at',
+                'valid_field' => 'author2_valid',
+                'color' => 'warning',
+                'icon' => 'person-fill',
+            ],
+            'production' => [
+                'title' => 'Production',
+                'field' => 'petugas_production_id',
+                'date_field' => 'production_validated_at',
+                'valid_field' => 'production_valid',
+                'color' => 'danger',
+                'icon' => 'box-seam-fill',
+            ],
+        ];
+        
+        $config = $stepConfigs[$step] ?? $stepConfigs['submit'];
+        
+        // Build query
+        $query = Submission::query();
+        
+        // Filter process type
+        if ($processType === 'normal') {
+            $query->where(function($q) {
+                $q->where('process_type', 'normal')->orWhereNull('process_type');
+            });
+        } elseif ($processType === 'fasttrack') {
+            $query->where('process_type', 'fasttrack');
+        }
+        
+        // Filter tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate($config['date_field'], '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate($config['date_field'], '<=', $request->tanggal_sampai);
+        }
+        
+        // Get data with count
+        $dataQuery = $query->clone()
+            ->select($config['field'], DB::raw('COUNT(*) as total_task'))
+            ->whereNotNull($config['field']);
+        
+        // Add valid filter if applicable
+        if ($config['valid_field']) {
+            $dataQuery->where($config['valid_field'], true);
+        }
+        
+        $rankings = $dataQuery
+            ->groupBy($config['field'])
+            ->orderByDesc('total_task')
+            ->get();
+        
+        // Add rank and get PIC names
+        $rankings = $rankings->map(function ($item, $index) use ($config) {
+            $pic = Pic::find($item->{$config['field']});
+            $item->rank = $index + 1;
+            $item->pic_name = $pic ? $pic->name : 'Unknown';
+            $item->pic = $pic;
+            return $item;
+        });
+        
+        // Get totals by process type for stats
+        $totalAll = Submission::whereNotNull($config['field'])
+            ->when($config['valid_field'], fn($q) => $q->where($config['valid_field'], true))
+            ->count();
+        $totalNormal = Submission::whereNotNull($config['field'])
+            ->where(fn($q) => $q->where('process_type', 'normal')->orWhereNull('process_type'))
+            ->when($config['valid_field'], fn($q) => $q->where($config['valid_field'], true))
+            ->count();
+        $totalFasttrack = Submission::whereNotNull($config['field'])
+            ->where('process_type', 'fasttrack')
+            ->when($config['valid_field'], fn($q) => $q->where($config['valid_field'], true))
+            ->count();
+        
+        // Statistics
+        $stats = [
+            'total_tasks' => $rankings->sum('total_task'),
+            'total_pic' => $rankings->count(),
+            'top_pic' => $rankings->first(),
+            'total_all' => $totalAll,
+            'total_normal' => $totalNormal,
+            'total_fasttrack' => $totalFasttrack,
+        ];
+        
+        $generatedAt = now()->format('d M Y H:i');
+        $filterInfo = $this->getFilterInfoExtended($request, $step, $processType, $stepConfigs);
+        
+        // Export PDF
+        if ($request->has('export') && $request->export === 'pdf') {
+            $pdf = Pdf::loadView('admin.reports.team-performance-pdf', compact(
+                'rankings', 'stats', 'generatedAt', 'filterInfo', 'config', 'step', 'processType', 'stepConfigs'
+            ))->setPaper('a4', 'portrait');
+            
+            $filename = 'Laporan_Tim_' . $config['title'] . '_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.pdf';
+            return $pdf->download($filename);
+        }
+        
+        return view('admin.reports.team-performance', compact(
+            'rankings', 'stats', 'config', 'step', 'processType', 'stepConfigs'
+        ));
+    }
+
+    /**
+     * Marketing Performance Report with Normal/Fasttrack filter
+     */
+    public function teamMarketingPerformance(Request $request)
+    {
+        $processType = $request->get('process_type', 'all');
+        
+        $query = Submission::query();
+        
+        // Filter process type
+        if ($processType === 'normal') {
+            $query->where(function($q) {
+                $q->where('process_type', 'normal')->orWhereNull('process_type');
+            });
+        } elseif ($processType === 'fasttrack') {
+            $query->where('process_type', 'fasttrack');
+        }
+        
+        // Filter tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
+        
+        // Get Marketing submissions with count
+        $marketingRankings = $query->clone()
+            ->select('marketing_id', DB::raw('COUNT(*) as total_task'))
+            ->whereNotNull('marketing_id')
+            ->groupBy('marketing_id')
+            ->orderByDesc('total_task')
+            ->get();
+        
+        // Add rank and get Marketing names
+        $marketingRankings = $marketingRankings->map(function ($item, $index) {
+            $marketing = \App\Models\Marketing::find($item->marketing_id);
+            $item->rank = $index + 1;
+            $item->name = $marketing ? $marketing->name : 'Unknown';
+            $item->model = $marketing;
+            return $item;
+        });
+        
+        // Get totals by process type
+        $totalAll = Submission::whereNotNull('marketing_id')->count();
+        $totalNormal = Submission::whereNotNull('marketing_id')
+            ->where(fn($q) => $q->where('process_type', 'normal')->orWhereNull('process_type'))
+            ->count();
+        $totalFasttrack = Submission::whereNotNull('marketing_id')
+            ->where('process_type', 'fasttrack')
+            ->count();
+        
+        // Statistics
+        $stats = [
+            'total_tasks' => $marketingRankings->sum('total_task'),
+            'total_marketing' => $marketingRankings->count(),
+            'top_marketing' => $marketingRankings->first(),
+            'total_all' => $totalAll,
+            'total_normal' => $totalNormal,
+            'total_fasttrack' => $totalFasttrack,
+        ];
+        
+        $generatedAt = now()->format('d M Y H:i');
+        $filterInfo = $this->getFilterInfoMarketing($request, $processType);
+        
+        // Export PDF
+        if ($request->has('export') && $request->export === 'pdf') {
+            $pdf = Pdf::loadView('admin.reports.team-marketing-performance-pdf', compact(
+                'marketingRankings', 'stats', 'generatedAt', 'filterInfo', 'processType'
+            ))->setPaper('a4', 'portrait');
+            
+            $filename = 'Laporan_Tim_Marketing_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.pdf';
+            return $pdf->download($filename);
+        }
+        
+        return view('admin.reports.team-marketing-performance', compact(
+            'marketingRankings', 'stats', 'processType'
+        ));
+    }
+
+    /**
+     * Get filter information for PDF reports (extended)
+     */
+    private function getFilterInfoExtended(Request $request, $step, $processType, $stepConfigs)
+    {
+        $info = [];
+        $info[] = 'Step: ' . ($stepConfigs[$step]['title'] ?? $step);
+        $info[] = 'Jalur: ' . ($processType === 'all' ? 'Semua' : ($processType === 'normal' ? 'Normal' : 'Fasttrack'));
+        
+        if ($request->filled('tanggal_dari')) {
+            $info[] = 'Dari: ' . date('d M Y', strtotime($request->tanggal_dari));
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $info[] = 'Sampai: ' . date('d M Y', strtotime($request->tanggal_sampai));
+        }
+        return implode(' | ', $info);
+    }
+
+    /**
+     * Get filter information for Marketing PDF reports
+     */
+    private function getFilterInfoMarketing(Request $request, $processType)
+    {
+        $info = [];
+        $info[] = 'Jalur: ' . ($processType === 'all' ? 'Semua' : ($processType === 'normal' ? 'Normal' : 'Fasttrack'));
+        
+        if ($request->filled('tanggal_dari')) {
+            $info[] = 'Dari: ' . date('d M Y', strtotime($request->tanggal_dari));
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $info[] = 'Sampai: ' . date('d M Y', strtotime($request->tanggal_sampai));
+        }
+        return implode(' | ', $info);
+    }
+
+    /**
      * Get filter information for PDF reports
      */
     private function getFilterInfo(Request $request)
