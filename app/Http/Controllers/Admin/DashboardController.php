@@ -96,6 +96,45 @@ class DashboardController extends Controller
         ));
     }
 
+    /**
+     * Point Rankings Page - Menampilkan peringkat point PIC dan Marketing
+     */
+    public function pointRankings()
+    {
+        // PIC Point Rankings - Semua PIC diurutkan berdasarkan point
+        $picRankings = Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->get()
+            ->map(function ($pic, $index) {
+                $pic->rank = $index + 1;
+                return $pic;
+            });
+
+        // Marketing Point Rankings - Semua Marketing diurutkan berdasarkan point
+        $marketingRankings = Marketing::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->get()
+            ->map(function ($marketing, $index) {
+                $marketing->rank = $index + 1;
+                return $marketing;
+            });
+
+        // Statistics
+        $totalPicPoints = Pic::where('is_active', true)->sum('total_points');
+        $totalMarketingPoints = Marketing::where('is_active', true)->sum('total_points');
+        $activePicCount = Pic::where('is_active', true)->count();
+        $activeMarketingCount = Marketing::where('is_active', true)->count();
+
+        return view('admin.point-rankings', compact(
+            'picRankings',
+            'marketingRankings',
+            'totalPicPoints',
+            'totalMarketingPoints',
+            'activePicCount',
+            'activeMarketingCount'
+        ));
+    }
+
     public function exportCompletedReviews(Request $request)
     {
         $startDate = $request->start_date;

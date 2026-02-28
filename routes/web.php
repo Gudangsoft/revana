@@ -264,6 +264,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         
         // PIC Point Report
+        Route::get('/point-rankings', [\App\Http\Controllers\Admin\DashboardController::class, 'pointRankings'])->name('point-rankings');
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
         Route::get('/pic-points/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'export'])->name('pic-points.export');
         Route::post('/pic-points/sync-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllPoints'])->name('pic-points.sync-all');

@@ -161,14 +161,17 @@
 
 <!-- Laporan Point -->
 <div class="nav-item">
-    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') ? '' : 'collapsed' }}" 
+    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') ? '' : 'collapsed' }}" 
        data-bs-toggle="collapse" href="#pointReportMenu" role="button" 
-       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') ? 'true' : 'false' }}">
+       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') ? 'true' : 'false' }}">
         <i class="bi bi-trophy-fill text-warning"></i> Laporan Point
         <i class="bi bi-chevron-down ms-auto"></i>
     </a>
-    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') ? 'show' : '' }}" id="pointReportMenu">
+    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') ? 'show' : '' }}" id="pointReportMenu">
         <div class="nav flex-column ms-3">
+            <a href="{{ route('admin.point-rankings') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.point-rankings') ? 'active' : '' }}">
+                <i class="bi bi-bar-chart-fill text-warning"></i> Peringkat Point
+            </a>
             <a href="{{ route('admin.task-point-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.task-point-settings') ? 'active' : '' }}">
                 <i class="bi bi-gear text-secondary"></i> Pengaturan Point
             </a>
