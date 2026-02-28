@@ -290,4 +290,161 @@
         </div>
     </div>
 </div>
+
+{{-- Point Rankings Section --}}
+<div class="row g-3 mt-3">
+    {{-- Marketing Point Ranking --}}
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-trophy-fill"></i> Peringkat Point Marketing</span>
+                <a href="{{ route('marketing.points.rankings') }}" class="btn btn-sm btn-light">
+                    <i class="bi bi-bar-chart-fill"></i> Lihat Semua
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 60px;">Rank</th>
+                                <th>Nama Marketing</th>
+                                <th class="text-center">Total Point</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($topMarketings as $index => $mkt)
+                            <tr class="{{ $mkt->id == $marketing->id ? 'table-success' : '' }}">
+                                <td class="text-center">
+                                    @if($index == 0)
+                                        <span class="badge bg-warning text-dark" style="font-size: 1rem;">
+                                            <i class="bi bi-trophy-fill"></i> 1
+                                        </span>
+                                    @elseif($index == 1)
+                                        <span class="badge bg-secondary" style="font-size: 1rem;">
+                                            <i class="bi bi-award-fill"></i> 2
+                                        </span>
+                                    @elseif($index == 2)
+                                        <span class="badge bg-danger" style="font-size: 1rem;">
+                                            <i class="bi bi-award"></i> 3
+                                        </span>
+                                    @else
+                                        <span class="text-muted">{{ $index + 1 }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-success me-2">
+                                            {{ strtoupper(substr($mkt->name, 0, 1)) }}
+                                        </div>
+                                        <strong>{{ $mkt->name }}</strong>
+                                        @if($mkt->id == $marketing->id)
+                                            <span class="badge bg-success ms-1">Anda</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-success" style="font-size: 1rem;">
+                                        {{ number_format($mkt->total_points ?? 0) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0">Belum ada data Marketing</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- PIC Point Ranking --}}
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-trophy-fill"></i> Peringkat Point PIC</span>
+                <a href="{{ route('marketing.points.rankings') }}" class="btn btn-sm btn-light">
+                    <i class="bi bi-bar-chart-fill"></i> Lihat Semua
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 60px;">Rank</th>
+                                <th>Nama PIC</th>
+                                <th class="text-center">Total Point</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($topPics as $index => $pic)
+                            <tr>
+                                <td class="text-center">
+                                    @if($index == 0)
+                                        <span class="badge bg-warning text-dark" style="font-size: 1rem;">
+                                            <i class="bi bi-trophy-fill"></i> 1
+                                        </span>
+                                    @elseif($index == 1)
+                                        <span class="badge bg-secondary" style="font-size: 1rem;">
+                                            <i class="bi bi-award-fill"></i> 2
+                                        </span>
+                                    @elseif($index == 2)
+                                        <span class="badge bg-danger" style="font-size: 1rem;">
+                                            <i class="bi bi-award"></i> 3
+                                        </span>
+                                    @else
+                                        <span class="text-muted">{{ $index + 1 }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-primary me-2">
+                                            {{ strtoupper(substr($pic->name, 0, 1)) }}
+                                        </div>
+                                        <strong>{{ $pic->name }}</strong>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary" style="font-size: 1rem;">
+                                        {{ number_format($pic->total_points ?? 0) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0">Belum ada data PIC</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+</style>
 @endsection

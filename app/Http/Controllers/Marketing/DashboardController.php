@@ -97,8 +97,20 @@ class DashboardController extends Controller
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
             'total_points' => $marketing->total_points,
         ];
+
+        // Marketing Point Rankings - Top 10 untuk dashboard
+        $topMarketings = \App\Models\Marketing::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
+
+        // PIC Point Rankings - Top 10 untuk dashboard
+        $topPics = \App\Models\Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
         
-        return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats'));
+        return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats', 'topMarketings', 'topPics'));
     }
 
     /**

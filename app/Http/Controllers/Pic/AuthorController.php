@@ -21,8 +21,20 @@ class AuthorController extends Controller
             ->with(['accreditationModel', 'picMarketing', 'picEditor'])
             ->latest()
             ->get();
+
+        // PIC Point Rankings - Top 10 untuk dashboard
+        $topPics = Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
+
+        // Marketing Point Rankings - Top 10 untuk dashboard
+        $topMarketings = Marketing::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
         
-        return view('pic.author.dashboard', compact('journals'));
+        return view('pic.author.dashboard', compact('journals', 'topPics', 'topMarketings'));
     }
 
     public function create()
