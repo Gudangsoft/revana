@@ -8,6 +8,66 @@
 @endsection
 
 @section('content')
+{{-- Ranking Point Marketing --}}
+@if(isset($topMarketings) && $topMarketings->count() > 0)
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="bi bi-trophy-fill"></i> Peringkat Point Marketing
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center" style="width: 60px;">Rank</th>
+                        <th>Nama Marketing</th>
+                        <th>Email</th>
+                        <th class="text-center">Total Point</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($topMarketings as $index => $marketing)
+                    <tr>
+                        <td class="text-center">
+                            @if($index == 0)
+                                <span class="badge bg-warning text-dark" style="font-size: 1rem;">
+                                    <i class="bi bi-trophy-fill"></i> 1
+                                </span>
+                            @elseif($index == 1)
+                                <span class="badge bg-secondary" style="font-size: 1rem;">
+                                    <i class="bi bi-award-fill"></i> 2
+                                </span>
+                            @elseif($index == 2)
+                                <span class="badge bg-danger" style="font-size: 1rem;">
+                                    <i class="bi bi-award"></i> 3
+                                </span>
+                            @else
+                                <span class="text-muted">{{ $index + 1 }}</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-success me-2">
+                                    {{ strtoupper(substr($marketing->name, 0, 1)) }}
+                                </div>
+                                <strong>{{ $marketing->name }}</strong>
+                            </div>
+                        </td>
+                        <td>{{ $marketing->email ?? '-' }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-success" style="font-size: 1rem;">
+                                {{ number_format($marketing->total_points ?? 0) }}
+                            </span>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="row">
     <div class="col-md-12">
         @if(session('success'))
@@ -270,5 +330,21 @@ if (resetPasswordFormMarketing) {
     });
 }
 </script>
+@endpush
+
+@push('styles')
+<style>
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+</style>
 @endpush
 @endsection

@@ -34,7 +34,14 @@ class MarketingController extends Controller
         }
         
         $marketings = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
-        return view('admin.marketings.index', compact('marketings'));
+
+        // Ranking data - Top 10 Marketing dengan point tertinggi
+        $topMarketings = Marketing::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
+
+        return view('admin.marketings.index', compact('marketings', 'topMarketings'));
     }
 
     public function create()

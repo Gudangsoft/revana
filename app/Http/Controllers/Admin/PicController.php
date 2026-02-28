@@ -26,7 +26,14 @@ class PicController extends Controller
             });
         }
         $pics = $query->orderBy('name')->paginate(request()->input('per_page', 20));
-        return view('admin.pics.index', compact('pics'));
+
+        // Ranking data - Top 10 PIC dengan point tertinggi
+        $topPics = Pic::where('is_active', true)
+            ->orderBy('total_points', 'desc')
+            ->take(10)
+            ->get();
+
+        return view('admin.pics.index', compact('pics', 'topPics'));
     }
 
     public function create()
