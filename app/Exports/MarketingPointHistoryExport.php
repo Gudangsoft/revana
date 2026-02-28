@@ -17,12 +17,14 @@ class MarketingPointHistoryExport implements FromCollection, WithHeadings, WithM
     protected Marketing $marketing;
     protected ?string $tanggalDari;
     protected ?string $tanggalSampai;
+    protected ?string $processType;
 
-    public function __construct(Marketing $marketing, ?string $tanggalDari = null, ?string $tanggalSampai = null)
+    public function __construct(Marketing $marketing, ?string $tanggalDari = null, ?string $tanggalSampai = null, ?string $processType = null)
     {
         $this->marketing = $marketing;
         $this->tanggalDari = $tanggalDari;
         $this->tanggalSampai = $tanggalSampai;
+        $this->processType = $processType;
     }
 
     public function collection()
@@ -34,6 +36,19 @@ class MarketingPointHistoryExport implements FromCollection, WithHeadings, WithM
         }
         if ($this->tanggalSampai) {
             $query->whereDate('created_at', '<=', $this->tanggalSampai);
+        }
+        if ($this->processType && $this->processType !== 'all') {
+            $processType = $this->processType;
+            $query->whereHas('submission', function($q) use ($processType) {
+                if ($processType === 'normal') {
+                    $q->where(function($qq) {
+                        $qq->where('process_type', 'normal')
+                           ->orWhereNull('process_type');
+                    });
+                } else {
+                    $q->where('process_type', $processType);
+                }
+            });
         }
 
         return $query->latest()->get();

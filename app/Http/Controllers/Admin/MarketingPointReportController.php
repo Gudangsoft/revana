@@ -75,6 +75,21 @@ class MarketingPointReportController extends Controller
             $query->whereDate('created_at', '<=', $request->tanggal_sampai);
         }
         
+        // Filter by process type (normal/fasttrack)
+        if ($request->filled('process_type') && $request->process_type !== 'all') {
+            $processType = $request->process_type;
+            $query->whereHas('submission', function($q) use ($processType) {
+                if ($processType === 'normal') {
+                    $q->where(function($qq) {
+                        $qq->where('process_type', 'normal')
+                           ->orWhereNull('process_type');
+                    });
+                } else {
+                    $q->where('process_type', $processType);
+                }
+            });
+        }
+        
         $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Stats
@@ -101,11 +116,12 @@ class MarketingPointReportController extends Controller
     {
         $tanggalDari = $request->tanggal_dari;
         $tanggalSampai = $request->tanggal_sampai;
+        $processType = $request->process_type;
         
         $filename = 'point-history-' . str_replace(' ', '-', strtolower($marketing->name)) . '-' . now()->format('Y-m-d') . '.xlsx';
         
         return Excel::download(
-            new MarketingPointHistoryExport($marketing, $tanggalDari, $tanggalSampai),
+            new MarketingPointHistoryExport($marketing, $tanggalDari, $tanggalSampai, $processType),
             $filename
         );
     }

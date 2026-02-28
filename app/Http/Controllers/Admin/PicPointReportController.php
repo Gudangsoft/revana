@@ -91,6 +91,21 @@ class PicPointReportController extends Controller
             $query->where('step', $request->step);
         }
         
+        // Filter by process type (normal/fasttrack)
+        if ($request->filled('process_type') && $request->process_type !== 'all') {
+            $processType = $request->process_type;
+            $query->whereHas('submission', function($q) use ($processType) {
+                if ($processType === 'normal') {
+                    $q->where(function($qq) {
+                        $qq->where('process_type', 'normal')
+                           ->orWhereNull('process_type');
+                    });
+                } else {
+                    $q->where('process_type', $processType);
+                }
+            });
+        }
+        
         $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Stats
@@ -278,7 +293,8 @@ class PicPointReportController extends Controller
                 $pic,
                 $request->tanggal_dari,
                 $request->tanggal_sampai,
-                $request->step
+                $request->step,
+                $request->process_type
             ),
             $filename
         );

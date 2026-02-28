@@ -135,7 +135,7 @@
                 <span><i class="bi bi-clock-history"></i> Riwayat Perolehan Point</span>
                 <div class="d-flex gap-2">
                     @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Kode Submit', 'Tugas', 'Deskripsi', 'Point']])
-                    <a href="{{ route('admin.pic-points.export-show', array_merge(['pic' => $pic->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'step']))) }}" class="btn btn-sm btn-success">
+                    <a href="{{ route('admin.pic-points.export-show', array_merge(['pic' => $pic->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'step', 'process_type']))) }}" class="btn btn-sm btn-success">
                         <i class="bi bi-file-earmark-excel"></i> Export Excel
                     </a>
                 </div>
@@ -143,15 +143,15 @@
             <div class="card-body">
                 <!-- Filter Form -->
                 <form method="GET" class="row g-2 mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label small">Dari Tanggal</label>
                         <input type="date" class="form-control form-control-sm" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label small">Sampai Tanggal</label>
                         <input type="date" class="form-control form-control-sm" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label small">Tipe Tugas</label>
                         <select class="form-select form-select-sm" name="step">
                             <option value="">-- Semua --</option>
@@ -160,7 +160,15 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3 d-flex align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small">Jalur Proses</label>
+                        <select class="form-select form-select-sm" name="process_type">
+                            <option value="all" {{ request('process_type', 'all') == 'all' ? 'selected' : '' }}>Semua Jalur</option>
+                            <option value="normal" {{ request('process_type') == 'normal' ? 'selected' : '' }}>Normal</option>
+                            <option value="fasttrack" {{ request('process_type') == 'fasttrack' ? 'selected' : '' }}>Fasttrack</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary btn-sm me-2">
                             <i class="bi bi-search"></i> Filter
                         </button>

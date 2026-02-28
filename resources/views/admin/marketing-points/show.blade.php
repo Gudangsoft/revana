@@ -85,7 +85,7 @@
                     <span><i class="bi bi-clock-history"></i> Riwayat Point</span>
                     <div class="d-flex gap-2">
                         @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Submission', 'Deskripsi', 'Point']])
-                        <a href="{{ route('admin.marketing-points.export', array_merge(['marketing' => $marketing->id], request()->only(['tanggal_dari', 'tanggal_sampai']))) }}" class="btn btn-sm btn-success">
+                        <a href="{{ route('admin.marketing-points.export', array_merge(['marketing' => $marketing->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'process_type']))) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-file-earmark-excel"></i> Export Excel
                         </a>
                         <a href="{{ route('admin.marketing-points.index') }}" class="btn btn-sm btn-secondary">
@@ -97,13 +97,20 @@
             <div class="card-body">
                 <!-- Filter -->
                 <form method="GET" class="row g-2 mb-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input type="date" name="tanggal_dari" class="form-control form-control-sm" 
                                value="{{ request('tanggal_dari') }}" placeholder="Dari tanggal">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input type="date" name="tanggal_sampai" class="form-control form-control-sm" 
                                value="{{ request('tanggal_sampai') }}" placeholder="Sampai tanggal">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" name="process_type">
+                            <option value="all" {{ request('process_type', 'all') == 'all' ? 'selected' : '' }}>Semua Jalur</option>
+                            <option value="normal" {{ request('process_type') == 'normal' ? 'selected' : '' }}>Normal</option>
+                            <option value="fasttrack" {{ request('process_type') == 'fasttrack' ? 'selected' : '' }}>Fasttrack</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-sm btn-primary">

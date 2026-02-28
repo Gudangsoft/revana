@@ -18,13 +18,15 @@ class PicPointHistoryExport implements FromCollection, WithHeadings, WithMapping
     protected ?string $tanggalDari;
     protected ?string $tanggalSampai;
     protected ?string $step;
+    protected ?string $processType;
 
-    public function __construct(Pic $pic, ?string $tanggalDari = null, ?string $tanggalSampai = null, ?string $step = null)
+    public function __construct(Pic $pic, ?string $tanggalDari = null, ?string $tanggalSampai = null, ?string $step = null, ?string $processType = null)
     {
         $this->pic = $pic;
         $this->tanggalDari = $tanggalDari;
         $this->tanggalSampai = $tanggalSampai;
         $this->step = $step;
+        $this->processType = $processType;
     }
 
     public function collection()
@@ -39,6 +41,19 @@ class PicPointHistoryExport implements FromCollection, WithHeadings, WithMapping
         }
         if ($this->step) {
             $query->where('step', $this->step);
+        }
+        if ($this->processType && $this->processType !== 'all') {
+            $processType = $this->processType;
+            $query->whereHas('submission', function($q) use ($processType) {
+                if ($processType === 'normal') {
+                    $q->where(function($qq) {
+                        $qq->where('process_type', 'normal')
+                           ->orWhereNull('process_type');
+                    });
+                } else {
+                    $q->where('process_type', $processType);
+                }
+            });
         }
 
         return $query->latest()->get();
