@@ -907,6 +907,22 @@ class DashboardController extends Controller
         // Current Marketing rank
         $currentMarketingRank = $marketingRankings->where('id', $currentMarketing->id)->first()->rank ?? null;
 
+        // Additional rank info
+        $pointsToNextRank = 0;
+        $nextRankMarketing = null;
+        $topPercentage = 0;
+        
+        if ($currentMarketingRank && $currentMarketingRank > 1) {
+            $nextRankMarketing = $marketingRankings->where('rank', $currentMarketingRank - 1)->first();
+            if ($nextRankMarketing) {
+                $pointsToNextRank = ($nextRankMarketing->total_points ?? 0) - ($currentMarketing->total_points ?? 0);
+            }
+        }
+        
+        if ($activeMarketingCount > 0 && $currentMarketingRank) {
+            $topPercentage = round(($currentMarketingRank / $activeMarketingCount) * 100, 1);
+        }
+
         return view('marketing.point-rankings', compact(
             'currentMarketing',
             'currentMarketingRank',
@@ -915,7 +931,10 @@ class DashboardController extends Controller
             'totalPicPoints',
             'totalMarketingPoints',
             'activePicCount',
-            'activeMarketingCount'
+            'activeMarketingCount',
+            'pointsToNextRank',
+            'nextRankMarketing',
+            'topPercentage'
         ));
     }
 }

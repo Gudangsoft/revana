@@ -7,12 +7,42 @@
 
 {{-- My Rank Banner --}}
 @if($currentMarketingRank)
-<div class="alert alert-success mb-4">
-    <div class="d-flex align-items-center">
-        <i class="bi bi-award-fill me-3" style="font-size: 2rem;"></i>
-        <div>
-            <h5 class="mb-1">Peringkat Anda: <strong>#{{ $currentMarketingRank }}</strong> dari {{ $activeMarketingCount }} Marketing</h5>
-            <p class="mb-0">Total Point: <strong>{{ number_format($currentMarketing->total_points ?? 0) }}</strong></p>
+<div class="card border-success mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="bi bi-megaphone-fill me-2"></i> Posisi Peringkat Saya
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center border-end">
+                <div class="display-4 fw-bold text-success">#{{ $currentMarketingRank }}</div>
+                <small class="text-muted">dari {{ $activeMarketingCount }} Marketing</small>
+            </div>
+            <div class="col-md-3 text-center border-end">
+                <div class="h4 mb-0 text-primary">{{ number_format($currentMarketing->total_points ?? 0) }}</div>
+                <small class="text-muted">Total Point</small>
+            </div>
+            <div class="col-md-3 text-center border-end">
+                <div class="h4 mb-0 {{ $topPercentage <= 25 ? 'text-success' : ($topPercentage <= 50 ? 'text-warning' : 'text-secondary') }}">
+                    Top {{ $topPercentage }}%
+                </div>
+                <small class="text-muted">Persentase Posisi</small>
+            </div>
+            <div class="col-md-3 text-center">
+                @if($currentMarketingRank == 1)
+                    <div class="h5 mb-0 text-warning">
+                        <i class="bi bi-trophy-fill"></i> Peringkat 1
+                    </div>
+                    <small class="text-muted">Anda yang terbaik!</small>
+                @elseif($pointsToNextRank > 0)
+                    <div class="h4 mb-0 text-danger">+{{ number_format($pointsToNextRank) }}</div>
+                    <small class="text-muted">Point ke peringkat {{ $currentMarketingRank - 1 }}</small>
+                @else
+                    <div class="h5 mb-0 text-success">
+                        <i class="bi bi-check-circle-fill"></i> Sama dengan di atas
+                    </div>
+                    <small class="text-muted">Point sama dengan rank {{ $currentMarketingRank - 1 }}</small>
+                @endif
+            </div>
         </div>
     </div>
 </div>

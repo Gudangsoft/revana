@@ -188,6 +188,22 @@ class PicPointController extends Controller
         // Current PIC rank
         $currentPicRank = $picRankings->where('id', $currentPic->id)->first()->rank ?? null;
 
+        // Additional rank info
+        $pointsToNextRank = 0;
+        $nextRankPic = null;
+        $topPercentage = 0;
+        
+        if ($currentPicRank && $currentPicRank > 1) {
+            $nextRankPic = $picRankings->where('rank', $currentPicRank - 1)->first();
+            if ($nextRankPic) {
+                $pointsToNextRank = ($nextRankPic->total_points ?? 0) - ($currentPic->total_points ?? 0);
+            }
+        }
+        
+        if ($activePicCount > 0 && $currentPicRank) {
+            $topPercentage = round(($currentPicRank / $activePicCount) * 100, 1);
+        }
+
         return view('pic.points.rankings', compact(
             'currentPic',
             'currentPicRank',
@@ -196,7 +212,10 @@ class PicPointController extends Controller
             'totalPicPoints',
             'totalMarketingPoints',
             'activePicCount',
-            'activeMarketingCount'
+            'activeMarketingCount',
+            'pointsToNextRank',
+            'nextRankPic',
+            'topPercentage'
         ));
     }
 }
