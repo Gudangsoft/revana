@@ -81,7 +81,6 @@
                             <tr>
                                 <th class="text-center" style="width: 70px;">Rank</th>
                                 <th>Nama PIC</th>
-                                <th>Role</th>
                                 <th class="text-center">Total Point</th>
                             </tr>
                         </thead>
@@ -118,9 +117,6 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <span class="badge bg-info">{{ ucfirst($pic->role ?? '-') }}</span>
-                                </td>
                                 <td class="text-center">
                                     <span class="badge bg-primary" style="font-size: 1rem;">
                                         {{ number_format($pic->total_points ?? 0) }}
@@ -129,7 +125,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
+                                <td colspan="3" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0">Belum ada data PIC</p>
                                 </td>

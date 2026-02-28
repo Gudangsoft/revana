@@ -46,9 +46,6 @@
                                         </div>
                                         <div>
                                             <strong>{{ $pic->name }}</strong>
-                                            @if($pic->role)
-                                                <br><small class="text-muted">{{ ucfirst($pic->role) }}</small>
-                                            @endif
                                         </div>
                                     </div>
                                 </td>
