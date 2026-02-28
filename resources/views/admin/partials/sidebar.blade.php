@@ -161,13 +161,13 @@
 
 <!-- Laporan Point -->
 <div class="nav-item">
-    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') ? '' : 'collapsed' }}" 
+    <a class="nav-link {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') || str_starts_with($currentRoute, 'admin.team-') ? '' : 'collapsed' }}" 
        data-bs-toggle="collapse" href="#pointReportMenu" role="button" 
-       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') ? 'true' : 'false' }}">
+       aria-expanded="{{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') || str_starts_with($currentRoute, 'admin.team-') ? 'true' : 'false' }}">
         <i class="bi bi-trophy-fill text-warning"></i> Laporan Point
         <i class="bi bi-chevron-down ms-auto"></i>
     </a>
-    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') ? 'show' : '' }}" id="pointReportMenu">
+    <div class="collapse {{ str_starts_with($currentRoute, 'admin.marketing-points') || str_starts_with($currentRoute, 'admin.pic-points') || str_starts_with($currentRoute, 'admin.pics.activity') || str_starts_with($currentRoute, 'admin.task-point-settings') || str_starts_with($currentRoute, 'admin.point-rankings') || str_starts_with($currentRoute, 'admin.team-') ? 'show' : '' }}" id="pointReportMenu">
         <div class="nav flex-column ms-3">
             <a href="{{ route('admin.point-rankings') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.point-rankings') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart-fill text-warning"></i> Peringkat Point
@@ -183,6 +183,15 @@
             </a>
             <a href="{{ route('admin.pics.activity-report') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.pics.activity') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart text-primary"></i> Aktivitas PIC
+            </a>
+            <a href="{{ route('admin.team-submit-report') }}" class="nav-link {{ $currentRoute == 'admin.team-submit-report' ? 'active' : '' }}">
+                <i class="bi bi-send-fill text-success"></i> Tim Submit Terbanyak
+            </a>
+            <a href="{{ route('admin.team-reviewer-report') }}" class="nav-link {{ $currentRoute == 'admin.team-reviewer-report' ? 'active' : '' }}">
+                <i class="bi bi-person-check-fill text-info"></i> Tim Reviewer Terbanyak
+            </a>
+            <a href="{{ route('admin.team-marketing-report') }}" class="nav-link {{ $currentRoute == 'admin.team-marketing-report' ? 'active' : '' }}">
+                <i class="bi bi-megaphone-fill text-danger"></i> Tim Marketing Terbanyak
             </a>
         </div>
     </div>

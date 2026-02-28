@@ -260,6 +260,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
         Route::get('/pics-activity-report', [PicController::class, 'activityReport'])->name('pics.activity-report');
+        Route::get('/team-submit-report', [PicController::class, 'teamSubmitReport'])->name('team-submit-report');
+        Route::get('/team-reviewer-report', [PicController::class, 'teamReviewerReport'])->name('team-reviewer-report');
+        Route::get('/team-marketing-report', [PicController::class, 'teamMarketingReport'])->name('team-marketing-report');
         Route::post('/pics/{pic}/reset-password', [PicController::class, 'resetPassword'])->name('pics.reset-password');
         Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         
