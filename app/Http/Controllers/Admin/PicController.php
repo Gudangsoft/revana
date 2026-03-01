@@ -7,6 +7,8 @@ use App\Models\Pic;
 use App\Models\PicPointHistory;
 use App\Models\Submission;
 use App\Exports\PicsExport;
+use App\Exports\TeamPerformanceExport;
+use App\Exports\AllTeamPerformanceExport;
 use App\Imports\PicsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -799,6 +801,24 @@ class PicController extends Controller
             return $pdf->download($filename);
         }
         
+        // Export Excel - Single Step
+        if ($request->has('export') && $request->export === 'excel') {
+            $filename = 'Laporan_Tim_' . $config['title'] . '_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.xlsx';
+            return Excel::download(
+                new TeamPerformanceExport($step, $processType, $request->tanggal_dari, $request->tanggal_sampai),
+                $filename
+            );
+        }
+        
+        // Export Excel - All Steps (Rekap Seluruh Laporan)
+        if ($request->has('export') && $request->export === 'excel_all') {
+            $filename = 'Rekap_Seluruh_Laporan_Tim_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.xlsx';
+            return Excel::download(
+                new AllTeamPerformanceExport($processType, $request->tanggal_dari, $request->tanggal_sampai),
+                $filename
+            );
+        }
+        
         return view('admin.reports.team-performance', compact(
             'rankings', 'stats', 'config', 'step', 'processType', 'stepConfigs'
         ));
@@ -877,6 +897,24 @@ class PicController extends Controller
             
             $filename = 'Laporan_Tim_Marketing_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.pdf';
             return $pdf->download($filename);
+        }
+        
+        // Export Excel
+        if ($request->has('export') && $request->export === 'excel') {
+            $filename = 'Laporan_Tim_Marketing_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.xlsx';
+            return Excel::download(
+                new TeamPerformanceExport('marketing', $processType, $request->tanggal_dari, $request->tanggal_sampai),
+                $filename
+            );
+        }
+        
+        // Export Excel - All Steps (Rekap Seluruh Laporan)
+        if ($request->has('export') && $request->export === 'excel_all') {
+            $filename = 'Rekap_Seluruh_Laporan_Tim_' . ucfirst($processType) . '_' . now()->format('Y-m-d') . '.xlsx';
+            return Excel::download(
+                new AllTeamPerformanceExport($processType, $request->tanggal_dari, $request->tanggal_sampai),
+                $filename
+            );
         }
         
         return view('admin.reports.team-marketing-performance', compact(

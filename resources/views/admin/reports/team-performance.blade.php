@@ -112,24 +112,32 @@
                 <a href="{{ route('admin.team-performance', array_merge(request()->query(), ['export' => 'pdf'])) }}" class="btn btn-danger">
                     <i class="bi bi-file-pdf"></i> PDF
                 </a>
+                <a href="{{ route('admin.team-performance', array_merge(request()->query(), ['export' => 'excel'])) }}" class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </a>
             </div>
         </form>
         <hr class="my-3">
-        @if($step === 'marketing')
-        <form method="POST" action="{{ route('admin.sync.marketing-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua Marketing berdasarkan jumlah submission?\n\nProses ini akan menghitung ulang total_points semua Marketing.')">
-            @csrf
-            <button type="submit" class="btn btn-info text-white">
-                <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point Marketing
-            </button>
-        </form>
-        @else
-        <form method="POST" action="{{ route('admin.sync.pic-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua PIC berdasarkan riwayat tugas?\n\nProses ini akan menghitung ulang total_points semua PIC.')">
-            @csrf
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point PIC
-            </button>
-        </form>
-        @endif
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="{{ route('admin.team-performance', array_merge(request()->query(), ['export' => 'excel_all'])) }}" class="btn btn-info text-white">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Export Seluruh Rekap (Excel)
+            </a>
+            @if($step === 'marketing')
+            <form method="POST" action="{{ route('admin.sync.marketing-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua Marketing berdasarkan jumlah submission?\n\nProses ini akan menghitung ulang total_points semua Marketing.')">
+                @csrf
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point Marketing
+                </button>
+            </form>
+            @else
+            <form method="POST" action="{{ route('admin.sync.pic-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua PIC berdasarkan riwayat tugas?\n\nProses ini akan menghitung ulang total_points semua PIC.')">
+                @csrf
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point PIC
+                </button>
+            </form>
+            @endif
+        </div>
     </div>
 </div>
 
