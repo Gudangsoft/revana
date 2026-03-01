@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Performa Tim PIC')
-@section('page-title', 'Laporan Performa Tim PIC')
+@section('title', 'Laporan Performa Tim ' . ($step === 'marketing' ? 'Marketing' : 'PIC'))
+@section('page-title', 'Laporan Performa Tim ' . ($step === 'marketing' ? 'Marketing' : 'PIC'))
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -63,13 +63,24 @@
 {{-- Step Navigation Tabs --}}
 <div class="card mb-4">
     <div class="card-header bg-light">
-        <div class="d-flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="text-muted me-2"><i class="bi bi-people"></i> PIC:</span>
             @foreach($stepConfigs as $stepKey => $stepConfig)
+                @if(!isset($stepConfig['is_marketing']))
                 <a href="{{ route('admin.team-performance', array_merge(request()->except('step'), ['step' => $stepKey])) }}" 
                    class="btn btn-sm {{ $step == $stepKey ? 'btn-'.$stepConfig['color'] : 'btn-outline-'.$stepConfig['color'] }}">
                     <i class="bi bi-{{ $stepConfig['icon'] }}"></i> {{ $stepConfig['title'] }}
                 </a>
+                @endif
             @endforeach
+            <span class="border-start ps-2 ms-2"></span>
+            <span class="text-muted me-2"><i class="bi bi-megaphone"></i> Marketing:</span>
+            @if(isset($stepConfigs['marketing']))
+            <a href="{{ route('admin.team-performance', array_merge(request()->except('step'), ['step' => 'marketing'])) }}" 
+               class="btn btn-sm {{ $step == 'marketing' ? 'btn-'.$stepConfigs['marketing']['color'] : 'btn-outline-'.$stepConfigs['marketing']['color'] }}">
+                <i class="bi bi-{{ $stepConfigs['marketing']['icon'] }}"></i> {{ $stepConfigs['marketing']['title'] }}
+            </a>
+            @endif
         </div>
     </div>
 </div>
@@ -104,23 +115,33 @@
             </div>
         </form>
         <hr class="my-3">
+        @if($step === 'marketing')
+        <form method="POST" action="{{ route('admin.sync.marketing-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua Marketing berdasarkan jumlah submission?\n\nProses ini akan menghitung ulang total_points semua Marketing.')">
+            @csrf
+            <button type="submit" class="btn btn-info text-white">
+                <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point Marketing
+            </button>
+        </form>
+        @else
         <form method="POST" action="{{ route('admin.sync.pic-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua PIC berdasarkan riwayat tugas?\n\nProses ini akan menghitung ulang total_points semua PIC.')">
             @csrf
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point PIC
             </button>
         </form>
+        @endif
     </div>
 </div>
 
 {{-- Statistics --}}
+@php $isMarketing = $step === 'marketing'; @endphp
 <div class="row mb-4">
     <div class="col-md-4 mb-3">
         <div class="card bg-{{ $config['color'] }} text-white h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="mb-0">Total Tugas {{ $config['title'] }}</h6>
+                        <h6 class="mb-0">{{ $isMarketing ? 'Total Submission' : 'Total Tugas' }} {{ $config['title'] }}</h6>
                         <h2 class="mb-0 fw-bold">{{ number_format($stats['total_tasks']) }}</h2>
                         <small>{{ $processType == 'all' ? 'Semua jalur' : ($processType == 'normal' ? 'Jalur Normal' : 'Jalur Fasttrack') }}</small>
                     </div>
@@ -134,9 +155,9 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="mb-0">Total PIC</h6>
+                        <h6 class="mb-0">Total {{ $isMarketing ? 'Marketing' : 'PIC' }}</h6>
                         <h2 class="mb-0 fw-bold">{{ number_format($stats['total_pic']) }}</h2>
-                        <small>PIC yang melakukan tugas</small>
+                        <small>{{ $isMarketing ? 'Marketing yang submit' : 'PIC yang melakukan tugas' }}</small>
                     </div>
                     <i class="bi bi-people-fill fs-1 opacity-50"></i>
                 </div>
@@ -150,7 +171,7 @@
                     <div>
                         <h6 class="mb-0">Top Performer</h6>
                         <h2 class="mb-0 fw-bold">{{ $stats['top_pic'] ? $stats['top_pic']->pic_name : '-' }}</h2>
-                        <small>{{ $stats['top_pic'] ? number_format($stats['top_pic']->total_task) . ' tugas' : '' }}</small>
+                        <small>{{ $stats['top_pic'] ? number_format($stats['top_pic']->total_task) . ($isMarketing ? ' submission' : ' tugas') : '' }}</small>
                     </div>
                     <i class="bi bi-trophy-fill fs-1 opacity-50"></i>
                 </div>
@@ -173,8 +194,8 @@
                 <thead class="table-light">
                     <tr>
                         <th class="text-center" style="width: 70px;">Rank</th>
-                        <th>Nama PIC</th>
-                        <th class="text-center">Total Tugas</th>
+                        <th>{{ $isMarketing ? 'Nama Marketing' : 'Nama PIC' }}</th>
+                        <th class="text-center">{{ $isMarketing ? 'Total Submission' : 'Total Tugas' }}</th>
                         <th class="text-center">Persentase</th>
                     </tr>
                 </thead>
@@ -232,7 +253,7 @@
                     <tr>
                         <td colspan="4" class="text-center text-muted py-4">
                             <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                            <p class="mb-0">Belum ada data tugas {{ $config['title'] }}</p>
+                            <p class="mb-0">Belum ada data {{ $isMarketing ? 'submission' : 'tugas' }} {{ $config['title'] }}</p>
                         </td>
                     </tr>
                     @endforelse
@@ -241,7 +262,7 @@
         </div>
     </div>
     <div class="card-footer text-muted">
-        Total {{ $rankings->count() }} PIC yang melakukan tugas {{ $config['title'] }}
+        Total {{ $rankings->count() }} {{ $isMarketing ? 'Marketing yang submit artikel' : 'PIC yang melakukan tugas '.$config['title'] }}
     </div>
 </div>
 

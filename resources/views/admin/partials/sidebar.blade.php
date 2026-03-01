@@ -188,10 +188,10 @@
             <span class="nav-link text-muted small">
                 <i class="bi bi-people-fill"></i> Laporan Tim Performa
             </span>
-            <a href="{{ route('admin.team-performance', ['step' => 'submit']) }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.team-performance') ? 'active' : '' }}">
+            <a href="{{ route('admin.team-performance', ['step' => 'submit']) }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.team-performance') && request('step') != 'marketing' ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow text-success"></i> Performa Tim PIC
             </a>
-            <a href="{{ route('admin.team-marketing-performance') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.team-marketing-performance') ? 'active' : '' }}">
+            <a href="{{ route('admin.team-performance', ['step' => 'marketing']) }}" class="nav-link {{ request('step') == 'marketing' ? 'active' : '' }}">
                 <i class="bi bi-megaphone-fill text-danger"></i> Performa Tim Marketing
             </a>
         </div>

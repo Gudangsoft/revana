@@ -698,6 +698,15 @@ class PicController extends Controller
                 'color' => 'danger',
                 'icon' => 'box-seam-fill',
             ],
+            'marketing' => [
+                'title' => 'Marketing',
+                'field' => 'marketing_id',
+                'date_field' => 'created_at',
+                'valid_field' => null,
+                'color' => 'danger',
+                'icon' => 'megaphone-fill',
+                'is_marketing' => true,
+            ],
         ];
         
         $config = $stepConfigs[$step] ?? $stepConfigs['submit'];
@@ -737,12 +746,20 @@ class PicController extends Controller
             ->orderByDesc('total_task')
             ->get();
         
-        // Add rank and get PIC names
-        $rankings = $rankings->map(function ($item, $index) use ($config) {
-            $pic = Pic::find($item->{$config['field']});
-            $item->rank = $index + 1;
-            $item->pic_name = $pic ? $pic->name : 'Unknown';
-            $item->pic = $pic;
+        // Add rank and get PIC/Marketing names
+        $isMarketing = $step === 'marketing';
+        $rankings = $rankings->map(function ($item, $index) use ($config, $isMarketing) {
+            if ($isMarketing) {
+                $model = \App\Models\Marketing::find($item->{$config['field']});
+                $item->rank = $index + 1;
+                $item->pic_name = $model ? $model->name : 'Unknown';
+                $item->pic = $model;
+            } else {
+                $pic = Pic::find($item->{$config['field']});
+                $item->rank = $index + 1;
+                $item->pic_name = $pic ? $pic->name : 'Unknown';
+                $item->pic = $pic;
+            }
             return $item;
         });
         

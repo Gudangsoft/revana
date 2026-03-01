@@ -187,18 +187,19 @@
         </table>
     </div>
 
+    @php $isMarketing = $step === 'marketing'; @endphp
     <div class="stats-grid">
         <div class="stats-box">
             <h3>{{ number_format($stats['total_tasks']) }}</h3>
-            <p>Total Task {{ $config['title'] ?? '' }}</p>
+            <p>{{ $isMarketing ? 'Total Submission' : 'Total Task' }} {{ $config['title'] ?? '' }}</p>
         </div>
         <div class="stats-box">
             <h3>{{ number_format($stats['total_pic']) }}</h3>
-            <p>Total PIC Bertugas</p>
+            <p>Total {{ $isMarketing ? 'Marketing' : 'PIC Bertugas' }}</p>
         </div>
         <div class="stats-box">
             <h3>{{ $stats['top_pic'] ? $stats['top_pic']->total_task : 0 }}</h3>
-            <p>Task Tertinggi</p>
+            <p>{{ $isMarketing ? 'Submission' : 'Task' }} Tertinggi</p>
         </div>
     </div>
 
@@ -206,8 +207,8 @@
         <thead>
             <tr>
                 <th style="width: 60px; text-align: center;">Rank</th>
-                <th>Nama PIC</th>
-                <th style="width: 100px; text-align: center;">Total Task</th>
+                <th>{{ $isMarketing ? 'Nama Marketing' : 'Nama PIC' }}</th>
+                <th style="width: 100px; text-align: center;">{{ $isMarketing ? 'Total Submission' : 'Total Task' }}</th>
                 <th style="width: 150px; text-align: center;">Persentase</th>
             </tr>
         </thead>
@@ -253,7 +254,7 @@
 
     <div class="footer">
         <p>Dokumen ini digenerate secara otomatis oleh SIPERA pada {{ now()->format('d F Y H:i:s') }}</p>
-        <p>Total {{ $rankings->count() }} PIC tercatat</p>
+        <p>Total {{ $rankings->count() }} {{ $isMarketing ? 'Marketing' : 'PIC' }} tercatat</p>
     </div>
 </body>
 </html>
