@@ -200,7 +200,6 @@
                 <th>Nama Marketing</th>
                 <th style="width: 80px; text-align: center;">Total</th>
                 <th style="width: 70px; text-align: center;">Selesai</th>
-                <th style="width: 80px; text-align: center;">Persentase</th>
             </tr>
         </thead>
         <tbody>
@@ -229,16 +228,10 @@
                 <td class="text-center">
                     <strong>{{ number_format($item->completed_task ?? 0) }}</strong>
                 </td>
-                <td class="text-center">
-                    @php
-                        $percentage = $stats['total_tasks'] > 0 ? ($item->total_task / $stats['total_tasks']) * 100 : 0;
-                    @endphp
-                    {{ number_format($percentage, 1) }}%
-                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="text-center" style="padding: 20px; color: #999;">
+                <td colspan="4" class="text-center" style="padding: 20px; color: #999;">
                     Belum ada data
                 </td>
             </tr>

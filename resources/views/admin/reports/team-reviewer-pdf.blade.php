@@ -127,7 +127,6 @@
                 <th class="center" style="width: 70px;">Rev. 1</th>
                 <th class="center" style="width: 70px;">Rev. 2</th>
                 <th class="center" style="width: 80px;">Total</th>
-                <th class="center" style="width: 100px;">Persentase</th>
             </tr>
         </thead>
         <tbody>
@@ -153,16 +152,10 @@
                     <span class="badge-secondary">{{ number_format($item->reviewer2_count) }}</span>
                 </td>
                 <td class="center"><strong>{{ number_format($item->total_review) }}</strong></td>
-                <td class="center">
-                    @php
-                        $percentage = $stats['total_reviews'] > 0 ? ($item->total_review / $stats['total_reviews']) * 100 : 0;
-                    @endphp
-                    {{ number_format($percentage, 1) }}%
-                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="6" style="text-align: center; padding: 20px;">Belum ada data review</td>
+                <td colspan="5" style="text-align: center; padding: 20px;">Belum ada data review</td>
             </tr>
             @endforelse
         </tbody>

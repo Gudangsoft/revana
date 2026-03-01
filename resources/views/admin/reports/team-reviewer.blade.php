@@ -101,7 +101,6 @@
                         <th class="text-center">Reviewer 1</th>
                         <th class="text-center">Reviewer 2</th>
                         <th class="text-center">Total Review</th>
-                        <th class="text-center">Persentase</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -148,21 +147,10 @@
                                 {{ number_format($item->total_review) }}
                             </span>
                         </td>
-                        <td class="text-center">
-                            @php
-                                $percentage = $stats['total_reviews'] > 0 ? ($item->total_review / $stats['total_reviews']) * 100 : 0;
-                            @endphp
-                            <div class="progress" style="height: 20px; min-width: 100px;">
-                                <div class="progress-bar bg-info" role="progressbar" 
-                                     style="width: {{ $percentage }}%">
-                                    {{ number_format($percentage, 1) }}%
-                                </div>
-                            </div>
-                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
+                        <td colspan="5" class="text-center text-muted py-4">
                             <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                             <p class="mb-0">Belum ada data review</p>
                         </td>

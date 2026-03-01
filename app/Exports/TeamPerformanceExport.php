@@ -173,7 +173,6 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
             $isMarketing ? 'Nama Marketing' : 'Nama PIC',
             $isMarketing ? 'Total Submission' : 'Total Tugas',
             'Selesai',
-            'Persentase',
             'Status',
         ];
     }
@@ -181,14 +180,12 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
     public function map($item): array
     {
         $this->rank++;
-        $percentage = $this->totalTasks > 0 ? ($item->total_task / $this->totalTasks) * 100 : 0;
 
         return [
             $this->rank,
             $item->name,
             $item->total_task,
             $item->completed_task ?? 0,
-            number_format($percentage, 1) . '%',
             $item->is_active ? 'Aktif' : 'Nonaktif',
         ];
     }
@@ -208,7 +205,6 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
             'C' => 15,
             'D' => 12,
             'E' => 12,
-            'F' => 12,
         ];
     }
 

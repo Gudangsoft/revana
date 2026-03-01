@@ -123,7 +123,6 @@
                 <th class="center" style="width: 50px;">Rank</th>
                 <th>Nama PIC</th>
                 <th class="center" style="width: 100px;">Total Submit</th>
-                <th class="center" style="width: 120px;">Persentase</th>
             </tr>
         </thead>
         <tbody>
@@ -143,16 +142,10 @@
                     @endif
                 </td>
                 <td class="center">{{ number_format($item->total_submit) }}</td>
-                <td class="center">
-                    @php
-                        $percentage = $stats['total_submissions'] > 0 ? ($item->total_submit / $stats['total_submissions']) * 100 : 0;
-                    @endphp
-                    {{ number_format($percentage, 1) }}%
-                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="4" style="text-align: center; padding: 20px;">Belum ada data submission</td>
+                <td colspan="3" style="text-align: center; padding: 20px;">Belum ada data submission</td>
             </tr>
             @endforelse
         </tbody>

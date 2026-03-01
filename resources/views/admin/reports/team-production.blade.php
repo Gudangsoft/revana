@@ -99,7 +99,6 @@
                         <th class="text-center" style="width: 70px;">Rank</th>
                         <th>Nama PIC</th>
                         <th class="text-center">Total Tugas</th>
-                        <th class="text-center">Persentase</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -140,21 +139,10 @@
                                 {{ number_format($item->total_task) }}
                             </span>
                         </td>
-                        <td class="text-center">
-                            @php
-                                $percentage = $stats['total_tasks'] > 0 ? ($item->total_task / $stats['total_tasks']) * 100 : 0;
-                            @endphp
-                            <div class="progress" style="height: 20px; min-width: 100px;">
-                                <div class="progress-bar bg-secondary" role="progressbar" 
-                                     style="width: {{ $percentage }}%">
-                                    {{ number_format($percentage, 1) }}%
-                                </div>
-                            </div>
-                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-4">
+                        <td colspan="3" class="text-center text-muted py-4">
                             <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                             <p class="mb-0">Belum ada data tugas Production</p>
                         </td>
