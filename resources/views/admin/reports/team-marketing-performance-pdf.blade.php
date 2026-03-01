@@ -127,20 +127,7 @@
         .rank-normal {
             color: #666;
         }
-        .progress-bar {
-            height: 15px;
-            background: #e9ecef;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #dc3545;
-            text-align: center;
-            color: white;
-            font-size: 7pt;
-            line-height: 15px;
-        }
+
         .footer {
             margin-top: 30px;
             padding-top: 15px;
@@ -238,15 +225,11 @@
                 <td class="text-center">
                     <strong>{{ number_format($item->total_task) }}</strong>
                 </td>
-                <td>
+                <td class="text-center">
                     @php
                         $percentage = $stats['total_tasks'] > 0 ? ($item->total_task / $stats['total_tasks']) * 100 : 0;
                     @endphp
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ $percentage }}%;">
-                            {{ number_format($percentage, 1) }}%
-                        </div>
-                    </div>
+                    {{ number_format($percentage, 1) }}%
                 </td>
             </tr>
             @empty

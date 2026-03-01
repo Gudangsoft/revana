@@ -89,22 +89,7 @@
             border-top: 1px solid #ddd;
             padding-top: 10px;
         }
-        .percentage-bar {
-            background: #e9ecef;
-            border-radius: 3px;
-            height: 15px;
-            width: 100%;
-            position: relative;
-        }
-        .percentage-fill {
-            background: #17a2b8;
-            height: 100%;
-            border-radius: 3px;
-            text-align: center;
-            color: white;
-            font-size: 9px;
-            line-height: 15px;
-        }
+
         .badge-primary { background: #007bff; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
         .badge-secondary { background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
     </style>
@@ -172,11 +157,7 @@
                     @php
                         $percentage = $stats['total_reviews'] > 0 ? ($item->total_review / $stats['total_reviews']) * 100 : 0;
                     @endphp
-                    <div class="percentage-bar">
-                        <div class="percentage-fill" style="width: {{ min($percentage, 100) }}%">
-                            {{ number_format($percentage, 1) }}%
-                        </div>
-                    </div>
+                    {{ number_format($percentage, 1) }}%
                 </td>
             </tr>
             @empty

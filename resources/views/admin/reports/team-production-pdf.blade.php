@@ -89,22 +89,7 @@
             border-top: 1px solid #ddd;
             padding-top: 10px;
         }
-        .percentage-bar {
-            background: #e9ecef;
-            border-radius: 3px;
-            height: 15px;
-            width: 100%;
-            position: relative;
-        }
-        .percentage-fill {
-            background: #6c757d;
-            height: 100%;
-            border-radius: 3px;
-            text-align: center;
-            color: white;
-            font-size: 9px;
-            line-height: 15px;
-        }
+
     </style>
 </head>
 <body>
@@ -162,11 +147,7 @@
                     @php
                         $percentage = $stats['total_tasks'] > 0 ? ($item->total_task / $stats['total_tasks']) * 100 : 0;
                     @endphp
-                    <div class="percentage-bar">
-                        <div class="percentage-fill" style="width: {{ min($percentage, 100) }}%">
-                            {{ number_format($percentage, 1) }}%
-                        </div>
-                    </div>
+                    {{ number_format($percentage, 1) }}%
                 </td>
             </tr>
             @empty
