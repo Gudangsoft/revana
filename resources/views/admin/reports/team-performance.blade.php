@@ -204,6 +204,7 @@
                         <th class="text-center" style="width: 70px;">Rank</th>
                         <th>{{ $isMarketing ? 'Nama Marketing' : 'Nama PIC' }}</th>
                         <th class="text-center">{{ $isMarketing ? 'Total Submission' : 'Total Tugas' }}</th>
+                        <th class="text-center">Selesai</th>
                         <th class="text-center">Persentase</th>
                     </tr>
                 </thead>
@@ -246,6 +247,11 @@
                             </span>
                         </td>
                         <td class="text-center">
+                            <span class="badge bg-success" style="font-size: 1rem;">
+                                {{ number_format($item->completed_task ?? 0) }}
+                            </span>
+                        </td>
+                        <td class="text-center">
                             @php
                                 $percentage = $stats['total_tasks'] > 0 ? ($item->total_task / $stats['total_tasks']) * 100 : 0;
                             @endphp
@@ -259,7 +265,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-4">
+                        <td colspan="5" class="text-center text-muted py-4">
                             <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                             <p class="mb-0">Belum ada data {{ $isMarketing ? 'submission' : 'tugas' }} {{ $config['title'] }}</p>
                         </td>

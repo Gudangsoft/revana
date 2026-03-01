@@ -735,7 +735,11 @@ class PicController extends Controller
         
         // Get data with count
         $dataQuery = $query->clone()
-            ->select($config['field'], DB::raw('COUNT(*) as total_task'))
+            ->select(
+                $config['field'], 
+                DB::raw('COUNT(*) as total_task'),
+                DB::raw('SUM(CASE WHEN status = "PUBLISHED" THEN 1 ELSE 0 END) as completed_task')
+            )
             ->whereNotNull($config['field']);
         
         // Add valid filter if applicable
@@ -852,7 +856,11 @@ class PicController extends Controller
         
         // Get Marketing submissions with count
         $marketingRankings = $query->clone()
-            ->select('marketing_id', DB::raw('COUNT(*) as total_task'))
+            ->select(
+                'marketing_id', 
+                DB::raw('COUNT(*) as total_task'),
+                DB::raw('SUM(CASE WHEN status = "PUBLISHED" THEN 1 ELSE 0 END) as completed_task')
+            )
             ->whereNotNull('marketing_id')
             ->groupBy('marketing_id')
             ->orderByDesc('total_task')

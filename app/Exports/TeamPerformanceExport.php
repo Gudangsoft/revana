@@ -127,7 +127,11 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
         
         // Get data with count
         $dataQuery = $query->clone()
-            ->select($config['field'], DB::raw('COUNT(*) as total_task'))
+            ->select(
+                $config['field'], 
+                DB::raw('COUNT(*) as total_task'),
+                DB::raw('SUM(CASE WHEN status = "PUBLISHED" THEN 1 ELSE 0 END) as completed_task')
+            )
             ->whereNotNull($config['field']);
         
         // Add valid filter if applicable
@@ -168,6 +172,7 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
             'Ranking',
             $isMarketing ? 'Nama Marketing' : 'Nama PIC',
             $isMarketing ? 'Total Submission' : 'Total Tugas',
+            'Selesai',
             'Persentase',
             'Status',
         ];
@@ -182,6 +187,7 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
             $this->rank,
             $item->name,
             $item->total_task,
+            $item->completed_task ?? 0,
             number_format($percentage, 1) . '%',
             $item->is_active ? 'Aktif' : 'Nonaktif',
         ];
@@ -202,6 +208,7 @@ class TeamPerformanceExport implements FromCollection, WithHeadings, WithMapping
             'C' => 15,
             'D' => 12,
             'E' => 12,
+            'F' => 12,
         ];
     }
 
