@@ -119,12 +119,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     slotSelect.innerHTML = '<option value="">-- Pilih Slot --</option>' + 
                         data.map(s => {
-                            const available = s.jumlah_slot - s.slot_terpakai;
-                            const isFull = available <= 0;
-                            const fullIndicator = isFull ? ' 🚫 PENUH' : ` - Sisa: ${available}/${s.jumlah_slot} slot`;
+                            const sisa = s.sisa !== undefined ? s.sisa : Math.max(0, s.jumlah_slot - s.slot_terpakai);
+                            const isFull = s.is_full !== undefined ? s.is_full : (sisa <= 0);
+                            const fullIndicator = isFull ? ' 🚫 PENUH - TIDAK TERSEDIA' : ` - Sisa: ${sisa}/${s.jumlah_slot} slot`;
                             const disabled = isFull ? ' disabled' : '';
                             const selected = selectedSlotId && s.id == selectedSlotId ? ' selected' : '';
-                            return `<option value="${s.id}"${disabled}${selected}>${s.text}${fullIndicator}</option>`;
+                            const style = isFull ? ' style="color: #dc3545; font-weight: bold; background-color: #f8d7da;"' : (sisa <= 2 ? ' style="color: #fd7e14; font-weight: bold;"' : ' style="color: #28a745;"');
+                            return `<option value="${s.id}"${disabled}${selected}${style}>${s.text}${fullIndicator}</option>`;
                         }).join('');
                 }
             })

@@ -375,7 +375,8 @@ class JournalManagementController extends Controller
             ->orderBy('nomor', 'desc')
             ->get()
             ->map(function($slot) {
-                $available = ($slot->jumlah_slot ?? 0) - ($slot->current_articles ?? 0);
+                // Use slot_terpakai for accurate availability calculation
+                $sisa = max(0, ($slot->jumlah_slot ?? 0) - ($slot->slot_terpakai ?? 0));
                 return [
                     'id' => $slot->id,
                     'text' => "Vol {$slot->volume}, No {$slot->nomor} - {$slot->bulan}/{$slot->tahun}",
@@ -384,7 +385,9 @@ class JournalManagementController extends Controller
                     'bulan' => $slot->bulan,
                     'tahun' => $slot->tahun,
                     'jumlah_slot' => $slot->jumlah_slot ?? 0,
-                    'slot_terpakai' => $slot->current_articles ?? 0,
+                    'slot_terpakai' => $slot->slot_terpakai ?? 0,
+                    'sisa' => $sisa,
+                    'is_full' => $sisa <= 0,
                 ];
             });
         

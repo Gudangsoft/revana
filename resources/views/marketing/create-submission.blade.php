@@ -352,10 +352,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 let html = '<option value="">-- Pilih Slot --</option>';
                 for (let i = 0; i < data.length; i++) {
                     const slot = data[i];
-                    const sisa = slot.sisa !== undefined ? slot.sisa : (slot.jumlah_slot - slot.slot_terpakai);
+                    const sisa = slot.sisa !== undefined ? slot.sisa : Math.max(0, slot.jumlah_slot - slot.slot_terpakai);
+                    const isFull = slot.is_full !== undefined ? slot.is_full : (sisa <= 0);
                     
-                    if (sisa <= 0) {
-                        html += '<option value="' + slot.id + '" disabled style="color: #dc3545; font-weight: bold;">🚫 SLOT PENUH - ' + slot.text + ' (0/' + slot.jumlah_slot + ')</option>';
+                    if (isFull) {
+                        html += '<option value="' + slot.id + '" disabled style="color: #dc3545; font-weight: bold; background-color: #f8d7da;">🚫 SLOT PENUH - ' + slot.text + ' (0/' + slot.jumlah_slot + ') - TIDAK TERSEDIA</option>';
                     } else if (sisa <= 2) {
                         html += '<option value="' + slot.id + '" style="color: #fd7e14; font-weight: bold;">⚠️ HAMPIR PENUH - ' + slot.text + ' (' + sisa + '/' + slot.jumlah_slot + ' tersisa)</option>';
                     } else {

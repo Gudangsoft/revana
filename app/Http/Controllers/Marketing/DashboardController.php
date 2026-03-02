@@ -606,7 +606,7 @@ class DashboardController extends Controller
             ->orderBy('bulan', 'desc')
             ->get()
             ->map(function ($slot) {
-                $sisa = $slot->jumlah_slot - $slot->slot_terpakai;
+                $sisa = max(0, ($slot->jumlah_slot ?? 0) - ($slot->slot_terpakai ?? 0));
                 return [
                     'id' => $slot->id,
                     'text' => sprintf(
@@ -614,12 +614,13 @@ class DashboardController extends Controller
                         $slot->volume ?? '-',
                         $slot->nomor ?? '-',
                         $slot->tahun,
-                        $sisa > 0 ? $sisa : 0,
-                        $slot->jumlah_slot
+                        $sisa,
+                        $slot->jumlah_slot ?? 0
                     ),
-                    'jumlah_slot' => $slot->jumlah_slot,
-                    'slot_terpakai' => $slot->slot_terpakai,
-                    'sisa' => $sisa > 0 ? $sisa : 0
+                    'jumlah_slot' => $slot->jumlah_slot ?? 0,
+                    'slot_terpakai' => $slot->slot_terpakai ?? 0,
+                    'sisa' => $sisa,
+                    'is_full' => $sisa <= 0
                 ];
             });
         
