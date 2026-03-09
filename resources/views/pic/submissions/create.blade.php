@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    function loadSlots(journalId) {
+    function loadSlots(journalId, restoreSlotId) {
         console.log('⏳ Loading slots...');
         
         slotSelect.innerHTML = '<option value="">⏳ Memuat...</option>';
@@ -479,6 +479,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 slotSelect.innerHTML = html;
                 slotSelect.disabled = false;
                 console.log('✅ Slots loaded');
+
+                // Restore slot yang dipilih sebelumnya (setelah validasi error)
+                if (restoreSlotId) {
+                    slotSelect.value = restoreSlotId;
+                    if (!slotSelect.value) {
+                        // Slot ID tidak ditemukan di daftar (mungkin sudah penuh)
+                        console.warn('⚠️ Slot ID', restoreSlotId, 'tidak ditemukan.');
+                    } else {
+                        console.log('✅ Slot restored:', restoreSlotId);
+                    }
+                }
             })
             .catch(function(error) {
                 console.error('❌ Error:', error);
@@ -543,12 +554,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Restore old
+    // Restore old values setelah validasi error
     <?php if(old('journal_master_id')): ?>
         const oldId = '<?php echo old("journal_master_id"); ?>';
+        const oldSlotId = '<?php echo old("journal_slot_id"); ?>';
         const oldJournal = journals.find(function(j) { return j.id == oldId; });
         if (oldJournal) {
-            selectJournal(oldJournal.id, oldJournal.nama);
+            // selectJournal memanggil loadSlots; kita pass oldSlotId agar slot ikut ter-restore
+            hiddenInput.value = oldId;
+            selectedJournalName = oldJournal.nama;
+            isJournalSelected = true;
+            searchInput.value = '✓ ' + oldJournal.nama;
+            searchInput.classList.add('is-valid');
+            loadSlots(oldId, oldSlotId || null);
         }
     <?php endif; ?>
     
