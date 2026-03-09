@@ -29,6 +29,30 @@
                 </div>
                 @endif
 
+                @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" id="validation-error-summary" role="alert">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-x-circle-fill me-2 mt-1" style="font-size:1.2rem"></i>
+                        <div class="flex-grow-1">
+                            <strong>Submission gagal disimpan!</strong> Terdapat {{ $errors->count() }} kesalahan yang perlu diperbaiki:
+                            <ul class="mb-0 mt-2">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+
+                @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+
                 <form action="{{ route('pic.submissions.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
@@ -528,7 +552,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     <?php endif; ?>
     
-    searchInput.focus();
+    // Auto-scroll ke ringkasan error validasi jika ada
+    const errorSummary = document.getElementById('validation-error-summary');
+    if (errorSummary) {
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        searchInput.focus();
+    }
+    
     console.log('✅ Ready! Type to search...');
 });
 </script>

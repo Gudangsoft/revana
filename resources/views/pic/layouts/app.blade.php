@@ -176,6 +176,20 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             @endif
+
+            {{-- Global Validation Error Summary (any page) --}}
+            @if($errors->any() && !request()->routeIs('pic.submissions.create') && !request()->routeIs('pic.fasttrack.create'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Terdapat kesalahan pada input:</strong>
+                <ul class="mb-0 mt-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
             
             @if(session('point_earned'))
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -201,8 +215,49 @@
         </div>
     </div>
 
+    {{-- Toast Notifications --}}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        @if(session('success'))
+        <div id="toastSuccess" class="toast align-items-center text-bg-success border-0 shadow" role="alert" data-bs-delay="6000">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i> {!! session('success') !!}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        @endif
+        @if(session('error'))
+        <div id="toastError" class="toast align-items-center text-bg-danger border-0 shadow" role="alert" data-bs-delay="8000">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        @endif
+        @if($errors->any())
+        <div id="toastValidation" class="toast align-items-center text-bg-warning border-0 shadow" role="alert" data-bs-delay="8000">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> <strong>{{ $errors->count() }} kesalahan</strong> ditemukan. Periksa form di bawah.
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        @endif
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Show toasts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            ['toastSuccess', 'toastError', 'toastValidation'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) { new bootstrap.Toast(el).show(); }
+            });
+        });
         // No sidebar collapse functionality
         // Sync button loading state
         var nsf = document.getElementById('navSyncForm');
