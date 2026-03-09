@@ -494,6 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Apakah Anda yakin ingin melanjutkan?\n\n' +
                     'Klik OK untuk melanjutkan atau Cancel untuk memilih slot lain.');
                 if (!confirmed) {
+                    e.preventDefault();
                     return false;
                 }
             }
@@ -505,7 +506,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Slot: ' + optionText.replace(/[🚫⚠️✅]/g, '').trim() + '\n\n' +
                 'Apakah data sudah benar dan yakin ingin submit?');
             if (!finalConfirm) {
+                e.preventDefault();
                 return false;
+            }
+
+            // Tampilkan loading state pada tombol submit agar tidak bisa diklik dua kali
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...';
             }
         });
     }

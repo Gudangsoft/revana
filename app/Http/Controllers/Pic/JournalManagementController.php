@@ -492,7 +492,7 @@ class JournalManagementController extends Controller
             "Submit artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
         );
         if ($picHistory) {
-            $pic->increment('total_points', $picHistory->points_earned);
+            // Note: total_points sudah di-increment di dalam PicPointHistory::awardPoints()
             $pointMessage .= " Anda mendapatkan +{$picHistory->points_earned} point!";
         }
 
