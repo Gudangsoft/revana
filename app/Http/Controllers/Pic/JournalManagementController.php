@@ -1782,7 +1782,7 @@ class JournalManagementController extends Controller
         $submission->increment('edit_count');
         
         // Log edit action
-        $submission->logHistory('update', 'edited', 'Submission diedit oleh PIC (Edit ke-' . $submission->edit_count . ')', [
+        $submission->logHistory('fasttrack', 'edited', 'Submission diedit oleh PIC (Edit ke-' . $submission->edit_count . ')', [
             'edit_count' => $submission->edit_count,
             'slot_changed' => $slotChanged
         ], $adminUser ? $adminUser->id : null);
@@ -1807,7 +1807,7 @@ class JournalManagementController extends Controller
 
         // Log history if slot changed
         if ($slotChanged) {
-            $submission->logHistory('update', 'slot_changed', 'Slot jurnal diubah oleh PIC', [
+            $submission->logHistory('fasttrack', 'slot_changed', 'Slot jurnal diubah oleh PIC', [
                 'old_slot_id' => $oldSlotId,
                 'new_slot_id' => $newSlotId
             ], $adminUser ? $adminUser->id : null);
