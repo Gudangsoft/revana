@@ -437,15 +437,6 @@ class JournalManagementController extends Controller
             $validated['file_artikel'] = $filename;
         }
 
-        // Generate kode_submit
-        $today = now()->format('Ymd');
-        $lastSubmit = Submission::where('kode_submit', 'like', "SUB{$today}%")->latest()->first();
-        $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
-        $validated['kode_submit'] = "SUB{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-        
-        // Generate kode_loa
-        $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
-        
         $validated['status'] = 'submitted';
         $validated['tanggal_submit'] = now();
         
@@ -461,10 +452,42 @@ class JournalManagementController extends Controller
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
         }
 
-        // Wrap dalam database transaction
-        $submission = \DB::transaction(function() use ($validated) {
-            return Submission::create($validated);
-        });
+        // Wrap dalam database transaction dengan generate kode_submit di dalam transaction
+        // untuk mencegah duplicate entry (race condition)
+        $maxRetries = 5;
+        $attempt = 0;
+        $submission = null;
+
+        while ($attempt < $maxRetries) {
+            $attempt++;
+            try {
+                $submission = \DB::transaction(function() use ($validated) {
+                    // Generate kode_submit di dalam transaction dengan lock
+                    $today = now()->format('Ymd');
+                    $lastSubmit = Submission::where('kode_submit', 'like', "SUB{$today}%")
+                        ->lockForUpdate()
+                        ->orderBy('kode_submit', 'desc')
+                        ->first();
+                    $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
+                    $validated['kode_submit'] = "SUB{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+                    
+                    // Generate kode_loa
+                    $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
+
+                    return Submission::create($validated);
+                });
+                break; // Berhasil, keluar dari loop
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                if ($attempt >= $maxRetries) {
+                    Log::error('Gagal generate kode_submit setelah ' . $maxRetries . ' percobaan', [
+                        'error' => $e->getMessage()
+                    ]);
+                    return back()->with('error', 'Gagal membuat kode submit. Silakan coba lagi.')->withInput();
+                }
+                // Retry dengan delay singkat
+                usleep(100000); // 100ms
+            }
+        }
 
         // Award points to Marketing if assigned
         $pointMessage = '';
@@ -472,7 +495,7 @@ class JournalManagementController extends Controller
             $pointHistory = MarketingPointHistory::awardPoints(
                 $validated['marketing_id'],
                 $submission->id,
-                "Submit artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
+                "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
             );
             
             if ($pointHistory) {
@@ -489,7 +512,7 @@ class JournalManagementController extends Controller
             $pic->id,
             $submission->id,
             'submit',
-            "Submit artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
+            "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
         );
         if ($picHistory) {
             // Note: total_points sudah di-increment di dalam PicPointHistory::awardPoints()
@@ -497,7 +520,7 @@ class JournalManagementController extends Controller
         }
 
         return redirect()->route('pic.submissions.index')
-            ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
+            ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $submission->kode_submit . $pointMessage);
     }
 
     public function submissionsShow(Submission $submission)
@@ -1520,15 +1543,6 @@ class JournalManagementController extends Controller
             $validated['file_artikel'] = $filename;
         }
 
-        // Generate kode_submit with FT prefix for fasttrack
-        $today = now()->format('Ymd');
-        $lastSubmit = Submission::where('kode_submit', 'like', "FT{$today}%")->latest()->first();
-        $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
-        $validated['kode_submit'] = "FT{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-        
-        // Generate kode_loa
-        $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
-        
         // Set fasttrack specific fields
         $validated['process_type'] = 'fasttrack';
         // Set status based on whether link_publish is provided
@@ -1553,7 +1567,40 @@ class JournalManagementController extends Controller
             $validated['production_valid'] = true;
         }
 
-        $submission = Submission::create($validated);
+        // Wrap dalam transaction dengan retry untuk mencegah duplicate kode_submit
+        $maxRetries = 5;
+        $attempt = 0;
+        $submission = null;
+
+        while ($attempt < $maxRetries) {
+            $attempt++;
+            try {
+                $submission = \DB::transaction(function() use ($validated) {
+                    // Generate kode_submit di dalam transaction dengan lock
+                    $today = now()->format('Ymd');
+                    $lastSubmit = Submission::where('kode_submit', 'like', "FT{$today}%")
+                        ->lockForUpdate()
+                        ->orderBy('kode_submit', 'desc')
+                        ->first();
+                    $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
+                    $validated['kode_submit'] = "FT{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+                    
+                    // Generate kode_loa
+                    $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
+
+                    return Submission::create($validated);
+                });
+                break; // Berhasil, keluar dari loop
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                if ($attempt >= $maxRetries) {
+                    Log::error('Gagal generate kode_submit fasttrack setelah ' . $maxRetries . ' percobaan', [
+                        'error' => $e->getMessage()
+                    ]);
+                    return back()->with('error', 'Gagal membuat kode submit. Silakan coba lagi.')->withInput();
+                }
+                usleep(100000); // 100ms
+            }
+        }
 
         // Log history
         $logMessage = 'Submission fasttrack dibuat';
@@ -1579,7 +1626,7 @@ class JournalManagementController extends Controller
                 'submission_id' => $submission->id,
                 'step' => 'submit',
                 'points_earned' => $pointsToAdd,
-                'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
+                'description' => "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}",
             ]);
             
             $pointMessage = " Anda mendapatkan +{$pointsToAdd} point!";
@@ -1590,7 +1637,7 @@ class JournalManagementController extends Controller
             $marketingPointHistory = MarketingPointHistory::awardPoints(
                 $validated['marketing_id'],
                 $submission->id,
-                "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}"
+                "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
             );
             
             if ($marketingPointHistory) {
@@ -1602,7 +1649,7 @@ class JournalManagementController extends Controller
         }
 
         return redirect()->route('pic.fasttrack.index')
-            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
+            ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $submission->kode_submit . $pointMessage);
     }
 
     /**
