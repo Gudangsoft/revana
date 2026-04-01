@@ -310,6 +310,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'update'])->name('email-settings.update');
         Route::post('/email-settings/test-email', [\App\Http\Controllers\Admin\EmailSettingController::class, 'testEmail'])->name('email-settings.test-email');
         
+        // SMS Gateway Settings (Fonnte)
+        Route::get('/sms-gateway', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'index'])->name('sms-gateway.index');
+        Route::put('/sms-gateway', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'update'])->name('sms-gateway.update');
+        Route::post('/sms-gateway/check-status', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'checkStatus'])->name('sms-gateway.check-status');
+        Route::post('/sms-gateway/test-send', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'testSend'])->name('sms-gateway.test-send');
+        
         // Point Settings
         Route::get('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'index'])->name('point-settings.index');
         Route::put('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'update'])->name('point-settings.update');

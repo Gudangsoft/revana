@@ -219,6 +219,9 @@
 <a href="{{ route('admin.email-settings.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-envelope-at-fill"></i> Pengaturan Email
 </a>
+<a href="{{ route('admin.sms-gateway.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.sms-gateway') ? 'active' : '' }}">
+    <i class="bi bi-whatsapp text-success"></i> SMS Gateway
+</a>
 <a href="{{ route('admin.component-overview') }}" class="nav-link {{ $currentRoute == 'admin.component-overview' ? 'active' : '' }}">
     <i class="bi bi-puzzle-fill text-info"></i> Component Overview
 </a>
