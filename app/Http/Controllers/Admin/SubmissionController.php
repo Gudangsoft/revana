@@ -14,8 +14,10 @@ use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Exports\SubmissionsExport;
 use App\Imports\SubmissionsImport;
+use App\Services\FonnteService;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SubmissionController extends Controller
 {
@@ -176,6 +178,9 @@ class SubmissionController extends Controller
             }
         }
 
+        // Kirim notifikasi WhatsApp ke penulis via Fonnte
+        $this->sendWhatsAppNotification($submission);
+
         return redirect()->route('admin.submissions.index')
             ->with('success', 'Data Submit berhasil ditambahkan.' . $pointMessage);
     }
@@ -293,6 +298,15 @@ class SubmissionController extends Controller
             $validated['file_artikel_original_name'] = $originalName;
         }
 
+        // Deteksi perubahan kredensial author untuk notifikasi WA
+        $credentialsChanged = false;
+        if (
+            (isset($validated['username_author']) && $validated['username_author'] !== $submission->username_author) ||
+            (isset($validated['password_author']) && $validated['password_author'] !== $submission->password_author)
+        ) {
+            $credentialsChanged = true;
+        }
+
         // Handle slot change
         if ($validated['journal_slot_id'] != $submission->journal_slot_id) {
             // Check new slot availability
@@ -308,6 +322,11 @@ class SubmissionController extends Controller
         }
 
         $submission->update($validated);
+
+        // Kirim notifikasi WhatsApp jika kredensial author berubah
+        if ($credentialsChanged) {
+            $this->sendWhatsAppNotification($submission, true);
+        }
 
         return redirect()->route('admin.submissions.index')
             ->with('success', 'Data Submit berhasil diperbarui');
@@ -1704,5 +1723,155 @@ class SubmissionController extends Controller
         });
         
         return view('admin.fasttrack-management.monitoring.index', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
+    }
+
+    // ==================== WHATSAPP NOTIFICATION ====================
+
+    /**
+     * Kirim notifikasi WhatsApp ke penulis setelah submission berhasil disimpan/diupdate.
+     * Mengirimkan informasi username & password OJS author.
+     * Kegagalan pengiriman WA tidak menggagalkan proses utama.
+     *
+     * @param Submission $submission
+     * @param bool $isUpdate Apakah ini notifikasi update kredensial
+     */
+    private function sendWhatsAppNotification(Submission $submission, bool $isUpdate = false): void
+    {
+        try {
+            // Pastikan nomor HP penulis tersedia
+            if (empty($submission->no_hp_penulis)) {
+                Log::info('Fonnte WA skip: no_hp_penulis kosong', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                ]);
+                return;
+            }
+
+            // Pastikan ada kredensial yang dikirim
+            if (empty($submission->username_author) && empty($submission->password_author)) {
+                Log::info('Fonnte WA skip: username_author & password_author kosong', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                ]);
+                return;
+            }
+
+            $fonnteService = app(FonnteService::class);
+
+            // Cek apakah Fonnte sudah dikonfigurasi
+            if (!$fonnteService->isConfigured()) {
+                Log::warning('Fonnte WA skip: API token belum dikonfigurasi');
+                return;
+            }
+
+            // Susun pesan notifikasi
+            $message = $this->buildWhatsAppMessage($submission, $isUpdate);
+
+            // Kirim pesan
+            $result = $fonnteService->send(
+                target: $submission->no_hp_penulis,
+                message: $message,
+                options: [
+                    'countryCode' => '62',
+                    'typing' => false,
+                    'delay' => '2',
+                ]
+            );
+
+            if ($result['success']) {
+                Log::info('Fonnte WA berhasil dikirim (Admin)', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                    'target' => $submission->no_hp_penulis,
+                    'is_update' => $isUpdate,
+                ]);
+            } else {
+                Log::warning('Fonnte WA gagal dikirim (Admin)', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                    'target' => $submission->no_hp_penulis,
+                    'reason' => $result['message'] ?? 'Unknown',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Catch semua exception — notifikasi WA tidak boleh menggagalkan proses utama
+            Log::error('Fonnte WA exception (Admin)', [
+                'submission_id' => $submission->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    /**
+     * Susun body pesan WhatsApp untuk notifikasi submission.
+     *
+     * @param Submission $submission
+     * @param bool $isUpdate Apakah ini notifikasi update kredensial
+     */
+    private function buildWhatsAppMessage(Submission $submission, bool $isUpdate = false): string
+    {
+        $nama = $submission->nama_penulis ?? '-';
+        $judul = $submission->judul_artikel ?? '-';
+        $kode = $submission->kode_submit ?? '-';
+        $username = $submission->username_author ?? '-';
+        $password = $submission->password_author ?? '-';
+
+        // Load nama jurnal jika relasi belum di-load
+        $namaJurnal = '-';
+        if ($submission->relationLoaded('journalSlot') && $submission->journalSlot) {
+            $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
+        } else {
+            $submission->load('journalSlot.journalMaster');
+            $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
+        }
+
+        if ($isUpdate) {
+            return <<<EOT
+Halo *{$nama}*,
+
+Kredensial akun OJS Author Anda telah diperbarui. Berikut informasi terbaru:
+
+📄 *Detail Submission*
+• Kode Submit: *{$kode}*
+• Judul Artikel: _{$judul}_
+• Jurnal: *{$namaJurnal}*
+
+🔐 *Akun OJS Author (Diperbarui)*
+• Username: `{$username}`
+• Password: `{$password}`
+
+Silakan login ke portal OJS menggunakan kredensial terbaru di atas.
+
+⚠️ *Penting:* Mohon segera ubah password Anda setelah login demi keamanan akun.
+
+Terima kasih. 🙏
+
+_Pesan ini dikirim secara otomatis oleh sistem SIPERA._
+EOT;
+        }
+
+        return <<<EOT
+Halo *{$nama}*,
+
+Artikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya:
+
+📄 *Detail Submission*
+• Kode Submit: *{$kode}*
+• Judul Artikel: _{$judul}_
+• Jurnal: *{$namaJurnal}*
+
+🔐 *Akun OJS Author*
+• Username: `{$username}`
+• Password: `{$password}`
+
+Silakan login ke portal OJS menggunakan kredensial di atas untuk memantau perkembangan artikel Anda.
+
+⚠️ *Penting:* Mohon segera ubah password Anda setelah login pertama demi keamanan akun.
+
+Terima kasih telah mempercayakan publikasi artikel Anda kepada kami. 🙏
+
+_Pesan ini dikirim secara otomatis oleh sistem SIPERA._
+EOT;
     }
 }

@@ -186,7 +186,7 @@
                 {{-- Template Pesan --}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Template Pesan WhatsApp</h5>
+                        <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>tsApTemplate Pesan Whap</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-secondary">
