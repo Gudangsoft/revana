@@ -11,6 +11,7 @@ use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Models\Pic;
 use App\Models\PicPointHistory;
+use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -519,8 +520,118 @@ class JournalManagementController extends Controller
             $pointMessage .= " Anda mendapatkan +{$picHistory->points_earned} point!";
         }
 
+        // Kirim notifikasi WhatsApp ke penulis via Fonnte
+        $this->sendWhatsAppNotification($submission);
+
         return redirect()->route('pic.submissions.index')
             ->with('success', 'Submission berhasil ditambahkan dengan kode: ' . $submission->kode_submit . $pointMessage);
+    }
+
+    /**
+     * Kirim notifikasi WhatsApp ke penulis setelah submission berhasil disimpan.
+     * Mengirimkan informasi username & password OJS author.
+     * Kegagalan pengiriman WA tidak menggagalkan proses submission.
+     */
+    private function sendWhatsAppNotification(Submission $submission): void
+    {
+        try {
+            // Pastikan nomor HP penulis tersedia
+            if (empty($submission->no_hp_penulis)) {
+                Log::info('Fonnte WA skip: no_hp_penulis kosong', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                ]);
+                return;
+            }
+
+            $fonnteService = app(FonnteService::class);
+
+            // Cek apakah Fonnte sudah dikonfigurasi
+            if (!$fonnteService->isConfigured()) {
+                Log::warning('Fonnte WA skip: API token belum dikonfigurasi');
+                return;
+            }
+
+            // Susun pesan notifikasi
+            $message = $this->buildWhatsAppMessage($submission);
+
+            // Kirim pesan
+            $result = $fonnteService->send(
+                target: $submission->no_hp_penulis,
+                message: $message,
+                options: [
+                    'countryCode' => '62',
+                    'typing' => false,
+                    'delay' => '2',
+                ]
+            );
+
+            if ($result['success']) {
+                Log::info('Fonnte WA berhasil dikirim', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                    'target' => $submission->no_hp_penulis,
+                ]);
+            } else {
+                Log::warning('Fonnte WA gagal dikirim', [
+                    'submission_id' => $submission->id,
+                    'kode_submit' => $submission->kode_submit,
+                    'target' => $submission->no_hp_penulis,
+                    'reason' => $result['message'] ?? 'Unknown',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Catch semua exception — notifikasi WA tidak boleh menggagalkan submission
+            Log::error('Fonnte WA exception', [
+                'submission_id' => $submission->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    /**
+     * Susun body pesan WhatsApp untuk notifikasi submission baru.
+     */
+    private function buildWhatsAppMessage(Submission $submission): string
+    {
+        $nama = $submission->nama_penulis ?? '-';
+        $judul = $submission->judul_artikel ?? '-';
+        $kode = $submission->kode_submit ?? '-';
+        $username = $submission->username_author ?? '-';
+        $password = $submission->password_author ?? '-';
+
+        // Load nama jurnal jika relasi belum di-load
+        $namaJurnal = '-';
+        if ($submission->relationLoaded('journalSlot') && $submission->journalSlot) {
+            $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
+        } else {
+            $submission->load('journalSlot.journalMaster');
+            $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
+        }
+
+        return <<<EOT
+Halo *{$nama}*,
+
+Artikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya:
+
+📄 *Detail Submission*
+• Kode Submit: *{$kode}*
+• Judul Artikel: _{$judul}_
+• Jurnal: *{$namaJurnal}*
+
+🔐 *Akun OJS Author*
+• Username: `{$username}`
+• Password: `{$password}`
+
+Silakan login ke portal OJS menggunakan kredensial di atas untuk memantau perkembangan artikel Anda.
+
+⚠️ *Penting:* Mohon segera ubah password Anda setelah login pertama demi keamanan akun.
+
+Terima kasih telah mempercayakan publikasi artikel Anda kepada kami. 🙏
+
+_Pesan ini dikirim secara otomatis oleh sistem SIPERA._
+EOT;
     }
 
     public function submissionsShow(Submission $submission)
