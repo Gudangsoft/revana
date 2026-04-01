@@ -362,6 +362,12 @@
     document.getElementById('checkStatusBtn').addEventListener('click', function() {
         const button = this;
         const resultDiv = document.getElementById('statusResult');
+        const token = document.getElementById('fonnte_api_token').value;
+
+        if (!token) {
+            resultDiv.innerHTML = '<span class="badge bg-warning text-dark p-2"><i class="bi bi-exclamation-triangle me-1"></i>Masukkan API Token terlebih dahulu</span>';
+            return;
+        }
 
         button.disabled = true;
         button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Mengecek...';
@@ -373,7 +379,8 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
-            }
+            },
+            body: JSON.stringify({ token: token })
         })
         .then(response => response.json())
         .then(data => {
@@ -413,6 +420,8 @@
         button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
         resultDiv.innerHTML = '';
 
+        const token = document.getElementById('fonnte_api_token').value;
+
         fetch('{{ route("admin.sms-gateway.test-send") }}', {
             method: 'POST',
             headers: {
@@ -420,7 +429,7 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ phone: phone, message: message })
+            body: JSON.stringify({ phone: phone, message: message, token: token })
         })
         .then(response => response.json())
         .then(data => {

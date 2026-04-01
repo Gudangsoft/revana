@@ -59,18 +59,20 @@ class SmsGatewayController extends Controller
     /**
      * Check Fonnte device/connection status
      */
-    public function checkStatus()
+    public function checkStatus(Request $request)
     {
-        $fonnte = new FonnteService();
+        // Gunakan token dari request (form) atau dari database
+        $token = $request->input('token') ?: Setting::get('fonnte_api_token');
 
-        if (!$fonnte->isConfigured()) {
+        if (!$token) {
             return response()->json([
                 'success' => false,
-                'message' => 'API Token belum dikonfigurasi. Silakan simpan token terlebih dahulu.',
+                'message' => 'API Token belum diisi. Silakan masukkan token terlebih dahulu.',
             ]);
         }
 
-        $result = $fonnte->getDeviceStatus();
+        $fonnte = new FonnteService();
+        $result = $fonnte->getDeviceStatusWithToken($token);
 
         return response()->json($result);
     }
@@ -85,19 +87,22 @@ class SmsGatewayController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        $fonnte = new FonnteService();
+        // Gunakan token dari request (form) atau dari database
+        $token = $request->input('token') ?: Setting::get('fonnte_api_token');
 
-        if (!$fonnte->isConfigured()) {
+        if (!$token) {
             return response()->json([
                 'success' => false,
-                'message' => 'API Token belum dikonfigurasi. Silakan simpan token terlebih dahulu.',
+                'message' => 'API Token belum diisi. Silakan masukkan token terlebih dahulu.',
             ]);
         }
 
-        $result = $fonnte->send(
+        $fonnte = new FonnteService();
+        $result = $fonnte->sendWithToken(
+            $token,
             $request->phone,
             $request->message,
-            ['countryCode' => Setting::get('sms_default_country_code', '62')]
+            ['countryCode' => $request->input('countryCode', Setting::get('sms_default_country_code', '62'))]
         );
 
         return response()->json($result);

@@ -33,11 +33,12 @@ class FonnteService
      * @param string $target Phone number (with or without country code)
      * @param string $message Message content
      * @param array $options Additional options (url, filename, schedule, typing, delay, countryCode)
+     * @param string|null $token Optional token override (if not provided, uses saved token)
      * @return array Response from Fonnte API
      */
-    public function send(string $target, string $message, array $options = []): array
+    public function send(string $target, string $message, array $options = [], ?string $token = null): array
     {
-        $token = $this->getToken();
+        $token = $token ?: $this->getToken();
 
         if (!$token) {
             return [
@@ -47,15 +48,18 @@ class FonnteService
         }
 
         try {
-            $payload = array_merge([
+            $payload = [
                 'target' => $target,
                 'message' => $message,
                 'countryCode' => $options['countryCode'] ?? '62',
-            ], $options);
+            ];
 
-            // Remove countryCode from options to avoid duplicate
-            unset($payload['countryCode']);
-            $payload['countryCode'] = $options['countryCode'] ?? '62';
+            // Merge additional options (url, filename, etc.)
+            foreach ($options as $key => $value) {
+                if (!isset($payload[$key])) {
+                    $payload[$key] = $value;
+                }
+            }
 
             $response = Http::withHeaders([
                 'Authorization' => $token,
@@ -88,11 +92,21 @@ class FonnteService
     }
 
     /**
-     * Get device/connection status from Fonnte
+     * Send with explicit token (alias for convenience)
      */
-    public function getDeviceStatus(): array
+    public function sendWithToken(string $token, string $target, string $message, array $options = []): array
     {
-        $token = $this->getToken();
+        return $this->send($target, $message, $options, $token);
+    }
+
+    /**
+     * Get device/connection status from Fonnte
+     *
+     * @param string|null $token Optional token override
+     */
+    public function getDeviceStatus(?string $token = null): array
+    {
+        $token = $token ?: $this->getToken();
 
         if (!$token) {
             return [
@@ -119,5 +133,13 @@ class FonnteService
                 'message' => 'Gagal cek status: ' . $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Get device status with explicit token (alias for convenience)
+     */
+    public function getDeviceStatusWithToken(string $token): array
+    {
+        return $this->getDeviceStatus($token);
     }
 }
