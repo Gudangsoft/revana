@@ -315,6 +315,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/sms-gateway', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'update'])->name('sms-gateway.update');
         Route::post('/sms-gateway/check-status', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'checkStatus'])->name('sms-gateway.check-status');
         Route::post('/sms-gateway/test-send', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'testSend'])->name('sms-gateway.test-send');
+        Route::get('/sms-gateway/debug', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'debug'])->name('sms-gateway.debug');
         
         // Point Settings
         Route::get('/point-settings', [\App\Http\Controllers\Admin\PointSettingController::class, 'index'])->name('point-settings.index');
