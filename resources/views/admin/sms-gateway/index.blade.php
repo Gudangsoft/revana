@@ -80,10 +80,13 @@
                                            class="form-control @error('fonnte_api_token') is-invalid @enderror"
                                            id="fonnte_api_token"
                                            name="fonnte_api_token"
-                                           value="{{ old('fonnte_api_token', $settings['fonnte_api_token'] ?? '') }}"
+                                           value="{{ $errors->any() ? old('fonnte_api_token') : ($settings['fonnte_api_token'] ?? '') }}"
                                            placeholder="Masukkan API Token dari Fonnte">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleToken">
                                         <i class="bi bi-eye" id="toggleTokenIcon"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" type="button" id="clearToken" title="Hapus token">
+                                        <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
                                 <small class="form-text text-muted">Token API dari dashboard Fonnte Anda</small>
@@ -98,7 +101,7 @@
                                        class="form-control @error('fonnte_device_id') is-invalid @enderror"
                                        id="fonnte_device_id"
                                        name="fonnte_device_id"
-                                       value="{{ old('fonnte_device_id', $settings['fonnte_device_id'] ?? '') }}"
+                                       value="{{ $errors->any() ? old('fonnte_device_id') : ($settings['fonnte_device_id'] ?? '') }}"
                                        placeholder="Opsional: ID Device di Fonnte">
                                 <small class="form-text text-muted">Opsional, untuk identifikasi device</small>
                                 @error('fonnte_device_id')
@@ -112,7 +115,7 @@
                                        class="form-control @error('sms_default_country_code') is-invalid @enderror"
                                        id="sms_default_country_code"
                                        name="sms_default_country_code"
-                                       value="{{ old('sms_default_country_code', $settings['sms_default_country_code'] ?? '62') }}"
+                                       value="{{ $errors->any() ? old('sms_default_country_code') : ($settings['sms_default_country_code'] ?? '62') }}"
                                        placeholder="62">
                                 <small class="form-text text-muted">Kode negara Indonesia: 62</small>
                                 @error('sms_default_country_code')
@@ -143,7 +146,8 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_gateway_enabled" name="sms_gateway_enabled" value="1"
-                                       {{ ($settings['sms_gateway_enabled'] ?? '0') == '1' ? 'checked' : '' }}>
+                                       {{ ($settings['sms_gateway_enabled'] ?? '0') == '1' ? 'checked' : '' }}
+                                       data-saved="{{ $settings['sms_gateway_enabled'] ?? '0' }}">
                                 <label class="form-check-label fw-bold" for="sms_gateway_enabled">
                                     <i class="bi bi-power text-success me-1"></i>Aktifkan SMS Gateway
                                 </label>
@@ -157,7 +161,8 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_notification_submit" name="sms_notification_submit" value="1"
-                                       {{ ($settings['sms_notification_submit'] ?? '0') == '1' ? 'checked' : '' }}>
+                                       {{ ($settings['sms_notification_submit'] ?? '0') == '1' ? 'checked' : '' }}
+                                       data-saved="{{ $settings['sms_notification_submit'] ?? '0' }}">
                                 <label class="form-check-label" for="sms_notification_submit">
                                     <i class="bi bi-file-earmark-plus text-info me-1"></i>Notifikasi Submit Artikel
                                 </label>
@@ -169,7 +174,8 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_notification_status_change" name="sms_notification_status_change" value="1"
-                                       {{ ($settings['sms_notification_status_change'] ?? '0') == '1' ? 'checked' : '' }}>
+                                       {{ ($settings['sms_notification_status_change'] ?? '0') == '1' ? 'checked' : '' }}
+                                       data-saved="{{ $settings['sms_notification_status_change'] ?? '0' }}">
                                 <label class="form-check-label" for="sms_notification_status_change">
                                     <i class="bi bi-arrow-repeat text-warning me-1"></i>Notifikasi Perubahan Status
                                 </label>
@@ -181,7 +187,8 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_notification_published" name="sms_notification_published" value="1"
-                                       {{ ($settings['sms_notification_published'] ?? '0') == '1' ? 'checked' : '' }}>
+                                       {{ ($settings['sms_notification_published'] ?? '0') == '1' ? 'checked' : '' }}
+                                       data-saved="{{ $settings['sms_notification_published'] ?? '0' }}">
                                 <label class="form-check-label" for="sms_notification_published">
                                     <i class="bi bi-check-circle text-success me-1"></i>Notifikasi Artikel Terbit
                                 </label>
@@ -194,7 +201,7 @@
                 {{-- Template Pesan --}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>tsApTemplate Pesan Whap</h5>
+                        <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Template Pesan WhatsApp</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-secondary">
@@ -215,42 +222,72 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="sms_template_submit" class="form-label fw-bold">
-                                <i class="bi bi-file-earmark-plus text-info me-1"></i>Template Notifikasi Submit
-                            </label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="sms_template_submit" class="form-label fw-bold mb-0">
+                                    <i class="bi bi-file-earmark-plus text-info me-1"></i>Template Notifikasi Submit
+                                </label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-reset-template" data-target="sms_template_submit" data-default="Halo {nama_penulis},&#10;&#10;Artikel Anda &quot;{judul_artikel}&quot; telah berhasil disubmit dengan kode: {kode_submit}.&#10;&#10;Terima kasih,&#10;{app_name}">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset ke Default
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-clear-template" data-target="sms_template_submit">
+                                        <i class="bi bi-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
                             <textarea class="form-control @error('sms_template_submit') is-invalid @enderror"
                                       id="sms_template_submit"
                                       name="sms_template_submit"
                                       rows="5"
-                                      placeholder="Template pesan saat artikel disubmit">{{ old('sms_template_submit', $settings['sms_template_submit'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat artikel disubmit">{{ $errors->any() ? old('sms_template_submit') : ($settings['sms_template_submit'] ?? '') }}</textarea>
                             @error('sms_template_submit')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-4">
-                            <label for="sms_template_status_change" class="form-label fw-bold">
-                                <i class="bi bi-arrow-repeat text-warning me-1"></i>Template Perubahan Status
-                            </label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="sms_template_status_change" class="form-label fw-bold mb-0">
+                                    <i class="bi bi-arrow-repeat text-warning me-1"></i>Template Perubahan Status
+                                </label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-reset-template" data-target="sms_template_status_change" data-default="Halo {nama_penulis},&#10;&#10;Status artikel &quot;{judul_artikel}&quot; ({kode_submit}) telah diupdate menjadi: {status}.&#10;&#10;Terima kasih,&#10;{app_name}">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset ke Default
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-clear-template" data-target="sms_template_status_change">
+                                        <i class="bi bi-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
                             <textarea class="form-control @error('sms_template_status_change') is-invalid @enderror"
                                       id="sms_template_status_change"
                                       name="sms_template_status_change"
                                       rows="5"
-                                      placeholder="Template pesan saat status berubah">{{ old('sms_template_status_change', $settings['sms_template_status_change'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat status berubah">{{ $errors->any() ? old('sms_template_status_change') : ($settings['sms_template_status_change'] ?? '') }}</textarea>
                             @error('sms_template_status_change')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="sms_template_published" class="form-label fw-bold">
-                                <i class="bi bi-check-circle text-success me-1"></i>Template Artikel Terbit
-                            </label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="sms_template_published" class="form-label fw-bold mb-0">
+                                    <i class="bi bi-check-circle text-success me-1"></i>Template Artikel Terbit
+                                </label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-reset-template" data-target="sms_template_published" data-default="Halo {nama_penulis},&#10;&#10;Selamat! Artikel &quot;{judul_artikel}&quot; ({kode_submit}) telah berhasil dipublikasikan.&#10;&#10;Link: {link_publish}&#10;&#10;Terima kasih,&#10;{app_name}">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset ke Default
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-clear-template" data-target="sms_template_published">
+                                        <i class="bi bi-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
                             <textarea class="form-control @error('sms_template_published') is-invalid @enderror"
                                       id="sms_template_published"
                                       name="sms_template_published"
                                       rows="5"
-                                      placeholder="Template pesan saat artikel terbit">{{ old('sms_template_published', $settings['sms_template_published'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat artikel terbit">{{ $errors->any() ? old('sms_template_published') : ($settings['sms_template_published'] ?? '') }}</textarea>
                             @error('sms_template_published')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -364,6 +401,37 @@
             icon.classList.remove('bi-eye-slash');
             icon.classList.add('bi-eye');
         }
+    });
+
+    // Hapus / clear API token
+    document.getElementById('clearToken').addEventListener('click', function() {
+        if (confirm('Hapus API Token? Gateway tidak akan berfungsi sampai token baru diisi dan disimpan.')) {
+            document.getElementById('fonnte_api_token').value = '';
+            document.getElementById('fonnte_api_token').type = 'text';
+            document.getElementById('toggleTokenIcon').classList.remove('bi-eye-slash');
+            document.getElementById('toggleTokenIcon').classList.add('bi-eye');
+        }
+    });
+
+    // Reset template ke default
+    document.querySelectorAll('.btn-reset-template').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const target = this.dataset.target;
+            const defaultText = this.dataset.default
+                .replace(/&quot;/g, '"')
+                .replace(/&#10;/g, '\n');
+            document.getElementById(target).value = defaultText;
+        });
+    });
+
+    // Hapus (kosongkan) template
+    document.querySelectorAll('.btn-clear-template').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const target = this.dataset.target;
+            if (confirm('Kosongkan template ini? Perubahan baru berlaku setelah disimpan.')) {
+                document.getElementById(target).value = '';
+            }
+        });
     });
 
     // Check connection status

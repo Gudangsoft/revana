@@ -55,17 +55,27 @@ class SmsGatewayController extends Controller
         // Ensure database table is ready
         $this->ensureSettingsTableReady();
 
+        // Read all SMS/Fonnte settings from DB in a single query for reliability
+        $dbSettings = DB::table('settings')
+            ->whereIn('key', [
+                'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
+                'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published',
+                'sms_default_country_code', 'sms_template_submit', 'sms_template_status_change', 'sms_template_published',
+            ])
+            ->pluck('value', 'key')
+            ->toArray();
+
         $settings = [
-            'fonnte_api_token' => Setting::get('fonnte_api_token', ''),
-            'fonnte_device_id' => Setting::get('fonnte_device_id', ''),
-            'sms_gateway_enabled' => Setting::get('sms_gateway_enabled', '0'),
-            'sms_notification_submit' => Setting::get('sms_notification_submit', '0'),
-            'sms_notification_status_change' => Setting::get('sms_notification_status_change', '0'),
-            'sms_notification_published' => Setting::get('sms_notification_published', '0'),
-            'sms_default_country_code' => Setting::get('sms_default_country_code', '62'),
-            'sms_template_submit' => Setting::get('sms_template_submit', "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}"),
-            'sms_template_status_change' => Setting::get('sms_template_status_change', "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}"),
-            'sms_template_published' => Setting::get('sms_template_published', "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}"),
+            'fonnte_api_token'              => $dbSettings['fonnte_api_token'] ?? '',
+            'fonnte_device_id'              => $dbSettings['fonnte_device_id'] ?? '',
+            'sms_gateway_enabled'           => $dbSettings['sms_gateway_enabled'] ?? '0',
+            'sms_notification_submit'       => $dbSettings['sms_notification_submit'] ?? '0',
+            'sms_notification_status_change'=> $dbSettings['sms_notification_status_change'] ?? '0',
+            'sms_notification_published'    => $dbSettings['sms_notification_published'] ?? '0',
+            'sms_default_country_code'      => $dbSettings['sms_default_country_code'] ?? '62',
+            'sms_template_submit'           => $dbSettings['sms_template_submit'] ?? "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_status_change'    => $dbSettings['sms_template_status_change'] ?? "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_published'        => $dbSettings['sms_template_published'] ?? "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
         ];
 
         return view('admin.sms-gateway.index', compact('settings'));
@@ -90,21 +100,25 @@ class SmsGatewayController extends Controller
             // Ensure database table is ready
             $this->ensureSettingsTableReady();
 
-            foreach ($validated as $key => $value) {
-                Setting::set($key, $value ?? '');
+            // Checkbox fields default to '0' when not submitted (unchecked)
+            $checkboxFields = ['sms_gateway_enabled', 'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published'];
+            foreach ($checkboxFields as $field) {
+                $validated[$field] = $request->input($field, '0');
             }
 
-            // Explicitly set checkboxes that might not be present
-            Setting::set('sms_gateway_enabled', $request->input('sms_gateway_enabled', '0'));
-            Setting::set('sms_notification_submit', $request->input('sms_notification_submit', '0'));
-            Setting::set('sms_notification_status_change', $request->input('sms_notification_status_change', '0'));
-            Setting::set('sms_notification_published', $request->input('sms_notification_published', '0'));
+            // Save all settings using raw DB upsert for maximum reliability
+            DB::transaction(function () use ($validated) {
+                foreach ($validated as $key => $value) {
+                    DB::table('settings')->updateOrInsert(
+                        ['key' => $key],
+                        ['value' => $value ?? '', 'updated_at' => now()]
+                    );
+                }
+            });
 
-            // Verify the save worked
-            $verifyToken = Setting::get('fonnte_api_token');
             Log::info('SMS Gateway Settings saved', [
-                'fonnte_api_token_saved' => !empty($verifyToken),
-                'sms_gateway_enabled' => Setting::get('sms_gateway_enabled'),
+                'sms_gateway_enabled' => $validated['sms_gateway_enabled'],
+                'sms_notification_submit' => $validated['sms_notification_submit'],
             ]);
 
             return redirect()->route('admin.sms-gateway.index')
