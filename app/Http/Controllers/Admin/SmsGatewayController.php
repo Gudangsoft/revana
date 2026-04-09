@@ -18,6 +18,9 @@ class SmsGatewayController extends Controller
      */
     private function ensureSettingsTableReady(): void
     {
+        // Clear schema cache to get fresh column info
+        \Illuminate\Support\Facades\DB::statement('SELECT 1');
+
         if (!Schema::hasTable('settings')) {
             Schema::create('settings', function (Blueprint $table) {
                 $table->id();
@@ -29,24 +32,18 @@ class SmsGatewayController extends Controller
             return;
         }
 
-        $needsMigration = false;
         if (!Schema::hasColumn('settings', 'key')) {
-            $needsMigration = true;
-        }
-        if (!Schema::hasColumn('settings', 'value')) {
-            $needsMigration = true;
+            Schema::table('settings', function (Blueprint $table) {
+                $table->string('key')->unique()->after('id');
+            });
+            Log::info('SMS Gateway: Added key column to settings table');
         }
 
-        if ($needsMigration) {
+        if (!Schema::hasColumn('settings', 'value')) {
             Schema::table('settings', function (Blueprint $table) {
-                if (!Schema::hasColumn('settings', 'key')) {
-                    $table->string('key')->unique()->after('id');
-                }
-                if (!Schema::hasColumn('settings', 'value')) {
-                    $table->text('value')->nullable()->after('key');
-                }
+                $table->text('value')->nullable()->after('key');
             });
-            Log::info('SMS Gateway: Auto-added missing key/value columns to settings table');
+            Log::info('SMS Gateway: Added value column to settings table');
         }
     }
 
@@ -55,15 +52,14 @@ class SmsGatewayController extends Controller
         // Ensure database table is ready
         $this->ensureSettingsTableReady();
 
-        // Read all SMS/Fonnte settings from DB in a single query for reliability
-        $dbSettings = DB::table('settings')
-            ->whereIn('key', [
-                'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
-                'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published',
-                'sms_default_country_code', 'sms_template_submit', 'sms_template_status_change', 'sms_template_published',
-            ])
-            ->pluck('value', 'key')
-            ->toArray();
+        $keys = [
+            'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
+            'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published',
+            'sms_default_country_code', 'sms_template_submit', 'sms_template_status_change', 'sms_template_published',
+        ];
+
+        // Read all SMS/Fonnte settings from DB via Eloquent model (consistent with FonnteService)
+        $dbSettings = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
 
         $settings = [
             'fonnte_api_token'              => $dbSettings['fonnte_api_token'] ?? '',
@@ -106,19 +102,17 @@ class SmsGatewayController extends Controller
                 $validated[$field] = $request->input($field, '0');
             }
 
-            // Save all settings using raw DB upsert for maximum reliability
-            DB::transaction(function () use ($validated) {
-                foreach ($validated as $key => $value) {
-                    DB::table('settings')->updateOrInsert(
-                        ['key' => $key],
-                        ['value' => $value ?? '', 'updated_at' => now()]
-                    );
-                }
-            });
+            // Save using Eloquent model (handles created_at/updated_at automatically)
+            foreach ($validated as $key => $value) {
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $value ?? '']
+                );
+            }
 
             Log::info('SMS Gateway Settings saved', [
+                'keys_saved' => array_keys($validated),
                 'sms_gateway_enabled' => $validated['sms_gateway_enabled'],
-                'sms_notification_submit' => $validated['sms_notification_submit'],
             ]);
 
             return redirect()->route('admin.sms-gateway.index')
@@ -142,21 +136,34 @@ class SmsGatewayController extends Controller
         $columns = Schema::getColumnListing('settings');
         $hasKey = Schema::hasColumn('settings', 'key');
         $hasValue = Schema::hasColumn('settings', 'value');
-        
-        $allSettings = DB::table('settings')->get();
-        $smsSettings = DB::table('settings')
-            ->where('key', 'like', 'fonnte_%')
-            ->orWhere('key', 'like', 'sms_%')
-            ->get();
+
+        $smsSettings = Setting::whereIn('key', [
+            'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
+            'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published',
+            'sms_default_country_code', 'sms_template_submit', 'sms_template_status_change', 'sms_template_published',
+        ])->get(['id', 'key', 'value', 'created_at', 'updated_at']);
+
+        // Write test
+        $writeTest = ['success' => false, 'message' => ''];
+        try {
+            Setting::updateOrCreate(['key' => '_debug_test_'], ['value' => now()->toDateTimeString()]);
+            $readback = Setting::where('key', '_debug_test_')->value('value');
+            Setting::where('key', '_debug_test_')->delete();
+            $writeTest = ['success' => true, 'readback' => $readback];
+        } catch (\Exception $e) {
+            $writeTest = ['success' => false, 'message' => $e->getMessage()];
+        }
 
         return response()->json([
             'table_exists' => Schema::hasTable('settings'),
             'columns' => $columns,
             'has_key_column' => $hasKey,
             'has_value_column' => $hasValue,
-            'total_records' => $allSettings->count(),
+            'sms_settings_count' => $smsSettings->count(),
             'sms_settings' => $smsSettings,
-            'all_keys' => $allSettings->pluck('key'),
+            'write_test' => $writeTest,
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
         ]);
     }
 
