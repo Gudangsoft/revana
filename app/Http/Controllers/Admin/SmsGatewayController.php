@@ -124,6 +124,7 @@ class SmsGatewayController extends Controller
             ]);
 
             return redirect()->route('admin.sms-gateway.index')
+                ->withInput()
                 ->with('error', 'Gagal menyimpan pengaturan: ' . $e->getMessage());
         }
     }

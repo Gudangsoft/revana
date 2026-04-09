@@ -11,11 +11,16 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h1 class="h3 mb-0"><i class="bi bi-whatsapp text-success me-2"></i>Pengaturan SMS Gateway (Fonnte)</h1>
-                <a href="https://fonnte.com" target="_blank" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-box-arrow-up-right me-1"></i>Buka Fonnte Dashboard
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="https://fonnte.com" target="_blank" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Buka Fonnte Dashboard
+                    </a>
+                    <button type="submit" form="smsGatewayForm" class="btn btn-success btn-sm">
+                        <i class="bi bi-save me-1"></i>Simpan Pengaturan
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -49,7 +54,7 @@
     </div>
     @endif
 
-    <form action="{{ route('admin.sms-gateway.update') }}" method="POST">
+    <form action="{{ route('admin.sms-gateway.update') }}" method="POST" id="smsGatewayForm">
         @csrf
         @method('PUT')
 
@@ -80,7 +85,7 @@
                                            class="form-control @error('fonnte_api_token') is-invalid @enderror"
                                            id="fonnte_api_token"
                                            name="fonnte_api_token"
-                                           value="{{ $errors->any() ? old('fonnte_api_token') : ($settings['fonnte_api_token'] ?? '') }}"
+                                           value="{{ old('fonnte_api_token', $settings['fonnte_api_token'] ?? '') }}"
                                            placeholder="Masukkan API Token dari Fonnte">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleToken">
                                         <i class="bi bi-eye" id="toggleTokenIcon"></i>
@@ -101,7 +106,7 @@
                                        class="form-control @error('fonnte_device_id') is-invalid @enderror"
                                        id="fonnte_device_id"
                                        name="fonnte_device_id"
-                                       value="{{ $errors->any() ? old('fonnte_device_id') : ($settings['fonnte_device_id'] ?? '') }}"
+                                       value="{{ old('fonnte_device_id', $settings['fonnte_device_id'] ?? '') }}"
                                        placeholder="Opsional: ID Device di Fonnte">
                                 <small class="form-text text-muted">Opsional, untuk identifikasi device</small>
                                 @error('fonnte_device_id')
@@ -115,7 +120,7 @@
                                        class="form-control @error('sms_default_country_code') is-invalid @enderror"
                                        id="sms_default_country_code"
                                        name="sms_default_country_code"
-                                       value="{{ $errors->any() ? old('sms_default_country_code') : ($settings['sms_default_country_code'] ?? '62') }}"
+                                       value="{{ old('sms_default_country_code', $settings['sms_default_country_code'] ?? '62') }}"
                                        placeholder="62">
                                 <small class="form-text text-muted">Kode negara Indonesia: 62</small>
                                 @error('sms_default_country_code')
@@ -146,8 +151,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_gateway_enabled" name="sms_gateway_enabled" value="1"
-                                       {{ ($settings['sms_gateway_enabled'] ?? '0') == '1' ? 'checked' : '' }}
-                                       data-saved="{{ $settings['sms_gateway_enabled'] ?? '0' }}">
+                                       {{ (old('sms_gateway_enabled', $settings['sms_gateway_enabled'] ?? '0')) == '1' ? 'checked' : '' }}>
                                 <label class="form-check-label fw-bold" for="sms_gateway_enabled">
                                     <i class="bi bi-power text-success me-1"></i>Aktifkan SMS Gateway
                                 </label>
@@ -161,8 +165,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_notification_submit" name="sms_notification_submit" value="1"
-                                       {{ ($settings['sms_notification_submit'] ?? '0') == '1' ? 'checked' : '' }}
-                                       data-saved="{{ $settings['sms_notification_submit'] ?? '0' }}">
+                                       {{ (old('sms_notification_submit', $settings['sms_notification_submit'] ?? '0')) == '1' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="sms_notification_submit">
                                     <i class="bi bi-file-earmark-plus text-info me-1"></i>Notifikasi Submit Artikel
                                 </label>
@@ -174,8 +177,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_notification_status_change" name="sms_notification_status_change" value="1"
-                                       {{ ($settings['sms_notification_status_change'] ?? '0') == '1' ? 'checked' : '' }}
-                                       data-saved="{{ $settings['sms_notification_status_change'] ?? '0' }}">
+                                       {{ (old('sms_notification_status_change', $settings['sms_notification_status_change'] ?? '0')) == '1' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="sms_notification_status_change">
                                     <i class="bi bi-arrow-repeat text-warning me-1"></i>Notifikasi Perubahan Status
                                 </label>
@@ -187,8 +189,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        id="sms_notification_published" name="sms_notification_published" value="1"
-                                       {{ ($settings['sms_notification_published'] ?? '0') == '1' ? 'checked' : '' }}
-                                       data-saved="{{ $settings['sms_notification_published'] ?? '0' }}">
+                                       {{ (old('sms_notification_published', $settings['sms_notification_published'] ?? '0')) == '1' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="sms_notification_published">
                                     <i class="bi bi-check-circle text-success me-1"></i>Notifikasi Artikel Terbit
                                 </label>
@@ -239,7 +240,7 @@
                                       id="sms_template_submit"
                                       name="sms_template_submit"
                                       rows="5"
-                                      placeholder="Template pesan saat artikel disubmit">{{ $errors->any() ? old('sms_template_submit') : ($settings['sms_template_submit'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat artikel disubmit">{{ old('sms_template_submit', $settings['sms_template_submit'] ?? '') }}</textarea>
                             @error('sms_template_submit')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -263,7 +264,7 @@
                                       id="sms_template_status_change"
                                       name="sms_template_status_change"
                                       rows="5"
-                                      placeholder="Template pesan saat status berubah">{{ $errors->any() ? old('sms_template_status_change') : ($settings['sms_template_status_change'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat status berubah">{{ old('sms_template_status_change', $settings['sms_template_status_change'] ?? '') }}</textarea>
                             @error('sms_template_status_change')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -287,7 +288,7 @@
                                       id="sms_template_published"
                                       name="sms_template_published"
                                       rows="5"
-                                      placeholder="Template pesan saat artikel terbit">{{ $errors->any() ? old('sms_template_published') : ($settings['sms_template_published'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat artikel terbit">{{ old('sms_template_published', $settings['sms_template_published'] ?? '') }}</textarea>
                             @error('sms_template_published')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -298,10 +299,14 @@
 
             {{-- Sidebar: Aksi & Test --}}
             <div class="col-lg-4">
+                <div style="position: sticky; top: 80px;">
                 {{-- Simpan --}}
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 border-success">
+                    <div class="card-header bg-success text-white py-2">
+                        <strong><i class="bi bi-floppy me-1"></i>Aksi</strong>
+                    </div>
                     <div class="card-body">
-                        <button type="submit" class="btn btn-success w-100 mb-3">
+                        <button type="submit" class="btn btn-success w-100 mb-2">
                             <i class="bi bi-save me-2"></i>Simpan Pengaturan
                         </button>
                         <button type="button" class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#testSmsModal">
@@ -341,6 +346,26 @@
                             <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i>Mendukung multi-nomor</li>
                             <li class="mb-0"><i class="bi bi-check2-circle text-success me-2"></i>Hemat waktu & profesional</li>
                         </ul>
+                    </div>
+                </div>
+                </div>{{-- end sticky --}}
+            </div>
+        </div>
+
+        {{-- Bottom action bar --}}
+        <div class="row mt-2 mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 bg-light">
+                    <div class="card-body py-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                        <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Semua perubahan akan tersimpan setelah klik tombol Simpan.</span>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#testSmsModal">
+                                <i class="bi bi-send me-1"></i>Kirim Pesan Test
+                            </button>
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-save me-1"></i>Simpan Pengaturan
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
