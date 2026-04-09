@@ -20,6 +20,12 @@
                     <a href="{{ route('admin.submissions.edit', $submission) }}" class="btn btn-warning">
                         <i class="bi bi-pencil"></i> Edit
                     </a>
+                    <form action="{{ route('admin.submissions.resend-wa', $submission) }}" method="POST" class="d-inline" onsubmit="return confirm('Kirim ulang notifikasi WhatsApp ke {{ $submission->no_hp_penulis ?? 'penulis' }}?')">
+                        @csrf
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-whatsapp"></i> Kirim Ulang WA
+                        </button>
+                    </form>
                     <a href="{{ route('admin.submissions.index') }}" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Kembali
                     </a>

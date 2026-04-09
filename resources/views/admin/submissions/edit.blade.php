@@ -332,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 @error('link_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <small class="form-text text-muted"><i class="bi bi-info-circle"></i> Link Submit harus unik — setiap artikel harus memiliki link yang berbeda. Link yang sudah digunakan tidak dapat diinput ulang.</small>
                             </div>
                         </div>
                     </div>

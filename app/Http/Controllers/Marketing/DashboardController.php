@@ -12,6 +12,7 @@ use App\Models\Accreditation;
 use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -255,7 +256,7 @@ class DashboardController extends Controller
             'journal_slot_id' => 'required|exists:journal_slots,id',
             'id_artikel' => 'required|string|max:100',
             'judul_artikel' => 'required|string|max:500',
-            'link_artikel' => 'nullable|url',
+            'link_artikel' => ['nullable', 'url', Rule::unique('submissions', 'link_artikel')],
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'username_author' => 'nullable|string|max:100',
@@ -708,7 +709,7 @@ class DashboardController extends Controller
             'journal_slot_id' => 'required|exists:journal_slots,id',
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
-            'link_artikel' => 'nullable|url|max:500',
+            'link_artikel' => ['nullable', 'url', 'max:500', Rule::unique('submissions', 'link_artikel')],
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -1040,6 +1041,7 @@ class DashboardController extends Controller
         $kode      = $submission->kode_submit ?? '-';
         $username  = $submission->username_author ?? '-';
         $password  = $submission->password_author ?? '-';
+        $linkSubmit = $submission->link_artikel ?? '-';
 
         // Load nama jurnal jika relasi belum di-load
         if ($submission->relationLoaded('journalSlot') && $submission->journalSlot) {
@@ -1059,6 +1061,7 @@ Kredensial akun OJS Author Anda telah diperbarui. Berikut informasi terbaru:
 • Kode Submit: *{$kode}*
 • Judul Artikel: _{$judul}_
 • Jurnal: *{$namaJurnal}*
+• Link Submit: {$linkSubmit}
 
 🔐 *Akun OJS Author (Diperbarui)*
 • Username: `{$username}`
@@ -1083,6 +1086,7 @@ Artikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya
 • Kode Submit: *{$kode}*
 • Judul Artikel: _{$judul}_
 • Jurnal: *{$namaJurnal}*
+• Link Submit: {$linkSubmit}
 
 🔐 *Akun OJS Author*
 • Username: `{$username}`

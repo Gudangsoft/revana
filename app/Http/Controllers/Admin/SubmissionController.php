@@ -18,6 +18,7 @@ use App\Services\FonnteService;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class SubmissionController extends Controller
 {
@@ -96,7 +97,7 @@ class SubmissionController extends Controller
             'jenis_jurnal_id' => 'nullable|exists:jenis_jurnals,id',
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
-            'link_artikel' => 'nullable|url',
+            'link_artikel' => ['nullable', 'url', Rule::unique('submissions', 'link_artikel')],
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -230,7 +231,7 @@ class SubmissionController extends Controller
             'jenis_jurnal_id' => 'nullable|exists:jenis_jurnals,id',
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
-            'link_artikel' => 'nullable|url',
+            'link_artikel' => ['nullable', 'url', Rule::unique('submissions', 'link_artikel')->ignore($submission->id)],
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -1361,7 +1362,7 @@ class SubmissionController extends Controller
             'journal_slot_id' => 'required|exists:journal_slots,id',
             'id_artikel' => 'required|string|max:255',
             'judul_artikel' => 'required|string|max:500',
-            'link_artikel' => 'nullable|url|max:500',
+            'link_artikel' => ['nullable', 'url', 'max:500', Rule::unique('submissions', 'link_artikel')],
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -1735,6 +1736,21 @@ class SubmissionController extends Controller
      * @param Submission $submission
      * @param bool $isUpdate Apakah ini notifikasi update kredensial
      */
+    public function resendWhatsApp(Submission $submission)
+    {
+        if (empty($submission->no_hp_penulis)) {
+            return back()->with('error', 'Gagal: No. HP penulis belum diisi pada data submission ini.');
+        }
+
+        if (empty($submission->username_author) && empty($submission->password_author)) {
+            return back()->with('error', 'Gagal: Username dan password OJS belum diisi pada data submission ini.');
+        }
+
+        $this->sendWhatsAppNotification($submission, false);
+
+        return back()->with('success', 'Notifikasi WhatsApp berhasil dikirim ulang ke ' . $submission->no_hp_penulis . '.');
+    }
+
     private function sendWhatsAppNotification(Submission $submission, bool $isUpdate = false): void
     {
         try {
@@ -1816,6 +1832,7 @@ class SubmissionController extends Controller
         $kode = $submission->kode_submit ?? '-';
         $username = $submission->username_author ?? '-';
         $password = $submission->password_author ?? '-';
+        $linkSubmit = $submission->link_artikel ?? '-';
 
         // Load nama jurnal jika relasi belum di-load
         $namaJurnal = '-';
@@ -1836,6 +1853,7 @@ Kredensial akun OJS Author Anda telah diperbarui. Berikut informasi terbaru:
 • Kode Submit: *{$kode}*
 • Judul Artikel: _{$judul}_
 • Jurnal: *{$namaJurnal}*
+• Link Submit: {$linkSubmit}
 
 🔐 *Akun OJS Author (Diperbarui)*
 • Username: `{$username}`
@@ -1860,6 +1878,7 @@ Artikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya
 • Kode Submit: *{$kode}*
 • Judul Artikel: _{$judul}_
 • Jurnal: *{$namaJurnal}*
+• Link Submit: {$linkSubmit}
 
 🔐 *Akun OJS Author*
 • Username: `{$username}`
