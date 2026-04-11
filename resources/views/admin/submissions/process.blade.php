@@ -84,6 +84,8 @@
                         'petugas_id_field' => 'petugas_editor1_id',
                         'has_credentials' => true,
                         'credential_fields' => ['username_editor', 'password_editor'],
+                        'has_notes' => true,
+                        'notes_via' => 'step',
                         'prev_step_valid' => true,
                     ],
                     'author1' => [
@@ -95,6 +97,8 @@
                         'petugas_rel' => 'petugasAuthor1',
                         'petugas_id_field' => 'petugas_author1_id',
                         'has_credentials' => false,
+                        'has_notes' => true,
+                        'notes_via' => 'step',
                         'prev_step_valid' => $submission->editor1_valid,
                     ],
                     'editor2' => [
@@ -106,6 +110,8 @@
                         'petugas_rel' => 'petugasEditor2',
                         'petugas_id_field' => 'petugas_editor2_id',
                         'has_credentials' => false,
+                        'has_notes' => true,
+                        'notes_via' => 'step',
                         'prev_step_valid' => $submission->author1_valid,
                     ],
                     'reviewer1' => [
@@ -119,6 +125,7 @@
                         'has_credentials' => true,
                         'credential_fields' => ['username_reviewer1', 'password_reviewer1'],
                         'has_notes' => true,
+                        'notes_via' => 'reviewer',
                         'notes_field' => 'catatan_reviewer1',
                         'prev_step_valid' => $submission->editor2_valid,
                     ],
@@ -133,6 +140,7 @@
                         'has_credentials' => true,
                         'credential_fields' => ['username_reviewer2', 'password_reviewer2'],
                         'has_notes' => true,
+                        'notes_via' => 'reviewer',
                         'notes_field' => 'catatan_reviewer2',
                         'prev_step_valid' => $submission->reviewer1_valid,
                     ],
@@ -145,6 +153,8 @@
                         'petugas_rel' => 'petugasEditor3',
                         'petugas_id_field' => 'petugas_editor3_id',
                         'has_credentials' => false,
+                        'has_notes' => true,
+                        'notes_via' => 'step',
                         'prev_step_valid' => $submission->reviewer2_valid,
                     ],
                     'author2' => [
@@ -156,6 +166,8 @@
                         'petugas_rel' => 'petugasAuthor2',
                         'petugas_id_field' => 'petugas_author2_id',
                         'has_credentials' => false,
+                        'has_notes' => true,
+                        'notes_via' => 'step',
                         'prev_step_valid' => $submission->editor3_valid,
                     ],
                     'production' => [
@@ -167,6 +179,8 @@
                         'petugas_rel' => 'petugasProduction',
                         'petugas_id_field' => 'petugas_production_id',
                         'has_credentials' => false,
+                        'has_notes' => true,
+                        'notes_via' => 'step',
                         'has_link_publish' => true,
                         'prev_step_valid' => $submission->author2_valid,
                     ],
@@ -283,15 +297,33 @@
                             </form>
                             
                             @if(isset($stepCfg['has_notes']) && $stepCfg['has_notes'])
-                                <!-- Catatan Reviewer -->
+                                @php
+                                    $notesVia = $stepCfg['notes_via'] ?? 'step';
+                                    // For step-based notes, show latest note_added from history
+                                    $latestStepNote = $stepHistories->where('action', 'note_added')->sortByDesc('created_at')->first();
+                                @endphp
+                                @if($notesVia === 'reviewer')
+                                <!-- Catatan Reviewer (disimpan di kolom submissions) -->
                                 <form action="{{ route('admin.submissions.update-reviewer-notes', $submission) }}" method="POST" class="mt-2">
                                     @csrf
-                                    <label class="form-label">Catatan Review</label>
+                                    <label class="form-label">Catatan untuk {{ $stepCfg['title'] }}</label>
                                     <textarea class="form-control form-control-sm" name="{{ $stepCfg['notes_field'] }}" rows="2">{{ $submission->{$stepCfg['notes_field']} }}</textarea>
                                     <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
                                         <i class="bi bi-save"></i> Simpan Catatan
                                     </button>
                                 </form>
+                                @else
+                                <!-- Catatan untuk step ini (disimpan di histories) -->
+                                <form action="{{ route('admin.submissions.update-step-notes', $submission) }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <input type="hidden" name="step" value="{{ $stepKey }}">
+                                    <label class="form-label">Catatan untuk {{ $stepCfg['title'] }}</label>
+                                    <textarea class="form-control form-control-sm" name="notes" rows="2" placeholder="Catatan akan terlihat oleh PIC {{ $stepCfg['title'] }}...">{{ $latestStepNote->notes ?? '' }}</textarea>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
+                                        <i class="bi bi-save"></i> Simpan Catatan
+                                    </button>
+                                </form>
+                                @endif
                             @endif
                             
                             <!-- Tombol Aksi Revisi & Validasi -->

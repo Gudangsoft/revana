@@ -148,6 +148,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/{submission}/request-revision', [SubmissionController::class, 'requestRevision'])->name('submissions.request-revision');
         Route::post('/submissions/{submission}/submit-revision', [SubmissionController::class, 'submitRevision'])->name('submissions.submit-revision');
         Route::post('/submissions/{submission}/update-reviewer-notes', [SubmissionController::class, 'updateReviewerNotes'])->name('submissions.update-reviewer-notes');
+        Route::post('/submissions/{submission}/update-step-notes', [SubmissionController::class, 'updateStepNotes'])->name('submissions.update-step-notes');
         Route::post('/submissions/{submission}/resend-wa', [SubmissionController::class, 'resendWhatsApp'])->name('submissions.resend-wa');
         Route::resource('submissions', SubmissionController::class);
         

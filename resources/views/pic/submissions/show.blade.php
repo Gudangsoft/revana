@@ -124,6 +124,40 @@
             <div class="alert alert-warning mt-1 mb-0">{{ $submission->catatan_marketing }}</div>
         </div>
         @endif
+
+        @php
+            // Kumpulkan catatan per role dari histories (note_added)
+            $notesByStep = [];
+            if ($submission->histories) {
+                foreach ($submission->histories->where('action', 'note_added')->sortByDesc('created_at') as $nh) {
+                    if (!isset($notesByStep[$nh->step])) {
+                        $notesByStep[$nh->step] = $nh->notes;
+                    }
+                }
+            }
+            // Tambahkan catatan_reviewer1 dan catatan_reviewer2 dari kolom submissions
+            if ($submission->catatan_reviewer1) $notesByStep['reviewer1'] = $submission->catatan_reviewer1;
+            if ($submission->catatan_reviewer2) $notesByStep['reviewer2'] = $submission->catatan_reviewer2;
+
+            $stepLabels = [
+                'editor1' => 'Editor 1', 'author1' => 'Author 1', 'editor2' => 'Editor 2',
+                'reviewer1' => 'Reviewer 1', 'reviewer2' => 'Reviewer 2',
+                'editor3' => 'Editor 3', 'author2' => 'Author 2', 'production' => 'Production',
+            ];
+        @endphp
+
+        @if(count($notesByStep) > 0)
+        <hr>
+        <div class="mb-3">
+            <strong><i class="bi bi-chat-left-text text-info"></i> Catatan per Tahap:</strong>
+            @foreach($notesByStep as $step => $noteText)
+            <div class="alert alert-info mt-2 mb-1 py-2">
+                <small class="fw-bold text-info">{{ $stepLabels[$step] ?? $step }}:</small>
+                <div>{{ $noteText }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
         
         @if($submission->link_publish)
         <hr>

@@ -651,6 +651,25 @@ class SubmissionController extends Controller
         return back()->with('success', 'Catatan reviewer berhasil diperbarui');
     }
 
+    // Update catatan untuk step manapun (editor1, author1, editor2, editor3, author2, production)
+    public function updateStepNotes(Request $request, Submission $submission)
+    {
+        $validSteps = ['editor1', 'author1', 'editor2', 'editor3', 'author2', 'production'];
+        $validated = $request->validate([
+            'step' => 'required|string|in:' . implode(',', $validSteps),
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        $step = $validated['step'];
+        $notes = $validated['notes'] ?? '';
+
+        if ($notes !== '') {
+            $submission->logHistory($step, 'note_added', $notes);
+        }
+
+        return back()->with('success', 'Catatan berhasil disimpan');
+    }
+
     // Show history for a submission
     public function history(Submission $submission)
     {

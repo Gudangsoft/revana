@@ -105,6 +105,45 @@
             </div>
         </div>
         @endif
+
+        @php
+            // Kumpulkan catatan dari histories (note_added)
+            $procNotesByStep = [];
+            if ($submission->histories) {
+                foreach ($submission->histories->where('action', 'note_added')->sortByDesc('created_at') as $nh) {
+                    if (!isset($procNotesByStep[$nh->step])) {
+                        $procNotesByStep[$nh->step] = $nh->notes;
+                    }
+                }
+            }
+            if ($submission->catatan_reviewer1) $procNotesByStep['reviewer1'] = $submission->catatan_reviewer1;
+            if ($submission->catatan_reviewer2) $procNotesByStep['reviewer2'] = $submission->catatan_reviewer2;
+
+            $procStepLabels = [
+                'editor1'   => 'Editor 1',  'author1'  => 'Author 1',
+                'editor2'   => 'Editor 2',  'reviewer1'=> 'Reviewer 1',
+                'reviewer2' => 'Reviewer 2','editor3'  => 'Editor 3',
+                'author2'   => 'Author 2',  'production'=> 'Production',
+            ];
+        @endphp
+
+        @if($submission->notes || count($procNotesByStep) > 0)
+        <hr>
+        <div class="mb-0">
+            @if($submission->notes)
+            <div class="alert alert-secondary mb-2 py-2">
+                <strong><i class="bi bi-sticky"></i> Catatan Umum:</strong>
+                <div>{{ $submission->notes }}</div>
+            </div>
+            @endif
+            @foreach($procNotesByStep as $step => $noteText)
+            <div class="alert alert-info mb-2 py-2">
+                <strong><i class="bi bi-chat-left-text"></i> Catatan {{ $procStepLabels[$step] ?? $step }}:</strong>
+                <div>{{ $noteText }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 </div>
 
