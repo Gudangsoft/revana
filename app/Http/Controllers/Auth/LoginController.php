@@ -20,8 +20,13 @@ class LoginController extends Controller
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
         ];
-        
-        return view('auth.login', compact('settings'));
+
+        $a = rand(1, 9);
+        $b = rand(1, 9);
+        session(['captcha_admin' => $a + $b]);
+        $captcha_question = "$a + $b";
+
+        return view('auth.login', compact('settings', 'captcha_question'));
     }
 
     public function login(Request $request)
@@ -30,6 +35,12 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required|string|min:8',
         ]);
+
+        // Verify math CAPTCHA
+        if ((int) $request->input('captcha_answer') !== (int) session('captcha_admin')) {
+            return back()->withErrors(['email' => 'Jawaban verifikasi salah. Silakan coba lagi.'])->onlyInput('email');
+        }
+        session()->forget('captcha_admin');
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
@@ -72,6 +83,8 @@ class LoginController extends Controller
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');
     }
+
+
 
     public function logout(Request $request)
     {

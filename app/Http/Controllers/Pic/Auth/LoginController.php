@@ -12,7 +12,12 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('pic.auth.login');
+        $a = rand(1, 9);
+        $b = rand(1, 9);
+        session(['captcha_pic' => $a + $b]);
+        $captcha_question = "$a + $b";
+
+        return view('pic.auth.login', compact('captcha_question'));
     }
 
     public function login(Request $request)
@@ -21,6 +26,12 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // Verify math CAPTCHA
+        if ((int) $request->input('captcha_answer') !== (int) session('captcha_pic')) {
+            return back()->withErrors(['email' => 'Jawaban verifikasi salah. Silakan coba lagi.'])->withInput($request->only('email'));
+        }
+        session()->forget('captcha_pic');
 
         $email = $request->input('email');
         $password = $request->input('password');

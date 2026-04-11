@@ -140,6 +140,11 @@
                                     </label>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label">Verifikasi: <strong>{{ $captcha_question }}</strong> = ?</label>
+                                    <input type="number" class="form-control" name="captcha_answer" required placeholder="Ketik jawaban">
+                                </div>
+
                                 <button type="submit" class="btn btn-primary w-100 py-2">
                                     <i class="bi bi-box-arrow-in-right"></i> Login
                                 </button>

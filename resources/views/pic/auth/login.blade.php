@@ -129,6 +129,14 @@
                     </label>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Verifikasi: <strong>{{ $captcha_question }}</strong> = ?</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calculator"></i></span>
+                        <input type="number" class="form-control" name="captcha_answer" required placeholder="Ketik jawaban">
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-login">
                     <i class="bi bi-box-arrow-in-right"></i> Login
                 </button>

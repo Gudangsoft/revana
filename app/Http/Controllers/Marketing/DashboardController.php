@@ -28,7 +28,11 @@ class DashboardController extends Controller
         if (Auth::guard('marketing')->check()) {
             return redirect()->route('marketing.dashboard');
         }
-        return view('marketing.login');
+        $a = rand(1, 9);
+        $b = rand(1, 9);
+        session(['captcha_marketing' => $a + $b]);
+        $captcha_question = "$a + $b";
+        return view('marketing.login', compact('captcha_question'));
     }
 
     /**
@@ -40,6 +44,12 @@ class DashboardController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // Verify math CAPTCHA
+        if ((int) $request->input('captcha_answer') !== (int) session('captcha_marketing')) {
+            return back()->with('error', 'Jawaban verifikasi salah. Silakan coba lagi.');
+        }
+        session()->forget('captcha_marketing');
 
         $marketing = Marketing::where('email', $request->email)->first();
 

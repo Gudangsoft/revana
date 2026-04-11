@@ -88,6 +88,13 @@
                     <div class="text-danger small mt-1">{{ $message }}</div>
                 @enderror
             </div>
+            <div class="mb-3">
+                <label class="form-label">Verifikasi: <strong>{{ $captcha_question }}</strong> = ?</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calculator"></i></span>
+                    <input type="number" class="form-control" name="captcha_answer" required placeholder="Ketik jawaban">
+                </div>
+            </div>
             <button type="submit" class="btn btn-marketing w-100">
                 <i class="bi bi-box-arrow-in-right"></i> Login
             </button>
@@ -99,5 +106,6 @@
             </a>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
