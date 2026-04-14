@@ -64,7 +64,7 @@ Route::get('/pic-login-test', function () {
 });
 
 // Reviewer Registration (public access)
-Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'showForm'])->name('reviewer-registration.form');
+Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'show'])->name('reviewer-registration.form');
 Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store'])->name('reviewer-registration.store');
 
 // Public Slot Info (no login required)
