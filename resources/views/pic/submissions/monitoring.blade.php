@@ -671,6 +671,9 @@
                                     <a href="{{ route('pic.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
+                                    @if($s->journalSlot)
+                                        <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $s->journalSlot->display_name }}">{{ Str::limit($s->journalSlot->journalMaster->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}</small>
+                                    @endif
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 30) }}</td>
