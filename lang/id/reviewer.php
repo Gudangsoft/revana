@@ -43,6 +43,7 @@ return [
     'lang_indonesia'           => 'Indonesia',
     'lang_english'             => 'English (Inggris)',
     'submit_btn'               => 'Kirim Pendaftaran',
+    'registration_success'     => 'Pendaftaran berhasil dikirim! Tim kami akan meninjau pendaftaran Anda. Silakan tunggu konfirmasi melalui email.',
     'disclaimer'               => 'Dengan mendaftar, Anda menyetujui untuk menjadi reviewer kami',
 
     // Reviewer Dashboard

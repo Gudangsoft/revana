@@ -5,11 +5,78 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ReviewerRegistration;
+use App\Models\FieldOfStudy;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class ReviewerRegistrationController extends Controller
 {
+    /**
+     * Show the public reviewer registration form
+     */
+    public function showForm()
+    {
+        $fieldOfStudies = FieldOfStudy::active()->ordered()->get();
+
+        return view('reviewer-registration.form', compact('fieldOfStudies'));
+    }
+
+    /**
+     * Store a new reviewer registration from the public form
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:reviewer_registrations,email|unique:users,email',
+            'affiliation' => 'required|string|max:255',
+            'whatsapp' => 'required|string|max:20',
+            'password' => 'required|string|min:8|confirmed',
+            'field_of_study_id' => 'required|exists:field_of_studies,id',
+            'sinta_id' => 'required|string|max:50',
+            'scopus_id' => 'nullable|string|max:50',
+            'article_languages' => 'required|array|min:1',
+            'article_languages.*' => 'in:Indonesia,English',
+        ]);
+
+        $fieldOfStudy = FieldOfStudy::find($validated['field_of_study_id']);
+
+        $registration = ReviewerRegistration::create([
+            'full_name' => $validated['full_name'],
+            'email' => $validated['email'],
+            'affiliation' => $validated['affiliation'],
+            'whatsapp' => $validated['whatsapp'],
+            'password' => Hash::make($validated['password']),
+            'field_of_study' => $fieldOfStudy ? $fieldOfStudy->name : '',
+            'field_of_study_id' => $validated['field_of_study_id'],
+            'sinta_id' => $validated['sinta_id'],
+            'scopus_id' => $validated['scopus_id'] ?? null,
+            'article_languages' => $validated['article_languages'],
+            'status' => 'pending',
+        ]);
+
+        // Build WhatsApp confirmation URL if configured
+        $whatsappUrl = null;
+        try {
+            $adminPhone = \App\Models\Setting::get('fonnte_admin_phone') ?? \App\Models\Setting::get('admin_whatsapp');
+            if ($adminPhone) {
+                $message = "Konfirmasi Pendaftaran Reviewer\n\n"
+                    . "Nama: {$registration->full_name}\n"
+                    . "Email: {$registration->email}\n"
+                    . "Institusi: {$registration->affiliation}\n"
+                    . "Bidang: {$registration->field_of_study}\n\n"
+                    . "Saya telah mendaftar sebagai reviewer melalui portal SIPERA.";
+                $whatsappUrl = "https://wa.me/{$adminPhone}?text=" . urlencode($message);
+            }
+        } catch (\Exception $e) {
+            // Silently skip WhatsApp URL generation
+        }
+
+        return redirect()->route('reviewer-registration.form')
+            ->with('success', __('reviewer.registration_success'))
+            ->with('whatsapp_url', $whatsappUrl);
+    }
+
     public function index()
     {
         // Only show pending and rejected registrations
