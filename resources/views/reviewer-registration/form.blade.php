@@ -130,6 +130,40 @@
 
         .match-success { color: #10b981; }
         .match-error { color: #dc2626; }
+
+        .captcha-question {
+            background: linear-gradient(135deg, #f0f4ff, #e8eaff);
+            border: 2px solid #4f46e5;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            user-select: none;
+        }
+        .captcha-num {
+            color: #4f46e5;
+            font-size: 1.6rem;
+        }
+        .captcha-op {
+            color: #7c3aed;
+            font-size: 1.4rem;
+        }
+        .captcha-eq {
+            color: #374151;
+            font-size: 1.4rem;
+        }
+        .captcha-placeholder {
+            color: #dc2626;
+            font-size: 1.6rem;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
@@ -399,6 +433,47 @@
                             @enderror
                             <small class="form-text text-muted">
                                 <i class="bi bi-info-circle"></i> {{ __('reviewer.article_languages_hint') }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Verifikasi CAPTCHA -->
+                    <div class="row mt-4">
+                        <div class="col-12 mb-3">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="bi bi-shield-check"></i> {{ __('reviewer.section_captcha') }}
+                            </h5>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="captcha" class="form-label">
+                                {{ __('reviewer.captcha_label') }} <span class="required-mark">*</span>
+                            </label>
+                            <div class="captcha-box d-flex align-items-center gap-3 mb-2">
+                                <div class="captcha-question">
+                                    <span class="captcha-num">{{ $captchaNum1 }}</span>
+                                    <span class="captcha-op">+</span>
+                                    <span class="captcha-num">{{ $captchaNum2 }}</span>
+                                    <span class="captcha-eq">=</span>
+                                    <span class="captcha-placeholder">?</span>
+                                </div>
+                                <a href="{{ route('reviewer-registration.form') }}" class="btn btn-outline-secondary btn-sm" title="Refresh CAPTCHA">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </a>
+                            </div>
+                            <input type="number" 
+                                   class="form-control @error('captcha') is-invalid @enderror" 
+                                   id="captcha" 
+                                   name="captcha" 
+                                   placeholder="{{ __('reviewer.captcha_placeholder') }}"
+                                   autocomplete="off"
+                                   required
+                                   style="max-width: 200px;">
+                            @error('captcha')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> {{ __('reviewer.captcha_hint') }}
                             </small>
                         </div>
                     </div>

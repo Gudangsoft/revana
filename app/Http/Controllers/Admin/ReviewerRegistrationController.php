@@ -18,7 +18,13 @@ class ReviewerRegistrationController extends Controller
     {
         $fieldOfStudies = FieldOfStudy::active()->ordered()->get();
 
-        return view('reviewer-registration.form', compact('fieldOfStudies'));
+        // Generate simple math CAPTCHA
+        $captchaNum1 = rand(1, 20);
+        $captchaNum2 = rand(1, 10);
+        $captchaAnswer = $captchaNum1 + $captchaNum2;
+        session(['captcha_answer' => $captchaAnswer]);
+
+        return view('reviewer-registration.form', compact('fieldOfStudies', 'captchaNum1', 'captchaNum2'));
     }
 
     /**
@@ -37,7 +43,16 @@ class ReviewerRegistrationController extends Controller
             'scopus_id' => 'nullable|string|max:50',
             'article_languages' => 'required|array|min:1',
             'article_languages.*' => 'in:Indonesia,English',
+            'captcha' => 'required|numeric',
         ]);
+
+        // Validate CAPTCHA answer
+        if ((int) $validated['captcha'] !== (int) session('captcha_answer')) {
+            return back()->withErrors(['captcha' => __('reviewer.captcha_wrong')])->withInput();
+        }
+
+        // Clear captcha from session
+        session()->forget('captcha_answer');
 
         $fieldOfStudy = FieldOfStudy::find($validated['field_of_study_id']);
 

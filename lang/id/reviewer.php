@@ -46,6 +46,13 @@ return [
     'registration_success'     => 'Pendaftaran berhasil dikirim! Tim kami akan meninjau pendaftaran Anda. Silakan tunggu konfirmasi melalui email.',
     'disclaimer'               => 'Dengan mendaftar, Anda menyetujui untuk menjadi reviewer kami',
 
+    // CAPTCHA
+    'section_captcha'          => 'Verifikasi Keamanan',
+    'captcha_label'            => 'Jawab pertanyaan berikut',
+    'captcha_placeholder'      => 'Ketik jawaban',
+    'captcha_hint'             => 'Jawab soal matematika di atas untuk membuktikan Anda bukan robot',
+    'captcha_wrong'            => 'Jawaban CAPTCHA salah. Silakan coba lagi.',
+
     // Reviewer Dashboard
     'dashboard_title'          => 'Dashboard Reviewer',
     'new_tasks_alert'          => 'Ada Tugas Baru!',
