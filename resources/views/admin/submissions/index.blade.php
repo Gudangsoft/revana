@@ -322,7 +322,7 @@
                                     <td class="sticky-col-2">
                                         <code class="text-primary">{{ $submission->kode_submit }}</code>
                                         @if($submission->journalSlot)
-                                            <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $submission->journalSlot->display_name }}">{{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}</small>
+                                            <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $submission->journalSlot->journalMaster?->nama_jurnal ?? '-' }} - Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}">{{ Str::limit($submission->journalSlot->journalMaster?->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}</small>
                                         @endif
                                         @if($submission->process_type === 'fasttrack')
                                             <br><span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>

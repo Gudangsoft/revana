@@ -129,7 +129,8 @@ class JournalSlot extends Model
     // Get display name
     public function getDisplayNameAttribute()
     {
-        return $this->journalMaster->nama_jurnal . ' - Vol.' . $this->volume . ' No.' . $this->nomor . ' (' . $this->bulan . ' ' . $this->tahun . ')';
+        $namaJurnal = $this->journalMaster?->nama_jurnal ?? '-';
+        return $namaJurnal . ' - Vol.' . $this->volume . ' No.' . $this->nomor . ' (' . $this->bulan . ' ' . $this->tahun . ')';
     }
 
     // Get bulan options

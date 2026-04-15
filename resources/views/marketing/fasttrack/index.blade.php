@@ -413,7 +413,7 @@
                                 <code class="text-warning">{{ $s->kode_submit }}</code>
                             </a>
                             @if($s->journalSlot)
-                                <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $s->journalSlot->display_name }}">{{ Str::limit($s->journalSlot->journalMaster->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}</small>
+                                <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $s->journalSlot->journalMaster?->nama_jurnal ?? '-' }} - Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}">{{ Str::limit($s->journalSlot->journalMaster?->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}</small>
                             @endif
                             <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lightning-charge"></i> FT</span>
                             <br>
