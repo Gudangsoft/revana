@@ -180,6 +180,9 @@
                     <tr>
                         <td>
                             <span class="badge bg-warning text-dark">{{ $submission->kode_submit }}</span>
+                            @if($submission->journalSlot)
+                                <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $submission->journalSlot->display_name }}">{{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}</small>
+                            @endif
                         </td>
                         <td>{{ Str::limit($submission->judul_artikel, 40) }}</td>
                         <td>{{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal ?? '-', 30) }}</td>

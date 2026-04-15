@@ -99,6 +99,9 @@
                         <td>{{ $loop->iteration + ($submissions->currentPage() - 1) * $submissions->perPage() }}</td>
                         <td>
                             <code class="text-warning">{{ $submission->kode_submit }}</code>
+                            @if($submission->journalSlot)
+                                <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $submission->journalSlot->display_name }}">{{ Str::limit($submission->journalSlot->journalMaster->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}</small>
+                            @endif
                             <br><span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> Fasttrack</span>
                         </td>
                         <td>
