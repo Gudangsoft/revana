@@ -138,6 +138,7 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
+                            <th>No</th>
                             <th>Kode Submit</th>
                             <th>ID Artikel</th>
                             <th>Judul</th>
@@ -153,6 +154,7 @@
                         @forelse($slot->submissions as $submission)
                         @php $isOwn = $submission->marketing_id === $marketing->id; @endphp
                         <tr class="{{ $isOwn ? 'table-warning' : '' }}">
+                            <td>{{ $loop->iteration }}</td>
                             <td>
                                 @if($isOwn)
                                     <i class="bi bi-star-fill text-warning me-1" title="Submission Anda"></i>
@@ -187,7 +189,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-4">
+                            <td colspan="10" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 Belum ada submission di slot ini
                             </td>
