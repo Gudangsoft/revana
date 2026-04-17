@@ -515,9 +515,8 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
-        $slot->load(['journalMaster', 'submissions' => function($q) use ($marketing) {
-            $q->where('marketing_id', $marketing->id)
-              ->orderBy('tanggal_submit', 'desc');
+        $slot->load(['journalMaster', 'submissions' => function($q) {
+            $q->with('marketing')->orderBy('tanggal_submit', 'desc');
         }]);
         
         return view('marketing.journal-slots.show', compact('marketing', 'slot'));

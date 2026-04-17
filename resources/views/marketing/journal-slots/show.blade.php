@@ -119,12 +119,21 @@
         </div>
     </div>
 
-    <!-- Submissions for this slot (only marketing's own) -->
+    <!-- Semua Submission di slot ini -->
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white">
-            <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> Submission Anda di Slot Ini</h6>
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> Semua Submission di Slot Ini</h6>
+            <span class="badge bg-secondary">{{ $slot->submissions->count() }} submission</span>
         </div>
         <div class="card-body">
+            @php $mySubmissions = $slot->submissions->where('marketing_id', $marketing->id)->count(); @endphp
+            @if($mySubmissions > 0)
+            <div class="alert alert-info py-2 mb-3">
+                <i class="bi bi-person-check"></i>
+                <strong>{{ $mySubmissions }}</strong> dari {{ $slot->submissions->count() }} submission di slot ini adalah milik Anda.
+                <span class="ms-1">(<i class="bi bi-star-fill text-warning"></i> = milik Anda)</span>
+            </div>
+            @endif
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-light">
@@ -133,6 +142,7 @@
                             <th>ID Artikel</th>
                             <th>Judul</th>
                             <th>Penulis</th>
+                            <th>Marketing</th>
                             <th>Tanggal Submit</th>
                             <th>Status</th>
                             <th>Progress</th>
@@ -141,28 +151,45 @@
                     </thead>
                     <tbody>
                         @forelse($slot->submissions as $submission)
-                        <tr>
-                            <td><code>{{ $submission->kode_submit }}</code></td>
+                        @php $isOwn = $submission->marketing_id === $marketing->id; @endphp
+                        <tr class="{{ $isOwn ? 'table-warning' : '' }}">
+                            <td>
+                                @if($isOwn)
+                                    <i class="bi bi-star-fill text-warning me-1" title="Submission Anda"></i>
+                                @endif
+                                <code>{{ $submission->kode_submit }}</code>
+                            </td>
                             <td>{{ $submission->id_artikel ?? '-' }}</td>
-                            <td>{{ Str::limit($submission->judul_artikel, 40) }}</td>
+                            <td>{{ Str::limit($submission->judul_artikel, 35) }}</td>
                             <td>{{ $submission->nama_penulis }}</td>
+                            <td>
+                                @if($isOwn)
+                                    <span class="badge bg-warning text-dark">Anda</span>
+                                @else
+                                    <span class="text-muted small">{{ $submission->marketing->name ?? '-' }}</span>
+                                @endif
+                            </td>
                             <td>{{ $submission->tanggal_submit?->format('d M Y') ?? '-' }}</td>
                             <td><x-submission-status :submission="$submission" /></td>
                             <td>
                                 <x-submission-progress :submission="$submission" />
                             </td>
                             <td class="text-center">
+                                @if($isOwn)
                                 <a href="{{ route('marketing.submissions.show', $submission) }}" 
                                    class="btn btn-sm btn-outline-primary" title="Lihat Detail">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                @else
+                                <span class="text-muted">—</span>
+                                @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                Anda belum memiliki submission di slot ini
+                                Belum ada submission di slot ini
                             </td>
                         </tr>
                         @endforelse
