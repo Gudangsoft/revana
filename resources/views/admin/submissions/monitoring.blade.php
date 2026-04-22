@@ -130,6 +130,20 @@
     border-color: #212529 !important;
 }
 
+.table-monitoring thead th.bg-validator {
+    background: #6f42c1 !important;
+    color: white !important;
+    border-color: #212529 !important;
+}
+
+.table-monitoring tbody td.td-validator {
+    background-color: #f3e8ff;
+}
+
+.table-monitoring tbody tr:hover td.td-validator {
+    background-color: #e9d5ff !important;
+}
+
 .table-monitoring thead th.text-dark {
     color: white !important;
 }
@@ -449,6 +463,9 @@
                                 <button type="button" class="btn btn-success btn-sm" id="bulkProductionBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkProductionModal">
                                     <i class="bi bi-gear"></i> Tugaskan Production
                                 </button>
+                                <button type="button" class="btn btn-sm" id="bulkValidatorBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkValidatorModal" style="background:#6f42c1;color:white;">
+                                    <i class="bi bi-shield-check"></i> Tugaskan Validator
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -487,6 +504,7 @@
                         <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
                         <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                         <button type="button" class="quick-nav-btn" data-target="production">Production</button>
+                        <button type="button" class="quick-nav-btn" data-target="validator" style="background:#6f42c1;color:white;border-color:#6f42c1;">Validator</button>
                     </div>
                 </div>
 
@@ -518,6 +536,7 @@
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                                 <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
+                                <th colspan="3" class="text-center bg-validator" id="colValidator">Validator</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers (4 cols) -->
@@ -555,13 +574,17 @@
                                 <th class="bg-success">Petugas</th>
                                 <th class="bg-success">Link Publish</th>
                                 <th class="bg-success">Valid</th>
+                                <!-- Validator sub-headers (3 cols) -->
+                                <th class="bg-validator">Petugas</th>
+                                <th class="bg-validator">Catatan</th>
+                                <th class="bg-validator">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($submissions as $s)
                             @php
-                                // Check if all workflow is completed
-                                $isCompleted = $s->production_valid == 1;
+                                // Check if all workflow is completed (validator is the final step)
+                                $isCompleted = $s->validator_valid == 1;
                             @endphp
                             <tr class="{{ $isCompleted ? 'table-success' : '' }}">
                                 <td class="text-center">
@@ -814,10 +837,28 @@
                                     @endif
                                 </td>
                                 <td class="text-center">{!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+
+                                <!-- Validator -->
+                                <td class="td-validator">
+                                    <select class="inline-assign-select {{ $s->petugas_validator_id ? 'has-value' : '' }}" 
+                                            data-submission="{{ $s->id }}" 
+                                            data-type="validator"
+                                            data-model="pic"
+                                            onchange="quickAssign(this)">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach($pics as $pic)
+                                            <option value="{{ $pic->id }}" {{ $s->petugas_validator_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td class="td-validator" title="{{ $s->catatan_validator }}">
+                                    {{ $s->catatan_validator ? Str::limit($s->catatan_validator, 20) : '-' }}
+                                </td>
+                                <td class="text-center td-validator">{!! $s->validator_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="30" class="text-center text-muted py-4">
+                                <td colspan="33" class="text-center text-muted py-4">
                                     Tidak ada data
                                 </td>
                             </tr>
@@ -996,7 +1037,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'reviewer2': 1500,
         'editor3': 1850,
         'author2': 2000,
-        'production': 2150
+        'production': 2150,
+        'validator': 2500
     };
     
     // Update scroll position indicator
@@ -1084,6 +1126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bulkAuthorBtn = document.getElementById('bulkAuthorBtn');
     const bulkReviewerBtn = document.getElementById('bulkReviewerBtn');
     const bulkProductionBtn = document.getElementById('bulkProductionBtn');
+    const bulkValidatorBtn = document.getElementById('bulkValidatorBtn');
     
     function updateSelectedCount() {
         const checked = document.querySelectorAll('.submission-checkbox:checked');
@@ -1095,6 +1138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bulkAuthorBtn.disabled = count === 0;
         bulkReviewerBtn.disabled = count === 0;
         bulkProductionBtn.disabled = count === 0;
+        if (bulkValidatorBtn) bulkValidatorBtn.disabled = count === 0;
         
         // Update select all checkboxes
         selectAll.checked = count === checkboxes.length && count > 0;
@@ -1166,6 +1210,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const productionSelectedCount = document.getElementById('productionSelectedCount');
         if (productionSelectedCount) {
             productionSelectedCount.textContent = ids.length;
+        }
+        
+        // Update validator selected count in modal
+        const validatorSelectedCount = document.getElementById('validatorSelectedCount');
+        if (validatorSelectedCount) {
+            validatorSelectedCount.textContent = ids.length;
         }
     }
     
@@ -1392,6 +1442,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Tugaskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Validator Assignment Modal -->
+<div class="modal fade" id="bulkValidatorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background:#6f42c1;">
+                <h5 class="modal-title"><i class="bi bi-shield-check"></i> Penugasan Massal Validator</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.submissions.bulk-assign') }}" method="POST">
+                @csrf
+                <input type="hidden" name="submission_ids" class="bulk-submission-ids">
+                <input type="hidden" name="assignment_type" value="validator">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Anda akan menugaskan petugas Validator untuk <strong id="validatorSelectedCount">0</strong> submission yang dipilih.
+                    </div>
+                    <div class="alert" style="background:#f3e8ff; border-color:#6f42c1;">
+                        <i class="bi bi-shield-check" style="color:#6f42c1;"></i>
+                        <strong>Tugas Validator:</strong> Mengecek kesesuaian artikel yang sudah dipublish oleh tim Production. Jika sesuai → validasi OK. Jika ada revisi → kembalikan ke Production.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Petugas Validator <span class="text-danger">*</span></label>
+                        <select class="form-select" name="petugas_id" required>
+                            <option value="">-- Pilih Petugas --</option>
+                            @foreach($pics as $pic)
+                                <option value="{{ $pic->id }}">{{ $pic->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white" style="background:#6f42c1;">
                         <i class="bi bi-check-circle"></i> Tugaskan
                     </button>
                 </div>

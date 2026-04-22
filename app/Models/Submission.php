@@ -82,6 +82,12 @@ class Submission extends Model
         'production_valid',
         'production_validated_at',
         
+        // Validator (pengecekan kesesuaian artikel setelah production publish)
+        'petugas_validator_id',
+        'validator_valid',
+        'validator_validated_at',
+        'catatan_validator',
+        
         // Hasil
         'link_publish',
         'status',
@@ -102,6 +108,7 @@ class Submission extends Model
         'editor3_valid' => 'boolean',
         'author2_valid' => 'boolean',
         'production_valid' => 'boolean',
+        'validator_valid' => 'boolean',
         'editor1_validated_at' => 'datetime',
         'author1_validated_at' => 'datetime',
         'editor2_validated_at' => 'datetime',
@@ -110,6 +117,7 @@ class Submission extends Model
         'editor3_validated_at' => 'datetime',
         'author2_validated_at' => 'datetime',
         'production_validated_at' => 'datetime',
+        'validator_validated_at' => 'datetime',
         'tanggal_submit' => 'date',
     ];
 
@@ -266,6 +274,11 @@ class Submission extends Model
         return $this->belongsTo(Pic::class, 'petugas_production_id');
     }
 
+    public function petugasValidator()
+    {
+        return $this->belongsTo(Pic::class, 'petugas_validator_id');
+    }
+
     // Histories relationship
     public function histories()
     {
@@ -322,6 +335,7 @@ class Submission extends Model
             'EDITOR3_PROCESS' => 'Editor 3 Process',
             'AUTHOR2_PROCESS' => 'Author 2 Process',
             'PRODUCTION_PROCESS' => 'Production Process',
+            'VALIDATOR_PROCESS' => 'Validator Process',
             'PUBLISHED' => 'Published',
             'REJECTED' => 'Rejected',
         ];
@@ -340,7 +354,7 @@ class Submission extends Model
         return \App\Services\ComponentSettingService::badgeColor($realStatus);
     }
 
-    // Get current step number (1-10) based on real progress
+    // Get current step number (1-11) based on real progress
     public function getCurrentStepAttribute()
     {
         $realStatus = $this->getRealStatus();
@@ -354,7 +368,8 @@ class Submission extends Model
             'EDITOR3_PROCESS' => 7,
             'AUTHOR2_PROCESS' => 8,
             'PRODUCTION_PROCESS' => 9,
-            'PUBLISHED' => 10,
+            'VALIDATOR_PROCESS' => 10,
+            'PUBLISHED' => 11,
             'REJECTED' => 0,
             default => 1,
         };
@@ -367,7 +382,7 @@ class Submission extends Model
         if ($realStatus === 'REJECTED') return 0;
         if ($realStatus === 'PUBLISHED') return 100;
         
-        return ($this->current_step / 10) * 100;
+        return ($this->current_step / 11) * 100;
     }
 
     /**
@@ -378,14 +393,14 @@ class Submission extends Model
     {
         if ($this->status === 'REJECTED') return 'REJECTED';
         
-        // If link_publish exists, it's published
-        if (!empty($this->link_publish)) {
+        // Validator is the final step — fully completed
+        if ($this->validator_valid) {
             return 'PUBLISHED';
         }
         
-        // Check production_valid
+        // Production is done, now waiting for validator
         if ($this->production_valid) {
-            return 'PUBLISHED';
+            return 'VALIDATOR_PROCESS';
         }
         
         // Check from the latest validated step backwards
@@ -489,6 +504,15 @@ class Submission extends Model
         $this->update([
             'production_valid' => true,
             'production_validated_at' => now(),
+            'status' => 'VALIDATOR_PROCESS',
+        ]);
+    }
+
+    public function validateValidator()
+    {
+        $this->update([
+            'validator_valid' => true,
+            'validator_validated_at' => now(),
             'status' => 'PUBLISHED',
         ]);
     }
@@ -503,8 +527,10 @@ class Submission extends Model
             return; // Don't change rejected status
         }
 
-        if ($this->production_valid) {
+        if ($this->validator_valid) {
             $this->status = 'PUBLISHED';
+        } elseif ($this->production_valid) {
+            $this->status = 'VALIDATOR_PROCESS';
         } elseif ($this->author2_valid) {
             $this->status = 'PRODUCTION_PROCESS';
         } elseif ($this->editor3_valid) {

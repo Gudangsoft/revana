@@ -509,6 +509,19 @@ class SubmissionController extends Controller
                     'petugas_name' => $petugas->name,
                 ]);
                 break;
+                
+            case 'validator':
+                $validated = $request->validate([
+                    'petugas_validator_id' => 'required|exists:pics,id',
+                ]);
+                $submission->update($validated);
+                
+                $petugas = Pic::find($validated['petugas_validator_id']);
+                $submission->logHistory('validator', 'assigned', 'Ditugaskan ke ' . $petugas->name, [
+                    'petugas_id' => $validated['petugas_validator_id'],
+                    'petugas_name' => $petugas->name,
+                ]);
+                break;
         }
         
         return back()->with('success', 'Data proses berhasil diperbarui');
@@ -528,6 +541,7 @@ class SubmissionController extends Controller
             'editor3' => 'petugas_editor3_id',
             'author2' => 'petugas_author2_id',
             'production' => 'petugas_production_id',
+            'validator' => 'petugas_validator_id',
         ];
         
         switch ($step) {
@@ -561,9 +575,13 @@ class SubmissionController extends Controller
                 break;
             case 'production':
                 $submission->validateProduction();
-                $submission->logHistory('production', 'approved', $notes ?: 'Production divalidasi - Artikel Published', [
+                $submission->logHistory('production', 'approved', $notes ?: 'Production divalidasi - Artikel dikirim ke Validator', [
                     'link_publish' => $submission->link_publish
                 ]);
+                break;
+            case 'validator':
+                $submission->validateValidator();
+                $submission->logHistory('validator', 'approved', $notes ?: 'Validator selesai - Artikel Published');
                 break;
         }
         
@@ -696,6 +714,7 @@ class SubmissionController extends Controller
             'petugasEditor3',
             'petugasAuthor2',
             'petugasProduction',
+            'petugasValidator',
         ])
         // Exclude fasttrack submissions from regular submissions monitoring
         ->where(function($q) {
@@ -908,7 +927,7 @@ class SubmissionController extends Controller
         
         $request->validate([
             'submission_ids' => 'required|string',
-            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production,validator',
             'petugas_id' => 'required|exists:' . ($isReviewer ? 'users' : 'pics') . ',id',
         ]);
 
@@ -982,6 +1001,10 @@ class SubmissionController extends Controller
                 case 'production':
                     $updateData['petugas_production_id'] = $petugasId;
                     break;
+                    
+                case 'validator':
+                    $updateData['petugas_validator_id'] = $petugasId;
+                    break;
             }
 
             if (!empty($updateData)) {
@@ -1007,6 +1030,7 @@ class SubmissionController extends Controller
             'reviewer1' => 'Reviewer 1',
             'reviewer2' => 'Reviewer 2',
             'production' => 'Production',
+            'validator' => 'Validator',
         ];
 
         return back()->with('success', "{$updated} submission berhasil ditugaskan ke {$petugas->name} sebagai {$typeLabels[$assignmentType]}");
@@ -1022,7 +1046,7 @@ class SubmissionController extends Controller
         // All assignment types now use Pic model
         $request->validate([
             'submission_ids' => 'required|string',
-            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'assignment_type' => 'required|in:editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production,validator',
             'petugas_id' => 'required|exists:pics,id',
             'credentials' => 'nullable|array',
         ]);
@@ -1115,6 +1139,10 @@ class SubmissionController extends Controller
                 case 'production':
                     $updateData['petugas_production_id'] = $petugasId;
                     break;
+                    
+                case 'validator':
+                    $updateData['petugas_validator_id'] = $petugasId;
+                    break;
             }
 
             if (!empty($updateData)) {
@@ -1141,6 +1169,7 @@ class SubmissionController extends Controller
             'reviewer1' => 'Reviewer 1',
             'reviewer2' => 'Reviewer 2',
             'production' => 'Production',
+            'validator' => 'Validator',
         ];
 
         return back()->with('success', "{$updated} submission berhasil ditugaskan ke {$petugas->name} sebagai {$typeLabels[$assignmentType]}");
@@ -1275,6 +1304,7 @@ class SubmissionController extends Controller
             'editor3_valid',
             'author2_valid',
             'production_valid',
+            'validator_valid',
         ];
 
         $request->validate([
