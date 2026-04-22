@@ -128,6 +128,17 @@
             'isProduction' => true,
             'validLabel' => 'Published',
         ],
+        [
+            'key' => 'validator',
+            'label' => 'Validator (V)',
+            'show' => $s['tracking_show_validator'] ?? '1',
+            'rowClass' => $s['tracking_row_validator'] ?? 'table-success',
+            'petugas' => $submission->petugasValidator,
+            'isValid' => $submission->validator_valid,
+            'hasAssignment' => $submission->petugasValidator,
+            'credential' => null,
+            'validLabel' => 'Valid',
+        ],
     ];
 @endphp
 

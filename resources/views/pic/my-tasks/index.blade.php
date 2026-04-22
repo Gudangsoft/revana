@@ -200,7 +200,7 @@
                         // Progress calculation
                         $status = strtoupper($submission->status);
                         $stepIndex = 0;
-                        $stepNames = ['NEW', 'EDITOR1', 'AUTHOR1', 'EDITOR2', 'REVIEWER1', 'REVIEWER2', 'EDITOR3', 'AUTHOR2', 'PRODUCTION', 'PUBLISHED'];
+                        $stepNames = ['NEW', 'EDITOR1', 'AUTHOR1', 'EDITOR2', 'REVIEWER1', 'REVIEWER2', 'EDITOR3', 'AUTHOR2', 'PRODUCTION', 'VALIDATOR', 'PUBLISHED'];
                         
                         foreach ($stepNames as $idx => $step) {
                             if (str_contains($status, $step)) {
@@ -208,8 +208,8 @@
                                 break;
                             }
                         }
-                        if ($status == 'PUBLISHED') $stepIndex = 9;
-                        $progress = round(($stepIndex / 9) * 100);
+                        if ($status == 'PUBLISHED') $stepIndex = 10;
+                        $progress = round(($stepIndex / 10) * 100);
                         
                         // My roles
                         $picId = auth()->guard('pic')->id();
@@ -220,6 +220,7 @@
                         if ($submission->petugas_author1_id == $picId) $roles[] = ['Author 1', 'info'];
                         if ($submission->petugas_author2_id == $picId) $roles[] = ['Author 2', 'info'];
                         if ($submission->petugas_production_id == $picId) $roles[] = ['Production', 'warning'];
+                        if ($submission->petugas_validator_id == $picId) $roles[] = ['Validator', 'success'];
                         if ($submission->petugas_submit_id == $picId) $roles[] = ['Submit', 'secondary'];
                         if (empty($roles) && $submission->created_by == $picId) $roles[] = ['Creator', 'dark'];
                         
@@ -240,6 +241,7 @@
                             'EDITOR3' => ['petugas_editor3_id'],
                             'AUTHOR2' => ['petugas_author2_id'],
                             'PRODUCTION' => ['petugas_production_id'],
+                            'VALIDATOR' => ['petugas_validator_id'],
                         ];
                         foreach ($urgentMappings as $statusKey => $fields) {
                             if (str_contains($status, $statusKey)) {
@@ -288,7 +290,7 @@
                                 </div>
                                 <small class="text-muted" style="min-width: 35px">{{ $progress }}%</small>
                             </div>
-                            <small class="text-muted">Step {{ $stepIndex + 1 }}/10</small>
+                            <small class="text-muted">Step {{ $stepIndex + 1 }}/11</small>
                         </td>
                         <td>
                             @php

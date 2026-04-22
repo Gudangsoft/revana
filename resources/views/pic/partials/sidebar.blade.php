@@ -136,7 +136,8 @@
                   ->orWhere('petugas_editor2_id', $picId)
                   ->orWhere('petugas_editor3_id', $picId)
                   ->orWhere('petugas_author2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
+                  ->orWhere('petugas_production_id', $picId)
+                  ->orWhere('petugas_validator_id', $picId);
             })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->get();
             
             // Count only tasks where status matches PIC's role
@@ -147,6 +148,7 @@
                 'EDITOR3' => ['petugas_editor3_id'],
                 'AUTHOR2' => ['petugas_author2_id'],
                 'PRODUCTION' => ['petugas_production_id'],
+                'VALIDATOR' => ['petugas_validator_id'],
             ];
             foreach ($allTasks as $task) {
                 $status = strtoupper($task->status);

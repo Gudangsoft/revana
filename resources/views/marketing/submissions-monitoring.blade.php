@@ -43,6 +43,7 @@
                     <option value="EDITOR3_PROCESS" {{ request('status') == 'EDITOR3_PROCESS' ? 'selected' : '' }}>Editor 3</option>
                     <option value="AUTHOR2_PROCESS" {{ request('status') == 'AUTHOR2_PROCESS' ? 'selected' : '' }}>Author 2</option>
                     <option value="PRODUCTION_PROCESS" {{ request('status') == 'PRODUCTION_PROCESS' ? 'selected' : '' }}>Production</option>
+                    <option value="VALIDATOR_PROCESS" {{ request('status') == 'VALIDATOR_PROCESS' ? 'selected' : '' }}>Validator</option>
                     <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>
                     <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
                 </select>
@@ -82,7 +83,7 @@
         $stats = [
             'submitted' => $submissions->where('status', 'SUBMITTED')->count(),
             'in_review' => $submissions->whereIn('status', ['EDITOR1_PROCESS', 'AUTHOR1_PROCESS', 'EDITOR2_PROCESS', 'REVIEWER1_PROCESS', 'REVIEWER2_PROCESS'])->count(),
-            'in_process' => $submissions->whereIn('status', ['EDITOR3_PROCESS', 'AUTHOR2_PROCESS', 'PRODUCTION_PROCESS'])->count(),
+            'in_process' => $submissions->whereIn('status', ['EDITOR3_PROCESS', 'AUTHOR2_PROCESS', 'PRODUCTION_PROCESS', 'VALIDATOR_PROCESS'])->count(),
             'published' => $submissions->where('status', 'PUBLISHED')->count(),
             'rejected' => $submissions->where('status', 'REJECTED')->count(),
         ];

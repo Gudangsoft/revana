@@ -501,6 +501,7 @@
                                 <option value="EDITOR3" {{ request('status') == 'EDITOR3' ? 'selected' : '' }}>Editor 3</option>
                                 <option value="AUTHOR2" {{ request('status') == 'AUTHOR2' ? 'selected' : '' }}>Author 2</option>
                                 <option value="PRODUCTION" {{ request('status') == 'PRODUCTION' ? 'selected' : '' }}>Production</option>
+                                <option value="VALIDATOR" {{ request('status') == 'VALIDATOR' ? 'selected' : '' }}>Validator</option>
                                 <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>
                                 <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
                             </select>
@@ -564,6 +565,7 @@
                         <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
                         <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                         <button type="button" class="quick-nav-btn" data-target="production">Production</button>
+                        <button type="button" class="quick-nav-btn" data-target="validator">Validator</button>
                     </div>
                 </div>
 
@@ -593,6 +595,7 @@
                                 <th colspan="2" class="text-center bg-info text-dark" id="colEditor3">Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                                 <th colspan="3" class="text-center bg-success text-white" id="colProduction">Production</th>
+                                <th colspan="2" class="text-center bg-teal-subtle text-success border-success" style="background-color: #d1e7dd !important;" id="colValidator">Validator</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers -->
@@ -626,6 +629,9 @@
                                 <th class="bg-success text-white">Petugas</th>
                                 <th class="bg-success text-white">Link Publish</th>
                                 <th class="bg-success text-white">Valid</th>
+                                <!-- Validator sub-headers (2 cols) -->
+                                <th class="text-success border-success" style="background-color: #d1e7dd !important;">Petugas</th>
+                                <th class="text-success border-success" style="background-color: #d1e7dd !important;">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -641,7 +647,8 @@
                                 $s->petugas_reviewer2_id == $picId || 
                                 $s->petugas_editor3_id == $picId || 
                                 $s->petugas_author2_id == $picId || 
-                                $s->petugas_production_id == $picId 
+                                $s->petugas_production_id == $picId ||
+                                $s->petugas_validator_id == $picId 
                                 ? 'my-task' : '' }}"
                                 data-submission-id="{{ $s->id }}"
                                 data-editor1-valid="{{ $s->editor1_valid ? '1' : '0' }}"
@@ -651,7 +658,8 @@
                                 data-reviewer2-valid="{{ $s->reviewer2_valid ? '1' : '0' }}"
                                 data-editor3-valid="{{ $s->editor3_valid ? '1' : '0' }}"
                                 data-author2-valid="{{ $s->author2_valid ? '1' : '0' }}"
-                                data-production-valid="{{ $s->production_valid ? '1' : '0' }}">
+                                data-production-valid="{{ $s->production_valid ? '1' : '0' }}"
+                                data-validator-valid="{{ $s->validator_valid ? '1' : '0' }}">
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
@@ -663,7 +671,8 @@
                                         $s->petugas_reviewer2_id == $picId || 
                                         $s->petugas_editor3_id == $picId || 
                                         $s->petugas_author2_id == $picId || 
-                                        $s->petugas_production_id == $picId)
+                                        $s->petugas_production_id == $picId ||
+                                        $s->petugas_validator_id == $picId)
                                         <span class="task-indicator" title="Tugas Anda">
                                             <i class="bi bi-star-fill"></i>
                                         </span>
@@ -941,6 +950,25 @@
                                         {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
+                                
+                                <!-- Validator -->
+                                <td class="{{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}">
+                                    {{ $s->petugasValidator?->name ?? '-' }}
+                                    @if($s->petugas_validator_id == $picId)
+                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center {{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_validator_id == $picId)
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->validator_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                                data-submission="{{ $s->id }}" data-field="validator_valid" data-current="{{ $s->validator_valid ? '1' : '0' }}"
+                                                data-stage-index="8">
+                                            <i class="bi {{ $s->validator_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
+                                        </button>
+                                    @else
+                                        {!! $s->validator_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    @endif
+                                </td>
                             </tr>
                             @empty
                             <tr>
@@ -981,7 +1009,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'reviewer2': 1500,
         'editor3': 1850,
         'author2': 2000,
-        'production': 2150
+        'production': 2150,
+        'validator': 2300
     };
     
     // Update scroll position indicator
@@ -1135,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // EXCEPTION 1: Reviewer 1 and Reviewer 2 can work in parallel
             // EXCEPTION 2: Editor 3 and Author 2 are OPTIONAL (can be skipped)
             const row = this.closest('tr');
-            const stageOrder = ['editor1_valid', 'author1_valid', 'editor2_valid', 'reviewer1_valid', 'reviewer2_valid', 'editor3_valid', 'author2_valid', 'production_valid'];
+            const stageOrder = ['editor1_valid', 'author1_valid', 'editor2_valid', 'reviewer1_valid', 'reviewer2_valid', 'editor3_valid', 'author2_valid', 'production_valid', 'validator_valid'];
             const currentStageIndex = stageOrder.indexOf(field);
             
             // Check all previous stages
@@ -1178,7 +1207,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         'reviewer2_valid': 'Reviewer 2',
                         'editor3_valid': 'Editor 3',
                         'author2_valid': 'Author 2',
-                        'production_valid': 'Production'
+                        'production_valid': 'Production',
+                        'validator_valid': 'Validator'
                     };
                     
                     alert('Proses sebelumnya (' + stageNames[previousStage] + ') belum valid. Harap tunggu validasi dari tahap sebelumnya.');

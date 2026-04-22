@@ -24,6 +24,7 @@ class ComponentSettingService
             'badge_color_EDITOR3_PROCESS' => 'bg-info',
             'badge_color_AUTHOR2_PROCESS' => 'bg-info',
             'badge_color_PRODUCTION_PROCESS' => 'bg-primary',
+            'badge_color_VALIDATOR_PROCESS' => 'bg-teal',
             'badge_color_PUBLISHED' => 'bg-success',
             'badge_color_REJECTED' => 'bg-danger',
 
@@ -37,6 +38,7 @@ class ComponentSettingService
             'badge_label_EDITOR3_PROCESS' => 'Editor 3 Process',
             'badge_label_AUTHOR2_PROCESS' => 'Author 2 Process',
             'badge_label_PRODUCTION_PROCESS' => 'Production Process',
+            'badge_label_VALIDATOR_PROCESS' => 'Validator Process',
             'badge_label_PUBLISHED' => 'Published',
             'badge_label_REJECTED' => 'Rejected',
 
@@ -55,6 +57,7 @@ class ComponentSettingService
             'tracking_show_editor3' => '1',
             'tracking_show_author2' => '1',
             'tracking_show_production' => '1',
+            'tracking_show_validator' => '1',
 
             // Tracking Row Colors (table-* classes)
             'tracking_row_submit' => '',
@@ -66,6 +69,7 @@ class ComponentSettingService
             'tracking_row_editor3' => 'table-info',
             'tracking_row_author2' => 'table-warning',
             'tracking_row_production' => 'table-success',
+            'tracking_row_validator' => 'table-success',
 
             // Step badge colors in tracking table
             'tracking_valid_color' => 'bg-success',
@@ -190,6 +194,7 @@ class ComponentSettingService
             'EDITOR3_PROCESS',
             'AUTHOR2_PROCESS',
             'PRODUCTION_PROCESS',
+            'VALIDATOR_PROCESS',
             'PUBLISHED',
             'REJECTED',
         ];
@@ -210,6 +215,7 @@ class ComponentSettingService
             'editor3' => 'Editor 3 (E3)',
             'author2' => 'Author 2 (A2)',
             'production' => 'Production (P)',
+            'validator' => 'Validator (V)',
         ];
     }
 }
