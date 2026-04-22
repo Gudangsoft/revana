@@ -138,6 +138,7 @@
             // Tambahkan catatan_reviewer1 dan catatan_reviewer2 dari kolom submissions
             if ($submission->catatan_reviewer1) $notesByStep['reviewer1'] = $submission->catatan_reviewer1;
             if ($submission->catatan_reviewer2) $notesByStep['reviewer2'] = $submission->catatan_reviewer2;
+            if ($submission->catatan_validator) $notesByStep['validator'] = $submission->catatan_validator;
 
             $stepLabels = [
                 'editor1' => 'Editor 1', 'author1' => 'Author 1', 'editor2' => 'Editor 2',

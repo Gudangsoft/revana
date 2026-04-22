@@ -760,18 +760,35 @@ EOT;
         ]);
         
         $status = strtoupper($submission->status);
-        $revisionStatus = str_replace('_PROCESS', '_REVISION', $status);
+        
+        if ($status === 'VALIDATOR_PROCESS') {
+            // Validator mengembalikan artikel ke Production
+            $submission->production_valid = false;
+            $submission->validator_valid = false;
+            $revisionStatus = 'PRODUCTION_REVISION';
+            
+            // Catat di field validator
+            $submission->catatan_validator = $request->revision_notes;
+        } else {
+            $revisionStatus = str_replace('_PROCESS', '_REVISION', $status);
+        }
         
         $submission->status = $revisionStatus;
         $submission->revision_notes = $request->revision_notes;
         $submission->save();
         
+        $stepName = $this->getStepFromStatus($status);
+        if (!$stepName && $status === 'VALIDATOR_PROCESS') $stepName = 'validator';
+        
         // Record history
         \DB::table('submission_histories')->insert([
             'submission_id' => $submission->id,
-            'status' => $revisionStatus,
+            'step' => $stepName ?: 'validator',
+            'action' => 'revision_request',
+            'user_id' => null,
             'notes' => 'Permintaan revisi: ' . $request->revision_notes,
-            'created_by' => $picId,
+            'data' => json_encode(['pic_id' => $picId]),
+            'revision_number' => 0,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

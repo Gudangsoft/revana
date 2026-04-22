@@ -118,12 +118,14 @@
             }
             if ($submission->catatan_reviewer1) $procNotesByStep['reviewer1'] = $submission->catatan_reviewer1;
             if ($submission->catatan_reviewer2) $procNotesByStep['reviewer2'] = $submission->catatan_reviewer2;
+            if ($submission->catatan_validator) $procNotesByStep['validator'] = $submission->catatan_validator;
 
             $procStepLabels = [
                 'editor1'   => 'Editor 1',  'author1'  => 'Author 1',
                 'editor2'   => 'Editor 2',  'reviewer1'=> 'Reviewer 1',
                 'reviewer2' => 'Reviewer 2','editor3'  => 'Editor 3',
                 'author2'   => 'Author 2',  'production'=> 'Production',
+                'validator' => 'Validator',
             ];
         @endphp
 
