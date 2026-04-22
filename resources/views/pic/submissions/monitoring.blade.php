@@ -163,6 +163,13 @@
     position: sticky !important;
 }
 
+.table-monitoring thead th.bg-validator {
+    background-color: #20c997 !important;
+    color: #fff !important;
+    z-index: 20 !important;
+    position: sticky !important;
+}
+
 .table-monitoring thead th.bg-dark {
     background-color: #212529 !important;
     color: #fff !important;
@@ -595,7 +602,7 @@
                                 <th colspan="2" class="text-center bg-info text-dark" id="colEditor3">Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                                 <th colspan="3" class="text-center bg-success text-white" id="colProduction">Production</th>
-                                <th colspan="2" class="text-center bg-teal-subtle text-success border-success" style="background-color: #d1e7dd !important;" id="colValidator">Validator</th>
+                                <th colspan="2" class="text-center bg-validator" id="colValidator">Validator</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers -->
@@ -630,8 +637,8 @@
                                 <th class="bg-success text-white">Link Publish</th>
                                 <th class="bg-success text-white">Valid</th>
                                 <!-- Validator sub-headers (2 cols) -->
-                                <th class="text-success border-success" style="background-color: #d1e7dd !important;">Petugas</th>
-                                <th class="text-success border-success" style="background-color: #d1e7dd !important;">Valid</th>
+                                <th class="bg-validator">Petugas</th>
+                                <th class="bg-validator">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
