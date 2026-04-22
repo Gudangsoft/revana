@@ -508,7 +508,7 @@
                                 <option value="EDITOR3" {{ request('status') == 'EDITOR3' ? 'selected' : '' }}>Editor 3</option>
                                 <option value="AUTHOR2" {{ request('status') == 'AUTHOR2' ? 'selected' : '' }}>Author 2</option>
                                 <option value="PRODUCTION" {{ request('status') == 'PRODUCTION' ? 'selected' : '' }}>Production</option>
-                                <option value="VALIDATOR" {{ request('status') == 'VALIDATOR' ? 'selected' : '' }}>Validator</option>
+                                <option value="VALIDATOR" {{ request('status') == 'VALIDATOR' ? 'selected' : '' }}>Validasi</option>
                                 <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>
                                 <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Rejected</option>
                             </select>
@@ -572,7 +572,7 @@
                         <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
                         <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                         <button type="button" class="quick-nav-btn" data-target="production">Production</button>
-                        <button type="button" class="quick-nav-btn" data-target="validator">Validator</button>
+                        <button type="button" class="quick-nav-btn" data-target="validator">Validasi</button>
                     </div>
                 </div>
 
@@ -602,7 +602,7 @@
                                 <th colspan="2" class="text-center bg-info text-dark" id="colEditor3">Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                                 <th colspan="3" class="text-center bg-success text-white" id="colProduction">Production</th>
-                                <th colspan="2" class="text-center bg-validator" id="colValidator">Validator</th>
+                                <th colspan="2" class="text-center bg-validator" id="colValidator">Validasi</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers -->

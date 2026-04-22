@@ -125,7 +125,7 @@
                 'editor2'   => 'Editor 2',  'reviewer1'=> 'Reviewer 1',
                 'reviewer2' => 'Reviewer 2','editor3'  => 'Editor 3',
                 'author2'   => 'Author 2',  'production'=> 'Production',
-                'validator' => 'Validator',
+                'validator' => 'Validasi',
             ];
         @endphp
 

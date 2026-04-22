@@ -504,7 +504,7 @@
                         <button type="button" class="quick-nav-btn" data-target="editor3">Editor3</button>
                         <button type="button" class="quick-nav-btn" data-target="author2">Author2</button>
                         <button type="button" class="quick-nav-btn" data-target="production">Production</button>
-                        <button type="button" class="quick-nav-btn" data-target="validator" style="background:#6f42c1;color:white;border-color:#6f42c1;">Validator</button>
+                        <button type="button" class="quick-nav-btn" data-target="validator" style="background:#6f42c1;color:white;border-color:#6f42c1;">Validasi</button>
                     </div>
                 </div>
 
@@ -536,7 +536,7 @@
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
                                 <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
-                                <th colspan="3" class="text-center bg-validator" id="colValidator">Validator</th>
+                                <th colspan="3" class="text-center bg-validator" id="colValidator">Validasi</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers (4 cols) -->

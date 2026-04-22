@@ -130,7 +130,7 @@
         ],
         [
             'key' => 'validator',
-            'label' => 'Validator (V)',
+            'label' => 'Validasi (V)',
             'show' => $s['tracking_show_validator'] ?? '1',
             'rowClass' => $s['tracking_row_validator'] ?? 'table-success',
             'petugas' => $submission->petugasValidator,
