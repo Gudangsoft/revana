@@ -1182,7 +1182,7 @@ class SubmissionController extends Controller
     {
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'assignment_type' => 'required|in:submit,editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production',
+            'assignment_type' => 'required|in:submit,editor1,editor2,editor3,author1,author2,reviewer1,reviewer2,production,validator',
             'petugas_id' => 'nullable|integer',
         ]);
 
@@ -1201,6 +1201,7 @@ class SubmissionController extends Controller
             'reviewer1' => 'petugas_reviewer1_id',
             'reviewer2' => 'petugas_reviewer2_id',
             'production' => 'petugas_production_id',
+            'validator' => 'petugas_validator_id',
         ];
 
         $field = $fieldMap[$assignmentType];

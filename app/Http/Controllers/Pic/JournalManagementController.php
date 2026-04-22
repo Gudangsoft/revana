@@ -667,6 +667,7 @@ EOT;
             'EDITOR3' => ['petugas_editor3_id' => 'Editor 3'],
             'AUTHOR2' => ['petugas_author2_id' => 'Author 2'],
             'PRODUCTION' => ['petugas_production_id' => 'Production'],
+            'VALIDATOR_PROCESS' => ['petugas_validator_id' => 'Validator'],
         ];
         
         foreach ($roleMappings as $statusKey => $fields) {
@@ -795,8 +796,10 @@ EOT;
             'EDITOR3_REVISION' => 'AUTHOR2_PROCESS',
             'AUTHOR2_PROCESS' => 'PRODUCTION_PROCESS',
             'AUTHOR2_REVISION' => 'PRODUCTION_PROCESS',
-            'PRODUCTION_PROCESS' => 'PUBLISHED',
-            'PRODUCTION_REVISION' => 'PUBLISHED',
+            'PRODUCTION_PROCESS' => 'VALIDATOR_PROCESS',
+            'PRODUCTION_REVISION' => 'VALIDATOR_PROCESS',
+            'VALIDATOR_PROCESS' => 'PUBLISHED',
+            'VALIDATOR_REVISION' => 'PUBLISHED',
         ];
         
         return $statusFlow[$currentStatus] ?? $currentStatus;
@@ -813,6 +816,7 @@ EOT;
             'EDITOR3' => 'editor3_valid',
             'AUTHOR2' => 'author2_valid',
             'PRODUCTION' => 'production_valid',
+            'VALIDATOR' => 'validator_valid',
         ];
         
         foreach ($validFields as $key => $field) {
@@ -833,6 +837,7 @@ EOT;
             'EDITOR3' => 'editor3',
             'AUTHOR2' => 'author2',
             'PRODUCTION' => 'production',
+            'VALIDATOR' => 'validator',
         ];
         
         foreach ($stepMapping as $key => $step) {
@@ -851,7 +856,7 @@ EOT;
         // Base query - ONLY show submissions assigned to this PIC
         $query = Submission::with(['journalSlot.journalMaster', 'marketing',
             'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 
-            'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
+            'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction', 'petugasValidator'])
             ->where('process_type', '!=', 'fasttrack'); // Exclude fasttrack submissions
         
         // Always filter by PIC's assigned tasks
@@ -865,7 +870,8 @@ EOT;
               ->orWhere('petugas_author2_id', $picId)
               ->orWhere('petugas_reviewer1_id', $picId)
               ->orWhere('petugas_reviewer2_id', $picId)
-              ->orWhere('petugas_production_id', $picId);
+              ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
         });
         
         // Filter by date range
@@ -909,7 +915,8 @@ EOT;
               ->orWhere('petugas_author2_id', $picId)
               ->orWhere('petugas_reviewer1_id', $picId)
               ->orWhere('petugas_reviewer2_id', $picId)
-              ->orWhere('petugas_production_id', $picId);
+              ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
         });
         
         $stats = [
@@ -930,7 +937,8 @@ EOT;
                   ->orWhere('petugas_author2_id', $picId)
                   ->orWhere('petugas_reviewer1_id', $picId)
                   ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
+                  ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
             })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->get();
         
         $urgentMappings = [
@@ -942,6 +950,8 @@ EOT;
             'REVIEWER1' => ['petugas_reviewer1_id'],
             'REVIEWER2' => ['petugas_reviewer2_id'],
             'PRODUCTION' => ['petugas_production_id'],
+            'VALIDATOR' => ['petugas_validator_id'],
+            'VALIDATOR_PROCESS' => ['petugas_validator_id'],
         ];
         
         foreach ($mySubmissions as $task) {
@@ -1046,7 +1056,7 @@ EOT;
         
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'field' => 'required|string|in:editor1_valid,author1_valid,editor2_valid,reviewer1_valid,reviewer2_valid,editor3_valid,author2_valid,production_valid',
+            'field' => 'required|string|in:editor1_valid,author1_valid,editor2_valid,reviewer1_valid,reviewer2_valid,editor3_valid,author2_valid,production_valid,validator_valid',
             'value' => 'required|boolean',
         ]);
         
@@ -1063,6 +1073,7 @@ EOT;
             'editor3_valid' => 'petugas_editor3_id',
             'author2_valid' => 'petugas_author2_id',
             'production_valid' => 'petugas_production_id',
+            'validator_valid' => 'petugas_validator_id',
         ];
         
         if (isset($fieldMap[$request->field])) {
@@ -1094,6 +1105,7 @@ EOT;
                 'editor3_valid',      // OPTIONAL
                 'author2_valid',      // OPTIONAL
                 'production_valid',
+                'validator_valid',
             ];
             
             $currentStageIndex = array_search($request->field, $stageOrder);
@@ -1144,6 +1156,7 @@ EOT;
                         'editor3_valid' => 'Editor 3',
                         'author2_valid' => 'Author 2',
                         'production_valid' => 'Production',
+                        'validator_valid' => 'Validator',
                     ];
                     
                     return response()->json([
@@ -1240,6 +1253,10 @@ EOT;
                     $stageName = 'Production';
                     $stepName = 'production';
                     break;
+                case 'validator_valid':
+                    $stageName = 'Validator';
+                    $stepName = 'validator';
+                    break;
             }
             
             // Get points from settings
@@ -1309,7 +1326,7 @@ EOT;
     {
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'field' => 'required|string|in:marketing_id,petugas_submit_id,petugas_editor1_id,petugas_author1_id,petugas_editor2_id,petugas_reviewer1_id,petugas_reviewer2_id,petugas_editor3_id,petugas_author2_id,petugas_production_id',
+            'field' => 'required|string|in:marketing_id,petugas_submit_id,petugas_editor1_id,petugas_author1_id,petugas_editor2_id,petugas_reviewer1_id,petugas_reviewer2_id,petugas_editor3_id,petugas_author2_id,petugas_production_id,petugas_validator_id',
             'value' => 'nullable',
         ]);
         
@@ -1346,7 +1363,7 @@ EOT;
         
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'stage' => 'required|string|in:editor1,author1,editor2,reviewer1,reviewer2,editor3,author2,production',
+            'stage' => 'required|string|in:editor1,author1,editor2,reviewer1,reviewer2,editor3,author2,production,validator',
         ]);
         
         $submission = Submission::findOrFail($request->submission_id);
@@ -1363,6 +1380,7 @@ EOT;
             'editor3' => 'petugas_editor3_id',
             'author2' => 'petugas_author2_id',
             'production' => 'petugas_production_id',
+            'validator' => 'petugas_validator_id',
         ];
         
         $petugasField = $stageFieldMapping[$stage] ?? null;
@@ -1402,7 +1420,7 @@ EOT;
         $lastViewed = session('pic_tasks_last_viewed_' . $picId);
         
         // Get all submissions where current PIC is assigned as petugas
-        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit', 'petugasEditor1', 'petugasAuthor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction'])
+        $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit', 'petugasEditor1', 'petugasAuthor1', 'petugasEditor2', 'petugasEditor3', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction', 'petugasValidator'])
             ->where(function($q) use ($picId) {
                 $q->where('created_by', $picId)
                   ->orWhere('petugas_submit_id', $picId)
@@ -1413,7 +1431,8 @@ EOT;
                   ->orWhere('petugas_author2_id', $picId)
                   ->orWhere('petugas_reviewer1_id', $picId)
                   ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
+                  ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
             });
         
         if ($request->filled('status')) {
@@ -1443,7 +1462,8 @@ EOT;
                   ->orWhere('petugas_author2_id', $picId)
                   ->orWhere('petugas_reviewer1_id', $picId)
                   ->orWhere('petugas_reviewer2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId);
+                  ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
             });
         };
         
@@ -1542,6 +1562,7 @@ EOT;
             'AUTHOR2_PROCESS' => ['petugas_author2_id'],
             'PRODUCTION_PROCESS' => ['petugas_production_id'],
             'PRODUCTION_REVISION' => ['petugas_production_id'],
+            'VALIDATOR_PROCESS' => ['petugas_validator_id'],
         ];
         
         foreach ($urgentMappings as $statusKey => $fields) {

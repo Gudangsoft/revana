@@ -142,7 +142,7 @@
             $stepLabels = [
                 'editor1' => 'Editor 1', 'author1' => 'Author 1', 'editor2' => 'Editor 2',
                 'reviewer1' => 'Reviewer 1', 'reviewer2' => 'Reviewer 2',
-                'editor3' => 'Editor 3', 'author2' => 'Author 2', 'production' => 'Production',
+                'editor3' => 'Editor 3', 'author2' => 'Author 2', 'production' => 'Production', 'validator' => 'Validator',
             ];
         @endphp
 
@@ -225,6 +225,12 @@
                     <i class="bi bi-check text-white"></i>
                 </div>
                 <small>Production</small>
+            </div>
+            <div class="col">
+                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center {{ $submission->validator_valid ? 'bg-success' : 'bg-secondary' }}" style="width: 40px; height: 40px;">
+                    <i class="bi bi-check text-white"></i>
+                </div>
+                <small>Validator</small>
             </div>
         </div>
     </div>
