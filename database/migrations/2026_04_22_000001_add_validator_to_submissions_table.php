@@ -15,29 +15,22 @@ return new class extends Migration
     {
         Schema::table('submissions', function (Blueprint $table) {
             // Petugas Validator: mengecek kesesuaian artikel yang sudah dipublish
-            $table->foreignId('petugas_validator_id')->nullable()->after('production_validated_at')
-                  ->constrained('pics')->onDelete('set null');
-            $table->boolean('validator_valid')->default(false)->after('petugas_validator_id');
-            $table->timestamp('validator_validated_at')->nullable()->after('validator_valid');
-            $table->text('catatan_validator')->nullable()->after('validator_validated_at');
+            if (!Schema::hasColumn('submissions', 'petugas_validator_id')) {
+                $table->foreignId('petugas_validator_id')->nullable()->after('production_validated_at')
+                      ->constrained('pics')->onDelete('set null');
+            }
+            if (!Schema::hasColumn('submissions', 'validator_valid')) {
+                $table->boolean('validator_valid')->default(false)->after('petugas_validator_id');
+            }
+            if (!Schema::hasColumn('submissions', 'validator_validated_at')) {
+                $table->timestamp('validator_validated_at')->nullable()->after('validator_valid');
+            }
+            if (!Schema::hasColumn('submissions', 'catatan_validator')) {
+                $table->text('catatan_validator')->nullable()->after('validator_validated_at');
+            }
         });
 
-        // Update status enum to include VALIDATOR_PROCESS
-        // MySQL requires a specific ALTER TABLE for ENUM columns
-        \DB::statement("ALTER TABLE submissions MODIFY COLUMN status ENUM(
-            'SUBMITTED',
-            'EDITOR1_PROCESS',
-            'AUTHOR1_PROCESS',
-            'EDITOR2_PROCESS',
-            'REVIEWER1_PROCESS',
-            'REVIEWER2_PROCESS',
-            'EDITOR3_PROCESS',
-            'AUTHOR2_PROCESS',
-            'PRODUCTION_PROCESS',
-            'VALIDATOR_PROCESS',
-            'PUBLISHED',
-            'REJECTED'
-        ) NOT NULL DEFAULT 'SUBMITTED'");
+        // Status is already VARCHAR(50), no need to alter enum.
     }
 
     /**
@@ -55,19 +48,6 @@ return new class extends Migration
             ]);
         });
 
-        // Revert status enum
-        \DB::statement("ALTER TABLE submissions MODIFY COLUMN status ENUM(
-            'SUBMITTED',
-            'EDITOR1_PROCESS',
-            'AUTHOR1_PROCESS',
-            'EDITOR2_PROCESS',
-            'REVIEWER1_PROCESS',
-            'REVIEWER2_PROCESS',
-            'EDITOR3_PROCESS',
-            'AUTHOR2_PROCESS',
-            'PRODUCTION_PROCESS',
-            'PUBLISHED',
-            'REJECTED'
-        ) NOT NULL DEFAULT 'SUBMITTED'");
+        // Status is VARCHAR(50), no need to revert enum.
     }
 };
