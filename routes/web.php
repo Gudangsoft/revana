@@ -51,6 +51,13 @@ Route::get('/test-tracking', function () {
     return 'Tracking route works!';
 });
 
+// Domain Khusus Verifikasi LOA
+Route::domain('verifyloa.apji.org')->group(function () {
+    Route::get('/', [TrackingController::class, 'index'])->name('verify.index');
+    Route::get('/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
+    Route::post('/search', [TrackingController::class, 'search'])->name('verify.search');
+});
+
 // Public LOA Tracking (no login required)
 Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('tracking.search');

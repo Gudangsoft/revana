@@ -180,7 +180,7 @@
 
             <!-- Back Button -->
             <div class="text-center">
-                <a href="{{ route('tracking.index') }}" class="back-btn">
+                <a href="{{ str_contains(Route::currentRouteName(), 'verify') ? route('verify.index') : route('tracking.index') }}" class="back-btn">
                     <i class="bi bi-arrow-left"></i> Lacak Artikel Lain
                 </a>
             </div>

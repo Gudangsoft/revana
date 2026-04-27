@@ -122,7 +122,7 @@
                     </div>
                     @endif
 
-                    <form action="{{ route('tracking.search') }}" method="POST">
+                    <form action="{{ Route::currentRouteName() == 'verify.index' ? route('verify.search') : route('tracking.search') }}" method="POST">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label fw-bold mb-2">

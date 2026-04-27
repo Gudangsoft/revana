@@ -16,6 +16,37 @@ class TrackingController extends Controller
     }
 
     /**
+     * Direct verification via URL (for QR Code)
+     */
+    public function verifyDirect($kodeLOA)
+    {
+        $kodeLOA = strtoupper(trim($kodeLOA));
+
+        $submission = Submission::with([
+            'journalSlot.journalMaster', 
+            'petugasSubmit',
+            'petugasEditor1',
+            'petugasAuthor1',
+            'petugasEditor2',
+            'petugasReviewer1',
+            'petugasReviewer2',
+            'petugasEditor3',
+            'petugasAuthor2',
+            'petugasProduction'
+        ])
+            ->where('kode_loa', $kodeLOA)
+            ->orWhere('kode_submit', $kodeLOA)
+            ->first();
+
+        if (!$submission) {
+            $route = str_contains(request()->route()->getName(), 'verify') ? 'verify.index' : 'tracking.index';
+            return redirect()->route($route)->with('error', 'Kode LOA tidak ditemukan.');
+        }
+
+        return view('public.tracking-result', compact('submission'));
+    }
+
+    /**
      * Search by LOA code
      */
     public function search(Request $request)
