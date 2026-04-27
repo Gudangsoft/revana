@@ -33,14 +33,19 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// Root route dengan deteksi domain khusus
-Route::get('/', function () {
-    // Jika diakses melalui domain verifikasi
-    if (request()->getHost() == 'verifyloa.apji.org') {
-        return app(TrackingController::class)->index();
-    }
+// --- SEKSI KHUSUS DOMAIN VERIFIKASI ---
+if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'verifyloa.apji.org')) {
+    Route::get('/', [TrackingController::class, 'index'])->name('verify.index');
+    Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('verify.search');
+    Route::get('/v/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
+    
+    // Cegah rute lain dieksekusi untuk domain ini agar tidak terjadi redirect loop ke login
+    // Kita biarkan rute statis (assets) tetap bisa diakses
+}
+// --- END SEKSI KHUSUS ---
 
-    // Default: Redirect berdasarkan auth
+// Root redirect untuk portal utama
+Route::get('/', function () {
     if (Auth::check()) {
         if (Auth::user()->role === 'admin') {
             return redirect('/admin/dashboard');
@@ -50,10 +55,7 @@ Route::get('/', function () {
         return redirect('/login');
     }
     return redirect('/login');
-})->name('verify.index');
-
-// Rute verifikasi langsung (di luar grup domain untuk kestabilan)
-Route::get('/v/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
+});
 
 // Test route
 Route::get('/test-tracking', function () {
