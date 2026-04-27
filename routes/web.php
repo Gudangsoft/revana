@@ -37,6 +37,15 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', function () {
     $host = $_SERVER['HTTP_HOST'] ?? '';
 
+    // Jika diakses melalui domain SIPERA (Portal Reviewer)
+    if (str_contains($host, 'sipera.apji.org')) {
+        if (Auth::check() && Auth::user()->role === 'reviewer') {
+            return redirect()->route('reviewer.dashboard');
+        }
+        // Jika tamu, tampilkan form pendaftaran reviewer
+        return app(\App\Http\Controllers\Admin\ReviewerRegistrationController::class)->showForm();
+    }
+
     // Jika diakses melalui domain verifikasi, langsung arahkan ke tracking
     if (str_contains($host, 'verifyloa.apji.org')) {
         return redirect('/tracking-loa');
