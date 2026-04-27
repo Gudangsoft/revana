@@ -35,12 +35,14 @@ use Illuminate\Support\Facades\Auth;
 
 // --- SEKSI KHUSUS DOMAIN VERIFIKASI ---
 if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'verifyloa.apji.org')) {
-    Route::get('/', [TrackingController::class, 'index'])->name('verify.index');
+    // Redirect root ke halaman tracking agar sesuai permintaan
+    Route::get('/', function () {
+        return redirect('/tracking-loa');
+    });
+
+    Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('verify.index');
     Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('verify.search');
     Route::get('/v/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
-    
-    // Cegah rute lain dieksekusi untuk domain ini agar tidak terjadi redirect loop ke login
-    // Kita biarkan rute statis (assets) tetap bisa diakses
 }
 // --- END SEKSI KHUSUS ---
 
