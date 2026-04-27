@@ -33,21 +33,16 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// --- SEKSI KHUSUS DOMAIN VERIFIKASI ---
-if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'verifyloa.apji.org')) {
-    // Redirect root ke halaman tracking agar sesuai permintaan
-    Route::get('/', function () {
-        return redirect('/tracking-loa');
-    });
-
-    Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('verify.index');
-    Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('verify.search');
-    Route::get('/v/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
-}
-// --- END SEKSI KHUSUS ---
-
-// Root redirect untuk portal utama
+// Root redirect utama
 Route::get('/', function () {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+
+    // Jika diakses melalui domain verifikasi, langsung arahkan ke tracking
+    if (str_contains($host, 'verifyloa.apji.org')) {
+        return redirect('/tracking-loa');
+    }
+
+    // Logika untuk portal utama
     if (Auth::check()) {
         if (Auth::user()->role === 'admin') {
             return redirect('/admin/dashboard');
@@ -58,6 +53,11 @@ Route::get('/', function () {
     }
     return redirect('/login');
 });
+
+// Pastikan rute tracking tersedia secara global
+Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('tracking.search');
+Route::get('/v/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
 
 // Test route
 Route::get('/test-tracking', function () {
