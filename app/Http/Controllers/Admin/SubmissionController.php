@@ -377,6 +377,7 @@ class SubmissionController extends Controller
             'petugasEditor3',
             'petugasAuthor2',
             'petugasProduction',
+            'petugasValidator',
             'creator',
             'histories.user'
         ]);
@@ -654,19 +655,22 @@ class SubmissionController extends Controller
         $validated = $request->validate([
             'catatan_reviewer1' => 'nullable|string',
             'catatan_reviewer2' => 'nullable|string',
+            'catatan_validator' => 'nullable|string',
         ]);
-        
-        // Log note changes
+
         if (!empty($validated['catatan_reviewer1']) && $validated['catatan_reviewer1'] !== $submission->catatan_reviewer1) {
             $submission->logHistory('reviewer1', 'note_added', $validated['catatan_reviewer1']);
         }
         if (!empty($validated['catatan_reviewer2']) && $validated['catatan_reviewer2'] !== $submission->catatan_reviewer2) {
             $submission->logHistory('reviewer2', 'note_added', $validated['catatan_reviewer2']);
         }
-        
+        if (!empty($validated['catatan_validator']) && $validated['catatan_validator'] !== $submission->catatan_validator) {
+            $submission->logHistory('validator', 'note_added', $validated['catatan_validator']);
+        }
+
         $submission->update($validated);
-        
-        return back()->with('success', 'Catatan reviewer berhasil diperbarui');
+
+        return back()->with('success', 'Catatan berhasil diperbarui');
     }
 
     // Update catatan untuk step manapun (editor1, author1, editor2, editor3, author2, production)

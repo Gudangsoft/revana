@@ -184,6 +184,20 @@
                         'has_link_publish' => true,
                         'prev_step_valid' => $submission->author2_valid,
                     ],
+                    'validator' => [
+                        'title' => 'Validator',
+                        'icon' => '9',
+                        'desc' => 'Validasi akhir sebelum publikasi',
+                        'valid_field' => 'validator_valid',
+                        'validated_at_field' => 'validator_validated_at',
+                        'petugas_rel' => 'petugasValidator',
+                        'petugas_id_field' => 'petugas_validator_id',
+                        'has_credentials' => false,
+                        'has_notes' => true,
+                        'notes_via' => 'reviewer',
+                        'notes_field' => 'catatan_validator',
+                        'prev_step_valid' => $submission->production_valid,
+                    ],
                 ];
             @endphp
 
