@@ -127,12 +127,6 @@
         </h2>
         <div id="collapseBKD" class="accordion-collapse collapse {{ $bkdActive ? 'show' : '' }}" data-bs-parent="#accordionBKD">
             <div class="accordion-body p-0">
-                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ $bkdActive && str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
-                    <i class="bi bi-journal-text"></i> Input Data BKD
-                </a>
-                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $bkdActive && str_starts_with($currentRoute, 'admin.journal-slots') ? 'active' : '' }}">
-                    <i class="bi bi-calendar3"></i> Data Slot BKD
-                </a>
                 <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i> Data Submit BKD
                 </a>
@@ -161,12 +155,6 @@
         </h2>
         <div id="collapseJAFA" class="accordion-collapse collapse {{ $jafaActive ? 'show' : '' }}" data-bs-parent="#accordionJAFA">
             <div class="accordion-body p-0">
-                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ $jafaActive && str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
-                    <i class="bi bi-journal-text"></i> Input Data JAFA
-                </a>
-                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $jafaActive && str_starts_with($currentRoute, 'admin.journal-slots') ? 'active' : '' }}">
-                    <i class="bi bi-calendar3"></i> Data Slot JAFA
-                </a>
                 <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i> Data Submit JAFA
                 </a>
@@ -291,6 +279,9 @@
 </a>
 <a href="{{ route('admin.reports.journal-articles') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.reports') ? 'active' : '' }}">
     <i class="bi bi-file-earmark-bar-graph"></i> Laporan Jurnal
+</a>
+<a href="{{ route('admin.laporan-kinerja.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.laporan-kinerja') ? 'active' : '' }}">
+    <i class="bi bi-bar-chart-steps text-warning"></i> Laporan Kinerja
 </a>
 <hr>
 <a href="{{ route('admin.profile.edit') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.profile') ? 'active' : '' }}">

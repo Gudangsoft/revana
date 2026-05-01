@@ -311,6 +311,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/pic-points/{pic}/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'exportShow'])->name('pic-points.export-show');
         Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
         Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
+
+        // Laporan Kinerja
+        Route::get('/laporan-kinerja', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'index'])->name('laporan-kinerja.index');
         
         // Field of Study Management
         Route::resource('field-of-studies', \App\Http\Controllers\Admin\FieldOfStudyController::class)->except(['show']);
