@@ -23,8 +23,18 @@
 
 
 @php
-    $journalActive  = str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals');
+    $currentProgram = request('program');
+    $isSubmissionRoute = str_starts_with($currentRoute, 'admin.submissions');
+    $isSharedJournalRoute = str_starts_with($currentRoute, 'admin.journal-masters')
+        || str_starts_with($currentRoute, 'admin.journal-slots')
+        || str_starts_with($currentRoute, 'admin.accreditations')
+        || str_starts_with($currentRoute, 'admin.kategoris')
+        || str_starts_with($currentRoute, 'admin.jenis-jurnals');
+
+    $journalActive  = $isSharedJournalRoute || ($isSubmissionRoute && !in_array($currentProgram, ['bkd', 'jafa']));
     $fastrackActive = str_starts_with($currentRoute, 'admin.fasttrack-management') || str_starts_with($currentRoute, 'admin.fasttrack');
+    $bkdActive      = $isSubmissionRoute && $currentProgram === 'bkd';
+    $jafaActive     = $isSubmissionRoute && $currentProgram === 'jafa';
 @endphp
 
 {{-- Menu Pengelolaan Jurnal --}}
@@ -102,6 +112,74 @@
     </div>
 </div>
 @endfeature
+
+{{-- Menu Pengelolaan Jurnal BKD --}}
+<div class="accordion accordion-flush" id="accordionBKD">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ $bkdActive ? 'active' : '' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseBKD"
+                    aria-expanded="{{ $bkdActive ? 'true' : 'false' }}">
+                <i class="bi bi-briefcase-fill text-info"></i> Pengelolaan Jurnal BKD
+            </button>
+        </h2>
+        <div id="collapseBKD" class="accordion-collapse collapse {{ $bkdActive ? 'show' : '' }}" data-bs-parent="#accordionBKD">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ $bkdActive && str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
+                    <i class="bi bi-journal-text"></i> Input Data BKD
+                </a>
+                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $bkdActive && str_starts_with($currentRoute, 'admin.journal-slots') ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot BKD
+                </a>
+                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-plus"></i> Data Submit BKD
+                </a>
+                <a href="{{ route('admin.submissions.monitoring', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Proses BKD
+                    @if($pendingValidationCount > 0)
+                    <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
+                    @endif
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Menu Pengelolaan Jurnal JAFA --}}
+<div class="accordion accordion-flush" id="accordionJAFA">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ $jafaActive ? 'active' : '' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseJAFA"
+                    aria-expanded="{{ $jafaActive ? 'true' : 'false' }}">
+                <i class="bi bi-folder2-open text-success"></i> Pengelolaan Jurnal JAFA
+            </button>
+        </h2>
+        <div id="collapseJAFA" class="accordion-collapse collapse {{ $jafaActive ? 'show' : '' }}" data-bs-parent="#accordionJAFA">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ $jafaActive && str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
+                    <i class="bi bi-journal-text"></i> Input Data JAFA
+                </a>
+                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $jafaActive && str_starts_with($currentRoute, 'admin.journal-slots') ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i> Data Slot JAFA
+                </a>
+                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-plus"></i> Data Submit JAFA
+                </a>
+                <a href="{{ route('admin.submissions.monitoring', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i> Monitoring Proses JAFA
+                    @if($pendingValidationCount > 0)
+                    <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
+                    @endif
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ str_starts_with($currentRoute, 'admin.assignments') ? 'active' : '' }}">
     <i class="bi bi-clipboard-check"></i> Penugasan Review
