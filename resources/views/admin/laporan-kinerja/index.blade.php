@@ -41,10 +41,18 @@
                             <i class="bi bi-arrow-clockwise"></i> Reset
                         </a>
                     </div>
-                    <div class="col-auto ms-auto">
+                    <div class="col-auto ms-auto d-flex gap-2 align-items-center">
                         <span class="badge bg-primary fs-6 px-3 py-2">
                             <i class="bi bi-calendar3"></i> {{ $namaBulan }}
                         </span>
+                        <a href="{{ route('admin.laporan-kinerja.export-excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+                           class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-excel"></i> Excel
+                        </a>
+                        <a href="{{ route('admin.laporan-kinerja.export-pdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+                           class="btn btn-danger btn-sm">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </a>
                     </div>
                 </form>
             </div>
