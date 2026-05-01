@@ -379,14 +379,22 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-bar-chart"></i> Monitoring Proses Submit (Filter Tanggal)</span>
-                <a href="{{ route('admin.submissions.index') }}" class="btn btn-secondary">
+                <span>
+                    <i class="bi bi-bar-chart"></i> Monitoring Proses Submit (Filter Tanggal)
+                    @if(isset($program) && $program)
+                        <span class="badge bg-{{ $program == 'bkd' ? 'info' : 'success' }} ms-2">{{ strtoupper($program) }}</span>
+                    @endif
+                </span>
+                <a href="{{ route('admin.submissions.index', array_filter(['program' => $program ?? null])) }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Kembali
                 </a>
             </div>
             <div class="card-body">
                 <!-- Filter -->
                 <form action="{{ route('admin.submissions.monitoring') }}" method="GET" class="mb-4">
+                    @if(isset($program) && $program)
+                        <input type="hidden" name="program" value="{{ $program }}">
+                    @endif
                     <div class="row g-2 align-items-end">
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
@@ -421,7 +429,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i> Filter
                                 </button>
-                                <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-outline-secondary">
+                                <a href="{{ route('admin.submissions.monitoring', array_filter(['program' => $program ?? null])) }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-clockwise"></i> Refresh
                                 </a>
                             </div>

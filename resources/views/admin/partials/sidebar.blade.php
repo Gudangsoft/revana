@@ -23,8 +23,28 @@
 
 
 @php
-    $journalActive = str_starts_with($currentRoute, 'admin.journal-masters') || str_starts_with($currentRoute, 'admin.journal-slots') || str_starts_with($currentRoute, 'admin.submissions') || str_starts_with($currentRoute, 'admin.accreditations') || str_starts_with($currentRoute, 'admin.kategoris') || str_starts_with($currentRoute, 'admin.jenis-jurnals');
-    $fastrackActive = str_starts_with($currentRoute, 'admin.fasttrack-management') || str_starts_with($currentRoute, 'admin.fasttrack');
+    $currentProgram = request('program');
+
+    $isJournalRoute = str_starts_with($currentRoute, 'admin.journal-masters')
+        || str_starts_with($currentRoute, 'admin.journal-slots')
+        || str_starts_with($currentRoute, 'admin.submissions')
+        || str_starts_with($currentRoute, 'admin.accreditations')
+        || str_starts_with($currentRoute, 'admin.kategoris')
+        || str_starts_with($currentRoute, 'admin.jenis-jurnals');
+
+    $isFastrackRoute = str_starts_with($currentRoute, 'admin.fasttrack-management')
+        || str_starts_with($currentRoute, 'admin.fasttrack');
+
+    $journalActive  = $isJournalRoute  && !in_array($currentProgram, ['bkd', 'jafa']);
+    $fastrackActive = $isFastrackRoute && !in_array($currentProgram, ['bkd', 'jafa']);
+
+    $bkdJournalActive   = $isJournalRoute  && $currentProgram === 'bkd';
+    $jafaJournalActive  = $isJournalRoute  && $currentProgram === 'jafa';
+    $bkdFastrackActive  = $isFastrackRoute && $currentProgram === 'bkd';
+    $jafaFastrackActive = $isFastrackRoute && $currentProgram === 'jafa';
+
+    $bkdActive  = $bkdJournalActive  || $bkdFastrackActive;
+    $jafaActive = $jafaJournalActive || $jafaFastrackActive;
 @endphp
 
 {{-- Menu Pengelolaan Jurnal --}}
@@ -107,41 +127,41 @@
 <div class="accordion accordion-flush" id="accordionBKD">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ $journalActive || $fastrackActive ? 'active' : '' }}"
+            <button class="accordion-button collapsed nav-link text-white {{ $bkdActive ? 'active' : '' }}"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseBKD"
-                    aria-expanded="{{ $journalActive || $fastrackActive ? 'true' : 'false' }}">
+                    aria-expanded="{{ $bkdActive ? 'true' : 'false' }}">
                 <i class="bi bi-briefcase-fill text-info"></i> Pengelolaan BKD
             </button>
         </h2>
-        <div id="collapseBKD" class="accordion-collapse collapse {{ $journalActive || $fastrackActive ? 'show' : '' }}">
+        <div id="collapseBKD" class="accordion-collapse collapse {{ $bkdActive ? 'show' : '' }}">
             <div class="accordion-body p-0 ps-2">
 
                 {{-- Sub: Pengelolaan Jurnal --}}
                 <div class="accordion accordion-flush" id="accordionBKDJournal">
                     <div class="accordion-item bg-transparent border-0">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed nav-link text-white {{ $journalActive ? 'active' : '' }}"
+                            <button class="accordion-button collapsed nav-link text-white {{ $bkdJournalActive ? 'active' : '' }}"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#collapseBKDJournal"
-                                    aria-expanded="{{ $journalActive ? 'true' : 'false' }}">
+                                    aria-expanded="{{ $bkdJournalActive ? 'true' : 'false' }}">
                                 <i class="bi bi-journal-bookmark-fill text-primary"></i> Pengelolaan Jurnal
                             </button>
                         </h2>
-                        <div id="collapseBKDJournal" class="accordion-collapse collapse {{ $journalActive ? 'show' : '' }}" data-bs-parent="#accordionBKDJournal">
+                        <div id="collapseBKDJournal" class="accordion-collapse collapse {{ $bkdJournalActive ? 'show' : '' }}" data-bs-parent="#accordionBKDJournal">
                             <div class="accordion-body p-0">
-                                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
+                                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ $bkdJournalActive && str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
                                     <i class="bi bi-journal-text"></i> Data Jurnal
                                 </a>
-                                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.index' || $currentRoute == 'admin.journal-slots.create' || $currentRoute == 'admin.journal-slots.edit' || $currentRoute == 'admin.journal-slots.show' || $currentRoute == 'admin.journal-slots.monitoring' ? 'active' : '' }}">
+                                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $bkdJournalActive && (str_starts_with($currentRoute, 'admin.journal-slots')) ? 'active' : '' }}">
                                     <i class="bi bi-calendar3"></i> Data Slot & Monitoring
                                 </a>
-                                <a href="{{ route('admin.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.index' || $currentRoute == 'admin.submissions.create' || $currentRoute == 'admin.submissions.edit' || $currentRoute == 'admin.submissions.show' || $currentRoute == 'admin.submissions.process' ? 'active' : '' }}">
+                                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdJournalActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
                                     <i class="bi bi-file-earmark-plus"></i> Data Submit
                                 </a>
-                                <a href="{{ route('admin.submissions.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
+                                <a href="{{ route('admin.submissions.monitoring', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdJournalActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
                                     <i class="bi bi-graph-up"></i> Monitoring Proses
                                     @if($pendingValidationCount > 0)
                                     <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
@@ -166,26 +186,26 @@
                 <div class="accordion accordion-flush" id="accordionBKDFasttrack">
                     <div class="accordion-item bg-transparent border-0">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed nav-link text-white {{ $fastrackActive ? 'active' : '' }}"
+                            <button class="accordion-button collapsed nav-link text-white {{ $bkdFastrackActive ? 'active' : '' }}"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#collapseBKDFasttrack"
-                                    aria-expanded="{{ $fastrackActive ? 'true' : 'false' }}">
+                                    aria-expanded="{{ $bkdFastrackActive ? 'true' : 'false' }}">
                                 <i class="bi bi-lightning-charge text-warning"></i> Pengelolaan Jurnal Fasttrack
                             </button>
                         </h2>
-                        <div id="collapseBKDFasttrack" class="accordion-collapse collapse {{ $fastrackActive ? 'show' : '' }}" data-bs-parent="#accordionBKDFasttrack">
+                        <div id="collapseBKDFasttrack" class="accordion-collapse collapse {{ $bkdFastrackActive ? 'show' : '' }}" data-bs-parent="#accordionBKDFasttrack">
                             <div class="accordion-body p-0">
-                                <a href="{{ route('admin.fasttrack.create') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.fasttrack') && !str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack.create', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdFastrackActive && str_starts_with($currentRoute, 'admin.fasttrack') && !str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}">
                                     <i class="bi bi-plus-circle text-warning"></i> Input Fasttrack
                                 </a>
-                                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $bkdFastrackActive && $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
                                     <i class="bi bi-calendar3"></i> Data Slot Fasttrack
                                 </a>
-                                <a href="{{ route('admin.fasttrack-management.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack-management.submissions.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdFastrackActive && $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
                                     <i class="bi bi-file-earmark-text"></i> Data Submit Fasttrack
                                 </a>
-                                <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack-management.monitoring.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdFastrackActive && $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
                                     <i class="bi bi-graph-up"></i> Monitoring Proses Fasttrack
                                 </a>
                             </div>
@@ -203,41 +223,41 @@
 <div class="accordion accordion-flush" id="accordionJAFA">
     <div class="accordion-item bg-transparent border-0">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white"
+            <button class="accordion-button collapsed nav-link text-white {{ $jafaActive ? 'active' : '' }}"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseJAFA"
-                    aria-expanded="false">
+                    aria-expanded="{{ $jafaActive ? 'true' : 'false' }}">
                 <i class="bi bi-folder2-open text-success"></i> Pengelolaan JAFA
             </button>
         </h2>
-        <div id="collapseJAFA" class="accordion-collapse collapse">
+        <div id="collapseJAFA" class="accordion-collapse collapse {{ $jafaActive ? 'show' : '' }}">
             <div class="accordion-body p-0 ps-2">
 
                 {{-- Sub: Pengelolaan Jurnal --}}
                 <div class="accordion accordion-flush" id="accordionJAFAJournal">
                     <div class="accordion-item bg-transparent border-0">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed nav-link text-white"
+                            <button class="accordion-button collapsed nav-link text-white {{ $jafaJournalActive ? 'active' : '' }}"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#collapseJAFAJournal"
-                                    aria-expanded="false">
+                                    aria-expanded="{{ $jafaJournalActive ? 'true' : 'false' }}">
                                 <i class="bi bi-journal-bookmark-fill text-primary"></i> Pengelolaan Jurnal
                             </button>
                         </h2>
-                        <div id="collapseJAFAJournal" class="accordion-collapse collapse" data-bs-parent="#accordionJAFAJournal">
+                        <div id="collapseJAFAJournal" class="accordion-collapse collapse {{ $jafaJournalActive ? 'show' : '' }}" data-bs-parent="#accordionJAFAJournal">
                             <div class="accordion-body p-0">
-                                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
+                                <a href="{{ route('admin.journal-masters.index') }}" class="nav-link ps-5 {{ $jafaJournalActive && str_starts_with($currentRoute, 'admin.journal-masters') ? 'active' : '' }}">
                                     <i class="bi bi-journal-text"></i> Data Jurnal
                                 </a>
-                                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.index' || $currentRoute == 'admin.journal-slots.create' || $currentRoute == 'admin.journal-slots.edit' || $currentRoute == 'admin.journal-slots.show' || $currentRoute == 'admin.journal-slots.monitoring' ? 'active' : '' }}">
+                                <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $jafaJournalActive && str_starts_with($currentRoute, 'admin.journal-slots') ? 'active' : '' }}">
                                     <i class="bi bi-calendar3"></i> Data Slot & Monitoring
                                 </a>
-                                <a href="{{ route('admin.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.index' || $currentRoute == 'admin.submissions.create' || $currentRoute == 'admin.submissions.edit' || $currentRoute == 'admin.submissions.show' || $currentRoute == 'admin.submissions.process' ? 'active' : '' }}">
+                                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaJournalActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
                                     <i class="bi bi-file-earmark-plus"></i> Data Submit
                                 </a>
-                                <a href="{{ route('admin.submissions.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
+                                <a href="{{ route('admin.submissions.monitoring', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaJournalActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
                                     <i class="bi bi-graph-up"></i> Monitoring Proses
                                     @if($pendingValidationCount > 0)
                                     <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
@@ -262,26 +282,26 @@
                 <div class="accordion accordion-flush" id="accordionJAFAFasttrack">
                     <div class="accordion-item bg-transparent border-0">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed nav-link text-white"
+                            <button class="accordion-button collapsed nav-link text-white {{ $jafaFastrackActive ? 'active' : '' }}"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#collapseJAFAFasttrack"
-                                    aria-expanded="false">
+                                    aria-expanded="{{ $jafaFastrackActive ? 'true' : 'false' }}">
                                 <i class="bi bi-lightning-charge text-warning"></i> Pengelolaan Jurnal Fasttrack
                             </button>
                         </h2>
-                        <div id="collapseJAFAFasttrack" class="accordion-collapse collapse" data-bs-parent="#accordionJAFAFasttrack">
+                        <div id="collapseJAFAFasttrack" class="accordion-collapse collapse {{ $jafaFastrackActive ? 'show' : '' }}" data-bs-parent="#accordionJAFAFasttrack">
                             <div class="accordion-body p-0">
-                                <a href="{{ route('admin.fasttrack.create') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.fasttrack') && !str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack.create', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaFastrackActive && str_starts_with($currentRoute, 'admin.fasttrack') && !str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}">
                                     <i class="bi bi-plus-circle text-warning"></i> Input Fasttrack
                                 </a>
-                                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack-management.slots.index') }}" class="nav-link ps-5 {{ $jafaFastrackActive && $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
                                     <i class="bi bi-calendar3"></i> Data Slot Fasttrack
                                 </a>
-                                <a href="{{ route('admin.fasttrack-management.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack-management.submissions.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaFastrackActive && $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
                                     <i class="bi bi-file-earmark-text"></i> Data Submit Fasttrack
                                 </a>
-                                <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
+                                <a href="{{ route('admin.fasttrack-management.monitoring.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaFastrackActive && $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
                                     <i class="bi bi-graph-up"></i> Monitoring Proses Fasttrack
                                 </a>
                             </div>

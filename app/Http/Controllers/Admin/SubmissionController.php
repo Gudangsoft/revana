@@ -67,11 +67,13 @@ class SubmissionController extends Controller
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
-        
+
+        $this->applyProgramFilter($query, $request);
+
         $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 20));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
-        
+
         return view('admin.submissions.index', compact('submissions', 'journals', 'statusOptions'));
     }
 
@@ -111,6 +113,7 @@ class SubmissionController extends Controller
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
+            'program_type' => ['nullable', Rule::in(['bkd', 'jafa'])],
         ]);
 
         // Check slot availability
@@ -745,18 +748,20 @@ class SubmissionController extends Controller
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
-        
+
+        $this->applyProgramFilter($query, $request);
+
         // Get paginated submissions
         $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50))->withQueryString();
-        
+
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
-        
+
         // Get PICs and Users for inline assignment dropdowns
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $users = User::where('role', 'admin')->orderBy('name')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
-        
+
         // Statistics - use single optimized query with conditional aggregation
         $baseQuery = Submission::query()
             ->selectRaw('
@@ -771,7 +776,7 @@ class SubmissionController extends Controller
                 $q->where('process_type', '!=', 'fasttrack')
                   ->orWhereNull('process_type');
             });
-        
+
         // Apply same filters
         if ($request->filled('tanggal_dari')) {
             $baseQuery->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
@@ -787,9 +792,10 @@ class SubmissionController extends Controller
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
-        
+        $this->applyProgramFilter($baseQuery, $request);
+
         $statsResult = $baseQuery->first();
-        
+
         $stats = [
             'total' => $statsResult->total ?? 0,
             'submitted' => $statsResult->submitted ?? 0,
@@ -797,13 +803,15 @@ class SubmissionController extends Controller
             'published' => $statsResult->published ?? 0,
             'rejected' => $statsResult->rejected ?? 0,
         ];
-        
+
         $pendingCount = $statsResult->pending_validations ?? 0;
         $pendingValidations = $submissions->filter(function($s) {
             return str_contains($s->status, '_SUBMITTED');
         });
-        
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
+
+        $program = $request->input('program');
+
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount', 'program'));
     }
 
     /**
@@ -1431,6 +1439,7 @@ class SubmissionController extends Controller
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
+            'program_type' => ['nullable', Rule::in(['bkd', 'jafa'])],
         ]);
 
         // Check slot availability
@@ -1675,12 +1684,14 @@ class SubmissionController extends Controller
             $query->where('status', $request->status);
         }
         
+        $this->applyProgramFilter($query, $request);
+
         $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $statusOptions = Submission::getStatusOptions();
-        
+
         return view('admin.fasttrack-management.submissions.index', compact('submissions', 'journals', 'marketings', 'pics', 'statusOptions'));
     }
     
@@ -1722,18 +1733,20 @@ class SubmissionController extends Controller
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
-        
+
+        $this->applyProgramFilter($query, $request);
+
         // Get paginated submissions
         $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50))->withQueryString();
-        
+
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
-        
+
         // Get PICs and Users for inline assignment dropdowns
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $users = User::where('role', 'admin')->orderBy('name')->get();
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
-        
+
         // Statistics - use single optimized query with conditional aggregation
         $statsQuery = Submission::query()
             ->selectRaw('
@@ -1745,7 +1758,7 @@ class SubmissionController extends Controller
                 SUM(CASE WHEN status LIKE "%_SUBMITTED%" THEN 1 ELSE 0 END) as pending_validations
             ')
             ->where('process_type', 'fasttrack');
-        
+
         // Apply same filters for statistics
         if ($request->filled('tanggal_dari')) {
             $statsQuery->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
@@ -1761,9 +1774,10 @@ class SubmissionController extends Controller
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
-        
+        $this->applyProgramFilter($statsQuery, $request);
+
         $statsResult = $statsQuery->first();
-        
+
         $stats = [
             'total' => $statsResult->total ?? 0,
             'submitted' => $statsResult->submitted ?? 0,
@@ -1771,13 +1785,15 @@ class SubmissionController extends Controller
             'published' => $statsResult->published ?? 0,
             'rejected' => $statsResult->rejected ?? 0,
         ];
-        
+
         $pendingCount = $statsResult->pending_validations ?? 0;
         $pendingValidations = $submissions->filter(function($s) {
             return str_contains($s->status, '_SUBMITTED');
         });
-        
-        return view('admin.fasttrack-management.monitoring.index', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount'));
+
+        $program = $request->input('program');
+
+        return view('admin.fasttrack-management.monitoring.index', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount', 'program'));
     }
 
     // ==================== WHATSAPP NOTIFICATION ====================
@@ -1946,5 +1962,13 @@ Terima kasih telah mempercayakan publikasi artikel Anda kepada kami. 🙏
 
 _Pesan ini dikirim secara otomatis oleh sistem SIPERA._
 EOT;
+    }
+
+    private function applyProgramFilter(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
+    {
+        $program = $request->input('program');
+        if (in_array($program, ['bkd', 'jafa'])) {
+            $query->where('program_type', $program);
+        }
     }
 }

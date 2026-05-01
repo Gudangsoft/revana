@@ -17,7 +17,7 @@
                     <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-info">
                         <i class="bi bi-download"></i> Export
                     </a>
-                    <a href="{{ route('admin.fasttrack.create') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.fasttrack.create', array_filter(['program' => request('program')])) }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah Submit
                     </a>
                 </div>
@@ -43,6 +43,9 @@
 
                 <!-- Search & Filter Form -->
                 <form action="{{ route('admin.fasttrack-management.submissions.index') }}" method="GET" class="mb-4">
+                    @if(request('program'))
+                        <input type="hidden" name="program" value="{{ request('program') }}">
+                    @endif
                     <div class="row g-3">
                         <div class="col-md-3">
                             <input type="text" class="form-control" name="search" placeholder="Cari kode submit, judul, penulis..." value="{{ request('search') }}">

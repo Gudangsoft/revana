@@ -199,7 +199,7 @@
                             <li><a class="dropdown-item" href="{{ route('admin.submissions.template') }}"><i class="bi bi-file-earmark-arrow-down"></i> Download Template</a></li>
                         </ul>
                     </div>
-                    <a href="{{ route('admin.submissions.create') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.submissions.create', array_filter(['program' => request('program')])) }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah
                     </a>
                     @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Kode Submit', 'ID Artikel', 'Judul Artikel', 'Nama Penulis', 'No HP', 'Username', 'Password', 'Submit By', 'PIC Marketing', 'Petugas Submit', 'Tanggal', 'Status', 'Aksi'], 'columnOffset' => 1])
@@ -229,6 +229,9 @@
 
                 <!-- Filter -->
                 <form action="{{ route('admin.submissions.index') }}" method="GET" class="mb-4">
+                    @if(request('program'))
+                        <input type="hidden" name="program" value="{{ request('program') }}">
+                    @endif
                     <div class="row g-3">
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label">Tanggal Dari</label>

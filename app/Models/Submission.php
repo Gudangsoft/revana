@@ -14,6 +14,10 @@ class Submission extends Model
     const PROCESS_NORMAL = 'normal';
     const PROCESS_FASTTRACK = 'fasttrack';
 
+    // Program Type Constants
+    const PROGRAM_BKD  = 'bkd';
+    const PROGRAM_JAFA = 'jafa';
+
     protected $fillable = [
         // Data Submit
         'kode_submit',
@@ -97,6 +101,7 @@ class Submission extends Model
         'catatan_marketing',
         'created_by',
         'edit_count',
+        'program_type',
     ];
 
     protected $casts = [
