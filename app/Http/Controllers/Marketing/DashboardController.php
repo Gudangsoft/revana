@@ -272,8 +272,9 @@ class DashboardController extends Controller
             'username_author' => 'nullable|string|max:100',
             'password_author' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
+            'program_type' => ['nullable', \Illuminate\Validation\Rule::in(['bkd', 'jafa'])],
         ]);
-        
+
         try {
             // Get slot info and sync actual count (anti-stale counter)
             $slot = JournalSlot::lockForUpdate()->findOrFail($request->journal_slot_id);
@@ -321,6 +322,7 @@ class DashboardController extends Controller
                     'username_author' => $request->username_author,
                     'password_author' => $request->password_author,
                     'notes' => $request->notes,
+                    'program_type' => $request->program_type ?: null,
                     'tanggal_submit' => now(),
                     'status' => 'SUBMITTED',
                     'created_by' => $adminUser->id,

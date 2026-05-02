@@ -410,6 +410,7 @@ class JournalManagementController extends Controller
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
+            'program_type' => ['nullable', \Illuminate\Validation\Rule::in(['bkd', 'jafa'])],
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -1685,6 +1686,7 @@ EOT;
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
+            'program_type' => ['nullable', \Illuminate\Validation\Rule::in(['bkd', 'jafa'])],
         ]);
 
         // Handle file upload
