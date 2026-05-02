@@ -225,7 +225,35 @@
     </a>
     @endrolecap
     @endfeature
-    
+
+    <!-- BKD Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-briefcase-fill text-info"></i>
+        <span>Pengelolaan BKD</span>
+    </div>
+    <a href="{{ route('pic.submissions.index', ['program' => 'bkd']) }}" class="nav-link {{ request()->routeIs('pic.submissions.index') && request('program') === 'bkd' ? 'active' : '' }}" data-title="Data Submit BKD">
+        <i class="bi bi-file-earmark-text text-info"></i>
+        <span>Data Submit BKD</span>
+    </a>
+    <a href="{{ route('pic.submissions.monitoring', ['program' => 'bkd']) }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring') && request('program') === 'bkd' ? 'active' : '' }}" data-title="Monitoring BKD">
+        <i class="bi bi-list-check text-info"></i>
+        <span>Monitoring Proses BKD</span>
+    </a>
+
+    <!-- JAFA Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-folder2-open text-success"></i>
+        <span>Pengelolaan JAFA</span>
+    </div>
+    <a href="{{ route('pic.submissions.index', ['program' => 'jafa']) }}" class="nav-link {{ request()->routeIs('pic.submissions.index') && request('program') === 'jafa' ? 'active' : '' }}" data-title="Data Submit JAFA">
+        <i class="bi bi-file-earmark-text text-success"></i>
+        <span>Data Submit JAFA</span>
+    </a>
+    <a href="{{ route('pic.submissions.monitoring', ['program' => 'jafa']) }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring') && request('program') === 'jafa' ? 'active' : '' }}" data-title="Monitoring JAFA">
+        <i class="bi bi-list-check text-success"></i>
+        <span>Monitoring Proses JAFA</span>
+    </a>
+
     <div class="sidebar-divider"></div>
     
     @feature('points')

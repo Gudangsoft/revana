@@ -328,12 +328,16 @@ class JournalManagementController extends Controller
             });
         }
 
+        if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
+            $query->where('program_type', $request->program);
+        }
+
         $submissions = $query->latest()->paginate(request()->input('per_page', 20));
-        
+
         // Get data for filters
         $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
         $jenisJurnals = \App\Models\JenisJurnal::where('is_active', true)->orderBy('name')->get();
-        
+
         return view('pic.submissions.index', compact('submissions', 'accreditations', 'jenisJurnals'));
     }
 
@@ -918,9 +922,13 @@ EOT;
             });
         }
 
+        if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
+            $query->where('program_type', $request->program);
+        }
+
         $submissions = $query->latest()->paginate(request()->input('per_page', 20));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
-        
+
         // Statistics - based on PIC's assigned tasks (exclude fasttrack)
         $statsQuery = Submission::where('process_type', '!=', 'fasttrack');
         $statsQuery->where(function($q) use ($picId) {

@@ -165,13 +165,17 @@ class DashboardController extends Controller
         if ($request->filled('end_date')) {
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
-        
+
+        if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
+            $query->where('program_type', $request->program);
+        }
+
         $perPage = in_array($request->input('per_page'), [10, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 10;
         $submissions = $query->latest('tanggal_submit')->paginate($perPage)->withQueryString();
-        
+
         // Debug log
         \Log::info('Submissions found: ' . $submissions->total());
-        
+
         return view('marketing.submissions', compact('marketing', 'submissions'));
     }
 
@@ -585,11 +589,15 @@ class DashboardController extends Controller
         if ($request->filled('end_date')) {
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
-        
+
+        if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
+            $query->where('program_type', $request->program);
+        }
+
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
         $submissions = $query->latest('tanggal_submit')->paginate($perPage)->withQueryString();
         $slots = JournalSlot::with('journalMaster')->where('is_active', true)->get();
-        
+
         return view('marketing.submissions-monitoring', compact('marketing', 'submissions', 'slots'));
     }
 
