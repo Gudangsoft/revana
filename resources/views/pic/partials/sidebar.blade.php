@@ -231,9 +231,9 @@
         <i class="bi bi-briefcase-fill text-info"></i>
         <span>Pengelolaan BKD</span>
     </div>
-    <a href="{{ route('pic.submissions.create', ['program' => 'bkd']) }}" class="nav-link {{ request()->routeIs('pic.submissions.create') && request('program') === 'bkd' ? 'active' : '' }}" data-title="Input Langsung BKD">
+    <a href="{{ route('pic.submissions.create', ['program' => 'bkd']) }}" class="nav-link {{ request()->routeIs('pic.submissions.create') && request('program') === 'bkd' ? 'active' : '' }}" data-title="Input Data BKD">
         <i class="bi bi-plus-circle-fill text-info"></i>
-        <span>Input Langsung BKD</span>
+        <span>Input Data BKD</span>
     </a>
     <a href="{{ route('pic.submissions.index', ['program' => 'bkd']) }}" class="nav-link {{ request()->routeIs('pic.submissions.index') && request('program') === 'bkd' ? 'active' : '' }}" data-title="Data Submit BKD">
         <i class="bi bi-file-earmark-text text-info"></i>
@@ -249,9 +249,9 @@
         <i class="bi bi-folder2-open text-success"></i>
         <span>Pengelolaan JAFA</span>
     </div>
-    <a href="{{ route('pic.submissions.create', ['program' => 'jafa']) }}" class="nav-link {{ request()->routeIs('pic.submissions.create') && request('program') === 'jafa' ? 'active' : '' }}" data-title="Input Langsung JAFA">
+    <a href="{{ route('pic.submissions.create', ['program' => 'jafa']) }}" class="nav-link {{ request()->routeIs('pic.submissions.create') && request('program') === 'jafa' ? 'active' : '' }}" data-title="Input Data JAFA">
         <i class="bi bi-plus-circle-fill text-success"></i>
-        <span>Input Langsung JAFA</span>
+        <span>Input Data JAFA</span>
     </a>
     <a href="{{ route('pic.submissions.index', ['program' => 'jafa']) }}" class="nav-link {{ request()->routeIs('pic.submissions.index') && request('program') === 'jafa' ? 'active' : '' }}" data-title="Data Submit JAFA">
         <i class="bi bi-file-earmark-text text-success"></i>

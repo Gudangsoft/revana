@@ -129,7 +129,7 @@
                     <i class="bi bi-briefcase-fill"></i> Pengelolaan BKD
                 </div>
                 <a href="{{ route('marketing.submissions.create', ['program' => 'bkd']) }}" class="nav-link {{ $currentRoute == 'marketing.submissions.create' && request('program') === 'bkd' ? 'active' : '' }}">
-                    <i class="bi bi-plus-circle-fill text-info"></i> Input Langsung BKD
+                    <i class="bi bi-plus-circle-fill text-info"></i> Input Data BKD
                 </a>
                 <a href="{{ route('marketing.submissions', ['program' => 'bkd']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') && !str_contains($currentRoute, 'create') && request('program') === 'bkd' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text text-info"></i> Data Submit BKD
@@ -142,7 +142,7 @@
                     <i class="bi bi-folder2-open"></i> Pengelolaan JAFA
                 </div>
                 <a href="{{ route('marketing.submissions.create', ['program' => 'jafa']) }}" class="nav-link {{ $currentRoute == 'marketing.submissions.create' && request('program') === 'jafa' ? 'active' : '' }}">
-                    <i class="bi bi-plus-circle-fill text-success"></i> Input Langsung JAFA
+                    <i class="bi bi-plus-circle-fill text-success"></i> Input Data JAFA
                 </a>
                 <a href="{{ route('marketing.submissions', ['program' => 'jafa']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') && !str_contains($currentRoute, 'create') && request('program') === 'jafa' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text text-success"></i> Data Submit JAFA
