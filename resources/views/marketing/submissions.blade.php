@@ -8,7 +8,7 @@
         <i class="bi bi-file-earmark-text"></i> Artikel Saya{{ request('program') ? ' — ' . strtoupper(request('program')) : '' }}
     </h4>
     <div>
-        <a href="{{ route('marketing.submissions.create') }}" class="btn btn-primary">
+        <a href="{{ route('marketing.submissions.create', array_filter(['program' => request('program')])) }}" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Submit Artikel Baru
         </a>
         <span class="badge bg-secondary fs-6 ms-2">Total: {{ $submissions->total() }} artikel</span>
@@ -33,8 +33,9 @@
 <div class="card mb-3">
     <div class="card-body py-2">
         <form method="GET" class="row g-2 align-items-center">
+            <input type="hidden" name="program" value="{{ request('program') }}">
             <div class="col-md-3">
-                <input type="text" name="search" class="form-control form-control-sm" 
+                <input type="text" name="search" class="form-control form-control-sm"
                        placeholder="Cari kode/judul/penulis..." value="{{ request('search') }}">
             </div>
             <div class="col-md-2">

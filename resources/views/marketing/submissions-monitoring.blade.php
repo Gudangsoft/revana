@@ -14,9 +14,10 @@
 <div class="card mb-3 shadow-sm border-0">
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
+            <input type="hidden" name="program" value="{{ request('program') }}">
             <div class="col-md-3">
                 <label class="form-label small mb-1">Cari</label>
-                <input type="text" name="search" class="form-control" 
+                <input type="text" name="search" class="form-control"
                        placeholder="Kode/Judul/ID Artikel..." value="{{ request('search') }}">
             </div>
             <div class="col-md-3">

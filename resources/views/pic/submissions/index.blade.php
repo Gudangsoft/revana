@@ -19,6 +19,7 @@
 <div class="card mb-3">
     <div class="card-body">
         <form method="GET" class="row g-3">
+            <input type="hidden" name="program" value="{{ request('program') }}">
             <div class="col-md-3">
                 <input type="text" name="search" class="form-control" placeholder="Cari kode/judul/penulis..." value="{{ request('search') }}">
             </div>
@@ -61,7 +62,7 @@
         <span><i class="bi bi-file-earmark-plus"></i> Daftar Submit{{ request('program') ? ' ' . strtoupper(request('program')) : ' Reguler' }}</span>
         <div class="d-flex align-items-center gap-2">
             @include('partials.column-toggle', ['tableId' => 'picSubmissionsTable', 'columns' => ['Kode Submit', 'Judul', 'Jurnal', 'Penulis', 'No HP', 'Akreditasi', 'Jenis', 'Link Submit', 'Tanggal', 'Aksi'], 'columnOffset' => 1])
-            <a href="{{ route('pic.submissions.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('pic.submissions.create', array_filter(['program' => request('program')])) }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-circle"></i> Tambah Submission
             </a>
         </div>
