@@ -127,7 +127,10 @@
         </h2>
         <div id="collapseBKD" class="accordion-collapse collapse {{ $bkdActive ? 'show' : '' }}" data-bs-parent="#accordionBKD">
             <div class="accordion-body p-0">
-                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
+                <a href="{{ route('admin.submissions.create', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.create' && $currentProgram === 'bkd' ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle-fill text-info"></i> Input Langsung BKD
+                </a>
+                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i> Data Submit BKD
                 </a>
                 <a href="{{ route('admin.submissions.monitoring', ['program' => 'bkd']) }}" class="nav-link ps-5 {{ $bkdActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
@@ -155,7 +158,10 @@
         </h2>
         <div id="collapseJAFA" class="accordion-collapse collapse {{ $jafaActive ? 'show' : '' }}" data-bs-parent="#accordionJAFA">
             <div class="accordion-body p-0">
-                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.create','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
+                <a href="{{ route('admin.submissions.create', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.create' && $currentProgram === 'jafa' ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle-fill text-success"></i> Input Langsung JAFA
+                </a>
+                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i> Data Submit JAFA
                 </a>
                 <a href="{{ route('admin.submissions.monitoring', ['program' => 'jafa']) }}" class="nav-link ps-5 {{ $jafaActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">

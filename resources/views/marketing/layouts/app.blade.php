@@ -128,7 +128,10 @@
                 <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 20px; color: #0dcaf0; text-transform: uppercase;">
                     <i class="bi bi-briefcase-fill"></i> Pengelolaan BKD
                 </div>
-                <a href="{{ route('marketing.submissions', ['program' => 'bkd']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') && request('program') === 'bkd' ? 'active' : '' }}">
+                <a href="{{ route('marketing.submissions.create', ['program' => 'bkd']) }}" class="nav-link {{ $currentRoute == 'marketing.submissions.create' && request('program') === 'bkd' ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle-fill text-info"></i> Input Langsung BKD
+                </a>
+                <a href="{{ route('marketing.submissions', ['program' => 'bkd']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') && !str_contains($currentRoute, 'create') && request('program') === 'bkd' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text text-info"></i> Data Submit BKD
                 </a>
                 <a href="{{ route('marketing.submissions.monitoring', ['program' => 'bkd']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') && request('program') === 'bkd' ? 'active' : '' }}">
@@ -138,7 +141,10 @@
                 <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; padding: 8px 20px; color: #198754; text-transform: uppercase;">
                     <i class="bi bi-folder2-open"></i> Pengelolaan JAFA
                 </div>
-                <a href="{{ route('marketing.submissions', ['program' => 'jafa']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') && request('program') === 'jafa' ? 'active' : '' }}">
+                <a href="{{ route('marketing.submissions.create', ['program' => 'jafa']) }}" class="nav-link {{ $currentRoute == 'marketing.submissions.create' && request('program') === 'jafa' ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle-fill text-success"></i> Input Langsung JAFA
+                </a>
+                <a href="{{ route('marketing.submissions', ['program' => 'jafa']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions') && !str_contains($currentRoute, 'monitoring') && !str_contains($currentRoute, 'create') && request('program') === 'jafa' ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text text-success"></i> Data Submit JAFA
                 </a>
                 <a href="{{ route('marketing.submissions.monitoring', ['program' => 'jafa']) }}" class="nav-link {{ str_contains($currentRoute, 'marketing.submissions.monitoring') && request('program') === 'jafa' ? 'active' : '' }}">
