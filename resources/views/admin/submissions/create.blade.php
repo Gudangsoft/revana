@@ -74,20 +74,7 @@
                         </div>
                     </div>
 
-                    <hr>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="program_type" class="form-label">Program</label>
-                            <select class="form-select @error('program_type') is-invalid @enderror" id="program_type" name="program_type">
-                                <option value="">-- Tanpa Program Khusus --</option>
-                                <option value="bkd" {{ old('program_type', request('program')) == 'bkd' ? 'selected' : '' }}>BKD (Beban Kerja Dosen)</option>
-                                <option value="jafa" {{ old('program_type', request('program')) == 'jafa' ? 'selected' : '' }}>JAFA (Jabatan Fungsional Akademik)</option>
-                            </select>
-                            @error('program_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                    <input type="hidden" name="program_type" value="{{ old('program_type', request('program')) }}">
 
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
