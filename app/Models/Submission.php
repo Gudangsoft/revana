@@ -133,9 +133,15 @@ class Submission extends Model
         static::creating(function ($submission) {
             // Auto generate kode_submit if not set
             if (empty($submission->kode_submit)) {
-                $submission->kode_submit = self::generateKodeSubmit();
+                $base   = self::generateKodeSubmit();
+                $prefix = match($submission->program_type) {
+                    'bkd'  => 'BKD-',
+                    'jafa' => 'JAFA-',
+                    default => '',
+                };
+                $submission->kode_submit = $prefix . $base;
             }
-            
+
             // Auto generate kode_loa: kode_submit + SIPERA
             if (empty($submission->kode_loa)) {
                 $submission->kode_loa = $submission->kode_submit . 'SIPERA';
