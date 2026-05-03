@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Submit - ' . $appSettings['app_name'])
-@section('page-title', 'Tambah Submit')
+@section('title', 'Tambah Submit' . (request('program') ? ' ' . strtoupper(request('program')) : '') . ' - ' . $appSettings['app_name'])
+@section('page-title', 'Tambah Submit' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -19,7 +19,7 @@
     <div class="col-md-10 mx-auto">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-file-earmark-plus"></i> Tambah Data Submit
+                <i class="bi bi-file-earmark-plus"></i> Tambah Data Submit{{ request('program') ? ' ' . strtoupper(request('program')) : '' }}
             </div>
             <div class="card-body">
                 @if(session('error'))

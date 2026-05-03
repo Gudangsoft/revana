@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Tambah Submission')
-@section('page-title', 'Tambah Submission')
+@section('title', 'Tambah Submission' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
+@section('page-title', 'Tambah Submission' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -19,7 +19,7 @@
     <div class="col-md-10 mx-auto">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-file-earmark-plus"></i> Tambah Data Submit
+                <i class="bi bi-file-earmark-plus"></i> Tambah Data Submit{{ request('program') ? ' ' . strtoupper(request('program')) : '' }}
             </div>
             <div class="card-body">
                 @if(session('error'))

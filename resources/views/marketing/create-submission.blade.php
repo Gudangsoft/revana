@@ -1,6 +1,6 @@
 @extends('marketing.layouts.app')
 
-@section('title', 'Tambah Submission')
+@section('title', 'Tambah Submission' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 <style>
     select option:disabled {
@@ -12,7 +12,7 @@
 @section('content')
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-plus-circle"></i> Tambah Submission Baru
+        <i class="bi bi-plus-circle"></i> Tambah Submission Baru{{ request('program') ? ' ' . strtoupper(request('program')) : '' }}
     </div>
     <div class="card-body">
         <form action="{{ route('marketing.submissions.store') }}" method="POST" enctype="multipart/form-data">
