@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Submit - ' . $appSettings['app_name'])
-@section('page-title', 'Edit Submit')
+@section('title', 'Edit Submit' . ($submission->program_type ? ' ' . strtoupper($submission->program_type) : '') . ' - ' . $appSettings['app_name'])
+@section('page-title', 'Edit Submit' . ($submission->program_type ? ' ' . strtoupper($submission->program_type) : ''))
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -217,8 +217,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="row">
     <div class="col-md-10 mx-auto">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex align-items-center gap-2">
                 <i class="bi bi-file-earmark-text"></i> Edit Data Submit
+                @if($submission->program_type)
+                    <span class="badge bg-{{ $submission->program_type == 'bkd' ? 'info' : 'success' }} ms-1">
+                        {{ strtoupper($submission->program_type) }}
+                    </span>
+                @endif
             </div>
             <div class="card-body">
                 @if(session('error'))
@@ -277,17 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
 
-                    <hr>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="program_type" class="form-label">Program</label>
-                            <select class="form-select" id="program_type" name="program_type">
-                                <option value="">-- Tanpa Program Khusus --</option>
-                                <option value="bkd" {{ old('program_type', $submission->program_type) == 'bkd' ? 'selected' : '' }}>BKD (Beban Kerja Dosen)</option>
-                                <option value="jafa" {{ old('program_type', $submission->program_type) == 'jafa' ? 'selected' : '' }}>JAFA (Jabatan Fungsional Akademik)</option>
-                            </select>
-                        </div>
-                    </div>
+                    <input type="hidden" name="program_type" value="{{ $submission->program_type }}">
 
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
@@ -492,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('admin.submissions.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.submissions.index', array_filter(['program' => $submission->program_type])) }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
                         <div>

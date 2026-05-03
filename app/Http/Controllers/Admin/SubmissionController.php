@@ -333,7 +333,8 @@ class SubmissionController extends Controller
             $this->sendWhatsAppNotification($submission, true);
         }
 
-        return redirect()->route('admin.submissions.index')
+        $program = $submission->fresh()->program_type;
+        return redirect()->route('admin.submissions.index', array_filter(['program' => $program]))
             ->with('success', 'Data Submit berhasil diperbarui');
     }
 
