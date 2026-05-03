@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Monitoring')
-@section('page-title', 'Monitoring')
+@section('title', 'Monitoring' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
+@section('page-title', 'Monitoring' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -451,15 +451,19 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <span><i class="bi bi-clipboard-data"></i> Monitoring Proses Submit</span>
+                    <span><i class="bi bi-clipboard-data"></i> Monitoring Proses Submit{{ request('program') ? ' ' . strtoupper(request('program')) : '' }}</span>
+                    @if(!in_array(request('program'), ['bkd', 'jafa']))
                     <a href="{{ route('pic.fasttrack.monitoring') }}" class="btn btn-warning btn-sm">
                         <i class="bi bi-lightning"></i> Lihat Fasttrack
                     </a>
+                    @endif
                 </div>
+                @if(!in_array(request('program'), ['bkd', 'jafa']))
                 <div class="alert alert-info mb-0 py-2 px-3" style="font-size: 0.875rem;">
-                    <i class="bi bi-info-circle"></i> 
+                    <i class="bi bi-info-circle"></i>
                     Halaman ini menampilkan data <strong>submissions normal</strong> saja.
                 </div>
+                @endif
             </div>
             <div class="card-body">
                 <!-- Summary Cards -->

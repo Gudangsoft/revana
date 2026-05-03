@@ -1,11 +1,11 @@
 @extends('marketing.layouts.app')
 
-@section('title', 'Monitoring Artikel')
+@section('title', 'Artikel' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
-        <i class="bi bi-file-earmark-text"></i> Artikel Saya
+        <i class="bi bi-file-earmark-text"></i> Artikel Saya{{ request('program') ? ' — ' . strtoupper(request('program')) : '' }}
     </h4>
     <div>
         <a href="{{ route('marketing.submissions.create') }}" class="btn btn-primary">

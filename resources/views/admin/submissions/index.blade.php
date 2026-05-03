@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Data Submit - ' . $appSettings['app_name'])
-@section('page-title', 'Data Submit')
+@section('title', 'Data Submit' . (request('program') ? ' ' . strtoupper(request('program')) : '') . ' - ' . $appSettings['app_name'])
+@section('page-title', 'Data Submit' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -181,7 +181,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-text"></i> Data Submit</span>
+                <span><i class="bi bi-file-earmark-text"></i> Data Submit{{ request('program') ? ' ' . strtoupper(request('program')) : '' }}</span>
                 <div>
                     <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-info">
                         <i class="bi bi-bar-chart"></i> Monitoring

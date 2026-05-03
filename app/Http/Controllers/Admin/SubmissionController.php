@@ -248,7 +248,8 @@ class SubmissionController extends Controller
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
-            
+            'program_type' => ['nullable', Rule::in(['bkd', 'jafa'])],
+
             // Workflow fields - Editor, Author, Production use pics table
             'petugas_editor1_id' => 'nullable|exists:pics,id',
             'username_editor' => 'nullable|string|max:255',

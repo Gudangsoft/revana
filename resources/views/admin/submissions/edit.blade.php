@@ -278,6 +278,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <hr>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="program_type" class="form-label">Program</label>
+                            <select class="form-select" id="program_type" name="program_type">
+                                <option value="">-- Tanpa Program Khusus --</option>
+                                <option value="bkd" {{ old('program_type', $submission->program_type) == 'bkd' ? 'selected' : '' }}>BKD (Beban Kerja Dosen)</option>
+                                <option value="jafa" {{ old('program_type', $submission->program_type) == 'jafa' ? 'selected' : '' }}>JAFA (Jabatan Fungsional Akademik)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>
 
                     <div class="row">

@@ -1,7 +1,7 @@
 @extends('pic.layouts.app')
 
-@section('title', 'Data Submit Reguler')
-@section('page-title', 'Data Submit Reguler')
+@section('title', 'Data Submit' . (request('program') ? ' ' . strtoupper(request('program')) : ' Reguler'))
+@section('page-title', 'Data Submit' . (request('program') ? ' ' . strtoupper(request('program')) : ' Reguler'))
 
 @section('sidebar')
     @include('pic.partials.sidebar')
@@ -58,7 +58,7 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-file-earmark-plus"></i> Daftar Submit Reguler</span>
+        <span><i class="bi bi-file-earmark-plus"></i> Daftar Submit{{ request('program') ? ' ' . strtoupper(request('program')) : ' Reguler' }}</span>
         <div class="d-flex align-items-center gap-2">
             @include('partials.column-toggle', ['tableId' => 'picSubmissionsTable', 'columns' => ['Kode Submit', 'Judul', 'Jurnal', 'Penulis', 'No HP', 'Akreditasi', 'Jenis', 'Link Submit', 'Tanggal', 'Aksi'], 'columnOffset' => 1])
             <a href="{{ route('pic.submissions.create') }}" class="btn btn-primary btn-sm">

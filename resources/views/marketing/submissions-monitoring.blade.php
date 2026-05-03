@@ -1,11 +1,11 @@
 @extends('marketing.layouts.app')
 
-@section('title', 'Monitoring Artikel')
+@section('title', 'Monitoring Artikel' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
-        <i class="bi bi-bar-chart-line"></i> Monitoring Artikel
+        <i class="bi bi-bar-chart-line"></i> Monitoring Artikel{{ request('program') ? ' — ' . strtoupper(request('program')) : '' }}
     </h4>
     <span class="badge bg-info fs-6">Total: {{ $submissions->total() }} submission</span>
 </div>

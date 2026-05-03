@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Monitoring Proses - ' . $appSettings['app_name'])
-@section('page-title', 'Monitoring Proses Submit')
+@section('title', 'Monitoring Proses' . (request('program') ? ' ' . strtoupper(request('program')) : '') . ' - ' . $appSettings['app_name'])
+@section('page-title', 'Monitoring Proses' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('sidebar')
     @include('admin.partials.sidebar')
@@ -517,9 +517,11 @@
                 </div>
 
                 <!-- Info Alert -->
+                @if(!in_array(request('program'), ['bkd', 'jafa']))
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i> <strong>Submissions Monitoring:</strong> Halaman ini menampilkan data submissions dengan workflow normal. Untuk monitoring Fasttrack, silakan kunjungi <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="text-decoration-none"><strong>Monitoring Fasttrack</strong></a>.
                 </div>
+                @endif
 
                 <!-- Data Table with Full Process Columns -->
                 <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
