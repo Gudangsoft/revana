@@ -329,7 +329,11 @@ class JournalManagementController extends Controller
         }
 
         if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $request->program);
+            $query->where('program_type', $request->program)
+                  ->where(function ($q) {
+                      $q->where('process_type', '!=', 'fasttrack')
+                        ->orWhereNull('process_type');
+                  });
         }
 
         $submissions = $query->latest()->paginate(request()->input('per_page', 20));
@@ -923,7 +927,11 @@ EOT;
         }
 
         if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $request->program);
+            $query->where('program_type', $request->program)
+                  ->where(function ($q) {
+                      $q->where('process_type', '!=', 'fasttrack')
+                        ->orWhereNull('process_type');
+                  });
         }
 
         $submissions = $query->latest()->paginate(request()->input('per_page', 20));

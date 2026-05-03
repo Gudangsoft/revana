@@ -167,7 +167,11 @@ class DashboardController extends Controller
         }
 
         if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $request->program);
+            $query->where('program_type', $request->program)
+                  ->where(function ($q) {
+                      $q->where('process_type', '!=', 'fasttrack')
+                        ->orWhereNull('process_type');
+                  });
         }
 
         $perPage = in_array($request->input('per_page'), [10, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 10;
@@ -591,7 +595,11 @@ class DashboardController extends Controller
         }
 
         if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $request->program);
+            $query->where('program_type', $request->program)
+                  ->where(function ($q) {
+                      $q->where('process_type', '!=', 'fasttrack')
+                        ->orWhereNull('process_type');
+                  });
         }
 
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;

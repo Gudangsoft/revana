@@ -1969,6 +1969,11 @@ EOT;
         $program = $request->input('program');
         if (in_array($program, ['bkd', 'jafa'])) {
             $query->where('program_type', $program);
+            // BKD dan JAFA hanya proses normal, tidak ada fasttrack
+            $query->where(function ($q) {
+                $q->where('process_type', '!=', 'fasttrack')
+                  ->orWhereNull('process_type');
+            });
         }
     }
 }
