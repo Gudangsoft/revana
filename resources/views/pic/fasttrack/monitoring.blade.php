@@ -1186,15 +1186,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Production can skip editor3 and author2 validation
                 if (field === 'production_valid') {
                     if (previousStage === 'editor3_valid' || previousStage === 'author2_valid') {
-                        continue; // Skip optional stages
+                        continue;
                     }
                 }
-                
+
                 // Author 2 can skip Editor 3 validation
                 if (field === 'author2_valid' && previousStage === 'editor3_valid') {
-                    continue; // Skip editor3 for author2
+                    continue;
                 }
-                
+
+                // SPECIAL CASE 3: Validator - Editor 3 dan Author 2 tidak wajib selesai
+                if (field === 'validator_valid') {
+                    if (previousStage === 'editor3_valid' || previousStage === 'author2_valid') {
+                        continue;
+                    }
+                }
+
                 // Convert snake_case to camelCase for dataset access: editor1_valid -> editor1Valid
                 const dataAttr = previousStage.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
                 const previousValid = row.dataset[dataAttr] === '1';
@@ -1231,13 +1238,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (field === 'production_valid') {
                 const reviewer1Valid = row.dataset.reviewer1Valid === '1';
                 const reviewer2Valid = row.dataset.reviewer2Valid === '1';
-                
+
                 if (!reviewer1Valid || !reviewer2Valid) {
                     alert('Production minimal memerlukan Reviewer 1 DAN Reviewer 2 selesai. Editor 3 dan Author 2 bersifat opsional.');
                     return;
                 }
             }
-            
+
+            // SPECIAL VALIDATION: Validator wajib ada link publikasi
+            if (field === 'validator_valid' && newValue) {
+                const linkInput = row.querySelector('input[data-field="link_publish"]');
+                if (!linkInput || !linkInput.value.trim()) {
+                    alert('Link publikasi harus diisi terlebih dahulu sebelum melakukan validasi akhir.');
+                    return;
+                }
+            }
+
             // Call toggle validation function
             toggleValidation(submissionId, field, newValue);
         });

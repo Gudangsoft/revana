@@ -3,6 +3,8 @@
 @section('title', 'Monitoring Artikel' . (request('program') ? ' ' . strtoupper(request('program')) : ''))
 
 @section('content')
+@include('partials.auto-refresh', ['interval' => 30, 'arId' => 'marketing-mon'])
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
         <i class="bi bi-bar-chart-line"></i> Monitoring Artikel{{ request('program') ? ' — ' . strtoupper(request('program')) : '' }}

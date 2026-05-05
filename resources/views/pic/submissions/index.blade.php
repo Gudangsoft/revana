@@ -8,6 +8,8 @@
 @endsection
 
 @section('content')
+@include('partials.auto-refresh', ['interval' => 30, 'arId' => 'pic-sub'])
+
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="bi bi-check-circle"></i> {{ session('success') }}

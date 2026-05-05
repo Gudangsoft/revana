@@ -76,6 +76,8 @@
 @endsection
 
 @section('content')
+@include('partials.auto-refresh', ['interval' => 30, 'arId' => 'pic-tasks'])
+
 <!-- Stats Row -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-2">

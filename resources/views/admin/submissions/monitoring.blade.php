@@ -293,6 +293,8 @@
 }
 </style>
 
+@include('partials.auto-refresh', ['interval' => 60, 'arId' => 'admin-mon'])
+
 {{-- Notifikasi Tugas Menunggu Validasi --}}
 @if($pendingCount > 0)
 <div class="alert alert-warning alert-dismissible fade show pending-validation-alert mb-4" role="alert">

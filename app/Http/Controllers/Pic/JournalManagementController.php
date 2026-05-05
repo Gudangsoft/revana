@@ -1162,15 +1162,20 @@ EOT;
                 // Production can skip editor3 and author2 if not assigned
                 if ($request->field === 'production_valid') {
                     if ($previousStage === 'editor3_valid' || $previousStage === 'author2_valid') {
-                        // Skip editor3 and author2 validation for production - they are optional
                         continue;
                     }
                 }
-                
+
                 // Author 2 can skip Editor 3 validation if editor3 not assigned
                 if ($request->field === 'author2_valid' && $previousStage === 'editor3_valid') {
-                    // Skip editor3 validation for author2 - editor3 is optional
                     continue;
+                }
+
+                // SPECIAL CASE 3: Validator - Editor 3 and Author 2 are optional prerequisites
+                if ($request->field === 'validator_valid') {
+                    if ($previousStage === 'editor3_valid' || $previousStage === 'author2_valid') {
+                        continue;
+                    }
                 }
                 
                 // Skip validation check if petugas for this stage is not assigned
@@ -1220,18 +1225,26 @@ EOT;
             
             // SPECIAL VALIDATION: Production requires BOTH Reviewer 1 AND Reviewer 2 (minimum requirement)
             if ($request->field === 'production_valid') {
-                // Check if reviewer1 has petugas assigned and is not valid
                 if ($submission->petugas_reviewer1_id && !$submission->reviewer1_valid) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Reviewer 1 belum valid. Production minimal memerlukan Reviewer 1 dan Reviewer 2 selesai.'
                     ], 400);
                 }
-                // Check if reviewer2 has petugas assigned and is not valid
                 if ($submission->petugas_reviewer2_id && !$submission->reviewer2_valid) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Reviewer 2 belum valid. Production minimal memerlukan Reviewer 1 dan Reviewer 2 selesai.'
+                    ], 400);
+                }
+            }
+
+            // SPECIAL VALIDATION: Validator requires link_publish to be filled
+            if ($request->field === 'validator_valid' && $request->value) {
+                if (empty($submission->link_publish)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Link publikasi harus diisi terlebih dahulu sebelum melakukan validasi akhir.'
                     ], 400);
                 }
             }

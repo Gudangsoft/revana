@@ -204,6 +204,8 @@
 }
 </style>
 
+@include('partials.auto-refresh', ['interval' => 30, 'arId' => 'marketing-ft'])
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">
         <i class="bi bi-lightning-charge text-warning"></i> Fasttrack

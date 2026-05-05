@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class LoginController extends Controller
 {
@@ -46,7 +47,24 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            
+
+            // Blokir login ganda untuk akun admin
+            if ($user->role === 'admin') {
+                $cacheKey = 'admin_session:' . $user->id;
+                $activeSession = Cache::get($cacheKey);
+
+                if ($activeSession && $activeSession !== session()->getId()) {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'email' => 'Akun admin ini sedang aktif di sesi lain. Silakan logout dari sesi tersebut terlebih dahulu.',
+                    ])->onlyInput('email');
+                }
+
+                Cache::put($cacheKey, session()->getId(), now()->addMinutes(config('session.lifetime', 120)));
+            }
+
             // Flash sync notification for admin after login
             if ($user->role === 'admin') {
                 try {
@@ -88,7 +106,13 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $userName = Auth::user()?->name ?? 'Admin';
+        $user = Auth::user();
+        $userName = $user?->name ?? 'Admin';
+
+        if ($user && $user->role === 'admin') {
+            Cache::forget('admin_session:' . $user->id);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
