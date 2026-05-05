@@ -87,7 +87,7 @@ class ReviewerRegistrationController extends Controller
             // Silently skip WhatsApp URL generation
         }
 
-        return redirect()->route('reviewer-registration.form')
+        return redirect()->route('login')
             ->with('success', __('reviewer.registration_success'))
             ->with('whatsapp_url', $whatsappUrl);
     }

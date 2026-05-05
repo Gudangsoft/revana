@@ -209,3 +209,20 @@ Tambahkan atribut `data-has-link-publish="1/0"` langsung pada elemen `<tr>` (ser
 - **File berubah:** 1 file
 - `log-update-2026-05-05.md`
 
+
+## 18. 🔄 Update: update
+
+- **Commit:** `8f744af` — 18:07 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-05.md`
+
+## 19. Redirect ke Login Setelah Daftar Reviewer
+
+**Tujuan:** Setelah berhasil submit form pendaftaran reviewer di `/daftar-reviewer`, user diarahkan ke halaman login (bukan kembali ke form).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ReviewerRegistrationController.php` | Ubah redirect dari `reviewer-registration.form` ke `login` |
+| `resources/views/auth/login.blade.php` | Tambah tampilan flash message `success` di halaman login |
+

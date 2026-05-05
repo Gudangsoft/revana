@@ -107,6 +107,14 @@
                             </div>
                             @endif
 
+                            @if(session('success'))
+                            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                                <i class="bi bi-check-circle me-2 fs-5"></i>
+                                <div>{!! session('success') !!}</div>
+                                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                            </div>
+                            @endif
+
                             @if($errors->any())
                             <div class="alert alert-danger">
                                 @foreach($errors->all() as $error)
