@@ -160,10 +160,7 @@
 
                             <div class="mt-3 text-center">
                                 <hr class="my-3">
-                                <a href="{{ route('tracking.index') }}" target="_blank" class="btn btn-warning w-100 mb-2">
-                                    <i class="bi bi-search"></i> Tracking LOA
-                                </a>
-                                <a href="{{ route('reviewer-registration.form') }}" class="btn btn-success w-100 mb-2">
+<a href="{{ route('reviewer-registration.form') }}" class="btn btn-success w-100 mb-2">
                                     <i class="bi bi-person-plus-fill"></i> Daftar sebagai Reviewer
                                 </a>
                                 <a href="{{ route('pic.login') }}" class="btn btn-outline-secondary w-100" style="display: none;">
