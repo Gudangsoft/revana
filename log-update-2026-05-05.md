@@ -226,3 +226,12 @@ Tambahkan atribut `data-has-link-publish="1/0"` langsung pada elemen `<tr>` (ser
 | `app/Http/Controllers/Admin/ReviewerRegistrationController.php` | Ubah redirect dari `reviewer-registration.form` ke `login` |
 | `resources/views/auth/login.blade.php` | Tambah tampilan flash message `success` di halaman login |
 
+
+## 20. 🔄 Update: regiter
+
+- **Commit:** `33ddafd` — 18:12 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/ReviewerRegistrationController.php`
+- `log-update-2026-05-05.md`
+- `resources/views/auth/login.blade.php`
+
