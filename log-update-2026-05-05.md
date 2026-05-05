@@ -187,3 +187,11 @@ Tambahkan atribut `data-has-link-publish="1/0"` langsung pada elemen `<tr>` (ser
 |------|-----------|
 | `routes/web.php` | Root route `sipera.apji.org`: tamu diarahkan ke `/login` (bukan form registrasi). User terautentikasi diarahkan ke dashboard sesuai role (admin/reviewer). |
 
+
+## 15. 🔄 Update: login
+
+- **Commit:** `9edbb11` — 18:04 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-05.md`
+- `routes/web.php`
+
