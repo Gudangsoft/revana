@@ -180,51 +180,58 @@
         <span>Dashboard</span>
     </a>
     
-    <!-- Kelola Jurnal Section -->
-    <div class="sidebar-section-header">
-        <i class="bi bi-journal-bookmark"></i>
-        <span>Data Jurnal</span>
-    </div>
-    
-    @rolecap('pic', 'proses_submission')
-    <a href="https://portal.apji.org/pic/submissions" class="nav-link" data-title="Data Jurnal">
-        <i class="bi bi-journal-text text-info"></i>
-        <span>Data Jurnal</span>
-    </a>
-    @endrolecap
-    
     @feature('fasttrack')
     @rolecap('pic', 'fasttrack')
-    <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.create', 'pic.fasttrack.edit', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Data Jurnal FS">
+    <!-- Fasttrack Input -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-lightning-charge text-warning"></i>
+        <span>Pengelolaan Fasttrack</span>
+    </div>
+    <a href="{{ route('pic.fasttrack.create') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.create') ? 'active' : '' }}" data-title="Input Data FS">
+        <i class="bi bi-plus-circle-fill text-warning"></i>
+        <span>Input Data FS</span>
+    </a>
+    <a href="{{ route('pic.fasttrack.index') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.index', 'pic.fasttrack.edit', 'pic.fasttrack.show') ? 'active' : '' }}" data-title="Data Jurnal FS">
         <i class="bi bi-lightning-charge text-warning"></i>
         <span>Data Jurnal FS</span>
+    </a>
+    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.monitoring') ? 'active' : '' }}" data-title="Monitoring FS">
+        <i class="bi bi-graph-up text-warning"></i>
+        <span>Monitoring Proses FS</span>
     </a>
     @endrolecap
     @endfeature
     
-    <!-- Monitoring Section -->
+    <!-- Tugas Saya -->
     <div class="sidebar-section-header">
-        <i class="bi bi-graph-up"></i>
-        <span>Monitoring</span>
+        <i class="bi bi-person-check"></i>
+        <span>Tugas Saya</span>
     </div>
-    
-    <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring', 'pic.my-tasks.*') ? 'active' : '' }}" data-title="Monitoring & Tugas">
-        <i class="bi bi-list-check"></i>
-        <span>Monitoring & Tugas Saya</span>
+    <a href="{{ route('pic.my-tasks.index') }}" class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}" data-title="Tugas Saya">
+        <i class="bi bi-list-task"></i>
+        <span>Tugas Saya</span>
         @if($pendingTasks > 0)
             <span class="badge bg-danger">{{ $pendingTasks }}</span>
         @endif
     </a>
-    
-    <!-- Fasttrack (Gabungan Data & Monitoring) -->
-    @feature('fasttrack')
-    @rolecap('pic', 'fasttrack')
-    <a href="{{ route('pic.fasttrack.monitoring') }}" class="nav-link {{ request()->routeIs('pic.fasttrack.monitoring') ? 'active' : '' }}" data-title="Fasttrack">
-        <i class="bi bi-graph-up text-warning"></i>
-        <span>Monitoring Fasttrack</span>
+
+    <!-- Normal Section -->
+    <div class="sidebar-section-header">
+        <i class="bi bi-journal-bookmark-fill" style="color:#6f42c1;"></i>
+        <span>Pengelolaan Jurnal Normal</span>
+    </div>
+    <a href="{{ route('pic.submissions.create') }}" class="nav-link {{ request()->routeIs('pic.submissions.create') && !request('program') ? 'active' : '' }}" data-title="Input Data Normal">
+        <i class="bi bi-plus-circle-fill" style="color:#6f42c1;"></i>
+        <span>Input Data Normal</span>
     </a>
-    @endrolecap
-    @endfeature
+    <a href="{{ route('pic.submissions.index') }}" class="nav-link {{ request()->routeIs('pic.submissions.index') && !request('program') ? 'active' : '' }}" data-title="Data Submit Normal">
+        <i class="bi bi-file-earmark-text" style="color:#6f42c1;"></i>
+        <span>Data Submit Normal</span>
+    </a>
+    <a href="{{ route('pic.submissions.monitoring') }}" class="nav-link {{ request()->routeIs('pic.submissions.monitoring') && !request('program') ? 'active' : '' }}" data-title="Monitoring Normal">
+        <i class="bi bi-list-check" style="color:#6f42c1;"></i>
+        <span>Monitoring Proses</span>
+    </a>
 
     <!-- BKD Section -->
     <div class="sidebar-section-header">
