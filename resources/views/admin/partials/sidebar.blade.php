@@ -31,7 +31,8 @@
         || str_starts_with($currentRoute, 'admin.kategoris')
         || str_starts_with($currentRoute, 'admin.jenis-jurnals');
 
-    $journalActive  = $isSharedJournalRoute || ($isSubmissionRoute && !in_array($currentProgram, ['bkd', 'jafa']));
+    $normalActive   = $isSubmissionRoute && !$currentProgram;
+    $journalActive  = $isSharedJournalRoute;
     $fastrackActive = str_starts_with($currentRoute, 'admin.fasttrack-management') || str_starts_with($currentRoute, 'admin.fasttrack');
     $bkdActive      = $isSubmissionRoute && $currentProgram === 'bkd';
     $jafaActive     = $isSubmissionRoute && $currentProgram === 'jafa';
@@ -57,15 +58,6 @@
                 <a href="{{ route('admin.journal-slots.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.journal-slots.index' || $currentRoute == 'admin.journal-slots.create' || $currentRoute == 'admin.journal-slots.edit' || $currentRoute == 'admin.journal-slots.show' || $currentRoute == 'admin.journal-slots.monitoring' ? 'active' : '' }}">
                     <i class="bi bi-calendar3"></i> Data Slot & Monitoring
                 </a>
-                <a href="{{ route('admin.submissions.index') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.index' || $currentRoute == 'admin.submissions.create' || $currentRoute == 'admin.submissions.edit' || $currentRoute == 'admin.submissions.show' || $currentRoute == 'admin.submissions.process' ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-plus"></i> Data Submit
-                </a>
-                <a href="{{ route('admin.submissions.monitoring') }}" class="nav-link ps-5 {{ $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-graph-up"></i> Monitoring Proses
-                    @if($pendingValidationCount > 0)
-                    <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
-                    @endif
-                </a>
                 <a href="{{ route('admin.accreditations.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.accreditations') ? 'active' : '' }}">
                     <i class="bi bi-award"></i> Akreditasi
                 </a>
@@ -74,6 +66,37 @@
                 </a>
                 <a href="{{ route('admin.jenis-jurnals.index') }}" class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}">
                     <i class="bi bi-journal-bookmark"></i> Jenis Jurnal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Menu Pengelolaan Jurnal Normal --}}
+<div class="accordion accordion-flush" id="accordionNormal">
+    <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed nav-link text-white {{ $normalActive ? 'active' : '' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseNormal"
+                    aria-expanded="{{ $normalActive ? 'true' : 'false' }}">
+                <i class="bi bi-journal-bookmark-fill" style="color:#a78bfa;"></i> Pengelolaan Jurnal Normal
+            </button>
+        </h2>
+        <div id="collapseNormal" class="accordion-collapse collapse {{ $normalActive ? 'show' : '' }}" data-bs-parent="#accordionNormal">
+            <div class="accordion-body p-0">
+                <a href="{{ route('admin.submissions.create') }}" class="nav-link ps-5 {{ $normalActive && $currentRoute == 'admin.submissions.create' ? 'active' : '' }}">
+                    <i class="bi bi-plus-circle-fill" style="color:#a78bfa;"></i> Input Data Normal
+                </a>
+                <a href="{{ route('admin.submissions.index') }}" class="nav-link ps-5 {{ $normalActive && in_array($currentRoute, ['admin.submissions.index','admin.submissions.edit','admin.submissions.show','admin.submissions.process']) ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text" style="color:#a78bfa;"></i> Data Submit Normal
+                </a>
+                <a href="{{ route('admin.submissions.monitoring') }}" class="nav-link ps-5 {{ $normalActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
+                    <i class="bi bi-list-check" style="color:#a78bfa;"></i> Monitoring Proses
+                    @if($pendingValidationCount > 0)
+                    <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
+                    @endif
                 </a>
             </div>
         </div>
