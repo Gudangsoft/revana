@@ -42,7 +42,7 @@
             --danger-color: #ef4444;
             --warning-color: #f59e0b;
             --info-color: #3b82f6;
-            --sidebar-width: 250px;
+            --sidebar-width: 280px;
         }
 
         body {
@@ -257,6 +257,56 @@
             border: none;
         }
 
+        /* Sidebar Toggle Button (desktop) */
+        .sidebar-toggle-btn {
+            position: fixed;
+            top: 50%;
+            left: var(--sidebar-width);
+            transform: translate(-50%, -50%);
+            z-index: 1045;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: left 0.3s ease-in-out, background 0.2s, box-shadow 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+        .sidebar-toggle-btn:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.4);
+        }
+        .sidebar-toggle-btn:hover i {
+            color: white !important;
+        }
+        .sidebar-toggle-btn i {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            transition: transform 0.3s ease, color 0.2s;
+            pointer-events: none;
+        }
+
+        /* Sidebar collapsed state */
+        body.sidebar-collapsed .sidebar {
+            transform: translateX(-100%);
+        }
+        body.sidebar-collapsed .sidebar-toggle-btn {
+            left: 0px;
+        }
+        body.sidebar-collapsed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
+        }
+        body.sidebar-collapsed .main-content {
+            margin-left: 0;
+        }
+
         /* Mobile Menu Toggle */
         .mobile-menu-toggle {
             display: none;
@@ -403,7 +453,15 @@
             }
 
             .sidebar.show-mobile {
-                transform: translateX(0);
+                transform: translateX(0) !important;
+            }
+
+            /* On mobile, collapsed state doesn't apply */
+            body.sidebar-collapsed .sidebar {
+                transform: translateX(-100%);
+            }
+            body.sidebar-collapsed .main-content {
+                margin-left: 0;
             }
 
             .mobile-menu-toggle {
@@ -637,6 +695,11 @@
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
 
+    <!-- Desktop Sidebar Toggle Button -->
+    <button class="sidebar-toggle-btn d-none d-lg-flex" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Sembunyikan / Tampilkan sidebar">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
     <!-- Mobile Menu Toggle Button -->
     <button class="mobile-menu-toggle" id="menuToggle" onclick="toggleMobileMenu()">
         <i class="bi bi-list fs-4"></i>
@@ -802,29 +865,39 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Mobile Menu Script -->
+    <!-- Sidebar & Mobile Menu Script -->
     <script>
+        // ── Desktop sidebar toggle ──────────────────────────────────────
+        function toggleSidebar() {
+            const collapsed = document.body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+        }
+
+        // Restore saved state on load (before paint to avoid flash)
+        (function () {
+            if (localStorage.getItem('sidebarCollapsed') === '1') {
+                document.body.classList.add('sidebar-collapsed');
+            }
+        })();
+
+        // ── Mobile sidebar toggle ───────────────────────────────────────
         function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
-            
+            const sidebar  = document.getElementById('sidebar');
+            const overlay  = document.getElementById('mobileOverlay');
             sidebar.classList.toggle('show-mobile');
             overlay.classList.toggle('show');
         }
 
-        // Close menu when clicking on a link
-        document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.sidebar .nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth <= 991) {
-                        toggleMobileMenu();
-                    }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close mobile menu when clicking a nav link
+            document.querySelectorAll('.sidebar .nav-link').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 991) toggleMobileMenu();
                 });
             });
 
-            // Close menu when resizing to desktop
-            window.addEventListener('resize', function() {
+            // Close mobile menu on resize to desktop
+            window.addEventListener('resize', function () {
                 if (window.innerWidth > 991) {
                     document.getElementById('sidebar').classList.remove('show-mobile');
                     document.getElementById('mobileOverlay').classList.remove('show');

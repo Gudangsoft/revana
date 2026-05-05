@@ -670,7 +670,8 @@
                                 data-editor3-valid="{{ $s->editor3_valid ? '1' : '0' }}"
                                 data-author2-valid="{{ $s->author2_valid ? '1' : '0' }}"
                                 data-production-valid="{{ $s->production_valid ? '1' : '0' }}"
-                                data-validator-valid="{{ $s->validator_valid ? '1' : '0' }}">
+                                data-validator-valid="{{ $s->validator_valid ? '1' : '0' }}"
+                                data-has-link-publish="{{ $s->link_publish ? '1' : '0' }}">
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
@@ -1258,8 +1259,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // SPECIAL VALIDATION: Validator wajib ada link publikasi
             if (field === 'validator_valid' && newValue) {
+                const hasLink = row.dataset.hasLinkPublish === '1';
+                // Cek juga input langsung kalau ada (production PIC)
                 const linkInput = row.querySelector('input[data-field="link_publish"]');
-                if (!linkInput || !linkInput.value.trim()) {
+                const linkFilled = hasLink || (linkInput && linkInput.value.trim() !== '');
+                if (!linkFilled) {
                     alert('Link publikasi harus diisi terlebih dahulu sebelum melakukan validasi akhir.');
                     return;
                 }
