@@ -132,3 +132,12 @@ Tambahkan atribut `data-has-link-publish="1/0"` langsung pada elemen `<tr>` (ser
   - Tambah CSS `.sidebar-toggle-btn`, `body.sidebar-collapsed`
   - Tambah HTML tombol toggle
   - Update JavaScript dengan fungsi `toggleSidebar()` + localStorage
+
+## 8. 🔄 Update: a
+
+- **Commit:** `e1e259c` — 10:58 oleh Gudangsoft
+- **File berubah:** 3 file
+- `CLAUDE.md`
+- `app/Services/FeatureSettingService.php`
+- `log-update-2026-05-05.md`
+
