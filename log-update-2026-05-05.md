@@ -176,3 +176,14 @@ Tambahkan atribut `data-has-link-publish="1/0"` langsung pada elemen `<tr>` (ser
 - **File berubah:** 1 file
 - `log-update-2026-05-05.md`
 
+---
+
+## 14. Ubah Portal Pertama sipera.apji.org ke Halaman Login
+
+**Tujuan:** Sebelumnya akses root `/` di domain `sipera.apji.org` langsung menampilkan form pendaftaran reviewer. Diubah agar halaman login menjadi portal akses pertama, konsisten dengan perilaku domain utama.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Root route `sipera.apji.org`: tamu diarahkan ke `/login` (bukan form registrasi). User terautentikasi diarahkan ke dashboard sesuai role (admin/reviewer). |
+

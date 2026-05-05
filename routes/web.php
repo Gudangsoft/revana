@@ -39,11 +39,14 @@ Route::get('/', function () {
 
     // Jika diakses melalui domain SIPERA (Portal Reviewer)
     if (str_contains($host, 'sipera.apji.org')) {
-        if (Auth::check() && Auth::user()->role === 'reviewer') {
+        if (Auth::check()) {
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
             return redirect()->route('reviewer.dashboard');
         }
-        // Jika tamu, tampilkan form pendaftaran reviewer
-        return app(\App\Http\Controllers\Admin\ReviewerRegistrationController::class)->showForm();
+        // Tamu → halaman login sebagai portal pertama
+        return redirect('/login');
     }
 
     // Jika diakses melalui domain verifikasi, langsung arahkan ke tracking
