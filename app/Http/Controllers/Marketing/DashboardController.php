@@ -786,7 +786,7 @@ class DashboardController extends Controller
         }
 
         // Determine status based on link_publish availability
-        $status = !empty($validated['link_publish']) ? 'PUBLISHED' : 'PENDING_ASSIGNMENT';
+        $status = !empty($validated['link_publish']) ? 'PUBLISHED' : 'SUBMITTED';
         $logMessage = !empty($validated['link_publish']) 
             ? 'Submission fasttrack dibuat oleh Marketing dengan link publish' 
             : 'Submission fasttrack dibuat oleh Marketing, menunggu penugasan admin';
