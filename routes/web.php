@@ -195,6 +195,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/{submission}', [SubmissionController::class, 'fasttrackShow'])->name('show');
             Route::get('/{submission}/edit', [SubmissionController::class, 'fasttrackEdit'])->name('edit');
             Route::put('/{submission}', [SubmissionController::class, 'fasttrackUpdate'])->name('update');
+            Route::delete('/{submission}', [SubmissionController::class, 'fasttrackDestroy'])->name('destroy');
         });
         
         // Articles (temporarily commented out - controller missing)
