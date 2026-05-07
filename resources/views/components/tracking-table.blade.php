@@ -12,132 +12,171 @@
 @php
     use App\Services\ComponentSettingService;
     $s = ComponentSettingService::all();
-    
+
     // Allow prop override, otherwise use setting
     $showCreds = $showCredentials ?? (bool)($s['tracking_show_credentials'] ?? true);
-    
-    $validColor = $s['tracking_valid_color'] ?? 'bg-success';
+
+    $validColor    = $s['tracking_valid_color']    ?? 'bg-success';
     $progressColor = $s['tracking_progress_color'] ?? 'bg-warning';
-    $pendingColor = $s['tracking_pending_color'] ?? 'bg-secondary';
-    
+    $pendingColor  = $s['tracking_pending_color']  ?? 'bg-secondary';
+
+    // Load assignment histories (1 query, grouped by step)
+    $assignHistories = \App\Models\SubmissionHistory::where('submission_id', $submission->id)
+        ->where('action', 'assigned')
+        ->orderBy('created_at')
+        ->get()
+        ->groupBy('step');
+
+    $assignedAt = [];
+    foreach ($assignHistories as $stepKey => $records) {
+        $assignedAt[$stepKey] = $records->first()->created_at;
+    }
+
+    $fmt = fn($dt) => $dt ? $dt->format('d/m/Y H:i') : '-';
+
+    // Submit: gunakan tanggal_submit atau created_at sebagai waktu penugasan
+    $submitPenugasan = $submission->tanggal_submit
+        ? \Carbon\Carbon::parse($submission->tanggal_submit)
+        : $submission->created_at;
+
     // Build steps config
     $steps = [
         [
-            'key' => 'submit',
-            'label' => 'Submit',
-            'show' => $s['tracking_show_submit'] ?? '1',
-            'rowClass' => $s['tracking_row_submit'] ?? '',
-            'petugas' => $submission->petugasSubmit,
-            'petugasFallback' => $submission->marketing,
+            'key'          => 'submit',
+            'label'        => 'Submit',
+            'show'         => $s['tracking_show_submit'] ?? '1',
+            'rowClass'     => $s['tracking_row_submit'] ?? '',
+            'petugas'      => $submission->petugasSubmit,
+            'petugasFallback'      => $submission->marketing,
             'petugasFallbackLabel' => '(Marketing)',
-            'isValid' => $submission->petugasSubmit || $submission->marketing,
-            'hasAssignment' => $submission->petugasSubmit || $submission->marketing,
-            'credential' => ($submission->username_author && $submission->password_author) 
+            'isValid'      => $submission->petugasSubmit || $submission->marketing,
+            'hasAssignment'=> $submission->petugasSubmit || $submission->marketing,
+            'credential'   => ($submission->username_author && $submission->password_author)
                 ? $submission->username_author . ' / ' . $submission->password_author : null,
-            'validLabel' => 'Valid',
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($submitPenugasan),
+            'selesai_at'   => '-',
         ],
         [
-            'key' => 'editor1',
-            'label' => 'Editor 1 (E1)',
-            'show' => $s['tracking_show_editor1'] ?? '1',
-            'rowClass' => $s['tracking_row_editor1'] ?? 'table-info',
-            'petugas' => $submission->petugasEditor1,
-            'isValid' => $submission->editor1_valid,
-            'hasAssignment' => $submission->petugasEditor1,
-            'credential' => ($submission->username_editor && $submission->password_editor) 
+            'key'          => 'editor1',
+            'label'        => 'Editor 1 (E1)',
+            'show'         => $s['tracking_show_editor1'] ?? '1',
+            'rowClass'     => $s['tracking_row_editor1'] ?? 'table-info',
+            'petugas'      => $submission->petugasEditor1,
+            'isValid'      => $submission->editor1_valid,
+            'hasAssignment'=> $submission->petugasEditor1,
+            'credential'   => ($submission->username_editor && $submission->password_editor)
                 ? $submission->username_editor . ' / ' . $submission->password_editor : null,
-            'validLabel' => 'Valid',
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['editor1'] ?? null),
+            'selesai_at'   => $fmt($submission->editor1_validated_at),
         ],
         [
-            'key' => 'author1',
-            'label' => 'Author 1 (A1)',
-            'show' => $s['tracking_show_author1'] ?? '1',
-            'rowClass' => $s['tracking_row_author1'] ?? 'table-warning',
-            'petugas' => $submission->petugasAuthor1,
-            'isValid' => $submission->author1_valid,
-            'hasAssignment' => $submission->petugasAuthor1,
-            'credential' => null,
-            'validLabel' => 'Valid',
+            'key'          => 'author1',
+            'label'        => 'Author 1 (A1)',
+            'show'         => $s['tracking_show_author1'] ?? '1',
+            'rowClass'     => $s['tracking_row_author1'] ?? 'table-warning',
+            'petugas'      => $submission->petugasAuthor1,
+            'isValid'      => $submission->author1_valid,
+            'hasAssignment'=> $submission->petugasAuthor1,
+            'credential'   => null,
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['author1'] ?? null),
+            'selesai_at'   => $fmt($submission->author1_validated_at),
         ],
         [
-            'key' => 'editor2',
-            'label' => 'Editor 2 (E2)',
-            'show' => $s['tracking_show_editor2'] ?? '1',
-            'rowClass' => $s['tracking_row_editor2'] ?? 'table-info',
-            'petugas' => $submission->petugasEditor2,
-            'isValid' => $submission->editor2_valid,
-            'hasAssignment' => $submission->petugasEditor2,
-            'credential' => null,
-            'validLabel' => 'Valid',
+            'key'          => 'editor2',
+            'label'        => 'Editor 2 (E2)',
+            'show'         => $s['tracking_show_editor2'] ?? '1',
+            'rowClass'     => $s['tracking_row_editor2'] ?? 'table-info',
+            'petugas'      => $submission->petugasEditor2,
+            'isValid'      => $submission->editor2_valid,
+            'hasAssignment'=> $submission->petugasEditor2,
+            'credential'   => null,
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['editor2'] ?? null),
+            'selesai_at'   => $fmt($submission->editor2_validated_at),
         ],
         [
-            'key' => 'reviewer1',
-            'label' => 'Reviewer 1 (R1)',
-            'show' => $s['tracking_show_reviewer1'] ?? '1',
-            'rowClass' => $s['tracking_row_reviewer1'] ?? 'table-primary',
-            'petugas' => $submission->petugasReviewer1,
-            'isValid' => $submission->reviewer1_valid,
-            'hasAssignment' => $submission->petugasReviewer1,
-            'credential' => ($submission->username_reviewer1 && $submission->password_reviewer1) 
+            'key'          => 'reviewer1',
+            'label'        => 'Reviewer 1 (R1)',
+            'show'         => $s['tracking_show_reviewer1'] ?? '1',
+            'rowClass'     => $s['tracking_row_reviewer1'] ?? 'table-primary',
+            'petugas'      => $submission->petugasReviewer1,
+            'isValid'      => $submission->reviewer1_valid,
+            'hasAssignment'=> $submission->petugasReviewer1,
+            'credential'   => ($submission->username_reviewer1 && $submission->password_reviewer1)
                 ? $submission->username_reviewer1 . ' / ' . $submission->password_reviewer1 : null,
-            'validLabel' => 'Valid',
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['reviewer1'] ?? null),
+            'selesai_at'   => $fmt($submission->reviewer1_validated_at),
         ],
         [
-            'key' => 'reviewer2',
-            'label' => 'Reviewer 2 (R2)',
-            'show' => $s['tracking_show_reviewer2'] ?? '1',
-            'rowClass' => $s['tracking_row_reviewer2'] ?? 'table-primary',
-            'petugas' => $submission->petugasReviewer2,
-            'isValid' => $submission->reviewer2_valid,
-            'hasAssignment' => $submission->petugasReviewer2,
-            'credential' => ($submission->username_reviewer2 && $submission->password_reviewer2) 
+            'key'          => 'reviewer2',
+            'label'        => 'Reviewer 2 (R2)',
+            'show'         => $s['tracking_show_reviewer2'] ?? '1',
+            'rowClass'     => $s['tracking_row_reviewer2'] ?? 'table-primary',
+            'petugas'      => $submission->petugasReviewer2,
+            'isValid'      => $submission->reviewer2_valid,
+            'hasAssignment'=> $submission->petugasReviewer2,
+            'credential'   => ($submission->username_reviewer2 && $submission->password_reviewer2)
                 ? $submission->username_reviewer2 . ' / ' . $submission->password_reviewer2 : null,
-            'validLabel' => 'Valid',
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['reviewer2'] ?? null),
+            'selesai_at'   => $fmt($submission->reviewer2_validated_at),
         ],
         [
-            'key' => 'editor3',
-            'label' => 'Editor 3 (E3)',
-            'show' => $s['tracking_show_editor3'] ?? '1',
-            'rowClass' => $s['tracking_row_editor3'] ?? 'table-info',
-            'petugas' => $submission->petugasEditor3,
-            'isValid' => $submission->editor3_valid,
-            'hasAssignment' => $submission->petugasEditor3,
-            'credential' => null,
-            'validLabel' => 'Valid',
+            'key'          => 'editor3',
+            'label'        => 'Editor 3 (E3)',
+            'show'         => $s['tracking_show_editor3'] ?? '1',
+            'rowClass'     => $s['tracking_row_editor3'] ?? 'table-info',
+            'petugas'      => $submission->petugasEditor3,
+            'isValid'      => $submission->editor3_valid,
+            'hasAssignment'=> $submission->petugasEditor3,
+            'credential'   => null,
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['editor3'] ?? null),
+            'selesai_at'   => $fmt($submission->editor3_validated_at),
         ],
         [
-            'key' => 'author2',
-            'label' => 'Author 2 (A2)',
-            'show' => $s['tracking_show_author2'] ?? '1',
-            'rowClass' => $s['tracking_row_author2'] ?? 'table-warning',
-            'petugas' => $submission->petugasAuthor2,
-            'isValid' => $submission->author2_valid,
-            'hasAssignment' => $submission->petugasAuthor2,
-            'credential' => null,
-            'validLabel' => 'Valid',
+            'key'          => 'author2',
+            'label'        => 'Author 2 (A2)',
+            'show'         => $s['tracking_show_author2'] ?? '1',
+            'rowClass'     => $s['tracking_row_author2'] ?? 'table-warning',
+            'petugas'      => $submission->petugasAuthor2,
+            'isValid'      => $submission->author2_valid,
+            'hasAssignment'=> $submission->petugasAuthor2,
+            'credential'   => null,
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['author2'] ?? null),
+            'selesai_at'   => $fmt($submission->author2_validated_at),
         ],
         [
-            'key' => 'production',
-            'label' => 'Production (P)',
-            'show' => $s['tracking_show_production'] ?? '1',
-            'rowClass' => $s['tracking_row_production'] ?? 'table-success',
-            'petugas' => $submission->petugasProduction,
-            'isValid' => $submission->production_valid || !empty($submission->link_publish),
-            'hasAssignment' => $submission->petugasProduction,
-            'credential' => null,
+            'key'          => 'production',
+            'label'        => 'Production (P)',
+            'show'         => $s['tracking_show_production'] ?? '1',
+            'rowClass'     => $s['tracking_row_production'] ?? 'table-success',
+            'petugas'      => $submission->petugasProduction,
+            'isValid'      => $submission->production_valid || !empty($submission->link_publish),
+            'hasAssignment'=> $submission->petugasProduction,
+            'credential'   => null,
             'isProduction' => true,
-            'validLabel' => 'Published',
+            'validLabel'   => 'Published',
+            'penugasan_at' => $fmt($assignedAt['production'] ?? null),
+            'selesai_at'   => $fmt($submission->production_validated_at),
         ],
         [
-            'key' => 'validator',
-            'label' => 'Validasi (V)',
-            'show' => $s['tracking_show_validator'] ?? '1',
-            'rowClass' => $s['tracking_row_validator'] ?? 'table-success',
-            'petugas' => $submission->petugasValidator,
-            'isValid' => $submission->validator_valid,
-            'hasAssignment' => $submission->petugasValidator,
-            'credential' => null,
-            'validLabel' => 'Valid',
+            'key'          => 'validator',
+            'label'        => 'Validasi (V)',
+            'show'         => $s['tracking_show_validator'] ?? '1',
+            'rowClass'     => $s['tracking_row_validator'] ?? 'table-success',
+            'petugas'      => $submission->petugasValidator,
+            'isValid'      => $submission->validator_valid,
+            'hasAssignment'=> $submission->petugasValidator,
+            'credential'   => null,
+            'validLabel'   => 'Valid',
+            'penugasan_at' => $fmt($assignedAt['validator'] ?? null),
+            'selesai_at'   => $fmt($submission->validator_validated_at),
         ],
     ];
 @endphp
@@ -156,6 +195,8 @@
                         @if($showCreds)
                         <th>Credential</th>
                         @endif
+                        <th style="min-width:120px"><i class="bi bi-clock"></i> Waktu Penugasan</th>
+                        <th style="min-width:120px"><i class="bi bi-clock-history"></i> Waktu Selesai</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -187,6 +228,8 @@
                                 @endif
                             </td>
                             @endif
+                            <td class="small text-nowrap text-muted">{{ $step['penugasan_at'] }}</td>
+                            <td class="small text-nowrap text-muted">{{ $step['selesai_at'] }}</td>
                             <td>
                                 @if($step['isValid'])
                                     <span class="badge {{ $validColor }}"><i class="bi bi-check-circle"></i> {{ $step['validLabel'] }}</span>
