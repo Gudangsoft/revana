@@ -222,3 +222,12 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 |------|-----------|
 | `routes/web.php` | Tambah `Route::get('/monitoring', ...)→name('monitoring')` ke grup `admin.fasttrack.*` |
 
+
+## 13. 🔄 Update: update
+
+- **Commit:** `b8412af` — 22:29 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-05-07.md`
+- `resources/views/admin/dashboard.blade.php`
+- `routes/web.php`
+
