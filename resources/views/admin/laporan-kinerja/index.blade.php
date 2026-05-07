@@ -10,14 +10,15 @@
 @section('content')
 <div class="row g-3">
 
-    {{-- Filter Bulan --}}
+    {{-- Filter --}}
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-body py-3">
                 <form action="{{ route('admin.laporan-kinerja.index') }}" method="GET" class="row g-2 align-items-end">
+                    {{-- Kolom Bulanan --}}
                     <div class="col-auto">
-                        <label class="form-label mb-1 small fw-semibold">Bulan</label>
-                        <select name="bulan" class="form-select form-select-sm">
+                        <label class="form-label mb-1 small fw-semibold text-muted">Bulan</label>
+                        <select name="bulan" class="form-select form-select-sm" id="selBulan">
                             @foreach(range(1,12) as $m)
                                 <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create()->month($m)->locale('id')->translatedFormat('F') }}
@@ -26,13 +27,30 @@
                         </select>
                     </div>
                     <div class="col-auto">
-                        <label class="form-label mb-1 small fw-semibold">Tahun</label>
-                        <select name="tahun" class="form-select form-select-sm">
+                        <label class="form-label mb-1 small fw-semibold text-muted">Tahun</label>
+                        <select name="tahun" class="form-select form-select-sm" id="selTahun">
                             @foreach($tahunList as $y)
                                 <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endforeach
                         </select>
                     </div>
+
+                    {{-- Pemisah --}}
+                    <div class="col-auto d-flex align-items-end pb-1">
+                        <span class="text-muted small">atau</span>
+                    </div>
+
+                    {{-- Filter Harian --}}
+                    <div class="col-auto">
+                        <label class="form-label mb-1 small fw-semibold text-primary">
+                            <i class="bi bi-calendar-day"></i> Tanggal (Harian)
+                        </label>
+                        <input type="date" name="tanggal" id="inputTanggal"
+                               class="form-control form-control-sm"
+                               value="{{ $tanggal ?? '' }}"
+                               max="{{ now()->format('Y-m-d') }}">
+                    </div>
+
                     <div class="col-auto">
                         <button type="submit" class="btn btn-primary btn-sm">
                             <i class="bi bi-search"></i> Tampilkan
@@ -42,14 +60,15 @@
                         </a>
                     </div>
                     <div class="col-auto ms-auto d-flex gap-2 align-items-center">
-                        <span class="badge bg-primary fs-6 px-3 py-2">
-                            <i class="bi bi-calendar3"></i> {{ $namaBulan }}
+                        <span class="badge {{ $tanggal ? 'bg-primary' : 'bg-secondary' }} fs-6 px-3 py-2">
+                            <i class="bi bi-calendar{{ $tanggal ? '-day' : '3' }}"></i> {{ $namaBulan }}
                         </span>
-                        <a href="{{ route('admin.laporan-kinerja.export-excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+                        @php $exportParams = $tanggal ? ['tanggal' => $tanggal] : ['bulan' => $bulan, 'tahun' => $tahun]; @endphp
+                        <a href="{{ route('admin.laporan-kinerja.export-excel', $exportParams) }}"
                            class="btn btn-success btn-sm">
                             <i class="bi bi-file-earmark-excel"></i> Excel
                         </a>
-                        <a href="{{ route('admin.laporan-kinerja.export-pdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+                        <a href="{{ route('admin.laporan-kinerja.export-pdf', $exportParams) }}"
                            class="btn btn-danger btn-sm">
                             <i class="bi bi-file-earmark-pdf"></i> PDF
                         </a>
@@ -221,4 +240,25 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    const inputTanggal = document.getElementById('inputTanggal');
+    const selBulan     = document.getElementById('selBulan');
+    const selTahun     = document.getElementById('selTahun');
+
+    function sync() {
+        const hasTanggal = inputTanggal.value !== '';
+        selBulan.disabled = hasTanggal;
+        selTahun.disabled = hasTanggal;
+        selBulan.style.opacity = hasTanggal ? '0.4' : '1';
+        selTahun.style.opacity = hasTanggal ? '0.4' : '1';
+    }
+
+    inputTanggal.addEventListener('input', sync);
+    sync();
+})();
+</script>
+@endpush
 @endsection

@@ -29,19 +29,33 @@ class LaporanKinerjaController extends Controller
 
     public function index(Request $request)
     {
-        $bulan = (int) $request->input('bulan', now()->month);
-        $tahun = (int) $request->input('tahun', now()->year);
+        $tanggal = $request->input('tanggal'); // Y-m-d, opsional
+        $bulan   = (int) $request->input('bulan', now()->month);
+        $tahun   = (int) $request->input('tahun', now()->year);
+
+        if ($tanggal) {
+            $carbonDate = \Carbon\Carbon::parse($tanggal);
+            $bulan      = $carbonDate->month;
+            $tahun      = $carbonDate->year;
+            $namaBulan  = $carbonDate->locale('id')->translatedFormat('d F Y');
+        } else {
+            $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
+                ->locale('id')
+                ->translatedFormat('F Y');
+        }
 
         // --- Rekap PIC ---
         $pics = Pic::where('is_active', true)
             ->orderBy('name')
             ->get();
 
-        $picHistories = PicPointHistory::with('pic')
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->get()
-            ->groupBy('pic_id');
+        $picQuery = PicPointHistory::with('pic');
+        if ($tanggal) {
+            $picQuery->whereDate('created_at', $tanggal);
+        } else {
+            $picQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+        }
+        $picHistories = $picQuery->get()->groupBy('pic_id');
 
         $picRekap = $pics->map(function ($pic) use ($picHistories) {
             $histories = $picHistories->get($pic->id, collect());
@@ -67,10 +81,13 @@ class LaporanKinerjaController extends Controller
             ->orderBy('name')
             ->get();
 
-        $mktHistories = MarketingPointHistory::whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->get()
-            ->groupBy('marketing_id');
+        $mktQuery = MarketingPointHistory::query();
+        if ($tanggal) {
+            $mktQuery->whereDate('created_at', $tanggal);
+        } else {
+            $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+        }
+        $mktHistories = $mktQuery->get()->groupBy('marketing_id');
 
         $mktRekap = $marketings->map(function ($mkt) use ($mktHistories) {
             $histories = $mktHistories->get($mkt->id, collect());
@@ -89,17 +106,11 @@ class LaporanKinerjaController extends Controller
         $totalMktSubmit = $mktRekap->sum('total_submit');
         $totalMktPoin   = $mktRekap->sum('total_poin');
 
-        $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
-            ->locale('id')
-            ->translatedFormat('F Y');
-
-        $steps = self::STEPS;
-
-        // Build year options (from earliest history or 5 years back)
+        $steps     = self::STEPS;
         $tahunList = range(now()->year, max(now()->year - 4, 2024));
 
         return view('admin.laporan-kinerja.index', compact(
-            'bulan', 'tahun', 'namaBulan',
+            'bulan', 'tahun', 'tanggal', 'namaBulan',
             'picRekap', 'mktRekap', 'steps',
             'totalPicTugas', 'totalPicPoin',
             'totalMktSubmit', 'totalMktPoin',
@@ -134,13 +145,28 @@ class LaporanKinerjaController extends Controller
 
     private function buildData(Request $request, bool $withTotals = false): array
     {
-        $bulan = (int) $request->input('bulan', now()->month);
-        $tahun = (int) $request->input('tahun', now()->year);
+        $tanggal = $request->input('tanggal');
+        $bulan   = (int) $request->input('bulan', now()->month);
+        $tahun   = (int) $request->input('tahun', now()->year);
+
+        if ($tanggal) {
+            $carbonDate = \Carbon\Carbon::parse($tanggal);
+            $bulan      = $carbonDate->month;
+            $tahun      = $carbonDate->year;
+            $namaBulan  = $carbonDate->locale('id')->translatedFormat('d F Y');
+        } else {
+            $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
+                ->locale('id')->translatedFormat('F Y');
+        }
 
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
-        $picHistories = PicPointHistory::whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->get()->groupBy('pic_id');
+        $picQuery = PicPointHistory::query();
+        if ($tanggal) {
+            $picQuery->whereDate('created_at', $tanggal);
+        } else {
+            $picQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+        }
+        $picHistories = $picQuery->get()->groupBy('pic_id');
 
         $picRekap = $pics->map(function ($pic) use ($picHistories) {
             $histories = $picHistories->get($pic->id, collect());
@@ -158,9 +184,13 @@ class LaporanKinerjaController extends Controller
         })->filter(fn($r) => $r['total_tugas'] > 0)->sortByDesc('total_poin')->values();
 
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
-        $mktHistories = MarketingPointHistory::whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->get()->groupBy('marketing_id');
+        $mktQuery = MarketingPointHistory::query();
+        if ($tanggal) {
+            $mktQuery->whereDate('created_at', $tanggal);
+        } else {
+            $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+        }
+        $mktHistories = $mktQuery->get()->groupBy('marketing_id');
 
         $mktRekap = $marketings->map(function ($mkt) use ($mktHistories) {
             $histories = $mktHistories->get($mkt->id, collect());
@@ -170,9 +200,6 @@ class LaporanKinerjaController extends Controller
                 'total_poin'   => $histories->sum('points_earned'),
             ];
         })->filter(fn($r) => $r['total_submit'] > 0)->sortByDesc('total_submit')->values();
-
-        $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
-            ->locale('id')->translatedFormat('F Y');
 
         $steps = self::STEPS;
 
