@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\MotivationalMessage;
 use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
@@ -82,8 +83,10 @@ class LoginController extends Controller
                     // Silent — jangan ganggu proses login
                 }
 
+                $request->session()->flash('motivational_message', MotivationalMessage::random());
                 return redirect()->intended('/admin/dashboard');
             } elseif ($user->role === 'reviewer') {
+                $request->session()->flash('motivational_message', MotivationalMessage::random());
                 return redirect()->intended('/reviewer/dashboard');
             }
             

@@ -3,6 +3,15 @@
 @section('title', 'Dashboard Marketing')
 
 @section('content')
+@if(session('motivational_message'))
+<div class="alert alert-dismissible fade show border-0 mb-3" role="alert"
+     style="background: linear-gradient(135deg,#f59e0b,#ef4444); color:#fff;">
+    <div class="d-flex align-items-center gap-2">
+        <span class="fs-5">{{ session('motivational_message') }}</span>
+    </div>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+</div>
+@endif
 {{-- Sync Point Reminder --}}
 @include('partials.sync-point-reminder', [
     'reminderId' => 'marketing_sync_point',

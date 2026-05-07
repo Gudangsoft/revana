@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pic\Auth;
 
+use App\Helpers\MotivationalMessage;
 use App\Http\Controllers\Controller;
 use App\Models\Pic;
 use Illuminate\Http\Request;
@@ -64,6 +65,7 @@ class LoginController extends Controller
         Auth::guard('pic')->login($pic, $remember);
         $request->session()->regenerate();
 
+        $request->session()->flash('motivational_message', MotivationalMessage::random());
         return redirect()->intended(route('pic.dashboard'));
     }
 

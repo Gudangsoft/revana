@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Marketing;
 
+use App\Helpers\MotivationalMessage;
 use App\Http\Controllers\Controller;
 use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
@@ -67,6 +68,7 @@ class DashboardController extends Controller
 
         Auth::guard('marketing')->login($marketing);
 
+        $request->session()->flash('motivational_message', MotivationalMessage::random());
         return redirect()->route('marketing.dashboard');
     }
 

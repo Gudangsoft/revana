@@ -8,6 +8,15 @@
 @endsection
 
 @section('content')
+@if(session('motivational_message'))
+<div class="alert alert-dismissible fade show border-0 mb-3" role="alert"
+     style="background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;">
+    <div class="d-flex align-items-center gap-2">
+        <span class="fs-5">{{ session('motivational_message') }}</span>
+    </div>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+</div>
+@endif
 <!-- Notification Alert for Submitted Reviews -->
 @if($submittedReviews > 0)
 <div class="alert alert-info alert-dismissible fade show" role="alert">
