@@ -255,3 +255,11 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 - `log-update-2026-05-07.md`
 - `resources/views/admin/dashboard.blade.php`
 
+
+## 17. 🔄 Update: update tampilan
+
+- **Commit:** `255d428` — 22:40 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-07.md`
+- `resources/views/admin/dashboard.blade.php`
+
