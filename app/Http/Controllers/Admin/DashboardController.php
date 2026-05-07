@@ -32,7 +32,9 @@ class DashboardController extends Controller
         $rejectedSubmissions = Submission::where('status', 'REJECTED')->count();
         
         // Process type counts
-        $regularSubmissions   = Submission::where('process_type', 'regular')->orWhereNull('process_type')->count();
+        $regularSubmissions   = Submission::where(function ($q) {
+            $q->where('process_type', 'normal')->orWhereNull('process_type');
+        })->count();
         $fasttrackSubmissions = Submission::where('process_type', 'fasttrack')->count();
 
         // BKD & JAFA stats
@@ -68,7 +70,7 @@ class DashboardController extends Controller
         $completedReviews = Submission::with(['journalSlot.journalMaster', 'marketing'])
             ->where('status', 'PUBLISHED')
             ->orderBy('updated_at', 'desc')
-            ->take(30)
+            ->take(10)
             ->get();
 
         $totalCompletedReviews = $approvedSubmissions;

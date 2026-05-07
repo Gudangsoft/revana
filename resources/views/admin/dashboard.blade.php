@@ -129,7 +129,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Perlu Review</h6>
-                        <h2 class="mb-0">{{ $pendingSubmissions + $newSubmissions }}</h2>
+                        <h2 class="mb-0">{{ $pendingSubmissions }}</h2>
                     </div>
                     <div class="text-warning" style="font-size: 2.5rem;">
                         <i class="bi bi-hourglass-split"></i>
@@ -162,7 +162,7 @@
         <div class="card">
             <div class="card-body text-center">
                 <h5 class="text-success">{{ $regularSubmissions }}</h5>
-                <small class="text-muted">Regular</small>
+                <small class="text-muted">Normal</small>
             </div>
         </div>
     </div>
@@ -464,10 +464,15 @@
                     <span class="badge bg-success ms-1">{{ $totalCompletedReviews }}</span>
                 </span>
                 <div class="d-flex gap-2">
-                    <small class="text-muted align-self-center">30 terbaru</small>
-                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                        <i class="bi bi-file-earmark-excel"></i> Export
-                    </button>
+                    <small class="text-muted align-self-center">10 terbaru</small>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('admin.submissions.index', ['status' => 'PUBLISHED']) }}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-arrow-right-circle"></i> Lihat Semua
+                        </a>
+                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="bi bi-file-earmark-excel"></i> Export
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-0">
