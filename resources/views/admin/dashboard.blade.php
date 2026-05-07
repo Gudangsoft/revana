@@ -322,8 +322,8 @@
                 <i class="bi bi-lightning-charge-fill text-warning"></i> <span class="fw-semibold">Quick Actions</span>
             </div>
             <div class="card-body d-flex flex-wrap gap-2">
-                <a href="{{ route('admin.journals.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle-fill"></i> Tambah Jurnal
+                <a href="{{ route('admin.journals.index') }}" class="btn btn-primary">
+                    <i class="bi bi-journal-bookmark-fill"></i> Jurnal Normal
                 </a>
                 <a href="{{ route('admin.submissions.index') }}" class="btn btn-success">
                     <i class="bi bi-file-earmark-text-fill"></i> Kelola Submissions

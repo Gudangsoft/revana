@@ -205,3 +205,20 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 - `log-update-2026-05-07.md`
 - `resources/views/admin/dashboard.blade.php`
 
+
+## 11. 🔄 Update: update info dashbord
+
+- **Commit:** `7cf9c7b` — 22:21 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-07.md`
+
+
+## 12. Fix Error Route `admin.fasttrack.monitoring` Tidak Terdefinisi
+
+**Tujuan:** Halaman `/admin/fasttrack` error karena route `admin.fasttrack.monitoring` tidak ada di grup admin fasttrack, meskipun view dan controller method-nya sudah ada.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah `Route::get('/monitoring', ...)→name('monitoring')` ke grup `admin.fasttrack.*` |
+

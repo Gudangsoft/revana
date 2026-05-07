@@ -189,6 +189,7 @@ Route::middleware('auth')->group(function () {
         // Admin Fasttrack Input
         Route::prefix('fasttrack')->name('fasttrack.')->middleware('feature:fasttrack')->group(function () {
             Route::get('/', [SubmissionController::class, 'fasttrackIndex'])->name('index');
+            Route::get('/monitoring', [SubmissionController::class, 'fasttrackMonitoring'])->name('monitoring');
             Route::get('/create', [SubmissionController::class, 'fasttrackCreate'])->name('create');
             Route::post('/', [SubmissionController::class, 'fasttrackStore'])->name('store');
             Route::get('/{submission}', [SubmissionController::class, 'fasttrackShow'])->name('show');
