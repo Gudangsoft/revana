@@ -1,82 +1,155 @@
-# Log Update — 7 May 2026
+# Log Update — 7 Mei 2026
 
-## Ringkasan
-Log perubahan otomatis dari git commits.
-
----
-
-## 1. Hapus Prefix Program di Field ID Artikel
-
-**Tujuan:** Field ID Artikel tidak lagi perlu diisi dengan prefix program (BKD-, JAFA-, dll) karena prefix tersebut sudah otomatis masuk ke Kode Submit.
-
-### File yang Diubah
-| File | Perubahan |
-|------|-----------|
-| `resources/views/admin/submissions/create.blade.php` | Hapus logika prefix `strtoupper(request('program')) . '-'` dari value dan placeholder field id_artikel |
-| `resources/views/pic/submissions/create.blade.php` | Sama: hapus prefix dari value dan placeholder field id_artikel |
-| `resources/views/marketing/create-submission.blade.php` | Sama: hapus prefix dari value dan placeholder field Nomor Submit |
-
-
-## 2. Notifikasi WhatsApp Otomatis via Fonnte
-
-**Tujuan:** Kirim WA otomatis ke Marketing/PIC saat submission baru masuk, ke reviewer saat ditugaskan beserta kredensial OJS, ke PIC saat review selesai, dan reminder harian ke reviewer yang belum selesai lebih dari 3 hari.
-
-### File yang Diubah
-| File | Perubahan |
-|------|-----------|
-| `app/Services/WaNotificationService.php` | Service baru: 4 metode notifikasi (newSubmission, reviewerAssigned, reviewCompleted, deadlineReminder) |
-| `app/Console/Commands/SendReviewerDeadlineReminders.php` | Artisan command `wa:reviewer-reminders` untuk reminder harian |
-| `app/Console/Kernel.php` | Daftarkan command `wa:reviewer-reminders` jalan tiap hari jam 08:00 |
-| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah trigger WA di store(), updateStep() reviewer1/2, validateStep() reviewer1/2 |
+> Sesi pengembangan penuh: perbaikan data, fitur WA otomatis, peningkatan UX, dan hardening teknis/keamanan.
 
 ---
 
-## 3. Peningkatan UX: Search Global, Stepper, Dashboard Charts
+## 1. Fix Kode Submit Lama: Prefix SUB → BKD / JAFA
 
-**Tujuan:** (1) Kotak pencarian di navbar untuk admin mencari submission lintas halaman. (2) Progress stepper horizontal di detail submission menggantikan progress bar sederhana. (3) Grafik tren bulanan + donut status di dashboard admin.
+**Tujuan:** Data submission lama yang `program_type = bkd` atau `jafa` masih tersimpan dengan prefix `SUB` pada `kode_submit`. Migration ini memperbaiki data existing tanpa mengubah urutan nomor.
+
+**Contoh:** `SUB202605050017` (bkd) → `BKD202605050017`
 
 ### File yang Diubah
 | File | Perubahan |
 |------|-----------|
-| `app/Http/Controllers/Admin/SearchController.php` | Controller baru: global search submission (nama, ID, judul, kode, jurnal) |
-| `resources/views/admin/search/results.blade.php` | View baru: halaman hasil pencarian dengan tabel responsif |
+| `database/migrations/2026_05_07_173754_fix_kode_submit_prefix_for_bkd_jafa.php` | Migration baru: UPDATE batch untuk BKD dan JAFA; mendukung rollback |
+
+---
+
+## 2. Hapus Prefix Program di Field ID Artikel
+
+**Tujuan:** Field ID Artikel di form submission tidak lagi diisi otomatis dengan prefix program (contoh: `BKD-`). Prefix tersebut kini hanya ada di Kode Submit yang di-generate otomatis — tidak perlu redundan di ID Artikel.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/create.blade.php` | Hapus logika `strtoupper(request('program')) . '-'` dari `value` dan `placeholder` |
+| `resources/views/pic/submissions/create.blade.php` | Sama — field ID Artikel kini kosong saat form dibuka |
+| `resources/views/marketing/create-submission.blade.php` | Sama — field Nomor Submit kini kosong saat form dibuka |
+
+---
+
+## 3. Notifikasi WhatsApp Otomatis (Fonnte)
+
+**Tujuan:** Mengurangi pekerjaan manual admin/PIC dengan mengirim WA otomatis pada 4 event kunci dalam alur submission.
+
+| Event | Penerima | Isi Pesan |
+|-------|----------|-----------|
+| Submission baru masuk | Marketing + PIC Submit | Kode, penulis, judul, jurnal, program |
+| Reviewer ditugaskan | Reviewer (User) | Detail artikel + kredensial OJS |
+| Review selesai divalidasi | PIC Submit | Notif reviewer sudah selesai |
+| Reminder harian (>3 hari belum selesai) | Reviewer | Pengingat dengan jumlah hari keterlambatan |
+
+**Cron reminder** berjalan setiap hari pukul 08:00 via Laravel Scheduler.
+Gunakan `php artisan wa:reviewer-reminders --days=5` untuk threshold kustom.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Services/WaNotificationService.php` | **Baru** — service terpusat dengan 4 metode notifikasi |
+| `app/Console/Commands/SendReviewerDeadlineReminders.php` | **Baru** — artisan command `wa:reviewer-reminders` |
+| `app/Console/Kernel.php` | Daftarkan command ke scheduler: `dailyAt('08:00')` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Trigger WA di `store()`, `updateStep()` reviewer1/2, `validateStep()` reviewer1/2 |
+
+> Menggunakan token Fonnte yang sudah dikonfigurasi di `/admin/sms-gateway` — tidak perlu setup tambahan.
+
+---
+
+## 4. Peningkatan UX: Search Global, Progress Stepper, Dashboard Charts
+
+### 4a. Search Global di Navbar
+
+Kotak pencarian muncul di navbar atas (admin only). Mencari lintas field: nama penulis, ID artikel, judul artikel, kode submit, nomor HP, nama jurnal.
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SearchController.php` | **Baru** — query search dengan `orWhere` + `orWhereHas` journal |
+| `resources/views/admin/search/results.blade.php` | **Baru** — halaman hasil pencarian responsif |
 | `routes/web.php` | Tambah route `GET /admin/search` → `admin.search` |
-| `resources/views/layouts/app.blade.php` | Tambah search box di navbar (hanya tampil untuk admin) |
-| `resources/views/admin/submissions/show.blade.php` | Ganti progress bar dengan horizontal stepper 5 tahap (Submit → Editorial → Review → Produksi → Selesai) |
-| `app/Http/Controllers/Admin/DashboardController.php` | Tambah data chart: chartLabels, chartTotals, chartPublished, chartRejected (per bulan) |
-| `resources/views/admin/dashboard.blade.php` | Tambah section chart: bar chart tren bulanan + donut status overview (Chart.js 4.4) |
+| `resources/views/layouts/app.blade.php` | Tambah form search di navbar (hanya muncul untuk role admin) |
 
----
+### 4b. Progress Stepper Horizontal
 
-## 4. Teknis & Keamanan: Caching, Activity Log, Rate Limiting
+Mengganti progress bar persentase sederhana dengan stepper 5 tahap yang lebih informatif di halaman detail submission.
 
-**Tujuan:** (1) Cache query ranking/poin 5 menit dengan invalidasi otomatis saat poin berubah. (2) Activity log untuk submission — catat siapa mengubah field apa sebelum/sesudah. (3) Rate limiting 5x/menit pada login PIC dan Marketing (admin sudah ada).
+```
+[✓] Disubmit  →  [✓] Editorial  →  [●] Review  →  [○] Produksi  →  [○] Selesai
+```
 
-### File yang Diubah
+- Tahap selesai: lingkaran hijau + centang
+- Tahap aktif: lingkaran biru + glow + label status spesifik
+- Ditolak: lingkaran merah + tanda silang
+
 | File | Perubahan |
 |------|-----------|
-| `app/Models/PicPointHistory.php` | Tambah `Cache::forget('rankings.topPics')` setelah award points |
-| `app/Models/MarketingPointHistory.php` | Tambah `Cache::forget('rankings.topMarketings')` setelah award points |
-| `app/Http/Controllers/Admin/DashboardController.php` | Wrap topPics, topMarketings, dan monthly chart data dalam `Cache::remember(..., 300)` |
-| `app/Http/Controllers/Pic/AuthorController.php` | Wrap topPics, topMarketings dalam `Cache::remember` |
-| `app/Http/Controllers/Marketing/DashboardController.php` | Wrap topPics, topMarketings dalam `Cache::remember` + failed login logging |
-| `database/migrations/2026_05_07_220232_create_activity_logs_table.php` | Migration baru tabel activity_logs |
-| `app/Models/ActivityLog.php` | Model baru: static `record()`, `diff()`, badge helpers, daftar field tracking |
-| `app/Http/Controllers/Admin/SubmissionController.php` | Snapshot before/after di update(), catat ActivityLog jika ada field berubah; load activityLogs di show() |
-| `resources/views/admin/submissions/show.blade.php` | Tambah section "Riwayat Perubahan" di bawah detail submission |
-| `routes/web.php` | Tambah `throttle:5,1` ke POST /pic/login dan POST /marketing/login |
-| `app/Http/Controllers/Pic/Auth/LoginController.php` | Tambah Log::warning pada password salah |
+| `resources/views/admin/submissions/show.blade.php` | Ganti progress bar dengan stepper 5 tahap + CSS inline |
+
+### 4c. Dashboard Charts (Chart.js 4.4)
+
+Menambahkan dua grafik di atas section Quick Actions pada dashboard admin:
+
+- **Bar + Line chart** — Tren submission per bulan (total / published / rejected) dalam satu grafik gabungan
+- **Donut chart** — Status overview: Published, Rejected, In Progress, Submitted + ringkasan angka
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DashboardController.php` | Tambah `chartLabels`, `chartTotals`, `chartPublished`, `chartRejected` (data per bulan) |
+| `resources/views/admin/dashboard.blade.php` | Tambah section 2 chart via `@push('scripts')` + Chart.js CDN |
 
 ---
 
-## 5. 🔄 Update: up
+## 5. Teknis & Keamanan
 
-- **Commit:** `e450978` — 17:34 oleh Gudangsoft
-- **File berubah:** 6 file
-- `app/Http/Controllers/Marketing/DashboardController.php`
-- `app/Models/Submission.php`
-- `log-update-2026-05-07.md`
-- `resources/views/admin/submissions/create.blade.php`
-- `resources/views/marketing/create-submission.blade.php`
-- `resources/views/pic/submissions/create.blade.php`
+### 5a. Query Caching (5 Menit)
 
+Ranking dan data chart di-cache untuk mengurangi beban database pada setiap load dashboard.
+
+| Cache Key | TTL | Isi |
+|-----------|-----|-----|
+| `rankings.topPics` | 5 menit | Top 10 PIC by total_points |
+| `rankings.topMarketings` | 5 menit | Top 10 Marketing by total_points |
+| `dashboard.monthlyStats.{year}` | 5 menit | Data chart tren bulanan |
+
+Cache di-invalidate otomatis setiap kali `awardPoints()` dipanggil (pada setiap submit/validasi submission).
+
+| File | Perubahan |
+|------|-----------|
+| `app/Models/PicPointHistory.php` | `Cache::forget('rankings.topPics')` setelah award |
+| `app/Models/MarketingPointHistory.php` | `Cache::forget('rankings.topMarketings')` setelah award |
+| `app/Http/Controllers/Admin/DashboardController.php` | Wrap 3 query berat dalam `Cache::remember(..., 300)` |
+| `app/Http/Controllers/Pic/AuthorController.php` | Wrap topPics + topMarketings dalam cache |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Wrap topPics + topMarketings dalam cache |
+
+### 5b. Activity Log per Submission
+
+Setiap kali admin mengedit data submission, perubahan field dicatat otomatis — termasuk nilai sebelum dan sesudah.
+
+Field yang dilacak: Judul Artikel, Nama Penulis, ID Artikel, Link Submit, No HP Penulis, Status, Marketing, PIC Submit, Slot Jurnal, Program, Catatan.
+
+Riwayat perubahan ditampilkan sebagai timeline di bagian bawah halaman detail submission (`/admin/submissions/{id}`).
+
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_05_07_220232_create_activity_logs_table.php` | **Baru** — tabel `activity_logs` (subject, causer, event, old/new JSON, IP) |
+| `app/Models/ActivityLog.php` | **Baru** — static `record()`, `diff()`, event label/badge |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Snapshot before/after di `update()`; load logs di `show()` |
+| `resources/views/admin/submissions/show.blade.php` | Tambah section "Riwayat Perubahan" (timeline tabel before/after) |
+
+### 5c. Rate Limiting Login
+
+Login PIC dan Marketing sebelumnya tidak memiliki proteksi brute-force. Sekarang dibatasi **5 percobaan per menit per IP** — sama dengan admin.
+
+| Guard | Route | Sebelum | Sesudah |
+|-------|-------|---------|---------|
+| Admin | `POST /login` | `throttle:5,1` | Tidak berubah |
+| PIC | `POST /pic/login` | ❌ Tidak ada | ✅ `throttle:5,1` |
+| Marketing | `POST /marketing/login` | ❌ Tidak ada | ✅ `throttle:5,1` |
+
+Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warning`) dengan email + IP + user agent untuk keperluan audit.
+
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah `->middleware('throttle:5,1')` ke 2 route login |
+| `app/Http/Controllers/Pic/Auth/LoginController.php` | Tambah `Log::warning` pada password salah |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah `Log::warning` pada password salah |
