@@ -29,15 +29,17 @@ class LaporanKinerjaController extends Controller
 
     public function index(Request $request)
     {
-        $tanggal = $request->input('tanggal'); // Y-m-d, opsional
-        $bulan   = (int) $request->input('bulan', now()->month);
-        $tahun   = (int) $request->input('tahun', now()->year);
+        $dariTanggal   = $request->input('dari_tanggal');   // Y-m-d, opsional
+        $sampaiTanggal = $request->input('sampai_tanggal'); // Y-m-d, opsional
+        $bulan         = (int) $request->input('bulan', now()->month);
+        $tahun         = (int) $request->input('tahun', now()->year);
 
-        if ($tanggal) {
-            $carbonDate = \Carbon\Carbon::parse($tanggal);
-            $bulan      = $carbonDate->month;
-            $tahun      = $carbonDate->year;
-            $namaBulan  = $carbonDate->locale('id')->translatedFormat('d F Y');
+        $isRange = $dariTanggal && $sampaiTanggal;
+
+        if ($isRange) {
+            $namaBulan = \Carbon\Carbon::parse($dariTanggal)->locale('id')->translatedFormat('d F Y')
+                . ' — '
+                . \Carbon\Carbon::parse($sampaiTanggal)->locale('id')->translatedFormat('d F Y');
         } else {
             $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
                 ->locale('id')
@@ -45,13 +47,12 @@ class LaporanKinerjaController extends Controller
         }
 
         // --- Rekap PIC ---
-        $pics = Pic::where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        $pics = Pic::where('is_active', true)->orderBy('name')->get();
 
         $picQuery = PicPointHistory::with('pic');
-        if ($tanggal) {
-            $picQuery->whereDate('created_at', $tanggal);
+        if ($isRange) {
+            $picQuery->whereDate('created_at', '>=', $dariTanggal)
+                     ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
             $picQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
@@ -77,13 +78,12 @@ class LaporanKinerjaController extends Controller
           ->values();
 
         // --- Rekap Marketing ---
-        $marketings = Marketing::where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
 
         $mktQuery = MarketingPointHistory::query();
-        if ($tanggal) {
-            $mktQuery->whereDate('created_at', $tanggal);
+        if ($isRange) {
+            $mktQuery->whereDate('created_at', '>=', $dariTanggal)
+                     ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
             $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
@@ -110,7 +110,7 @@ class LaporanKinerjaController extends Controller
         $tahunList = range(now()->year, max(now()->year - 4, 2024));
 
         return view('admin.laporan-kinerja.index', compact(
-            'bulan', 'tahun', 'tanggal', 'namaBulan',
+            'bulan', 'tahun', 'dariTanggal', 'sampaiTanggal', 'isRange', 'namaBulan',
             'picRekap', 'mktRekap', 'steps',
             'totalPicTugas', 'totalPicPoin',
             'totalMktSubmit', 'totalMktPoin',
@@ -145,15 +145,16 @@ class LaporanKinerjaController extends Controller
 
     private function buildData(Request $request, bool $withTotals = false): array
     {
-        $tanggal = $request->input('tanggal');
-        $bulan   = (int) $request->input('bulan', now()->month);
-        $tahun   = (int) $request->input('tahun', now()->year);
+        $dariTanggal   = $request->input('dari_tanggal');
+        $sampaiTanggal = $request->input('sampai_tanggal');
+        $bulan         = (int) $request->input('bulan', now()->month);
+        $tahun         = (int) $request->input('tahun', now()->year);
+        $isRange       = $dariTanggal && $sampaiTanggal;
 
-        if ($tanggal) {
-            $carbonDate = \Carbon\Carbon::parse($tanggal);
-            $bulan      = $carbonDate->month;
-            $tahun      = $carbonDate->year;
-            $namaBulan  = $carbonDate->locale('id')->translatedFormat('d F Y');
+        if ($isRange) {
+            $namaBulan = \Carbon\Carbon::parse($dariTanggal)->locale('id')->translatedFormat('d F Y')
+                . ' — '
+                . \Carbon\Carbon::parse($sampaiTanggal)->locale('id')->translatedFormat('d F Y');
         } else {
             $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
                 ->locale('id')->translatedFormat('F Y');
@@ -161,8 +162,9 @@ class LaporanKinerjaController extends Controller
 
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
         $picQuery = PicPointHistory::query();
-        if ($tanggal) {
-            $picQuery->whereDate('created_at', $tanggal);
+        if ($isRange) {
+            $picQuery->whereDate('created_at', '>=', $dariTanggal)
+                     ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
             $picQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
@@ -185,8 +187,9 @@ class LaporanKinerjaController extends Controller
 
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
         $mktQuery = MarketingPointHistory::query();
-        if ($tanggal) {
-            $mktQuery->whereDate('created_at', $tanggal);
+        if ($isRange) {
+            $mktQuery->whereDate('created_at', '>=', $dariTanggal)
+                     ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
             $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }

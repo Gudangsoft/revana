@@ -15,10 +15,10 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body py-3">
                 <form action="{{ route('admin.laporan-kinerja.index') }}" method="GET" class="row g-2 align-items-end">
-                    {{-- Kolom Bulanan --}}
+                    {{-- Filter Bulanan --}}
                     <div class="col-auto">
                         <label class="form-label mb-1 small fw-semibold text-muted">Bulan</label>
-                        <select name="bulan" class="form-select form-select-sm" id="selBulan">
+                        <select name="bulan" class="form-select form-select-sm sel-bulanan" id="selBulan">
                             @foreach(range(1,12) as $m)
                                 <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create()->month($m)->locale('id')->translatedFormat('F') }}
@@ -28,7 +28,7 @@
                     </div>
                     <div class="col-auto">
                         <label class="form-label mb-1 small fw-semibold text-muted">Tahun</label>
-                        <select name="tahun" class="form-select form-select-sm" id="selTahun">
+                        <select name="tahun" class="form-select form-select-sm sel-bulanan" id="selTahun">
                             @foreach($tahunList as $y)
                                 <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endforeach
@@ -40,14 +40,26 @@
                         <span class="text-muted small">atau</span>
                     </div>
 
-                    {{-- Filter Harian --}}
+                    {{-- Filter Rentang Tanggal --}}
                     <div class="col-auto">
                         <label class="form-label mb-1 small fw-semibold text-primary">
-                            <i class="bi bi-calendar-day"></i> Tanggal (Harian)
+                            <i class="bi bi-calendar-range"></i> Dari Tanggal
                         </label>
-                        <input type="date" name="tanggal" id="inputTanggal"
+                        <input type="date" name="dari_tanggal" id="inputDari"
                                class="form-control form-control-sm"
-                               value="{{ $tanggal ?? '' }}"
+                               value="{{ $dariTanggal ?? '' }}"
+                               max="{{ now()->format('Y-m-d') }}">
+                    </div>
+                    <div class="col-auto d-flex align-items-end pb-1">
+                        <span class="text-muted small">s/d</span>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-1 small fw-semibold text-primary">
+                            <i class="bi bi-calendar-range"></i> Sampai Tanggal
+                        </label>
+                        <input type="date" name="sampai_tanggal" id="inputSampai"
+                               class="form-control form-control-sm"
+                               value="{{ $sampaiTanggal ?? '' }}"
                                max="{{ now()->format('Y-m-d') }}">
                     </div>
 
@@ -60,10 +72,14 @@
                         </a>
                     </div>
                     <div class="col-auto ms-auto d-flex gap-2 align-items-center">
-                        <span class="badge {{ $tanggal ? 'bg-primary' : 'bg-secondary' }} fs-6 px-3 py-2">
-                            <i class="bi bi-calendar{{ $tanggal ? '-day' : '3' }}"></i> {{ $namaBulan }}
+                        <span class="badge {{ $isRange ? 'bg-primary' : 'bg-secondary' }} fs-6 px-3 py-2">
+                            <i class="bi bi-calendar{{ $isRange ? '-range' : '3' }}"></i> {{ $namaBulan }}
                         </span>
-                        @php $exportParams = $tanggal ? ['tanggal' => $tanggal] : ['bulan' => $bulan, 'tahun' => $tahun]; @endphp
+                        @php
+                            $exportParams = $isRange
+                                ? ['dari_tanggal' => $dariTanggal, 'sampai_tanggal' => $sampaiTanggal]
+                                : ['bulan' => $bulan, 'tahun' => $tahun];
+                        @endphp
                         <a href="{{ route('admin.laporan-kinerja.export-excel', $exportParams) }}"
                            class="btn btn-success btn-sm">
                             <i class="bi bi-file-earmark-excel"></i> Excel
@@ -244,19 +260,26 @@
 @push('scripts')
 <script>
 (function () {
-    const inputTanggal = document.getElementById('inputTanggal');
-    const selBulan     = document.getElementById('selBulan');
-    const selTahun     = document.getElementById('selTahun');
+    const inputDari   = document.getElementById('inputDari');
+    const inputSampai = document.getElementById('inputSampai');
+    const selBulan    = document.getElementById('selBulan');
+    const selTahun    = document.getElementById('selTahun');
 
     function sync() {
-        const hasTanggal = inputTanggal.value !== '';
-        selBulan.disabled = hasTanggal;
-        selTahun.disabled = hasTanggal;
-        selBulan.style.opacity = hasTanggal ? '0.4' : '1';
-        selTahun.style.opacity = hasTanggal ? '0.4' : '1';
+        const isRange = inputDari.value !== '' || inputSampai.value !== '';
+        selBulan.disabled = isRange;
+        selTahun.disabled = isRange;
+        selBulan.style.opacity = isRange ? '0.4' : '1';
+        selTahun.style.opacity = isRange ? '0.4' : '1';
+
+        // Sinkronkan min sampai_tanggal dengan nilai dari_tanggal
+        if (inputDari.value) inputSampai.min = inputDari.value;
+        if (inputSampai.value) inputDari.max = inputSampai.value;
+        else inputDari.max = '{{ now()->format("Y-m-d") }}';
     }
 
-    inputTanggal.addEventListener('input', sync);
+    inputDari.addEventListener('input', sync);
+    inputSampai.addEventListener('input', sync);
     sync();
 })();
 </script>
