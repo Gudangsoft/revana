@@ -316,101 +316,210 @@
 
 <!-- Quick Actions -->
 <div class="row mt-4">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-lightning"></i> Quick Actions
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <i class="bi bi-lightning-charge-fill text-warning"></i> <span class="fw-semibold">Quick Actions</span>
             </div>
-            <div class="card-body">
-                <a href="{{ route('admin.journals.create') }}" class="btn btn-primary me-2">
-                    <i class="bi bi-plus-circle"></i> Tambah Jurnal
+            <div class="card-body d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.journals.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle-fill"></i> Tambah Jurnal
                 </a>
-                <a href="{{ route('admin.submissions.index') }}" class="btn btn-success me-2">
-                    <i class="bi bi-file-earmark-text"></i> Kelola Submissions
+                <a href="{{ route('admin.submissions.index') }}" class="btn btn-success">
+                    <i class="bi bi-file-earmark-text-fill"></i> Kelola Submissions
                 </a>
-                <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-info me-2">
-                    <i class="bi bi-lightning"></i> Fasttrack Jurnal
+                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="btn" style="background:#0891b2;color:#fff;">
+                    <i class="bi bi-briefcase-fill"></i> Submission BKD
+                    <span class="badge bg-white text-dark ms-1">{{ $bkdStats['total'] }}</span>
                 </a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-award"></i> Jurnal by Akreditasi
-            </div>
-            <div class="card-body">
-                @foreach($journalsByAccreditation->take(5) as $accreditation)
-                <div class="d-flex justify-content-between mb-2">
-                    <span>{{ $accreditation->accreditation ?: 'Tidak Terakreditasi' }}</span>
-                    <span class="badge bg-primary">{{ $accreditation->count }}</span>
-                </div>
-                @endforeach
+                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="btn" style="background:#7c3aed;color:#fff;">
+                    <i class="bi bi-mortarboard-fill"></i> Submission JAFA
+                    <span class="badge bg-white text-dark ms-1">{{ $jafaStats['total'] }}</span>
+                </a>
+                <a href="{{ route('admin.fasttrack.index') }}" class="btn btn-warning text-dark">
+                    <i class="bi bi-lightning-charge-fill"></i> Fasttrack Jurnal
+                </a>
+                <a href="{{ route('admin.laporan-kinerja.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-graph-up-arrow"></i> Laporan Kinerja
+                </a>
+                <a href="{{ route('admin.sms-gateway.index') }}" class="btn btn-outline-success">
+                    <i class="bi bi-whatsapp"></i> WA Gateway
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Recent Assignments -->
+<!-- BKD & JAFA Stats -->
+<div class="row mt-4 g-3">
+    {{-- BKD --}}
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0891b2 !important;">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-semibold" style="color:#0891b2;"><i class="bi bi-briefcase-fill"></i> Program BKD</span>
+                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}" class="btn btn-sm btn-outline-secondary">
+                    Lihat Semua
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-2">
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#e0f2fe;">
+                            <div class="fw-bold fs-5" style="color:#0891b2;">{{ $bkdStats['total'] }}</div>
+                            <small class="text-muted">Total</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#fef9c3;">
+                            <div class="fw-bold fs-5 text-warning">{{ $bkdStats['pending'] }}</div>
+                            <small class="text-muted">Antrian</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#dcfce7;">
+                            <div class="fw-bold fs-5 text-success">{{ $bkdStats['published'] }}</div>
+                            <small class="text-muted">Published</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#fee2e2;">
+                            <div class="fw-bold fs-5 text-danger">{{ $bkdStats['rejected'] }}</div>
+                            <small class="text-muted">Ditolak</small>
+                        </div>
+                    </div>
+                </div>
+                @if($bkdStats['total'] > 0)
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.75rem;">
+                        <span class="text-muted">Progress Published</span>
+                        <span class="fw-semibold">{{ round($bkdStats['published'] / $bkdStats['total'] * 100) }}%</span>
+                    </div>
+                    <div class="progress" style="height:6px;">
+                        <div class="progress-bar bg-success" style="width:{{ round($bkdStats['published'] / $bkdStats['total'] * 100) }}%"></div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    {{-- JAFA --}}
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #7c3aed !important;">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-semibold" style="color:#7c3aed;"><i class="bi bi-mortarboard-fill"></i> Program JAFA</span>
+                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}" class="btn btn-sm btn-outline-secondary">
+                    Lihat Semua
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-2">
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#ede9fe;">
+                            <div class="fw-bold fs-5" style="color:#7c3aed;">{{ $jafaStats['total'] }}</div>
+                            <small class="text-muted">Total</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#fef9c3;">
+                            <div class="fw-bold fs-5 text-warning">{{ $jafaStats['pending'] }}</div>
+                            <small class="text-muted">Antrian</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#dcfce7;">
+                            <div class="fw-bold fs-5 text-success">{{ $jafaStats['published'] }}</div>
+                            <small class="text-muted">Published</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded" style="background:#fee2e2;">
+                            <div class="fw-bold fs-5 text-danger">{{ $jafaStats['rejected'] }}</div>
+                            <small class="text-muted">Ditolak</small>
+                        </div>
+                    </div>
+                </div>
+                @if($jafaStats['total'] > 0)
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.75rem;">
+                        <span class="text-muted">Progress Published</span>
+                        <span class="fw-semibold">{{ round($jafaStats['published'] / $jafaStats['total'] * 100) }}%</span>
+                    </div>
+                    <div class="progress" style="height:6px;">
+                        <div class="progress-bar" style="width:{{ round($jafaStats['published'] / $jafaStats['total'] * 100) }}%;background:#7c3aed;"></div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submissions Disetujui -->
 <div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-spreadsheet"></i> Submissions yang Sudah Disetujui</span>
-                <div>
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">
+                    <i class="bi bi-patch-check-fill text-success"></i> Submissions yang Sudah Disetujui
+                    <span class="badge bg-success ms-1">{{ $totalCompletedReviews }}</span>
+                </span>
+                <div class="d-flex gap-2">
+                    <small class="text-muted align-self-center">30 terbaru</small>
                     <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                        <i class="bi bi-file-earmark-excel"></i> Export
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-info mb-3">
-                    <i class="bi bi-info-circle"></i> Total <strong>{{ $totalCompletedReviews }}</strong> submissions telah disetujui.
-                    Menampilkan 20 data terbaru.
-                </div>
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-sm">
+                    <table class="table table-hover table-sm align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>No</th>
-                                <th>Kode Submit</th>
+                                <th style="width:40px;">#</th>
+                                <th style="width:160px;">Kode Submit</th>
                                 <th>Judul Artikel</th>
                                 <th>Jurnal</th>
                                 <th>Penulis</th>
-                                <th class="hide-mobile">Institusi</th>
-                                <th>File</th>
-                                <th>Tanggal</th>
+                                <th style="width:100px;">Selesai</th>
+                                <th style="width:60px;"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($completedReviews as $submission)
+                            @forelse($completedReviews as $s)
+                            @php
+                                $prog = strtoupper($s->program_type ?? '');
+                                $progColor = match($s->program_type) {
+                                    'bkd'  => '#0891b2',
+                                    'jafa' => '#7c3aed',
+                                    default => '#6b7280',
+                                };
+                            @endphp
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td><strong>{{ $submission->kode_submit ?? 'N/A' }}</strong></td>
+                                <td class="text-muted">{{ $loop->iteration }}</td>
                                 <td>
-                                    <strong>{{ Str::limit($submission->judul_artikel ?? 'N/A', 40) }}</strong>
-                                </td>
-                                <td><span class="badge bg-secondary">{{ $submission->journalSlot->journalMaster->nama_jurnal ?? 'N/A' }}</span></td>
-                                <td>{{ Str::limit($submission->nama_penulis ?? 'N/A', 25) }}</td>
-                                <td class="hide-mobile">
-                                    <small>{{ Str::limit($submission->institusi_penulis ?? '-', 25) }}</small>
-                                </td>
-                                <td>
-                                    @if($submission->file_pdf)
-                                        <a href="{{ Storage::url($submission->file_pdf) }}" target="_blank" class="btn btn-sm btn-success">
-                                            <i class="bi bi-file-earmark-check"></i> Lihat
-                                        </a>
-                                    @else
-                                        <span class="text-muted">-</span>
+                                    <code class="text-success fw-bold" style="font-size:.8rem;">{{ $s->kode_submit ?? '-' }}</code>
+                                    @if($prog)
+                                    <br><span class="badge rounded-pill" style="background:{{ $progColor }};font-size:.65rem;">{{ $prog }}</span>
                                     @endif
                                 </td>
-                                <td><small>{{ $submission->updated_at ? $submission->updated_at->format('d M Y') : '-' }}</small></td>
+                                <td>
+                                    <div style="max-width:280px;">{{ Str::limit($s->judul_artikel ?? '-', 55) }}</div>
+                                    <small class="text-muted">{{ Str::limit($s->nama_penulis ?? '', 30) }}</small>
+                                </td>
+                                <td><small>{{ $s->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</small></td>
+                                <td><small>{{ $s->marketing?->name ?? '-' }}</small></td>
+                                <td><small class="text-muted">{{ $s->updated_at?->format('d M Y') ?? '-' }}</small></td>
+                                <td>
+                                    <a href="{{ route('admin.submissions.show', $s) }}" class="btn btn-xs btn-outline-primary" style="padding:.15rem .4rem;font-size:.75rem;">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                    <p class="mb-0">Belum ada artikel yang selesai direview</p>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size:2rem;"></i>
+                                    <p class="mb-0 mt-1">Belum ada artikel yang disetujui</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -425,65 +534,79 @@
 <!-- Point Rankings -->
 @include('admin.partials.point-rankings')
 
-<!-- Review Assignment History -->
+<!-- Submissions Terbaru -->
 <div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history"></i> Submissions Terbaru</span>
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">
+                    <i class="bi bi-clock-history text-primary"></i> Submissions Terbaru
+                    <small class="text-muted fw-normal">(15 terbaru)</small>
+                </span>
                 <a href="{{ route('admin.submissions.index') }}" class="btn btn-sm btn-outline-primary">
-                    Lihat Semua
+                    <i class="bi bi-list-ul"></i> Lihat Semua
                 </a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-hover table-sm align-middle mb-0">
+                        <thead class="table-light">
                             <tr>
-                                <th>Kode Submit</th>
+                                <th style="width:160px;">Kode Submit</th>
                                 <th>Judul Artikel</th>
                                 <th>Jurnal</th>
-                                <th>Penulis</th>
-                                <th>Status</th>
-                                <th>Tanggal</th>
-                                <th>Aksi</th>
+                                <th style="width:130px;">Marketing / PIC</th>
+                                <th style="width:130px;">Status</th>
+                                <th style="width:100px;">Tanggal</th>
+                                <th style="width:50px;"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($recentSubmissions as $submission)
+                            @forelse($recentSubmissions as $s)
+                            @php
+                                $progColor = match($s->program_type) {
+                                    'bkd'  => '#0891b2',
+                                    'jafa' => '#7c3aed',
+                                    default => '#6b7280',
+                                };
+                                $prog = strtoupper($s->program_type ?? 'SUB');
+                                if ($s->process_type === 'fasttrack') $prog = 'FT';
+                            @endphp
                             <tr>
-                                <td><strong>{{ $submission->kode_submit }}</strong></td>
                                 <td>
-                                    <strong>{{ Str::limit($submission->judul_artikel ?? 'N/A', 50) }}</strong><br>
+                                    <code class="fw-bold" style="color:{{ $progColor }};font-size:.8rem;">{{ $s->kode_submit }}</code>
+                                    <br>
+                                    <span class="badge rounded-pill" style="background:{{ $progColor }};font-size:.62rem;">{{ $prog }}</span>
+                                </td>
+                                <td>
+                                    <div style="max-width:260px;" class="fw-semibold">{{ Str::limit($s->judul_artikel ?? '-', 50) }}</div>
+                                    <small class="text-muted"><i class="bi bi-person"></i> {{ Str::limit($s->nama_penulis ?? '', 28) }}</small>
+                                </td>
+                                <td><small>{{ $s->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</small></td>
+                                <td>
                                     <small class="text-muted">
-                                        <span class="badge bg-secondary">{{ $submission->process_type ?? 'Regular' }}</span>
+                                        @if($s->marketing) <i class="bi bi-megaphone-fill"></i> {{ $s->marketing->name }}<br> @endif
+                                        @if($s->petugasSubmit) <i class="bi bi-person-badge"></i> {{ $s->petugasSubmit->name }} @endif
                                     </small>
                                 </td>
-                                <td>{{ $submission->journalSlot->journalMaster->nama_jurnal ?? 'N/A' }}</td>
-                                <td>{{ Str::limit($submission->nama_penulis, 25) }}</td>
                                 <td>
-                                    @php
-                                        $statusColors = [
-                                            'new' => 'info',
-                                            'pending' => 'warning',
-                                            'approved' => 'success',
-                                            'rejected' => 'danger',
-                                            'in_progress' => 'primary'
-                                        ];
-                                        $color = $statusColors[$submission->status] ?? 'secondary';
-                                    @endphp
-                                    <span class="badge bg-{{ $color }}">{{ ucfirst($submission->status) }}</span>
+                                    <span class="badge {{ $s->status_badge_class }}" style="font-size:.7rem;">
+                                        {{ $s->status_label }}
+                                    </span>
                                 </td>
-                                <td>{{ $submission->created_at->format('d M Y') }}</td>
+                                <td><small class="text-muted">{{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d M Y') : $s->created_at->format('d M Y') }}</small></td>
                                 <td>
-                                    <a href="{{ route('admin.submissions.show', $submission) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('admin.submissions.show', $s) }}" class="btn btn-outline-primary" style="padding:.15rem .4rem;font-size:.75rem;">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">Belum ada submission</td>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size:2rem;"></i>
+                                    <p class="mb-0 mt-1">Belum ada submission</p>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>

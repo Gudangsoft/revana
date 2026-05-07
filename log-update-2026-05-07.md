@@ -97,6 +97,21 @@ Menambahkan dua grafik di atas section Quick Actions pada dashboard admin:
 | `app/Http/Controllers/Admin/DashboardController.php` | Tambah `chartLabels`, `chartTotals`, `chartPublished`, `chartRejected` (data per bulan) |
 | `resources/views/admin/dashboard.blade.php` | Tambah section 2 chart via `@push('scripts')` + Chart.js CDN |
 
+### 4d. Update Dashboard: Quick Actions, BKD/JAFA Stats, Tabel Submissions
+
+**Quick Actions** diperbarui dengan 7 tombol berwarna: Tambah Jurnal, Kelola Submissions, Submission BKD (+ counter), Submission JAFA (+ counter), Fasttrack, Laporan Kinerja, WA Gateway.
+
+**Informasi BKD & JAFA** — section baru dengan 4 angka per program (Total, Antrian, Published, Ditolak) + progress bar published.
+
+**Submissions yang Sudah Disetujui** — diperbesar ke 30 data terbaru, tambah kolom Program (badge berwarna) dan Marketing, ada tombol detail langsung.
+
+**Submissions Terbaru** — diperbesar ke 15 data, urut dari tanggal submit terbaru, kolom Program + badge warna (BKD=cyan, JAFA=ungu, FT=abu), kolom Marketing/PIC, gunakan `status_label` + `status_badge_class` yang sudah benar.
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DashboardController.php` | Tambah `bkdStats`, `jafaStats`; recentSubmissions jadi 15 (urut tanggal_submit); completedReviews jadi 30; load relasi marketing + petugasSubmit |
+| `resources/views/admin/dashboard.blade.php` | Redesain Quick Actions, tambah BKD/JAFA stats cards, update 2 tabel submissions |
+
 ---
 
 ## 5. Teknis & Keamanan
@@ -171,6 +186,13 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 ## 8. 🔄 Update: update 7 mei
 
 - **Commit:** `f6e54e9` — 22:11 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-07.md`
+
+
+## 9. 🔄 Update: Update 7 Mei 2026
+
+- **Commit:** `eee46d2` — 22:12 oleh Gudangsoft
 - **File berubah:** 1 file
 - `log-update-2026-05-07.md`
 

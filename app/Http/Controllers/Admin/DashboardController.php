@@ -31,27 +31,44 @@ class DashboardController extends Controller
         $approvedSubmissions = Submission::where('status', 'PUBLISHED')->count();
         $rejectedSubmissions = Submission::where('status', 'REJECTED')->count();
         
-        // Process type counts  
-        $regularSubmissions = Submission::where('process_type', 'regular')->orWhereNull('process_type')->count();
+        // Process type counts
+        $regularSubmissions   = Submission::where('process_type', 'regular')->orWhereNull('process_type')->count();
         $fasttrackSubmissions = Submission::where('process_type', 'fasttrack')->count();
-        
+
+        // BKD & JAFA stats
+        $bkdStats = [
+            'total'     => Submission::where('program_type', 'bkd')->count(),
+            'pending'   => Submission::where('program_type', 'bkd')->where('status', 'SUBMITTED')->count(),
+            'proses'    => Submission::where('program_type', 'bkd')->whereNotIn('status', ['SUBMITTED','PUBLISHED','REJECTED'])->count(),
+            'published' => Submission::where('program_type', 'bkd')->where('status', 'PUBLISHED')->count(),
+            'rejected'  => Submission::where('program_type', 'bkd')->where('status', 'REJECTED')->count(),
+        ];
+        $jafaStats = [
+            'total'     => Submission::where('program_type', 'jafa')->count(),
+            'pending'   => Submission::where('program_type', 'jafa')->where('status', 'SUBMITTED')->count(),
+            'proses'    => Submission::where('program_type', 'jafa')->whereNotIn('status', ['SUBMITTED','PUBLISHED','REJECTED'])->count(),
+            'published' => Submission::where('program_type', 'jafa')->where('status', 'PUBLISHED')->count(),
+            'rejected'  => Submission::where('program_type', 'jafa')->where('status', 'REJECTED')->count(),
+        ];
+
         // Journal statistics
         $journalsByAccreditation = JournalMaster::selectRaw('accreditation, COUNT(*) as count')
             ->groupBy('accreditation')
             ->orderBy('count', 'desc')
             ->get();
-            
-        // Recent submissions
-        $recentSubmissions = Submission::with(['journalSlot.journalMaster'])
-            ->latest()
-            ->take(10)
+
+        // Recent submissions — newest first, include relations
+        $recentSubmissions = Submission::with(['journalSlot.journalMaster', 'marketing', 'petugasSubmit'])
+            ->orderBy('tanggal_submit', 'desc')
+            ->orderBy('id', 'desc')
+            ->take(15)
             ->get();
 
-        // Completed submissions (approved)
-        $completedReviews = Submission::with(['journalSlot.journalMaster'])
+        // Completed submissions (approved) — newest approved first
+        $completedReviews = Submission::with(['journalSlot.journalMaster', 'marketing'])
             ->where('status', 'PUBLISHED')
             ->orderBy('updated_at', 'desc')
-            ->take(20)
+            ->take(30)
             ->get();
 
         $totalCompletedReviews = $approvedSubmissions;
@@ -124,7 +141,9 @@ class DashboardController extends Controller
             'chartLabels',
             'chartTotals',
             'chartPublished',
-            'chartRejected'
+            'chartRejected',
+            'bkdStats',
+            'jafaStats'
         ));
     }
 
