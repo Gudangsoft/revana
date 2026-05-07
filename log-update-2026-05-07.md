@@ -263,3 +263,10 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 - `log-update-2026-05-07.md`
 - `resources/views/admin/dashboard.blade.php`
 
+
+## 18. 🔄 Update: update tampilan
+
+- **Commit:** `a13eb52` — 22:40 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-07.md`
+

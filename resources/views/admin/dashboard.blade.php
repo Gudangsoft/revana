@@ -470,116 +470,37 @@
     </div>
 </div>
 
-<!-- Submissions Disetujui -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">
-                    <i class="bi bi-patch-check-fill text-success"></i> Submissions yang Sudah Disetujui
-                    <span class="badge bg-success ms-1">{{ $totalCompletedReviews }}</span>
-                </span>
-                <div class="d-flex gap-2">
-                    <small class="text-muted align-self-center">10 terbaru</small>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('admin.submissions.index', ['status' => 'PUBLISHED']) }}" class="btn btn-sm btn-outline-success">
-                            <i class="bi bi-arrow-right-circle"></i> Lihat Semua
-                        </a>
-                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                            <i class="bi bi-file-earmark-excel"></i> Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width:40px;">#</th>
-                                <th style="width:160px;">Kode Submit</th>
-                                <th>Judul Artikel</th>
-                                <th>Jurnal</th>
-                                <th>Penulis</th>
-                                <th style="width:100px;">Selesai</th>
-                                <th style="width:60px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($completedReviews as $s)
-                            @php
-                                $prog = strtoupper($s->program_type ?? '');
-                                $progColor = match($s->program_type) {
-                                    'bkd'  => '#0891b2',
-                                    'jafa' => '#7c3aed',
-                                    default => '#6b7280',
-                                };
-                            @endphp
-                            <tr>
-                                <td class="text-muted">{{ $loop->iteration }}</td>
-                                <td>
-                                    <code class="text-success fw-bold" style="font-size:.8rem;">{{ $s->kode_submit ?? '-' }}</code>
-                                    @if($prog)
-                                    <br><span class="badge rounded-pill" style="background:{{ $progColor }};font-size:.65rem;">{{ $prog }}</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div style="max-width:280px;">{{ Str::limit($s->judul_artikel ?? '-', 55) }}</div>
-                                    <small class="text-muted">{{ Str::limit($s->nama_penulis ?? '', 30) }}</small>
-                                </td>
-                                <td><small>{{ $s->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</small></td>
-                                <td><small>{{ $s->marketing?->name ?? '-' }}</small></td>
-                                <td><small class="text-muted">{{ $s->updated_at?->format('d M Y') ?? '-' }}</small></td>
-                                <td>
-                                    <a href="{{ route('admin.submissions.show', $s) }}" class="btn btn-xs btn-outline-primary" style="padding:.15rem .4rem;font-size:.75rem;">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox" style="font-size:2rem;"></i>
-                                    <p class="mb-0 mt-1">Belum ada artikel yang disetujui</p>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Point Rankings -->
-@include('admin.partials.point-rankings')
-
 <!-- Submissions Terbaru -->
 <div class="row mt-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">
-                    <i class="bi bi-clock-history text-primary"></i> Submissions Terbaru
-                    <small class="text-muted fw-normal">(15 terbaru)</small>
-                </span>
-                <a href="{{ route('admin.submissions.index') }}" class="btn btn-sm btn-outline-primary">
+        <div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+            <div class="card-header border-0 d-flex justify-content-between align-items-center py-3 px-4"
+                 style="background:linear-gradient(135deg,#3b82f6,#6366f1);">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:32px;height:32px;background:rgba(255,255,255,.2);">
+                        <i class="bi bi-clock-history text-white" style="font-size:.9rem;"></i>
+                    </div>
+                    <span class="fw-semibold text-white fs-6">Submissions Terbaru</span>
+                    <span class="badge text-dark" style="background:rgba(255,255,255,.25);font-size:.72rem;">15 terbaru</span>
+                </div>
+                <a href="{{ route('admin.submissions.index') }}" class="btn btn-sm text-white"
+                   style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;">
                     <i class="bi bi-list-ul"></i> Lihat Semua
                 </a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-sm align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width:160px;">Kode Submit</th>
-                                <th>Judul Artikel</th>
-                                <th>Jurnal</th>
-                                <th style="width:130px;">Marketing / PIC</th>
-                                <th style="width:130px;">Status</th>
-                                <th style="width:100px;">Tanggal</th>
-                                <th style="width:50px;"></th>
+                    <table class="table table-sm align-middle mb-0" style="font-size:.85rem;">
+                        <thead>
+                            <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                                <th class="px-3 py-2 text-muted fw-semibold" style="width:150px;font-size:.75rem;letter-spacing:.04em;">KODE</th>
+                                <th class="py-2 text-muted fw-semibold" style="font-size:.75rem;letter-spacing:.04em;">JUDUL ARTIKEL</th>
+                                <th class="py-2 text-muted fw-semibold" style="font-size:.75rem;letter-spacing:.04em;">JURNAL</th>
+                                <th class="py-2 text-muted fw-semibold" style="width:130px;font-size:.75rem;letter-spacing:.04em;">MARKETING / PIC</th>
+                                <th class="py-2 text-muted fw-semibold" style="width:120px;font-size:.75rem;letter-spacing:.04em;">STATUS</th>
+                                <th class="py-2 text-muted fw-semibold" style="width:95px;font-size:.75rem;letter-spacing:.04em;">TANGGAL</th>
+                                <th class="py-2" style="width:44px;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -593,40 +514,55 @@
                                 $prog = strtoupper($s->program_type ?? 'SUB');
                                 if ($s->process_type === 'fasttrack') $prog = 'FT';
                             @endphp
-                            <tr>
-                                <td>
-                                    <code class="fw-bold" style="color:{{ $progColor }};font-size:.8rem;">{{ $s->kode_submit }}</code>
+                            <tr style="border-bottom:1px solid #f1f5f9;transition:background .15s;"
+                                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                                <td class="px-3">
+                                    <a href="{{ route('admin.submissions.show', $s) }}" class="text-decoration-none">
+                                        <code class="fw-bold" style="color:{{ $progColor }};font-size:.78rem;">{{ $s->kode_submit }}</code>
+                                    </a>
                                     <br>
-                                    <span class="badge rounded-pill" style="background:{{ $progColor }};font-size:.62rem;">{{ $prog }}</span>
+                                    <span class="badge rounded-pill" style="background:{{ $progColor }}22;color:{{ $progColor }};border:1px solid {{ $progColor }}55;font-size:.6rem;font-weight:600;">{{ $prog }}</span>
                                 </td>
                                 <td>
-                                    <div style="max-width:260px;" class="fw-semibold">{{ Str::limit($s->judul_artikel ?? '-', 50) }}</div>
-                                    <small class="text-muted"><i class="bi bi-person"></i> {{ Str::limit($s->nama_penulis ?? '', 28) }}</small>
-                                </td>
-                                <td><small>{{ $s->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</small></td>
-                                <td>
-                                    <small class="text-muted">
-                                        @if($s->marketing) <i class="bi bi-megaphone-fill"></i> {{ $s->marketing->name }}<br> @endif
-                                        @if($s->petugasSubmit) <i class="bi bi-person-badge"></i> {{ $s->petugasSubmit->name }} @endif
-                                    </small>
+                                    <div class="fw-semibold text-dark" style="max-width:260px;line-height:1.3;">{{ Str::limit($s->judul_artikel ?? '-', 50) }}</div>
+                                    <small class="text-muted"><i class="bi bi-person-fill" style="font-size:.65rem;"></i> {{ Str::limit($s->nama_penulis ?? '', 30) }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge {{ $s->status_badge_class }}" style="font-size:.7rem;">
+                                    <small class="text-secondary" style="line-height:1.3;display:block;max-width:160px;">{{ Str::limit($s->journalSlot?->journalMaster?->nama_jurnal ?? '-', 35) }}</small>
+                                </td>
+                                <td>
+                                    <div style="font-size:.75rem;line-height:1.5;">
+                                        @if($s->marketing)
+                                        <div class="text-muted"><i class="bi bi-megaphone-fill text-primary" style="font-size:.65rem;"></i> {{ Str::limit($s->marketing->name, 18) }}</div>
+                                        @endif
+                                        @if($s->petugasSubmit)
+                                        <div class="text-muted"><i class="bi bi-person-badge-fill text-success" style="font-size:.65rem;"></i> {{ Str::limit($s->petugasSubmit->name, 18) }}</div>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge {{ $s->status_badge_class }}" style="font-size:.68rem;padding:.3em .55em;">
                                         {{ $s->status_label }}
                                     </span>
                                 </td>
-                                <td><small class="text-muted">{{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d M Y') : $s->created_at->format('d M Y') }}</small></td>
                                 <td>
-                                    <a href="{{ route('admin.submissions.show', $s) }}" class="btn btn-outline-primary" style="padding:.15rem .4rem;font-size:.75rem;">
-                                        <i class="bi bi-eye"></i>
+                                    <small class="text-muted" style="font-size:.75rem;">
+                                        {{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d M Y') : $s->created_at->format('d M Y') }}
+                                    </small>
+                                </td>
+                                <td class="pe-3">
+                                    <a href="{{ route('admin.submissions.show', $s) }}"
+                                       class="btn btn-sm d-flex align-items-center justify-content-center"
+                                       style="width:28px;height:28px;padding:0;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;color:#3b82f6;">
+                                        <i class="bi bi-eye" style="font-size:.75rem;"></i>
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox" style="font-size:2rem;"></i>
-                                    <p class="mb-0 mt-1">Belum ada submission</p>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox" style="font-size:2.5rem;opacity:.3;"></i>
+                                    <p class="mb-0 mt-2 small">Belum ada submission</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -637,6 +573,103 @@
         </div>
     </div>
 </div>
+
+<!-- Submissions Disetujui -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+            <div class="card-header border-0 d-flex justify-content-between align-items-center py-3 px-4"
+                 style="background:linear-gradient(135deg,#10b981,#059669);">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:32px;height:32px;background:rgba(255,255,255,.2);">
+                        <i class="bi bi-patch-check-fill text-white" style="font-size:.9rem;"></i>
+                    </div>
+                    <span class="fw-semibold text-white fs-6">Submissions Disetujui</span>
+                    <span class="badge text-dark" style="background:rgba(255,255,255,.25);font-size:.72rem;">{{ $totalCompletedReviews }} total</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.submissions.index', ['status' => 'PUBLISHED']) }}"
+                       class="btn btn-sm text-white"
+                       style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;">
+                        <i class="bi bi-arrow-right-circle"></i> Lihat Semua
+                    </a>
+                    <button class="btn btn-sm text-white" data-bs-toggle="modal" data-bs-target="#exportModal"
+                            style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;">
+                        <i class="bi bi-file-earmark-excel"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0" style="font-size:.85rem;">
+                        <thead>
+                            <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                                <th class="px-3 py-2 text-muted fw-semibold" style="width:40px;font-size:.75rem;letter-spacing:.04em;">#</th>
+                                <th class="py-2 text-muted fw-semibold" style="width:150px;font-size:.75rem;letter-spacing:.04em;">KODE</th>
+                                <th class="py-2 text-muted fw-semibold" style="font-size:.75rem;letter-spacing:.04em;">JUDUL ARTIKEL</th>
+                                <th class="py-2 text-muted fw-semibold" style="font-size:.75rem;letter-spacing:.04em;">JURNAL</th>
+                                <th class="py-2 text-muted fw-semibold" style="width:120px;font-size:.75rem;letter-spacing:.04em;">MARKETING</th>
+                                <th class="py-2 text-muted fw-semibold" style="width:95px;font-size:.75rem;letter-spacing:.04em;">SELESAI</th>
+                                <th class="py-2" style="width:44px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($completedReviews as $s)
+                            @php
+                                $prog = strtoupper($s->program_type ?? '');
+                                $progColor = match($s->program_type) {
+                                    'bkd'  => '#0891b2',
+                                    'jafa' => '#7c3aed',
+                                    default => '#6b7280',
+                                };
+                            @endphp
+                            <tr style="border-bottom:1px solid #f1f5f9;transition:background .15s;"
+                                onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background=''">
+                                <td class="px-3 text-muted" style="font-size:.75rem;">{{ $loop->iteration }}</td>
+                                <td>
+                                    <a href="{{ route('admin.submissions.show', $s) }}" class="text-decoration-none">
+                                        <code class="fw-bold text-success" style="font-size:.78rem;">{{ $s->kode_submit ?? '-' }}</code>
+                                    </a>
+                                    @if($prog)
+                                    <br><span class="badge rounded-pill" style="background:{{ $progColor }}22;color:{{ $progColor }};border:1px solid {{ $progColor }}55;font-size:.6rem;font-weight:600;">{{ $prog }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark" style="max-width:280px;line-height:1.3;">{{ Str::limit($s->judul_artikel ?? '-', 55) }}</div>
+                                    <small class="text-muted"><i class="bi bi-person-fill" style="font-size:.65rem;"></i> {{ Str::limit($s->nama_penulis ?? '', 30) }}</small>
+                                </td>
+                                <td><small class="text-secondary" style="font-size:.78rem;">{{ Str::limit($s->journalSlot?->journalMaster?->nama_jurnal ?? '-', 35) }}</small></td>
+                                <td><small class="text-muted" style="font-size:.78rem;">{{ $s->marketing?->name ?? '-' }}</small></td>
+                                <td>
+                                    <small class="text-muted" style="font-size:.75rem;">{{ $s->updated_at?->format('d M Y') ?? '-' }}</small>
+                                </td>
+                                <td class="pe-3">
+                                    <a href="{{ route('admin.submissions.show', $s) }}"
+                                       class="btn btn-sm d-flex align-items-center justify-content-center"
+                                       style="width:28px;height:28px;padding:0;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#10b981;">
+                                        <i class="bi bi-eye" style="font-size:.75rem;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox" style="font-size:2.5rem;opacity:.3;"></i>
+                                    <p class="mb-0 mt-2 small">Belum ada artikel yang disetujui</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Point Rankings -->
+@include('admin.partials.point-rankings')
 
 <!-- Export Modal -->
 <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
