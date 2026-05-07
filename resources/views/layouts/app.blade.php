@@ -257,6 +257,26 @@
             border: none;
         }
 
+        /* Section Label */
+        .sidebar-section-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            padding: 1.1rem 1.5rem 0.3rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sidebar-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+        }
+
         /* Sidebar Toggle Button (desktop) */
         .sidebar-toggle-btn {
             position: fixed;
