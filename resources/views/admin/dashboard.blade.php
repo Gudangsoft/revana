@@ -330,6 +330,87 @@
 </script>
 @endpush
 
+<!-- Analytics Row: Top Reviewers + Avg Completion -->
+<div class="row mt-4 g-3">
+    {{-- Top 5 Reviewer --}}
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-semibold"><i class="bi bi-trophy-fill text-warning"></i> Top 5 Reviewer</span>
+                <a href="{{ route('admin.leaderboard.index') }}" class="btn btn-sm btn-outline-secondary">Lihat Semua</a>
+            </div>
+            <div class="card-body">
+                @if($topReviewers->isEmpty())
+                    <p class="text-muted text-center small py-3">Belum ada data reviewer</p>
+                @else
+                <canvas id="topReviewersChart" height="120"></canvas>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Avg Completion + Audit Log Shortcut --}}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm mb-3" style="border-left:4px solid #6366f1!important;">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2.8rem;font-weight:700;color:#6366f1;line-height:1;">
+                    {{ $avgCompletionDays > 0 ? $avgCompletionDays : '–' }}
+                </div>
+                <div class="text-muted mt-1" style="font-size:.85rem;">hari rata-rata penyelesaian</div>
+                <div class="text-muted" style="font-size:.75rem;">(submission → published)</div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm" style="border-left:4px solid #4ade80!important;">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="fw-semibold" style="font-size:.9rem;">Audit Log</div>
+                        <small class="text-muted">Lacak semua aksi kritis admin</small>
+                    </div>
+                    <a href="{{ route('admin.activity-logs.index') }}"
+                       class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-shield-check"></i> Buka
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+@if($topReviewers->isNotEmpty())
+<script>
+(function () {
+    new Chart(document.getElementById('topReviewersChart'), {
+        type: 'bar',
+        data: {
+            labels: @json($topReviewers->pluck('name')),
+            datasets: [{
+                label: 'Total Poin',
+                data: @json($topReviewers->pluck('total_points')),
+                backgroundColor: ['#6366f1','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe'],
+                borderRadius: 6,
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.raw} poin` } },
+            },
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.05)' } },
+                y: { grid: { display: false }, ticks: { font: { size: 12 } } },
+            }
+        }
+    });
+})();
+</script>
+@endif
+@endpush
+
 <!-- Quick Actions -->
 <div class="row mt-4">
     <div class="col-12">

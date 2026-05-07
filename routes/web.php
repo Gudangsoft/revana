@@ -26,6 +26,7 @@ use App\Http\Controllers\Reviewer\CertificateController;
 use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
 use App\Http\Controllers\Pic\AuthorController;
 use App\Http\Controllers\Pic\JournalManagementController as PicJournalController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\ReviewerRegistrationController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\ReviewRequestController;
@@ -331,6 +332,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/field-of-studies-template', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'downloadTemplate'])->name('field-of-studies.template');
         Route::delete('/field-of-studies-bulk-delete', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'bulkDelete'])->name('field-of-studies.bulk-delete');
         
+        // Audit Log
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');

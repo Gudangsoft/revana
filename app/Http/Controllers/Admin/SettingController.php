@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -142,6 +143,8 @@ class SettingController extends Controller
             Setting::set('certificate_template', $templatePath);
         }
         
+        Cache::forget('app_settings');
+
         return redirect()->route('admin.settings.index')
             ->with('success', 'Setting berhasil diperbarui!');
     }

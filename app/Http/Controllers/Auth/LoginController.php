@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\MotivationalMessage;
 use App\Http\Controllers\Admin\SyncController;
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,7 @@ class LoginController extends Controller
                     // Silent — jangan ganggu proses login
                 }
 
+                ActivityLog::record('admin_login', $user, [], ['ip' => $request->ip()]);
                 $request->session()->flash('motivational_message', MotivationalMessage::random());
                 return redirect()->intended('/admin/dashboard');
             } elseif ($user->role === 'reviewer') {
@@ -113,6 +115,7 @@ class LoginController extends Controller
         $userName = $user?->name ?? 'Admin';
 
         if ($user && $user->role === 'admin') {
+            ActivityLog::record('admin_logout', $user, [], []);
             Cache::forget('admin_session:' . $user->id);
         }
 

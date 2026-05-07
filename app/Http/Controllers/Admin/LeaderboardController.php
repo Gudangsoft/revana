@@ -6,11 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\RewardRedemption;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class LeaderboardController extends Controller
 {
     public function index()
+    {
+        $reviewers = Cache::remember('leaderboard.reviewers', 300, function () {
+        return $this->buildLeaderboard();
+        });
+
+        return view('admin.leaderboard.index', compact('reviewers'));
+    }
+
+    private function buildLeaderboard()
     {
         // Get reviewers with their statistics
         $reviewers = User::where('role', 'reviewer')
@@ -63,6 +73,6 @@ class LeaderboardController extends Controller
             return $reviewer;
         });
 
-        return view('admin.leaderboard.index', compact('reviewers'));
+        return $reviewers;
     }
 }

@@ -121,6 +121,25 @@ class DashboardController extends Controller
             Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
 
+        // Analytics: top 5 reviewer by total_points (cache 5 menit)
+        $topReviewers = Cache::remember('analytics.topReviewers', 300, fn () =>
+            User::where('role', 'reviewer')
+                ->where('total_points', '>', 0)
+                ->orderBy('total_points', 'desc')
+                ->take(5)
+                ->get(['id', 'name', 'total_points'])
+        );
+
+        // Analytics: rata-rata hari penyelesaian submission (PUBLISHED)
+        $avgCompletionDays = Cache::remember('analytics.avgCompletion', 300, fn () =>
+            (int) round(
+                Submission::where('status', 'PUBLISHED')
+                    ->whereNotNull('tanggal_submit')
+                    ->selectRaw('AVG(DATEDIFF(updated_at, tanggal_submit)) as avg_days')
+                    ->value('avg_days') ?? 0
+            )
+        );
+
         return view('admin.dashboard', compact(
             'totalJournals',
             'totalReviewers',
@@ -145,7 +164,9 @@ class DashboardController extends Controller
             'chartPublished',
             'chartRejected',
             'bkdStats',
-            'jafaStats'
+            'jafaStats',
+            'topReviewers',
+            'avgCompletionDays'
         ));
     }
 

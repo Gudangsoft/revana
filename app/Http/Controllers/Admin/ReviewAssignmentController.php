@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Journal;
 use App\Models\ReviewAssignment;
 use App\Models\ReviewResult;
@@ -299,6 +300,11 @@ class ReviewAssignmentController extends Controller
             }
         }
 
+        ActivityLog::record('review_approved', $assignment, [], [
+            'reviewer_count' => $reviewResults->count(),
+            'points' => $assignment->journal?->points ?? 0,
+        ]);
+
         return back()->with('success', 'Review berhasil disetujui dan point telah diberikan');
     }
 
@@ -323,6 +329,11 @@ class ReviewAssignmentController extends Controller
                 $result->reviewer->notify(new ReviewRevisionNotification($assignment, $validated['admin_feedback']));
             }
         }
+
+        ActivityLog::record('revision_requested', $assignment, [], [
+            'admin_feedback' => $validated['admin_feedback'],
+            'reviewer_count' => count($reviewResults),
+        ]);
 
         return back()->with('success', 'Permintaan revisi telah dikirim ke ' . count($reviewResults) . ' reviewer');
     }

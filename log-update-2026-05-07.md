@@ -270,3 +270,63 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 - **File berubah:** 1 file
 - `log-update-2026-05-07.md`
 
+
+## 19. 🔄 Update: update tampilan
+
+- **Commit:** `e2bfdf5` — 22:43 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-07.md`
+- `resources/views/admin/dashboard.blade.php`
+
+---
+
+## 20. Audit Log Aksi Kritis
+
+**Tujuan:** Mencatat jejak aksi penting yang dilakukan admin: approve/revisi review, tambah/hapus poin reviewer, login dan logout admin.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ReviewAssignmentController.php` | `ActivityLog::record()` di `approve()` dan `revision()` |
+| `app/Http/Controllers/Admin/PointManagementController.php` | `ActivityLog::record()` di `store()` dan `destroy()` |
+| `app/Http/Controllers/Auth/LoginController.php` | `ActivityLog::record()` di `login()` (admin) dan `logout()` |
+| `app/Http/Controllers/Admin/ActivityLogController.php` | **Baru** — controller index dengan filter event/causer/date |
+| `resources/views/admin/activity-logs/index.blade.php` | **Baru** — halaman audit log dengan tabel + filter |
+| `routes/web.php` | Tambah `GET /admin/activity-logs` |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah menu "Audit Log" di section Pengaturan |
+
+---
+
+## 21. Caching Settings & Leaderboard
+
+**Tujuan:** Mengurangi query DB pada setiap render halaman. Settings sebelumnya di-query ulang pada setiap view render melalui View composer.
+
+### Perubahan
+- Settings di-cache 10 menit (`app_settings`) — di-bust otomatis saat admin simpan setting
+- Leaderboard reviewer di-cache 5 menit (`leaderboard.reviewers`)
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Providers/AppServiceProvider.php` | Wrap settings array dalam `Cache::remember('app_settings', 600)` |
+| `app/Http/Controllers/Admin/SettingController.php` | `Cache::forget('app_settings')` setelah save |
+| `app/Http/Controllers/Admin/LeaderboardController.php` | Wrap query leaderboard dalam `Cache::remember('leaderboard.reviewers', 300)` |
+
+---
+
+## 22. Dashboard Analytics: Top Reviewers + Avg Completion Time
+
+**Tujuan:** Menambah insight analitik di dashboard: siapa reviewer paling aktif dan berapa rata-rata hari penyelesaian submission.
+
+### Fitur Baru
+- **Top 5 Reviewer** — horizontal bar chart (Chart.js) berdasarkan total poin, dengan link ke halaman leaderboard
+- **Rata-rata Hari Penyelesaian** — metrik tunggal (avg DATEDIFF updated_at - tanggal_submit untuk status PUBLISHED)
+- **Shortcut Audit Log** — card cepat untuk buka halaman audit log
+- Semua data analytics di-cache 5 menit
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DashboardController.php` | Tambah `$topReviewers` dan `$avgCompletionDays` (cached) |
+| `resources/views/admin/dashboard.blade.php` | Tambah section "Analytics Row" dengan horizontal bar chart + metrik |
+

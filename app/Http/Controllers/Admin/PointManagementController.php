@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\PointHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -57,12 +58,26 @@ class PointManagementController extends Controller
             $message = 'Points berhasil dikurangi';
         }
 
+        ActivityLog::record('point_adjusted', $user, [], [
+            'points' => $validated['points'],
+            'type' => $validated['type'],
+            'description' => $validated['description'],
+            'user_name' => $user->name,
+        ]);
+
         return redirect()->route('admin.points.index')
             ->with('success', $message);
     }
 
     public function destroy(PointHistory $point)
     {
+        $snapshot = [
+            'points' => $point->points,
+            'type' => $point->type,
+            'description' => $point->description,
+            'user_name' => $point->user->name ?? '-',
+        ];
+
         // Reverse the point transaction
         if ($point->type === 'EARNED') {
             $point->user->decrement('total_points', $point->points);
@@ -72,6 +87,8 @@ class PointManagementController extends Controller
         }
 
         $point->delete();
+
+        ActivityLog::record('point_deleted', $point->user, $snapshot, []);
 
         return redirect()->route('admin.points.index')
             ->with('success', 'Point history berhasil dihapus dan points telah dikembalikan');

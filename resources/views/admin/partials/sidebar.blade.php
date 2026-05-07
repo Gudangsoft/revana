@@ -365,3 +365,7 @@
    class="nav-link {{ $currentRoute == 'admin.feature-management' ? 'active' : '' }}">
     <i class="bi bi-toggles" style="color:#fcd34d;"></i> Feature Management
 </a>
+<a href="{{ route('admin.activity-logs.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.activity-logs') ? 'active' : '' }}">
+    <i class="bi bi-shield-check" style="color:#4ade80;"></i> Audit Log
+</a>
