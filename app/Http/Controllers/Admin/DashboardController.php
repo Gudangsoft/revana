@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\ReviewRequest;
 use App\Models\Pic;
 use App\Models\Marketing;
+use Illuminate\Support\Facades\Cache;
 use App\Exports\CompletedReviewsExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -62,21 +63,48 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
-        // PIC Point Rankings - Top 10 PIC dengan point tertinggi
-        $topPics = Pic::where('is_active', true)
-            ->orderBy('total_points', 'desc')
-            ->take(10)
-            ->get();
+        // Monthly breakdown per status for chart (cache 5 menit per tahun)
+        $chartData = Cache::remember('dashboard.monthlyStats.' . date('Y'), 300, function () {
+            $months = range(1, 12);
+            $totals    = array_fill_keys($months, 0);
+            $published = array_fill_keys($months, 0);
+            $rejected  = array_fill_keys($months, 0);
 
-        // Marketing Point Rankings - Top 10 Marketing dengan point tertinggi
-        $topMarketings = Marketing::where('is_active', true)
-            ->orderBy('total_points', 'desc')
-            ->take(10)
-            ->get();
+            foreach (Submission::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->whereYear('created_at', date('Y'))->groupBy('month')->get() as $row) {
+                $totals[(int)$row->month] = (int)$row->count;
+            }
+            foreach (Submission::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->whereYear('created_at', date('Y'))->where('status', 'PUBLISHED')
+                ->groupBy('month')->get() as $row) {
+                $published[(int)$row->month] = (int)$row->count;
+            }
+            foreach (Submission::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->whereYear('created_at', date('Y'))->where('status', 'REJECTED')
+                ->groupBy('month')->get() as $row) {
+                $rejected[(int)$row->month] = (int)$row->count;
+            }
+            return compact('totals', 'published', 'rejected');
+        });
+
+        $chartLabels    = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        $chartTotals    = array_values($chartData['totals']);
+        $chartPublished = array_values($chartData['published']);
+        $chartRejected  = array_values($chartData['rejected']);
+
+        // PIC Point Rankings - Top 10 PIC dengan point tertinggi (cache 5 menit)
+        $topPics = Cache::remember('rankings.topPics', 300, fn () =>
+            Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+        );
+
+        // Marketing Point Rankings - Top 10 Marketing dengan point tertinggi (cache 5 menit)
+        $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
+            Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+        );
 
         return view('admin.dashboard', compact(
             'totalJournals',
-            'totalReviewers', 
+            'totalReviewers',
             'totalSubmissions',
             'pendingSubmissions',
             'newSubmissions',
@@ -92,7 +120,11 @@ class DashboardController extends Controller
             'totalCompletedReviews',
             'monthlySubmissions',
             'topPics',
-            'topMarketings'
+            'topMarketings',
+            'chartLabels',
+            'chartTotals',
+            'chartPublished',
+            'chartRejected'
         ));
     }
 

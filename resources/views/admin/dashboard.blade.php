@@ -176,6 +176,144 @@
     </div>
 </div>
 
+<!-- Charts Row -->
+<div class="row mt-4">
+    {{-- Tren Submission Bulanan --}}
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-semibold"><i class="bi bi-graph-up-arrow text-primary"></i> Tren Submission {{ date('Y') }}</span>
+                <small class="text-muted">Total · Published · Rejected</small>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart" height="110"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- Conversion Rate Donut --}}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom">
+                <span class="fw-semibold"><i class="bi bi-pie-chart-fill text-success"></i> Status Overview</span>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                <canvas id="statusDonut" style="max-height:180px;max-width:180px;"></canvas>
+                <div class="mt-3 w-100">
+                    @php
+                        $total = $approvedSubmissions + $rejectedSubmissions + $inProgressSubmissions + $pendingSubmissions;
+                        $pct = fn($v) => $total > 0 ? round($v / $total * 100) : 0;
+                    @endphp
+                    <div class="d-flex justify-content-between mb-1">
+                        <span><span class="badge bg-success">Published</span></span>
+                        <span class="fw-bold">{{ $approvedSubmissions }} <small class="text-muted">({{ $pct($approvedSubmissions) }}%)</small></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span><span class="badge bg-danger">Rejected</span></span>
+                        <span class="fw-bold">{{ $rejectedSubmissions }} <small class="text-muted">({{ $pct($rejectedSubmissions) }}%)</small></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span><span class="badge bg-primary">In Progress</span></span>
+                        <span class="fw-bold">{{ $inProgressSubmissions }} <small class="text-muted">({{ $pct($inProgressSubmissions) }}%)</small></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><span class="badge bg-warning text-dark">Submitted</span></span>
+                        <span class="fw-bold">{{ $pendingSubmissions }} <small class="text-muted">({{ $pct($pendingSubmissions) }}%)</small></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const labels    = @json($chartLabels);
+    const totals    = @json($chartTotals);
+    const published = @json($chartPublished);
+    const rejected  = @json($chartRejected);
+
+    // Trend chart
+    new Chart(document.getElementById('trendChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Total Submission',
+                    data: totals,
+                    backgroundColor: 'rgba(99,102,241,.15)',
+                    borderColor: 'rgba(99,102,241,1)',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    type: 'bar',
+                    order: 2,
+                },
+                {
+                    label: 'Published',
+                    data: published,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22,163,74,.12)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: .4,
+                    type: 'line',
+                    order: 1,
+                },
+                {
+                    label: 'Rejected',
+                    data: rejected,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239,68,68,.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: .4,
+                    type: 'line',
+                    order: 0,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                tooltip: { mode: 'index', intersect: false },
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,.05)' } },
+                x: { grid: { display: false } },
+            }
+        }
+    });
+
+    // Status donut
+    new Chart(document.getElementById('statusDonut'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Published', 'Rejected', 'In Progress', 'Submitted'],
+            datasets: [{
+                data: [{{ $approvedSubmissions }}, {{ $rejectedSubmissions }}, {{ $inProgressSubmissions }}, {{ $pendingSubmissions }}],
+                backgroundColor: ['#16a34a','#ef4444','#3b82f6','#f59e0b'],
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: {
+                    label: ctx => ` ${ctx.label}: ${ctx.raw}`
+                }}
+            }
+        }
+    });
+})();
+</script>
+@endpush
+
 <!-- Quick Actions -->
 <div class="row mt-4">
     <div class="col-md-8">

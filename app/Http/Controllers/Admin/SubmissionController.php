@@ -15,6 +15,8 @@ use App\Models\MarketingPointHistory;
 use App\Exports\SubmissionsExport;
 use App\Imports\SubmissionsImport;
 use App\Services\FonnteService;
+use App\Services\WaNotificationService;
+use App\Models\ActivityLog;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -153,6 +155,9 @@ class SubmissionController extends Controller
             'nama_penulis' => $submission->nama_penulis,
         ]);
         
+        // WA notification: submission baru masuk
+        app(WaNotificationService::class)->notifyNewSubmission($submission);
+
         // Award points to Marketing
         $pointMessage = '';
         if (!empty($validated['marketing_id'])) {
@@ -205,7 +210,12 @@ class SubmissionController extends Controller
             'creator'
         ]);
         
-        return view('admin.submissions.show', compact('submission'));
+        $activityLogs = ActivityLog::where('subject_type', Submission::class)
+            ->where('subject_id', $submission->id)
+            ->latest()
+            ->get();
+
+        return view('admin.submissions.show', compact('submission', 'activityLogs'));
     }
 
     public function edit(Submission $submission)
@@ -303,6 +313,10 @@ class SubmissionController extends Controller
             $validated['file_artikel_original_name'] = $originalName;
         }
 
+        // Snapshot field penting sebelum update (untuk activity log)
+        $trackedFields = array_keys(ActivityLog::SUBMISSION_TRACKED_FIELDS);
+        $beforeSnapshot = $submission->only($trackedFields);
+
         // Deteksi perubahan kredensial author untuk notifikasi WA
         $credentialsChanged = false;
         if (
@@ -327,6 +341,23 @@ class SubmissionController extends Controller
         }
 
         $submission->update($validated);
+
+        // Activity log — catat field yang berubah
+        $afterSnapshot  = $submission->fresh()->only($trackedFields);
+        $changedOld     = ActivityLog::diff($beforeSnapshot, $afterSnapshot);
+        $changedNew     = array_intersect_key($afterSnapshot, $changedOld);
+        if (!empty($changedOld)) {
+            $labels = ActivityLog::SUBMISSION_TRACKED_FIELDS;
+            $oldLabeled = array_combine(
+                array_map(fn ($k) => $labels[$k] ?? $k, array_keys($changedOld)),
+                array_values($changedOld)
+            );
+            $newLabeled = array_combine(
+                array_map(fn ($k) => $labels[$k] ?? $k, array_keys($changedNew)),
+                array_values($changedNew)
+            );
+            ActivityLog::record('updated', $submission, $oldLabeled, $newLabeled);
+        }
 
         // Kirim notifikasi WhatsApp jika kredensial author berubah
         if ($credentialsChanged) {
@@ -458,6 +489,10 @@ class SubmissionController extends Controller
                     'petugas_name' => $petugas->name,
                 ]);
                 $submission->logHistory('reviewer1', 'credential_added', 'Kredensial reviewer 1 ditambahkan');
+                app(WaNotificationService::class)->notifyReviewerAssigned(
+                    $submission, $petugas, 'reviewer1',
+                    $validated['username_reviewer1'], $validated['password_reviewer1']
+                );
                 break;
                 
             case 'reviewer2':
@@ -474,6 +509,10 @@ class SubmissionController extends Controller
                     'petugas_name' => $petugas->name,
                 ]);
                 $submission->logHistory('reviewer2', 'credential_added', 'Kredensial reviewer 2 ditambahkan');
+                app(WaNotificationService::class)->notifyReviewerAssigned(
+                    $submission, $petugas, 'reviewer2',
+                    $validated['username_reviewer2'], $validated['password_reviewer2']
+                );
                 break;
                 
             case 'editor3':
@@ -566,10 +605,12 @@ class SubmissionController extends Controller
             case 'reviewer1':
                 $submission->validateReviewer1();
                 $submission->logHistory('reviewer1', 'approved', $notes ?: 'Reviewer 1 divalidasi');
+                app(WaNotificationService::class)->notifyReviewCompleted($submission, 'reviewer1');
                 break;
             case 'reviewer2':
                 $submission->validateReviewer2();
                 $submission->logHistory('reviewer2', 'approved', $notes ?: 'Reviewer 2 divalidasi');
+                app(WaNotificationService::class)->notifyReviewCompleted($submission, 'reviewer2');
                 break;
             case 'editor3':
                 $submission->validateEditor3();

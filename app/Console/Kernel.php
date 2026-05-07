@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
 
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('wa:reviewer-reminders')->dailyAt('08:00');
     }
 
     protected function commands()

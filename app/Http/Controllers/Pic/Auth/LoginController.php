@@ -8,6 +8,7 @@ use App\Models\Pic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -56,6 +57,9 @@ class LoginController extends Controller
 
         // Check password
         if (!Hash::check($password, $pic->password)) {
+            Log::warning('PIC login failed: wrong password', [
+                'email' => $email, 'ip' => $request->ip(), 'user_agent' => $request->userAgent(),
+            ]);
             return back()->withErrors([
                 'email' => 'Password salah.',
             ])->withInput($request->only('email'));

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class MarketingPointHistory extends Model
 {
@@ -82,6 +83,8 @@ class MarketingPointHistory extends Model
         // Sync total_points from actual submission count (1 submission = 1 point)
         $submissionCount = \App\Models\Submission::where('marketing_id', $marketingId)->count();
         Marketing::where('id', $marketingId)->update(['total_points' => $submissionCount]);
+
+        Cache::forget('rankings.topMarketings');
 
         return $history;
     }

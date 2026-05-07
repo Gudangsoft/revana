@@ -34,18 +34,104 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Progress Bar -->
+                <!-- Progress Stepper -->
+                @php
+                    $stages = [
+                        ['key' => 'submit',    'label' => 'Disubmit',  'icon' => 'bi-cloud-upload-fill',     'statuses' => ['SUBMITTED']],
+                        ['key' => 'editor',    'label' => 'Editorial', 'icon' => 'bi-pencil-square',          'statuses' => ['EDITOR1_PROCESS','AUTHOR1_PROCESS','EDITOR2_PROCESS']],
+                        ['key' => 'review',    'label' => 'Review',    'icon' => 'bi-person-check-fill',      'statuses' => ['REVIEWER1_PROCESS','REVIEWER2_PROCESS']],
+                        ['key' => 'produksi',  'label' => 'Produksi',  'icon' => 'bi-gear-fill',              'statuses' => ['EDITOR3_PROCESS','AUTHOR2_PROCESS','PRODUCTION_PROCESS','VALIDATOR_PROCESS']],
+                        ['key' => 'selesai',   'label' => 'Selesai',   'icon' => 'bi-check-circle-fill',      'statuses' => ['PUBLISHED','REJECTED']],
+                    ];
+                    $statusOrder = ['SUBMITTED'=>0,'EDITOR1_PROCESS'=>1,'AUTHOR1_PROCESS'=>2,'EDITOR2_PROCESS'=>3,
+                                    'REVIEWER1_PROCESS'=>4,'REVIEWER2_PROCESS'=>5,'EDITOR3_PROCESS'=>6,
+                                    'AUTHOR2_PROCESS'=>7,'PRODUCTION_PROCESS'=>8,'VALIDATOR_PROCESS'=>9,
+                                    'PUBLISHED'=>10,'REJECTED'=>10];
+                    $currentOrder = $statusOrder[$submission->status] ?? 0;
+                    $isRejected   = $submission->status === 'REJECTED';
+                    $isPublished  = $submission->status === 'PUBLISHED';
+
+                    $stageOrder = ['submit'=>0,'editor'=>1,'review'=>2,'produksi'=>3,'selesai'=>4];
+                    $activeStage = 0;
+                    foreach ($stages as $si => $stage) {
+                        foreach ($stage['statuses'] as $st) {
+                            if ($st === $submission->status) { $activeStage = $si; break 2; }
+                        }
+                        $stageMax = max(array_map(fn($s) => $statusOrder[$s] ?? 0, $stage['statuses']));
+                        if ($currentOrder > $stageMax) $activeStage = $si + 1;
+                    }
+                    $activeStage = min($activeStage, count($stages) - 1);
+                @endphp
+
                 <div class="mb-4">
-                    <label class="form-label">Progress</label>
-                    <div class="progress" style="height: 30px;">
-                        <div class="progress-bar {{ $submission->status === 'REJECTED' ? 'bg-danger' : 'bg-success' }}" role="progressbar" style="width: {{ $submission->progress_percentage }}%">
-                            {{ round($submission->progress_percentage) }}%
+                    <div class="d-flex align-items-center justify-content-between position-relative submission-stepper">
+                        {{-- connector line --}}
+                        <div class="stepper-line"></div>
+
+                        @foreach($stages as $i => $stage)
+                        @php
+                            $stageMax = max(array_map(fn($s) => $statusOrder[$s] ?? 0, $stage['statuses']));
+                            $isDone    = $currentOrder > $stageMax;
+                            $isActive  = $i === $activeStage;
+                            $isPending = !$isDone && !$isActive;
+
+                            if ($isActive && $isRejected) {
+                                $circleClass = 'stepper-circle-danger';
+                                $labelClass  = 'text-danger fw-bold';
+                            } elseif ($isDone || ($isActive && $isPublished)) {
+                                $circleClass = 'stepper-circle-done';
+                                $labelClass  = 'text-success fw-semibold';
+                            } elseif ($isActive) {
+                                $circleClass = 'stepper-circle-active';
+                                $labelClass  = 'text-primary fw-bold';
+                            } else {
+                                $circleClass = 'stepper-circle-pending';
+                                $labelClass  = 'text-muted';
+                            }
+                        @endphp
+                        <div class="stepper-step text-center">
+                            <div class="stepper-circle {{ $circleClass }} mx-auto">
+                                @if($isDone || ($isActive && $isPublished))
+                                    <i class="bi bi-check-lg"></i>
+                                @elseif($isActive && $isRejected)
+                                    <i class="bi bi-x-lg"></i>
+                                @elseif($isActive)
+                                    <i class="{{ $stage['icon'] }}"></i>
+                                @else
+                                    <i class="{{ $stage['icon'] }}"></i>
+                                @endif
+                            </div>
+                            <div class="stepper-label {{ $labelClass }} mt-1">{{ $stage['label'] }}</div>
+                            @if($isActive)
+                            <div class="stepper-sublabel text-muted">
+                                {{ $submission->status_label }}
+                            </div>
+                            @endif
                         </div>
-                    </div>
-                    <div class="text-center mt-2">
-                        <span class="badge {{ $submission->status_badge_class }} fs-6">{{ $submission->status_label }}</span>
+                        @endforeach
                     </div>
                 </div>
+
+                <style>
+                .submission-stepper { padding: 0.5rem 0 1.5rem; }
+                .stepper-line {
+                    position: absolute; top: 20px; left: 10%; right: 10%; height: 3px;
+                    background: #e2e8f0; z-index: 0;
+                }
+                .stepper-step { flex: 1; position: relative; z-index: 1; }
+                .stepper-circle {
+                    width: 42px; height: 42px; border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.1rem; border: 3px solid;
+                    transition: all .2s;
+                }
+                .stepper-circle-done    { background:#16a34a; border-color:#16a34a; color:#fff; }
+                .stepper-circle-active  { background:#3b82f6; border-color:#3b82f6; color:#fff; box-shadow:0 0 0 4px rgba(59,130,246,.2); }
+                .stepper-circle-danger  { background:#ef4444; border-color:#ef4444; color:#fff; box-shadow:0 0 0 4px rgba(239,68,68,.2); }
+                .stepper-circle-pending { background:#fff; border-color:#cbd5e1; color:#94a3b8; }
+                .stepper-label  { font-size:.78rem; white-space:nowrap; }
+                .stepper-sublabel { font-size:.67rem; white-space:nowrap; }
+                </style>
 
                 <div class="row">
                     <div class="col-md-6">
@@ -199,4 +285,63 @@
         </div>
     </div>
 </div>
+
+{{-- Activity Log --}}
+@if($activityLogs->isNotEmpty())
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <span class="fw-semibold"><i class="bi bi-clock-history text-secondary"></i> Riwayat Perubahan</span>
+                <small class="text-muted ms-2">({{ $activityLogs->count() }} entri)</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="timeline p-3">
+                    @foreach($activityLogs as $log)
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="flex-shrink-0 pt-1">
+                            <span class="badge {{ $log->event_badge_class }} rounded-pill px-2 py-1" style="font-size:.7rem;">
+                                {{ $log->event_label }}
+                            </span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="fw-semibold text-dark" style="font-size:.85rem;">
+                                    <i class="bi bi-person-circle text-muted me-1"></i>{{ $log->causer_name }}
+                                    <span class="badge bg-light text-secondary border" style="font-size:.65rem;">{{ $log->causer_guard }}</span>
+                                </span>
+                                <small class="text-muted">{{ $log->created_at->format('d M Y H:i') }}</small>
+                            </div>
+                            @if($log->old_values || $log->new_values)
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0" style="font-size:.8rem;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width:140px;">Field</th>
+                                            <th>Sebelum</th>
+                                            <th>Sesudah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach(array_keys($log->new_values ?? $log->old_values ?? []) as $field)
+                                        <tr>
+                                            <td class="text-muted">{{ $field }}</td>
+                                            <td class="text-danger">{{ $log->old_values[$field] ?? '-' }}</td>
+                                            <td class="text-success">{{ $log->new_values[$field] ?? '-' }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    @if(!$loop->last)<hr class="my-2">@endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

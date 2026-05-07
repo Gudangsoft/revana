@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class PicPointHistory extends Model
 {
@@ -120,6 +121,8 @@ class PicPointHistory extends Model
 
         // Update total points on PIC
         Pic::where('id', $picId)->increment('total_points', $points);
+
+        Cache::forget('rankings.topPics');
 
         return $history;
     }

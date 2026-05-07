@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +64,9 @@ class DashboardController extends Controller
         }
 
         if (!Hash::check($request->password, $marketing->password)) {
+            Log::warning('Marketing login failed: wrong password', [
+                'email' => $request->email, 'ip' => $request->ip(), 'user_agent' => $request->userAgent(),
+            ]);
             return back()->with('error', 'Password salah.');
         }
 
@@ -113,17 +117,13 @@ class DashboardController extends Controller
             'total_points' => $marketing->total_points,
         ];
 
-        // Marketing Point Rankings - Top 10 untuk dashboard
-        $topMarketings = \App\Models\Marketing::where('is_active', true)
-            ->orderBy('total_points', 'desc')
-            ->take(10)
-            ->get();
+        $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
+            \App\Models\Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+        );
 
-        // PIC Point Rankings - Top 10 untuk dashboard
-        $topPics = \App\Models\Pic::where('is_active', true)
-            ->orderBy('total_points', 'desc')
-            ->take(10)
-            ->get();
+        $topPics = Cache::remember('rankings.topPics', 300, fn () =>
+            \App\Models\Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+        );
         
         return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats', 'topMarketings', 'topPics'));
     }

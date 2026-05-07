@@ -27,6 +27,7 @@ use App\Http\Controllers\Pic\Auth\LoginController as PicLoginController;
 use App\Http\Controllers\Pic\AuthorController;
 use App\Http\Controllers\Pic\JournalManagementController as PicJournalController;
 use App\Http\Controllers\Admin\ReviewerRegistrationController;
+use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\ReviewRequestController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReportController;
@@ -109,6 +110,7 @@ Route::middleware('auth')->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
         Route::get('/export-completed-reviews', [AdminDashboard::class, 'exportCompletedReviews'])->name('export.completed.reviews');
         Route::get('/component-overview', [AdminDashboard::class, 'componentOverview'])->name('component-overview');
         Route::post('/component-overview', [AdminDashboard::class, 'saveComponentSettings'])->name('component-overview.save');
@@ -421,7 +423,7 @@ Route::prefix('pic')->group(function () {
     // PIC Login (guest only)
     Route::middleware('guest:pic')->group(function () {
         Route::get('/login', [PicLoginController::class, 'showLoginForm'])->name('pic.login');
-        Route::post('/login', [PicLoginController::class, 'login'])->name('pic.login.submit');
+        Route::post('/login', [PicLoginController::class, 'login'])->name('pic.login.submit')->middleware('throttle:5,1');
     });
     
     // PIC Authenticated routes
@@ -529,7 +531,7 @@ use App\Http\Controllers\Marketing\DashboardController as MarketingDashboardCont
 Route::prefix('marketing')->group(function () {
     // Guest routes
     Route::get('/login', [MarketingDashboardController::class, 'loginForm'])->name('marketing.login');
-    Route::post('/login', [MarketingDashboardController::class, 'login'])->name('marketing.login.submit');
+    Route::post('/login', [MarketingDashboardController::class, 'login'])->name('marketing.login.submit')->middleware('throttle:5,1');
     
     // Authenticated routes
     Route::middleware('auth:marketing')->group(function () {

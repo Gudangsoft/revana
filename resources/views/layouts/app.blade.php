@@ -746,6 +746,23 @@
             <div class="container-fluid">
                 <span class="navbar-brand mb-0 h1">@yield('page-title', 'Dashboard')</span>
                 <div class="ms-auto d-flex align-items-center flex-wrap gap-2">
+                    @if(auth()->user()->role === 'admin')
+                    <form action="{{ route('admin.search') }}" method="GET"
+                          class="d-flex align-items-center me-1" role="search" id="globalSearchForm">
+                        <div class="input-group input-group-sm" style="width:240px;">
+                            <input type="text" name="q" id="globalSearchInput"
+                                   class="form-control border-0 shadow-sm"
+                                   placeholder="Cari penulis, ID, judul…"
+                                   value="{{ request('q') }}"
+                                   autocomplete="off"
+                                   style="border-radius:20px 0 0 20px; background:#f1f5f9;">
+                            <button class="btn btn-primary btn-sm" type="submit"
+                                    style="border-radius:0 20px 20px 0;">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    @endif
                     <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif" 
                        class="text-decoration-none text-dark me-2 d-none d-md-flex align-items-center profile-link">
                         @if(auth()->user()->photo)

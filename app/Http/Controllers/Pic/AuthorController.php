@@ -9,6 +9,7 @@ use App\Models\Pic;
 use App\Models\Accreditation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class AuthorController extends Controller
@@ -22,17 +23,13 @@ class AuthorController extends Controller
             ->latest()
             ->get();
 
-        // PIC Point Rankings - Top 10 untuk dashboard
-        $topPics = Pic::where('is_active', true)
-            ->orderBy('total_points', 'desc')
-            ->take(10)
-            ->get();
+        $topPics = Cache::remember('rankings.topPics', 300, fn () =>
+            Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+        );
 
-        // Marketing Point Rankings - Top 10 untuk dashboard
-        $topMarketings = Marketing::where('is_active', true)
-            ->orderBy('total_points', 'desc')
-            ->take(10)
-            ->get();
+        $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
+            Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+        );
         
         return view('pic.author.dashboard', compact('journals', 'topPics', 'topMarketings'));
     }
