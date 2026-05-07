@@ -141,36 +141,52 @@
 </div>
 
 <!-- Additional Stats -->
-<div class="row mt-4">
-    <div class="col-md-3">
+<div class="row mt-4 g-3">
+    <div class="col-md-2 col-4">
         <div class="card">
-            <div class="card-body text-center">
-                <h5 class="text-primary">{{ $approvedSubmissions }}</h5>
+            <div class="card-body text-center py-3">
+                <h5 class="text-primary mb-1">{{ $approvedSubmissions }}</h5>
                 <small class="text-muted">Disetujui</small>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2 col-4">
         <div class="card">
-            <div class="card-body text-center">
-                <h5 class="text-info">{{ $inProgressSubmissions }}</h5>
-                <small class="text-muted">Sedang Diproses</small>
+            <div class="card-body text-center py-3">
+                <h5 class="text-info mb-1">{{ $inProgressSubmissions }}</h5>
+                <small class="text-muted">Diproses</small>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2 col-4">
         <div class="card">
-            <div class="card-body text-center">
-                <h5 class="text-success">{{ $regularSubmissions }}</h5>
+            <div class="card-body text-center py-3">
+                <h5 class="text-success mb-1">{{ $regularSubmissions }}</h5>
                 <small class="text-muted">Normal</small>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2 col-4">
         <div class="card">
-            <div class="card-body text-center">
-                <h5 class="text-warning">{{ $fasttrackSubmissions }}</h5>
+            <div class="card-body text-center py-3">
+                <h5 class="text-warning mb-1">{{ $fasttrackSubmissions }}</h5>
                 <small class="text-muted">Fasttrack</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-4">
+        <div class="card">
+            <div class="card-body text-center py-3">
+                <h5 class="mb-1" style="color:#0891b2;">{{ $bkdStats['total'] }}</h5>
+                <small class="text-muted">BKD</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-4">
+        <div class="card">
+            <div class="card-body text-center py-3">
+                <h5 class="text-purple mb-1" style="color:#7c3aed;">{{ $jafaStats['total'] }}</h5>
+                <small class="text-muted">JAFA</small>
             </div>
         </div>
     </div>
