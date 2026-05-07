@@ -133,13 +133,12 @@ class Submission extends Model
         static::creating(function ($submission) {
             // Auto generate kode_submit if not set
             if (empty($submission->kode_submit)) {
-                $base   = self::generateKodeSubmit();
                 $prefix = match($submission->program_type) {
-                    'bkd'  => 'BKD-',
-                    'jafa' => 'JAFA-',
-                    default => '',
+                    'bkd'  => 'BKD',
+                    'jafa' => 'JAFA',
+                    default => 'SUB',
                 };
-                $submission->kode_submit = $prefix . $base;
+                $submission->kode_submit = self::generateKodeSubmit($prefix);
             }
 
             // Auto generate kode_loa: kode_submit + SIPERA
@@ -194,18 +193,18 @@ class Submission extends Model
         });
     }
 
-    public static function generateKodeSubmit()
+    public static function generateKodeSubmit(string $prefix = 'SUB')
     {
-        $prefix = 'SUB';
-        $year = date('Y');
+        $year  = date('Y');
         $month = date('m');
         $lastSubmission = self::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
+            ->where('kode_submit', 'like', $prefix . '%')
             ->orderBy('id', 'desc')
             ->first();
-        
+
         $number = $lastSubmission ? (int) substr($lastSubmission->kode_submit, -4) + 1 : 1;
-        
+
         return $prefix . $year . $month . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 

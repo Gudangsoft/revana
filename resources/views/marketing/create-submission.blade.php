@@ -75,7 +75,7 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Nomor Submit <span class="text-danger">*</span></label>
-                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel', request('program') ? strtoupper(request('program')) . '-' : '') }}" placeholder="{{ request('program') ? strtoupper(request('program')) . '-XXXXX' : 'Masukkan Nomor Submit' }}" required>
+                    <input type="text" name="id_artikel" class="form-control @error('id_artikel') is-invalid @enderror" value="{{ old('id_artikel') }}" placeholder="Masukkan Nomor Submit" required>
                     @error('id_artikel')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

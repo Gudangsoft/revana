@@ -83,7 +83,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="id_artikel" class="form-label">ID Artikel <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('id_artikel') is-invalid @enderror" id="id_artikel" name="id_artikel" value="{{ old('id_artikel', request('program') ? strtoupper(request('program')) . '-' : '') }}" placeholder="{{ request('program') ? strtoupper(request('program')) . '-XXXXX' : 'Masukkan ID Artikel' }}" required>
+                                <input type="text" class="form-control @error('id_artikel') is-invalid @enderror" id="id_artikel" name="id_artikel" value="{{ old('id_artikel') }}" placeholder="Masukkan ID Artikel" required>
                                 @error('id_artikel')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

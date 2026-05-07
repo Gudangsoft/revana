@@ -297,19 +297,26 @@ class DashboardController extends Controller
                 ])->withInput();
             }
             
-            // Generate kode submit
-            $lastSubmission = Submission::where('kode_submit', 'like', 'SUB' . date('Y') . '%')
+            // Generate kode submit — prefix sesuai program_type
+            $programType = $request->input('program_type');
+            $prefix = match($programType) {
+                'bkd'  => 'BKD',
+                'jafa' => 'JAFA',
+                default => 'SUB',
+            };
+
+            $lastSubmission = Submission::where('kode_submit', 'like', $prefix . date('Y') . '%')
                 ->orderBy('kode_submit', 'desc')
                 ->first();
-            
+
             if ($lastSubmission) {
-                $lastNumber = (int) substr($lastSubmission->kode_submit, 7);
+                $lastNumber = (int) substr($lastSubmission->kode_submit, strlen($prefix) + 4);
                 $newNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
             } else {
                 $newNumber = '010001';
             }
-            
-            $kodeSubmit = 'SUB' . date('Y') . $newNumber;
+
+            $kodeSubmit = $prefix . date('Y') . $newNumber;
             
             // Get admin user for created_by
             $adminUser = \App\Models\User::orderBy('id')->first();
