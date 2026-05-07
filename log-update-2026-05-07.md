@@ -153,3 +153,10 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 | `routes/web.php` | Tambah `->middleware('throttle:5,1')` ke 2 route login |
 | `app/Http/Controllers/Pic/Auth/LoginController.php` | Tambah `Log::warning` pada password salah |
 | `app/Http/Controllers/Marketing/DashboardController.php` | Tambah `Log::warning` pada password salah |
+
+## 6. 🔄 Update: update
+
+- **Commit:** `7aa7bb1` — 22:10 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-07.md`
+
