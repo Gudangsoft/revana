@@ -92,12 +92,8 @@
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
-                                <div class="mt-1">
-                                    @if(!empty($settings['fonnte_api_token']))
-                                        <small class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Token terisi &mdash; {{ strlen($settings['fonnte_api_token']) }} karakter. Biarkan kosong saat simpan jika tidak ingin mengganti.</small>
-                                    @else
-                                        <small class="text-danger"><i class="bi bi-x-circle me-1"></i>Belum diisi &mdash; masukkan API Token dari dashboard Fonnte lalu simpan.</small>
-                                    @endif
+                                <div class="mt-1" id="tokenStatusWrap">
+                                    <small id="tokenStatus"></small>
                                 </div>
                                 @error('fonnte_api_token')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -535,6 +531,22 @@
             document.getElementById('fonnte_api_token').value = '';
         }
     });
+
+    // Token status badge — baca dari isi input langsung (tidak bergantung PHP $settings)
+    function updateTokenStatus() {
+        const val = document.getElementById('fonnte_api_token').value.trim();
+        const el  = document.getElementById('tokenStatus');
+        if (!el) return;
+        if (val.length > 0) {
+            el.className = 'text-success';
+            el.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Token terisi &mdash; ' + val.length + ' karakter. Kosongkan hanya jika ingin mengganti token.';
+        } else {
+            el.className = 'text-danger';
+            el.innerHTML = '<i class="bi bi-x-circle me-1"></i>Belum diisi &mdash; masukkan API Token dari dashboard Fonnte lalu simpan.';
+        }
+    }
+    document.getElementById('fonnte_api_token').addEventListener('input', updateTokenStatus);
+    updateTokenStatus();
 
     // Toggle badge: tampilkan "Aktif" / "Tidak Aktif" di samping setiap switch
     function updateToggleBadge(checkbox) {

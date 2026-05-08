@@ -59,37 +59,24 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Read all SMS/Fonnte settings from DB via Eloquent model (consistent with FonnteService)
-        $dbSettings = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
+        // Read all settings from DB — single query
+        $db = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
 
-        // Auto-seed semua template jika belum ada atau kosong di DB
-        $templateDefaults = [
-            'sms_template_submit'           => "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_status_change'    => "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_published'        => "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
-            'wa_template_credential_new'    => self::defaultCredentialNewTemplate(),
-            'wa_template_credential_update' => self::defaultCredentialUpdateTemplate(),
-        ];
-        foreach ($templateDefaults as $key => $default) {
-            if (empty($dbSettings[$key])) {
-                Setting::updateOrCreate(['key' => $key], ['value' => $default]);
-                $dbSettings[$key] = $default;
-            }
-        }
-
+        // Default template fallbacks (display only, tidak menulis ke DB di sini
+        // agar tidak overwrite data user saat ada read lag setelah save)
         $settings = [
-            'fonnte_api_token'              => $dbSettings['fonnte_api_token'] ?? '',
-            'fonnte_device_id'              => $dbSettings['fonnte_device_id'] ?? '',
-            'sms_gateway_enabled'           => $dbSettings['sms_gateway_enabled'] ?? '0',
-            'sms_notification_submit'       => $dbSettings['sms_notification_submit'] ?? '0',
-            'sms_notification_status_change'=> $dbSettings['sms_notification_status_change'] ?? '0',
-            'sms_notification_published'    => $dbSettings['sms_notification_published'] ?? '0',
-            'sms_default_country_code'      => $dbSettings['sms_default_country_code'] ?? '62',
-            'sms_template_submit'           => $dbSettings['sms_template_submit'],
-            'sms_template_status_change'    => $dbSettings['sms_template_status_change'],
-            'sms_template_published'        => $dbSettings['sms_template_published'],
-            'wa_template_credential_new'    => $dbSettings['wa_template_credential_new'],
-            'wa_template_credential_update' => $dbSettings['wa_template_credential_update'],
+            'fonnte_api_token'              => $db['fonnte_api_token'] ?? '',
+            'fonnte_device_id'              => $db['fonnte_device_id'] ?? '',
+            'sms_gateway_enabled'           => $db['sms_gateway_enabled'] ?? '0',
+            'sms_notification_submit'       => $db['sms_notification_submit'] ?? '0',
+            'sms_notification_status_change'=> $db['sms_notification_status_change'] ?? '0',
+            'sms_notification_published'    => $db['sms_notification_published'] ?? '0',
+            'sms_default_country_code'      => $db['sms_default_country_code'] ?? '62',
+            'sms_template_submit'           => ($db['sms_template_submit'] ?? '') ?: "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_status_change'    => ($db['sms_template_status_change'] ?? '') ?: "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_published'        => ($db['sms_template_published'] ?? '') ?: "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
+            'wa_template_credential_new'    => ($db['wa_template_credential_new'] ?? '') ?: self::defaultCredentialNewTemplate(),
+            'wa_template_credential_update' => ($db['wa_template_credential_update'] ?? '') ?: self::defaultCredentialUpdateTemplate(),
         ];
 
         return view('admin.sms-gateway.index', compact('settings'));
@@ -134,7 +121,7 @@ class SmsGatewayController extends Controller
                 }
             }
 
-            // Save using Eloquent model (handles created_at/updated_at automatically)
+            // Save — updateOrCreate menjamin record ada di DB setelah ini
             foreach ($validated as $key => $value) {
                 Setting::updateOrCreate(
                     ['key' => $key],
@@ -147,7 +134,10 @@ class SmsGatewayController extends Controller
                 'sms_gateway_enabled' => $validated['sms_gateway_enabled'],
             ]);
 
+            // withInput() memastikan form menampilkan nilai yang baru disimpan
+            // tanpa bergantung pada DB read (menghindari issue read replica / connection lag)
             return redirect()->route('admin.sms-gateway.index')
+                ->withInput($request->except([]))
                 ->with('success', 'Pengaturan SMS Gateway berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error('SMS Gateway Settings save error', [
