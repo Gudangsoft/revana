@@ -330,3 +330,19 @@ Gagal login karena password salah kini juga dicatat di Laravel log (`Log::warnin
 | `app/Http/Controllers/Admin/DashboardController.php` | Tambah `$topReviewers` dan `$avgCompletionDays` (cached) |
 | `resources/views/admin/dashboard.blade.php` | Tambah section "Analytics Row" dengan horizontal bar chart + metrik |
 
+
+## 23. 🔄 Update:  Audit Log Aksi Kritis, Caching Settings & Leaderboard,Dashboard Analytics
+
+- **Commit:** `0b020a6` — 23:07 oleh Gudangsoft
+- **File berubah:** 13 file
+- `app/Http/Controllers/Admin/ActivityLogController.php`
+- `app/Http/Controllers/Admin/DashboardController.php`
+- `app/Http/Controllers/Admin/LeaderboardController.php`
+- `app/Http/Controllers/Admin/PointManagementController.php`
+- `app/Http/Controllers/Admin/ReviewAssignmentController.php`
+- `app/Http/Controllers/Admin/SettingController.php`
+- `app/Http/Controllers/Auth/LoginController.php`
+- `app/Providers/AppServiceProvider.php`
+- `log-update-2026-05-07.md`
+- `resources/views/admin/activity-logs/index.blade.php`
+

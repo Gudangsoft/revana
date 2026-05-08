@@ -293,6 +293,63 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        {{-- Template Kredensial Penulis --}}
+                        <hr class="my-4">
+                        <h6 class="fw-bold text-success mb-3"><i class="bi bi-key me-2"></i>Template Notifikasi Kredensial Penulis</h6>
+                        <div class="alert alert-info py-2 small">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Variabel:</strong>
+                            <code>{nama}</code> <code>{kode}</code> <code>{judul}</code> <code>{namaJurnal}</code> <code>{linkSubmit}</code> <code>{username}</code> <code>{password}</code>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="wa_template_credential_new" class="form-label fw-bold mb-0">
+                                    <i class="bi bi-person-plus text-success me-1"></i>Template Submission Baru (Kredensial Pertama)
+                                </label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-reset-template" data-target="wa_template_credential_new" data-default="{{ htmlspecialchars(\App\Http\Controllers\Admin\SmsGatewayController::defaultCredentialNewTemplate(), ENT_QUOTES) }}">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset ke Default
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-clear-template" data-target="wa_template_credential_new">
+                                        <i class="bi bi-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea class="form-control @error('wa_template_credential_new') is-invalid @enderror"
+                                      id="wa_template_credential_new"
+                                      name="wa_template_credential_new"
+                                      rows="10"
+                                      placeholder="Template pesan WA saat submission baru dibuat">{{ old('wa_template_credential_new', $settings['wa_template_credential_new'] ?? '') }}</textarea>
+                            @error('wa_template_credential_new')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="wa_template_credential_update" class="form-label fw-bold mb-0">
+                                    <i class="bi bi-pencil-square text-warning me-1"></i>Template Update Kredensial (Diperbarui)
+                                </label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-reset-template" data-target="wa_template_credential_update" data-default="{{ htmlspecialchars(\App\Http\Controllers\Admin\SmsGatewayController::defaultCredentialUpdateTemplate(), ENT_QUOTES) }}">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset ke Default
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-clear-template" data-target="wa_template_credential_update">
+                                        <i class="bi bi-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea class="form-control @error('wa_template_credential_update') is-invalid @enderror"
+                                      id="wa_template_credential_update"
+                                      name="wa_template_credential_update"
+                                      rows="10"
+                                      placeholder="Template pesan WA saat kredensial diperbarui">{{ old('wa_template_credential_update', $settings['wa_template_credential_update'] ?? '') }}</textarea>
+                            @error('wa_template_credential_update')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
                 </div>
             </div>

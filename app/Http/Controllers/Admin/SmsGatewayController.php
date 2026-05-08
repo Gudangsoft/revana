@@ -56,6 +56,7 @@ class SmsGatewayController extends Controller
             'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
             'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published',
             'sms_default_country_code', 'sms_template_submit', 'sms_template_status_change', 'sms_template_published',
+            'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
         // Read all SMS/Fonnte settings from DB via Eloquent model (consistent with FonnteService)
@@ -72,6 +73,8 @@ class SmsGatewayController extends Controller
             'sms_template_submit'           => $dbSettings['sms_template_submit'] ?? "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
             'sms_template_status_change'    => $dbSettings['sms_template_status_change'] ?? "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
             'sms_template_published'        => $dbSettings['sms_template_published'] ?? "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
+            'wa_template_credential_new'    => $dbSettings['wa_template_credential_new'] ?? self::defaultCredentialNewTemplate(),
+            'wa_template_credential_update' => $dbSettings['wa_template_credential_update'] ?? self::defaultCredentialUpdateTemplate(),
         ];
 
         return view('admin.sms-gateway.index', compact('settings'));
@@ -90,6 +93,8 @@ class SmsGatewayController extends Controller
             'sms_template_submit' => 'nullable|string|max:2000',
             'sms_template_status_change' => 'nullable|string|max:2000',
             'sms_template_published' => 'nullable|string|max:2000',
+            'wa_template_credential_new' => 'nullable|string|max:3000',
+            'wa_template_credential_update' => 'nullable|string|max:3000',
         ]);
 
         try {
@@ -127,6 +132,16 @@ class SmsGatewayController extends Controller
                 ->withInput()
                 ->with('error', 'Gagal menyimpan pengaturan: ' . $e->getMessage());
         }
+    }
+
+    public static function defaultCredentialNewTemplate(): string
+    {
+        return "Halo *{nama}*,\n\nArtikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya:\n\n📄 Detail Submission\n\nKode Submit: {kode}\nJudul Artikel: {judul}\nJurnal: {namaJurnal}\nLink Submit: {linkSubmit}\n\n🔐 Akun OJS Author\nUsername: {username}\nPassword: {password}\n\n🔎 Monitoring & Verifikasi\nPemantauan status artikel dapat dilakukan melalui akun OJS Anda.\nPengecekan LoA (Letter of Acceptance) dapat dilakukan melalui:\n👉 https://verifyloa.apji.org/\n\n⚠️ Penting:\nSelama proses submission hingga publikasi, password tidak diperkenankan untuk diubah guna menjaga sinkronisasi sistem monitoring dan administrasi.\n\n📞 Informasi Tambahan:\nJika terdapat pertanyaan atau kendala, silakan menghubungi Tim Marketing kami untuk mendapatkan bantuan lebih lanjut.";
+    }
+
+    public static function defaultCredentialUpdateTemplate(): string
+    {
+        return "Halo *{nama}*,\n\nKredensial akun OJS Author Anda telah diperbarui. Berikut informasi terbaru:\n\n📄 Detail Submission\n\nKode Submit: {kode}\nJudul Artikel: {judul}\nJurnal: {namaJurnal}\nLink Submit: {linkSubmit}\n\n🔐 Akun OJS Author (Diperbarui)\nUsername: {username}\nPassword: {password}\n\n🔎 Monitoring & Verifikasi\nPemantauan status artikel dapat dilakukan melalui akun OJS Anda.\nPengecekan LoA (Letter of Acceptance) dapat dilakukan melalui:\n👉 https://verifyloa.apji.org/\n\n⚠️ Penting:\nSelama proses submission hingga publikasi, password tidak diperkenankan untuk diubah guna menjaga sinkronisasi sistem monitoring dan administrasi.\n\n📞 Informasi Tambahan:\nJika terdapat pertanyaan atau kendala, silakan menghubungi Tim Marketing kami untuk mendapatkan bantuan lebih lanjut.";
     }
 
     /**

@@ -10,6 +10,7 @@ use App\Models\Submission;
 use App\Models\JournalMaster;
 use App\Models\JournalSlot;
 use App\Models\Accreditation;
+use App\Models\Setting;
 use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -1079,7 +1080,6 @@ class DashboardController extends Controller
         $password  = $submission->password_author ?? '-';
         $linkSubmit = $submission->link_artikel ?? '-';
 
-        // Load nama jurnal jika relasi belum di-load
         if ($submission->relationLoaded('journalSlot') && $submission->journalSlot) {
             $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
         } else {
@@ -1087,54 +1087,17 @@ class DashboardController extends Controller
             $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
         }
 
-        if ($isUpdate) {
-            return <<<EOT
-Halo *{$nama}*,
+        $key = $isUpdate ? 'wa_template_credential_update' : 'wa_template_credential_new';
+        $defaultFn = $isUpdate
+            ? [\App\Http\Controllers\Admin\SmsGatewayController::class, 'defaultCredentialUpdateTemplate']
+            : [\App\Http\Controllers\Admin\SmsGatewayController::class, 'defaultCredentialNewTemplate'];
 
-Kredensial akun OJS Author Anda telah diperbarui. Berikut informasi terbaru:
+        $template = Setting::get($key) ?: call_user_func($defaultFn);
 
-📄 *Detail Submission*
-• Kode Submit: *{$kode}*
-• Judul Artikel: _{$judul}_
-• Jurnal: *{$namaJurnal}*
-• Link Submit: {$linkSubmit}
-
-🔐 *Akun OJS Author (Diperbarui)*
-• Username: `{$username}`
-• Password: `{$password}`
-
-Silakan login ke portal OJS menggunakan kredensial terbaru di atas.
-
-⚠️ *Penting:* Mohon segera ubah password Anda setelah login demi keamanan akun.
-
-Terima kasih. 🙏
-
-_Pesan ini dikirim secara otomatis oleh sistem SIPERA._
-EOT;
-        }
-
-        return <<<EOT
-Halo *{$nama}*,
-
-Artikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya:
-
-📄 *Detail Submission*
-• Kode Submit: *{$kode}*
-• Judul Artikel: _{$judul}_
-• Jurnal: *{$namaJurnal}*
-• Link Submit: {$linkSubmit}
-
-🔐 *Akun OJS Author*
-• Username: `{$username}`
-• Password: `{$password}`
-
-Silakan login ke portal OJS menggunakan kredensial di atas untuk memantau perkembangan artikel Anda.
-
-⚠️ *Penting:* Mohon segera ubah password Anda setelah login pertama demi keamanan akun.
-
-Terima kasih telah mempercayakan publikasi artikel Anda kepada kami. 🙏
-
-_Pesan ini dikirim secara otomatis oleh sistem SIPERA._
-EOT;
+        return str_replace(
+            ['{nama}', '{kode}', '{judul}', '{namaJurnal}', '{linkSubmit}', '{username}', '{password}'],
+            [$nama, $kode, $judul, $namaJurnal, $linkSubmit, $username, $password],
+            $template
+        );
     }
 }

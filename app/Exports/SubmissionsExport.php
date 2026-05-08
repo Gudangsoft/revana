@@ -3,23 +3,30 @@
 namespace App\Exports;
 
 use App\Models\Submission;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
+class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithChunkReading
 {
     protected $filters;
+    protected int $rowNumber = 0;
 
     public function __construct($filters = [])
     {
         $this->filters = $filters;
     }
 
-    public function collection()
+    public function chunkSize(): int
+    {
+        return 500;
+    }
+
+    public function query()
     {
         $query = Submission::with([
             'journalSlot.journalMaster',
@@ -43,7 +50,7 @@ class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, Wi
         }
 
         if (!empty($this->filters['journal_master_id'])) {
-            $query->whereHas('journalSlot', function($q) {
+            $query->whereHas('journalSlot', function ($q) {
                 $q->where('journal_master_id', $this->filters['journal_master_id']);
             });
         }
@@ -52,7 +59,7 @@ class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, Wi
             $query->where('status', $this->filters['status']);
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        return $query->orderBy('created_at', 'desc');
     }
 
     public function headings(): array
@@ -74,36 +81,28 @@ class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Jurnal',
             'Slot',
             'Status',
-            // Editor 1
             'Petugas Editor 1',
             'Username Editor',
             'Password Editor',
             'Editor 1 Valid',
-            // Author 1
             'Petugas Author 1',
             'Author 1 Valid',
-            // Editor 2
             'Petugas Editor 2',
             'Editor 2 Valid',
-            // Reviewer 1
             'Petugas Reviewer 1',
             'Username Reviewer 1',
             'Password Reviewer 1',
             'Catatan Reviewer 1',
             'Reviewer 1 Valid',
-            // Reviewer 2
             'Petugas Reviewer 2',
             'Username Reviewer 2',
             'Password Reviewer 2',
             'Catatan Reviewer 2',
             'Reviewer 2 Valid',
-            // Editor 3
             'Petugas Editor 3',
             'Editor 3 Valid',
-            // Author 2
             'Petugas Author 2',
             'Author 2 Valid',
-            // Production
             'Petugas Production',
             'Link Publish',
             'Production Valid',
@@ -112,15 +111,23 @@ class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function map($submission): array
     {
-        static $rowNumber = 0;
-        $rowNumber++;
+        $this->rowNumber++;
 
-        $slotInfo = $submission->journalSlot 
+        $slotInfo = $submission->journalSlot
             ? "Vol. {$submission->journalSlot->volume} No. {$submission->journalSlot->nomor} - {$submission->journalSlot->bulan} {$submission->journalSlot->tahun}"
             : '-';
 
+        $tanggalSubmit = '-';
+        if ($submission->tanggal_submit) {
+            try {
+                $tanggalSubmit = \Carbon\Carbon::parse($submission->tanggal_submit)->format('d/m/Y');
+            } catch (\Exception $e) {
+                $tanggalSubmit = $submission->tanggal_submit;
+            }
+        }
+
         return [
-            $rowNumber,
+            $this->rowNumber,
             $submission->kode_submit ?? '-',
             $submission->kode_loa ?? '-',
             $submission->id_artikel ?? '-',
@@ -132,40 +139,32 @@ class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, Wi
             $submission->password_author ?? '-',
             $submission->pic_marketing ?? '-',
             $submission->petugasSubmit?->name ?? '-',
-            $submission->tanggal_submit?->format('d/m/Y') ?? '-',
+            $tanggalSubmit,
             $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-',
             $slotInfo,
             $submission->status_label ?? $submission->status,
-            // Editor 1
             $submission->petugasEditor1?->name ?? '-',
             $submission->username_editor ?? '-',
             $submission->password_editor ?? '-',
             $submission->editor1_valid ? 'Ya' : 'Tidak',
-            // Author 1
             $submission->petugasAuthor1?->name ?? '-',
             $submission->author1_valid ? 'Ya' : 'Tidak',
-            // Editor 2
             $submission->petugasEditor2?->name ?? '-',
             $submission->editor2_valid ? 'Ya' : 'Tidak',
-            // Reviewer 1
             $submission->petugasReviewer1?->name ?? '-',
             $submission->username_reviewer1 ?? '-',
             $submission->password_reviewer1 ?? '-',
             $submission->catatan_reviewer1 ?? '-',
             $submission->reviewer1_valid ? 'Ya' : 'Tidak',
-            // Reviewer 2
             $submission->petugasReviewer2?->name ?? '-',
             $submission->username_reviewer2 ?? '-',
             $submission->password_reviewer2 ?? '-',
             $submission->catatan_reviewer2 ?? '-',
             $submission->reviewer2_valid ? 'Ya' : 'Tidak',
-            // Editor 3
             $submission->petugasEditor3?->name ?? '-',
             $submission->editor3_valid ? 'Ya' : 'Tidak',
-            // Author 2
             $submission->petugasAuthor2?->name ?? '-',
             $submission->author2_valid ? 'Ya' : 'Tidak',
-            // Production
             $submission->petugasProduction?->name ?? '-',
             $submission->link_publish ?? '-',
             $submission->production_valid ? 'Ya' : 'Tidak',
@@ -191,22 +190,22 @@ class SubmissionsExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function columnWidths(): array
     {
         return [
-            'A' => 5,   // No
-            'B' => 15,  // Kode Submit
-            'C' => 18,  // Kode LOA
-            'D' => 18,  // ID Artikel
-            'E' => 40,  // Judul Artikel
-            'F' => 30,  // Link Artikel
-            'G' => 25,  // Nama Penulis
-            'H' => 15,  // No HP
-            'I' => 15,  // Username Author
-            'J' => 12,  // Password Author
-            'K' => 15,  // PIC Marketing
-            'L' => 20,  // Petugas Submit
-            'M' => 12,  // Tanggal Submit
-            'N' => 25,  // Jurnal
-            'O' => 25,  // Slot
-            'P' => 15,  // Status
+            'A' => 5,
+            'B' => 15,
+            'C' => 18,
+            'D' => 18,
+            'E' => 40,
+            'F' => 30,
+            'G' => 25,
+            'H' => 15,
+            'I' => 15,
+            'J' => 12,
+            'K' => 15,
+            'L' => 20,
+            'M' => 12,
+            'N' => 25,
+            'O' => 25,
+            'P' => 15,
         ];
     }
 }

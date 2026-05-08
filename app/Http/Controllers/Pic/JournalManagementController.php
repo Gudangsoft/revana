@@ -11,6 +11,7 @@ use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Models\Pic;
 use App\Models\PicPointHistory;
+use App\Models\Setting;
 use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -612,8 +613,6 @@ class JournalManagementController extends Controller
         $password = $submission->password_author ?? '-';
         $linkSubmit = $submission->link_artikel ?? '-';
 
-        // Load nama jurnal jika relasi belum di-load
-        $namaJurnal = '-';
         if ($submission->relationLoaded('journalSlot') && $submission->journalSlot) {
             $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
         } else {
@@ -621,29 +620,14 @@ class JournalManagementController extends Controller
             $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
         }
 
-        return <<<EOT
-Halo *{$nama}*,
+        $template = Setting::get('wa_template_credential_new')
+            ?: \App\Http\Controllers\Admin\SmsGatewayController::defaultCredentialNewTemplate();
 
-Artikel Anda telah berhasil disubmit ke sistem kami. Berikut detail informasinya:
-
-📄 *Detail Submission*
-• Kode Submit: *{$kode}*
-• Judul Artikel: _{$judul}_
-• Jurnal: *{$namaJurnal}*
-• Link Submit: {$linkSubmit}
-
-🔐 *Akun OJS Author*
-• Username: `{$username}`
-• Password: `{$password}`
-
-Silakan login ke portal OJS menggunakan kredensial di atas untuk memantau perkembangan artikel Anda.
-
-⚠️ *Penting:* Mohon segera ubah password Anda setelah login pertama demi keamanan akun.
-
-Terima kasih telah mempercayakan publikasi artikel Anda kepada kami. 🙏
-
-_Pesan ini dikirim secara otomatis oleh sistem SIPERA._
-EOT;
+        return str_replace(
+            ['{nama}', '{kode}', '{judul}', '{namaJurnal}', '{linkSubmit}', '{username}', '{password}'],
+            [$nama, $kode, $judul, $namaJurnal, $linkSubmit, $username, $password],
+            $template
+        );
     }
 
     public function submissionsShow(Submission $submission)
