@@ -97,9 +97,9 @@
                                 <div class="d-flex align-items-center gap-2 mt-1">
                                     @if(!empty($settings['fonnte_api_token']))
                                         <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Token tersimpan</span>
-                                        <small class="text-muted">Klik <i class="bi bi-eye"></i> untuk lihat</small>
+                                        <small class="text-muted">Kosongkan field ini hanya jika ingin mengganti token. Jika dibiarkan kosong, token lama tetap dipertahankan.</small>
                                     @else
-                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Belum diisi</span>
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Belum diisi — masukkan token lalu simpan</span>
                                     @endif
                                 </div>
                                 @error('fonnte_api_token')

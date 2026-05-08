@@ -122,6 +122,18 @@ class SmsGatewayController extends Controller
                 $validated[$field] = $request->input($field, '0');
             }
 
+            // Sensitive fields: jangan timpa nilai yang sudah ada jika field dikosongkan
+            // (terjadi saat form dibuka ulang — password field tampil kosong oleh browser)
+            $protectedFields = ['fonnte_api_token'];
+            foreach ($protectedFields as $field) {
+                if (empty($validated[$field])) {
+                    $existing = Setting::get($field);
+                    if (!empty($existing)) {
+                        unset($validated[$field]); // jangan timpa
+                    }
+                }
+            }
+
             // Save using Eloquent model (handles created_at/updated_at automatically)
             foreach ($validated as $key => $value) {
                 Setting::updateOrCreate(

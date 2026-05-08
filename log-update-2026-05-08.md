@@ -86,3 +86,12 @@
 - **File berubah:** 1 file
 - `log-update-2026-05-08.md`
 
+
+## 8. 🔄 Update: sms ger=tway update
+
+- **Commit:** `c776bc1` — 10:07 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `log-update-2026-05-08.md`
+- `resources/views/admin/sms-gateway/index.blade.php`
+
