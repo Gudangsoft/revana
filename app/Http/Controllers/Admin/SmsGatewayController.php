@@ -62,13 +62,16 @@ class SmsGatewayController extends Controller
         // Read all SMS/Fonnte settings from DB via Eloquent model (consistent with FonnteService)
         $dbSettings = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
 
-        // Auto-seed credential templates jika belum ada di DB
-        $credentialDefaults = [
+        // Auto-seed semua template jika belum ada atau kosong di DB
+        $templateDefaults = [
+            'sms_template_submit'           => "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_status_change'    => "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_published'        => "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
             'wa_template_credential_new'    => self::defaultCredentialNewTemplate(),
             'wa_template_credential_update' => self::defaultCredentialUpdateTemplate(),
         ];
-        foreach ($credentialDefaults as $key => $default) {
-            if (!array_key_exists($key, $dbSettings)) {
+        foreach ($templateDefaults as $key => $default) {
+            if (empty($dbSettings[$key])) {
                 Setting::updateOrCreate(['key' => $key], ['value' => $default]);
                 $dbSettings[$key] = $default;
             }
@@ -82,9 +85,9 @@ class SmsGatewayController extends Controller
             'sms_notification_status_change'=> $dbSettings['sms_notification_status_change'] ?? '0',
             'sms_notification_published'    => $dbSettings['sms_notification_published'] ?? '0',
             'sms_default_country_code'      => $dbSettings['sms_default_country_code'] ?? '62',
-            'sms_template_submit'           => $dbSettings['sms_template_submit'] ?? "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_status_change'    => $dbSettings['sms_template_status_change'] ?? "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_published'        => $dbSettings['sms_template_published'] ?? "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
+            'sms_template_submit'           => $dbSettings['sms_template_submit'],
+            'sms_template_status_change'    => $dbSettings['sms_template_status_change'],
+            'sms_template_published'        => $dbSettings['sms_template_published'],
             'wa_template_credential_new'    => $dbSettings['wa_template_credential_new'],
             'wa_template_credential_update' => $dbSettings['wa_template_credential_update'],
         ];

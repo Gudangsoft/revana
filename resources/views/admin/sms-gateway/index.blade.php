@@ -94,9 +94,16 @@
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
-                                <small class="form-text text-muted">Token API dari dashboard Fonnte Anda</small>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    @if(!empty($settings['fonnte_api_token']))
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Token tersimpan</span>
+                                        <small class="text-muted">Klik <i class="bi bi-eye"></i> untuk lihat</small>
+                                    @else
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Belum diisi</span>
+                                    @endif
+                                </div>
                                 @error('fonnte_api_token')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -108,7 +115,11 @@
                                        name="fonnte_device_id"
                                        value="{{ old('fonnte_device_id', $settings['fonnte_device_id'] ?? '') }}"
                                        placeholder="Opsional: ID Device di Fonnte">
-                                <small class="form-text text-muted">Opsional, untuk identifikasi device</small>
+                                @if(!empty($settings['fonnte_device_id']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan: <strong>{{ $settings['fonnte_device_id'] }}</strong></small>
+                                @else
+                                    <small class="text-muted">Opsional, untuk identifikasi device</small>
+                                @endif
                                 @error('fonnte_device_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -236,11 +247,19 @@
                                     </button>
                                 </div>
                             </div>
-                            <textarea class="form-control @error('sms_template_submit') is-invalid @enderror"
+                            <textarea class="form-control template-textarea @error('sms_template_submit') is-invalid @enderror"
                                       id="sms_template_submit"
                                       name="sms_template_submit"
                                       rows="5"
                                       placeholder="Template pesan saat artikel disubmit">{{ old('sms_template_submit', $settings['sms_template_submit'] ?? '') }}</textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                @if(!empty($settings['sms_template_submit']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['sms_template_submit']) }} karakter</small>
+                                @else
+                                    <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
+                                @endif
+                                <small class="text-muted char-counter" data-target="sms_template_submit"></small>
+                            </div>
                             @error('sms_template_submit')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -260,11 +279,19 @@
                                     </button>
                                 </div>
                             </div>
-                            <textarea class="form-control @error('sms_template_status_change') is-invalid @enderror"
+                            <textarea class="form-control template-textarea @error('sms_template_status_change') is-invalid @enderror"
                                       id="sms_template_status_change"
                                       name="sms_template_status_change"
                                       rows="5"
                                       placeholder="Template pesan saat status berubah">{{ old('sms_template_status_change', $settings['sms_template_status_change'] ?? '') }}</textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                @if(!empty($settings['sms_template_status_change']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['sms_template_status_change']) }} karakter</small>
+                                @else
+                                    <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
+                                @endif
+                                <small class="text-muted char-counter" data-target="sms_template_status_change"></small>
+                            </div>
                             @error('sms_template_status_change')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -284,11 +311,19 @@
                                     </button>
                                 </div>
                             </div>
-                            <textarea class="form-control @error('sms_template_published') is-invalid @enderror"
+                            <textarea class="form-control template-textarea @error('sms_template_published') is-invalid @enderror"
                                       id="sms_template_published"
                                       name="sms_template_published"
                                       rows="5"
                                       placeholder="Template pesan saat artikel terbit">{{ old('sms_template_published', $settings['sms_template_published'] ?? '') }}</textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                @if(!empty($settings['sms_template_published']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['sms_template_published']) }} karakter</small>
+                                @else
+                                    <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
+                                @endif
+                                <small class="text-muted char-counter" data-target="sms_template_published"></small>
+                            </div>
                             @error('sms_template_published')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -317,11 +352,19 @@
                                     </button>
                                 </div>
                             </div>
-                            <textarea class="form-control @error('wa_template_credential_new') is-invalid @enderror"
+                            <textarea class="form-control template-textarea @error('wa_template_credential_new') is-invalid @enderror"
                                       id="wa_template_credential_new"
                                       name="wa_template_credential_new"
                                       rows="10"
                                       placeholder="Template pesan WA saat submission baru dibuat">{{ old('wa_template_credential_new', $settings['wa_template_credential_new'] ?? '') }}</textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                @if(!empty($settings['wa_template_credential_new']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['wa_template_credential_new']) }} karakter</small>
+                                @else
+                                    <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
+                                @endif
+                                <small class="text-muted char-counter" data-target="wa_template_credential_new"></small>
+                            </div>
                             @error('wa_template_credential_new')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -341,11 +384,19 @@
                                     </button>
                                 </div>
                             </div>
-                            <textarea class="form-control @error('wa_template_credential_update') is-invalid @enderror"
+                            <textarea class="form-control template-textarea @error('wa_template_credential_update') is-invalid @enderror"
                                       id="wa_template_credential_update"
                                       name="wa_template_credential_update"
                                       rows="10"
                                       placeholder="Template pesan WA saat kredensial diperbarui">{{ old('wa_template_credential_update', $settings['wa_template_credential_update'] ?? '') }}</textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                @if(!empty($settings['wa_template_credential_update']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['wa_template_credential_update']) }} karakter</small>
+                                @else
+                                    <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
+                                @endif
+                                <small class="text-muted char-counter" data-target="wa_template_credential_update"></small>
+                            </div>
                             @error('wa_template_credential_update')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -493,6 +544,19 @@
             document.getElementById('toggleTokenIcon').classList.remove('bi-eye-slash');
             document.getElementById('toggleTokenIcon').classList.add('bi-eye');
         }
+    });
+
+    // Live character counter untuk semua textarea template
+    function updateCharCounter(textarea) {
+        const counter = document.querySelector('.char-counter[data-target="' + textarea.id + '"]');
+        if (counter) {
+            const len = textarea.value.length;
+            counter.textContent = len > 0 ? len + ' karakter' : '';
+        }
+    }
+    document.querySelectorAll('.template-textarea').forEach(function(ta) {
+        updateCharCounter(ta);
+        ta.addEventListener('input', function() { updateCharCounter(this); });
     });
 
     // Reset template ke default
