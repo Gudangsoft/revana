@@ -210,3 +210,10 @@ Dua masalah bersamaan:
 - `app/Http/Controllers/Admin/SmsGatewayController.php`
 - `log-update-2026-05-08.md`
 
+
+## 20. 🔄 Update: Fix SMS Gateway form kosong — session flash + Eloquent read
+
+- **Commit:** `d542f47` — 17:12 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-08.md`
+
