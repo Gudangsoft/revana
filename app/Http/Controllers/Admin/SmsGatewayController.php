@@ -85,8 +85,8 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Sumber 1: session flash (paling segar — dari save yang baru saja dilakukan)
-        $fromSession = session()->pull('sms_gw_just_saved', []);
+        // Sumber 1: session persisten (diperbarui setiap save, tidak dihapus saat baca)
+        $fromSession = session('sms_gw_settings', []);
 
         // Sumber 2: file lokal
         $fromFile = $this->readFromFile();
@@ -99,23 +99,22 @@ class SmsGatewayController extends Controller
             Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
         }
 
-        // Merge prioritas: DB → file override → session override (tertinggi = paling fresh)
-        $merged = $fromFile;
+        // Merge: session & file sebagai basis fallback, DB sebagai override (source of truth)
+        $merged = array_merge($fromSession, $fromFile);
         foreach ($db as $k => $v) {
             if ($v !== '' && $v !== null) {
                 $merged[$k] = $v;
             }
         }
-        foreach ($fromSession as $k => $v) {
-            if ($v !== '' && $v !== null) {
-                $merged[$k] = $v;
-            }
-        }
 
-        // Jika DB punya data yang lebih lengkap dari file, perbarui file
-        $dbNonEmpty = array_filter($db, fn($v) => $v !== '' && $v !== null);
-        if (count($dbNonEmpty) > count(array_filter($fromFile, fn($v) => $v !== '' && $v !== null))) {
-            $this->writeToFile(array_merge($fromFile, $dbNonEmpty));
+        // Perbarui session & file dari DB jika DB lebih lengkap
+        $mergedNonEmpty = array_filter($merged, fn($v) => $v !== '' && $v !== null);
+        if (!empty($mergedNonEmpty)) {
+            session()->put('sms_gw_settings', $merged);
+            $fileNonEmpty = array_filter($fromFile, fn($v) => $v !== '' && $v !== null);
+            if (count($mergedNonEmpty) > count($fileNonEmpty)) {
+                $this->writeToFile($merged);
+            }
         }
 
         $settings = [
@@ -192,9 +191,8 @@ class SmsGatewayController extends Controller
             }
             $this->writeToFile($fileData);
 
-            // Simpan ke session — dijamin tersedia di request berikutnya (setelah redirect)
-            // sehingga form pasti tampil berisi meskipun DB/file read bermasalah
-            session()->put('sms_gw_just_saved', $fileData);
+            // Perbarui session persisten — form selalu terisi meskipun DB/file read bermasalah
+            session()->put('sms_gw_settings', $fileData);
 
             // Cache juga diperbarui sebagai lapisan tambahan
             Cache::put('sms_gw_settings', $fileData, now()->addDays(30));
