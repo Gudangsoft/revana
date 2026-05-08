@@ -85,36 +85,28 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Sumber 1: session persisten (diperbarui setiap save, tidak dihapus saat baca)
+        // Baca semua sumber
+        $fromFile    = $this->readFromFile();
         $fromSession = session('sms_gw_settings', []);
-
-        // Sumber 2: file lokal
-        $fromFile = $this->readFromFile();
-
-        // Sumber 3: DB via Eloquent
         try {
-            $db = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
+            $fromDb = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
         } catch (\Exception $e) {
-            $db = [];
+            $fromDb = [];
             Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
         }
 
-        // Merge: session & file sebagai basis fallback, DB sebagai override (source of truth)
-        $merged = array_merge($fromSession, $fromFile);
-        foreach ($db as $k => $v) {
-            if ($v !== '' && $v !== null) {
-                $merged[$k] = $v;
-            }
+        // Merge prioritas: File < DB < Session (session = paling fresh dari browser ini)
+        $merged = $fromFile;
+        foreach ($fromDb as $k => $v) {
+            if ($v !== '' && $v !== null) $merged[$k] = $v;
+        }
+        foreach ($fromSession as $k => $v) {
+            if ($v !== '' && $v !== null) $merged[$k] = $v;
         }
 
-        // Perbarui session & file dari DB jika DB lebih lengkap
-        $mergedNonEmpty = array_filter($merged, fn($v) => $v !== '' && $v !== null);
-        if (!empty($mergedNonEmpty)) {
-            session()->put('sms_gw_settings', $merged);
-            $fileNonEmpty = array_filter($fromFile, fn($v) => $v !== '' && $v !== null);
-            if (count($mergedNonEmpty) > count($fileNonEmpty)) {
-                $this->writeToFile($merged);
-            }
+        // Sync: jika ada data baru dari DB/session, perbarui file
+        if (!empty(array_filter($merged, fn($v) => $v !== '' && $v !== null))) {
+            $this->writeToFile($merged);
         }
 
         $settings = [
