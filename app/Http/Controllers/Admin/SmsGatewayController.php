@@ -30,7 +30,10 @@ class SmsGatewayController extends Controller
 
     private function writeToFile(array $data): void
     {
-        file_put_contents($this->settingsFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $result = file_put_contents($this->settingsFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        if ($result === false) {
+            Log::warning('SMS Gateway: file_put_contents failed', ['path' => $this->settingsFile]);
+        }
     }
 
     /**
@@ -69,7 +72,11 @@ class SmsGatewayController extends Controller
 
     public function index()
     {
-        $this->ensureSettingsTableReady();
+        try {
+            $this->ensureSettingsTableReady();
+        } catch (\Exception $e) {
+            Log::warning('SMS Gateway: ensureSettingsTableReady failed', ['error' => $e->getMessage()]);
+        }
 
         $keys = [
             'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
@@ -81,9 +88,9 @@ class SmsGatewayController extends Controller
         // Baca dari file lokal (paling andal — selalu ada setelah pertama kali simpan)
         $fromFile = $this->readFromFile();
 
-        // Coba baca dari DB (bisa gagal di beberapa environment)
+        // Coba baca dari DB via Eloquent (lebih stabil dari raw DB::table)
         try {
-            $db = DB::table('settings')->useWritePdo()->whereIn('key', $keys)->pluck('value', 'key')->toArray();
+            $db = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
         } catch (\Exception $e) {
             $db = [];
             Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
@@ -153,8 +160,7 @@ class SmsGatewayController extends Controller
             $existingFile = $this->readFromFile();
             foreach ($protectedFields as $field) {
                 if (empty($validated[$field])) {
-                    $existing = DB::table('settings')->useWritePdo()->where('key', $field)->value('value')
-                        ?: ($existingFile[$field] ?? '');
+                    $existing = Setting::get($field) ?: ($existingFile[$field] ?? '');
                     if (!empty($existing)) {
                         unset($validated[$field]);
                     }
@@ -173,7 +179,7 @@ class SmsGatewayController extends Controller
             $fileData = array_merge($existingFile, $validated);
             foreach ($protectedFields as $field) {
                 if (!array_key_exists($field, $validated) && empty($fileData[$field])) {
-                    $fileData[$field] = DB::table('settings')->useWritePdo()->where('key', $field)->value('value') ?? '';
+                    $fileData[$field] = Setting::get($field) ?? '';
                 }
             }
             $this->writeToFile($fileData);

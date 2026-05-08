@@ -165,3 +165,32 @@ Tambah lapisan persistensi berbasis file (`storage/app/sms_gateway_settings.json
 - `app/Http/Controllers/Admin/SmsGatewayController.php`
 - `log-update-2026-05-08.md`
 
+
+## 16. 🔄 Update: up
+
+- **Commit:** `7af3f1d` — 10:54 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-08.md`
+
+
+## 17. Fix: Form SMS Gateway Masih Kosong Setelah Simpan (Round 2)
+
+**Tujuan:** Perbaiki form SMS Gateway yang tetap kosong setelah simpan meskipun sudah ada file-based fallback.
+
+### Akar Masalah
+Dua masalah bersamaan:
+1. `DB::table('settings')->useWritePdo()->whereIn()` di `index()` mengembalikan hasil kosong — `useWritePdo()` berperilaku tidak konsisten di beberapa setup MySQL production
+2. `file_put_contents()` gagal diam-diam (return `false` tanpa exception) — tidak terdeteksi karena tidak ada pengecekan return value
+3. `ensureSettingsTableReady()` di `index()` tanpa try-catch — jika DB error, halaman langsung 500 dan data file tidak terbaca
+
+### Solusi
+- Ganti `DB::table()->useWritePdo()->whereIn()` → `Setting::whereIn()->pluck()` di `index()` (Eloquent lebih stabil)
+- Ganti `DB::table()->useWritePdo()` → `Setting::get()` di semua tempat di `update()`
+- Tambah cek return value `file_put_contents` + logging di `writeToFile()`
+- Wrap `ensureSettingsTableReady()` di `index()` dengan try-catch agar tidak memblokir pembacaan data dari file
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SmsGatewayController.php` | Ganti `DB::table()->useWritePdo()` → Eloquent, tambah logging file write, wrap ensureSettingsTableReady |
+
