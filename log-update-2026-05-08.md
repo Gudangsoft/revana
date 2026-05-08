@@ -50,3 +50,17 @@
 | `app/Http/Controllers/Admin/SubmissionController.php` | `buildWhatsAppMessage()` baca dari DB, tambah `use Setting` |
 | `app/Http/Controllers/Pic/JournalManagementController.php` | `buildWhatsAppMessage()` baca dari DB, tambah `use Setting` |
 | `app/Http/Controllers/Marketing/DashboardController.php` | `buildWhatsAppMessage()` baca dari DB, tambah `use Setting` |
+
+## 4. 🔄 Update: update
+
+- **Commit:** `68dd06b` — 09:49 oleh Gudangsoft
+- **File berubah:** 8 file
+- `app/Exports/SubmissionsExport.php`
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-05-07.md`
+- `log-update-2026-05-08.md`
+- `resources/views/admin/sms-gateway/index.blade.php`
+
