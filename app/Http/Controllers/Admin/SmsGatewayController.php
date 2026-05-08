@@ -62,6 +62,18 @@ class SmsGatewayController extends Controller
         // Read all SMS/Fonnte settings from DB via Eloquent model (consistent with FonnteService)
         $dbSettings = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
 
+        // Auto-seed credential templates jika belum ada di DB
+        $credentialDefaults = [
+            'wa_template_credential_new'    => self::defaultCredentialNewTemplate(),
+            'wa_template_credential_update' => self::defaultCredentialUpdateTemplate(),
+        ];
+        foreach ($credentialDefaults as $key => $default) {
+            if (!array_key_exists($key, $dbSettings)) {
+                Setting::updateOrCreate(['key' => $key], ['value' => $default]);
+                $dbSettings[$key] = $default;
+            }
+        }
+
         $settings = [
             'fonnte_api_token'              => $dbSettings['fonnte_api_token'] ?? '',
             'fonnte_device_id'              => $dbSettings['fonnte_device_id'] ?? '',
@@ -73,8 +85,8 @@ class SmsGatewayController extends Controller
             'sms_template_submit'           => $dbSettings['sms_template_submit'] ?? "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
             'sms_template_status_change'    => $dbSettings['sms_template_status_change'] ?? "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
             'sms_template_published'        => $dbSettings['sms_template_published'] ?? "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
-            'wa_template_credential_new'    => $dbSettings['wa_template_credential_new'] ?? self::defaultCredentialNewTemplate(),
-            'wa_template_credential_update' => $dbSettings['wa_template_credential_update'] ?? self::defaultCredentialUpdateTemplate(),
+            'wa_template_credential_new'    => $dbSettings['wa_template_credential_new'],
+            'wa_template_credential_update' => $dbSettings['wa_template_credential_update'],
         ];
 
         return view('admin.sms-gateway.index', compact('settings'));
