@@ -59,8 +59,8 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Read from DB — single query
-        $db = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
+        // Paksa baca dari write connection (master) — bypass read replica lag
+        $db = DB::table('settings')->useWritePdo()->whereIn('key', $keys)->pluck('value', 'key')->toArray();
 
         // Fallback ke session cache jika DB read kosong/tidak lengkap
         // (terjadi saat read replica lag, koneksi berbeda, atau cache DB belum sync)
@@ -128,9 +128,9 @@ class SmsGatewayController extends Controller
             $protectedFields = ['fonnte_api_token'];
             foreach ($protectedFields as $field) {
                 if (empty($validated[$field])) {
-                    $existing = Setting::get($field);
+                    $existing = DB::table('settings')->useWritePdo()->where('key', $field)->value('value');
                     if (!empty($existing)) {
-                        unset($validated[$field]); // jangan timpa
+                        unset($validated[$field]);
                     }
                 }
             }
@@ -147,7 +147,7 @@ class SmsGatewayController extends Controller
             $sessionData = $validated;
             foreach ($protectedFields as $field) {
                 if (!isset($sessionData[$field])) {
-                    $sessionData[$field] = Setting::get($field, '');
+                    $sessionData[$field] = DB::table('settings')->useWritePdo()->where('key', $field)->value('value') ?? '';
                 }
             }
             // Simpan ke session permanen — bertahan saat navigasi keluar-masuk halaman

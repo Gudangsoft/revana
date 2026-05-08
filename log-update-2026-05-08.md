@@ -121,3 +121,11 @@
 - `log-update-2026-05-08.md`
 - `resources/views/admin/sms-gateway/index.blade.php`
 
+
+## 12. 🔄 Update: update
+
+- **Commit:** `1334ab9` — 10:39 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `log-update-2026-05-08.md`
+
