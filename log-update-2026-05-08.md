@@ -157,3 +157,11 @@ Tambah lapisan persistensi berbasis file (`storage/app/sms_gateway_settings.json
 |------|-----------|
 | `app/Http/Controllers/Admin/SmsGatewayController.php` | Tambah `readFromFile()`, `writeToFile()`, `$settingsFile`; update `index()` dan `update()` |
 
+
+## 15. 🔄 Update: Fix form SMS Gateway selalu kosong setelah simpan
+
+- **Commit:** `b60730e` — 10:51 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `log-update-2026-05-08.md`
+
