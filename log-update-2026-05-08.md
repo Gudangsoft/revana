@@ -238,3 +238,24 @@ Dua masalah bersamaan:
 - **File berubah:** 1 file
 - `log-update-2026-05-08.md`
 
+
+## 24. 🔄 Update: Fix SMS Gateway: session persisten + merge strategy tiga lapisan
+
+- **Commit:** `0b8920a` — 17:21 oleh Gudangsoft
+- **File berubah:** 1 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+
+
+## 25. 🔄 Update: Fix merge order: session > DB > file, sync file on every load
+
+- **Commit:** `75de9c1` — 17:30 oleh Gudangsoft
+- **File berubah:** 1 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+
+
+## 26. 🔄 Update: Fix SMS Gateway: render view langsung setelah save, tidak redirect
+
+- **Commit:** `72d0e79` — 17:32 oleh Gudangsoft
+- **File berubah:** 1 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+
