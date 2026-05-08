@@ -80,26 +80,23 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label for="fonnte_api_token" class="form-label">API Token <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="password"
-                                           class="form-control @error('fonnte_api_token') is-invalid @enderror"
+                                    <div class="input-group">
+                                    <input type="text"
+                                           class="form-control font-monospace @error('fonnte_api_token') is-invalid @enderror"
                                            id="fonnte_api_token"
                                            name="fonnte_api_token"
                                            value="{{ old('fonnte_api_token', $settings['fonnte_api_token'] ?? '') }}"
-                                           placeholder="Masukkan API Token dari Fonnte">
-                                    <button class="btn btn-outline-secondary" type="button" id="toggleToken">
-                                        <i class="bi bi-eye" id="toggleTokenIcon"></i>
-                                    </button>
+                                           placeholder="Masukkan API Token dari Fonnte"
+                                           autocomplete="off">
                                     <button class="btn btn-outline-danger" type="button" id="clearToken" title="Hapus token">
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 mt-1">
+                                <div class="mt-1">
                                     @if(!empty($settings['fonnte_api_token']))
-                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Token tersimpan</span>
-                                        <small class="text-muted">Kosongkan field ini hanya jika ingin mengganti token. Jika dibiarkan kosong, token lama tetap dipertahankan.</small>
+                                        <small class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Token terisi &mdash; {{ strlen($settings['fonnte_api_token']) }} karakter. Biarkan kosong saat simpan jika tidak ingin mengganti.</small>
                                     @else
-                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Belum diisi — masukkan token lalu simpan</span>
+                                        <small class="text-danger"><i class="bi bi-x-circle me-1"></i>Belum diisi &mdash; masukkan API Token dari dashboard Fonnte lalu simpan.</small>
                                     @endif
                                 </div>
                                 @error('fonnte_api_token')
@@ -159,13 +156,16 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       id="sms_gateway_enabled" name="sms_gateway_enabled" value="1"
-                                       {{ (old('sms_gateway_enabled', $settings['sms_gateway_enabled'] ?? '0')) == '1' ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold" for="sms_gateway_enabled">
-                                    <i class="bi bi-power text-success me-1"></i>Aktifkan SMS Gateway
-                                </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input toggle-setting" type="checkbox" role="switch"
+                                           id="sms_gateway_enabled" name="sms_gateway_enabled" value="1"
+                                           {{ (old('sms_gateway_enabled', $settings['sms_gateway_enabled'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold" for="sms_gateway_enabled">
+                                        <i class="bi bi-power text-success me-1"></i>Aktifkan SMS Gateway
+                                    </label>
+                                </div>
+                                <span class="toggle-badge" data-for="sms_gateway_enabled"></span>
                             </div>
                             <small class="text-muted ms-5">Aktifkan untuk mengirim notifikasi WhatsApp otomatis</small>
                         </div>
@@ -173,37 +173,46 @@
                         <hr>
 
                         <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       id="sms_notification_submit" name="sms_notification_submit" value="1"
-                                       {{ (old('sms_notification_submit', $settings['sms_notification_submit'] ?? '0')) == '1' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="sms_notification_submit">
-                                    <i class="bi bi-file-earmark-plus text-info me-1"></i>Notifikasi Submit Artikel
-                                </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input toggle-setting" type="checkbox" role="switch"
+                                           id="sms_notification_submit" name="sms_notification_submit" value="1"
+                                           {{ (old('sms_notification_submit', $settings['sms_notification_submit'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sms_notification_submit">
+                                        <i class="bi bi-file-earmark-plus text-info me-1"></i>Notifikasi Submit Artikel
+                                    </label>
+                                </div>
+                                <span class="toggle-badge" data-for="sms_notification_submit"></span>
                             </div>
                             <small class="text-muted ms-5">Kirim WhatsApp saat artikel baru disubmit</small>
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       id="sms_notification_status_change" name="sms_notification_status_change" value="1"
-                                       {{ (old('sms_notification_status_change', $settings['sms_notification_status_change'] ?? '0')) == '1' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="sms_notification_status_change">
-                                    <i class="bi bi-arrow-repeat text-warning me-1"></i>Notifikasi Perubahan Status
-                                </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input toggle-setting" type="checkbox" role="switch"
+                                           id="sms_notification_status_change" name="sms_notification_status_change" value="1"
+                                           {{ (old('sms_notification_status_change', $settings['sms_notification_status_change'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sms_notification_status_change">
+                                        <i class="bi bi-arrow-repeat text-warning me-1"></i>Notifikasi Perubahan Status
+                                    </label>
+                                </div>
+                                <span class="toggle-badge" data-for="sms_notification_status_change"></span>
                             </div>
                             <small class="text-muted ms-5">Kirim WhatsApp saat status artikel berubah</small>
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       id="sms_notification_published" name="sms_notification_published" value="1"
-                                       {{ (old('sms_notification_published', $settings['sms_notification_published'] ?? '0')) == '1' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="sms_notification_published">
-                                    <i class="bi bi-check-circle text-success me-1"></i>Notifikasi Artikel Terbit
-                                </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input toggle-setting" type="checkbox" role="switch"
+                                           id="sms_notification_published" name="sms_notification_published" value="1"
+                                           {{ (old('sms_notification_published', $settings['sms_notification_published'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sms_notification_published">
+                                        <i class="bi bi-check-circle text-success me-1"></i>Notifikasi Artikel Terbit
+                                    </label>
+                                </div>
+                                <span class="toggle-badge" data-for="sms_notification_published"></span>
                             </div>
                             <small class="text-muted ms-5">Kirim WhatsApp saat artikel berhasil terbit/published</small>
                         </div>
@@ -520,43 +529,50 @@
 
 @push('scripts')
 <script>
-    // Toggle token visibility
-    document.getElementById('toggleToken').addEventListener('click', function() {
-        const tokenInput = document.getElementById('fonnte_api_token');
-        const icon = document.getElementById('toggleTokenIcon');
-
-        if (tokenInput.type === 'password') {
-            tokenInput.type = 'text';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        } else {
-            tokenInput.type = 'password';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        }
-    });
-
     // Hapus / clear API token
     document.getElementById('clearToken').addEventListener('click', function() {
         if (confirm('Hapus API Token? Gateway tidak akan berfungsi sampai token baru diisi dan disimpan.')) {
             document.getElementById('fonnte_api_token').value = '';
-            document.getElementById('fonnte_api_token').type = 'text';
-            document.getElementById('toggleTokenIcon').classList.remove('bi-eye-slash');
-            document.getElementById('toggleTokenIcon').classList.add('bi-eye');
         }
     });
 
-    // Live character counter untuk semua textarea template
-    function updateCharCounter(textarea) {
+    // Toggle badge: tampilkan "Aktif" / "Tidak Aktif" di samping setiap switch
+    function updateToggleBadge(checkbox) {
+        const badge = document.querySelector('.toggle-badge[data-for="' + checkbox.id + '"]');
+        if (!badge) return;
+        if (checkbox.checked) {
+            badge.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Aktif</span>';
+        } else {
+            badge.innerHTML = '<span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i>Tidak Aktif</span>';
+        }
+    }
+    document.querySelectorAll('.toggle-setting').forEach(function(cb) {
+        updateToggleBadge(cb);
+        cb.addEventListener('change', function() { updateToggleBadge(this); });
+    });
+
+    // Live character counter + status badge untuk semua textarea template
+    function updateTemplateStatus(textarea) {
         const counter = document.querySelector('.char-counter[data-target="' + textarea.id + '"]');
-        if (counter) {
-            const len = textarea.value.length;
-            counter.textContent = len > 0 ? len + ' karakter' : '';
+        if (!counter) return;
+        const len = textarea.value.trim().length;
+        // Update char counter (kanan)
+        counter.textContent = len > 0 ? textarea.value.length + ' karakter' : '';
+        // Update status badge (kiri — sibling pertama dalam div yang sama)
+        const statusEl = counter.parentElement.querySelector('small:first-child');
+        if (statusEl) {
+            if (len > 0) {
+                statusEl.className = 'text-success';
+                statusEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Aktif &mdash; ' + textarea.value.length + ' karakter';
+            } else {
+                statusEl.className = 'text-danger';
+                statusEl.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Kosong &mdash; template belum diisi';
+            }
         }
     }
     document.querySelectorAll('.template-textarea').forEach(function(ta) {
-        updateCharCounter(ta);
-        ta.addEventListener('input', function() { updateCharCounter(this); });
+        updateTemplateStatus(ta);
+        ta.addEventListener('input', function() { updateTemplateStatus(this); });
     });
 
     // Reset template ke default
