@@ -109,22 +109,27 @@ class SmsGatewayController extends Controller
             $this->writeToFile($merged);
         }
 
-        $settings = [
-            'fonnte_api_token'              => $merged['fonnte_api_token'] ?? '',
-            'fonnte_device_id'              => $merged['fonnte_device_id'] ?? '',
-            'sms_gateway_enabled'           => $merged['sms_gateway_enabled'] ?? '0',
-            'sms_notification_submit'       => $merged['sms_notification_submit'] ?? '0',
-            'sms_notification_status_change'=> $merged['sms_notification_status_change'] ?? '0',
-            'sms_notification_published'    => $merged['sms_notification_published'] ?? '0',
-            'sms_default_country_code'      => $merged['sms_default_country_code'] ?? '62',
-            'sms_template_submit'           => ($merged['sms_template_submit'] ?? '') ?: "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_status_change'    => ($merged['sms_template_status_change'] ?? '') ?: "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_published'        => ($merged['sms_template_published'] ?? '') ?: "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
-            'wa_template_credential_new'    => ($merged['wa_template_credential_new'] ?? '') ?: self::defaultCredentialNewTemplate(),
-            'wa_template_credential_update' => ($merged['wa_template_credential_update'] ?? '') ?: self::defaultCredentialUpdateTemplate(),
-        ];
+        $settings = $this->buildSettings($merged);
 
         return view('admin.sms-gateway.index', compact('settings'));
+    }
+
+    private function buildSettings(array $data): array
+    {
+        return [
+            'fonnte_api_token'               => $data['fonnte_api_token'] ?? '',
+            'fonnte_device_id'               => $data['fonnte_device_id'] ?? '',
+            'sms_gateway_enabled'            => $data['sms_gateway_enabled'] ?? '0',
+            'sms_notification_submit'        => $data['sms_notification_submit'] ?? '0',
+            'sms_notification_status_change' => $data['sms_notification_status_change'] ?? '0',
+            'sms_notification_published'     => $data['sms_notification_published'] ?? '0',
+            'sms_default_country_code'       => $data['sms_default_country_code'] ?? '62',
+            'sms_template_submit'            => ($data['sms_template_submit'] ?? '') ?: "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_status_change'     => ($data['sms_template_status_change'] ?? '') ?: "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_published'         => ($data['sms_template_published'] ?? '') ?: "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
+            'wa_template_credential_new'     => ($data['wa_template_credential_new'] ?? '') ?: self::defaultCredentialNewTemplate(),
+            'wa_template_credential_update'  => ($data['wa_template_credential_update'] ?? '') ?: self::defaultCredentialUpdateTemplate(),
+        ];
     }
 
     public function update(Request $request)
@@ -182,17 +187,17 @@ class SmsGatewayController extends Controller
                 }
             }
             $this->writeToFile($fileData);
-
-            // Perbarui session persisten — form selalu terisi meskipun DB/file read bermasalah
             session()->put('sms_gw_settings', $fileData);
-
-            // Cache juga diperbarui sebagai lapisan tambahan
             Cache::put('sms_gw_settings', $fileData, now()->addDays(30));
 
             Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
 
-            return redirect()->route('admin.sms-gateway.index')
-                ->with('success', 'Pengaturan SMS Gateway berhasil disimpan!');
+            // Render view langsung dengan data yang baru disimpan (tidak redirect)
+            // → form pasti tampil terisi tanpa bergantung pada DB/session read
+            $settings = $this->buildSettings($fileData);
+            session()->now('success', 'Pengaturan SMS Gateway berhasil disimpan!');
+            return view('admin.sms-gateway.index', compact('settings'));
+
         } catch (\Exception $e) {
             Log::error('SMS Gateway Settings save error', [
                 'error' => $e->getMessage(),
