@@ -59,11 +59,25 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Read all settings from DB — single query
+        // Read from DB — single query
         $db = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
 
-        // Default template fallbacks (display only, tidak menulis ke DB di sini
-        // agar tidak overwrite data user saat ada read lag setelah save)
+        // Fallback ke session cache jika DB read kosong/tidak lengkap
+        // (terjadi saat read replica lag, koneksi berbeda, atau cache DB belum sync)
+        $cache = session('sms_gw_cache', []);
+        foreach ($keys as $k) {
+            if (empty($db[$k]) && !empty($cache[$k])) {
+                $db[$k] = $cache[$k];
+            }
+        }
+
+        // Jika DB read berhasil (ada data), perbarui session cache
+        $dbHasData = count(array_filter($db, fn($v) => $v !== '' && $v !== null)) >= 3;
+        if ($dbHasData) {
+            session(['sms_gw_cache' => array_merge($cache, $db)]);
+        }
+
+        // Default template fallbacks (display only, tidak menulis ke DB di sini)
         $settings = [
             'fonnte_api_token'              => $db['fonnte_api_token'] ?? '',
             'fonnte_device_id'              => $db['fonnte_device_id'] ?? '',
@@ -129,15 +143,19 @@ class SmsGatewayController extends Controller
                 );
             }
 
-            Log::info('SMS Gateway Settings saved', [
-                'keys_saved' => array_keys($validated),
-                'sms_gateway_enabled' => $validated['sms_gateway_enabled'],
-            ]);
+            // Bangun data lengkap untuk session cache (termasuk protected field yang tidak masuk $validated)
+            $sessionData = $validated;
+            foreach ($protectedFields as $field) {
+                if (!isset($sessionData[$field])) {
+                    $sessionData[$field] = Setting::get($field, '');
+                }
+            }
+            // Simpan ke session permanen — bertahan saat navigasi keluar-masuk halaman
+            session(['sms_gw_cache' => $sessionData]);
 
-            // withInput() memastikan form menampilkan nilai yang baru disimpan
-            // tanpa bergantung pada DB read (menghindari issue read replica / connection lag)
+            Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
+
             return redirect()->route('admin.sms-gateway.index')
-                ->withInput($request->except([]))
                 ->with('success', 'Pengaturan SMS Gateway berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error('SMS Gateway Settings save error', [
