@@ -129,3 +129,31 @@
 - `app/Http/Controllers/Admin/SmsGatewayController.php`
 - `log-update-2026-05-08.md`
 
+
+## 13. 🔄 Update: update sms gertway
+
+- **Commit:** `0fd6d10` — 10:42 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `log-update-2026-05-08.md`
+
+
+## 14. Fix: Form SMS Gateway Selalu Kosong Setelah Simpan
+
+**Tujuan:** Memastikan form SMS Gateway selalu menampilkan nilai yang tersimpan, tidak kosong saat halaman dibuka kembali setelah simpan.
+
+### Akar Masalah
+`DB::table('settings')->whereIn()` secara konsisten mengembalikan hasil kosong di production environment, meskipun `Setting::updateOrCreate()` berhasil menyimpan (terbukti dari pesan sukses). Hal ini disebabkan oleh kemungkinan replica lag, query cache, atau konfigurasi koneksi di server production yang berbeda dari local.
+
+### Solusi
+Tambah lapisan persistensi berbasis file (`storage/app/sms_gateway_settings.json`) yang sepenuhnya independen dari DB dan Cache driver:
+- `writeToFile()` menulis JSON ke `storage/app/sms_gateway_settings.json` setiap kali settings disimpan
+- `readFromFile()` membaca file tersebut sebagai sumber data **utama** di `index()`
+- DB tetap digunakan sebagai override jika berhasil dibaca (DB = source of truth)
+- Protected field (`fonnte_api_token`) kini di-fallback ke file jika DB read gagal
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SmsGatewayController.php` | Tambah `readFromFile()`, `writeToFile()`, `$settingsFile`; update `index()` dan `update()` |
+

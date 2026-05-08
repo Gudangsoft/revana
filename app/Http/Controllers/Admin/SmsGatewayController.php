@@ -7,12 +7,32 @@ use App\Models\Setting;
 use App\Services\FonnteService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class SmsGatewayController extends Controller
 {
+    private string $settingsFile;
+
+    public function __construct()
+    {
+        $this->settingsFile = storage_path('app/sms_gateway_settings.json');
+    }
+
+    private function readFromFile(): array
+    {
+        if (!file_exists($this->settingsFile)) return [];
+        $data = json_decode(file_get_contents($this->settingsFile), true);
+        return is_array($data) ? $data : [];
+    }
+
+    private function writeToFile(array $data): void
+    {
+        file_put_contents($this->settingsFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
+
     /**
      * Ensure the settings table has the required key/value columns
      */
@@ -49,7 +69,6 @@ class SmsGatewayController extends Controller
 
     public function index()
     {
-        // Ensure database table is ready
         $this->ensureSettingsTableReady();
 
         $keys = [
@@ -59,38 +78,44 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Paksa baca dari write connection (master) — bypass read replica lag
-        $db = DB::table('settings')->useWritePdo()->whereIn('key', $keys)->pluck('value', 'key')->toArray();
+        // Baca dari file lokal (paling andal — selalu ada setelah pertama kali simpan)
+        $fromFile = $this->readFromFile();
 
-        // Fallback ke session cache jika DB read kosong/tidak lengkap
-        // (terjadi saat read replica lag, koneksi berbeda, atau cache DB belum sync)
-        $cache = session('sms_gw_cache', []);
-        foreach ($keys as $k) {
-            if (empty($db[$k]) && !empty($cache[$k])) {
-                $db[$k] = $cache[$k];
+        // Coba baca dari DB (bisa gagal di beberapa environment)
+        try {
+            $db = DB::table('settings')->useWritePdo()->whereIn('key', $keys)->pluck('value', 'key')->toArray();
+        } catch (\Exception $e) {
+            $db = [];
+            Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
+        }
+
+        // Merge: file jadi basis, DB override untuk nilai non-kosong
+        $merged = $fromFile;
+        foreach ($db as $k => $v) {
+            if ($v !== '' && $v !== null) {
+                $merged[$k] = $v;
             }
         }
 
-        // Jika DB read berhasil (ada data), perbarui session cache
-        $dbHasData = count(array_filter($db, fn($v) => $v !== '' && $v !== null)) >= 3;
-        if ($dbHasData) {
-            session(['sms_gw_cache' => array_merge($cache, $db)]);
+        // Jika DB punya data yang lebih lengkap dari file, perbarui file
+        $dbNonEmpty = array_filter($db, fn($v) => $v !== '' && $v !== null);
+        if (count($dbNonEmpty) > count(array_filter($fromFile, fn($v) => $v !== '' && $v !== null))) {
+            $this->writeToFile(array_merge($fromFile, $dbNonEmpty));
         }
 
-        // Default template fallbacks (display only, tidak menulis ke DB di sini)
         $settings = [
-            'fonnte_api_token'              => $db['fonnte_api_token'] ?? '',
-            'fonnte_device_id'              => $db['fonnte_device_id'] ?? '',
-            'sms_gateway_enabled'           => $db['sms_gateway_enabled'] ?? '0',
-            'sms_notification_submit'       => $db['sms_notification_submit'] ?? '0',
-            'sms_notification_status_change'=> $db['sms_notification_status_change'] ?? '0',
-            'sms_notification_published'    => $db['sms_notification_published'] ?? '0',
-            'sms_default_country_code'      => $db['sms_default_country_code'] ?? '62',
-            'sms_template_submit'           => ($db['sms_template_submit'] ?? '') ?: "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_status_change'    => ($db['sms_template_status_change'] ?? '') ?: "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
-            'sms_template_published'        => ($db['sms_template_published'] ?? '') ?: "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
-            'wa_template_credential_new'    => ($db['wa_template_credential_new'] ?? '') ?: self::defaultCredentialNewTemplate(),
-            'wa_template_credential_update' => ($db['wa_template_credential_update'] ?? '') ?: self::defaultCredentialUpdateTemplate(),
+            'fonnte_api_token'              => $merged['fonnte_api_token'] ?? '',
+            'fonnte_device_id'              => $merged['fonnte_device_id'] ?? '',
+            'sms_gateway_enabled'           => $merged['sms_gateway_enabled'] ?? '0',
+            'sms_notification_submit'       => $merged['sms_notification_submit'] ?? '0',
+            'sms_notification_status_change'=> $merged['sms_notification_status_change'] ?? '0',
+            'sms_notification_published'    => $merged['sms_notification_published'] ?? '0',
+            'sms_default_country_code'      => $merged['sms_default_country_code'] ?? '62',
+            'sms_template_submit'           => ($merged['sms_template_submit'] ?? '') ?: "Halo {nama_penulis},\n\nArtikel Anda \"{judul_artikel}\" telah berhasil disubmit dengan kode: {kode_submit}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_status_change'    => ($merged['sms_template_status_change'] ?? '') ?: "Halo {nama_penulis},\n\nStatus artikel \"{judul_artikel}\" ({kode_submit}) telah diupdate menjadi: {status}.\n\nTerima kasih,\n{app_name}",
+            'sms_template_published'        => ($merged['sms_template_published'] ?? '') ?: "Halo {nama_penulis},\n\nSelamat! Artikel \"{judul_artikel}\" ({kode_submit}) telah berhasil dipublikasikan.\n\nLink: {link_publish}\n\nTerima kasih,\n{app_name}",
+            'wa_template_credential_new'    => ($merged['wa_template_credential_new'] ?? '') ?: self::defaultCredentialNewTemplate(),
+            'wa_template_credential_update' => ($merged['wa_template_credential_update'] ?? '') ?: self::defaultCredentialUpdateTemplate(),
         ];
 
         return view('admin.sms-gateway.index', compact('settings'));
@@ -124,11 +149,12 @@ class SmsGatewayController extends Controller
             }
 
             // Sensitive fields: jangan timpa nilai yang sudah ada jika field dikosongkan
-            // (terjadi saat form dibuka ulang — password field tampil kosong oleh browser)
             $protectedFields = ['fonnte_api_token'];
+            $existingFile = $this->readFromFile();
             foreach ($protectedFields as $field) {
                 if (empty($validated[$field])) {
-                    $existing = DB::table('settings')->useWritePdo()->where('key', $field)->value('value');
+                    $existing = DB::table('settings')->useWritePdo()->where('key', $field)->value('value')
+                        ?: ($existingFile[$field] ?? '');
                     if (!empty($existing)) {
                         unset($validated[$field]);
                     }
@@ -143,15 +169,17 @@ class SmsGatewayController extends Controller
                 );
             }
 
-            // Bangun data lengkap untuk session cache (termasuk protected field yang tidak masuk $validated)
-            $sessionData = $validated;
+            // Tulis ke file lokal — fallback paling andal saat DB read bermasalah
+            $fileData = array_merge($existingFile, $validated);
             foreach ($protectedFields as $field) {
-                if (!isset($sessionData[$field])) {
-                    $sessionData[$field] = DB::table('settings')->useWritePdo()->where('key', $field)->value('value') ?? '';
+                if (!array_key_exists($field, $validated) && empty($fileData[$field])) {
+                    $fileData[$field] = DB::table('settings')->useWritePdo()->where('key', $field)->value('value') ?? '';
                 }
             }
-            // Simpan ke session permanen — bertahan saat navigasi keluar-masuk halaman
-            session(['sms_gw_cache' => $sessionData]);
+            $this->writeToFile($fileData);
+
+            // Cache juga diperbarui sebagai lapisan tambahan
+            Cache::put('sms_gw_settings', $fileData, now()->addDays(30));
 
             Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
 
