@@ -192,5 +192,13 @@ Dua masalah bersamaan:
 ### File yang Diubah
 | File | Perubahan |
 |------|-----------|
-| `app/Http/Controllers/Admin/SmsGatewayController.php` | Ganti `DB::table()->useWritePdo()` → Eloquent, tambah logging file write, wrap ensureSettingsTableReady |
+| `app/Http/Controllers/Admin/SmsGatewayController.php` | Ganti `DB::table()->useWritePdo()` → Eloquent, tambah session flash `sms_gw_just_saved`, tambah logging file write, wrap ensureSettingsTableReady |
+
+
+## 18. 🔄 Update: update sms getway
+
+- **Commit:** `b6a7923` — 17:04 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `log-update-2026-05-08.md`
 

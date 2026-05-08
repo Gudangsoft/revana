@@ -85,10 +85,13 @@ class SmsGatewayController extends Controller
             'wa_template_credential_new', 'wa_template_credential_update',
         ];
 
-        // Baca dari file lokal (paling andal — selalu ada setelah pertama kali simpan)
+        // Sumber 1: session flash (paling segar — dari save yang baru saja dilakukan)
+        $fromSession = session()->pull('sms_gw_just_saved', []);
+
+        // Sumber 2: file lokal
         $fromFile = $this->readFromFile();
 
-        // Coba baca dari DB via Eloquent (lebih stabil dari raw DB::table)
+        // Sumber 3: DB via Eloquent
         try {
             $db = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
         } catch (\Exception $e) {
@@ -96,9 +99,14 @@ class SmsGatewayController extends Controller
             Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
         }
 
-        // Merge: file jadi basis, DB override untuk nilai non-kosong
+        // Merge prioritas: DB → file override → session override (tertinggi = paling fresh)
         $merged = $fromFile;
         foreach ($db as $k => $v) {
+            if ($v !== '' && $v !== null) {
+                $merged[$k] = $v;
+            }
+        }
+        foreach ($fromSession as $k => $v) {
             if ($v !== '' && $v !== null) {
                 $merged[$k] = $v;
             }
@@ -183,6 +191,10 @@ class SmsGatewayController extends Controller
                 }
             }
             $this->writeToFile($fileData);
+
+            // Simpan ke session — dijamin tersedia di request berikutnya (setelah redirect)
+            // sehingga form pasti tampil berisi meskipun DB/file read bermasalah
+            session()->put('sms_gw_just_saved', $fileData);
 
             // Cache juga diperbarui sebagai lapisan tambahan
             Cache::put('sms_gw_settings', $fileData, now()->addDays(30));
