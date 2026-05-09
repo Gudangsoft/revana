@@ -420,6 +420,7 @@ class JournalManagementController extends Controller
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
             'program_type' => ['nullable', \Illuminate\Validation\Rule::in(['bkd', 'jafa'])],
+            'link_publish' => 'nullable|url|max:500',
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -449,19 +450,27 @@ class JournalManagementController extends Controller
             $validated['file_artikel'] = $filename;
         }
 
-        $validated['status'] = 'submitted';
+        // BKD dengan link_publish → langsung PUBLISHED, skip proses review
+        $isBkdPublish = ($validated['program_type'] ?? null) === 'bkd' && !empty($validated['link_publish']);
+        $validated['status'] = $isBkdPublish ? 'PUBLISHED' : 'submitted';
         $validated['tanggal_submit'] = now();
-        
+
         // Get admin user for created_by (foreign key constraint requires users table ID)
         $adminUser = \App\Models\User::orderBy('id')->first();
         if (!$adminUser) {
             return back()->with('error', 'Error: Admin user tidak ditemukan. Hubungi administrator.')->withInput();
         }
         $validated['created_by'] = $adminUser->id;
-        
+
         // Set petugas_submit_id to current PIC if not provided
         if (!isset($validated['petugas_submit_id'])) {
             $validated['petugas_submit_id'] = auth()->guard('pic')->id();
+        }
+
+        // BKD langsung publish: auto-assign production dan mark valid
+        if ($isBkdPublish) {
+            $validated['petugas_production_id'] = auth()->guard('pic')->id();
+            $validated['production_valid'] = true;
         }
 
         // Wrap dalam database transaction dengan generate kode_submit di dalam transaction

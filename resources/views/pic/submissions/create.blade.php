@@ -131,6 +131,23 @@
                         </div>
                     </div>
 
+                    @if(request('program') === 'bkd')
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="link_publish" class="form-label">
+                                    Link Publish <span class="badge bg-success ms-1">Opsional — Langsung PUBLISHED</span>
+                                </label>
+                                <input type="url" class="form-control @error('link_publish') is-invalid @enderror" id="link_publish" name="link_publish" value="{{ old('link_publish') }}" placeholder="https://... (isi jika artikel sudah terbit)">
+                                @error('link_publish')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted"><i class="bi bi-info-circle"></i> Jika diisi, status submission akan langsung menjadi <strong>PUBLISHED</strong> tanpa melalui proses review.</small>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
