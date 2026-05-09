@@ -54,6 +54,38 @@
     </div>
     @endif
 
+    {{-- Banner: ringkasan setting yang sedang aktif --}}
+    @if(!empty($settings['fonnte_api_token']) || !empty($settings['fonnte_device_id']))
+    <div class="alert alert-success d-flex align-items-start gap-3 mb-4" style="border-left: 4px solid #198754;">
+        <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
+        <div>
+            <strong>Pengaturan aktif saat ini:</strong>
+            <div class="row mt-1 g-2">
+                @if(!empty($settings['fonnte_api_token']))
+                <div class="col-auto">
+                    <span class="badge bg-success"><i class="bi bi-key me-1"></i>Token: {{ substr($settings['fonnte_api_token'], 0, 6) }}...{{ substr($settings['fonnte_api_token'], -4) }}</span>
+                </div>
+                @endif
+                @if(!empty($settings['fonnte_device_id']))
+                <div class="col-auto">
+                    <span class="badge bg-primary"><i class="bi bi-phone me-1"></i>Device: {{ $settings['fonnte_device_id'] }}</span>
+                </div>
+                @endif
+                <div class="col-auto">
+                    <span class="badge {{ $settings['sms_gateway_enabled'] == '1' ? 'bg-success' : 'bg-secondary' }}">
+                        <i class="bi bi-power me-1"></i>Gateway: {{ $settings['sms_gateway_enabled'] == '1' ? 'Aktif' : 'Nonaktif' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>Pengaturan belum dikonfigurasi. Isi API Token dan simpan untuk mengaktifkan notifikasi WhatsApp.</span>
+    </div>
+    @endif
+
     <form action="{{ route('admin.sms-gateway.update') }}" method="POST" id="smsGatewayForm">
         @csrf
         @method('PUT')
@@ -95,6 +127,14 @@
                                 <div class="mt-1" id="tokenStatusWrap">
                                     <small id="tokenStatus"></small>
                                 </div>
+                                @if(!empty($settings['fonnte_api_token']))
+                                    <small class="text-success d-block mt-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Token tersimpan
+                                        <span class="font-monospace">({{ substr($settings['fonnte_api_token'], 0, 6) }}...{{ substr($settings['fonnte_api_token'], -4) }})</span>
+                                    </small>
+                                @else
+                                    <small class="text-danger d-block mt-1"><i class="bi bi-exclamation-circle me-1"></i>Belum diisi — notifikasi WA tidak akan terkirim</small>
+                                @endif
                                 @error('fonnte_api_token')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror

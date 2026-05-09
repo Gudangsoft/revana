@@ -87,6 +87,7 @@ class SmsGatewayController extends Controller
 
         // Baca semua sumber
         $fromFile    = $this->readFromFile();
+        $fromCache   = Cache::get('sms_gw_settings', []);
         $fromSession = session('sms_gw_settings', []);
         try {
             $fromDb = Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
@@ -95,8 +96,11 @@ class SmsGatewayController extends Controller
             Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
         }
 
-        // Merge prioritas: File < DB < Session (session = paling fresh dari browser ini)
-        $merged = $fromFile;
+        // Merge prioritas: File < Cache < DB < Session
+        $merged = is_array($fromFile) ? $fromFile : [];
+        foreach ($fromCache as $k => $v) {
+            if ($v !== '' && $v !== null) $merged[$k] = $v;
+        }
         foreach ($fromDb as $k => $v) {
             if ($v !== '' && $v !== null) $merged[$k] = $v;
         }
