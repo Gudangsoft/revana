@@ -32,7 +32,20 @@
         $assignedAt[$stepKey] = $records->first()->created_at;
     }
 
-    $fmt = fn($dt) => $dt ? $dt->format('d/m/Y H:i') : '-';
+    // Load PicPointHistory sebagai fallback waktu selesai untuk data lama
+    // yang *_valid = true tapi *_validated_at = null (sebelum fix tracked timestamps)
+    $picPointTimes = \App\Models\PicPointHistory::where('submission_id', $submission->id)
+        ->select('step', \Illuminate\Support\Facades\DB::raw('MIN(created_at) as completed_at'))
+        ->groupBy('step')
+        ->pluck('completed_at', 'step');
+
+    $fmt = fn($dt) => $dt ? \Carbon\Carbon::parse($dt)->format('d/m/Y H:i') : '-';
+
+    // Waktu selesai: utamakan *_validated_at, fallback ke PicPointHistory, fallback ke '-'
+    $selesai = function($validatedAt, $stepKey) use ($fmt, $picPointTimes) {
+        if ($validatedAt) return $fmt($validatedAt);
+        return isset($picPointTimes[$stepKey]) ? $fmt($picPointTimes[$stepKey]) : '-';
+    };
 
     // Submit: gunakan tanggal_submit atau created_at sebagai waktu penugasan
     $submitPenugasan = $submission->tanggal_submit
@@ -69,7 +82,7 @@
                 ? $submission->username_editor . ' / ' . $submission->password_editor : null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['editor1'] ?? null),
-            'selesai_at'   => $fmt($submission->editor1_validated_at),
+            'selesai_at'   => $selesai($submission->editor1_validated_at, 'editor1'),
         ],
         [
             'key'          => 'author1',
@@ -82,7 +95,7 @@
             'credential'   => null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['author1'] ?? null),
-            'selesai_at'   => $fmt($submission->author1_validated_at),
+            'selesai_at'   => $selesai($submission->author1_validated_at, 'author1'),
         ],
         [
             'key'          => 'editor2',
@@ -95,7 +108,7 @@
             'credential'   => null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['editor2'] ?? null),
-            'selesai_at'   => $fmt($submission->editor2_validated_at),
+            'selesai_at'   => $selesai($submission->editor2_validated_at, 'editor2'),
         ],
         [
             'key'          => 'reviewer1',
@@ -109,7 +122,7 @@
                 ? $submission->username_reviewer1 . ' / ' . $submission->password_reviewer1 : null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['reviewer1'] ?? null),
-            'selesai_at'   => $fmt($submission->reviewer1_validated_at),
+            'selesai_at'   => $selesai($submission->reviewer1_validated_at, 'reviewer1'),
         ],
         [
             'key'          => 'reviewer2',
@@ -123,7 +136,7 @@
                 ? $submission->username_reviewer2 . ' / ' . $submission->password_reviewer2 : null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['reviewer2'] ?? null),
-            'selesai_at'   => $fmt($submission->reviewer2_validated_at),
+            'selesai_at'   => $selesai($submission->reviewer2_validated_at, 'reviewer2'),
         ],
         [
             'key'          => 'editor3',
@@ -136,7 +149,7 @@
             'credential'   => null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['editor3'] ?? null),
-            'selesai_at'   => $fmt($submission->editor3_validated_at),
+            'selesai_at'   => $selesai($submission->editor3_validated_at, 'editor3'),
         ],
         [
             'key'          => 'author2',
@@ -149,7 +162,7 @@
             'credential'   => null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['author2'] ?? null),
-            'selesai_at'   => $fmt($submission->author2_validated_at),
+            'selesai_at'   => $selesai($submission->author2_validated_at, 'author2'),
         ],
         [
             'key'          => 'production',
@@ -163,7 +176,7 @@
             'isProduction' => true,
             'validLabel'   => 'Published',
             'penugasan_at' => $fmt($assignedAt['production'] ?? null),
-            'selesai_at'   => $fmt($submission->production_validated_at),
+            'selesai_at'   => $selesai($submission->production_validated_at, 'production'),
         ],
         [
             'key'          => 'validator',
@@ -176,7 +189,7 @@
             'credential'   => null,
             'validLabel'   => 'Valid',
             'penugasan_at' => $fmt($assignedAt['validator'] ?? null),
-            'selesai_at'   => $fmt($submission->validator_validated_at),
+            'selesai_at'   => $selesai($submission->validator_validated_at, 'validator'),
         ],
     ];
 @endphp
