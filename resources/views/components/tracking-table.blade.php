@@ -47,10 +47,9 @@
         return isset($picPointTimes[$stepKey]) ? $fmt($picPointTimes[$stepKey]) : '-';
     };
 
-    // Submit: gunakan tanggal_submit atau created_at sebagai waktu penugasan
-    $submitPenugasan = $submission->tanggal_submit
-        ? \Carbon\Carbon::parse($submission->tanggal_submit)
-        : $submission->created_at;
+    // Submit: gunakan created_at (memiliki jam) sebagai waktu penugasan.
+    // tanggal_submit adalah tipe DATE (tanpa jam) → selalu 00:00 jika dipakai langsung.
+    $submitPenugasan = $submission->created_at;
 
     // Build steps config
     $steps = [
