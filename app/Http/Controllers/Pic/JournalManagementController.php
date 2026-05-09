@@ -1246,12 +1246,33 @@ class JournalManagementController extends Controller
         
         // Store old value before update
         $oldValue = $submission->{$request->field};
-        
+
         $submission->{$request->field} = $request->value;
-        
+
+        // Sync *_validated_at timestamp sesuai nilai valid
+        $validatedAtMap = [
+            'editor1_valid'    => 'editor1_validated_at',
+            'author1_valid'    => 'author1_validated_at',
+            'editor2_valid'    => 'editor2_validated_at',
+            'reviewer1_valid'  => 'reviewer1_validated_at',
+            'reviewer2_valid'  => 'reviewer2_validated_at',
+            'editor3_valid'    => 'editor3_validated_at',
+            'author2_valid'    => 'author2_validated_at',
+            'production_valid' => 'production_validated_at',
+            'validator_valid'  => 'validator_validated_at',
+        ];
+        if (isset($validatedAtMap[$request->field])) {
+            $tsField = $validatedAtMap[$request->field];
+            if ($request->value && empty($submission->{$tsField})) {
+                $submission->{$tsField} = now(); // set waktu selesai saat pertama kali valid
+            } elseif (!$request->value) {
+                $submission->{$tsField} = null; // hapus waktu selesai saat di-unvalid
+            }
+        }
+
         // Recalculate status based on current validation flags
         $submission->recalculateStatus();
-        
+
         $submission->save();
         
         // Add points when validation is set to true (and was previously false to prevent duplicate points)
