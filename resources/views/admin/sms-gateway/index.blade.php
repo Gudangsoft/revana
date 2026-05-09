@@ -127,14 +127,6 @@
                                 <div class="mt-1" id="tokenStatusWrap">
                                     <small id="tokenStatus"></small>
                                 </div>
-                                @if(!empty($settings['fonnte_api_token']))
-                                    <small class="text-success d-block mt-1">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Token tersimpan
-                                        <span class="font-monospace">({{ substr($settings['fonnte_api_token'], 0, 6) }}...{{ substr($settings['fonnte_api_token'], -4) }})</span>
-                                    </small>
-                                @else
-                                    <small class="text-danger d-block mt-1"><i class="bi bi-exclamation-circle me-1"></i>Belum diisi — notifikasi WA tidak akan terkirim</small>
-                                @endif
                                 @error('fonnte_api_token')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -688,6 +680,65 @@
             button.innerHTML = '<i class="bi bi-wifi me-1"></i>Cek Status Koneksi';
         });
     });
+
+    // ── localStorage persistence ──────────────────────────────────────────
+    // Menyimpan dan memulihkan nilai form di browser agar form tidak pernah kosong
+    // meski server-side DB/file/cache gagal dibaca.
+    const SMS_GW_KEY = 'sms_gw_v1';
+    const TEXT_FIELDS   = ['fonnte_api_token','fonnte_device_id','sms_default_country_code',
+                           'sms_template_submit','sms_template_status_change','sms_template_published',
+                           'wa_template_credential_new','wa_template_credential_update'];
+    const TOGGLE_FIELDS = ['sms_gateway_enabled','sms_notification_submit',
+                           'sms_notification_status_change','sms_notification_published'];
+
+    function gwSaveToStorage() {
+        try {
+            const d = {};
+            TEXT_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) d[id] = el.value;
+            });
+            TOGGLE_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) d[id] = el.checked ? '1' : '0';
+            });
+            localStorage.setItem(SMS_GW_KEY, JSON.stringify(d));
+        } catch(e) {}
+    }
+
+    function gwLoadFromStorage() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(SMS_GW_KEY) || '{}');
+            TEXT_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.value && saved[id]) {
+                    el.value = saved[id];
+                    el.dispatchEvent(new Event('input'));
+                }
+            });
+            TOGGLE_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.checked && saved[id] === '1') {
+                    el.checked = true;
+                    el.dispatchEvent(new Event('change'));
+                }
+            });
+        } catch(e) {}
+    }
+
+    // Simpan ke localStorage saat form di-submit
+    const smsForm = document.getElementById('smsGatewayForm');
+    if (smsForm) smsForm.addEventListener('submit', gwSaveToStorage);
+
+    // Jika halaman baru saja berhasil disimpan (server render langsung), perbarui localStorage
+    @if(session('success'))
+    gwSaveToStorage();
+    @endif
+
+    // Pulihkan nilai dari localStorage untuk field yang kosong (DB/file/cache gagal baca)
+    gwLoadFromStorage();
+    updateTokenStatus();
+    // ── end localStorage ──────────────────────────────────────────────────
 
     // Send test SMS
     document.getElementById('sendTestSms').addEventListener('click', function() {
