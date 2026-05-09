@@ -163,14 +163,24 @@ class SmsGatewayController extends Controller
                 $validated[$field] = $request->input($field, '0');
             }
 
-            // Sensitive fields: jangan timpa nilai yang sudah ada jika field dikosongkan
+            // Sensitive fields: jangan timpa / kosongkan nilai jika field dibiarkan kosong saat submit
             $protectedFields = ['fonnte_api_token'];
-            $existingFile = $this->readFromFile();
+            $existingFile    = $this->readFromFile();
+            $existingCache   = Cache::get('sms_gw_settings', []);
+            $existingSession = session('sms_gw_settings', []);
+
             foreach ($protectedFields as $field) {
                 if (empty($validated[$field])) {
-                    $existing = Setting::get($field) ?: ($existingFile[$field] ?? '');
+                    // Cari nilai lama dari semua sumber (DB → file → cache → session)
+                    $existing = Setting::get($field)
+                        ?: ($existingFile[$field]    ?? '')
+                        ?: ($existingCache[$field]   ?? '')
+                        ?: ($existingSession[$field] ?? '');
+
                     if (!empty($existing)) {
-                        unset($validated[$field]);
+                        $validated[$field] = $existing; // pulihkan agar tersimpan & tampil di view
+                    } else {
+                        unset($validated[$field]); // tidak ada nilai lama → jangan simpan kosong ke DB
                     }
                 }
             }
@@ -185,11 +195,6 @@ class SmsGatewayController extends Controller
 
             // Tulis ke file lokal — fallback paling andal saat DB read bermasalah
             $fileData = array_merge($existingFile, $validated);
-            foreach ($protectedFields as $field) {
-                if (!array_key_exists($field, $validated) && empty($fileData[$field])) {
-                    $fileData[$field] = Setting::get($field) ?? '';
-                }
-            }
             $this->writeToFile($fileData);
             session()->put('sms_gw_settings', $fileData);
             Cache::put('sms_gw_settings', $fileData, now()->addDays(30));
