@@ -24,7 +24,7 @@ class ComponentSettingService
             'badge_color_EDITOR3_PROCESS' => 'bg-info',
             'badge_color_AUTHOR2_PROCESS' => 'bg-info',
             'badge_color_PRODUCTION_PROCESS' => 'bg-primary',
-            'badge_color_VALIDATOR_PROCESS' => 'bg-teal',
+            'badge_color_VALIDATOR_PROCESS' => 'bg-primary',
             'badge_color_PUBLISHED' => 'bg-success',
             'badge_color_REJECTED' => 'bg-danger',
 
@@ -133,7 +133,10 @@ class ComponentSettingService
      */
     public static function badgeColor(string $status): string
     {
-        return self::get('badge_color_' . $status, 'bg-secondary');
+        $color = self::get('badge_color_' . $status, 'bg-secondary');
+        // Fallback jika class tidak ada di Bootstrap 5 standar (misal bg-teal)
+        $valid = ['bg-primary','bg-secondary','bg-success','bg-danger','bg-warning','bg-info','bg-dark','bg-light'];
+        return in_array($color, $valid) ? $color : 'bg-primary';
     }
 
     /**
