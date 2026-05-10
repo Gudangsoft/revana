@@ -166,5 +166,71 @@
         </div>
 
     </div>
+
+    {{-- Log Aktivitas --}}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-clock-history me-2"></i><strong>Log Aktivitas</strong></span>
+                    <span class="badge bg-secondary">{{ $logs->count() }} entri</span>
+                </div>
+                <div class="card-body p-0">
+                    @forelse($logs as $log)
+                    <div class="d-flex gap-3 p-3 border-bottom align-items-start">
+                        {{-- Icon --}}
+                        <div class="flex-shrink-0 pt-1">
+                            <span class="badge bg-{{ $log->actionColor() }} rounded-circle p-2">
+                                @if($log->action === 'created') <i class="bi bi-plus-lg"></i>
+                                @elseif($log->action === 'updated') <i class="bi bi-pencil"></i>
+                                @elseif($log->action === 'validated') <i class="bi bi-patch-check"></i>
+                                @elseif($log->action === 'unvalidated') <i class="bi bi-x-circle"></i>
+                                @else <i class="bi bi-chat-text"></i>
+                                @endif
+                            </span>
+                        </div>
+                        {{-- Content --}}
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="fw-semibold small">{{ $log->actor_name }}</span>
+                                <span class="badge bg-{{ $log->actor_type === 'admin' ? 'dark' : 'primary' }}" style="font-size:0.65rem;">
+                                    {{ $log->actor_type === 'admin' ? 'Admin' : 'PIC' }}
+                                </span>
+                                <span class="badge bg-{{ $log->actionColor() }}" style="font-size:0.65rem;">{{ $log->actionLabel() }}</span>
+                            </div>
+                            @if($log->changes)
+                            <div class="mt-1">
+                                @foreach($log->changes as $field => $diff)
+                                <div class="small mb-1">
+                                    <span class="text-muted fw-semibold">{{ \App\Models\LaporanHarianLog::fieldLabel($field) }}:</span>
+                                    @if($field === 'capaian_hasil')
+                                        <span class="badge bg-secondary">{{ $diff['old'] ?? '-' }}%</span>
+                                        <i class="bi bi-arrow-right text-muted mx-1"></i>
+                                        <span class="badge bg-primary">{{ $diff['new'] ?? '-' }}%</span>
+                                    @else
+                                        <span class="text-danger text-decoration-line-through">{{ Str::limit($diff['old'] ?? '-', 60) }}</span>
+                                        <i class="bi bi-arrow-right text-muted mx-1"></i>
+                                        <span class="text-success">{{ Str::limit($diff['new'] ?? '-', 60) }}</span>
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
+                        </div>
+                        {{-- Time --}}
+                        <div class="flex-shrink-0 text-muted small text-nowrap">
+                            {{ $log->created_at->format('d/m/Y H:i') }}
+                        </div>
+                    </div>
+                    @empty
+                    <div class="p-4 text-center text-muted small">
+                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>Belum ada log aktivitas
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection

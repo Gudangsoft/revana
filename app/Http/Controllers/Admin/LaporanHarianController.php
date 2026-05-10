@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LaporanHarian;
+use App\Models\LaporanHarianLog;
 use App\Models\Pic;
 use Illuminate\Http\Request;
 
@@ -37,7 +38,10 @@ class LaporanHarianController extends Controller
     public function show(LaporanHarian $laporanHarian)
     {
         $laporanHarian->load(['pic', 'validator']);
-        return view('admin.laporan-harian.show', compact('laporanHarian'));
+        $logs = LaporanHarianLog::where('laporan_harian_id', $laporanHarian->id)
+            ->orderByDesc('created_at')
+            ->get();
+        return view('admin.laporan-harian.show', compact('laporanHarian', 'logs'));
     }
 
     public function setValidasi(Request $request, LaporanHarian $laporanHarian)
@@ -47,19 +51,35 @@ class LaporanHarianController extends Controller
             'action'        => 'required|in:validate,unvalidate',
         ]);
 
+        $adminUser   = auth()->user();
+        $adminId     = $adminUser->id;
+        $adminName   = $adminUser->name;
+        $oldCatatan  = $laporanHarian->catatan_admin;
+        $newCatatan  = $request->catatan_admin;
+
         if ($request->action === 'validate') {
             $laporanHarian->update([
                 'validated_at'  => now(),
-                'validated_by'  => auth()->id(),
-                'catatan_admin' => $request->catatan_admin,
+                'validated_by'  => $adminId,
+                'catatan_admin' => $newCatatan,
             ]);
+            $changes = [];
+            if ((string) $oldCatatan !== (string) $newCatatan) {
+                $changes['catatan_admin'] = ['old' => $oldCatatan, 'new' => $newCatatan];
+            }
+            LaporanHarianLog::record($laporanHarian, 'admin', $adminId, $adminName, 'validated', $changes);
             $message = 'Catatan kinerja berhasil divalidasi.';
         } else {
             $laporanHarian->update([
                 'validated_at'  => null,
                 'validated_by'  => null,
-                'catatan_admin' => $request->catatan_admin,
+                'catatan_admin' => $newCatatan,
             ]);
+            $changes = [];
+            if ((string) $oldCatatan !== (string) $newCatatan) {
+                $changes['catatan_admin'] = ['old' => $oldCatatan, 'new' => $newCatatan];
+            }
+            LaporanHarianLog::record($laporanHarian, 'admin', $adminId, $adminName, 'unvalidated', $changes);
             $message = 'Validasi dibatalkan.';
         }
 
