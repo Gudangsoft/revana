@@ -336,16 +336,16 @@
     <i class="bi bi-bar-chart-line-fill" style="color:#34d399;"></i> Laporan Kinerja
 </a>
 <a href="{{ route('admin.laporan-harian.index') }}"
-   class="nav-link {{ str_starts_with($currentRoute, 'admin.laporan-harian') ? 'active' : '' }}"
+   class="nav-link {{ $currentRoute === 'admin.laporan-harian.index' ? 'active' : '' }}"
    style="display:flex;align-items:center;gap:8px;">
     <i class="bi bi-clipboard2-check-fill" style="color:#818cf8;"></i>
     <span>Catatan Kinerja Harian</span>
-    @if(\Carbon\Carbon::parse('2026-05-09')->diffInDays(now()) <= 7)
-    <span class="ms-auto d-flex align-items-center gap-1">
-        <span class="sidebar-new-dot"></span>
-        <span class="badge bg-danger" style="font-size:0.6rem;padding:2px 5px;">New</span>
-    </span>
-    @endif
+</a>
+<a href="{{ route('admin.laporan-harian.rekap') }}"
+   class="nav-link ps-4 {{ $currentRoute === 'admin.laporan-harian.rekap' ? 'active' : '' }}"
+   style="display:flex;align-items:center;gap:8px;font-size:0.88rem;">
+    <i class="bi bi-calendar3-range" style="color:#818cf8;"></i>
+    <span>Rekap Bulanan</span>
 </a>
 
 {{-- ═══ PENGATURAN ═══ --}}

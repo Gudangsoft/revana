@@ -30,19 +30,29 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label small fw-semibold">Dari Tanggal</label>
                     <input type="date" name="dari_tanggal" class="form-control form-control-sm" value="{{ $dariTanggal }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label small fw-semibold">Sampai Tanggal</label>
                     <input type="date" name="sampai_tanggal" class="form-control form-control-sm" value="{{ $sampaiTanggal }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" name="belum_divalidasi" id="chkBelum" value="1"
+                               {{ $belumDivalidasi ? 'checked' : '' }}>
+                        <label class="form-check-label small fw-semibold" for="chkBelum">Belum Divalidasi</label>
+                    </div>
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm flex-fill">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
                     <a href="{{ route('admin.laporan-harian.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                    <a href="{{ route('admin.laporan-harian.rekap') }}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-calendar3 me-1"></i>Rekap
+                    </a>
                 </div>
             </form>
         </div>
@@ -55,7 +65,7 @@
         $totalValidated = $laporan->filter(fn($l) => $l->total_validated > 0 && $l->total_validated >= $l->total_kegiatan)->count();
         $totalBelum     = $totalPicHari - $totalValidated;
     @endphp
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-3">
         <div class="col-md-3">
             <div class="card border-0 bg-primary text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
@@ -102,11 +112,30 @@
         </div>
     </div>
 
+    {{-- Chart tren capaian --}}
+    @if($chartData->count() > 1)
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-graph-up me-2 text-primary"></i><strong>Tren Rata-rata Capaian Harian</strong></span>
+            <span class="text-muted small">{{ $dariTanggal }} s.d. {{ $sampaiTanggal }}</span>
+        </div>
+        <div class="card-body py-2">
+            <canvas id="chartCapaian" height="80"></canvas>
+        </div>
+    </div>
+    @endif
+
     {{-- Table --}}
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-table me-2"></i><strong>Daftar Catatan Kinerja Harian</strong></span>
-            <span class="badge bg-secondary">{{ $laporan->total() }} data</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary">{{ $laporan->total() }} data</span>
+                <a href="{{ route('admin.laporan-harian.export') }}?{{ http_build_query(['pic_id' => $picId, 'dari_tanggal' => $dariTanggal, 'sampai_tanggal' => $sampaiTanggal]) }}"
+                   class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-download me-1"></i>Export CSV
+                </a>
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -167,6 +196,11 @@
                                     <i class="bi bi-clock me-1"></i>{{ \Carbon\Carbon::parse($item->last_validated_at)->format('d/m/Y H:i') }}
                                 </div>
                                 @endif
+                                @if($item->last_validated_by && $validators->has($item->last_validated_by))
+                                <div class="small text-muted" style="font-size:0.72rem;">
+                                    <i class="bi bi-person-check me-1"></i>{{ $validators[$item->last_validated_by] }}
+                                </div>
+                                @endif
                             @elseif($isSomeValid)
                                 <span class="badge bg-warning text-dark">
                                     <i class="bi bi-patch-check me-1"></i>Sebagian ({{ $item->total_validated }}/{{ $item->total_kegiatan }})
@@ -205,3 +239,41 @@
     </div>
 </div>
 @endsection
+
+@if($chartData->count() > 1)
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const labels = @json($chartData->pluck('tanggal')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m')));
+    const values = @json($chartData->pluck('avg_capaian'));
+    const ctx = document.getElementById('chartCapaian');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Rata-rata Capaian (%)',
+                data: values,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.08)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#6366f1',
+                pointRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+})();
+</script>
+@endpush
+@endif

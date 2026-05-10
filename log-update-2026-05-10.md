@@ -108,3 +108,31 @@ Log perubahan otomatis dari git commits.
 - **File berubah:** 1 file
 - `log-update-2026-05-10.md`
 
+
+## 12. 🔄 Update: up
+
+- **Commit:** `267f323` — 20:07 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-10.md`
+- `resources/views/admin/laporan-harian/index.blade.php`
+
+---
+
+## N. Fitur Lengkap Catatan Kinerja Harian — Grafik, Rekap, Export, Notifikasi
+
+**Tujuan:** Melengkapi menu Catatan Kinerja Harian dengan semua fitur yang diminta: grafik tren capaian (PIC & admin), rekap bulanan per PIC, export CSV, filter belum divalidasi, dan notifikasi pengingat otomatis.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah route export CSV dan rekap bulanan admin |
+| `app/Http/Controllers/Admin/LaporanHarianController.php` | Tambah method `export()`, `rekap()`; update `index()` dengan filter belum divalidasi + chart data |
+| `app/Http/Controllers/Pic/LaporanHarianController.php` | Tambah chart data 30 hari + variabel `$showReminder` |
+| `app/Http/Controllers/Pic/AuthorController.php` | Tambah `$showReminder` di dashboard |
+| `resources/views/admin/laporan-harian/index.blade.php` | Tambah chart tren, export button, checkbox filter belum divalidasi, link rekap |
+| `resources/views/admin/laporan-harian/rekap.blade.php` | Halaman baru: rekap bulanan per PIC dengan chart + tabel summary |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah link "Rekap Bulanan" di sidebar |
+| `resources/views/pic/laporan-harian/index.blade.php` | Tambah chart tren 30 hari + banner notifikasi pengingat |
+| `resources/views/pic/laporan-harian/edit.blade.php` | Fix @push → @section (PIC layout pakai @yield) |
+| `resources/views/pic/author/dashboard.blade.php` | Tambah banner notifikasi pengingat jika belum isi setelah pukul 14:00 |
+

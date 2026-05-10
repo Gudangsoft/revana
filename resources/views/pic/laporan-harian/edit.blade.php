@@ -95,7 +95,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 const range = document.getElementById('capaianRange');
 const badge = document.getElementById('capaianBadge');
@@ -108,4 +108,4 @@ if (range && badge) {
     range.addEventListener('input', function() { update(parseInt(this.value)); });
 }
 </script>
-@endpush
+@endsection

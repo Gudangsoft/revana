@@ -16,7 +16,18 @@ class LaporanHarianController extends Controller
         $todayEntries = LaporanHarian::where('pic_id', $picId)->where('tanggal', $today)->orderBy('id')->get();
         $laporan      = LaporanHarian::where('pic_id', $picId)->orderByDesc('tanggal')->orderBy('id')->paginate(20);
 
-        return view('pic.laporan-harian.index', compact('laporan', 'todayEntries', 'today'));
+        // Chart: last 30 days avg capaian per day
+        $chartData = LaporanHarian::where('pic_id', $picId)
+            ->where('tanggal', '>=', now()->subDays(29)->toDateString())
+            ->selectRaw('tanggal, ROUND(AVG(capaian_hasil)) as avg_capaian, COUNT(*) as total')
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
+        // Reminder after 14:00 if no entries today
+        $showReminder = $todayEntries->isEmpty() && now()->hour >= 14;
+
+        return view('pic.laporan-harian.index', compact('laporan', 'todayEntries', 'today', 'chartData', 'showReminder'));
     }
 
     public function store(Request $request)

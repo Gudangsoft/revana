@@ -105,6 +105,11 @@
                                     <span class="text-success small">
                                         <i class="bi bi-patch-check-fill me-1"></i>Valid {{ $entry->validated_at->format('d/m H:i') }}
                                     </span>
+                                    @if($entry->validator)
+                                    <span class="text-muted small">
+                                        <i class="bi bi-person-check me-1"></i>{{ $entry->validator->name }}
+                                    </span>
+                                    @endif
                                     <button type="submit" name="action" value="save_catatan" class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-save me-1"></i>Update Catatan
                                     </button>

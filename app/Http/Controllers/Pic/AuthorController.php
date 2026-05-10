@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pic;
 
 use App\Http\Controllers\Controller;
 use App\Models\Journal;
+use App\Models\LaporanHarian;
 use App\Models\Marketing;
 use App\Models\Pic;
 use App\Models\Accreditation;
@@ -17,7 +18,7 @@ class AuthorController extends Controller
     public function dashboard()
     {
         $pic = Auth::guard('pic')->user();
-        
+
         $journals = Journal::where('pic_author_id', $pic->id)
             ->with(['accreditationModel', 'picMarketing', 'picEditor'])
             ->latest()
@@ -30,8 +31,37 @@ class AuthorController extends Controller
         $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
             Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
-        
-        return view('pic.author.dashboard', compact('journals', 'topPics', 'topMarketings'));
+
+        // Widget Catatan Kinerja Harian
+        $today             = now()->toDateString();
+        $todayEntries      = LaporanHarian::where('pic_id', $pic->id)->where('tanggal', $today)->get();
+        $monthAvgCapaian   = LaporanHarian::where('pic_id', $pic->id)
+                                ->whereYear('tanggal', now()->year)
+                                ->whereMonth('tanggal', now()->month)
+                                ->avg('capaian_hasil');
+        $monthTotalEntries = LaporanHarian::where('pic_id', $pic->id)
+                                ->whereYear('tanggal', now()->year)
+                                ->whereMonth('tanggal', now()->month)
+                                ->count();
+        // Streak: hitung hari berturut-turut yang sudah diisi
+        $streak = 0;
+        $checkDate = now()->startOfDay();
+        while (true) {
+            $hasEntry = LaporanHarian::where('pic_id', $pic->id)
+                ->whereDate('tanggal', $checkDate->toDateString())
+                ->exists();
+            if (!$hasEntry) break;
+            $streak++;
+            $checkDate->subDay();
+            if ($streak > 365) break;
+        }
+
+        $showReminder = $todayEntries->isEmpty() && now()->hour >= 14;
+
+        return view('pic.author.dashboard', compact(
+            'journals', 'topPics', 'topMarketings',
+            'todayEntries', 'monthAvgCapaian', 'monthTotalEntries', 'streak', 'today', 'showReminder'
+        ));
     }
 
     public function create()

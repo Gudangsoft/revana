@@ -25,6 +25,22 @@
         </div>
         @endif
 
+        {{-- Pengingat otomatis --}}
+        @if($showReminder)
+        <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-3 shadow-sm" role="alert">
+            <i class="bi bi-alarm-fill fs-3 text-warning flex-shrink-0"></i>
+            <div class="flex-grow-1">
+                <strong>Pengingat!</strong> Anda belum mengisi catatan kinerja hari ini.
+                <div class="small mt-1">Jangan lupa catat kegiatan Anda sebelum hari berakhir.</div>
+            </div>
+            <button type="button" class="btn btn-warning btn-sm"
+                    onclick="document.getElementById('formTambah').classList.add('show');this.closest('.alert').remove();">
+                <i class="bi bi-plus-circle me-1"></i>Isi Sekarang
+            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
         {{-- Header hari ini --}}
         <div class="card shadow-sm mb-3 border-0 bg-primary text-white">
             <div class="card-body d-flex align-items-center justify-content-between py-3">
@@ -190,6 +206,18 @@
         </div>
         @endif
 
+        {{-- Grafik capaian 30 hari --}}
+        @if($chartData->count() > 1)
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-graph-up me-2 text-primary"></i><strong>Tren Capaian — 30 Hari Terakhir</strong></span>
+            </div>
+            <div class="card-body py-2">
+                <canvas id="chartCapaianPic" height="90"></canvas>
+            </div>
+        </div>
+        @endif
+
         {{-- Riwayat --}}
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -270,7 +298,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 const range = document.getElementById('capaianRange');
 const badge = document.getElementById('capaianBadge');
@@ -280,14 +308,56 @@ if (range && badge) {
         const v = parseInt(this.value);
         badge.className = 'badge ms-1 ' + (v >= 80 ? 'bg-success' : v >= 50 ? 'bg-warning text-dark' : 'bg-danger');
     });
-    // init color
     const iv = parseInt(range.value);
     badge.className = 'badge ms-1 ' + (iv >= 80 ? 'bg-success' : iv >= 50 ? 'bg-warning text-dark' : 'bg-danger');
 }
-// Auto buka form jika belum ada catatan hari ini dan tidak ada session success
-@if($todayEntries->count() === 0 && !session('success') && !session('error'))
+@if($todayEntries->count() === 0 && !session('success') && !session('error') && !$showReminder)
 const collapseEl = document.getElementById('formTambah');
 if (collapseEl) new bootstrap.Collapse(collapseEl, { show: true });
 @endif
 </script>
-@endpush
+
+@if($chartData->count() > 1)
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const labels = @json($chartData->pluck('tanggal')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m')));
+    const values = @json($chartData->pluck('avg_capaian'));
+    const totals = @json($chartData->pluck('total'));
+    const ctx    = document.getElementById('chartCapaianPic');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Capaian (%)',
+                data: values,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.08)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#6366f1',
+                pointRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: (ctx) => `${totals[ctx.dataIndex]} kegiatan`
+                    }
+                }
+            },
+            scales: {
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+})();
+</script>
+@endif
+@endsection
