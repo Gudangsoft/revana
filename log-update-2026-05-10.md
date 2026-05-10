@@ -93,3 +93,11 @@ Log perubahan otomatis dari git commits.
 - **File berubah:** 1 file
 - `log-update-2026-05-10.md`
 
+
+## 10. 🔄 Update: update
+
+- **Commit:** `8aae0eb` — 20:05 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LaporanHarianController.php`
+- `resources/views/admin/laporan-harian/index.blade.php`
+
