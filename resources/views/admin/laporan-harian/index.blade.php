@@ -115,7 +115,7 @@
                         <th style="width:120px">Tanggal</th>
                         <th style="width:180px">PIC</th>
                         <th style="width:80px" class="text-center">Kegiatan</th>
-                        <th>Ringkasan Kegiatan</th>
+                        <th style="width:260px">Ringkasan Kegiatan</th>
                         <th style="width:90px" class="text-center">Capaian</th>
                         <th style="width:160px">Status Validasi</th>
                         <th style="width:70px" class="text-center">Detail</th>
