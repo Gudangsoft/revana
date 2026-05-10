@@ -111,7 +111,7 @@
                         <th>Laporan Kinerja</th>
                         <th style="width:90px" class="text-center">Capaian</th>
                         <th style="width:80px" class="text-center">Bukti</th>
-                        <th style="width:110px" class="text-center">Status</th>
+                        <th style="width:150px">Status / Validator</th>
                         <th style="width:70px" class="text-center">Detail</th>
                     </tr>
                 </thead>
@@ -148,11 +148,17 @@
                             <span class="text-muted small">-</span>
                             @endif
                         </td>
-                        <td class="text-center">
+                        <td>
                             @if($item->validated_at)
-                                <span class="badge bg-success" title="Divalidasi {{ $item->validated_at->format('d/m/Y H:i') }}">
-                                    <i class="bi bi-patch-check-fill me-1"></i>Valid
-                                </span>
+                                <div class="d-flex flex-column align-items-start gap-1">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-patch-check-fill me-1"></i>Valid
+                                    </span>
+                                    <div class="small text-muted" style="font-size:0.72rem;line-height:1.3;">
+                                        <i class="bi bi-person-check me-1"></i>{{ $item->validator->name ?? 'Admin' }}<br>
+                                        <i class="bi bi-clock me-1"></i>{{ $item->validated_at->format('d/m/Y H:i') }}
+                                    </div>
+                                </div>
                             @else
                                 <span class="badge bg-warning text-dark">
                                     <i class="bi bi-hourglass-split me-1"></i>Belum
