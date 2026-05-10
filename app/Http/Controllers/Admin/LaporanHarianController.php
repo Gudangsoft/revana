@@ -63,7 +63,7 @@ class LaporanHarianController extends Controller
             $message = 'Validasi dibatalkan.';
         }
 
-        return redirect()->route('admin.laporan-harian.show', $laporanHarian)
+        return redirect()->route('admin.laporan-harian.index')
             ->with('success', $message);
     }
 }
