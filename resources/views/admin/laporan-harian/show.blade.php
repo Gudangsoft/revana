@@ -50,7 +50,8 @@
                 </div>
                 <div class="list-group list-group-flush">
                     @forelse($entries as $i => $entry)
-                    <div class="list-group-item px-4 py-3">
+                    <div class="list-group-item px-4 py-3 {{ $entry->validated_at ? 'bg-success bg-opacity-10' : '' }}">
+                        {{-- Header kegiatan --}}
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-secondary rounded-circle" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;">{{ $i+1 }}</span>
@@ -60,21 +61,40 @@
                                 <span class="text-muted small">Kegiatan {{ $i+1 }}</span>
                                 @endif
                             </div>
-                            <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
                                 @php $c = $entry->capaian_hasil; @endphp
                                 <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">{{ $c }}%</span>
-                                @if($entry->validated_at)
-                                    <span class="badge bg-success" title="Divalidasi {{ $entry->validated_at->format('d/m/Y H:i') }}">
-                                        <i class="bi bi-patch-check-fill"></i>
-                                    </span>
-                                @endif
                                 @if($entry->bukti_hasil)
                                 <a href="{{ $entry->bukti_hasil }}" target="_blank" class="badge bg-info text-white text-decoration-none">
                                     <i class="bi bi-link-45deg"></i> Bukti
                                 </a>
                                 @endif
+                                {{-- Tombol validasi per kegiatan --}}
+                                @if($entry->validated_at)
+                                    <span class="badge bg-success" title="Divalidasi {{ $entry->validated_at->format('d/m/Y H:i') }}">
+                                        <i class="bi bi-patch-check-fill me-1"></i>Valid
+                                    </span>
+                                    <form action="{{ route('admin.laporan-harian.validate-entry', $entry) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="action" value="unvalidate">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2"
+                                                title="Batalkan validasi"
+                                                onclick="return confirm('Batalkan validasi kegiatan ini?')">
+                                            <i class="bi bi-x-circle" style="font-size:0.75rem;"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('admin.laporan-harian.validate-entry', $entry) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="action" value="validate">
+                                        <button type="submit" class="btn btn-success btn-sm py-0 px-2">
+                                            <i class="bi bi-patch-check me-1" style="font-size:0.75rem;"></i>Validasi
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
+                        {{-- Isi kegiatan --}}
                         <div class="row g-2 small">
                             <div class="col-md-6">
                                 <div class="text-muted fw-semibold mb-1">Catatan Kerja</div>
@@ -85,6 +105,12 @@
                                 <div class="p-2 bg-light rounded" style="white-space:pre-wrap;">{{ $entry->laporan_kinerja }}</div>
                             </div>
                         </div>
+                        @if($entry->validated_at)
+                        <div class="mt-2 small text-muted">
+                            <i class="bi bi-patch-check-fill text-success me-1"></i>
+                            Divalidasi {{ $entry->validated_at->format('d/m/Y H:i') }}
+                        </div>
+                        @endif
                     </div>
                     @empty
                     <div class="list-group-item text-center text-muted py-4">

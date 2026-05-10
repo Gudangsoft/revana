@@ -106,4 +106,28 @@ class LaporanHarianController extends Controller
         return redirect()->route('admin.laporan-harian.index')
             ->with('success', $message);
     }
+
+    public function setValidasiEntry(Request $request, LaporanHarian $laporanHarian)
+    {
+        $adminUser = auth()->user();
+
+        if ($request->action === 'validate') {
+            $laporanHarian->update([
+                'validated_at' => now(),
+                'validated_by' => $adminUser->id,
+            ]);
+            LaporanHarianLog::record($laporanHarian, 'admin', $adminUser->id, $adminUser->name, 'validated');
+            $message = 'Kegiatan berhasil divalidasi.';
+        } else {
+            $laporanHarian->update([
+                'validated_at' => null,
+                'validated_by' => null,
+            ]);
+            LaporanHarianLog::record($laporanHarian, 'admin', $adminUser->id, $adminUser->name, 'unvalidated');
+            $message = 'Validasi kegiatan dibatalkan.';
+        }
+
+        return redirect()->route('admin.laporan-harian.show', [$laporanHarian->pic_id, $laporanHarian->tanggal->toDateString()])
+            ->with('success', $message);
+    }
 }
