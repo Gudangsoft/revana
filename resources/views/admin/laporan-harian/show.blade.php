@@ -95,7 +95,7 @@
                             </div>
                         </div>
                         {{-- Isi kegiatan --}}
-                        <div class="row g-2 small">
+                        <div class="row g-2 small mb-3">
                             <div class="col-md-6">
                                 <div class="text-muted fw-semibold mb-1">Catatan Kerja</div>
                                 <div class="p-2 bg-light rounded" style="white-space:pre-wrap;">{{ $entry->target_kerja }}</div>
@@ -105,6 +105,37 @@
                                 <div class="p-2 bg-light rounded" style="white-space:pre-wrap;">{{ $entry->laporan_kinerja }}</div>
                             </div>
                         </div>
+
+                        {{-- Form catatan + validasi --}}
+                        <form action="{{ route('admin.laporan-harian.validate-entry', $entry) }}" method="POST">
+                            @csrf
+                            <div class="d-flex gap-2 align-items-start">
+                                <div class="flex-grow-1">
+                                    <textarea name="catatan_admin" rows="2"
+                                              class="form-control form-control-sm"
+                                              placeholder="Catatan / feedback untuk kegiatan ini...">{{ $entry->catatan_admin }}</textarea>
+                                </div>
+                                <div class="d-flex flex-column gap-1 flex-shrink-0">
+                                    @if($entry->validated_at)
+                                        <button type="submit" name="action" value="save_catatan" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-save"></i> Simpan
+                                        </button>
+                                        <button type="submit" name="action" value="unvalidate" class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('Batalkan validasi kegiatan ini?')">
+                                            <i class="bi bi-x-circle"></i> Batal Valid
+                                        </button>
+                                    @else
+                                        <button type="submit" name="action" value="validate" class="btn btn-success btn-sm">
+                                            <i class="bi bi-patch-check"></i> Validasi
+                                        </button>
+                                        <button type="submit" name="action" value="save_catatan" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-save"></i> Simpan
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </form>
+
                         @if($entry->validated_at)
                         <div class="mt-2 small text-muted">
                             <i class="bi bi-patch-check-fill text-success me-1"></i>

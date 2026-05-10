@@ -93,19 +93,37 @@ class LaporanHarianController extends Controller
 
     public function setValidasiEntry(Request $request, LaporanHarian $laporanHarian)
     {
-        $adminUser = auth()->user();
+        $request->validate(['catatan_admin' => 'nullable|string|max:2000']);
+
+        $adminUser  = auth()->user();
+        $oldCatatan = $laporanHarian->catatan_admin;
+        $newCatatan = $request->catatan_admin;
 
         if ($request->action === 'validate') {
             $laporanHarian->update([
-                'validated_at' => now(),
-                'validated_by' => $adminUser->id,
+                'validated_at'  => now(),
+                'validated_by'  => $adminUser->id,
+                'catatan_admin' => $newCatatan,
             ]);
-            LaporanHarianLog::record($laporanHarian, 'admin', $adminUser->id, $adminUser->name, 'validated');
+            $changes = [];
+            if ((string) $oldCatatan !== (string) $newCatatan) {
+                $changes['catatan_admin'] = ['old' => $oldCatatan, 'new' => $newCatatan];
+            }
+            LaporanHarianLog::record($laporanHarian, 'admin', $adminUser->id, $adminUser->name, 'validated', $changes);
             $message = 'Kegiatan berhasil divalidasi.';
+        } elseif ($request->action === 'save_catatan') {
+            $laporanHarian->update(['catatan_admin' => $newCatatan]);
+            if ((string) $oldCatatan !== (string) $newCatatan) {
+                LaporanHarianLog::record($laporanHarian, 'admin', $adminUser->id, $adminUser->name, 'catatan',
+                    ['catatan_admin' => ['old' => $oldCatatan, 'new' => $newCatatan]]
+                );
+            }
+            $message = 'Catatan berhasil disimpan.';
         } else {
             $laporanHarian->update([
-                'validated_at' => null,
-                'validated_by' => null,
+                'validated_at'  => null,
+                'validated_by'  => null,
+                'catatan_admin' => $newCatatan,
             ]);
             LaporanHarianLog::record($laporanHarian, 'admin', $adminUser->id, $adminUser->name, 'unvalidated');
             $message = 'Validasi kegiatan dibatalkan.';
