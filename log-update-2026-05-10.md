@@ -78,3 +78,11 @@ Log perubahan otomatis dari git commits.
 - **File berubah:** 1 file
 - `log-update-2026-05-10.md`
 
+
+## 8. 🔄 Update: laporan
+
+- **Commit:** `9b00c51` — 19:50 oleh Gudangsoft
+- **File berubah:** 2 file
+- `resources/views/admin/laporan-harian/show.blade.php`
+- `routes/web.php`
+
