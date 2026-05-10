@@ -68,6 +68,7 @@ class LaporanHarianLog extends Model
     public static function fieldLabel(string $field): string
     {
         return match($field) {
+            'judul_kegiatan'  => 'Judul Kegiatan',
             'target_kerja'    => 'Catatan Kerja',
             'laporan_kinerja' => 'Laporan Kinerja',
             'bukti_hasil'     => 'Bukti Hasil',

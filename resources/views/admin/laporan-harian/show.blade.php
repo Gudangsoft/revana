@@ -38,6 +38,12 @@
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless table-sm mb-0">
+                        @if($laporanHarian->judul_kegiatan)
+                        <tr>
+                            <th style="width:160px" class="text-muted fw-normal small">Judul Kegiatan</th>
+                            <td class="fw-semibold">{{ $laporanHarian->judul_kegiatan }}</td>
+                        </tr>
+                        @endif
                         <tr>
                             <th style="width:160px" class="text-muted fw-normal small">Tanggal</th>
                             <td class="fw-semibold">

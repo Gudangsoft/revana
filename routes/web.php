@@ -535,6 +535,9 @@ Route::prefix('pic')->group(function () {
         // Laporan Kinerja Harian
         Route::get('/laporan-harian', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'index'])->name('pic.laporan-harian.index');
         Route::post('/laporan-harian', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'store'])->name('pic.laporan-harian.store');
+        Route::get('/laporan-harian/{laporanHarian}/edit', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'edit'])->name('pic.laporan-harian.edit');
+        Route::put('/laporan-harian/{laporanHarian}', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'update'])->name('pic.laporan-harian.update');
+        Route::delete('/laporan-harian/{laporanHarian}', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'destroy'])->name('pic.laporan-harian.destroy');
     });
 });
 

@@ -11,6 +11,7 @@ class LaporanHarian extends Model
     protected $fillable = [
         'pic_id',
         'tanggal',
+        'judul_kegiatan',
         'target_kerja',
         'laporan_kinerja',
         'bukti_hasil',

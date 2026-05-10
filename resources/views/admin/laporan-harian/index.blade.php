@@ -114,6 +114,7 @@
                     <tr>
                         <th style="width:110px">Tanggal</th>
                         <th style="width:150px">PIC</th>
+                        <th style="width:160px">Judul Kegiatan</th>
                         <th>Catatan Kerja</th>
                         <th>Laporan Kinerja</th>
                         <th style="width:90px" class="text-center">Capaian</th>
@@ -134,8 +135,11 @@
                         <td>
                             <div class="fw-semibold small">{{ $item->pic->name ?? '-' }}</div>
                         </td>
-                        <td class="small" style="max-width:220px">
-                            <div title="{{ $item->target_kerja }}">{{ Str::limit($item->target_kerja, 100) }}</div>
+                        <td class="small">
+                            {{ $item->judul_kegiatan ?: '-' }}
+                        </td>
+                        <td class="small" style="max-width:200px">
+                            <div title="{{ $item->target_kerja }}">{{ Str::limit($item->target_kerja, 80) }}</div>
                         </td>
                         <td class="small" style="max-width:220px">
                             <div title="{{ $item->laporan_kinerja }}">{{ Str::limit($item->laporan_kinerja, 100) }}</div>
@@ -183,7 +187,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-4 d-block mb-2"></i>Tidak ada data laporan untuk filter ini
                         </td>
                     </tr>
