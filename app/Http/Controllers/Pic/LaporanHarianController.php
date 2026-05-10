@@ -30,6 +30,12 @@ class LaporanHarianController extends Controller
             'capaian_hasil'   => 'required|integer|min:0|max:100',
         ]);
 
+        // Hanya boleh mengisi/edit catatan untuk hari ini
+        if ($validated['tanggal'] !== now()->toDateString()) {
+            return redirect()->route('pic.laporan-harian.index')
+                ->with('error', 'Catatan hanya bisa diisi atau diedit pada hari yang sama.');
+        }
+
         $validated['pic_id'] = $picId;
 
         LaporanHarian::updateOrCreate(

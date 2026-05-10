@@ -48,3 +48,11 @@ Log perubahan otomatis dari git commits.
 - `resources/views/pic/partials/sidebar.blade.php`
 - `routes/web.php`
 
+
+## 4. 🔄 Update: up
+
+- **Commit:** `b493f30` — 18:24 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LaporanHarianController.php`
+- `routes/web.php`
+

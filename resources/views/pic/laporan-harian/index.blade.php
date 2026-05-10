@@ -18,6 +18,13 @@
         </div>
         @endif
 
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
         @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show">
             <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
@@ -50,6 +57,23 @@
                     </span>
                 </div>
                 <div class="card-body">
+
+                    {{-- Panduan pengisian --}}
+                    <div class="alert alert-info py-2 px-3 mb-3" style="font-size:0.82rem;">
+                        <div class="fw-semibold mb-1"><i class="bi bi-info-circle me-1"></i>Panduan Pengisian</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Catatan hanya bisa diisi atau diedit <strong>pada hari yang sama</strong>. Setelah hari berganti, catatan tidak bisa diubah.</li>
+                            <li><strong>Catatan Kerja:</strong> tuliskan rencana / pekerjaan yang dilakukan hari ini.</li>
+                            <li><strong>Laporan Kinerja:</strong> tuliskan realisasi atau hasil yang sudah dikerjakan.</li>
+                            <li><strong>Bukti Hasil:</strong> upload file ke Google Drive lalu tempelkan link-nya (opsional).</li>
+                            <li><strong>Capaian Hasil:</strong> geser slider untuk menunjukkan persentase penyelesaian pekerjaan hari ini.
+                                <span class="badge bg-danger" style="font-size:0.65rem;">0–49%</span> Rendah &nbsp;
+                                <span class="badge bg-warning text-dark" style="font-size:0.65rem;">50–79%</span> Cukup &nbsp;
+                                <span class="badge bg-success" style="font-size:0.65rem;">80–100%</span> Baik
+                            </li>
+                        </ul>
+                    </div>
+
                     <form action="{{ route('pic.laporan-harian.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="tanggal" value="{{ $today }}">
@@ -58,7 +82,7 @@
                             <label class="form-label fw-semibold">Catatan Kerja Hari Ini <span class="text-danger">*</span></label>
                             <textarea name="target_kerja" rows="3"
                                       class="form-control @error('target_kerja') is-invalid @enderror"
-                                      placeholder="Tuliskan catatan pekerjaan hari ini..." required>{{ old('target_kerja', $todayLaporan->target_kerja ?? '') }}</textarea>
+                                      placeholder="Contoh: Menyelesaikan review artikel jurnal A, koordinasi dengan editor, dll." required>{{ old('target_kerja', $todayLaporan->target_kerja ?? '') }}</textarea>
                             @error('target_kerja')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -66,33 +90,41 @@
                             <label class="form-label fw-semibold">Laporan Kinerja <span class="text-danger">*</span></label>
                             <textarea name="laporan_kinerja" rows="3"
                                       class="form-control @error('laporan_kinerja') is-invalid @enderror"
-                                      placeholder="Tuliskan realisasi pekerjaan yang sudah dikerjakan..." required>{{ old('laporan_kinerja', $todayLaporan->laporan_kinerja ?? '') }}</textarea>
+                                      placeholder="Contoh: Sudah menyelesaikan review 2 artikel, mengirim feedback ke author." required>{{ old('laporan_kinerja', $todayLaporan->laporan_kinerja ?? '') }}</textarea>
                             @error('laporan_kinerja')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Bukti Hasil <small class="text-muted">(Upload ke Google Drive)</small></label>
+                            <label class="form-label fw-semibold">
+                                Bukti Hasil
+                                <small class="text-muted fw-normal">(opsional — upload ke Google Drive)</small>
+                            </label>
                             <input type="url" name="bukti_hasil"
                                    class="form-control @error('bukti_hasil') is-invalid @enderror"
                                    value="{{ old('bukti_hasil', $todayLaporan->bukti_hasil ?? '') }}"
-                                   placeholder="Cth: https://drive.google.com/file/d/...">
+                                   placeholder="https://drive.google.com/file/d/...">
                             @error('bukti_hasil')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Upload file ke Google Drive → klik kanan → <em>Bagikan</em> → salin link → tempelkan di sini.</div>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label fw-semibold">
-                                Capaian Hasil %
-                                <span class="badge bg-primary ms-1" id="capaianBadge">{{ old('capaian_hasil', $todayLaporan->capaian_hasil ?? 0) }}%</span>
+                                Capaian Hasil
+                                <span class="badge ms-1" id="capaianBadge"
+                                      style="font-size:0.8rem;min-width:52px;">
+                                    {{ old('capaian_hasil', $todayLaporan->capaian_hasil ?? 0) }}%
+                                </span>
                             </label>
                             <input type="range" name="capaian_hasil" id="capaianRange"
                                    class="form-range"
                                    min="0" max="100" step="5"
                                    value="{{ old('capaian_hasil', $todayLaporan->capaian_hasil ?? 0) }}">
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">0%</small>
-                                <small class="text-muted">50%</small>
-                                <small class="text-muted">100%</small>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="badge bg-danger" style="font-size:0.7rem;">0% — Belum mulai</span>
+                                <span class="badge bg-warning text-dark" style="font-size:0.7rem;">50% — Separuh selesai</span>
+                                <span class="badge bg-success" style="font-size:0.7rem;">100% — Selesai</span>
                             </div>
+                            <div class="form-text mt-1"><i class="bi bi-hand-index me-1"></i>Geser slider sesuai persentase pekerjaan yang sudah terselesaikan hari ini.</div>
                         </div>
 
                         <div class="d-flex gap-2">
