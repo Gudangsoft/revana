@@ -50,19 +50,19 @@
 
     {{-- Summary cards --}}
     @php
-        $totalLaporan   = $laporan->total();
-        $avgCapaian     = $laporan->count() > 0 ? round($laporan->avg('capaian_hasil')) : 0;
-        $totalValidated = $laporan->filter(fn($l) => $l->validated_at)->count();
-        $totalBelum     = $laporan->count() - $totalValidated;
+        $totalPicHari   = $laporan->total();
+        $avgCapaian     = $laporan->count() > 0 ? round($laporan->avg('avg_capaian')) : 0;
+        $totalValidated = $laporan->filter(fn($l) => $l->total_validated > 0 && $l->total_validated >= $l->total_kegiatan)->count();
+        $totalBelum     = $totalPicHari - $totalValidated;
     @endphp
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card border-0 bg-primary text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bi bi-clipboard2-check fs-2 opacity-75"></i>
+                    <i class="bi bi-people-fill fs-2 opacity-75"></i>
                     <div>
-                        <div class="fs-4 fw-bold">{{ $totalLaporan }}</div>
-                        <div class="small opacity-75">Total Laporan</div>
+                        <div class="fs-4 fw-bold">{{ $totalPicHari }}</div>
+                        <div class="small opacity-75">Total PIC (per Hari)</div>
                     </div>
                 </div>
             </div>
@@ -112,64 +112,54 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width:110px">Tanggal</th>
-                        <th style="width:150px">PIC</th>
-                        <th style="width:160px">Judul Kegiatan</th>
-                        <th>Catatan Kerja</th>
-                        <th>Laporan Kinerja</th>
+                        <th style="width:120px">Tanggal</th>
+                        <th style="width:180px">PIC</th>
+                        <th style="width:90px" class="text-center">Kegiatan</th>
                         <th style="width:90px" class="text-center">Capaian</th>
-                        <th style="width:80px" class="text-center">Bukti</th>
-                        <th style="width:150px">Status / Validator</th>
+                        <th style="width:160px">Status Validasi</th>
                         <th style="width:70px" class="text-center">Detail</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($laporan as $item)
+                    @php
+                        $tanggalCarbon = \Carbon\Carbon::parse($item->tanggal);
+                        $isAllValid    = $item->total_validated > 0 && $item->total_validated >= $item->total_kegiatan;
+                        $isSomeValid   = $item->total_validated > 0 && !$isAllValid;
+                    @endphp
                     <tr>
                         <td class="small text-nowrap">
-                            {{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('d M Y') }}
-                            @if($item->tanggal->isToday())
-                                <span class="badge bg-success ms-1">Hari ini</span>
+                            {{ $tanggalCarbon->locale('id')->translatedFormat('d M Y') }}
+                            @if($tanggalCarbon->isToday())
+                                <br><span class="badge bg-success">Hari ini</span>
                             @endif
                         </td>
                         <td>
-                            <div class="fw-semibold small">{{ $item->pic->name ?? '-' }}</div>
-                        </td>
-                        <td class="small">
-                            {{ $item->judul_kegiatan ?: '-' }}
-                        </td>
-                        <td class="small" style="max-width:200px">
-                            <div title="{{ $item->target_kerja }}">{{ Str::limit($item->target_kerja, 80) }}</div>
-                        </td>
-                        <td class="small" style="max-width:220px">
-                            <div title="{{ $item->laporan_kinerja }}">{{ Str::limit($item->laporan_kinerja, 100) }}</div>
+                            <div class="fw-semibold">{{ $item->pic->name ?? '-' }}</div>
                         </td>
                         <td class="text-center">
-                            @php $c = $item->capaian_hasil; @endphp
+                            <span class="badge bg-primary rounded-pill">{{ $item->total_kegiatan }} kegiatan</span>
+                        </td>
+                        <td class="text-center">
+                            @php $c = $item->avg_capaian; @endphp
                             <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">
                                 {{ $c }}%
                             </span>
                         </td>
-                        <td class="text-center">
-                            @if($item->bukti_hasil)
-                            <a href="{{ $item->bukti_hasil }}" target="_blank" class="btn btn-outline-info btn-sm" title="Lihat Bukti">
-                                <i class="bi bi-link-45deg"></i>
-                            </a>
-                            @else
-                            <span class="text-muted small">-</span>
-                            @endif
-                        </td>
                         <td>
-                            @if($item->validated_at)
-                                <div class="d-flex flex-column align-items-start gap-1">
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-patch-check-fill me-1"></i>Valid
-                                    </span>
-                                    <div class="small text-muted" style="font-size:0.72rem;line-height:1.3;">
-                                        <i class="bi bi-person-check me-1"></i>{{ $item->validator->name ?? 'Admin' }}<br>
-                                        <i class="bi bi-clock me-1"></i>{{ $item->validated_at->format('d/m/Y H:i') }}
-                                    </div>
+                            @if($isAllValid)
+                                <span class="badge bg-success">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Semua Valid
+                                </span>
+                                @if($item->last_validated_at)
+                                <div class="small text-muted mt-1" style="font-size:0.72rem;">
+                                    <i class="bi bi-clock me-1"></i>{{ \Carbon\Carbon::parse($item->last_validated_at)->format('d/m/Y H:i') }}
                                 </div>
+                                @endif
+                            @elseif($isSomeValid)
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-patch-check me-1"></i>Sebagian ({{ $item->total_validated }}/{{ $item->total_kegiatan }})
+                                </span>
                             @else
                                 <span class="badge bg-warning text-dark">
                                     <i class="bi bi-hourglass-split me-1"></i>Belum
@@ -180,14 +170,15 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('admin.laporan-harian.show', $item) }}" class="btn btn-outline-primary btn-sm" title="Lihat Detail">
+                            <a href="{{ route('admin.laporan-harian.show', [$item->pic_id, $item->tanggal]) }}"
+                               class="btn btn-outline-primary btn-sm" title="Lihat & Validasi">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
+                        <td colspan="6" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-4 d-block mb-2"></i>Tidak ada data laporan untuk filter ini
                         </td>
                     </tr>

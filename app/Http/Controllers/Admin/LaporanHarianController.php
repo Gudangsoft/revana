@@ -7,6 +7,7 @@ use App\Models\LaporanHarian;
 use App\Models\LaporanHarianLog;
 use App\Models\Pic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LaporanHarianController extends Controller
 {
@@ -20,8 +21,19 @@ class LaporanHarianController extends Controller
             $dariTanggal = now()->startOfMonth()->toDateString();
         }
 
-        $query = LaporanHarian::with(['pic', 'validator'])
+        // Group by pic_id + tanggal — 1 baris per PIC per hari
+        $query = LaporanHarian::with('pic')
+            ->select(
+                'pic_id',
+                'tanggal',
+                DB::raw('COUNT(*) as total_kegiatan'),
+                DB::raw('ROUND(AVG(capaian_hasil)) as avg_capaian'),
+                DB::raw('SUM(CASE WHEN validated_at IS NOT NULL THEN 1 ELSE 0 END) as total_validated'),
+                DB::raw('MAX(validated_at) as last_validated_at'),
+                DB::raw('MAX(catatan_admin) as catatan_admin')
+            )
             ->whereBetween('tanggal', [$dariTanggal, $sampaiTanggal])
+            ->groupBy('pic_id', 'tanggal')
             ->orderByDesc('tanggal')
             ->orderBy('pic_id');
 
@@ -35,51 +47,59 @@ class LaporanHarianController extends Controller
         return view('admin.laporan-harian.index', compact('laporan', 'pics', 'picId', 'dariTanggal', 'sampaiTanggal'));
     }
 
-    public function show(LaporanHarian $laporanHarian)
+    public function show($picId, $tanggal)
     {
-        $laporanHarian->load(['pic', 'validator']);
-        $logs = LaporanHarianLog::where('laporan_harian_id', $laporanHarian->id)
-            ->orderByDesc('created_at')
-            ->get();
-        return view('admin.laporan-harian.show', compact('laporanHarian', 'logs'));
+        $pic      = Pic::findOrFail($picId);
+        $entries  = LaporanHarian::where('pic_id', $picId)->where('tanggal', $tanggal)->orderBy('id')->get();
+        $logs     = LaporanHarianLog::whereIn('laporan_harian_id', $entries->pluck('id'))
+                        ->orderByDesc('created_at')->get();
+
+        $allValidated  = $entries->isNotEmpty() && $entries->every(fn($e) => $e->validated_at);
+        $someValidated = $entries->some(fn($e) => $e->validated_at);
+        $catatanAdmin  = $entries->first()?->catatan_admin;
+
+        return view('admin.laporan-harian.show', compact(
+            'pic', 'entries', 'logs', 'tanggal',
+            'allValidated', 'someValidated', 'catatanAdmin'
+        ));
     }
 
-    public function setValidasi(Request $request, LaporanHarian $laporanHarian)
+    public function setValidasi(Request $request, $picId, $tanggal)
     {
         $request->validate([
             'catatan_admin' => 'nullable|string|max:2000',
             'action'        => 'required|in:validate,unvalidate',
         ]);
 
-        $adminUser   = auth()->user();
-        $adminId     = $adminUser->id;
-        $adminName   = $adminUser->name;
-        $oldCatatan  = $laporanHarian->catatan_admin;
-        $newCatatan  = $request->catatan_admin;
+        $adminUser  = auth()->user();
+        $adminId    = $adminUser->id;
+        $adminName  = $adminUser->name;
+        $entries    = LaporanHarian::where('pic_id', $picId)->where('tanggal', $tanggal)->get();
+        $newCatatan = $request->catatan_admin;
 
         if ($request->action === 'validate') {
-            $laporanHarian->update([
-                'validated_at'  => now(),
-                'validated_by'  => $adminId,
-                'catatan_admin' => $newCatatan,
-            ]);
-            $changes = [];
-            if ((string) $oldCatatan !== (string) $newCatatan) {
-                $changes['catatan_admin'] = ['old' => $oldCatatan, 'new' => $newCatatan];
+            foreach ($entries as $entry) {
+                $entry->update([
+                    'validated_at'  => now(),
+                    'validated_by'  => $adminId,
+                    'catatan_admin' => $newCatatan,
+                ]);
+                LaporanHarianLog::record($entry, 'admin', $adminId, $adminName, 'validated',
+                    $newCatatan ? ['catatan_admin' => ['old' => null, 'new' => $newCatatan]] : []
+                );
             }
-            LaporanHarianLog::record($laporanHarian, 'admin', $adminId, $adminName, 'validated', $changes);
-            $message = 'Catatan kinerja berhasil divalidasi.';
+            $message = 'Semua catatan kinerja PIC berhasil divalidasi.';
         } else {
-            $laporanHarian->update([
-                'validated_at'  => null,
-                'validated_by'  => null,
-                'catatan_admin' => $newCatatan,
-            ]);
-            $changes = [];
-            if ((string) $oldCatatan !== (string) $newCatatan) {
-                $changes['catatan_admin'] = ['old' => $oldCatatan, 'new' => $newCatatan];
+            foreach ($entries as $entry) {
+                $entry->update([
+                    'validated_at'  => null,
+                    'validated_by'  => null,
+                    'catatan_admin' => $newCatatan,
+                ]);
+                LaporanHarianLog::record($entry, 'admin', $adminId, $adminName, 'unvalidated',
+                    $newCatatan ? ['catatan_admin' => ['old' => null, 'new' => $newCatatan]] : []
+                );
             }
-            LaporanHarianLog::record($laporanHarian, 'admin', $adminId, $adminName, 'unvalidated', $changes);
             $message = 'Validasi dibatalkan.';
         }
 
