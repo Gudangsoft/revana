@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Catatan Kinerja — {{ $pic->name }}')
+@section('title', 'Detail Catatan Kinerja — ' . $pic->name)
 @section('page-title', 'Detail Catatan Kinerja Harian')
 
 @section('sidebar')

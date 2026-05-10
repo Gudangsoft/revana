@@ -322,9 +322,9 @@ Route::middleware('auth')->group(function () {
 
         // Laporan Kinerja Harian PIC
         Route::get('/laporan-harian', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'index'])->name('laporan-harian.index');
-        Route::get('/laporan-harian/{picId}/{tanggal}', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'show'])->name('laporan-harian.show');
-        Route::post('/laporan-harian/{picId}/{tanggal}/validate', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'setValidasi'])->name('laporan-harian.validate');
         Route::post('/laporan-harian/entry/{laporanHarian}/validate', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'setValidasiEntry'])->name('laporan-harian.validate-entry');
+        Route::get('/laporan-harian/{picId}/{tanggal}', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'show'])->name('laporan-harian.show')->where('picId', '[0-9]+');
+        Route::post('/laporan-harian/{picId}/{tanggal}/validate', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'setValidasi'])->name('laporan-harian.validate')->where('picId', '[0-9]+');
 
         // Laporan Kinerja
         Route::get('/laporan-kinerja', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'index'])->name('laporan-kinerja.index');
