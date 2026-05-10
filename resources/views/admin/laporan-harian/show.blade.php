@@ -69,28 +69,14 @@
                                     <i class="bi bi-link-45deg"></i> Bukti
                                 </a>
                                 @endif
-                                {{-- Tombol validasi per kegiatan --}}
                                 @if($entry->validated_at)
-                                    <span class="badge bg-success" title="Divalidasi {{ $entry->validated_at->format('d/m/Y H:i') }}">
+                                    <span class="badge bg-success">
                                         <i class="bi bi-patch-check-fill me-1"></i>Valid
                                     </span>
-                                    <form action="{{ route('admin.laporan-harian.validate-entry', $entry) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="action" value="unvalidate">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2"
-                                                title="Batalkan validasi"
-                                                onclick="return confirm('Batalkan validasi kegiatan ini?')">
-                                            <i class="bi bi-x-circle" style="font-size:0.75rem;"></i>
-                                        </button>
-                                    </form>
                                 @else
-                                    <form action="{{ route('admin.laporan-harian.validate-entry', $entry) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="action" value="validate">
-                                        <button type="submit" class="btn btn-success btn-sm py-0 px-2">
-                                            <i class="bi bi-patch-check me-1" style="font-size:0.75rem;"></i>Validasi
-                                        </button>
-                                    </form>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-hourglass-split me-1"></i>Belum
+                                    </span>
                                 @endif
                             </div>
                         </div>
@@ -109,39 +95,31 @@
                         {{-- Form catatan + validasi --}}
                         <form action="{{ route('admin.laporan-harian.validate-entry', $entry) }}" method="POST">
                             @csrf
-                            <div class="d-flex gap-2 align-items-start">
-                                <div class="flex-grow-1">
-                                    <textarea name="catatan_admin" rows="2"
-                                              class="form-control form-control-sm"
-                                              placeholder="Catatan / feedback untuk kegiatan ini...">{{ $entry->catatan_admin }}</textarea>
-                                </div>
-                                <div class="d-flex flex-column gap-1 flex-shrink-0">
-                                    @if($entry->validated_at)
-                                        <button type="submit" name="action" value="save_catatan" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-save"></i> Simpan
-                                        </button>
-                                        <button type="submit" name="action" value="unvalidate" class="btn btn-outline-danger btn-sm"
-                                                onclick="return confirm('Batalkan validasi kegiatan ini?')">
-                                            <i class="bi bi-x-circle"></i> Batal Valid
-                                        </button>
-                                    @else
-                                        <button type="submit" name="action" value="validate" class="btn btn-success btn-sm">
-                                            <i class="bi bi-patch-check"></i> Validasi
-                                        </button>
-                                        <button type="submit" name="action" value="save_catatan" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-save"></i> Simpan
-                                        </button>
-                                    @endif
-                                </div>
+                            <div class="mb-2">
+                                <textarea name="catatan_admin" rows="2"
+                                          class="form-control form-control-sm"
+                                          placeholder="Catatan / feedback (opsional)...">{{ $entry->catatan_admin }}</textarea>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                @if($entry->validated_at)
+                                    <span class="text-success small">
+                                        <i class="bi bi-patch-check-fill me-1"></i>Valid {{ $entry->validated_at->format('d/m H:i') }}
+                                    </span>
+                                    <button type="submit" name="action" value="save_catatan" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-save me-1"></i>Update Catatan
+                                    </button>
+                                    <button type="submit" name="action" value="unvalidate" class="btn btn-link btn-sm text-danger p-0"
+                                            onclick="return confirm('Batalkan validasi?')">
+                                        Batalkan validasi
+                                    </button>
+                                @else
+                                    <button type="submit" name="action" value="validate" class="btn btn-success btn-sm px-4">
+                                        <i class="bi bi-patch-check me-1"></i>Validasi
+                                    </button>
+                                    <span class="text-muted small">Belum divalidasi</span>
+                                @endif
                             </div>
                         </form>
-
-                        @if($entry->validated_at)
-                        <div class="mt-2 small text-muted">
-                            <i class="bi bi-patch-check-fill text-success me-1"></i>
-                            Divalidasi {{ $entry->validated_at->format('d/m/Y H:i') }}
-                        </div>
-                        @endif
                     </div>
                     @empty
                     <div class="list-group-item text-center text-muted py-4">
