@@ -218,8 +218,84 @@
         </div>
         @endif
 
+        {{-- Riwayat --}}
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history me-2"></i><strong>Riwayat Catatan</strong></span>
+                <span class="badge bg-secondary">{{ $laporan->total() }} total</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:110px">Tanggal</th>
+                            <th style="width:180px">Judul Kegiatan</th>
+                            <th>Catatan Kerja</th>
+                            <th style="width:85px" class="text-center">Capaian</th>
+                            <th style="width:100px" class="text-center">Status</th>
+                            <th style="width:55px" class="text-center">Bukti</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($laporan as $item)
+                        <tr>
+                            <td class="small text-nowrap">
+                                {{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('d M Y') }}
+                                @if($item->tanggal->isToday())
+                                    <br><span class="badge bg-success">Hari ini</span>
+                                @endif
+                            </td>
+                            <td class="small">{{ $item->judul_kegiatan ?: '-' }}</td>
+                            <td class="small" style="max-width:220px">
+                                <div title="{{ $item->target_kerja }}">{{ Str::limit($item->target_kerja, 80) }}</div>
+                                @if($item->catatan_admin)
+                                <div class="mt-1 p-1 bg-light rounded border-start border-info border-2 text-muted" style="font-size:0.75rem;">
+                                    <i class="bi bi-chat-text text-info me-1"></i>{{ Str::limit($item->catatan_admin, 60) }}
+                                </div>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @php $c = $item->capaian_hasil; @endphp
+                                <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                    {{ $c }}%
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if($item->validated_at)
+                                    <span class="badge bg-success"><i class="bi bi-patch-check-fill"></i></span>
+                                @else
+                                    <span class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if($item->bukti_hasil)
+                                <a href="{{ $item->bukti_hasil }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-link-45deg"></i>
+                                </a>
+                                @else
+                                <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>Belum ada catatan
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if($laporan->hasPages())
+            <div class="card-footer">
+                {{ $laporan->links('pagination::bootstrap-5') }}
+            </div>
+            @endif
+        </div>
+
         {{-- Catatan Kinerja PIC Lain --}}
-        <div class="card shadow-sm mb-4">
+        <div class="card shadow-sm mt-4">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <span>
                     <i class="bi bi-people-fill me-2 text-primary"></i>
@@ -347,82 +423,6 @@
             <div class="card-footer text-muted small text-center">
                 Menampilkan data tanggal {{ $teamTanggalLabel }}
                 — <a href="{{ route('pic.laporan-harian.index') }}" class="text-decoration-none">Kembali ke hari ini</a>
-            </div>
-            @endif
-        </div>
-
-        {{-- Riwayat --}}
-        <div class="card shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history me-2"></i><strong>Riwayat Catatan</strong></span>
-                <span class="badge bg-secondary">{{ $laporan->total() }} total</span>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:110px">Tanggal</th>
-                            <th style="width:180px">Judul Kegiatan</th>
-                            <th>Catatan Kerja</th>
-                            <th style="width:85px" class="text-center">Capaian</th>
-                            <th style="width:100px" class="text-center">Status</th>
-                            <th style="width:55px" class="text-center">Bukti</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($laporan as $item)
-                        <tr>
-                            <td class="small text-nowrap">
-                                {{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('d M Y') }}
-                                @if($item->tanggal->isToday())
-                                    <br><span class="badge bg-success">Hari ini</span>
-                                @endif
-                            </td>
-                            <td class="small">{{ $item->judul_kegiatan ?: '-' }}</td>
-                            <td class="small" style="max-width:220px">
-                                <div title="{{ $item->target_kerja }}">{{ Str::limit($item->target_kerja, 80) }}</div>
-                                @if($item->catatan_admin)
-                                <div class="mt-1 p-1 bg-light rounded border-start border-info border-2 text-muted" style="font-size:0.75rem;">
-                                    <i class="bi bi-chat-text text-info me-1"></i>{{ Str::limit($item->catatan_admin, 60) }}
-                                </div>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                @php $c = $item->capaian_hasil; @endphp
-                                <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                    {{ $c }}%
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                @if($item->validated_at)
-                                    <span class="badge bg-success"><i class="bi bi-patch-check-fill"></i></span>
-                                @else
-                                    <span class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                @if($item->bukti_hasil)
-                                <a href="{{ $item->bukti_hasil }}" target="_blank" class="btn btn-outline-info btn-sm">
-                                    <i class="bi bi-link-45deg"></i>
-                                </a>
-                                @else
-                                <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>Belum ada catatan
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            @if($laporan->hasPages())
-            <div class="card-footer">
-                {{ $laporan->links('pagination::bootstrap-5') }}
             </div>
             @endif
         </div>
