@@ -164,3 +164,10 @@ Log perubahan otomatis dari git commits.
 | `resources/views/admin/laporan-harian/show.blade.php` | Full redesign: hero header gradient, entry cards dengan progress bar capaian, info panel PIC, navigasi hari sebelumnya/berikutnya, timeline log vertikal |
 | `resources/views/admin/laporan-harian/index.blade.php` | Fix URL date format (parse tanggal ke dateString agar tidak mengandung timestamp) |
 
+
+## 14. 🔄 Update: a
+
+- **Commit:** `ed2be60` — 21:58 oleh Gudangsoft
+- **File berubah:** 1 file
+- `resources/views/admin/partials/sidebar.blade.php`
+
