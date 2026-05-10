@@ -114,7 +114,8 @@
                     <tr>
                         <th style="width:120px">Tanggal</th>
                         <th style="width:180px">PIC</th>
-                        <th style="width:90px" class="text-center">Kegiatan</th>
+                        <th style="width:80px" class="text-center">Kegiatan</th>
+                        <th>Ringkasan Kegiatan</th>
                         <th style="width:90px" class="text-center">Capaian</th>
                         <th style="width:160px">Status Validasi</th>
                         <th style="width:70px" class="text-center">Detail</th>
@@ -138,7 +139,17 @@
                             <div class="fw-semibold">{{ $item->pic->name ?? '-' }}</div>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-primary rounded-pill">{{ $item->total_kegiatan }} kegiatan</span>
+                            <span class="badge bg-primary rounded-pill">{{ $item->total_kegiatan }}</span>
+                        </td>
+                        <td class="small" style="max-width:280px;">
+                            @foreach(explode('||', $item->ringkasan_kegiatan ?? '') as $idx => $judul)
+                            @if($judul)
+                            <div class="d-flex align-items-start gap-1 {{ $idx > 0 ? 'mt-1' : '' }}">
+                                <span class="badge bg-light text-dark border flex-shrink-0" style="font-size:0.65rem;">{{ $idx+1 }}</span>
+                                <span class="text-truncate" style="max-width:240px;" title="{{ $judul }}">{{ Str::limit($judul, 60) }}</span>
+                            </div>
+                            @endif
+                            @endforeach
                         </td>
                         <td class="text-center">
                             @php $c = $item->avg_capaian; @endphp
@@ -178,7 +189,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
+                        <td colspan="7" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-4 d-block mb-2"></i>Tidak ada data laporan untuk filter ini
                         </td>
                     </tr>

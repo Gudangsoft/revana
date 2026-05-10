@@ -30,7 +30,8 @@ class LaporanHarianController extends Controller
                 DB::raw('ROUND(AVG(capaian_hasil)) as avg_capaian'),
                 DB::raw('SUM(CASE WHEN validated_at IS NOT NULL THEN 1 ELSE 0 END) as total_validated'),
                 DB::raw('MAX(validated_at) as last_validated_at'),
-                DB::raw('MAX(catatan_admin) as catatan_admin')
+                DB::raw('MAX(catatan_admin) as catatan_admin'),
+                DB::raw('GROUP_CONCAT(IFNULL(judul_kegiatan, target_kerja) ORDER BY id SEPARATOR "||") as ringkasan_kegiatan')
             )
             ->whereBetween('tanggal', [$dariTanggal, $sampaiTanggal])
             ->groupBy('pic_id', 'tanggal')
