@@ -32,3 +32,19 @@ Log perubahan otomatis dari git commits.
 | `resources/views/pic/partials/sidebar.blade.php` | Tambah badge "New" + titik blink pada menu Catatan Kinerja Harian; tambah CSS `@keyframes sidebarBlink` |
 | `resources/views/admin/partials/sidebar.blade.php` | Tambah badge "New" + titik blink pada menu Catatan Kinerja Harian; tambah `<style>` block dengan animasi |
 
+
+## 3. 🔄 Update: update /laporan-harian
+
+- **Commit:** `8f08dd1` — 18:22 oleh Gudangsoft
+- **File berubah:** 10 file
+- `app/Http/Controllers/Admin/LaporanHarianController.php`
+- `app/Models/LaporanHarian.php`
+- `database/migrations/2026_05_10_000001_add_validation_to_laporan_harian_table.php`
+- `log-update-2026-05-10.md`
+- `resources/views/admin/laporan-harian/index.blade.php`
+- `resources/views/admin/laporan-harian/show.blade.php`
+- `resources/views/admin/partials/sidebar.blade.php`
+- `resources/views/pic/laporan-harian/index.blade.php`
+- `resources/views/pic/partials/sidebar.blade.php`
+- `routes/web.php`
+
