@@ -40,7 +40,7 @@ class LaporanHarianController extends Controller
         return view('admin.laporan-harian.show', compact('laporanHarian'));
     }
 
-    public function validate(Request $request, LaporanHarian $laporanHarian)
+    public function setValidasi(Request $request, LaporanHarian $laporanHarian)
     {
         $request->validate([
             'catatan_admin' => 'nullable|string|max:2000',
