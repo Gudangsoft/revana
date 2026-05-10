@@ -136,3 +136,31 @@ Log perubahan otomatis dari git commits.
 | `resources/views/pic/laporan-harian/edit.blade.php` | Fix @push → @section (PIC layout pakai @yield) |
 | `resources/views/pic/author/dashboard.blade.php` | Tambah banner notifikasi pengingat jika belum isi setelah pukul 14:00 |
 
+
+## 13. 🔄 Update: update
+
+- **Commit:** `ce596b1` — 20:24 oleh Gudangsoft
+- **File berubah:** 12 file
+- `app/Http/Controllers/Admin/LaporanHarianController.php`
+- `app/Http/Controllers/Pic/AuthorController.php`
+- `app/Http/Controllers/Pic/LaporanHarianController.php`
+- `log-update-2026-05-10.md`
+- `resources/views/admin/laporan-harian/index.blade.php`
+- `resources/views/admin/laporan-harian/rekap.blade.php`
+- `resources/views/admin/laporan-harian/show.blade.php`
+- `resources/views/admin/partials/sidebar.blade.php`
+- `resources/views/pic/author/dashboard.blade.php`
+- `resources/views/pic/laporan-harian/edit.blade.php`
+
+---
+
+## N+1. Redesign Halaman Detail Catatan Kinerja (Admin Show)
+
+**Tujuan:** Mempercantik tampilan halaman detail catatan kinerja admin agar lebih informatif dan enak dilihat.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/laporan-harian/show.blade.php` | Full redesign: hero header gradient, entry cards dengan progress bar capaian, info panel PIC, navigasi hari sebelumnya/berikutnya, timeline log vertikal |
+| `resources/views/admin/laporan-harian/index.blade.php` | Fix URL date format (parse tanggal ke dateString agar tidak mengandung timestamp) |
+

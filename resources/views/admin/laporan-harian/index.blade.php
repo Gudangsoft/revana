@@ -215,7 +215,7 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('admin.laporan-harian.show', [$item->pic_id, $item->tanggal]) }}"
+                            <a href="{{ route('admin.laporan-harian.show', [$item->pic_id, \Carbon\Carbon::parse($item->tanggal)->toDateString()]) }}"
                                class="btn btn-outline-primary btn-sm" title="Lihat & Validasi">
                                 <i class="bi bi-eye"></i>
                             </a>
