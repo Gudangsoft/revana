@@ -180,27 +180,6 @@
                 </div>
             </div>
 
-            {{-- Catatan / Feedback --}}
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <i class="bi bi-chat-text me-2"></i><strong>Catatan / Feedback</strong>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.laporan-harian.validate', [$pic->id, $tanggal]) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="action" value="{{ $allValidated ? 'validate' : 'validate' }}">
-                        <textarea name="catatan_admin" rows="4"
-                                  class="form-control form-control-sm mb-2"
-                                  placeholder="Tuliskan catatan atau feedback untuk PIC...">{{ old('catatan_admin', $catatanAdmin) }}</textarea>
-                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
-                            <i class="bi bi-save me-1"></i>Simpan Catatan
-                        </button>
-                    </form>
-                    @if($catatanAdmin)
-                    <div class="mt-3 p-2 bg-light rounded small border-start border-info border-2" style="white-space:pre-wrap;">{{ $catatanAdmin }}</div>
-                    @endif
-                </div>
-            </div>
         </div>
 
     </div>
