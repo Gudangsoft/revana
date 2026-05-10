@@ -320,6 +320,10 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.laporan-kinerja') ? 'active' : '' }}">
     <i class="bi bi-bar-chart-line-fill" style="color:#34d399;"></i> Laporan Kinerja
 </a>
+<a href="{{ route('admin.laporan-harian.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.laporan-harian') ? 'active' : '' }}">
+    <i class="bi bi-clipboard2-check-fill" style="color:#818cf8;"></i> Catatan Kinerja Harian
+</a>
 
 {{-- ═══ PENGATURAN ═══ --}}
 <div class="sidebar-section-label">Pengaturan</div>

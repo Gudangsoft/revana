@@ -287,6 +287,11 @@
     @endrolecap
     @endfeature
     
+    <a href="{{ route('pic.laporan-harian.index') }}" class="nav-link {{ request()->routeIs('pic.laporan-harian.*') ? 'active' : '' }}" data-title="Laporan Kinerja Harian">
+        <i class="bi bi-clipboard2-check"></i>
+        <span>Catatan Kinerja Harian</span>
+    </a>
+
     <a href="{{ route('pic.reports.journal-articles') }}" class="nav-link {{ request()->routeIs('pic.reports.*') ? 'active' : '' }}" data-title="Laporan">
         <i class="bi bi-file-earmark-bar-graph"></i>
         <span>Laporan Jurnal</span>

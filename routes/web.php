@@ -320,6 +320,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
         Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
 
+        // Laporan Kinerja Harian PIC
+        Route::get('/laporan-harian', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'index'])->name('laporan-harian.index');
+
         // Laporan Kinerja
         Route::get('/laporan-kinerja', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'index'])->name('laporan-kinerja.index');
         Route::get('/laporan-kinerja/export-excel', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'exportExcel'])->name('laporan-kinerja.export-excel');
@@ -526,6 +529,10 @@ Route::prefix('pic')->group(function () {
         
         // Laporan
         Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('pic.reports.journal-articles');
+
+        // Laporan Kinerja Harian
+        Route::get('/laporan-harian', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'index'])->name('pic.laporan-harian.index');
+        Route::post('/laporan-harian', [\App\Http\Controllers\Pic\LaporanHarianController::class, 'store'])->name('pic.laporan-harian.store');
     });
 });
 
