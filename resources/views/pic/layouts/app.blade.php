@@ -100,6 +100,24 @@
     </style>
 </head>
 <body>
+    {{-- Banner impersonasi admin --}}
+    @if(session('admin_impersonating'))
+    <div style="background:#f59e0b;color:#1c1917;padding:7px 20px;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+        <span>
+            <i class="bi bi-eye-fill me-1"></i>
+            Admin sedang <strong>melihat sebagai PIC: {{ auth()->guard('pic')->user()->name }}</strong>
+            — data yang tampil adalah milik PIC ini
+        </span>
+        <form method="POST" action="{{ route('admin.pics.return-to-admin') }}" style="margin:0;">
+            @csrf
+            <button type="submit"
+                    style="background:#92400e;color:white;border:none;border-radius:4px;padding:3px 14px;font-size:0.78rem;cursor:pointer;font-weight:600;">
+                <i class="bi bi-arrow-left me-1"></i>Kembali ke Admin
+            </button>
+        </form>
+    </div>
+    @endif
+
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('pic.author.dashboard') }}">

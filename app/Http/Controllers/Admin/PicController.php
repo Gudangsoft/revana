@@ -171,14 +171,31 @@ class PicController extends Controller
                 ->with('error', 'PIC tidak aktif, tidak dapat login sebagai PIC ini.');
         }
 
-        // Store original admin user ID in session for potential return
-        session(['admin_impersonating' => Auth::id()]);
-        
-        // Logout from admin (web guard) and login as PIC (pic guard)
+        $adminId = Auth::id();
+
+        // Clear any existing PIC session first to prevent stale pic_id
+        Auth::guard('pic')->logout();
+
+        // Store admin ID for return-to-admin
+        session(['admin_impersonating' => $adminId]);
+
+        // Login as the selected PIC
         Auth::guard('pic')->login($pic);
-        
+
         return redirect()->route('pic.dashboard')
-            ->with('success', 'Anda sekarang login sebagai ' . $pic->name);
+            ->with('success', 'Sedang melihat sebagai: ' . $pic->name);
+    }
+
+    /**
+     * Return from PIC impersonation back to admin
+     */
+    public function returnToAdmin()
+    {
+        Auth::guard('pic')->logout();
+        session()->forget('admin_impersonating');
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Kembali ke akun admin.');
     }
 
     /**

@@ -319,6 +319,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pic-points/{pic}/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'exportShow'])->name('pic-points.export-show');
         Route::post('/pic-points/{pic}/adjust', [\App\Http\Controllers\Admin\PicPointReportController::class, 'adjustPoints'])->name('pic-points.adjust');
         Route::post('/pics/{pic}/login-as', [PicController::class, 'loginAs'])->name('pics.login-as');
+        Route::post('/pics/return-to-admin', [PicController::class, 'returnToAdmin'])->name('pics.return-to-admin');
 
         // Laporan Kinerja Harian PIC
         Route::get('/laporan-harian', [\App\Http\Controllers\Admin\LaporanHarianController::class, 'index'])->name('laporan-harian.index');
