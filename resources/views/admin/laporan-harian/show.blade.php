@@ -33,17 +33,17 @@
             </div>
         </div>
         <div class="d-flex flex-wrap gap-3 text-center">
-            <div class="bg-white bg-opacity-15 rounded-3 px-4 py-2">
-                <div class="fs-4 fw-bold">{{ $totalCount }}</div>
-                <div class="small opacity-75">Kegiatan</div>
+            <div class="rounded-3 px-4 py-2" style="background:rgba(255,255,255,0.18);">
+                <div class="fs-4 fw-bold" style="color:#fff;">{{ $totalCount }}</div>
+                <div class="small" style="color:rgba(255,255,255,0.75);">Kegiatan</div>
             </div>
-            <div class="bg-white bg-opacity-15 rounded-3 px-4 py-2">
-                <div class="fs-4 fw-bold">{{ $avgCapaian }}%</div>
-                <div class="small opacity-75">Rata-rata</div>
+            <div class="rounded-3 px-4 py-2" style="background:rgba(255,255,255,0.18);">
+                <div class="fs-4 fw-bold" style="color:#fff;">{{ $avgCapaian }}%</div>
+                <div class="small" style="color:rgba(255,255,255,0.75);">Rata-rata</div>
             </div>
-            <div class="bg-white bg-opacity-15 rounded-3 px-4 py-2">
-                <div class="fs-4 fw-bold">{{ $validatedCount }}/{{ $totalCount }}</div>
-                <div class="small opacity-75">Tervalidasi</div>
+            <div class="rounded-3 px-4 py-2" style="background:rgba(255,255,255,0.18);">
+                <div class="fs-4 fw-bold" style="color:#fff;">{{ $validatedCount }}/{{ $totalCount }}</div>
+                <div class="small" style="color:rgba(255,255,255,0.75);">Tervalidasi</div>
             </div>
         </div>
     </div>
