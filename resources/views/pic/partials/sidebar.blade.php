@@ -120,6 +120,20 @@
         color: #000;
         border: none;
     }
+
+    .sidebar-new-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #dc3545;
+        display: inline-block;
+        animation: sidebarBlink 1s infinite;
+    }
+
+    @keyframes sidebarBlink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.2; }
+    }
 </style>
 
 <nav class="nav flex-column">
@@ -287,9 +301,15 @@
     @endrolecap
     @endfeature
     
-    <a href="{{ route('pic.laporan-harian.index') }}" class="nav-link {{ request()->routeIs('pic.laporan-harian.*') ? 'active' : '' }}" data-title="Laporan Kinerja Harian">
+    <a href="{{ route('pic.laporan-harian.index') }}" class="nav-link {{ request()->routeIs('pic.laporan-harian.*') ? 'active' : '' }}" data-title="Catatan Kinerja Harian">
         <i class="bi bi-clipboard2-check"></i>
         <span>Catatan Kinerja Harian</span>
+        @if(\Carbon\Carbon::parse('2026-05-09')->diffInDays(now()) <= 7)
+        <span class="ms-auto d-flex align-items-center gap-1">
+            <span class="sidebar-new-dot"></span>
+            <span class="badge bg-danger" style="font-size:0.6rem;padding:2px 5px;">New</span>
+        </span>
+        @endif
     </a>
 
     <a href="{{ route('pic.reports.journal-articles') }}" class="nav-link {{ request()->routeIs('pic.reports.*') ? 'active' : '' }}" data-title="Laporan">

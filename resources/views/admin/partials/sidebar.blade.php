@@ -1,3 +1,18 @@
+<style>
+.sidebar-new-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #dc3545;
+    display: inline-block;
+    animation: sidebarBlink 1s infinite;
+    flex-shrink: 0;
+}
+@keyframes sidebarBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+</style>
 @php
     $currentRoute = Route::currentRouteName();
     $pendingValidationCount = \App\Models\Submission::where('status', 'like', '%_SUBMITTED')->count();
@@ -321,8 +336,16 @@
     <i class="bi bi-bar-chart-line-fill" style="color:#34d399;"></i> Laporan Kinerja
 </a>
 <a href="{{ route('admin.laporan-harian.index') }}"
-   class="nav-link {{ str_starts_with($currentRoute, 'admin.laporan-harian') ? 'active' : '' }}">
-    <i class="bi bi-clipboard2-check-fill" style="color:#818cf8;"></i> Catatan Kinerja Harian
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.laporan-harian') ? 'active' : '' }}"
+   style="display:flex;align-items:center;gap:8px;">
+    <i class="bi bi-clipboard2-check-fill" style="color:#818cf8;"></i>
+    <span>Catatan Kinerja Harian</span>
+    @if(\Carbon\Carbon::parse('2026-05-09')->diffInDays(now()) <= 7)
+    <span class="ms-auto d-flex align-items-center gap-1">
+        <span class="sidebar-new-dot"></span>
+        <span class="badge bg-danger" style="font-size:0.6rem;padding:2px 5px;">New</span>
+    </span>
+    @endif
 </a>
 
 {{-- ═══ PENGATURAN ═══ --}}

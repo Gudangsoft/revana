@@ -19,7 +19,7 @@ class LaporanHarianController extends Controller
             $dariTanggal = now()->startOfMonth()->toDateString();
         }
 
-        $query = LaporanHarian::with('pic')
+        $query = LaporanHarian::with(['pic', 'validator'])
             ->whereBetween('tanggal', [$dariTanggal, $sampaiTanggal])
             ->orderByDesc('tanggal')
             ->orderBy('pic_id');
@@ -32,5 +32,38 @@ class LaporanHarianController extends Controller
         $pics    = Pic::where('is_active', true)->orderBy('name')->get();
 
         return view('admin.laporan-harian.index', compact('laporan', 'pics', 'picId', 'dariTanggal', 'sampaiTanggal'));
+    }
+
+    public function show(LaporanHarian $laporanHarian)
+    {
+        $laporanHarian->load(['pic', 'validator']);
+        return view('admin.laporan-harian.show', compact('laporanHarian'));
+    }
+
+    public function validate(Request $request, LaporanHarian $laporanHarian)
+    {
+        $request->validate([
+            'catatan_admin' => 'nullable|string|max:2000',
+            'action'        => 'required|in:validate,unvalidate',
+        ]);
+
+        if ($request->action === 'validate') {
+            $laporanHarian->update([
+                'validated_at'  => now(),
+                'validated_by'  => auth()->id(),
+                'catatan_admin' => $request->catatan_admin,
+            ]);
+            $message = 'Catatan kinerja berhasil divalidasi.';
+        } else {
+            $laporanHarian->update([
+                'validated_at'  => null,
+                'validated_by'  => null,
+                'catatan_admin' => $request->catatan_admin,
+            ]);
+            $message = 'Validasi dibatalkan.';
+        }
+
+        return redirect()->route('admin.laporan-harian.show', $laporanHarian)
+            ->with('success', $message);
     }
 }

@@ -43,12 +43,13 @@
 
     {{-- Summary cards --}}
     @php
-        $totalLaporan  = $laporan->total();
-        $avgCapaian    = $laporan->count() > 0 ? round($laporan->avg('capaian_hasil')) : 0;
-        $totalBukti    = $laporan->filter(fn($l) => $l->bukti_hasil)->count();
+        $totalLaporan   = $laporan->total();
+        $avgCapaian     = $laporan->count() > 0 ? round($laporan->avg('capaian_hasil')) : 0;
+        $totalValidated = $laporan->filter(fn($l) => $l->validated_at)->count();
+        $totalBelum     = $laporan->count() - $totalValidated;
     @endphp
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 bg-primary text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
                     <i class="bi bi-clipboard2-check fs-2 opacity-75"></i>
@@ -59,7 +60,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 bg-success text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
                     <i class="bi bi-percent fs-2 opacity-75"></i>
@@ -70,13 +71,24 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 bg-info text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bi bi-link-45deg fs-2 opacity-75"></i>
+                    <i class="bi bi-patch-check-fill fs-2 opacity-75"></i>
                     <div>
-                        <div class="fs-4 fw-bold">{{ $totalBukti }}</div>
-                        <div class="small opacity-75">Laporan Dengan Bukti</div>
+                        <div class="fs-4 fw-bold">{{ $totalValidated }}</div>
+                        <div class="small opacity-75">Sudah Divalidasi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-dark shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="bi bi-hourglass-split fs-2 opacity-75"></i>
+                    <div>
+                        <div class="fs-4 fw-bold">{{ $totalBelum }}</div>
+                        <div class="small opacity-75">Belum Divalidasi</div>
                     </div>
                 </div>
             </div>
@@ -99,6 +111,8 @@
                         <th>Laporan Kinerja</th>
                         <th style="width:90px" class="text-center">Capaian</th>
                         <th style="width:80px" class="text-center">Bukti</th>
+                        <th style="width:110px" class="text-center">Status</th>
+                        <th style="width:70px" class="text-center">Detail</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,10 +148,29 @@
                             <span class="text-muted small">-</span>
                             @endif
                         </td>
+                        <td class="text-center">
+                            @if($item->validated_at)
+                                <span class="badge bg-success" title="Divalidasi {{ $item->validated_at->format('d/m/Y H:i') }}">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Valid
+                                </span>
+                            @else
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-hourglass-split me-1"></i>Belum
+                                </span>
+                            @endif
+                            @if($item->catatan_admin)
+                                <i class="bi bi-chat-text-fill text-info ms-1" title="{{ $item->catatan_admin }}" style="cursor:help;"></i>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ route('admin.laporan-harian.show', $item) }}" class="btn btn-outline-primary btn-sm" title="Lihat Detail">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-4 d-block mb-2"></i>Tidak ada data laporan untuk filter ini
                         </td>
                     </tr>
