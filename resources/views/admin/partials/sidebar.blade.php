@@ -28,7 +28,8 @@
         || str_starts_with($currentRoute, 'admin.journal-slots')
         || str_starts_with($currentRoute, 'admin.accreditations')
         || str_starts_with($currentRoute, 'admin.kategoris')
-        || str_starts_with($currentRoute, 'admin.jenis-jurnals');
+        || str_starts_with($currentRoute, 'admin.jenis-jurnals')
+        || str_starts_with($currentRoute, 'admin.field-of-studies');
 
     $normalActive   = $isSubmissionRoute && !$currentProgram;
     $journalActive  = $isSharedJournalRoute;
@@ -94,6 +95,10 @@
                 <a href="{{ route('admin.jenis-jurnals.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.jenis-jurnals') ? 'active' : '' }}">
                     <i class="bi bi-bookmarks-fill" style="color:#818cf8;"></i> Jenis Jurnal
+                </a>
+                <a href="{{ route('admin.field-of-studies.index') }}"
+                   class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.field-of-studies') ? 'active' : '' }}">
+                    <i class="bi bi-mortarboard-fill" style="color:#818cf8;"></i> Bidang Ilmu
                 </a>
             </div>
         </div>
@@ -273,11 +278,6 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.pics.') ? 'active' : '' }}">
     <i class="bi bi-person-badge-fill" style="color:#60a5fa;"></i> PIC
 </a>
-<a href="{{ route('admin.field-of-studies.index') }}"
-   class="nav-link {{ str_starts_with($currentRoute, 'admin.field-of-studies') ? 'active' : '' }}">
-    <i class="bi bi-mortarboard-fill" style="color:#a78bfa;"></i> Bidang Ilmu
-</a>
-
 {{-- ═══ LAPORAN ═══ --}}
 <div class="sidebar-section-label">Laporan</div>
 
