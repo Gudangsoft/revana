@@ -134,74 +134,64 @@
             </div>
         </div>
 
-        {{-- Panel Validasi --}}
+        {{-- Panel Ringkasan & Catatan --}}
         <div class="col-lg-4">
+            {{-- Status ringkasan --}}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <i class="bi bi-bar-chart-fill me-2"></i><strong>Ringkasan</strong>
+                </div>
+                <div class="card-body">
+                    @php
+                        $validatedCount = $entries->filter(fn($e) => $e->validated_at)->count();
+                        $totalCount     = $entries->count();
+                        $pct            = $totalCount > 0 ? round($validatedCount / $totalCount * 100) : 0;
+                    @endphp
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-muted">Progress Validasi</span>
+                        <span class="fw-semibold small">{{ $validatedCount }}/{{ $totalCount }}</span>
+                    </div>
+                    <div class="progress mb-3" style="height:8px;">
+                        <div class="progress-bar {{ $pct === 100 ? 'bg-success' : 'bg-primary' }}"
+                             style="width:{{ $pct }}%"></div>
+                    </div>
+                    @if($allValidated)
+                        <div class="alert alert-success py-2 mb-0 small">
+                            <i class="bi bi-patch-check-fill me-1"></i>Semua kegiatan sudah divalidasi
+                        </div>
+                    @elseif($someValidated)
+                        <div class="alert alert-warning py-2 mb-0 small">
+                            <i class="bi bi-patch-check me-1"></i>{{ $validatedCount }} dari {{ $totalCount }} kegiatan divalidasi
+                        </div>
+                    @else
+                        <div class="alert alert-secondary py-2 mb-0 small">
+                            <i class="bi bi-hourglass-split me-1"></i>Belum ada yang divalidasi
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Catatan / Feedback --}}
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <i class="bi bi-shield-check me-2"></i><strong>Validasi</strong>
+                    <i class="bi bi-chat-text me-2"></i><strong>Catatan / Feedback</strong>
                 </div>
                 <div class="card-body">
-
-                    @if($allValidated)
-                    <div class="alert alert-success d-flex align-items-start gap-2 mb-3">
-                        <i class="bi bi-patch-check-fill fs-5 mt-1 flex-shrink-0"></i>
-                        <div>
-                            <div class="fw-semibold">Semua kegiatan sudah divalidasi</div>
-                            <div class="small">{{ $entries->count() }} dari {{ $entries->count() }} kegiatan</div>
-                        </div>
-                    </div>
-                    @elseif($someValidated)
-                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
-                        <i class="bi bi-patch-check fs-5 mt-1 flex-shrink-0"></i>
-                        <div>
-                            <div class="fw-semibold">Sebagian divalidasi</div>
-                            <div class="small">{{ $entries->filter(fn($e) => $e->validated_at)->count() }} dari {{ $entries->count() }} kegiatan</div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
-                        <i class="bi bi-hourglass-split fs-5 mt-1 flex-shrink-0"></i>
-                        <div class="fw-semibold">Belum divalidasi</div>
-                    </div>
-                    @endif
-
                     <form action="{{ route('admin.laporan-harian.validate', [$pic->id, $tanggal]) }}" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small">Catatan / Feedback <small class="text-muted fw-normal">(opsional)</small></label>
-                            <textarea name="catatan_admin" rows="4"
-                                      class="form-control form-control-sm"
-                                      placeholder="Tuliskan catatan atau feedback untuk PIC...">{{ old('catatan_admin', $catatanAdmin) }}</textarea>
-                        </div>
-                        <div class="d-grid gap-2">
-                            @if(!$allValidated)
-                            <button type="submit" name="action" value="validate" class="btn btn-success">
-                                <i class="bi bi-patch-check me-1"></i>Validasi Semua Kegiatan
-                            </button>
-                            @else
-                            <button type="submit" name="action" value="validate" class="btn btn-outline-success">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Update Catatan
-                            </button>
-                            <button type="submit" name="action" value="unvalidate" class="btn btn-outline-danger btn-sm"
-                                    onclick="return confirm('Batalkan validasi semua kegiatan hari ini?')">
-                                <i class="bi bi-x-circle me-1"></i>Batalkan Validasi
-                            </button>
-                            @endif
-                        </div>
+                        <input type="hidden" name="action" value="{{ $allValidated ? 'validate' : 'validate' }}">
+                        <textarea name="catatan_admin" rows="4"
+                                  class="form-control form-control-sm mb-2"
+                                  placeholder="Tuliskan catatan atau feedback untuk PIC...">{{ old('catatan_admin', $catatanAdmin) }}</textarea>
+                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-save me-1"></i>Simpan Catatan
+                        </button>
                     </form>
-
+                    @if($catatanAdmin)
+                    <div class="mt-3 p-2 bg-light rounded small border-start border-info border-2" style="white-space:pre-wrap;">{{ $catatanAdmin }}</div>
+                    @endif
                 </div>
             </div>
-
-            {{-- Catatan admin --}}
-            @if($catatanAdmin)
-            <div class="card shadow-sm mt-3">
-                <div class="card-header"><i class="bi bi-chat-text me-2"></i><strong>Catatan Tersimpan</strong></div>
-                <div class="card-body">
-                    <div class="p-2 bg-light rounded small" style="white-space:pre-wrap;">{{ $catatanAdmin }}</div>
-                </div>
-            </div>
-            @endif
         </div>
 
     </div>

@@ -68,43 +68,27 @@ class LaporanHarianController extends Controller
     {
         $request->validate([
             'catatan_admin' => 'nullable|string|max:2000',
-            'action'        => 'required|in:validate,unvalidate',
         ]);
 
         $adminUser  = auth()->user();
-        $adminId    = $adminUser->id;
-        $adminName  = $adminUser->name;
         $entries    = LaporanHarian::where('pic_id', $picId)->where('tanggal', $tanggal)->get();
         $newCatatan = $request->catatan_admin;
+        $oldCatatan = $entries->first()?->catatan_admin;
 
-        if ($request->action === 'validate') {
-            foreach ($entries as $entry) {
-                $entry->update([
-                    'validated_at'  => now(),
-                    'validated_by'  => $adminId,
-                    'catatan_admin' => $newCatatan,
-                ]);
-                LaporanHarianLog::record($entry, 'admin', $adminId, $adminName, 'validated',
-                    $newCatatan ? ['catatan_admin' => ['old' => null, 'new' => $newCatatan]] : []
-                );
-            }
-            $message = 'Semua catatan kinerja PIC berhasil divalidasi.';
-        } else {
-            foreach ($entries as $entry) {
-                $entry->update([
-                    'validated_at'  => null,
-                    'validated_by'  => null,
-                    'catatan_admin' => $newCatatan,
-                ]);
-                LaporanHarianLog::record($entry, 'admin', $adminId, $adminName, 'unvalidated',
-                    $newCatatan ? ['catatan_admin' => ['old' => null, 'new' => $newCatatan]] : []
-                );
-            }
-            $message = 'Validasi dibatalkan.';
+        // Hanya simpan catatan, tidak ubah status validasi
+        foreach ($entries as $entry) {
+            $entry->update(['catatan_admin' => $newCatatan]);
         }
 
-        return redirect()->route('admin.laporan-harian.index')
-            ->with('success', $message);
+        if ($entries->isNotEmpty() && (string) $oldCatatan !== (string) $newCatatan) {
+            LaporanHarianLog::record(
+                $entries->first(), 'admin', $adminUser->id, $adminUser->name, 'catatan',
+                ['catatan_admin' => ['old' => $oldCatatan, 'new' => $newCatatan]]
+            );
+        }
+
+        return redirect()->route('admin.laporan-harian.show', [$picId, $tanggal])
+            ->with('success', 'Catatan berhasil disimpan.');
     }
 
     public function setValidasiEntry(Request $request, LaporanHarian $laporanHarian)
