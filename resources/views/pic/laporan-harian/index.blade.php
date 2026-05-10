@@ -218,6 +218,139 @@
         </div>
         @endif
 
+        {{-- Catatan Kinerja PIC Lain --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <span>
+                    <i class="bi bi-people-fill me-2 text-primary"></i>
+                    <strong>Catatan Kinerja Harian — Semua PIC</strong>
+                </span>
+                <form method="GET" action="{{ route('pic.laporan-harian.index') }}" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="page" value="1">
+                    <label class="small text-muted mb-0">Tanggal:</label>
+                    <input type="date" name="team_tanggal" class="form-control form-control-sm" style="width:auto;"
+                           value="{{ $teamTanggal }}"
+                           onchange="this.form.submit()">
+                </form>
+            </div>
+            <div class="card-body p-0">
+                @php
+                    $teamTanggalLabel = \Carbon\Carbon::parse($teamTanggal)->locale('id')->translatedFormat('l, d F Y');
+                    $isTeamToday = $teamTanggal === $today;
+                @endphp
+                @if($teamEntries->isEmpty())
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                    Tidak ada catatan dari PIC lain untuk
+                    <strong>{{ $teamTanggalLabel }}</strong>
+                </div>
+                @else
+                <div class="accordion accordion-flush" id="accordionTeam">
+                    @foreach($teamEntries as $teamPicId => $entries)
+                    @php
+                        $teamPic    = $entries->first()->pic;
+                        $teamAvg    = round($entries->avg('capaian_hasil'));
+                        $teamValid  = $entries->filter(fn($e) => $e->validated_at)->count();
+                        $colorClass = $teamAvg >= 80 ? 'success' : ($teamAvg >= 50 ? 'warning' : 'danger');
+                    @endphp
+                    <div class="accordion-item border-0 border-bottom">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-3" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#teamPic{{ $teamPicId }}">
+                                <div class="d-flex align-items-center gap-3 flex-grow-1 me-3">
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                                         style="width:34px;height:34px;font-size:0.8rem;">
+                                        {{ strtoupper(substr($teamPic->name ?? '?', 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ $teamPic->name ?? 'PIC #'.$teamPicId }}</div>
+                                        <div class="small text-muted">{{ $entries->count() }} kegiatan</div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+                                        <span class="badge bg-{{ $colorClass }}{{ $colorClass === 'warning' ? ' text-dark' : '' }}">
+                                            {{ $teamAvg }}%
+                                        </span>
+                                        @if($teamValid === $entries->count())
+                                            <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>Semua Valid</span>
+                                        @elseif($teamValid > 0)
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-patch-check me-1"></i>{{ $teamValid }}/{{ $entries->count() }}</span>
+                                        @else
+                                            <span class="badge bg-secondary"><i class="bi bi-hourglass-split me-1"></i>Belum</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="teamPic{{ $teamPicId }}" class="accordion-collapse collapse"
+                             data-bs-parent="#accordionTeam">
+                            <div class="accordion-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead class="table-light" style="font-size:0.8rem;">
+                                            <tr>
+                                                <th style="width:30px;">#</th>
+                                                <th>Judul Kegiatan</th>
+                                                <th>Catatan Kerja</th>
+                                                <th>Realisasi</th>
+                                                <th style="width:80px;" class="text-center">Capaian</th>
+                                                <th style="width:80px;" class="text-center">Status</th>
+                                                <th style="width:55px;" class="text-center">Bukti</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="font-size:0.82rem;">
+                                            @foreach($entries as $j => $e)
+                                            @php $ec = $e->capaian_hasil; @endphp
+                                            <tr>
+                                                <td class="text-muted">{{ $j + 1 }}</td>
+                                                <td>{{ $e->judul_kegiatan ?: '-' }}</td>
+                                                <td style="max-width:200px;">
+                                                    <span title="{{ $e->target_kerja }}">{{ \Str::limit($e->target_kerja, 70) }}</span>
+                                                </td>
+                                                <td style="max-width:200px;">
+                                                    <span title="{{ $e->laporan_kinerja }}">{{ \Str::limit($e->laporan_kinerja, 70) }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-{{ $ec >= 80 ? 'success' : ($ec >= 50 ? 'warning text-dark' : 'danger') }}">
+                                                        {{ $ec }}%
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($e->validated_at)
+                                                        <span class="badge bg-success"><i class="bi bi-patch-check-fill"></i></span>
+                                                    @else
+                                                        <span class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($e->bukti_hasil)
+                                                    <a href="{{ $e->bukti_hasil }}" target="_blank" class="btn btn-outline-info btn-sm py-0">
+                                                        <i class="bi bi-link-45deg"></i>
+                                                    </a>
+                                                    @else
+                                                    <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+            @if(!$isTeamToday)
+            <div class="card-footer text-muted small text-center">
+                Menampilkan data tanggal {{ $teamTanggalLabel }}
+                — <a href="{{ route('pic.laporan-harian.index') }}" class="text-decoration-none">Kembali ke hari ini</a>
+            </div>
+            @endif
+        </div>
+
         {{-- Riwayat --}}
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">

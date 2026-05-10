@@ -27,7 +27,20 @@ class LaporanHarianController extends Controller
         // Reminder after 14:00 if no entries today
         $showReminder = $todayEntries->isEmpty() && now()->hour >= 14;
 
-        return view('pic.laporan-harian.index', compact('laporan', 'todayEntries', 'today', 'chartData', 'showReminder'));
+        // Team view: other PICs' entries for the requested date
+        $teamTanggal   = request('team_tanggal', $today);
+        $teamEntries   = LaporanHarian::with('pic')
+            ->where('pic_id', '!=', $picId)
+            ->where('tanggal', $teamTanggal)
+            ->orderBy('pic_id')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('pic_id');
+
+        return view('pic.laporan-harian.index', compact(
+            'laporan', 'todayEntries', 'today', 'chartData', 'showReminder',
+            'teamEntries', 'teamTanggal'
+        ));
     }
 
     public function store(Request $request)
