@@ -71,7 +71,6 @@
                         <ul class="mb-0 ps-3">
                             <li>Catatan hanya bisa ditambahkan dan diedit <strong>pada hari yang sama</strong>.</li>
                             <li>Anda bisa menambahkan <strong>beberapa catatan</strong> untuk kegiatan yang berbeda dalam satu hari.</li>
-                            <li><strong>Capaian Hasil:</strong> <span class="badge bg-danger" style="font-size:0.65rem;">0–49%</span> Rendah &nbsp;<span class="badge bg-warning text-dark" style="font-size:0.65rem;">50–79%</span> Cukup &nbsp;<span class="badge bg-success" style="font-size:0.65rem;">80–100%</span> Baik</li>
                         </ul>
                     </div>
 
@@ -151,10 +150,6 @@
                                 <span class="fw-semibold text-dark">Realisasi:</span> {{ Str::limit($item->laporan_kinerja, 120) }}
                             </div>
                             <div class="d-flex align-items-center gap-2 mt-2">
-                                @php $c = $item->capaian_hasil; @endphp
-                                <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                    {{ $c }}%
-                                </span>
                                 @if($item->validated_at)
                                     <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>Divalidasi</span>
                                 @else
@@ -191,18 +186,6 @@
         </div>
         @endif
 
-        {{-- Grafik capaian 30 hari --}}
-        @if($chartData->count() > 1)
-        <div class="card shadow-sm mb-4">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <span><i class="bi bi-graph-up me-2 text-primary"></i><strong>Tren Capaian — 30 Hari Terakhir</strong></span>
-            </div>
-            <div class="card-body py-2">
-                <canvas id="chartCapaianPic" height="90"></canvas>
-            </div>
-        </div>
-        @endif
-
         {{-- Riwayat --}}
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -216,7 +199,6 @@
                             <th style="width:110px">Tanggal</th>
                             <th style="width:180px">Judul Kegiatan</th>
                             <th>Catatan Kerja</th>
-                            <th style="width:85px" class="text-center">Capaian</th>
                             <th style="width:100px" class="text-center">Status</th>
                             <th style="width:55px" class="text-center">Bukti</th>
                         </tr>
@@ -240,12 +222,6 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                @php $c = $item->capaian_hasil; @endphp
-                                <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                    {{ $c }}%
-                                </span>
-                            </td>
-                            <td class="text-center">
                                 @if($item->validated_at)
                                     <span class="badge bg-success"><i class="bi bi-patch-check-fill"></i></span>
                                 @else
@@ -264,7 +240,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="5" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-4 d-block mb-2"></i>Belum ada catatan
                             </td>
                         </tr>
@@ -309,10 +285,8 @@
                 <div class="accordion accordion-flush" id="accordionTeam">
                     @foreach($teamEntries as $teamPicId => $entries)
                     @php
-                        $teamPic    = $entries->first()->pic;
-                        $teamAvg    = round($entries->avg('capaian_hasil'));
-                        $teamValid  = $entries->filter(fn($e) => $e->validated_at)->count();
-                        $colorClass = $teamAvg >= 80 ? 'success' : ($teamAvg >= 50 ? 'warning' : 'danger');
+                        $teamPic   = $entries->first()->pic;
+                        $teamValid = $entries->filter(fn($e) => $e->validated_at)->count();
                     @endphp
                     <div class="accordion-item border-0 border-bottom">
                         <h2 class="accordion-header">
@@ -329,9 +303,6 @@
                                         <div class="small text-muted">{{ $entries->count() }} kegiatan</div>
                                     </div>
                                     <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
-                                        <span class="badge bg-{{ $colorClass }}{{ $colorClass === 'warning' ? ' text-dark' : '' }}">
-                                            {{ $teamAvg }}%
-                                        </span>
                                         @if($teamValid === $entries->count())
                                             <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>Semua Valid</span>
                                         @elseif($teamValid > 0)
@@ -354,14 +325,12 @@
                                                 <th>Judul Kegiatan</th>
                                                 <th>Catatan Kerja</th>
                                                 <th>Realisasi</th>
-                                                <th style="width:80px;" class="text-center">Capaian</th>
                                                 <th style="width:80px;" class="text-center">Status</th>
                                                 <th style="width:55px;" class="text-center">Bukti</th>
                                             </tr>
                                         </thead>
                                         <tbody style="font-size:0.82rem;">
                                             @foreach($entries as $j => $e)
-                                            @php $ec = $e->capaian_hasil; @endphp
                                             <tr>
                                                 <td class="text-muted">{{ $j + 1 }}</td>
                                                 <td>{{ $e->judul_kegiatan ?: '-' }}</td>
@@ -370,11 +339,6 @@
                                                 </td>
                                                 <td style="max-width:200px;">
                                                     <span title="{{ $e->laporan_kinerja }}">{{ \Str::limit($e->laporan_kinerja, 70) }}</span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <span class="badge bg-{{ $ec >= 80 ? 'success' : ($ec >= 50 ? 'warning text-dark' : 'danger') }}">
-                                                        {{ $ec }}%
-                                                    </span>
                                                 </td>
                                                 <td class="text-center">
                                                     @if($e->validated_at)
@@ -424,47 +388,4 @@ if (collapseEl) new bootstrap.Collapse(collapseEl, { show: true });
 @endif
 </script>
 
-@if($chartData->count() > 1)
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-(function() {
-    const labels = @json($chartData->pluck('tanggal')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m')));
-    const values = @json($chartData->pluck('avg_capaian'));
-    const totals = @json($chartData->pluck('total'));
-    const ctx    = document.getElementById('chartCapaianPic');
-    if (!ctx) return;
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Capaian (%)',
-                data: values,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.08)',
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: '#6366f1',
-                pointRadius: 5,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        afterLabel: (ctx) => `${totals[ctx.dataIndex]} kegiatan`
-                    }
-                }
-            },
-            scales: {
-                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-})();
-</script>
-@endif
 @endsection
