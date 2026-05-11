@@ -17,9 +17,6 @@
                     <a href="https://fonnte.com" target="_blank" class="btn btn-outline-success btn-sm">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Buka Fonnte Dashboard
                     </a>
-                    <button type="submit" form="smsGatewayForm" class="btn btn-success btn-sm">
-                        <i class="bi bi-save me-1"></i>Simpan Pengaturan
-                    </button>
                 </div>
             </div>
         </div>
@@ -497,24 +494,6 @@
             </div>
         </div>
 
-        {{-- Bottom action bar --}}
-        <div class="row mt-2 mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0 bg-light">
-                    <div class="card-body py-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                        <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Semua perubahan akan tersimpan setelah klik tombol Simpan.</span>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#testSmsModal">
-                                <i class="bi bi-send me-1"></i>Kirim Pesan Test
-                            </button>
-                            <button type="submit" class="btn btn-success px-4">
-                                <i class="bi bi-save me-1"></i>Simpan Pengaturan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </form>
 </div>
 

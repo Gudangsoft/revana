@@ -201,11 +201,8 @@ class SmsGatewayController extends Controller
 
             Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
 
-            // Render view langsung dengan data yang baru disimpan (tidak redirect)
-            // → form pasti tampil terisi tanpa bergantung pada DB/session read
-            $settings = $this->buildSettings($fileData);
-            session()->now('success', 'Pengaturan SMS Gateway berhasil disimpan!');
-            return view('admin.sms-gateway.index', compact('settings'));
+            return redirect()->route('admin.sms-gateway.index')
+                ->with('success', 'Pengaturan SMS Gateway berhasil disimpan!');
 
         } catch (\Exception $e) {
             Log::error('SMS Gateway Settings save error', [
