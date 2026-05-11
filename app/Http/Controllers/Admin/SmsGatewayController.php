@@ -96,7 +96,7 @@ class SmsGatewayController extends Controller
             Log::warning('SMS Gateway: DB read failed', ['error' => $e->getMessage()]);
         }
 
-        // Merge prioritas: File < Cache < DB < Session
+        // Merge prioritas: File < Cache < DB < Session (session = paling baru, ditulis saat save)
         $merged = is_array($fromFile) ? $fromFile : [];
         foreach ($fromCache as $k => $v) {
             if ($v !== '' && $v !== null) $merged[$k] = $v;
@@ -105,7 +105,8 @@ class SmsGatewayController extends Controller
             if ($v !== '' && $v !== null) $merged[$k] = $v;
         }
         foreach ($fromSession as $k => $v) {
-            if ($v !== '' && $v !== null) $merged[$k] = $v;
+            // Session selalu menang — ditulis langsung dari data yang disubmit
+            if ($v !== null) $merged[$k] = $v;
         }
 
         // Sync: jika ada data baru dari DB/session, perbarui file
@@ -139,81 +140,69 @@ class SmsGatewayController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'fonnte_api_token' => 'nullable|string|max:500',
-            'fonnte_device_id' => 'nullable|string|max:255',
-            'sms_gateway_enabled' => 'nullable|in:0,1',
-            'sms_notification_submit' => 'nullable|in:0,1',
+            'fonnte_api_token'               => 'nullable|string|max:500',
+            'fonnte_device_id'               => 'nullable|string|max:255',
+            'sms_gateway_enabled'            => 'nullable|in:0,1',
+            'sms_notification_submit'        => 'nullable|in:0,1',
             'sms_notification_status_change' => 'nullable|in:0,1',
-            'sms_notification_published' => 'nullable|in:0,1',
-            'sms_default_country_code' => 'nullable|string|max:5',
-            'sms_template_submit' => 'nullable|string|max:2000',
-            'sms_template_status_change' => 'nullable|string|max:2000',
-            'sms_template_published' => 'nullable|string|max:2000',
-            'wa_template_credential_new' => 'nullable|string|max:3000',
-            'wa_template_credential_update' => 'nullable|string|max:3000',
+            'sms_notification_published'     => 'nullable|in:0,1',
+            'sms_default_country_code'       => 'nullable|string|max:5',
+            'sms_template_submit'            => 'nullable|string|max:2000',
+            'sms_template_status_change'     => 'nullable|string|max:2000',
+            'sms_template_published'         => 'nullable|string|max:2000',
+            'wa_template_credential_new'     => 'nullable|string|max:3000',
+            'wa_template_credential_update'  => 'nullable|string|max:3000',
         ]);
 
-        try {
-            // Ensure database table is ready
-            $this->ensureSettingsTableReady();
+        // Flash input sekarang agar old() selalu ada di view ini maupun request berikutnya
+        $request->flash();
 
-            // Checkbox fields default to '0' when not submitted (unchecked)
-            $checkboxFields = ['sms_gateway_enabled', 'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published'];
-            foreach ($checkboxFields as $field) {
-                $validated[$field] = $request->input($field, '0');
-            }
-
-            // Sensitive fields: jangan timpa / kosongkan nilai jika field dibiarkan kosong saat submit
-            $protectedFields = ['fonnte_api_token'];
-            $existingFile    = $this->readFromFile();
-            $existingCache   = Cache::get('sms_gw_settings', []);
-            $existingSession = session('sms_gw_settings', []);
-
-            foreach ($protectedFields as $field) {
-                if (empty($validated[$field])) {
-                    // Cari nilai lama dari semua sumber (DB → file → cache → session)
-                    $existing = Setting::get($field)
-                        ?: ($existingFile[$field]    ?? '')
-                        ?: ($existingCache[$field]   ?? '')
-                        ?: ($existingSession[$field] ?? '');
-
-                    if (!empty($existing)) {
-                        $validated[$field] = $existing; // pulihkan agar tersimpan & tampil di view
-                    } else {
-                        unset($validated[$field]); // tidak ada nilai lama → jangan simpan kosong ke DB
-                    }
-                }
-            }
-
-            // Save — updateOrCreate menjamin record ada di DB setelah ini
-            foreach ($validated as $key => $value) {
-                Setting::updateOrCreate(
-                    ['key' => $key],
-                    ['value' => $value ?? '']
-                );
-            }
-
-            // Tulis ke file lokal — fallback paling andal saat DB read bermasalah
-            $fileData = array_merge($existingFile, $validated);
-            $this->writeToFile($fileData);
-            session()->put('sms_gw_settings', $fileData);
-            Cache::put('sms_gw_settings', $fileData, now()->addDays(30));
-
-            Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
-
-            return redirect()->route('admin.sms-gateway.index')
-                ->with('success', 'Pengaturan SMS Gateway berhasil disimpan!');
-
-        } catch (\Exception $e) {
-            Log::error('SMS Gateway Settings save error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return redirect()->route('admin.sms-gateway.index')
-                ->withInput()
-                ->with('error', 'Gagal menyimpan pengaturan: ' . $e->getMessage());
+        // Checkbox tidak dikirim saat unchecked — default ke '0'
+        $checkboxFields = ['sms_gateway_enabled', 'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published'];
+        foreach ($checkboxFields as $field) {
+            $validated[$field] = $request->input($field, '0');
         }
+
+        // Jika token dikosongkan, pulihkan dari penyimpanan yang sudah ada
+        if (empty($validated['fonnte_api_token'])) {
+            $existing = Setting::get('fonnte_api_token')
+                ?: (($this->readFromFile())['fonnte_api_token'] ?? '')
+                ?: (Cache::get('sms_gw_settings', []))['fonnte_api_token'] ?? ''
+                ?: (session('sms_gw_settings', []))['fonnte_api_token'] ?? '';
+            if (!empty($existing)) {
+                $validated['fonnte_api_token'] = $existing;
+            }
+        }
+
+        // Simpan ke semua sumber — best-effort (error ditangkap per-sumber)
+        try {
+            $this->ensureSettingsTableReady();
+            foreach ($validated as $key => $value) {
+                Setting::updateOrCreate(['key' => $key], ['value' => $value ?? '']);
+            }
+        } catch (\Exception $e) {
+            Log::warning('SMS Gateway: DB save failed', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            $existingFile = $this->readFromFile();
+            $fileData     = array_merge($existingFile, $validated);
+            $this->writeToFile($fileData);
+        } catch (\Exception $e) {
+            $fileData = $validated;
+            Log::warning('SMS Gateway: file save failed', ['error' => $e->getMessage()]);
+        }
+
+        session()->put('sms_gw_settings', $validated);
+        Cache::put('sms_gw_settings', $validated, now()->addDays(30));
+
+        Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
+
+        // Return view langsung dengan $settings dari data yang baru disimpan
+        // → form selalu terisi tanpa bergantung pada keberhasilan DB/file read
+        $settings = $this->buildSettings($validated);
+        session()->now('success', 'Pengaturan SMS Gateway berhasil disimpan!');
+        return view('admin.sms-gateway.index', compact('settings'));
     }
 
     public static function defaultCredentialNewTemplate(): string
