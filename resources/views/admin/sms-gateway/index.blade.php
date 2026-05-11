@@ -53,9 +53,9 @@
 
     {{-- Banner: ringkasan setting yang sedang aktif --}}
     @php
-        $activeToken  = $settings['fonnte_api_token']  ?: old('fonnte_api_token');
-        $activeDevice = $settings['fonnte_device_id']  ?: old('fonnte_device_id');
-        $activeGw     = ($settings['sms_gateway_enabled'] ?? old('sms_gateway_enabled', '0')) == '1';
+        $activeToken  = ($settings['fonnte_api_token']  ?? '') ?: old('fonnte_api_token',  '');
+        $activeDevice = ($settings['fonnte_device_id']  ?? '') ?: old('fonnte_device_id',  '');
+        $activeGw     = (($settings['sms_gateway_enabled'] ?? old('sms_gateway_enabled', '0')) == '1');
     @endphp
     @if(!empty($activeToken) || !empty($activeDevice))
     <div class="alert alert-success d-flex align-items-start gap-3 mb-4" style="border-left: 4px solid #198754;">
