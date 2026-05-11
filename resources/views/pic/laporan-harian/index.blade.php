@@ -105,31 +105,16 @@
                             </div>
                         </div>
 
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Bukti Hasil <small class="text-muted fw-normal">(opsional)</small></label>
-                                <input type="url" name="bukti_hasil"
-                                       class="form-control @error('bukti_hasil') is-invalid @enderror"
-                                       value="{{ old('bukti_hasil') }}"
-                                       placeholder="https://drive.google.com/...">
-                                @error('bukti_hasil')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                <div class="form-text">Upload ke Google Drive → salin link → tempel di sini.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">
-                                    Capaian Hasil
-                                    <span class="badge ms-1" id="capaianBadge" style="font-size:0.8rem;min-width:52px;">{{ old('capaian_hasil', 0) }}%</span>
-                                </label>
-                                <input type="range" name="capaian_hasil" id="capaianRange"
-                                       class="form-range" min="0" max="100" step="5"
-                                       value="{{ old('capaian_hasil', 0) }}">
-                                <div class="d-flex justify-content-between mt-1">
-                                    <span class="badge bg-danger" style="font-size:0.65rem;">0% Belum</span>
-                                    <span class="badge bg-warning text-dark" style="font-size:0.65rem;">50% Separuh</span>
-                                    <span class="badge bg-success" style="font-size:0.65rem;">100% Selesai</span>
-                                </div>
-                            </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Bukti Hasil <small class="text-muted fw-normal">(opsional)</small></label>
+                            <input type="url" name="bukti_hasil"
+                                   class="form-control @error('bukti_hasil') is-invalid @enderror"
+                                   value="{{ old('bukti_hasil') }}"
+                                   placeholder="https://drive.google.com/...">
+                            @error('bukti_hasil')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Link bukti hasil kerja (Google Drive, OneDrive, YouTube, atau tautan lainnya).</div>
                         </div>
+                        <input type="hidden" name="capaian_hasil" value="{{ old('capaian_hasil', 100) }}">
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
@@ -433,17 +418,6 @@
 
 @section('scripts')
 <script>
-const range = document.getElementById('capaianRange');
-const badge = document.getElementById('capaianBadge');
-if (range && badge) {
-    range.addEventListener('input', function() {
-        badge.textContent = this.value + '%';
-        const v = parseInt(this.value);
-        badge.className = 'badge ms-1 ' + (v >= 80 ? 'bg-success' : v >= 50 ? 'bg-warning text-dark' : 'bg-danger');
-    });
-    const iv = parseInt(range.value);
-    badge.className = 'badge ms-1 ' + (iv >= 80 ? 'bg-success' : iv >= 50 ? 'bg-warning text-dark' : 'bg-danger');
-}
 @if($todayEntries->count() === 0 && !session('success') && !session('error') && !$showReminder)
 const collapseEl = document.getElementById('formTambah');
 if (collapseEl) new bootstrap.Collapse(collapseEl, { show: true });

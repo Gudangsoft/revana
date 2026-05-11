@@ -62,6 +62,7 @@
                                    value="{{ old('bukti_hasil', $laporanHarian->bukti_hasil) }}"
                                    placeholder="https://drive.google.com/...">
                             @error('bukti_hasil')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Link bukti hasil kerja (Google Drive, OneDrive, YouTube, atau tautan lainnya).</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
