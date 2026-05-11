@@ -51,37 +51,20 @@
     </div>
     @endif
 
-    {{-- Banner: ringkasan setting yang sedang aktif --}}
-    @php
-        $activeToken  = ($settings['fonnte_api_token']  ?? '') ?: old('fonnte_api_token',  '');
-        $activeDevice = ($settings['fonnte_device_id']  ?? '') ?: old('fonnte_device_id',  '');
-        $activeGw     = (($settings['sms_gateway_enabled'] ?? old('sms_gateway_enabled', '0')) == '1');
-    @endphp
-    @if(!empty($activeToken) || !empty($activeDevice))
-    <div class="alert alert-success d-flex align-items-start gap-3 mb-4" style="border-left: 4px solid #198754;">
+    {{-- Banner status — ditampilkan/disembunyikan via JS berdasarkan localStorage --}}
+    <div id="bannerConfigured" class="alert alert-success d-flex align-items-start gap-3 mb-4"
+         style="border-left:4px solid #198754; display:none!important;">
         <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
         <div>
             <strong>Pengaturan aktif saat ini:</strong>
-            <div class="row mt-1 g-2">
-                @if(!empty($activeToken))
-                <div class="col-auto">
-                    <span class="badge bg-success"><i class="bi bi-key me-1"></i>Token: {{ substr($activeToken, 0, 6) }}...{{ substr($activeToken, -4) }}</span>
-                </div>
-                @endif
-                @if(!empty($activeDevice))
-                <div class="col-auto">
-                    <span class="badge bg-primary"><i class="bi bi-phone me-1"></i>Device: {{ $activeDevice }}</span>
-                </div>
-                @endif
-                <div class="col-auto">
-                    <span class="badge {{ $activeGw ? 'bg-success' : 'bg-secondary' }}">
-                        <i class="bi bi-power me-1"></i>Gateway: {{ $activeGw ? 'Aktif' : 'Nonaktif' }}
-                    </span>
-                </div>
-            </div>
+            <div class="row mt-1 g-2" id="bannerBadges"></div>
         </div>
     </div>
-    @endif
+    <div id="bannerUnconfigured" class="alert alert-warning d-flex align-items-center gap-2 mb-4"
+         style="display:none!important;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>Pengaturan belum dikonfigurasi. Isi API Token dan simpan untuk mengaktifkan notifikasi WhatsApp.</span>
+    </div>
 
     <form action="{{ route('admin.sms-gateway.update') }}" method="POST" id="smsGatewayForm">
         @csrf
@@ -718,6 +701,39 @@
     gwLoadFromStorage();
     updateTokenStatus();
     // ── end localStorage ──────────────────────────────────────────────────
+
+    // ── Banner status berdasarkan nilai field (localStorage + server) ─────
+    function updateConfigBanner() {
+        try {
+            const token  = (document.getElementById('fonnte_api_token')?.value  || '').trim();
+            const device = (document.getElementById('fonnte_device_id')?.value  || '').trim();
+            const gwOn   = document.getElementById('sms_gateway_enabled')?.checked;
+            const warn   = document.getElementById('bannerUnconfigured');
+            const ok     = document.getElementById('bannerConfigured');
+            const badges = document.getElementById('bannerBadges');
+            if (!warn || !ok) return;
+            if (token || device) {
+                warn.style.removeProperty('display');
+                warn.style.display = 'none';
+                ok.style.removeProperty('display');
+                ok.style.display = '';
+                if (badges) {
+                    let html = '';
+                    if (token) html += '<div class="col-auto"><span class="badge bg-success"><i class="bi bi-key me-1"></i>Token: ' + token.substring(0,6) + '...' + token.slice(-4) + '</span></div>';
+                    if (device) html += '<div class="col-auto"><span class="badge bg-primary"><i class="bi bi-phone me-1"></i>Device: ' + device + '</span></div>';
+                    html += '<div class="col-auto"><span class="badge ' + (gwOn ? 'bg-success' : 'bg-secondary') + '"><i class="bi bi-power me-1"></i>Gateway: ' + (gwOn ? 'Aktif' : 'Nonaktif') + '</span></div>';
+                    badges.innerHTML = html;
+                }
+            } else {
+                ok.style.removeProperty('display');
+                ok.style.display = 'none';
+                warn.style.removeProperty('display');
+                warn.style.display = '';
+            }
+        } catch(e) {}
+    }
+    updateConfigBanner();
+    // ── end banner ────────────────────────────────────────────────────────
 
     // Send test SMS
     document.getElementById('sendTestSms').addEventListener('click', function() {
