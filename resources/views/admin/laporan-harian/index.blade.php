@@ -61,12 +61,11 @@
     {{-- Summary cards --}}
     @php
         $totalPicHari   = $laporan->total();
-        $avgCapaian     = $laporan->count() > 0 ? round($laporan->avg('avg_capaian')) : 0;
         $totalValidated = $laporan->filter(fn($l) => $l->total_validated > 0 && $l->total_validated >= $l->total_kegiatan)->count();
         $totalBelum     = $totalPicHari - $totalValidated;
     @endphp
     <div class="row g-3 mb-3">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 bg-primary text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
                     <i class="bi bi-people-fill fs-2 opacity-75"></i>
@@ -77,18 +76,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 bg-success text-white shadow-sm">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bi bi-percent fs-2 opacity-75"></i>
-                    <div>
-                        <div class="fs-4 fw-bold">{{ $avgCapaian }}%</div>
-                        <div class="small opacity-75">Rata-rata Capaian</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 bg-info text-white shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
                     <i class="bi bi-patch-check-fill fs-2 opacity-75"></i>
@@ -99,7 +87,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 bg-warning text-dark shadow-sm">
                 <div class="card-body d-flex align-items-center gap-3">
                     <i class="bi bi-hourglass-split fs-2 opacity-75"></i>
@@ -111,19 +99,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Chart tren capaian --}}
-    @if($chartData->count() > 1)
-    <div class="card shadow-sm mb-4">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <span><i class="bi bi-graph-up me-2 text-primary"></i><strong>Tren Rata-rata Capaian Harian</strong></span>
-            <span class="text-muted small">{{ $dariTanggal }} s.d. {{ $sampaiTanggal }}</span>
-        </div>
-        <div class="card-body py-2">
-            <canvas id="chartCapaian" height="80"></canvas>
-        </div>
-    </div>
-    @endif
 
     {{-- Table --}}
     <div class="card shadow-sm">
@@ -145,7 +120,6 @@
                         <th style="width:180px">PIC</th>
                         <th style="width:80px" class="text-center">Kegiatan</th>
                         <th style="width:260px">Ringkasan Kegiatan</th>
-                        <th style="width:90px" class="text-center">Capaian</th>
                         <th style="width:160px">Status Validasi</th>
                         <th style="width:70px" class="text-center">Detail</th>
                     </tr>
@@ -179,12 +153,6 @@
                             </div>
                             @endif
                             @endforeach
-                        </td>
-                        <td class="text-center">
-                            @php $c = $item->avg_capaian; @endphp
-                            <span class="badge {{ $c >= 80 ? 'bg-success' : ($c >= 50 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                {{ $c }}%
-                            </span>
                         </td>
                         <td>
                             @if($isAllValid)
@@ -223,7 +191,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
+                        <td colspan="6" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-4 d-block mb-2"></i>Tidak ada data laporan untuk filter ini
                         </td>
                     </tr>
@@ -240,40 +208,3 @@
 </div>
 @endsection
 
-@if($chartData->count() > 1)
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-(function() {
-    const labels = @json($chartData->pluck('tanggal')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m')));
-    const values = @json($chartData->pluck('avg_capaian'));
-    const ctx = document.getElementById('chartCapaian');
-    if (!ctx) return;
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Rata-rata Capaian (%)',
-                data: values,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.08)',
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: '#6366f1',
-                pointRadius: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-})();
-</script>
-@endpush
-@endif

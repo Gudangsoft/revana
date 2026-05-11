@@ -13,7 +13,6 @@
     $validatedCount  = $entries->filter(fn($e) => $e->validated_at)->count();
     $totalCount      = $entries->count();
     $pct             = $totalCount > 0 ? round($validatedCount / $totalCount * 100) : 0;
-    $avgCapaian      = $totalCount > 0 ? round($entries->avg('capaian_hasil')) : 0;
 @endphp
 
 {{-- Hero Header --}}
@@ -36,10 +35,6 @@
             <div class="rounded-3 px-4 py-2" style="background:rgba(255,255,255,0.18);">
                 <div class="fs-4 fw-bold" style="color:#fff;">{{ $totalCount }}</div>
                 <div class="small" style="color:rgba(255,255,255,0.75);">Kegiatan</div>
-            </div>
-            <div class="rounded-3 px-4 py-2" style="background:rgba(255,255,255,0.18);">
-                <div class="fs-4 fw-bold" style="color:#fff;">{{ $avgCapaian }}%</div>
-                <div class="small" style="color:rgba(255,255,255,0.75);">Rata-rata</div>
             </div>
             <div class="rounded-3 px-4 py-2" style="background:rgba(255,255,255,0.18);">
                 <div class="fs-4 fw-bold" style="color:#fff;">{{ $validatedCount }}/{{ $totalCount }}</div>
@@ -73,9 +68,7 @@
 
         @forelse($entries as $i => $entry)
         @php
-            $c          = $entry->capaian_hasil;
-            $isValid    = (bool) $entry->validated_at;
-            $colorClass = $c >= 80 ? 'success' : ($c >= 50 ? 'warning' : 'danger');
+            $isValid = (bool) $entry->validated_at;
         @endphp
 
         <div class="card shadow-sm mb-3 border-0 {{ $isValid ? 'border-start border-success border-3' : 'border-start border-secondary border-3' }}"
@@ -95,13 +88,6 @@
                         @else
                         <div class="text-muted small">Kegiatan {{ $i + 1 }}</div>
                         @endif
-                        <div class="d-flex align-items-center gap-2 mt-1">
-                            {{-- Capaian badge + mini bar --}}
-                            <span class="badge bg-{{ $colorClass }}{{ $colorClass === 'warning' ? ' text-dark' : '' }}">{{ $c }}%</span>
-                            <div class="progress" style="width:80px;height:5px;">
-                                <div class="progress-bar bg-{{ $colorClass }}" style="width:{{ $c }}%"></div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
@@ -195,21 +181,6 @@
         </div>
         @endforelse
 
-        {{-- Footer rata-rata jika > 1 entry --}}
-        @if($totalCount > 1)
-        <div class="card border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center gap-4 py-2 px-4">
-                <span class="small text-muted fw-semibold">Rata-rata Capaian:</span>
-                <span class="badge {{ $avgCapaian >= 80 ? 'bg-success' : ($avgCapaian >= 50 ? 'bg-warning text-dark' : 'bg-danger') }} fs-6">
-                    {{ $avgCapaian }}%
-                </span>
-                <div class="progress flex-grow-1" style="height:8px;">
-                    <div class="progress-bar {{ $avgCapaian >= 80 ? 'bg-success' : ($avgCapaian >= 50 ? 'bg-warning' : 'bg-danger') }}"
-                         style="width:{{ $avgCapaian }}%"></div>
-                </div>
-            </div>
-        </div>
-        @endif
 
     </div>
 
@@ -249,40 +220,6 @@
                     <span class="small fw-semibold text-secondary">Belum Ada Validasi</span>
                 </div>
                 @endif
-            </div>
-        </div>
-
-        {{-- Progress Validasi --}}
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-transparent border-bottom-0 pb-0">
-                <span class="fw-semibold small"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Progress Validasi</span>
-            </div>
-            <div class="card-body pt-2">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small text-muted">{{ $validatedCount }} dari {{ $totalCount }} kegiatan</span>
-                    <span class="fw-bold {{ $pct === 100 ? 'text-success' : 'text-primary' }}">{{ $pct }}%</span>
-                </div>
-                <div class="progress mb-3" style="height:10px;border-radius:99px;">
-                    <div class="progress-bar {{ $pct === 100 ? 'bg-success' : 'bg-primary' }}"
-                         style="width:{{ $pct }}%;transition:width 0.6s ease;border-radius:99px;"></div>
-                </div>
-                {{-- Capaian per kegiatan --}}
-                @foreach($entries as $e)
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    @php $ec = $e->capaian_hasil; @endphp
-                    <span class="small text-muted" style="min-width:16px;">{{ $loop->iteration }}</span>
-                    <div class="progress flex-grow-1" style="height:6px;">
-                        <div class="progress-bar bg-{{ $ec >= 80 ? 'success' : ($ec >= 50 ? 'warning' : 'danger') }}"
-                             style="width:{{ $ec }}%"></div>
-                    </div>
-                    <span class="small text-muted" style="min-width:32px;">{{ $ec }}%</span>
-                    @if($e->validated_at)
-                        <i class="bi bi-patch-check-fill text-success small"></i>
-                    @else
-                        <i class="bi bi-circle text-muted small"></i>
-                    @endif
-                </div>
-                @endforeach
             </div>
         </div>
 
@@ -355,15 +292,9 @@
                                 @foreach($log->changes as $field => $diff)
                                 <div class="{{ !$loop->first ? 'mt-1 pt-1 border-top' : '' }}">
                                     <span class="text-muted fw-semibold">{{ \App\Models\LaporanHarianLog::fieldLabel($field) }}:</span>
-                                    @if($field === 'capaian_hasil')
-                                        <span class="badge bg-secondary ms-1">{{ $diff['old'] ?? '-' }}%</span>
-                                        <i class="bi bi-arrow-right text-muted mx-1"></i>
-                                        <span class="badge bg-primary">{{ $diff['new'] ?? '-' }}%</span>
-                                    @else
                                         <span class="text-danger text-decoration-line-through ms-1">{{ Str::limit($diff['old'] ?? '-', 50) }}</span>
                                         <i class="bi bi-arrow-right text-muted mx-1"></i>
                                         <span class="text-success">{{ Str::limit($diff['new'] ?? '-', 50) }}</span>
-                                    @endif
                                 </div>
                                 @endforeach
                             </div>
