@@ -81,11 +81,6 @@
             </div>
         </div>
     </div>
-    @elseif(!session('success'))
-    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span>Pengaturan belum dikonfigurasi. Isi API Token dan simpan untuk mengaktifkan notifikasi WhatsApp.</span>
-    </div>
     @endif
 
     <form action="{{ route('admin.sms-gateway.update') }}" method="POST" id="smsGatewayForm">
