@@ -52,31 +52,36 @@
     @endif
 
     {{-- Banner: ringkasan setting yang sedang aktif --}}
-    @if(!empty($settings['fonnte_api_token']) || !empty($settings['fonnte_device_id']))
+    @php
+        $activeToken  = $settings['fonnte_api_token']  ?: old('fonnte_api_token');
+        $activeDevice = $settings['fonnte_device_id']  ?: old('fonnte_device_id');
+        $activeGw     = ($settings['sms_gateway_enabled'] ?? old('sms_gateway_enabled', '0')) == '1';
+    @endphp
+    @if(!empty($activeToken) || !empty($activeDevice))
     <div class="alert alert-success d-flex align-items-start gap-3 mb-4" style="border-left: 4px solid #198754;">
         <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
         <div>
             <strong>Pengaturan aktif saat ini:</strong>
             <div class="row mt-1 g-2">
-                @if(!empty($settings['fonnte_api_token']))
+                @if(!empty($activeToken))
                 <div class="col-auto">
-                    <span class="badge bg-success"><i class="bi bi-key me-1"></i>Token: {{ substr($settings['fonnte_api_token'], 0, 6) }}...{{ substr($settings['fonnte_api_token'], -4) }}</span>
+                    <span class="badge bg-success"><i class="bi bi-key me-1"></i>Token: {{ substr($activeToken, 0, 6) }}...{{ substr($activeToken, -4) }}</span>
                 </div>
                 @endif
-                @if(!empty($settings['fonnte_device_id']))
+                @if(!empty($activeDevice))
                 <div class="col-auto">
-                    <span class="badge bg-primary"><i class="bi bi-phone me-1"></i>Device: {{ $settings['fonnte_device_id'] }}</span>
+                    <span class="badge bg-primary"><i class="bi bi-phone me-1"></i>Device: {{ $activeDevice }}</span>
                 </div>
                 @endif
                 <div class="col-auto">
-                    <span class="badge {{ $settings['sms_gateway_enabled'] == '1' ? 'bg-success' : 'bg-secondary' }}">
-                        <i class="bi bi-power me-1"></i>Gateway: {{ $settings['sms_gateway_enabled'] == '1' ? 'Aktif' : 'Nonaktif' }}
+                    <span class="badge {{ $activeGw ? 'bg-success' : 'bg-secondary' }}">
+                        <i class="bi bi-power me-1"></i>Gateway: {{ $activeGw ? 'Aktif' : 'Nonaktif' }}
                     </span>
                 </div>
             </div>
         </div>
     </div>
-    @else
+    @elseif(!session('success'))
     <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <span>Pengaturan belum dikonfigurasi. Isi API Token dan simpan untuk mengaktifkan notifikasi WhatsApp.</span>
