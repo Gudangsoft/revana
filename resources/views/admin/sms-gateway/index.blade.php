@@ -52,16 +52,16 @@
     @endif
 
     {{-- Banner status — ditampilkan/disembunyikan via JS berdasarkan localStorage --}}
-    <div id="bannerConfigured" class="alert alert-success d-flex align-items-start gap-3 mb-4"
-         style="border-left:4px solid #198754; display:none!important;">
+    <div id="bannerConfigured" class="alert alert-success align-items-start gap-3 mb-4 d-none"
+         style="border-left:4px solid #198754; display:none;">
         <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
         <div>
             <strong>Pengaturan aktif saat ini:</strong>
             <div class="row mt-1 g-2" id="bannerBadges"></div>
         </div>
     </div>
-    <div id="bannerUnconfigured" class="alert alert-warning d-flex align-items-center gap-2 mb-4"
-         style="display:none!important;">
+    <div id="bannerUnconfigured" class="alert alert-warning align-items-center gap-2 mb-4 d-none"
+         style="display:none;">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <span>Pengaturan belum dikonfigurasi. Isi API Token dan simpan untuk mengaktifkan notifikasi WhatsApp.</span>
     </div>
@@ -713,10 +713,9 @@
             const badges = document.getElementById('bannerBadges');
             if (!warn || !ok) return;
             if (token || device) {
-                warn.style.removeProperty('display');
-                warn.style.display = 'none';
-                ok.style.removeProperty('display');
-                ok.style.display = '';
+                warn.classList.add('d-none');
+                ok.classList.remove('d-none');
+                ok.style.display = 'flex';
                 if (badges) {
                     let html = '';
                     if (token) html += '<div class="col-auto"><span class="badge bg-success"><i class="bi bi-key me-1"></i>Token: ' + token.substring(0,6) + '...' + token.slice(-4) + '</span></div>';
@@ -725,10 +724,9 @@
                     badges.innerHTML = html;
                 }
             } else {
-                ok.style.removeProperty('display');
-                ok.style.display = 'none';
-                warn.style.removeProperty('display');
-                warn.style.display = '';
+                ok.classList.add('d-none');
+                warn.classList.remove('d-none');
+                warn.style.display = 'flex';
             }
         } catch(e) {}
     }
