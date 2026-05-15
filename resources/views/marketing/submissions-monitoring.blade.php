@@ -210,7 +210,7 @@
         </div>
     </div>
     <div class="card-footer bg-white">
-        @include('partials.per-page-selector', ['paginator' => $submissions])
+        @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 50])
     </div>
 </div>
 @else

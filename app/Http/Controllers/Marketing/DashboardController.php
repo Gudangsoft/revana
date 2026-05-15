@@ -612,7 +612,7 @@ class DashboardController extends Controller
                   });
         }
 
-        $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
+        $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 50;
         $submissions = $query->latest('tanggal_submit')->paginate($perPage)->withQueryString();
         $slots = JournalSlot::with('journalMaster')->where('is_active', true)->get();
 

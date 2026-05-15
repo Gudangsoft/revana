@@ -927,7 +927,7 @@ class JournalManagementController extends Controller
                   });
         }
 
-        $submissions = $query->latest()->paginate(request()->input('per_page', 20));
+        $submissions = $query->latest()->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
 
         // Statistics - based on PIC's assigned tasks (exclude fasttrack)
@@ -1903,7 +1903,7 @@ class JournalManagementController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
-        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
+        $submissions = $query->latest()->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
         

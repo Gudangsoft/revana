@@ -18,9 +18,7 @@
 /* Sticky Table Styles for Monitoring */
 .monitoring-scroll-wrapper {
     overflow-x: auto;
-    overflow-y: auto;
-    max-height: calc(100vh - 400px);
-    min-height: 300px;
+    overflow-y: visible;
     border: 1px solid #dee2e6;
     border-radius: 4px;
     scrollbar-width: thin;
@@ -995,7 +993,7 @@
                 </div>
 
                 <!-- Pagination -->
-                @include('partials.per-page-selector', ['paginator' => $submissions])
+                @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 50])
             </div>
         </div>
     </div>
