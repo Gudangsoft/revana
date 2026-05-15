@@ -11,9 +11,12 @@
 <div class="row justify-content-center">
     <div class="col-lg-8">
 
-        <div class="mb-3">
+        <div class="mb-3 d-flex justify-content-between align-items-center">
             <a href="{{ route('admin.tenants.index') }}" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-arrow-left me-1"></i>Kembali
+            </a>
+            <a href="{{ route('admin.tenants.tutorial') }}" class="btn btn-outline-info btn-sm" target="_blank">
+                <i class="bi bi-book me-1"></i>Baca Panduan Lengkap
             </a>
         </div>
 

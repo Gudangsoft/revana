@@ -33,3 +33,20 @@ Log perubahan otomatis dari git commits.
 | `resources/views/admin/partials/sidebar.blade.php` | Tambah seksi "Super Admin" dengan menu Manajemen Tenant |
 | `composer.json` | Tambah autoload `app/helpers.php` |
 
+## 2. Halaman Tutorial Manajemen Tenant
+
+**Tujuan:** Menyediakan panduan penggunaan lengkap sistem multi-tenant yang dapat diakses langsung dari panel admin.
+
+### File yang Dibuat
+| File | Keterangan |
+|------|-----------|
+| `resources/views/admin/tenants/tutorial.blade.php` | Halaman panduan lengkap dengan daftar isi, penjelasan form, tabel perbandingan paket, deskripsi fitur, FAQ, dan referensi CLI |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/TenantController.php` | Tambah method `tutorial()` |
+| `routes/web.php` | Tambah route `GET /admin/tenants/tutorial` |
+| `resources/views/admin/tenants/index.blade.php` | Tambah tombol "Panduan" |
+| `resources/views/admin/tenants/create.blade.php` | Tambah link "Baca Panduan Lengkap" |
+

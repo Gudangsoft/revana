@@ -11,6 +11,11 @@ class TenantController extends Controller
 {
     public function __construct(private TenantManager $manager) {}
 
+    public function tutorial()
+    {
+        return view('admin.tenants.tutorial');
+    }
+
     public function index()
     {
         $tenants  = Tenant::orderByDesc('created_at')->get();

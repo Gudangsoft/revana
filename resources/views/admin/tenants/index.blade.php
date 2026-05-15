@@ -30,6 +30,9 @@
             <div class="small text-muted">Kelola semua institusi yang menggunakan sistem SIPERA</div>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('admin.tenants.tutorial') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-book me-1"></i>Panduan
+            </a>
             <form action="{{ route('admin.tenants.migrate-all') }}" method="POST"
                   onsubmit="return confirm('Jalankan migration ke semua tenant?')">
                 @csrf

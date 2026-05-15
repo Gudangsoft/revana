@@ -394,6 +394,7 @@ Route::middleware('auth')->group(function () {
         // Manajemen Tenant (multi-tenant super admin)
         Route::prefix('tenants')->name('tenants.')->group(function () {
             Route::get('/', [TenantController::class, 'index'])->name('index');
+            Route::get('/tutorial', [TenantController::class, 'tutorial'])->name('tutorial');
             Route::get('/create', [TenantController::class, 'create'])->name('create');
             Route::post('/', [TenantController::class, 'store'])->name('store');
             Route::get('/{tenant}', [TenantController::class, 'show'])->name('show');
