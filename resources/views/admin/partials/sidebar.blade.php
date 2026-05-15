@@ -156,10 +156,6 @@
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.fasttrack') && !str_starts_with($currentRoute, 'admin.fasttrack-management') ? 'active' : '' }}">
                     <i class="bi bi-plus-circle-fill text-warning"></i> Input Fasttrack
                 </a>
-                <a href="{{ route('admin.fasttrack-management.slots.index') }}"
-                   class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.slots.index' ? 'active' : '' }}">
-                    <i class="bi bi-calendar2-week text-warning"></i> Slot Fasttrack
-                </a>
                 <a href="{{ route('admin.fasttrack-management.submissions.index') }}"
                    class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
                     <i class="bi bi-table text-warning"></i> Data Submit
