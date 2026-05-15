@@ -889,7 +889,7 @@
                     </table>
                 </div>
                 
-                @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 200])
+                @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 50])
             </div>
         </div>
     </div>

@@ -281,3 +281,12 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 - `log-update-2026-05-15.md`
 - `resources/views/pic/fasttrack/show.blade.php`
 
+
+## 22. 🔄 Update: a
+
+- **Commit:** `218f8ba` — 22:10 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-05-15.md`
+- `resources/views/admin/submissions/index.blade.php`
+
