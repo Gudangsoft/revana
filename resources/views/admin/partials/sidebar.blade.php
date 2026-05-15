@@ -396,3 +396,14 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.activity-logs') ? 'active' : '' }}">
     <i class="bi bi-shield-check" style="color:#4ade80;"></i> Audit Log
 </a>
+
+{{-- ═══ SUPER ADMIN ═══ --}}
+<div class="sidebar-section-label mt-2">Super Admin</div>
+<a href="{{ route('admin.tenants.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.tenants') ? 'active' : '' }}">
+    <i class="bi bi-building-fill-gear" style="color:#f472b6;"></i> Manajemen Tenant
+    @php $tenantCount = \App\Models\Tenant::count(); @endphp
+    @if($tenantCount > 0)
+        <span class="badge bg-pink ms-1 rounded-pill" style="background:#f472b6;">{{ $tenantCount }}</span>
+    @endif
+</a>

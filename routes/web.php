@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\ReviewRequestController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Admin\TenantController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -389,6 +390,20 @@ Route::middleware('auth')->group(function () {
         
         // Laporan
         Route::get('/reports/journal-articles', [ReportController::class, 'journalArticleReport'])->name('reports.journal-articles');
+
+        // Manajemen Tenant (multi-tenant super admin)
+        Route::prefix('tenants')->name('tenants.')->group(function () {
+            Route::get('/', [TenantController::class, 'index'])->name('index');
+            Route::get('/create', [TenantController::class, 'create'])->name('create');
+            Route::post('/', [TenantController::class, 'store'])->name('store');
+            Route::get('/{tenant}', [TenantController::class, 'show'])->name('show');
+            Route::post('/{tenant}/toggle-feature/{feature}', [TenantController::class, 'toggleFeature'])->name('toggle-feature');
+            Route::post('/{tenant}/suspend', [TenantController::class, 'suspend'])->name('suspend');
+            Route::post('/{tenant}/activate', [TenantController::class, 'activate'])->name('activate');
+            Route::post('/{tenant}/migrate', [TenantController::class, 'migrate'])->name('migrate');
+            Route::post('/migrate-all', [TenantController::class, 'migrateAll'])->name('migrate-all');
+            Route::delete('/{tenant}', [TenantController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Reviewer routes
