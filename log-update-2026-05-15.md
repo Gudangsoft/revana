@@ -150,7 +150,32 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 
 ---
 
-## 11. UI Manajemen Tenant
+## 11. Filter Tanggal di Tugas Saya PIC
+
+**Tujuan:** PIC bisa menyaring tugas berdasarkan rentang tanggal submit.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Tambah filter `tanggal_dari` / `tanggal_sampai` + `withQueryString()` di `myTasks()` |
+| `resources/views/pic/my-tasks/index.blade.php` | Tambah 2 input date di form filter, layout diubah ke `col-md-*` 5 kolom |
+
+*Catatan: Marketing submissions sudah punya filter tanggal (`start_date`/`end_date`) sejak sebelumnya.*
+
+---
+
+## 12. Seragamkan Tampilan Marketing Fasttrack Monitoring
+
+**Tujuan:** Samakan tampilan `/marketing/fasttrack/monitoring` dengan halaman monitoring artikel lain agar konsisten.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/fasttrack/monitoring.blade.php` | Rewrite: tambah auto-refresh, header + total badge, filter dengan label & shadow, 4 stats card gradient (Total/Bulan Ini/Published/Belum Published), tabel dengan `column-toggle` + `align-middle`, `x-submission-status`, card-footer per-page-selector, empty state dengan tombol input |
+
+---
+
+## 13. UI Manajemen Tenant
 
 **Tujuan:** Interface lengkap untuk mengelola semua tenant dari portal super admin.
 
@@ -177,4 +202,35 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 - `config/tenants.php`
 - `database/migrations/2026_05_15_000002_add_branding_to_tenants_table.php`
 - `log-update-2026-05-15.md`
+
+
+## 13. 🔄 Update: upreport
+
+- **Commit:** `7e7a700` — 16:35 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/ReportController.php`
+- `log-update-2026-05-15.md`
+
+---
+
+## 15. Accordion Sidebar PIC & Marketing
+
+**Tujuan:** Menu pengelolaan (Fasttrack, Normal, BKD, JAFA, Jurnal) di sidebar PIC dan Marketing bisa di-collapse — klik header untuk toggle buka/tutup.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/partials/sidebar.blade.php` | Header section diubah jadi `<button>` Bootstrap collapse; sub-links dibungkus `<div class="collapse">`; auto-expand section aktif; CSS `.sidebar-toggle` + `.nav-link-sub` + chevron rotate |
+| `resources/views/marketing/layouts/app.blade.php` | Sidebar inline direfactor: 5 section collapsible (Normal, Fasttrack, BKD, JAFA, Jurnal); CSS `.sidebar-sec-toggle` + chevron; auto-expand section aktif |
+
+---
+
+## 14. Hapus Slot Fasttrack
+
+**Tujuan:** Admin bisa menghapus slot fasttrack langsung dari halaman daftar slot.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/fasttrack-management/slots/index.blade.php` | Tambah tombol hapus (bi-trash) di kolom aksi; hidden DELETE form; JS `confirmDelete()` — blokir jika slot masih ada submission, konfirmasi sebelum submit |
 

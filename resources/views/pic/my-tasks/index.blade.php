@@ -147,13 +147,15 @@
 <!-- Filter -->
 <div class="card mb-4">
     <div class="card-body py-3">
-        <form method="GET" class="row g-2 align-items-center">
-            <div class="col-md-5">
-                <input type="text" name="search" class="form-control" 
-                       placeholder="Cari kode, judul, penulis..." 
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small mb-1">Cari</label>
+                <input type="text" name="search" class="form-control"
+                       placeholder="Kode, judul, penulis..."
                        value="{{ request('search') }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Status</label>
                 <select name="status" class="form-select">
                     <option value="">Semua Status</option>
                     <option value="SUBMITTED" {{ request('status') == 'SUBMITTED' ? 'selected' : '' }}>Baru</option>
@@ -163,13 +165,23 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search"></i> Cari
-                </button>
+                <label class="form-label small mb-1">Tgl Submit Dari</label>
+                <input type="date" name="tanggal_dari" class="form-control"
+                       value="{{ request('tanggal_dari') }}">
             </div>
             <div class="col-md-2">
+                <label class="form-label small mb-1">Tgl Submit Sampai</label>
+                <input type="date" name="tanggal_sampai" class="form-control"
+                       value="{{ request('tanggal_sampai') }}">
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="col-md-1">
                 <a href="{{ route('pic.my-tasks.index') }}" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-x"></i> Reset
+                    <i class="bi bi-x"></i>
                 </a>
             </div>
         </form>

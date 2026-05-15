@@ -1508,8 +1508,14 @@ class JournalManagementController extends Controller
                   ->orWhere('nama_penulis', 'like', "%{$search}%");
             });
         }
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
+        }
 
-        $submissions = $query->latest()->paginate(request()->input('per_page', 20));
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
         
         // Statistics for current PIC - all assigned submissions
         $baseQuery = function() use ($picId) {

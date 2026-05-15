@@ -157,6 +157,10 @@
                                         <a href="{{ route('admin.journal-slots.edit', $slot) }}" class="btn btn-outline-warning">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                onclick="confirmDelete('{{ route('admin.journal-slots.destroy', $slot) }}', '{{ $slot->kode_slot }}', {{ $slot->slot_terpakai ?? 0 }})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -177,4 +181,25 @@
         </div>
     </div>
 </div>
+
+{{-- Hidden delete form --}}
+<form id="deleteSlotForm" method="POST" style="display:none">
+    @csrf @method('DELETE')
+</form>
+
+@push('scripts')
+<script>
+function confirmDelete(url, kode, terpakai) {
+    if (terpakai > 0) {
+        alert('Slot ' + kode + ' tidak dapat dihapus karena sudah memiliki ' + terpakai + ' submission.');
+        return;
+    }
+    if (!confirm('Hapus slot ' + kode + '?\nData tidak dapat dipulihkan.')) return;
+    var form = document.getElementById('deleteSlotForm');
+    form.action = url;
+    form.submit();
+}
+</script>
+@endpush
+
 @endsection
