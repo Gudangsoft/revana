@@ -234,3 +234,16 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 |------|-----------|
 | `resources/views/admin/fasttrack-management/slots/index.blade.php` | Tambah tombol hapus (bi-trash) di kolom aksi; hidden DELETE form; JS `confirmDelete()` — blokir jika slot masih ada submission, konfirmasi sebelum submit |
 
+
+## 18. 🔄 Update: update
+
+- **Commit:** `402c7e2` — 17:04 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-05-15.md`
+- `resources/views/admin/fasttrack-management/slots/index.blade.php`
+- `resources/views/marketing/fasttrack/monitoring.blade.php`
+- `resources/views/marketing/layouts/app.blade.php`
+- `resources/views/pic/my-tasks/index.blade.php`
+- `resources/views/pic/partials/sidebar.blade.php`
+
