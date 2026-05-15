@@ -97,6 +97,11 @@ return [
             'duration' => 365,
             'features' => ['sms_gateway', 'laporan_harian', 'marketing', 'reviewer', 'fasttrack', 'bkd', 'jafa', 'export_csv', 'loa_verify', 'multi_journal'],
         ],
+        'lifetime' => [
+            'label'    => 'Lifetime',
+            'duration' => null, // tidak pernah expired
+            'features' => ['sms_gateway', 'laporan_harian', 'marketing', 'reviewer', 'fasttrack', 'bkd', 'jafa', 'export_csv', 'loa_verify', 'multi_journal'],
+        ],
     ],
 
 ];

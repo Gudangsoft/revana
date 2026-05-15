@@ -33,6 +33,7 @@ use App\Http\Controllers\ReviewRequestController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\TenantController;
+use App\Http\Controllers\Admin\TenantImpersonateController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,6 +69,10 @@ Route::get('/', function () {
     }
     return redirect('/login');
 });
+
+// Impersonate: enter & stop (accessible on any subdomain, no auth required for enter)
+Route::get('/impersonate/{token}', [TenantImpersonateController::class, 'enter'])->name('impersonate.enter');
+Route::post('/impersonate/stop', [TenantImpersonateController::class, 'stop'])->name('impersonate.stop');
 
 // Pastikan rute tracking tersedia secara global
 Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
@@ -394,15 +399,20 @@ Route::middleware('auth')->group(function () {
         // Manajemen Tenant (multi-tenant super admin)
         Route::prefix('tenants')->name('tenants.')->group(function () {
             Route::get('/', [TenantController::class, 'index'])->name('index');
+            Route::get('/monitoring', [TenantController::class, 'monitoring'])->name('monitoring');
             Route::get('/tutorial', [TenantController::class, 'tutorial'])->name('tutorial');
             Route::get('/create', [TenantController::class, 'create'])->name('create');
             Route::post('/', [TenantController::class, 'store'])->name('store');
+            Route::post('/migrate-all', [TenantController::class, 'migrateAll'])->name('migrate-all');
             Route::get('/{tenant}', [TenantController::class, 'show'])->name('show');
             Route::post('/{tenant}/toggle-feature/{feature}', [TenantController::class, 'toggleFeature'])->name('toggle-feature');
             Route::post('/{tenant}/suspend', [TenantController::class, 'suspend'])->name('suspend');
             Route::post('/{tenant}/activate', [TenantController::class, 'activate'])->name('activate');
             Route::post('/{tenant}/migrate', [TenantController::class, 'migrate'])->name('migrate');
-            Route::post('/migrate-all', [TenantController::class, 'migrateAll'])->name('migrate-all');
+            Route::post('/{tenant}/renew', [TenantController::class, 'renew'])->name('renew');
+            Route::post('/{tenant}/change-plan', [TenantController::class, 'changePlan'])->name('change-plan');
+            Route::post('/{tenant}/branding', [TenantController::class, 'updateBranding'])->name('branding');
+            Route::post('/{tenant}/impersonate', [TenantImpersonateController::class, 'start'])->name('impersonate');
             Route::delete('/{tenant}', [TenantController::class, 'destroy'])->name('destroy');
         });
     });

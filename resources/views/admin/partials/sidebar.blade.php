@@ -400,10 +400,14 @@
 {{-- ═══ SUPER ADMIN ═══ --}}
 <div class="sidebar-section-label mt-2">Super Admin</div>
 <a href="{{ route('admin.tenants.index') }}"
-   class="nav-link {{ str_starts_with($currentRoute, 'admin.tenants') ? 'active' : '' }}">
+   class="nav-link {{ $currentRoute === 'admin.tenants.index' || $currentRoute === 'admin.tenants.show' || $currentRoute === 'admin.tenants.create' ? 'active' : '' }}">
     <i class="bi bi-building-fill-gear" style="color:#f472b6;"></i> Manajemen Tenant
     @php $tenantCount = \App\Models\Tenant::count(); @endphp
     @if($tenantCount > 0)
-        <span class="badge bg-pink ms-1 rounded-pill" style="background:#f472b6;">{{ $tenantCount }}</span>
+        <span class="badge ms-1 rounded-pill" style="background:#f472b6;">{{ $tenantCount }}</span>
     @endif
+</a>
+<a href="{{ route('admin.tenants.monitoring') }}"
+   class="nav-link {{ $currentRoute === 'admin.tenants.monitoring' ? 'active' : '' }}">
+    <i class="bi bi-activity" style="color:#f472b6;"></i> Monitoring Tenant
 </a>

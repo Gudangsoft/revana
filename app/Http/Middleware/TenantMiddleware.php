@@ -42,11 +42,21 @@ class TenantMiddleware
         // Switch koneksi database ke tenant
         $this->switchDatabase($tenant);
 
-        // Binding tenant ke container — akses via app('tenant') atau helper tenant()
+        // Isolasi penyimpanan file per tenant
+        $this->switchStorage($tenant);
+
+        // Binding tenant ke container
         app()->instance('tenant', $tenant);
 
         // Share ke semua view Blade
         view()->share('currentTenant', $tenant);
+
+        // Share branding jika ada
+        $branding = $tenant->branding ?? [];
+        if (!empty($branding['app_name'])) {
+            Config::set('app.name', $branding['app_name']);
+        }
+        view()->share('tenantBranding', $branding);
 
         return $next($request);
     }
@@ -64,5 +74,14 @@ class TenantMiddleware
         Config::set('database.default', 'tenant');
         DB::purge('tenant');
         DB::reconnect('tenant');
+    }
+
+    private function switchStorage(Tenant $tenant): void
+    {
+        $tenantPath = storage_path('app/tenants/' . $tenant->subdomain);
+
+        Config::set('filesystems.disks.public.root', $tenantPath . '/public');
+        Config::set('filesystems.disks.public.url', url('storage/tenants/' . $tenant->subdomain));
+        Config::set('filesystems.disks.local.root', $tenantPath);
     }
 }

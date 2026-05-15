@@ -168,6 +168,71 @@
                 </div>
             </div>
 
+            {{-- Impersonate --}}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-person-badge me-2 text-purple"></i>Impersonate
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Login sementara sebagai admin tenant ini tanpa mengetahui password.</p>
+                    <form action="{{ route('admin.tenants.impersonate', $tenant) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-purple w-100 btn-sm"
+                                style="border-color:#7c3aed;color:#7c3aed;"
+                                onmouseover="this.style.background='#7c3aed';this.style.color='white'"
+                                onmouseout="this.style.background='';this.style.color='#7c3aed'">
+                            <i class="bi bi-person-badge-fill me-1"></i>Masuk sebagai Admin Tenant
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Perpanjang / Ubah Paket --}}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-calendar-plus me-2 text-success"></i>Perpanjang / Ubah Paket
+                </div>
+                <div class="card-body">
+                    @if($tenant->plan === 'lifetime')
+                    <div class="alert alert-success py-2 mb-3 text-center small">
+                        <i class="bi bi-infinity me-1"></i>Paket <strong>Lifetime</strong> — tidak perlu perpanjang.
+                    </div>
+                    @else
+                    <form action="{{ route('admin.tenants.renew', $tenant) }}" method="POST" class="mb-3">
+                        @csrf
+                        <label class="form-label small fw-semibold">Perpanjang (hari)</label>
+                        <div class="input-group input-group-sm">
+                            <select name="days" class="form-select">
+                                <option value="30">30 hari</option>
+                                <option value="60">60 hari</option>
+                                <option value="90">90 hari</option>
+                                <option value="180">180 hari</option>
+                                <option value="365" selected>365 hari (1 tahun)</option>
+                            </select>
+                            <button type="submit" class="btn btn-success btn-sm">Perpanjang</button>
+                        </div>
+                    </form>
+                    @endif
+                    <form action="{{ route('admin.tenants.change-plan', $tenant) }}" method="POST">
+                        @csrf
+                        <label class="form-label small fw-semibold">Ubah Paket</label>
+                        <div class="input-group input-group-sm">
+                            <select name="plan" class="form-select">
+                                @foreach($plans as $key => $plan)
+                                <option value="{{ $key }}" {{ $tenant->plan === $key ? 'selected' : '' }}>
+                                    {{ $plan['label'] }} {{ $plan['duration'] ? '('.$plan['duration'].' hari)' : '(Seumur Hidup)' }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                    onclick="return confirm('Mengubah paket akan mereset fitur sesuai paket baru. Lanjutkan?')">
+                                Ubah
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             {{-- Aksi --}}
             <div class="card shadow-sm border-0 mb-3">
                 <div class="card-header fw-semibold">
@@ -212,6 +277,50 @@
                 </div>
             </div>
 
+            {{-- Branding --}}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-palette me-2 text-info"></i>Branding Tenant
+                </div>
+                <div class="card-body">
+                    @php $b = $tenant->branding ?? []; @endphp
+                    <form action="{{ route('admin.tenants.branding', $tenant) }}" method="POST">
+                        @csrf
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold mb-1">Nama Aplikasi</label>
+                            <input type="text" name="app_name" class="form-control form-control-sm"
+                                   placeholder="Contoh: SIPERA IAIN Mataram"
+                                   value="{{ $b['app_name'] ?? '' }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold mb-1">Tagline</label>
+                            <input type="text" name="tagline" class="form-control form-control-sm"
+                                   placeholder="Sistem Insentif Reviewer ..."
+                                   value="{{ $b['tagline'] ?? '' }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold mb-1">URL Logo</label>
+                            <input type="url" name="logo_url" class="form-control form-control-sm"
+                                   placeholder="https://..."
+                                   value="{{ $b['logo_url'] ?? '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold mb-1">Warna Utama</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="color" name="primary_color" class="form-control form-control-color form-control-sm"
+                                       value="{{ $b['primary_color'] ?? '#4f46e5' }}" style="width:3rem;">
+                                <input type="text" id="colorHex" class="form-control form-control-sm font-monospace"
+                                       value="{{ $b['primary_color'] ?? '#4f46e5' }}" maxlength="7"
+                                       oninput="document.querySelector('[name=primary_color]').value=this.value">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-info btn-sm text-white w-100">
+                            <i class="bi bi-save me-1"></i>Simpan Branding
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -247,4 +356,12 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+document.querySelector('[name=primary_color]')?.addEventListener('input', function() {
+    const hex = document.getElementById('colorHex');
+    if (hex) hex.value = this.value;
+});
+</script>
+@endpush
 @endsection

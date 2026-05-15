@@ -825,6 +825,25 @@
             </div>
         </nav>
 
+        {{-- Impersonate Banner --}}
+        @if(session('impersonating'))
+        <div class="alert alert-warning d-flex align-items-center justify-content-between mb-2 py-2" role="alert"
+             style="border-left: 4px solid #f59e0b; border-radius: 6px;">
+            <div>
+                <i class="bi bi-person-badge-fill me-2 text-warning"></i>
+                <strong>Mode Impersonate Aktif</strong>
+                — Anda login sebagai admin tenant atas nama
+                <strong>{{ session('impersonate_by', 'Super Admin') }}</strong>
+            </div>
+            <form action="{{ route('impersonate.stop') }}" method="POST" class="mb-0">
+                @csrf
+                <button type="submit" class="btn btn-warning btn-sm">
+                    <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Super Admin
+                </button>
+            </form>
+        </div>
+        @endif
+
         <!-- Alerts -->
         @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

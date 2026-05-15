@@ -93,7 +93,7 @@
                                     onchange="updateFeaturePreview()" required>
                                 @foreach($plans as $key => $plan)
                                 <option value="{{ $key }}" {{ old('plan', 'trial') === $key ? 'selected' : '' }}>
-                                    {{ $plan['label'] }} ({{ $plan['duration'] }} hari)
+                                    {{ $plan['label'] }} ({{ $plan['duration'] ? $plan['duration'] . ' hari' : 'Seumur Hidup' }})
                                 </option>
                                 @endforeach
                             </select>

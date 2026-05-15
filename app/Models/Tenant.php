@@ -11,13 +11,14 @@ class Tenant extends Model
         'name', 'institution', 'email', 'phone',
         'subdomain', 'custom_domain',
         'db_name', 'db_user', 'db_password',
-        'features', 'plan', 'status',
+        'features', 'branding', 'plan', 'status',
         'trial_ends_at', 'expires_at',
         'admin_name', 'admin_email', 'notes',
     ];
 
     protected $casts = [
         'features'      => 'array',
+        'branding'      => 'array',
         'trial_ends_at' => 'datetime',
         'expires_at'    => 'datetime',
     ];
@@ -83,6 +84,7 @@ class Tenant extends Model
 
     public function isExpired(): bool
     {
+        if ($this->plan === 'lifetime') return false;
         if ($this->status === 'expired') return true;
         if ($this->expires_at && $this->expires_at->isPast()) return true;
         if ($this->status === 'trial' && $this->trial_ends_at && $this->trial_ends_at->isPast()) return true;
@@ -91,6 +93,7 @@ class Tenant extends Model
 
     public function daysLeft(): ?int
     {
+        if ($this->plan === 'lifetime') return null; // null = seumur hidup
         $date = $this->status === 'trial' ? $this->trial_ends_at : $this->expires_at;
         if (!$date) return null;
         return max(0, (int) now()->diffInDays($date, false));

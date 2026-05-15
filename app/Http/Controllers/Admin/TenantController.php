@@ -46,10 +46,10 @@ class TenantController extends Controller
         ]);
 
         // Tentukan expires_at dari durasi plan
-        $planDuration = config("tenants.plans.{$validated['plan']}.duration", 14);
+        $planDuration = config("tenants.plans.{$validated['plan']}.duration");
         $validated['status']        = $validated['plan'] === 'trial' ? 'trial' : 'active';
-        $validated['trial_ends_at'] = $validated['plan'] === 'trial' ? now()->addDays($planDuration) : null;
-        $validated['expires_at']    = $validated['plan'] !== 'trial' ? now()->addDays($planDuration) : null;
+        $validated['trial_ends_at'] = $validated['plan'] === 'trial' && $planDuration ? now()->addDays($planDuration) : null;
+        $validated['expires_at']    = ($validated['plan'] !== 'trial' && $planDuration) ? now()->addDays($planDuration) : null;
 
         try {
             $tenant = $this->manager->create($validated);
@@ -124,6 +124,56 @@ class TenantController extends Controller
         }
 
         return back()->with('error', "Migration selesai: {$failed} dari {$total} tenant gagal. Cek log server.");
+    }
+
+    public function monitoring()
+    {
+        $tenants  = Tenant::orderByDesc('created_at')->get();
+        $statsList = [];
+        foreach ($tenants as $t) {
+            try {
+                $statsList[$t->id] = $this->manager->stats($t);
+            } catch (\Exception $e) {
+                $statsList[$t->id] = ['error' => $e->getMessage(), 'db_ok' => false];
+            }
+        }
+        return view('admin.tenants.monitoring', compact('tenants', 'statsList'));
+    }
+
+    public function renew(Request $request, Tenant $tenant)
+    {
+        $request->validate(['days' => 'required|integer|min:1|max:3650']);
+        $this->manager->renew($tenant, (int) $request->days);
+        return back()->with('success', "Masa aktif \"{$tenant->name}\" diperpanjang {$request->days} hari.");
+    }
+
+    public function changePlan(Request $request, Tenant $tenant)
+    {
+        $request->validate([
+            'plan' => 'required|in:' . implode(',', array_keys(config('tenants.plans', []))),
+        ]);
+        $this->manager->changePlan($tenant, $request->plan);
+        return back()->with('success', "Paket \"{$tenant->name}\" diubah ke " . ucfirst($request->plan) . '.');
+    }
+
+    public function updateBranding(Request $request, Tenant $tenant)
+    {
+        $request->validate([
+            'app_name'      => 'nullable|string|max:100',
+            'logo_url'      => 'nullable|url|max:500',
+            'primary_color' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+            'tagline'       => 'nullable|string|max:200',
+        ]);
+
+        $branding = array_filter([
+            'app_name'      => $request->app_name,
+            'logo_url'      => $request->logo_url,
+            'primary_color' => $request->primary_color,
+            'tagline'       => $request->tagline,
+        ]);
+
+        $tenant->update(['branding' => $branding ?: null]);
+        return back()->with('success', "Branding \"{$tenant->name}\" berhasil diperbarui.");
     }
 
     public function destroy(Request $request, Tenant $tenant)
