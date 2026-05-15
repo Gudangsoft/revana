@@ -132,7 +132,25 @@ Implementasi lengkap sistem multi-tenant (Opsi B: 1 codebase, database terpisah 
 
 ---
 
-## 10. UI Manajemen Tenant
+## 10. Fix OOM Error di Laporan Artikel per Jurnal
+
+**Tujuan:** Halaman `/pic/reports/journal-articles` crash "Allowed memory size exhausted" karena load ribuan objek Submission ke memori.
+
+### Penyebab
+- `with(['slots.submissions'])` eager-load seluruh baris Submission (semua kolom)
+- Di dalam loop per jurnal, query ulang `Submission::whereHas(...)` → N+1 + data dobel di memori
+
+### Solusi
+Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load objek Submission sama sekali.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/ReportController.php` | Ganti `with(['slots.submissions'])->get()` + loop query menjadi `withCount` dengan 5 constraint status; `allJournals` hanya select id+nama_jurnal |
+
+---
+
+## 11. UI Manajemen Tenant
 
 **Tujuan:** Interface lengkap untuk mengelola semua tenant dari portal super admin.
 
@@ -144,3 +162,19 @@ Implementasi lengkap sistem multi-tenant (Opsi B: 1 codebase, database terpisah 
 | `resources/views/admin/tenants/show.blade.php` | Detail tenant: toggle fitur, stats DB, aksi, impersonate, perpanjang, branding |
 | `resources/views/admin/tenants/tutorial.blade.php` | Tutorial lengkap 10 bagian dengan sticky TOC |
 | `resources/views/admin/partials/sidebar.blade.php` | Tambah section Super Admin: Manajemen Tenant + Monitoring Tenant |
+
+## 11. 🔄 Update: update tenan
+
+- **Commit:** `cf08656` — 11:39 oleh Gudangsoft
+- **File berubah:** 16 file
+- `app/Console/Commands/TenantsCheckExpiry.php`
+- `app/Console/Kernel.php`
+- `app/Http/Controllers/Admin/TenantController.php`
+- `app/Http/Controllers/Admin/TenantImpersonateController.php`
+- `app/Http/Middleware/TenantMiddleware.php`
+- `app/Models/Tenant.php`
+- `app/Services/TenantManager.php`
+- `config/tenants.php`
+- `database/migrations/2026_05_15_000002_add_branding_to_tenants_table.php`
+- `log-update-2026-05-15.md`
+
