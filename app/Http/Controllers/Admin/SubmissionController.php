@@ -73,7 +73,7 @@ class SubmissionController extends Controller
 
         $this->applyProgramFilter($query, $request);
 
-        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 20));
+        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50));
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
 

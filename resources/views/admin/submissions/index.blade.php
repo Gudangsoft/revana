@@ -409,7 +409,7 @@
                     </div>
                 </div>
 
-                @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 20])
+                @include('partials.per-page-selector', ['paginator' => $submissions, 'default' => 50])
             </div>
         </div>
     </div>

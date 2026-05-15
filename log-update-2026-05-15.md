@@ -273,3 +273,11 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 - **File berubah:** 1 file
 - `resources/views/admin/partials/sidebar.blade.php`
 
+
+## 21. 🔄 Update: fs
+
+- **Commit:** `d742f7c` — 17:16 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-15.md`
+- `resources/views/pic/fasttrack/show.blade.php`
+
