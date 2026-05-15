@@ -298,3 +298,11 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 - `log-update-2026-05-15.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
 
+
+## 24. 🔄 Update: up table
+
+- **Commit:** `f2fbe07` — 22:17 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-15.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+

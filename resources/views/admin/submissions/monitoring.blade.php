@@ -13,8 +13,7 @@
 .monitoring-scroll-wrapper {
     overflow-x: auto;
     overflow-y: auto;
-    max-height: calc(100vh - 400px);
-    min-height: 300px;
+    min-height: 200px;
     border: 1px solid #dee2e6;
     border-radius: 4px;
     scrollbar-width: thin;
@@ -1590,6 +1589,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Auto-fit table height: isi sisa viewport agar halaman tidak scroll
+(function fitTableToViewport() {
+    var wrapper = document.getElementById('monitoringScrollWrapper');
+    if (!wrapper) return;
+
+    function adjust() {
+        var rect = wrapper.getBoundingClientRect();
+        var paginationBar = wrapper.closest('.card-body')?.nextElementSibling;
+        var belowHeight = paginationBar ? (paginationBar.offsetHeight + 24) : 70;
+        var available = window.innerHeight - rect.top - belowHeight;
+        wrapper.style.maxHeight = Math.max(200, available) + 'px';
+    }
+
+    adjust();
+    window.addEventListener('resize', adjust);
+
+    // Prevent the page body from scrolling on this page
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    // Restore on navigation away
+    window.addEventListener('beforeunload', function() {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    });
+})();
 </script>
 
 @endsection
