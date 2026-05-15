@@ -99,7 +99,8 @@
 .table-monitoring {
     border-collapse: collapse;
     border-spacing: 0;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
+    line-height: 1.2;
 }
 
 .table-monitoring thead th {
@@ -110,7 +111,8 @@
     color: white !important;
     border: 1px solid #212529 !important;
     white-space: nowrap;
-    padding: 6px 8px;
+    padding: 4px 5px;
+    font-size: 0.7rem;
 }
 
 .table-monitoring thead tr:nth-child(2) th {
@@ -182,8 +184,9 @@
 
 .table-monitoring tbody td {
     white-space: nowrap;
-    padding: 5px 8px;
+    padding: 2px 5px;
     border: 1px solid #dee2e6;
+    vertical-align: middle;
 }
 
 .table-monitoring tbody tr:hover td {
@@ -602,15 +605,13 @@
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
-                                <td class="sticky-first">
-                                    <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none" title="Klik untuk proses">
+                                <td class="sticky-first"
+                                    title="{{ $s->journalSlot ? ($s->journalSlot->journalMaster?->nama_jurnal ?? '-').' — Vol.'.$s->journalSlot->volume.' No.'.$s->journalSlot->nomor : '' }}">
+                                    <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none">
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
-                                    @if($s->journalSlot)
-                                        <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $s->journalSlot->journalMaster?->nama_jurnal ?? '-' }} - Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}">{{ Str::limit($s->journalSlot->journalMaster?->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}</small>
-                                    @endif
                                     @if($isCompleted)
-                                        <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
+                                        <span class="badge bg-success ms-1"><i class="bi bi-check-circle-fill"></i></span>
                                     @endif
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
