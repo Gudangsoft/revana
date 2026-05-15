@@ -213,6 +213,25 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 
 ---
 
+## 16. Samakan Tampilan Detail Fasttrack PIC
+
+**Tujuan:** Halaman `/pic/fasttrack/{id}` diseragamkan dengan `/pic/submissions/{id}` — tampilan lebih lengkap dan konsisten.
+
+### Field yang Ditambahkan
+- Link Submit (`link_artikel`) dengan tombol buka
+- Username & Password Author
+- Catatan Marketing
+- Catatan per tahap (dari histories `note_added`)
+- Link Publish (button success)
+- Riwayat perubahan (tabel histories, sorted desc)
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/fasttrack/show.blade.php` | Rewrite total — layout card seperti submissions/show, action bar dengan status badge + edit count, semua field lengkap |
+
+---
+
 ## 15. Accordion Sidebar PIC & Marketing
 
 **Tujuan:** Menu pengelolaan (Fasttrack, Normal, BKD, JAFA, Jurnal) di sidebar PIC dan Marketing bisa di-collapse — klik header untuk toggle buka/tutup.
@@ -246,4 +265,11 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 - `resources/views/marketing/layouts/app.blade.php`
 - `resources/views/pic/my-tasks/index.blade.php`
 - `resources/views/pic/partials/sidebar.blade.php`
+
+
+## 19. 🔄 Update: a
+
+- **Commit:** `68b3754` — 17:10 oleh Gudangsoft
+- **File berubah:** 1 file
+- `resources/views/admin/partials/sidebar.blade.php`
 

@@ -8,211 +8,259 @@
 @endsection
 
 @section('content')
-<div class="row">
-    <div class="col-md-10 mx-auto">
-        <div class="card">
-            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-lightning-charge"></i> Detail Submission Fasttrack</span>
-                <div>
-                    @php
-                        $editCount = $submission->edit_count ?? 0;
-                        $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
-                        $canEdit = $editCount < $maxEditCount;
-                    @endphp
-                    @if($canEdit)
-                        <a href="{{ route('pic.fasttrack.edit', $submission) }}" class="btn btn-primary btn-sm me-2">
-                            <i class="bi bi-pencil-square"></i> Edit ({{ $maxEditCount - $editCount }}x tersisa)
-                        </a>
-                    @else
-                        <button class="btn btn-secondary btn-sm me-2" disabled title="Batas edit sudah tercapai">
-                            <i class="bi bi-lock"></i> Edit Terkunci
-                        </button>
-                    @endif
-                    <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-outline-dark btn-sm">
-                        <i class="bi bi-arrow-left"></i> Kembali
-                    </a>
-                </div>
+@php
+    $editCount    = $submission->edit_count ?? 0;
+    $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
+    $canEdit      = $editCount < $maxEditCount;
+
+    // Catatan per tahap dari histories
+    $notesByStep = [];
+    if ($submission->histories) {
+        foreach ($submission->histories->where('action', 'note_added')->sortByDesc('created_at') as $nh) {
+            if (!isset($notesByStep[$nh->step])) $notesByStep[$nh->step] = $nh->notes;
+        }
+    }
+@endphp
+
+{{-- Action bar --}}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-warning text-dark fs-6">
+            <i class="bi bi-lightning-charge-fill"></i> Fasttrack
+        </span>
+        <x-submission-status :submission="$submission" />
+        @if($editCount > 0)
+            <span class="badge {{ ($maxEditCount - $editCount) == 0 ? 'bg-danger' : (($maxEditCount - $editCount) == 1 ? 'bg-warning text-dark' : 'bg-info') }}">
+                <i class="bi bi-pencil"></i> Diedit {{ $editCount }}x
+            </span>
+        @endif
+    </div>
+    <div class="d-flex gap-2">
+        @if($canEdit)
+            <a href="{{ route('pic.fasttrack.edit', $submission) }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-pencil-square"></i> Edit ({{ $maxEditCount - $editCount }}x tersisa)
+            </a>
+        @else
+            <button class="btn btn-secondary btn-sm" disabled>
+                <i class="bi bi-lock"></i> Edit Terkunci
+            </button>
+        @endif
+        <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+    </div>
+</div>
+
+{{-- Main Detail Card --}}
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-file-earmark-text"></i> Detail Submission Fasttrack</span>
+        <code class="text-warning fw-bold">{{ $submission->kode_submit }}</code>
+    </div>
+    <div class="card-body">
+
+        {{-- Kode & Tanggal --}}
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>Kode Submit:</strong>
+                <div><code>{{ $submission->kode_submit }}</code></div>
             </div>
-            <div class="card-body">
-                <!-- Info Badge -->
-                <div class="mb-4">
-                    <span class="badge bg-warning text-dark fs-6"><i class="bi bi-lightning-charge"></i> Fasttrack</span>
-                    <span class="badge bg-success fs-6">Published</span>
-                    @php
-                        $editCount = $submission->edit_count ?? 0;
-                        $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
-                        $remainingEdits = $maxEditCount - $editCount;
-                    @endphp
-                    @if($editCount > 0)
-                        <span class="badge {{ $remainingEdits == 0 ? 'bg-danger' : ($remainingEdits == 1 ? 'bg-warning text-dark' : 'bg-info') }} fs-6">
-                            <i class="bi bi-pencil"></i> Diedit {{ $editCount }}x
-                        </span>
-                    @endif
-                </div>
-
-                <!-- Kode Submit -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="text-muted mb-1">Kode Submit</h6>
-                                <h4 class="text-warning mb-0"><code>{{ $submission->kode_submit }}</code></h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="text-muted mb-1">Kode LOA</h6>
-                                <h4 class="mb-0"><code>{{ $submission->kode_loa }}</code></h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data Jurnal -->
-                <h6 class="text-muted mb-3 border-bottom pb-2"><i class="bi bi-journal-text"></i> Data Jurnal</h6>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <table class="table table-borderless table-sm">
-                            <tr>
-                                <td class="text-muted" width="40%">Nama Jurnal</td>
-                                <td><strong>{{ $submission->journalSlot->journalMaster->nama_jurnal ?? '-' }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Publisher</td>
-                                <td>{{ $submission->journalSlot->journalMaster->publisher ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Akreditasi</td>
-                                <td>
-                                    @if($submission->journalSlot->journalMaster->accreditation ?? null)
-                                        <span class="badge bg-info">{{ $submission->journalSlot->journalMaster->accreditation }}</span>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <table class="table table-borderless table-sm">
-                            <tr>
-                                <td class="text-muted" width="40%">Volume</td>
-                                <td>{{ $submission->journalSlot->volume ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Nomor</td>
-                                <td>{{ $submission->journalSlot->nomor ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Tahun</td>
-                                <td>{{ $submission->journalSlot->tahun ?? '-' }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Data Artikel -->
-                <h6 class="text-muted mb-3 border-bottom pb-2"><i class="bi bi-file-text"></i> Data Artikel</h6>
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <table class="table table-borderless table-sm">
-                            <tr>
-                                <td class="text-muted" width="20%">Judul Artikel</td>
-                                <td><strong>{{ $submission->judul_artikel }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Link Publish</td>
-                                <td>
-                                    @if($submission->link_publish)
-                                        <a href="{{ $submission->link_publish }}" target="_blank" class="btn btn-success btn-sm">
-                                            <i class="bi bi-box-arrow-up-right"></i> Buka Link Publish
-                                        </a>
-                                        <br><small class="text-muted">{{ $submission->link_publish }}</small>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Tanggal Submit</td>
-                                <td>{{ $submission->tanggal_submit ? $submission->tanggal_submit->format('d F Y') : '-' }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Data Penulis -->
-                <h6 class="text-muted mb-3 border-bottom pb-2"><i class="bi bi-person"></i> Data Penulis</h6>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <table class="table table-borderless table-sm">
-                            <tr>
-                                <td class="text-muted" width="40%">Nama Penulis</td>
-                                <td><strong>{{ $submission->nama_penulis }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">No HP</td>
-                                <td>{{ $submission->no_hp_penulis ?? '-' }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- PIC & Marketing -->
-                <h6 class="text-muted mb-3 border-bottom pb-2"><i class="bi bi-people"></i> PIC & Marketing</h6>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <table class="table table-borderless table-sm">
-                            <tr>
-                                <td class="text-muted" width="40%">Marketing</td>
-                                <td>{{ $submission->marketing->name ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">PIC Submit</td>
-                                <td>{{ $submission->petugasSubmit->name ?? '-' }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Catatan -->
-                @if($submission->notes)
-                <h6 class="text-muted mb-3 border-bottom pb-2"><i class="bi bi-chat-left-text"></i> Catatan</h6>
-                <div class="alert alert-secondary">
-                    {{ $submission->notes }}
-                </div>
-                @endif
-
-                <!-- History -->
-                @if($submission->histories && $submission->histories->count() > 0)
-                <h6 class="text-muted mb-3 border-bottom pb-2"><i class="bi bi-clock-history"></i> History</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Waktu</th>
-                                <th>Step</th>
-                                <th>Action</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($submission->histories as $history)
-                            <tr>
-                                <td>{{ $history->created_at->format('d/m/Y H:i') }}</td>
-                                <td><span class="badge bg-secondary">{{ $history->step }}</span></td>
-                                <td>{{ $history->action }}</td>
-                                <td>{{ $history->notes ?? '-' }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @endif
+            <div class="col-md-4">
+                <strong>Kode LOA:</strong>
+                <div><code>{{ $submission->kode_loa ?? '-' }}</code></div>
+            </div>
+            <div class="col-md-4">
+                <strong>Tanggal Submit:</strong>
+                <div>{{ $submission->tanggal_submit ? \Carbon\Carbon::parse($submission->tanggal_submit)->format('d F Y') : $submission->created_at->format('d F Y') }}</div>
             </div>
         </div>
+
+        <hr>
+
+        {{-- Jurnal & Slot --}}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Jurnal:</strong>
+                <div>
+                    @if($submission->journalSlot?->journalMaster)
+                        {{ $submission->journalSlot->journalMaster->nama_jurnal }}
+                        @if($submission->journalSlot->journalMaster->accreditation)
+                            <span class="badge bg-info ms-1">{{ $submission->journalSlot->journalMaster->accreditation }}</span>
+                        @endif
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
+                </div>
+            </div>
+            <div class="col-md-6">
+                <strong>Slot:</strong>
+                <div>
+                    @if($submission->journalSlot)
+                        Vol. {{ $submission->journalSlot->volume }}
+                        No. {{ $submission->journalSlot->nomor }}
+                        ({{ $submission->journalSlot->bulan }}/{{ $submission->journalSlot->tahun }})
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        {{-- Artikel --}}
+        @if($submission->id_artikel)
+        <div class="mb-3">
+            <strong>ID Artikel:</strong>
+            <div>{{ $submission->id_artikel }}</div>
+        </div>
+        @endif
+
+        <div class="mb-3">
+            <strong>Judul Artikel:</strong>
+            <div class="text-primary fw-bold">{{ $submission->judul_artikel }}</div>
+        </div>
+
+        {{-- Link Submit --}}
+        @if($submission->link_artikel)
+        <div class="mb-3">
+            <strong>Link Submit:</strong>
+            <div>
+                <a href="{{ $submission->link_artikel }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right"></i> Buka Link Submit
+                </a>
+                <br><small class="text-muted">{{ $submission->link_artikel }}</small>
+            </div>
+        </div>
+        @endif
+
+        <hr>
+
+        {{-- Data Penulis --}}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Nama Penulis:</strong>
+                <div>{{ $submission->nama_penulis }}</div>
+            </div>
+            <div class="col-md-6">
+                <strong>No. HP Penulis:</strong>
+                <div>{{ $submission->no_hp_penulis ?? '-' }}</div>
+            </div>
+        </div>
+
+        {{-- Username / Password Author --}}
+        @if($submission->username_author || $submission->password_author)
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Username Author:</strong>
+                <div>{{ $submission->username_author ?? '-' }}</div>
+            </div>
+            <div class="col-md-6">
+                <strong>Password Author:</strong>
+                <div>{{ $submission->password_author ?? '-' }}</div>
+            </div>
+        </div>
+        @endif
+
+        <hr>
+
+        {{-- PIC & Marketing --}}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Marketing:</strong>
+                <div>{{ $submission->marketing->name ?? '-' }}</div>
+            </div>
+            <div class="col-md-6">
+                <strong>PIC Submit:</strong>
+                <div>{{ $submission->petugasSubmit->name ?? '-' }}</div>
+            </div>
+        </div>
+
+        {{-- Catatan --}}
+        @if($submission->notes)
+        <hr>
+        <div class="mb-3">
+            <strong>Catatan:</strong>
+            <div class="text-muted">{{ $submission->notes }}</div>
+        </div>
+        @endif
+
+        {{-- Catatan Marketing --}}
+        @if($submission->catatan_marketing)
+        <hr>
+        <div class="mb-3">
+            <strong><i class="bi bi-chat-left-text text-warning"></i> Catatan dari Marketing:</strong>
+            <div class="alert alert-warning mt-1 mb-0">{{ $submission->catatan_marketing }}</div>
+        </div>
+        @endif
+
+        {{-- Catatan per tahap --}}
+        @if(count($notesByStep) > 0)
+        <hr>
+        <div class="mb-3">
+            <strong><i class="bi bi-chat-left-text text-info"></i> Catatan per Tahap:</strong>
+            @foreach($notesByStep as $step => $noteText)
+            <div class="alert alert-info mt-2 mb-1 py-2">
+                <small class="fw-bold text-info">{{ ucfirst($step) }}:</small>
+                <div>{{ $noteText }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
+        {{-- Link Publish --}}
+        @if($submission->link_publish)
+        <hr>
+        <div class="mb-3">
+            <strong>Link Publish:</strong>
+            <div>
+                <a href="{{ $submission->link_publish }}" target="_blank" class="btn btn-sm btn-success">
+                    <i class="bi bi-link-45deg"></i> Lihat Publikasi
+                </a>
+                <br><small class="text-muted">{{ $submission->link_publish }}</small>
+            </div>
+        </div>
+        @endif
+
     </div>
+</div>
+
+{{-- History --}}
+@if($submission->histories && $submission->histories->count() > 0)
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="bi bi-clock-history"></i> Riwayat Perubahan
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Step</th>
+                        <th>Action</th>
+                        <th>Catatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($submission->histories->sortByDesc('created_at') as $history)
+                    <tr>
+                        <td class="text-nowrap">{{ $history->created_at->format('d/m/Y H:i') }}</td>
+                        <td><span class="badge bg-secondary">{{ $history->step }}</span></td>
+                        <td>{{ $history->action }}</td>
+                        <td class="text-muted">{{ $history->notes ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
+<div class="d-flex justify-content-start">
+    <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali ke Daftar
+    </a>
 </div>
 @endsection
