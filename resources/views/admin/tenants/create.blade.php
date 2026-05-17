@@ -27,6 +27,62 @@
         </div>
         @endif
 
+        {{-- Info Database & Setup MySQL Admin --}}
+        @php
+            $dbAdminUser = env('DB_ADMIN_USERNAME', env('DB_USERNAME', '?'));
+            $dbAdminConfigured = env('DB_ADMIN_USERNAME') !== null;
+            $dbUser = env('DB_USERNAME', '?');
+            $dbHost = env('DB_HOST', '127.0.0.1');
+        @endphp
+        <div class="card mb-3 border-info">
+            <div class="card-header bg-info text-white py-2">
+                <i class="bi bi-database-gear me-2"></i><strong>Info Database Tenant</strong>
+            </div>
+            <div class="card-body pb-2">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted mb-1">Nama Database yang akan dibuat</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light"><code>tenant_</code></span>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="dbPreview"
+                                   value="(isi subdomain dulu)" readonly>
+                        </div>
+                        <small class="text-muted">Format: <code>tenant_{subdomain}</code></small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">MySQL Admin User</label>
+                        <input type="text" class="form-control form-control-sm font-monospace"
+                               value="{{ $dbAdminUser }}" readonly>
+                        <small class="{{ $dbAdminConfigured ? 'text-success' : 'text-danger' }}">
+                            @if($dbAdminConfigured)
+                                <i class="bi bi-check-circle"></i> DB_ADMIN_USERNAME dikonfigurasi
+                            @else
+                                <i class="bi bi-exclamation-triangle"></i> Belum ada DB_ADMIN_USERNAME di .env
+                            @endif
+                        </small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">App DB User</label>
+                        <input type="text" class="form-control form-control-sm font-monospace"
+                               value="{{ $dbUser }}" readonly>
+                        <small class="text-muted">User untuk akses data tenant</small>
+                    </div>
+                </div>
+
+                @if(!$dbAdminConfigured)
+                <div class="alert alert-warning py-2 mb-2">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Perlu setup:</strong> Tambahkan ke file <code>.env</code> di server:
+                    <pre class="bg-dark text-light rounded p-2 mt-2 mb-1 small">DB_ADMIN_USERNAME=root
+DB_ADMIN_PASSWORD=password_root_mysql</pre>
+                    Atau jalankan perintah ini di MySQL untuk memberi privilege ke user aplikasi:
+                    <pre class="bg-dark text-light rounded p-2 mt-1 mb-0 small">GRANT CREATE, DROP ON *.* TO '{{ $dbUser }}'@'{{ $dbHost }}';
+FLUSH PRIVILEGES;</pre>
+                </div>
+                @endif
+            </div>
+        </div>
+
         <div class="card shadow-sm border-primary">
             <div class="card-header bg-primary text-white">
                 <i class="bi bi-building-add me-2"></i><strong>Form Pendaftaran Tenant Baru</strong>
@@ -153,9 +209,15 @@ const plans = @json($plans);
 const features = @json($features);
 
 function updatePreview() {
-    const val = document.getElementById('subdomainInput').value.toLowerCase();
+    const val = document.getElementById('subdomainInput').value.toLowerCase().replace(/[^a-z0-9\-]/g, '');
     document.getElementById('domainPreview').textContent = (val || '—') + '.apji.org';
+    // Update DB name preview
+    const dbPreview = document.getElementById('dbPreview');
+    if (dbPreview) {
+        dbPreview.value = val ? val.replace(/-/g, '_') : '(isi subdomain dulu)';
+    }
 }
+document.getElementById('subdomainInput')?.addEventListener('input', updatePreview);
 
 function updateFeaturePreview() {
     const plan = document.getElementById('planSelect').value;

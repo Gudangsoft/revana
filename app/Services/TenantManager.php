@@ -105,7 +105,7 @@ class TenantManager
     {
         $dbName = $tenant->db_name;
         try {
-            DB::statement("DROP DATABASE IF EXISTS `{$dbName}`");
+            DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$dbName}`");
             Log::info("Tenant DB dropped: {$dbName}");
         } catch (\Exception $e) {
             Log::error("Gagal drop DB tenant: {$e->getMessage()}");
@@ -211,7 +211,10 @@ class TenantManager
     {
         $charset   = config('database.connections.mysql.charset', 'utf8mb4');
         $collation = config('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
-        DB::statement("CREATE DATABASE IF NOT EXISTS `{$tenant->db_name}` CHARACTER SET {$charset} COLLATE {$collation}");
+        // Gunakan koneksi mysql_admin (user dengan privilege CREATE DATABASE)
+        DB::connection('mysql_admin')->statement(
+            "CREATE DATABASE IF NOT EXISTS `{$tenant->db_name}` CHARACTER SET {$charset} COLLATE {$collation}"
+        );
         Log::info("Tenant DB created: {$tenant->db_name}");
     }
 

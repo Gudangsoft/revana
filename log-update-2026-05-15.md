@@ -213,6 +213,36 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 
 ---
 
+## 17. Fix CREATE DATABASE — Koneksi MySQL Admin Terpisah
+
+**Tujuan:** Mengatasi error `Access denied for user ... to database 'tenant_...'` saat membuat tenant baru, karena user MySQL aplikasi tidak punya privilege `CREATE DATABASE`.
+
+### Solusi
+- Tambah koneksi `mysql_admin` di `config/database.php` menggunakan `DB_ADMIN_USERNAME` / `DB_ADMIN_PASSWORD` dari `.env` (fallback ke `DB_USERNAME`/`DB_PASSWORD`)
+- `TenantManager::createDatabase()` dan `delete()` kini menggunakan `DB::connection('mysql_admin')` untuk operasi DDL
+- Form create tenant menampilkan: preview nama DB (`tenant_{subdomain}`), status konfigurasi admin user, dan panduan SQL/`.env` jika belum dikonfigurasi
+
+### Setup yang perlu dilakukan di server
+Tambahkan ke `.env`:
+```
+DB_ADMIN_USERNAME=root
+DB_ADMIN_PASSWORD=password_root_mysql
+```
+Atau jalankan di MySQL:
+```sql
+GRANT CREATE, DROP ON *.* TO 'dbrevana'@'127.0.0.1';
+FLUSH PRIVILEGES;
+```
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `config/database.php` | Tambah koneksi `mysql_admin` dengan `DB_ADMIN_USERNAME`/`DB_ADMIN_PASSWORD` |
+| `app/Services/TenantManager.php` | `createDatabase()` + `delete()` gunakan `DB::connection('mysql_admin')` |
+| `resources/views/admin/tenants/create.blade.php` | Info box: preview DB name, status admin user, panduan setup + JS update realtime |
+
+---
+
 ## 16. Samakan Tampilan Detail Fasttrack PIC
 
 **Tujuan:** Halaman `/pic/fasttrack/{id}` diseragamkan dengan `/pic/submissions/{id}` — tampilan lebih lengkap dan konsisten.
@@ -321,4 +351,17 @@ Ganti ke `withCount` + constraint per status — hanya ambil angka, tidak load o
 - **File berubah:** 2 file
 - `log-update-2026-05-15.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
+
+
+## 27. 🔄 Update: s
+
+- **Commit:** `d7fca7a` — 22:33 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-05-15.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/marketing/submissions-monitoring.blade.php`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
 
