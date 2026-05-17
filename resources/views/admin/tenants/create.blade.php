@@ -192,14 +192,16 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">
-                    Masukkan kredensial MySQL yang punya privilege
-                    <code>CREATE DATABASE</code> (biasanya <strong>root</strong>).
-                    Akan disimpan ke file <code>.env</code> di server — cukup dilakukan sekali.
-                </p>
+                <div class="alert alert-info py-2 small mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Masukkan user MySQL yang punya akses <strong>CREATE DATABASE</strong>.
+                    Biasanya <strong>root</strong> (bukan user aplikasi seperti <code>dbrevana</code>).
+                    Kredensial ini disimpan ke <code>.env</code> di server — cukup dilakukan <strong>satu kali</strong>.
+                </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">MySQL Username</label>
+                    <label class="form-label fw-semibold">MySQL Username <span class="text-danger">*</span></label>
                     <input type="text" id="dbAdminUser" class="form-control" value="root" placeholder="root">
+                    <div class="form-text text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Gunakan <strong>root</strong>, bukan user biasa</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">MySQL Password</label>
@@ -369,47 +371,62 @@ async function startCreate() {
 }
 
 // ── DB Admin Setup ────────────────────────────────────────────────────────────
-async function testDbAdmin() {
-    const resultEl = document.getElementById('setupDbResult');
-    resultEl.innerHTML = '<div class="text-center py-2"><span class="spinner-border spinner-border-sm"></span> Menghubungkan...</div>';
-
-    const res  = await fetch('{{ route("admin.tenants.test-db-admin") }}', {
-        method:  'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body:    JSON.stringify({
-            db_admin_username: document.getElementById('dbAdminUser').value,
-            db_admin_password: document.getElementById('dbAdminPass').value,
-        }),
+function dbAdminPayload() {
+    return JSON.stringify({
+        db_admin_username: document.getElementById('dbAdminUser').value.trim(),
+        db_admin_password: document.getElementById('dbAdminPass').value,
     });
-    const data = await res.json();
-    resultEl.innerHTML = data.success
-        ? `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle me-1"></i>${data.message}</div>`
-        : `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle me-1"></i>${data.message}</div>`;
+}
+
+function setDbResult(html) {
+    document.getElementById('setupDbResult').innerHTML = html;
+}
+
+function setDbBusy(msg) {
+    setDbResult(`<div class="alert alert-secondary py-2 small mb-0">
+        <span class="spinner-border spinner-border-sm me-2"></span>${msg}
+    </div>`);
+}
+
+async function testDbAdmin() {
+    setDbBusy('Menguji koneksi, mohon tunggu (maks 10 detik)...');
+    try {
+        const res  = await fetch('{{ route("admin.tenants.test-db-admin") }}', {
+            method:  'POST',
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body:    dbAdminPayload(),
+        });
+        const data = await res.json();
+        setDbResult(data.success
+            ? `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle-fill me-1"></i>${data.message}</div>`
+            : `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${data.message}</div>`
+        );
+    } catch (e) {
+        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>Request gagal: ${e.message}</div>`);
+    }
 }
 
 async function saveDbAdmin() {
-    const resultEl = document.getElementById('setupDbResult');
-    resultEl.innerHTML = '<div class="text-center py-2"><span class="spinner-border spinner-border-sm"></span> Menyimpan...</div>';
-
-    const res  = await fetch('{{ route("admin.tenants.save-db-admin") }}', {
-        method:  'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body:    JSON.stringify({
-            db_admin_username: document.getElementById('dbAdminUser').value,
-            db_admin_password: document.getElementById('dbAdminPass').value,
-        }),
-    });
-    const data = await res.json();
-
-    if (data.success) {
-        resultEl.innerHTML = `<div class="alert alert-success py-2 small mb-0">
-            <i class="bi bi-check-circle-fill me-1"></i>${data.message}. Sistem akan dicek ulang...
-        </div>`;
-        setTimeout(() => { window.location.reload(); }, 1800);
-    } else {
-        resultEl.innerHTML = `<div class="alert alert-danger py-2 small mb-0">
-            <i class="bi bi-x-circle me-1"></i>${data.message}
-        </div>`;
+    setDbBusy('Menyimpan ke .env dan menguji koneksi...');
+    try {
+        const res  = await fetch('{{ route("admin.tenants.save-db-admin") }}', {
+            method:  'POST',
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body:    dbAdminPayload(),
+        });
+        const data = await res.json();
+        if (data.success) {
+            setDbResult(`<div class="alert alert-success py-2 small mb-0">
+                <i class="bi bi-check-circle-fill me-1"></i><strong>${data.message}</strong> — halaman akan dimuat ulang...
+            </div>`);
+            setTimeout(() => { window.location.reload(); }, 2000);
+        } else {
+            setDbResult(`<div class="alert alert-danger py-2 small mb-0">
+                <i class="bi bi-x-circle-fill me-1"></i>${data.message}
+            </div>`);
+        }
+    } catch (e) {
+        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>Request gagal: ${e.message}</div>`);
     }
 }
 </script>

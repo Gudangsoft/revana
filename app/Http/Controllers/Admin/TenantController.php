@@ -86,34 +86,33 @@ class TenantController extends Controller
 
     public function testDbAdmin(Request $request)
     {
-        $request->validate(['db_admin_username' => 'required', 'db_admin_password' => 'required']);
+        $username = trim($request->input('db_admin_username', ''));
+        $password = $request->input('db_admin_password', '');
 
-        Config::set('database.connections.mysql_admin.username', $request->db_admin_username);
-        Config::set('database.connections.mysql_admin.password', $request->db_admin_password);
-        DB::purge('mysql_admin');
-
-        try {
-            DB::connection('mysql_admin')->getPdo();
-            return response()->json(['success' => true, 'message' => 'Koneksi berhasil']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
+        if (!$username) {
+            return response()->json(['success' => false, 'message' => 'Username tidak boleh kosong']);
         }
+
+        return $this->tryConnectAdmin($username, $password);
     }
 
     public function saveDbAdmin(Request $request)
     {
-        $request->validate(['db_admin_username' => 'required', 'db_admin_password' => 'required']);
+        $username = trim($request->input('db_admin_username', ''));
+        $password = $request->input('db_admin_password', '');
 
-        Config::set('database.connections.mysql_admin.username', $request->db_admin_username);
-        Config::set('database.connections.mysql_admin.password', $request->db_admin_password);
-        DB::purge('mysql_admin');
-
-        try {
-            DB::connection('mysql_admin')->getPdo();
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
+        if (!$username) {
+            return response()->json(['success' => false, 'message' => 'Username tidak boleh kosong']);
         }
 
+        // Test koneksi dulu
+        $test = $this->tryConnectAdmin($username, $password);
+        $testData = $test->getData(true);
+        if (!$testData['success']) {
+            return $test;
+        }
+
+        // Simpan ke .env
         $envPath = base_path('.env');
         if (!file_exists($envPath)) {
             return response()->json(['success' => false, 'message' => 'File .env tidak ditemukan di server']);
@@ -121,8 +120,8 @@ class TenantController extends Controller
 
         $env = file_get_contents($envPath);
         foreach ([
-            'DB_ADMIN_USERNAME' => $request->db_admin_username,
-            'DB_ADMIN_PASSWORD' => $request->db_admin_password,
+            'DB_ADMIN_USERNAME' => $username,
+            'DB_ADMIN_PASSWORD' => $password,
         ] as $key => $value) {
             if (preg_match("/^{$key}=/m", $env)) {
                 $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
@@ -132,7 +131,43 @@ class TenantController extends Controller
         }
         file_put_contents($envPath, $env);
 
-        return response()->json(['success' => true, 'message' => 'Konfigurasi berhasil disimpan ke .env']);
+        // Clear config cache agar env() terbaca ulang
+        try { \Artisan::call('config:clear'); } catch (\Throwable) {}
+
+        return response()->json(['success' => true, 'message' => "Berhasil! {$username} disimpan sebagai DB admin"]);
+    }
+
+    private function tryConnectAdmin(string $username, string $password): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Set timeout koneksi pendek agar tidak hang lama
+            Config::set('database.connections.mysql_admin', array_merge(
+                config('database.connections.mysql_admin'),
+                [
+                    'username' => $username,
+                    'password' => $password,
+                    'options'  => [\PDO::ATTR_CONNECT_TIMEOUT => 5],
+                ]
+            ));
+            DB::purge('mysql_admin');
+            DB::connection('mysql_admin')->getPdo();
+
+            // Cek privilege CREATE
+            $canCreate = false;
+            try {
+                $testDb = 'sipera_priv_test_' . time();
+                DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
+                DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
+                $canCreate = true;
+            } catch (\Throwable) {}
+
+            if ($canCreate) {
+                return response()->json(['success' => true, 'message' => "Koneksi OK — {$username} punya privilege CREATE DATABASE"]);
+            }
+            return response()->json(['success' => false, 'message' => "Terhubung tapi {$username} tidak punya privilege CREATE DATABASE. Coba user root."]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
+        }
     }
 
     private function validateTenantRequest(Request $request): array

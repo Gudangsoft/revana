@@ -56,3 +56,12 @@ Log perubahan otomatis dari git commits.
 - `resources/views/admin/tenants/create.blade.php`
 - `routes/web.php`
 
+
+## 5. 🔄 Update: up
+
+- **Commit:** `d94f95d` — 19:22 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `log-update-2026-05-17.md`
+- `resources/views/admin/tenants/create.blade.php`
+
