@@ -56,41 +56,29 @@ class TenantController extends Controller
 
     public function systemCheck()
     {
-        try {
-            $checks = [];
+        // Hanya cek konfigurasi — TIDAK koneksi ke DB agar tidak hang
+        $adminUser    = env('DB_ADMIN_USERNAME');
+        $adminConfigured = $adminUser !== null && $adminUser !== '';
 
-            $adminUser = env('DB_ADMIN_USERNAME');
-            $checks['admin_configured'] = [
-                'ok'    => $adminUser !== null,
-                'label' => $adminUser !== null
-                    ? "DB_ADMIN_USERNAME: {$adminUser}"
+        return response()->json([
+            'admin_configured' => [
+                'ok'    => $adminConfigured,
+                'label' => $adminConfigured
+                    ? "DB_ADMIN_USERNAME: {$adminUser} (dikonfigurasi)"
                     : 'DB_ADMIN_USERNAME belum dikonfigurasi di .env',
-            ];
+            ],
+            'all_ok' => $adminConfigured,
+        ]);
+    }
 
-            try {
-                // Pakai koneksi sementara dengan timeout pendek agar tidak hang lama
-                Config::set('database.connections.mysql_admin.options.' . \PDO::ATTR_TIMEOUT, 5);
-                DB::purge('mysql_admin');
-
-                $testDb = 'sipera_priv_test_' . time();
-                DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
-                DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
-                $checks['create_db'] = ['ok' => true, 'label' => 'Dapat membuat & menghapus database'];
-            } catch (\Throwable $e) {
-                $msg   = $e->getMessage();
-                $short = strlen($msg) > 100 ? substr($msg, 0, 100) . '...' : $msg;
-                $checks['create_db'] = ['ok' => false, 'label' => 'Tidak dapat membuat database: ' . $short];
-            }
-
-            $checks['all_ok'] = collect($checks)->every(fn($c) => is_array($c) ? $c['ok'] : $c);
-
-            return response()->json($checks);
+    public function testCurrentDb()
+    {
+        try {
+            DB::purge('mysql_admin');
+            DB::connection('mysql_admin')->getPdo();
+            return response()->json(['success' => true, 'message' => 'Koneksi berhasil']);
         } catch (\Throwable $e) {
-            return response()->json([
-                'admin_configured' => ['ok' => false, 'label' => 'Gagal memeriksa konfigurasi'],
-                'create_db'        => ['ok' => false, 'label' => $e->getMessage()],
-                'all_ok'           => false,
-            ]);
+            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
         }
     }
 

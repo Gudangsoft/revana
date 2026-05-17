@@ -228,6 +228,7 @@ const features = @json($features);
 document.addEventListener('DOMContentLoaded', () => {
     runSystemCheck();
     updatePlanPreview();
+    updateDbPreview();
 
     document.getElementById('nameInput').addEventListener('input', function () {
         const sub = this.value
@@ -280,46 +281,57 @@ async function runSystemCheck() {
     const details  = document.getElementById('checkDetails');
     const btnSetup = document.getElementById('btnSetupDb');
 
-    const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), 12000); // 12-detik timeout
-
     try {
-        const res  = await fetch('{{ route("admin.tenants.system-check") }}', { signal: abort.signal });
-        clearTimeout(timer);
-
-        let data;
-        try { data = await res.json(); }
-        catch (e) { throw new Error('Response bukan JSON — cek log server'); }
+        const res  = await fetch('{{ route("admin.tenants.system-check") }}');
+        const data = await res.json();
 
         spinner.classList.add('d-none');
 
         if (data.all_ok) {
             card.className  = 'card mb-3 border-success';
             label.className = 'small text-success fw-semibold';
-            label.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Sistem siap — database dapat dibuat otomatis';
+            label.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Konfigurasi OK — '
+                + data.admin_configured.label
+                + ' &nbsp;|&nbsp; <a href="#" onclick="testDbNow(event)" class="text-success">Test koneksi</a>';
         } else {
             card.className  = 'card mb-3 border-warning';
             label.className = 'small text-warning fw-semibold';
-            label.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>Perlu konfigurasi database admin sebelum membuat tenant';
+            label.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>DB_ADMIN_USERNAME belum diatur — klik tombol di kanan untuk setup';
             btnSetup.classList.remove('d-none');
-
-            details.classList.remove('d-none');
-            details.innerHTML = Object.entries(data)
-                .filter(([k]) => k !== 'all_ok')
-                .map(([, v]) =>
-                    `<span class="me-3 ${v.ok ? 'text-success' : 'text-danger'}">
-                        <i class="bi ${v.ok ? 'bi-check-circle' : 'bi-x-circle'}"></i> ${v.label}
-                    </span>`
-                ).join('');
         }
     } catch (err) {
-        clearTimeout(timer);
         spinner.classList.add('d-none');
         card.className  = 'card mb-3 border-secondary';
         label.className = 'small text-muted';
-        label.textContent = err.name === 'AbortError'
-            ? 'Timeout: server tidak merespons dalam 12 detik'
-            : 'Tidak dapat memeriksa sistem: ' + err.message;
+        label.textContent = 'Tidak dapat memeriksa konfigurasi: ' + err.message;
+        btnSetup.classList.remove('d-none');
+    }
+}
+
+async function testDbNow(e) {
+    e.preventDefault();
+    const label = document.getElementById('checkLabel');
+    label.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menguji koneksi database...';
+
+    try {
+        const res  = await fetch('{{ route("admin.tenants.test-current-db") }}', {
+            method:  'POST',
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+        });
+        const data = await res.json();
+        const card = document.getElementById('systemCheckCard');
+        if (data.success) {
+            card.className  = 'card mb-3 border-success';
+            label.className = 'small text-success fw-semibold';
+            label.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Koneksi database admin OK — siap membuat tenant';
+        } else {
+            card.className  = 'card mb-3 border-danger';
+            label.className = 'small text-danger fw-semibold';
+            label.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>' + data.message
+                + ' &nbsp;<button class="btn btn-sm btn-warning py-0" data-bs-toggle="modal" data-bs-target="#modalSetupDb">Perbaiki</button>';
+        }
+    } catch (err) {
+        document.getElementById('checkLabel').textContent = 'Test gagal: ' + err.message;
     }
 }
 
