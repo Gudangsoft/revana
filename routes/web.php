@@ -402,7 +402,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/monitoring', [TenantController::class, 'monitoring'])->name('monitoring');
             Route::get('/tutorial', [TenantController::class, 'tutorial'])->name('tutorial');
             Route::get('/create', [TenantController::class, 'create'])->name('create');
+            Route::get('/system-check', [TenantController::class, 'systemCheck'])->name('system-check');
             Route::post('/', [TenantController::class, 'store'])->name('store');
+            Route::post('/store-ajax', [TenantController::class, 'storeAjax'])->name('store-ajax');
+            Route::post('/test-db-admin', [TenantController::class, 'testDbAdmin'])->name('test-db-admin');
+            Route::post('/save-db-admin', [TenantController::class, 'saveDbAdmin'])->name('save-db-admin');
             Route::post('/migrate-all', [TenantController::class, 'migrateAll'])->name('migrate-all');
             Route::get('/{tenant}', [TenantController::class, 'show'])->name('show');
             Route::post('/{tenant}/toggle-feature/{feature}', [TenantController::class, 'toggleFeature'])->name('toggle-feature');

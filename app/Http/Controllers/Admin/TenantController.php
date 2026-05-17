@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Services\TenantManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 class TenantController extends Controller
 {
@@ -33,6 +35,106 @@ class TenantController extends Controller
 
     public function store(Request $request)
     {
+        $validated = $this->validateTenantRequest($request);
+
+        try {
+            $tenant = $this->manager->create($validated);
+            return redirect()->route('admin.tenants.show', $tenant)
+                ->with('success', "Tenant \"{$tenant->name}\" berhasil dibuat. Database: {$tenant->db_name}");
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Gagal membuat tenant: ' . $e->getMessage());
+        }
+    }
+
+    public function storeAjax(Request $request)
+    {
+        $validated = $this->validateTenantRequest($request);
+        $result    = $this->manager->createWithSteps($validated);
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    public function systemCheck()
+    {
+        $checks = [];
+
+        $adminUser = env('DB_ADMIN_USERNAME');
+        $checks['admin_configured'] = [
+            'ok'    => $adminUser !== null,
+            'label' => $adminUser !== null
+                ? "DB_ADMIN_USERNAME: {$adminUser}"
+                : 'DB_ADMIN_USERNAME belum dikonfigurasi di .env',
+        ];
+
+        try {
+            $testDb = 'sipera_priv_test_' . time();
+            DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
+            DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
+            $checks['create_db'] = ['ok' => true, 'label' => 'Dapat membuat & menghapus database'];
+        } catch (\Exception $e) {
+            $msg   = $e->getMessage();
+            $short = strlen($msg) > 120 ? substr($msg, 0, 120) . '...' : $msg;
+            $checks['create_db'] = ['ok' => false, 'label' => 'Tidak dapat membuat database: ' . $short];
+        }
+
+        $checks['all_ok'] = collect($checks)->every(fn($c) => is_array($c) ? $c['ok'] : $c);
+
+        return response()->json($checks);
+    }
+
+    public function testDbAdmin(Request $request)
+    {
+        $request->validate(['db_admin_username' => 'required', 'db_admin_password' => 'required']);
+
+        Config::set('database.connections.mysql_admin.username', $request->db_admin_username);
+        Config::set('database.connections.mysql_admin.password', $request->db_admin_password);
+        DB::purge('mysql_admin');
+
+        try {
+            DB::connection('mysql_admin')->getPdo();
+            return response()->json(['success' => true, 'message' => 'Koneksi berhasil']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
+        }
+    }
+
+    public function saveDbAdmin(Request $request)
+    {
+        $request->validate(['db_admin_username' => 'required', 'db_admin_password' => 'required']);
+
+        Config::set('database.connections.mysql_admin.username', $request->db_admin_username);
+        Config::set('database.connections.mysql_admin.password', $request->db_admin_password);
+        DB::purge('mysql_admin');
+
+        try {
+            DB::connection('mysql_admin')->getPdo();
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
+        }
+
+        $envPath = base_path('.env');
+        if (!file_exists($envPath)) {
+            return response()->json(['success' => false, 'message' => 'File .env tidak ditemukan di server']);
+        }
+
+        $env = file_get_contents($envPath);
+        foreach ([
+            'DB_ADMIN_USERNAME' => $request->db_admin_username,
+            'DB_ADMIN_PASSWORD' => $request->db_admin_password,
+        ] as $key => $value) {
+            if (preg_match("/^{$key}=/m", $env)) {
+                $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
+            } else {
+                $env .= "\n{$key}={$value}";
+            }
+        }
+        file_put_contents($envPath, $env);
+
+        return response()->json(['success' => true, 'message' => 'Konfigurasi berhasil disimpan ke .env']);
+    }
+
+    private function validateTenantRequest(Request $request): array
+    {
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'institution' => 'nullable|string|max:255',
@@ -45,20 +147,12 @@ class TenantController extends Controller
             'notes'       => 'nullable|string|max:1000',
         ]);
 
-        // Tentukan expires_at dari durasi plan
         $planDuration = config("tenants.plans.{$validated['plan']}.duration");
         $validated['status']        = $validated['plan'] === 'trial' ? 'trial' : 'active';
         $validated['trial_ends_at'] = $validated['plan'] === 'trial' && $planDuration ? now()->addDays($planDuration) : null;
         $validated['expires_at']    = ($validated['plan'] !== 'trial' && $planDuration) ? now()->addDays($planDuration) : null;
 
-        try {
-            $tenant = $this->manager->create($validated);
-            return redirect()->route('admin.tenants.show', $tenant)
-                ->with('success', "Tenant \"{$tenant->name}\" berhasil dibuat. Database: {$tenant->db_name}");
-        } catch (\Exception $e) {
-            return back()->withInput()
-                ->with('error', 'Gagal membuat tenant: ' . $e->getMessage());
-        }
+        return $validated;
     }
 
     public function show(Tenant $tenant)

@@ -14,6 +14,81 @@ use Illuminate\Support\Str;
 class TenantManager
 {
     /**
+     * Buat tenant dengan tracking tiap langkah — untuk AJAX wizard.
+     */
+    public function createWithSteps(array $data): array
+    {
+        $steps  = [];
+        $tenant = null;
+
+        // Langkah 1: Simpan record tenant
+        try {
+            $data['subdomain'] = strtolower(preg_replace('/[^a-z0-9\-]/', '', $data['subdomain']));
+            $data['db_name']   = 'tenant_' . str_replace('-', '_', $data['subdomain']);
+            $tenant = Tenant::create($data);
+            $tenant->initFeaturesFromPlan();
+            $steps['record'] = ['ok' => true, 'msg' => 'Data tenant disimpan'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'steps' => [
+                'record' => ['ok' => false, 'msg' => $e->getMessage()],
+            ]];
+        }
+
+        // Langkah 2: Buat database
+        try {
+            $this->createDatabase($tenant);
+            $steps['database'] = ['ok' => true, 'msg' => "Database {$tenant->db_name} dibuat"];
+        } catch (\Exception $e) {
+            $steps['database'] = ['ok' => false, 'msg' => $e->getMessage()];
+            Log::error("createWithSteps DB gagal: " . $e->getMessage());
+            return ['success' => false, 'tenant_id' => $tenant->id, 'steps' => $steps];
+        }
+
+        // Langkah 3: Migrasi
+        $migrateResult = $this->migrate($tenant);
+        $steps['migrate'] = [
+            'ok'  => $migrateResult['success'],
+            'msg' => $migrateResult['success'] ? 'Struktur tabel berhasil dibuat' : $migrateResult['output'],
+        ];
+
+        if (!$migrateResult['success']) {
+            return ['success' => false, 'tenant_id' => $tenant->id, 'steps' => $steps];
+        }
+
+        // Langkah 4: Buat akun admin
+        $credentials = $this->seedAdminUser($tenant);
+        if ($tenant->admin_email) {
+            $steps['admin'] = [
+                'ok'  => $credentials !== null,
+                'msg' => $credentials ? "Akun {$tenant->admin_email} dibuat" : 'Gagal membuat akun admin',
+            ];
+        } else {
+            $steps['admin'] = ['ok' => true, 'msg' => 'Dilewati (tidak ada email admin)'];
+        }
+
+        // Langkah 5: Kirim WA
+        if ($credentials && $tenant->phone) {
+            try {
+                $this->sendWelcomeWa($tenant, $credentials);
+                $steps['wa'] = ['ok' => true, 'msg' => "Notifikasi terkirim ke {$tenant->phone}"];
+            } catch (\Exception $e) {
+                $steps['wa'] = ['ok' => false, 'msg' => 'Gagal kirim WA: ' . $e->getMessage()];
+            }
+        } else {
+            $steps['wa'] = ['ok' => true, 'msg' => 'Dilewati (tidak ada nomor WA atau email admin)'];
+        }
+
+        Log::info("Tenant created via wizard: {$tenant->subdomain}", ['db' => $tenant->db_name]);
+
+        return [
+            'success'  => true,
+            'tenant_id' => $tenant->id,
+            'redirect' => route('admin.tenants.show', $tenant),
+            'steps'    => $steps,
+        ];
+    }
+
+    /**
      * Buat tenant baru: simpan ke DB master, buat database, jalankan migration + seed admin.
      */
     public function create(array $data): Tenant
