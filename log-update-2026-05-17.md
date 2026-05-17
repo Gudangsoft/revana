@@ -46,3 +46,13 @@ Log perubahan otomatis dari git commits.
 - `log-update-2026-05-17.md`
 - `resources/views/admin/tenants/create.blade.php`
 
+
+## 4. 🔄 Update: a
+
+- **Commit:** `5e98e78` — 19:08 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `log-update-2026-05-17.md`
+- `resources/views/admin/tenants/create.blade.php`
+- `routes/web.php`
+

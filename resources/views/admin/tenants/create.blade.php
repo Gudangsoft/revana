@@ -17,20 +17,27 @@
         </a>
     </div>
 
-    {{-- System Check --}}
-    <div class="card mb-3 border-secondary" id="systemCheckCard">
-        <div class="card-body py-2 px-3">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <div class="spinner-border spinner-border-sm text-secondary" id="checkSpinner"></div>
-                <span id="checkLabel" class="small text-muted">Memeriksa konfigurasi sistem...</span>
-                <button class="btn btn-warning btn-sm ms-auto d-none" id="btnSetupDb"
-                        data-bs-toggle="modal" data-bs-target="#modalSetupDb">
-                    <i class="bi bi-gear-fill me-1"></i>Setup Database Admin
-                </button>
-            </div>
-            <div id="checkDetails" class="mt-2 d-none small"></div>
-        </div>
+    {{-- Status DB Admin --}}
+    @if($dbAdminConfigured)
+    <div class="alert alert-success py-2 mb-3 d-flex align-items-center gap-2">
+        <i class="bi bi-check-circle-fill"></i>
+        <span class="small">Database admin: <code>{{ $dbAdminUser }}</code> — siap membuat tenant</span>
+        <button class="btn btn-sm btn-outline-success ms-auto py-0"
+                data-bs-toggle="modal" data-bs-target="#modalSetupDb">Ubah</button>
     </div>
+    @else
+    <div class="alert alert-warning mb-3 d-flex align-items-center gap-3">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1 small">
+            <strong>Perlu setup sekali:</strong> DB_ADMIN_USERNAME belum diatur.
+            Klik tombol ini untuk memasukkan password MySQL root — disimpan ke server otomatis.
+        </div>
+        <button class="btn btn-warning btn-sm flex-shrink-0"
+                data-bs-toggle="modal" data-bs-target="#modalSetupDb">
+            <i class="bi bi-gear-fill me-1"></i>Setup Sekarang
+        </button>
+    </div>
+    @endif
 
     {{-- Form --}}
     <div class="card shadow-sm border-primary">
@@ -226,7 +233,6 @@ const features = @json($features);
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    runSystemCheck();
     updatePlanPreview();
     updateDbPreview();
 
@@ -271,68 +277,6 @@ function togglePassVis(inputId, btn) {
     const show = inp.type === 'password';
     inp.type = show ? 'text' : 'password';
     btn.innerHTML = '<i class="bi bi-eye' + (show ? '-slash' : '') + '"></i>';
-}
-
-// ── System Check ──────────────────────────────────────────────────────────────
-async function runSystemCheck() {
-    const card     = document.getElementById('systemCheckCard');
-    const spinner  = document.getElementById('checkSpinner');
-    const label    = document.getElementById('checkLabel');
-    const details  = document.getElementById('checkDetails');
-    const btnSetup = document.getElementById('btnSetupDb');
-
-    try {
-        const res  = await fetch('{{ route("admin.tenants.system-check") }}');
-        const data = await res.json();
-
-        spinner.classList.add('d-none');
-
-        if (data.all_ok) {
-            card.className  = 'card mb-3 border-success';
-            label.className = 'small text-success fw-semibold';
-            label.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Konfigurasi OK — '
-                + data.admin_configured.label
-                + ' &nbsp;|&nbsp; <a href="#" onclick="testDbNow(event)" class="text-success">Test koneksi</a>';
-        } else {
-            card.className  = 'card mb-3 border-warning';
-            label.className = 'small text-warning fw-semibold';
-            label.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>DB_ADMIN_USERNAME belum diatur — klik tombol di kanan untuk setup';
-            btnSetup.classList.remove('d-none');
-        }
-    } catch (err) {
-        spinner.classList.add('d-none');
-        card.className  = 'card mb-3 border-secondary';
-        label.className = 'small text-muted';
-        label.textContent = 'Tidak dapat memeriksa konfigurasi: ' + err.message;
-        btnSetup.classList.remove('d-none');
-    }
-}
-
-async function testDbNow(e) {
-    e.preventDefault();
-    const label = document.getElementById('checkLabel');
-    label.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menguji koneksi database...';
-
-    try {
-        const res  = await fetch('{{ route("admin.tenants.test-current-db") }}', {
-            method:  'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-        });
-        const data = await res.json();
-        const card = document.getElementById('systemCheckCard');
-        if (data.success) {
-            card.className  = 'card mb-3 border-success';
-            label.className = 'small text-success fw-semibold';
-            label.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Koneksi database admin OK — siap membuat tenant';
-        } else {
-            card.className  = 'card mb-3 border-danger';
-            label.className = 'small text-danger fw-semibold';
-            label.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>' + data.message
-                + ' &nbsp;<button class="btn btn-sm btn-warning py-0" data-bs-toggle="modal" data-bs-target="#modalSetupDb">Perbaiki</button>';
-        }
-    } catch (err) {
-        document.getElementById('checkLabel').textContent = 'Test gagal: ' + err.message;
-    }
 }
 
 // ── Create Wizard ─────────────────────────────────────────────────────────────
@@ -461,10 +405,7 @@ async function saveDbAdmin() {
         resultEl.innerHTML = `<div class="alert alert-success py-2 small mb-0">
             <i class="bi bi-check-circle-fill me-1"></i>${data.message}. Sistem akan dicek ulang...
         </div>`;
-        setTimeout(() => {
-            bootstrap.Modal.getInstance(document.getElementById('modalSetupDb')).hide();
-            runSystemCheck();
-        }, 1800);
+        setTimeout(() => { window.location.reload(); }, 1800);
     } else {
         resultEl.innerHTML = `<div class="alert alert-danger py-2 small mb-0">
             <i class="bi bi-x-circle me-1"></i>${data.message}

@@ -28,9 +28,11 @@ class TenantController extends Controller
 
     public function create()
     {
-        $features = config('tenants.features', []);
-        $plans    = config('tenants.plans', []);
-        return view('admin.tenants.create', compact('features', 'plans'));
+        $features            = config('tenants.features', []);
+        $plans               = config('tenants.plans', []);
+        $dbAdminUser         = env('DB_ADMIN_USERNAME');
+        $dbAdminConfigured   = !empty($dbAdminUser);
+        return view('admin.tenants.create', compact('features', 'plans', 'dbAdminConfigured', 'dbAdminUser'));
     }
 
     public function store(Request $request)
