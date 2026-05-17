@@ -211,11 +211,22 @@ class TenantManager
     {
         $charset   = config('database.connections.mysql.charset', 'utf8mb4');
         $collation = config('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
-        // Gunakan koneksi mysql_admin (user dengan privilege CREATE DATABASE)
-        DB::connection('mysql_admin')->statement(
-            "CREATE DATABASE IF NOT EXISTS `{$tenant->db_name}` CHARACTER SET {$charset} COLLATE {$collation}"
+        $dbName    = $tenant->db_name;
+        $appUser   = config('database.connections.mysql.username');
+        $appHost   = config('database.connections.mysql.host', '127.0.0.1');
+
+        $admin = DB::connection('mysql_admin');
+
+        // 1. Buat database
+        $admin->statement(
+            "CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET {$charset} COLLATE {$collation}"
         );
-        Log::info("Tenant DB created: {$tenant->db_name}");
+
+        // 2. Grant semua privilege ke user aplikasi agar bisa migrate & akses data
+        $admin->statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$appUser}'@'{$appHost}'");
+        $admin->statement("FLUSH PRIVILEGES");
+
+        Log::info("Tenant DB created + privileges granted: {$dbName} → {$appUser}@{$appHost}");
     }
 
     public function switchToTenant(Tenant $tenant): void
