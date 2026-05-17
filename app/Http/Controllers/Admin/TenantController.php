@@ -56,30 +56,42 @@ class TenantController extends Controller
 
     public function systemCheck()
     {
-        $checks = [];
-
-        $adminUser = env('DB_ADMIN_USERNAME');
-        $checks['admin_configured'] = [
-            'ok'    => $adminUser !== null,
-            'label' => $adminUser !== null
-                ? "DB_ADMIN_USERNAME: {$adminUser}"
-                : 'DB_ADMIN_USERNAME belum dikonfigurasi di .env',
-        ];
-
         try {
-            $testDb = 'sipera_priv_test_' . time();
-            DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
-            DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
-            $checks['create_db'] = ['ok' => true, 'label' => 'Dapat membuat & menghapus database'];
-        } catch (\Exception $e) {
-            $msg   = $e->getMessage();
-            $short = strlen($msg) > 120 ? substr($msg, 0, 120) . '...' : $msg;
-            $checks['create_db'] = ['ok' => false, 'label' => 'Tidak dapat membuat database: ' . $short];
+            $checks = [];
+
+            $adminUser = env('DB_ADMIN_USERNAME');
+            $checks['admin_configured'] = [
+                'ok'    => $adminUser !== null,
+                'label' => $adminUser !== null
+                    ? "DB_ADMIN_USERNAME: {$adminUser}"
+                    : 'DB_ADMIN_USERNAME belum dikonfigurasi di .env',
+            ];
+
+            try {
+                // Pakai koneksi sementara dengan timeout pendek agar tidak hang lama
+                Config::set('database.connections.mysql_admin.options.' . \PDO::ATTR_TIMEOUT, 5);
+                DB::purge('mysql_admin');
+
+                $testDb = 'sipera_priv_test_' . time();
+                DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
+                DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
+                $checks['create_db'] = ['ok' => true, 'label' => 'Dapat membuat & menghapus database'];
+            } catch (\Throwable $e) {
+                $msg   = $e->getMessage();
+                $short = strlen($msg) > 100 ? substr($msg, 0, 100) . '...' : $msg;
+                $checks['create_db'] = ['ok' => false, 'label' => 'Tidak dapat membuat database: ' . $short];
+            }
+
+            $checks['all_ok'] = collect($checks)->every(fn($c) => is_array($c) ? $c['ok'] : $c);
+
+            return response()->json($checks);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'admin_configured' => ['ok' => false, 'label' => 'Gagal memeriksa konfigurasi'],
+                'create_db'        => ['ok' => false, 'label' => $e->getMessage()],
+                'all_ok'           => false,
+            ]);
         }
-
-        $checks['all_ok'] = collect($checks)->every(fn($c) => is_array($c) ? $c['ok'] : $c);
-
-        return response()->json($checks);
     }
 
     public function testDbAdmin(Request $request)

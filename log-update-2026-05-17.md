@@ -26,3 +26,14 @@ Log perubahan otomatis dari git commits.
 
 ---
 
+
+## 2. 🔄 Update: up
+
+- **Commit:** `e4c6bd5` — 18:50 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `app/Services/TenantManager.php`
+- `log-update-2026-05-17.md`
+- `resources/views/admin/tenants/create.blade.php`
+- `routes/web.php`
+

@@ -274,22 +274,29 @@ function togglePassVis(inputId, btn) {
 
 // ── System Check ──────────────────────────────────────────────────────────────
 async function runSystemCheck() {
-    const card    = document.getElementById('systemCheckCard');
-    const spinner = document.getElementById('checkSpinner');
-    const label   = document.getElementById('checkLabel');
-    const details = document.getElementById('checkDetails');
+    const card     = document.getElementById('systemCheckCard');
+    const spinner  = document.getElementById('checkSpinner');
+    const label    = document.getElementById('checkLabel');
+    const details  = document.getElementById('checkDetails');
     const btnSetup = document.getElementById('btnSetupDb');
 
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 12000); // 12-detik timeout
+
     try {
-        const res  = await fetch('{{ route("admin.tenants.system-check") }}');
-        const data = await res.json();
+        const res  = await fetch('{{ route("admin.tenants.system-check") }}', { signal: abort.signal });
+        clearTimeout(timer);
+
+        let data;
+        try { data = await res.json(); }
+        catch (e) { throw new Error('Response bukan JSON — cek log server'); }
 
         spinner.classList.add('d-none');
 
         if (data.all_ok) {
-            card.className    = 'card mb-3 border-success';
-            label.className   = 'small text-success fw-semibold';
-            label.innerHTML   = '<i class="bi bi-check-circle-fill me-1"></i>Sistem siap — database dapat dibuat otomatis';
+            card.className  = 'card mb-3 border-success';
+            label.className = 'small text-success fw-semibold';
+            label.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Sistem siap — database dapat dibuat otomatis';
         } else {
             card.className  = 'card mb-3 border-warning';
             label.className = 'small text-warning fw-semibold';
@@ -305,9 +312,14 @@ async function runSystemCheck() {
                     </span>`
                 ).join('');
         }
-    } catch {
+    } catch (err) {
+        clearTimeout(timer);
         spinner.classList.add('d-none');
-        label.textContent = 'Tidak dapat memeriksa sistem (cek koneksi server)';
+        card.className  = 'card mb-3 border-secondary';
+        label.className = 'small text-muted';
+        label.textContent = err.name === 'AbortError'
+            ? 'Timeout: server tidak merespons dalam 12 detik'
+            : 'Tidak dapat memeriksa sistem: ' + err.message;
     }
 }
 
