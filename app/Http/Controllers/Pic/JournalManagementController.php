@@ -874,9 +874,11 @@ class JournalManagementController extends Controller
         
         // Base query - ONLY show submissions assigned to this PIC
         $query = Submission::with(['journalSlot.journalMaster', 'marketing',
-            'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3', 
+            'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3',
             'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2', 'petugasProduction', 'petugasValidator'])
-            ->where('process_type', '!=', 'fasttrack'); // Exclude fasttrack submissions
+            ->where(function($q) {
+                $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+            });
         
         // Always filter by PIC's assigned tasks
         $query->where(function($q) use ($picId) {
@@ -931,7 +933,9 @@ class JournalManagementController extends Controller
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
 
         // Statistics - based on PIC's assigned tasks (exclude fasttrack)
-        $statsQuery = Submission::where('process_type', '!=', 'fasttrack');
+        $statsQuery = Submission::where(function($q) {
+            $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+        });
         $statsQuery->where(function($q) use ($picId) {
             $q->where('created_by', $picId)
               ->orWhere('petugas_submit_id', $picId)
@@ -955,7 +959,9 @@ class JournalManagementController extends Controller
         
         // Count urgent tasks (tasks that require current PIC's action) - exclude fasttrack
         $urgentTasks = 0;
-        $mySubmissions = Submission::where('process_type', '!=', 'fasttrack')
+        $mySubmissions = Submission::where(function($q) {
+                $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+            })
             ->where(function($q) use ($picId) {
                 $q->where('petugas_editor1_id', $picId)
                   ->orWhere('petugas_author1_id', $picId)

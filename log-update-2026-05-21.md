@@ -17,3 +17,30 @@
 - Tombol "Koreksi Dulu" — tutup modal, kembali ke form
 - Tombol "Sudah Benar — Simpan Sekarang" — disable diri sendiri + spinner + submit form
 - `data-bs-backdrop="static"` agar modal tidak tertutup klik luar secara tidak sengaja
+
+## 2. Fix: Submission Normal Tidak Muncul di Monitoring Proses PIC
+
+**Tujuan:** Memperbaiki bug dimana submission yang baru diinput tidak muncul di halaman "Monitoring Proses" meskipun data tersimpan di database.
+
+### Root Cause
+Di MySQL, `WHERE process_type != 'fasttrack'` dengan nilai NULL menghasilkan NULL (bukan true), sehingga semua submission normal (yang `process_type`-nya NULL) dihapus dari hasil query. Ini mempengaruhi: list utama monitoring, kartu statistik (total/new/in_progress/published), dan penghitung tugas mendesak.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Ganti 3x `where('process_type', '!=', 'fasttrack')` menjadi `where(fn($q) => $q->where(...)->orWhereNull('process_type'))` di method `submissionsMonitoring()` |
+
+### Perubahan Detail
+- Line ~879 (main query): tambah `orWhereNull('process_type')`
+- Line ~934 (stats query): tambah `orWhereNull('process_type')`
+- Line ~958 (urgent tasks query): tambah `orWhereNull('process_type')`
+
+## 3. 🔄 Update: up
+
+- **Commit:** `cace493` — 09:04 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `resources/views/admin/tenants/create.blade.php`
+- `resources/views/marketing/fasttrack/create.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
+
