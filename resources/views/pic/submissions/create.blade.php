@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alertEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i><strong>Periksa kembali semua data di bawah ini.</strong> Data yang sudah tersimpan tidak bisa diubah sembarangan — pastikan sudah benar sebelum melanjutkan.';
         }
 
-        bootstrap.Modal.getOrCreate(document.getElementById('modalKonfirmasi')).show();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalKonfirmasi')).show();
     };
 
     document.getElementById('btnSimpanFinal').addEventListener('click', function() {

@@ -230,10 +230,8 @@
                     </div>
                 </div>
 
-                {{-- Result selalu terlihat --}}
-                <div id="setupDbResult" class="mb-1"></div>
-
             </div>
+            <div id="setupDbResult" style="display:none" class="px-3 pb-2"></div>
             <div class="modal-footer">
                 <button type="button" id="btnTestDb" class="btn btn-outline-secondary" onclick="testDbAdmin()">
                     <i class="bi bi-plug me-1"></i>Test Koneksi
@@ -392,7 +390,14 @@ async function startCreate() {
 // ── DB Admin Setup ────────────────────────────────────────────────────────────
 function setDbResult(html) {
     const el = document.getElementById('setupDbResult');
-    if (el) { el.innerHTML = html; el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    if (!el) return;
+    if (html) {
+        el.innerHTML = html;
+        el.style.display = 'block';
+    } else {
+        el.style.display = 'none';
+        el.innerHTML = '';
+    }
 }
 
 function setBtnState(busy) {

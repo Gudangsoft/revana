@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `<tr><th class="w-35 bg-light text-nowrap pe-3">${r[0]}</th><td>${escapeHtml(String(r[1]))}</td></tr>`
         ).join('');
 
-        bootstrap.Modal.getOrCreate(document.getElementById('modalKonfirmasi')).show();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalKonfirmasi')).show();
     };
 
     document.getElementById('btnSimpanFinal').addEventListener('click', function() {

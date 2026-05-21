@@ -8,6 +8,7 @@ use App\Services\TenantManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TenantController extends Controller
 {
@@ -117,14 +118,21 @@ class TenantController extends Controller
         if (!file_exists($envPath)) {
             return response()->json(['success' => false, 'message' => 'File .env tidak ditemukan di server']);
         }
+        if (!is_writable($envPath)) {
+            return response()->json(['success' => false, 'message' => "File .env tidak bisa ditulis oleh web server. Jalankan: chmod 664 {$envPath}"]);
+        }
 
         $env = file_get_contents($envPath);
         foreach (['DB_ADMIN_USERNAME' => $username, 'DB_ADMIN_PASSWORD' => $password] as $key => $value) {
-            $env = preg_match("/^{$key}=/m", $env)
-                ? preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env)
-                : $env . "\n{$key}={$value}";
+            if (preg_match("/^{$key}=/m", $env)) {
+                $env = preg_replace_callback("/^{$key}=.*/m", fn($m) => "{$key}={$value}", $env);
+            } else {
+                $env .= "\n{$key}={$value}";
+            }
         }
-        file_put_contents($envPath, $env);
+        if (file_put_contents($envPath, $env) === false) {
+            return response()->json(['success' => false, 'message' => "Gagal menulis ke .env. Periksa permission file: ls -la {$envPath}"]);
+        }
 
         // Langsung GRANT CREATE ke app user agar tidak perlu admin lagi untuk tiap database
         $appUser = config('database.connections.mysql.username');
