@@ -35,7 +35,7 @@
             <br><small>Artikel akan langsung berstatus "Published" tanpa melalui workflow normal.</small>
         </div>
 
-        <form action="{{ route('marketing.fasttrack.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="fastttrackForm" action="{{ route('marketing.fasttrack.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <div class="alert alert-info mb-3">
@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnSimpanFinal').addEventListener('click', function() {
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...';
-        document.querySelector('form').submit();
+        document.getElementById('fastttrackForm').submit();
     });
 });
 </script>

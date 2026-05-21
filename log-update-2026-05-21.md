@@ -35,7 +35,20 @@ Di MySQL, `WHERE process_type != 'fasttrack'` dengan nilai NULL menghasilkan NUL
 - Line ~934 (stats query): tambah `orWhereNull('process_type')`
 - Line ~958 (urgent tasks query): tambah `orWhereNull('process_type')`
 
-## 3. 🔄 Update: up
+## 3. Fix: Konfirmasi Submit PIC Salah Target Form
+
+**Tujuan:** Memperbaiki bug dimana klik "Sudah Benar — Simpan Sekarang" mengirim data ke halaman Point, bukan ke halaman penyimpanan submission.
+
+### Root Cause
+`document.querySelector('form')` mengambil form **pertama** dalam DOM. Layout PIC punya 3–4 form sebelum konten halaman (return-to-admin, points.sync, logout). Akibatnya form points sync yang tersubmit, bukan form submission.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/create.blade.php` | Tambah `id="submissionForm"` pada `<form>`, ganti `document.querySelector('form')` → `document.getElementById('submissionForm')` |
+| `resources/views/marketing/fasttrack/create.blade.php` | Sama — tambah `id="fastttrackForm"` dan gunakan getElementById |
+
+## 4. 🔄 Update: up
 
 - **Commit:** `cace493` — 09:04 oleh Gudangsoft
 - **File berubah:** 4 file
@@ -43,4 +56,12 @@ Di MySQL, `WHERE process_type != 'fasttrack'` dengan nilai NULL menghasilkan NUL
 - `resources/views/admin/tenants/create.blade.php`
 - `resources/views/marketing/fasttrack/create.blade.php`
 - `resources/views/pic/submissions/create.blade.php`
+
+
+## 4. 🔄 Update: a
+
+- **Commit:** `0e8d136` — 09:26 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-05-21.md`
 
