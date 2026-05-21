@@ -413,6 +413,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/{tenant}/toggle-feature/{feature}', [TenantController::class, 'toggleFeature'])->name('toggle-feature');
             Route::post('/{tenant}/suspend', [TenantController::class, 'suspend'])->name('suspend');
             Route::post('/{tenant}/activate', [TenantController::class, 'activate'])->name('activate');
+            Route::post('/{tenant}/setup-db', [TenantController::class, 'setupDb'])->name('setup-db');
             Route::post('/{tenant}/migrate', [TenantController::class, 'migrate'])->name('migrate');
             Route::post('/{tenant}/renew', [TenantController::class, 'renew'])->name('renew');
             Route::post('/{tenant}/change-plan', [TenantController::class, 'changePlan'])->name('change-plan');

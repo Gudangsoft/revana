@@ -194,11 +194,42 @@
                 <a href="{{ route('marketing.fasttrack.index') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Kembali
                 </a>
-                <button type="submit" class="btn btn-warning">
-                    <i class="bi bi-lightning-charge"></i> Simpan Fasttrack
+                <button type="button" class="btn btn-warning" onclick="showKonfirmasi()">
+                    <i class="bi bi-clipboard-check me-1"></i>Periksa &amp; Simpan
                 </button>
             </div>
         </form>
+
+        {{-- Modal Konfirmasi --}}
+        <div class="modal fade" id="modalKonfirmasi" tabindex="-1" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header" style="background:#fff8e1;border-bottom:2px solid #ffc107">
+                        <h5 class="modal-title fw-bold">
+                            <i class="bi bi-clipboard-check text-warning me-2"></i>Konfirmasi Data Fasttrack
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning py-2 mb-3 small">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            <strong>Periksa kembali semua data di bawah ini.</strong>
+                            Data yang sudah tersimpan tidak bisa diubah sembarangan — pastikan sudah benar sebelum melanjutkan.
+                        </div>
+                        <table class="table table-bordered table-sm small mb-0">
+                            <tbody id="konfirmasiData"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-pencil-square me-1"></i>Koreksi Dulu
+                        </button>
+                        <button type="button" class="btn btn-warning px-4" id="btnSimpanFinal">
+                            <i class="bi bi-check-circle me-1"></i>Sudah Benar — Simpan Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -291,17 +322,76 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Add validation when form is submitted
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Tampilkan modal konfirmasi sebelum submit
+    window.showKonfirmasi = function() {
         const selectedOption = slotSelect.options[slotSelect.selectedIndex];
-        if (selectedOption && selectedOption.disabled) {
-            e.preventDefault();
-            alert('⚠️ Slot yang Anda pilih sudah PENUH!\n\nSilakan pilih slot lain yang masih tersedia.');
-            slotSelect.value = '';
-            slotSelect.focus();
-            return false;
+
+        if (!journalMasterIdInput.value) {
+            alert('⚠️ Harap pilih jurnal terlebih dahulu!');
+            searchInput.focus();
+            return;
         }
+        if (!slotSelect.value) {
+            alert('⚠️ Harap pilih slot jurnal terlebih dahulu!');
+            slotSelect.focus();
+            return;
+        }
+        if (selectedOption && selectedOption.disabled) {
+            alert('🚫 SLOT SUDAH PENUH!\n\nSlot yang Anda pilih sudah tidak tersedia.\nSilakan pilih slot lain yang masih memiliki sisa kuota.');
+            slotSelect.focus();
+            return;
+        }
+
+        const idArtikel    = document.querySelector('[name="id_artikel"]').value.trim();
+        const judulArtikel = document.querySelector('[name="judul_artikel"]').value.trim();
+        const namaPenulis  = document.querySelector('[name="nama_penulis"]').value.trim();
+
+        if (!idArtikel)    { alert('⚠️ ID Artikel wajib diisi!');    document.querySelector('[name="id_artikel"]').focus();    return; }
+        if (!judulArtikel) { alert('⚠️ Judul Artikel wajib diisi!'); document.querySelector('[name="judul_artikel"]').focus(); return; }
+        if (!namaPenulis)  { alert('⚠️ Nama Penulis wajib diisi!');  document.querySelector('[name="nama_penulis"]').focus();  return; }
+
+        const slotText       = selectedOption.text.replace(/[\u{1F6AB}⚠️✅]/gu, '').replace('PENUH - TIDAK TERSEDIA','').trim();
+        const linkArtikel    = document.querySelector('[name="link_artikel"]').value.trim();
+        const linkPublish    = document.querySelector('[name="link_publish"]').value.trim();
+        const fileInput      = document.querySelector('[name="file_artikel"]');
+        const fileText       = fileInput && fileInput.files.length > 0 ? fileInput.files[0].name : '(tidak ada)';
+        const noHp           = document.querySelector('[name="no_hp_penulis"]').value.trim();
+        const usernameAuthor = document.querySelector('[name="username_author"]').value.trim();
+        const passwordAuthor = document.querySelector('[name="password_author"]').value.trim();
+        const notes          = document.querySelector('[name="notes"]').value.trim();
+
+        const rows = [
+            ['Jurnal',        searchInput.value],
+            ['Slot',          slotText],
+            ['ID Artikel',    idArtikel],
+            ['Judul Artikel', judulArtikel],
+            ['Link Submit',   linkArtikel  || '(kosong)'],
+            ...(linkPublish    ? [['Link Publish',    linkPublish]]    : []),
+            ['File Artikel',  fileText],
+            ['Nama Penulis',  namaPenulis],
+            ...(noHp           ? [['No HP Penulis',   noHp]]           : []),
+            ...(usernameAuthor ? [['Username Author', usernameAuthor]] : []),
+            ...(passwordAuthor ? [['Password Author', passwordAuthor]] : []),
+            ...(notes          ? [['Catatan',         notes]]          : []),
+        ];
+
+        document.getElementById('konfirmasiData').innerHTML = rows.map(r =>
+            `<tr><th class="w-35 bg-light text-nowrap pe-3">${r[0]}</th><td>${escapeHtml(String(r[1]))}</td></tr>`
+        ).join('');
+
+        bootstrap.Modal.getOrCreate(document.getElementById('modalKonfirmasi')).show();
+    };
+
+    document.getElementById('btnSimpanFinal').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...';
+        document.querySelector('form').submit();
     });
 });
 </script>

@@ -262,11 +262,42 @@
                         <a href="{{ route('pic.submissions.index') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i> Simpan
+                        <button type="button" class="btn btn-primary" onclick="showKonfirmasi()">
+                            <i class="bi bi-clipboard-check me-1"></i>Periksa &amp; Simpan
                         </button>
                     </div>
                 </form>
+
+                {{-- Modal Konfirmasi --}}
+                <div class="modal fade" id="modalKonfirmasi" tabindex="-1" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background:#fff8e1;border-bottom:2px solid #ffc107">
+                                <h5 class="modal-title fw-bold">
+                                    <i class="bi bi-clipboard-check text-warning me-2"></i>Konfirmasi Data Submission
+                                </h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning py-2 mb-3 small">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    <strong>Periksa kembali semua data di bawah ini.</strong>
+                                    Data yang sudah tersimpan tidak bisa diubah sembarangan — pastikan sudah benar sebelum melanjutkan.
+                                </div>
+                                <table class="table table-bordered table-sm small mb-0">
+                                    <tbody id="konfirmasiData"></tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-pencil-square me-1"></i>Koreksi Dulu
+                                </button>
+                                <button type="button" class="btn btn-primary px-4" id="btnSimpanFinal">
+                                    <i class="bi bi-check-circle me-1"></i>Sudah Benar — Simpan Sekarang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -518,61 +549,83 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Validasi form submit - cegah pemilihan slot penuh
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const slotSelect = document.getElementById('journal_slot_id');
-            const selectedOption = slotSelect.options[slotSelect.selectedIndex];
-            
-            // Cek jika tidak ada slot yang dipilih
-            if (!slotSelect.value) {
-                e.preventDefault();
-                alert('⚠️ Harap pilih slot jurnal terlebih dahulu!');
-                slotSelect.focus();
-                return false;
-            }
-            
-            // Cek jika slot yang dipilih disabled (penuh)
-            if (selectedOption && selectedOption.disabled) {
-                e.preventDefault();
-                alert('🚫 SLOT SUDAH PENUH!\n\nSlot yang Anda pilih sudah tidak tersedia.\nSilakan pilih slot lain yang masih memiliki sisa kuota.');
-                slotSelect.focus();
-                return false;
-            }
-            
-            // Peringatan untuk slot yang hampir penuh (<=2)
-            const optionText = selectedOption.text;
-            if (optionText.includes('⚠️ HAMPIR PENUH')) {
-                const confirmed = confirm('⚠️ PERINGATAN: Slot Hampir Penuh!\n\n' + 
-                    'Slot yang Anda pilih hanya memiliki sisa slot terbatas.\n' +
-                    'Apakah Anda yakin ingin melanjutkan?\n\n' +
-                    'Klik OK untuk melanjutkan atau Cancel untuk memilih slot lain.');
-                if (!confirmed) {
-                    e.preventDefault();
-                    return false;
-                }
-            }
-            
-            // Konfirmasi final sebelum submit
-            const journalName = document.getElementById('search_journal').value;
-            const finalConfirm = confirm('📝 KONFIRMASI SUBMISSION\n\n' +
-                'Jurnal: ' + journalName + '\n' +
-                'Slot: ' + optionText.replace(/[🚫⚠️✅]/g, '').trim() + '\n\n' +
-                'Apakah data sudah benar dan yakin ingin submit?');
-            if (!finalConfirm) {
-                e.preventDefault();
-                return false;
-            }
+    // Tampilkan modal konfirmasi sebelum submit
+    window.showKonfirmasi = function() {
+        const slotEl = document.getElementById('journal_slot_id');
+        const selectedOption = slotEl.options[slotEl.selectedIndex];
 
-            // Tampilkan loading state pada tombol submit agar tidak bisa diklik dua kali
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...';
-            }
-        });
-    }
+        if (!hiddenInput.value) {
+            alert('⚠️ Harap pilih jurnal terlebih dahulu!');
+            searchInput.focus();
+            return;
+        }
+        if (!slotEl.value) {
+            alert('⚠️ Harap pilih slot jurnal terlebih dahulu!');
+            slotEl.focus();
+            return;
+        }
+        if (selectedOption && selectedOption.disabled) {
+            alert('🚫 SLOT SUDAH PENUH!\n\nSlot yang Anda pilih sudah tidak tersedia.\nSilakan pilih slot lain yang masih memiliki sisa kuota.');
+            slotEl.focus();
+            return;
+        }
+
+        const idArtikel   = document.getElementById('id_artikel').value.trim();
+        const judulArtikel = document.getElementById('judul_artikel').value.trim();
+        const namaPenulis  = document.getElementById('nama_penulis').value.trim();
+
+        if (!idArtikel)    { alert('⚠️ ID Artikel wajib diisi!');    document.getElementById('id_artikel').focus();    return; }
+        if (!judulArtikel) { alert('⚠️ Judul Artikel wajib diisi!'); document.getElementById('judul_artikel').focus(); return; }
+        if (!namaPenulis)  { alert('⚠️ Nama Penulis wajib diisi!');  document.getElementById('nama_penulis').focus();  return; }
+
+        const slotText       = selectedOption.text.replace(/[\u{1F6AB}⚠️✅]/gu, '').trim();
+        const linkArtikel    = document.getElementById('link_artikel').value.trim();
+        const linkPublishEl  = document.getElementById('link_publish');
+        const linkPublish    = linkPublishEl ? linkPublishEl.value.trim() : '';
+        const fileInput      = document.getElementById('file_artikel');
+        const fileText       = fileInput && fileInput.files.length > 0 ? fileInput.files[0].name : '(tidak ada)';
+        const noHp           = document.getElementById('no_hp_penulis').value.trim();
+        const usernameAuthor = document.getElementById('username_author').value.trim();
+        const passwordAuthor = document.getElementById('password_author').value.trim();
+        const notes          = document.getElementById('notes').value.trim();
+        const marketingEl    = document.getElementById('marketing_id');
+        const marketingText  = marketingEl.selectedIndex > 0 ? marketingEl.options[marketingEl.selectedIndex].text.trim() : '(tidak dipilih)';
+
+        const rows = [
+            ['Jurnal',         selectedJournalName],
+            ['Slot',           slotText],
+            ['ID Artikel',     idArtikel],
+            ['Judul Artikel',  judulArtikel],
+            ['Link Submit',    linkArtikel  || '(kosong)'],
+            ...(linkPublish    ? [['Link Publish',    linkPublish]]    : []),
+            ['File Artikel',   fileText],
+            ['Nama Penulis',   namaPenulis],
+            ...(noHp           ? [['No HP Penulis',   noHp]]           : []),
+            ...(usernameAuthor ? [['Username Author', usernameAuthor]] : []),
+            ...(passwordAuthor ? [['Password Author', passwordAuthor]] : []),
+            ...(notes          ? [['Catatan',         notes]]          : []),
+            ['PIC Marketing',  marketingText],
+        ];
+
+        document.getElementById('konfirmasiData').innerHTML = rows.map(function(r) {
+            return '<tr><th class="w-35 bg-light text-nowrap pe-3">' + r[0] + '</th><td>' + escapeHtml(String(r[1])) + '</td></tr>';
+        }).join('');
+
+        const alertEl = document.querySelector('#modalKonfirmasi .alert-warning');
+        if (selectedOption.text.includes('HAMPIR PENUH')) {
+            alertEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i><strong>Perhatian: Slot hampir penuh!</strong> Periksa kembali data, lalu klik Simpan jika sudah yakin.';
+        } else {
+            alertEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i><strong>Periksa kembali semua data di bawah ini.</strong> Data yang sudah tersimpan tidak bisa diubah sembarangan — pastikan sudah benar sebelum melanjutkan.';
+        }
+
+        bootstrap.Modal.getOrCreate(document.getElementById('modalKonfirmasi')).show();
+    };
+
+    document.getElementById('btnSimpanFinal').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...';
+        document.querySelector('form').submit();
+    });
     
     // Restore old values setelah validasi error
     <?php if(old('journal_master_id')): ?>

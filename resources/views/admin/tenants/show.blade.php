@@ -240,6 +240,17 @@
                 </div>
                 <div class="card-body d-grid gap-2">
 
+                    {{-- Setup ulang DB + Migrasi --}}
+                    @if(isset($stats['db_ok']) && !$stats['db_ok'])
+                    <form action="{{ route('admin.tenants.setup-db', $tenant) }}" method="POST"
+                          onsubmit="return confirm('Buat database + jalankan migrasi untuk {{ $tenant->name }}?')">
+                        @csrf
+                        <button type="submit" class="btn btn-primary w-100 btn-sm">
+                            <i class="bi bi-database-add me-1"></i>Buat Database &amp; Migrasi
+                        </button>
+                    </form>
+                    @endif
+
                     {{-- Migrate --}}
                     <form action="{{ route('admin.tenants.migrate', $tenant) }}" method="POST"
                           onsubmit="return confirm('Jalankan migration ke tenant ini?')">

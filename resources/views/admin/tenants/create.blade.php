@@ -185,42 +185,61 @@
 <div class="modal fade" id="modalSetupDb" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-warning bg-opacity-10">
                 <h5 class="modal-title">
-                    <i class="bi bi-database-gear me-2 text-warning"></i>Setup Database Admin
+                    <i class="bi bi-database-gear me-2 text-warning"></i>Setup Database Admin (1 kali)
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="alert alert-info py-2 small mb-3">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Masukkan user MySQL yang punya akses <strong>CREATE DATABASE</strong>.
-                    Biasanya <strong>root</strong> (bukan user aplikasi seperti <code>dbrevana</code>).
-                    Kredensial ini disimpan ke <code>.env</code> di server — cukup dilakukan <strong>satu kali</strong>.
+
+                {{-- Step indicator --}}
+                <div class="d-flex align-items-center gap-2 mb-3 p-2 bg-light rounded small">
+                    <span class="badge bg-secondary rounded-pill">1</span>
+                    <span>Isi username & password MySQL <strong>ROOT</strong> server</span>
+                    <span class="text-muted">→</span>
+                    <span class="badge bg-secondary rounded-pill">2</span>
+                    <span>Klik <strong>Simpan & Aktifkan</strong></span>
+                    <span class="text-muted">→</span>
+                    <span class="badge bg-secondary rounded-pill">3</span>
+                    <span>Selesai ✓</span>
+                </div>
+
+                @php $appDbUser = config('database.connections.mysql.username', 'app'); @endphp
+                <div class="alert alert-warning py-2 small mb-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Bukan user aplikasi!</strong>
+                    User aplikasi saat ini adalah <code>{{ $appDbUser }}</code> — jangan masukkan ini.
+                    Yang dibutuhkan adalah user <strong>root MySQL</strong> (login ke server MySQL sebagai admin).
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">MySQL Root Username</label>
+                    <input type="text" id="dbAdminUser" class="form-control" value="root"
+                           placeholder="root" autocomplete="off">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">MySQL Username <span class="text-danger">*</span></label>
-                    <input type="text" id="dbAdminUser" class="form-control" value="root" placeholder="root">
-                    <div class="form-text text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Gunakan <strong>root</strong>, bukan user biasa</div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">MySQL Password</label>
+                    <label class="form-label fw-semibold">MySQL Root Password</label>
                     <div class="input-group">
-                        <input type="password" id="dbAdminPass" class="form-control" placeholder="Password MySQL">
+                        <input type="password" id="dbAdminPass" class="form-control"
+                               placeholder="Password MySQL root server" autocomplete="new-password">
                         <button class="btn btn-outline-secondary" type="button"
                                 onclick="togglePassVis('dbAdminPass', this)">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
                 </div>
-                <div id="setupDbResult"></div>
+
+                {{-- Result selalu terlihat --}}
+                <div id="setupDbResult" class="mb-1"></div>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-primary" onclick="testDbAdmin()">
+                <button type="button" id="btnTestDb" class="btn btn-outline-secondary" onclick="testDbAdmin()">
                     <i class="bi bi-plug me-1"></i>Test Koneksi
                 </button>
-                <button type="button" class="btn btn-success" onclick="saveDbAdmin()">
-                    <i class="bi bi-floppy me-1"></i>Simpan & Aktifkan
+                <button type="button" id="btnSaveDb" class="btn btn-success px-4" onclick="saveDbAdmin()">
+                    <i class="bi bi-check-circle me-1"></i>Simpan & Aktifkan
                 </button>
             </div>
         </div>
@@ -371,62 +390,68 @@ async function startCreate() {
 }
 
 // ── DB Admin Setup ────────────────────────────────────────────────────────────
-function dbAdminPayload() {
-    return JSON.stringify({
-        db_admin_username: document.getElementById('dbAdminUser').value.trim(),
-        db_admin_password: document.getElementById('dbAdminPass').value,
+function setDbResult(html) {
+    const el = document.getElementById('setupDbResult');
+    if (el) { el.innerHTML = html; el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+function setBtnState(busy) {
+    ['btnTestDb','btnSaveDb'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.disabled = busy;
     });
 }
 
-function setDbResult(html) {
-    document.getElementById('setupDbResult').innerHTML = html;
-}
+async function callDbAdmin(url) {
+    const user = (document.getElementById('dbAdminUser')?.value || '').trim();
+    const pass = document.getElementById('dbAdminPass')?.value || '';
+    if (!user) { setDbResult('<div class="alert alert-danger py-2 small mb-0">Username tidak boleh kosong</div>'); return null; }
 
-function setDbBusy(msg) {
-    setDbResult(`<div class="alert alert-secondary py-2 small mb-0">
-        <span class="spinner-border spinner-border-sm me-2"></span>${msg}
-    </div>`);
-}
+    setDbResult('<div class="alert alert-secondary py-2 small mb-0"><span class="spinner-border spinner-border-sm me-2"></span>Memproses, harap tunggu (maks 15 detik)...</div>');
+    setBtnState(true);
 
-async function testDbAdmin() {
-    setDbBusy('Menguji koneksi, mohon tunggu (maks 10 detik)...');
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 15000);
     try {
-        const res  = await fetch('{{ route("admin.tenants.test-db-admin") }}', {
-            method:  'POST',
+        const res = await fetch(url, {
+            method: 'POST',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body:    dbAdminPayload(),
+            body: JSON.stringify({ db_admin_username: user, db_admin_password: pass }),
+            signal: abort.signal,
         });
-        const data = await res.json();
-        setDbResult(data.success
-            ? `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle-fill me-1"></i>${data.message}</div>`
-            : `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${data.message}</div>`
-        );
+        clearTimeout(timer);
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('json')) {
+            const txt = await res.text();
+            throw new Error('Server error HTTP ' + res.status + ': ' + txt.replace(/<[^>]+>/g,'').substring(0,300));
+        }
+        return await res.json();
     } catch (e) {
-        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>Request gagal: ${e.message}</div>`);
+        clearTimeout(timer);
+        const msg = e.name === 'AbortError' ? 'Timeout — server tidak merespons dalam 15 detik' : e.message;
+        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${msg}</div>`);
+        return null;
+    } finally {
+        setBtnState(false);
     }
 }
 
+async function testDbAdmin() {
+    const data = await callDbAdmin('{{ route("admin.tenants.test-db-admin") }}');
+    if (!data) return;
+    setDbResult(data.success
+        ? `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle-fill me-1"></i>${data.message}</div>`
+        : `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${data.message}</div>`);
+}
+
 async function saveDbAdmin() {
-    setDbBusy('Menyimpan ke .env dan menguji koneksi...');
-    try {
-        const res  = await fetch('{{ route("admin.tenants.save-db-admin") }}', {
-            method:  'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body:    dbAdminPayload(),
-        });
-        const data = await res.json();
-        if (data.success) {
-            setDbResult(`<div class="alert alert-success py-2 small mb-0">
-                <i class="bi bi-check-circle-fill me-1"></i><strong>${data.message}</strong> — halaman akan dimuat ulang...
-            </div>`);
-            setTimeout(() => { window.location.reload(); }, 2000);
-        } else {
-            setDbResult(`<div class="alert alert-danger py-2 small mb-0">
-                <i class="bi bi-x-circle-fill me-1"></i>${data.message}
-            </div>`);
-        }
-    } catch (e) {
-        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>Request gagal: ${e.message}</div>`);
+    const data = await callDbAdmin('{{ route("admin.tenants.save-db-admin") }}');
+    if (!data) return;
+    if (data.success) {
+        setDbResult(`<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle-fill me-1"></i>${data.message}<br><small>Halaman dimuat ulang dalam 3 detik...</small></div>`);
+        setTimeout(() => window.location.reload(), 3000);
+    } else {
+        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${data.message}</div>`);
     }
 }
 </script>

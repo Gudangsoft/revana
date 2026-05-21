@@ -280,6 +280,14 @@ class TenantManager
         Log::info("Tenant {$tenant->subdomain} plan diubah ke {$plan}.");
     }
 
+    /**
+     * Buat database untuk tenant yang sudah ada record-nya (dipakai dari CLI/web retry).
+     */
+    public function setupDatabase(Tenant $tenant): void
+    {
+        $this->createDatabase($tenant);
+    }
+
     // ─── Private helpers ─────────────────────────────────────────────────────
 
     private function createDatabase(Tenant $tenant): void
@@ -290,18 +298,27 @@ class TenantManager
         $appUser   = config('database.connections.mysql.username');
         $appHost   = config('database.connections.mysql.host', '127.0.0.1');
 
-        $admin = DB::connection('mysql_admin');
+        $sql = "CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET {$charset} COLLATE {$collation}";
 
-        // 1. Buat database
-        $admin->statement(
-            "CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET {$charset} COLLATE {$collation}"
-        );
+        $adminUser = env('DB_ADMIN_USERNAME');
+        $useAdmin  = !empty($adminUser);
 
-        // 2. Grant semua privilege ke user aplikasi agar bisa migrate & akses data
-        $admin->statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$appUser}'@'{$appHost}'");
-        $admin->statement("FLUSH PRIVILEGES");
-
-        Log::info("Tenant DB created + privileges granted: {$dbName} → {$appUser}@{$appHost}");
+        if ($useAdmin) {
+            // Pakai koneksi admin (root) — bisa GRANT setelah CREATE
+            $admin = DB::connection('mysql_admin');
+            $admin->statement($sql);
+            try {
+                $admin->statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$appUser}'@'{$appHost}'");
+                $admin->statement("FLUSH PRIVILEGES");
+            } catch (\Throwable $e) {
+                Log::warning("GRANT gagal (non-fatal): " . $e->getMessage());
+            }
+            Log::info("Tenant DB created via admin: {$dbName}");
+        } else {
+            // Fallback: pakai user aplikasi langsung (harus sudah punya CREATE privilege)
+            DB::statement($sql);
+            Log::info("Tenant DB created via app user: {$dbName}");
+        }
     }
 
     public function switchToTenant(Tenant $tenant): void

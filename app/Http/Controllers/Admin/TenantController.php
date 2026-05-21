@@ -105,8 +105,8 @@ class TenantController extends Controller
             return response()->json(['success' => false, 'message' => 'Username tidak boleh kosong']);
         }
 
-        // Test koneksi dulu
-        $test = $this->tryConnectAdmin($username, $password);
+        // Test koneksi + cek privilege CREATE
+        $test     = $this->tryConnectAdmin($username, $password);
         $testData = $test->getData(true);
         if (!$testData['success']) {
             return $test;
@@ -119,54 +119,79 @@ class TenantController extends Controller
         }
 
         $env = file_get_contents($envPath);
-        foreach ([
-            'DB_ADMIN_USERNAME' => $username,
-            'DB_ADMIN_PASSWORD' => $password,
-        ] as $key => $value) {
-            if (preg_match("/^{$key}=/m", $env)) {
-                $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
-            } else {
-                $env .= "\n{$key}={$value}";
-            }
+        foreach (['DB_ADMIN_USERNAME' => $username, 'DB_ADMIN_PASSWORD' => $password] as $key => $value) {
+            $env = preg_match("/^{$key}=/m", $env)
+                ? preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env)
+                : $env . "\n{$key}={$value}";
         }
         file_put_contents($envPath, $env);
 
-        // Clear config cache agar env() terbaca ulang
+        // Langsung GRANT CREATE ke app user agar tidak perlu admin lagi untuk tiap database
+        $appUser = config('database.connections.mysql.username');
+        $grantMsg = '';
+        $hosts = ['localhost', '127.0.0.1', '%'];
+        try {
+            $conn = DB::connection('mysql_admin');
+            foreach ($hosts as $h) {
+                try {
+                    $conn->statement("GRANT CREATE, DROP ON *.* TO '{$appUser}'@'{$h}'");
+                } catch (\Throwable) {}
+            }
+            $conn->statement("FLUSH PRIVILEGES");
+            $grantMsg = " dan hak CREATE DATABASE diberikan ke user <strong>{$appUser}</strong>";
+        } catch (\Throwable $e) {
+            Log::warning("GRANT ke app user gagal: " . $e->getMessage());
+            $grantMsg = " (catatan: GRANT otomatis gagal, tapi root tersimpan untuk operasi berikutnya)";
+        }
+
+        // Clear config cache
         try { \Artisan::call('config:clear'); } catch (\Throwable) {}
 
-        return response()->json(['success' => true, 'message' => "Berhasil! {$username} disimpan sebagai DB admin"]);
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil! <strong>{$username}</strong> disimpan sebagai DB admin{$grantMsg}",
+        ]);
     }
 
     private function tryConnectAdmin(string $username, string $password): \Illuminate\Http\JsonResponse
     {
+        $host = config('database.connections.mysql_admin.host', '127.0.0.1');
+        $port = (int) config('database.connections.mysql_admin.port', 3306);
+
+        // 1. Test apakah port MySQL bisa dijangkau (timeout 5 detik)
+        $fp = @fsockopen($host, $port, $errno, $errstr, 5);
+        if (!$fp) {
+            return response()->json([
+                'success' => false,
+                'message' => "MySQL tidak dapat dijangkau di {$host}:{$port} — {$errstr}",
+            ]);
+        }
+        fclose($fp);
+
+        // 2. Test kredensial via PDO
         try {
-            // Set timeout koneksi pendek agar tidak hang lama
-            Config::set('database.connections.mysql_admin', array_merge(
-                config('database.connections.mysql_admin'),
-                [
-                    'username' => $username,
-                    'password' => $password,
-                    'options'  => [\PDO::ATTR_CONNECT_TIMEOUT => 5],
-                ]
-            ));
+            Config::set('database.connections.mysql_admin.username', $username);
+            Config::set('database.connections.mysql_admin.password', $password);
             DB::purge('mysql_admin');
             DB::connection('mysql_admin')->getPdo();
-
-            // Cek privilege CREATE
-            $canCreate = false;
-            try {
-                $testDb = 'sipera_priv_test_' . time();
-                DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
-                DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
-                $canCreate = true;
-            } catch (\Throwable) {}
-
-            if ($canCreate) {
-                return response()->json(['success' => true, 'message' => "Koneksi OK — {$username} punya privilege CREATE DATABASE"]);
-            }
-            return response()->json(['success' => false, 'message' => "Terhubung tapi {$username} tidak punya privilege CREATE DATABASE. Coba user root."]);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Login gagal: ' . $e->getMessage()]);
+        }
+
+        // 3. Cek apakah punya privilege CREATE DATABASE
+        try {
+            $testDb = 'sipera_priv_test_' . time();
+            DB::connection('mysql_admin')->statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
+            DB::connection('mysql_admin')->statement("DROP DATABASE IF EXISTS `{$testDb}`");
+            return response()->json([
+                'success' => true,
+                'message' => "OK — <strong>{$username}</strong> terhubung dan punya privilege CREATE DATABASE",
+            ]);
+        } catch (\Throwable) {
+            return response()->json([
+                'success' => false,
+                'message' => "Terhubung tapi <strong>{$username}</strong> tidak punya privilege CREATE DATABASE. Gunakan user <strong>root</strong>.",
+            ]);
         }
     }
 
@@ -231,6 +256,27 @@ class TenantController extends Controller
     {
         $tenant->update(['status' => 'active']);
         return back()->with('success', "Tenant \"{$tenant->name}\" berhasil diaktifkan.");
+    }
+
+    public function setupDb(Tenant $tenant)
+    {
+        try {
+            $this->manager->setupDatabase($tenant);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal buat database: ' . $e->getMessage());
+        }
+
+        $result = $this->manager->migrate($tenant);
+        if (!$result['success']) {
+            return back()->with('error', 'Database dibuat tapi migrasi gagal: ' . $result['output']);
+        }
+
+        $credentials = $this->manager->seedAdminUser($tenant);
+        if ($credentials && $tenant->phone) {
+            $this->manager->sendWelcomeWa($tenant, $credentials);
+        }
+
+        return back()->with('success', "Database + migrasi berhasil untuk {$tenant->name}. Tenant siap digunakan.");
     }
 
     public function migrate(Tenant $tenant)

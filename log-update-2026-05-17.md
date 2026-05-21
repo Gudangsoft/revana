@@ -26,8 +26,23 @@ Log perubahan otomatis dari git commits.
 
 ---
 
+## 2. Tenant CLI Command + Retry Button Web UI
 
-## 2. 🔄 Update: up
+**Tujuan:** Membuat tenant bisa dibuat/diperbaiki via SSH (CLI) jika web UI mengalami kendala, dan menambahkan tombol "Buat Database & Migrasi" pada halaman detail tenant.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Console/Commands/TenantCreate.php` | Baru — command `php artisan tenant:create` dengan interaktif prompt |
+| `app/Services/TenantManager.php` | Tambah `setupDatabase()` public method |
+| `app/Http/Controllers/Admin/TenantController.php` | Tambah `setupDb()` action |
+| `routes/web.php` | Tambah route `POST /tenants/{tenant}/setup-db` |
+| `resources/views/admin/tenants/show.blade.php` | Tambah tombol "Buat Database & Migrasi" jika `db_ok = false` |
+
+---
+
+
+## 3. 🔄 Update: up
 
 - **Commit:** `e4c6bd5` — 18:50 oleh Gudangsoft
 - **File berubah:** 5 file
@@ -60,6 +75,15 @@ Log perubahan otomatis dari git commits.
 ## 5. 🔄 Update: up
 
 - **Commit:** `d94f95d` — 19:22 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `log-update-2026-05-17.md`
+- `resources/views/admin/tenants/create.blade.php`
+
+
+## 6. 🔄 Update: y
+
+- **Commit:** `b96c126` — 19:27 oleh Gudangsoft
 - **File berubah:** 3 file
 - `app/Http/Controllers/Admin/TenantController.php`
 - `log-update-2026-05-17.md`
