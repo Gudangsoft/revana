@@ -349,11 +349,23 @@ async function startCreate() {
     renderSteps(null);
 
     try {
-        const res  = await fetch('{{ route("admin.tenants.store-ajax") }}', {
-            method:  'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-            body:    new FormData(form),
-        });
+        const abort = new AbortController();
+        const timer = setTimeout(() => abort.abort(), 120000);
+        let res;
+        try {
+            res = await fetch('{{ route("admin.tenants.store-ajax") }}', {
+                method:  'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body:    new FormData(form),
+                signal:  abort.signal,
+            });
+        } catch (fetchErr) {
+            clearTimeout(timer);
+            throw new Error(fetchErr.name === 'AbortError'
+                ? 'Timeout — server butuh terlalu lama (>2 menit). Cek log server.'
+                : fetchErr.message);
+        }
+        clearTimeout(timer);
         const data = await res.json();
 
         renderSteps(data.steps || {});

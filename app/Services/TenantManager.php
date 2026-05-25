@@ -203,7 +203,7 @@ class TenantManager
             $output = Artisan::output();
             $this->switchToMaster();
             return ['success' => true, 'output' => $output];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->switchToMaster();
             Log::error("Migrate tenant {$tenant->subdomain} gagal: {$e->getMessage()}");
             return ['success' => false, 'output' => $e->getMessage()];

@@ -78,3 +78,27 @@ Div `#setupDbResult` diletakkan di antara `.modal-body` dan `.modal-footer` (di 
 - `resources/views/admin/tenants/create.blade.php`
 - `resources/views/admin/tenants/tutorial.blade.php`
 
+
+## 7. 🔄 Update: o
+
+- **Commit:** `01122b4` — 21:21 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `log-update-2026-05-25.md`
+
+## 8. Fix: "Failed to fetch" saat Buat Tenant — PHP Timeout
+
+**Tujuan:** Memperbaiki error "Request gagal: Failed to fetch" pada wizard pembuatan tenant baru. PHP mati sebelum mengirim respons karena `Artisan::call('migrate')` menjalankan 100+ file migration.
+
+### Root Cause
+- Default PHP `max_execution_time` (biasanya 30 detik) terlampaui oleh step migrasi
+- `Artisan::call('migrate', ...)` dalam proses yang sama perlu memanggil 100+ migration file — makan waktu lebih dari 30 detik
+- Catch block `\Exception` di `TenantManager::migrate()` tidak menangkap `\Error` (fatal PHP errors)
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/TenantController.php` | `storeAjax()`: tambah `set_time_limit(300)` + `ignore_user_abort(true)` di awal method |
+| `app/Services/TenantManager.php` | `migrate()`: ubah `catch (\Exception $e)` → `catch (\Throwable $e)` agar Error fatal pun tertangkap |
+| `resources/views/admin/tenants/create.blade.php` | `startCreate()`: tambah `AbortController` dengan timeout 120 detik — jika server tetap tidak merespons, tampilkan pesan jelas bukan "Failed to fetch" |
+

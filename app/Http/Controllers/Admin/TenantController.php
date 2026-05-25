@@ -52,6 +52,9 @@ class TenantController extends Controller
 
     public function storeAjax(Request $request)
     {
+        set_time_limit(300);
+        ignore_user_abort(true);
+
         $validated = $this->validateTenantRequest($request);
         $result    = $this->manager->createWithSteps($validated);
         return response()->json($result, $result['success'] ? 200 : 422);
