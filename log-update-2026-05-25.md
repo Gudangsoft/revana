@@ -102,3 +102,37 @@ Div `#setupDbResult` diletakkan di antara `.modal-body` dan `.modal-footer` (di 
 | `app/Services/TenantManager.php` | `migrate()`: ubah `catch (\Exception $e)` → `catch (\Throwable $e)` agar Error fatal pun tertangkap |
 | `resources/views/admin/tenants/create.blade.php` | `startCreate()`: tambah `AbortController` dengan timeout 120 detik — jika server tetap tidak merespons, tampilkan pesan jelas bukan "Failed to fetch" |
 
+
+## 10. Fix: Isolasi Database Tenant — TenantMiddleware Global
+
+**Tujuan:** Semua subdomain tenant (contoh: `mansipera.apji.org`) kini punya database sendiri — login, dashboard, dan semua data terpisah dari portal master.
+
+### Root Cause
+`TenantMiddleware` hanya terdaftar sebagai route alias (`'tenant'`), tidak pernah diterapkan ke grup `web`. Akibatnya semua subdomain tetap pakai database master.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Kernel.php` | Tambah `TenantMiddleware` ke grup `web` — berlaku untuk semua web request |
+| `app/Http/Middleware/TenantMiddleware.php` | Tambah bypass untuk `localhost`, `127.0.0.1`, IP langsung, dan `APP_MASTER_HOST` — agar dev lokal tidak kena abort 404 |
+| `routes/web.php` | Hapus `->middleware('tenant')` redundant di route impersonate |
+
+### Cara Kerja Sekarang
+- Request ke `portal.apji.org` → middleware bypass → pakai DB master (super admin)
+- Request ke `mansipera.apji.org` → middleware cari tenant `mansipera` → switch ke `tenant_mansipera` DB
+- Request ke `127.0.0.1:8000` (lokal) → middleware bypass → pakai DB master
+
+### Yang Perlu di Production .env
+```
+TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
+```
+
+## 9. 🔄 Update: tenant
+
+- **Commit:** `ab8cd80` — 21:32 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/TenantController.php`
+- `app/Services/TenantManager.php`
+- `log-update-2026-05-25.md`
+- `resources/views/admin/tenants/create.blade.php`
+

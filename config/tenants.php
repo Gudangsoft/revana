@@ -7,7 +7,7 @@ return [
     | Domain utama (super admin) — tidak diperlakukan sebagai tenant
     |--------------------------------------------------------------------------
     */
-    'master_domain' => env('TENANT_MASTER_DOMAIN', 'portal.apji.org'),
+    'master_domain' => env('TENANT_MASTER_DOMAIN', 'sipera.apji.org'),
 
     /*
     |--------------------------------------------------------------------------

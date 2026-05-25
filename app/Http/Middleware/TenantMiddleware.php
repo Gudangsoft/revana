@@ -16,8 +16,14 @@ class TenantMiddleware
         $host         = $request->getHost();
         $masterDomain = config('tenants.master_domain', 'portal.apji.org');
 
-        // Portal utama → lewat tanpa perubahan
-        if ($host === $masterDomain) {
+        // Lokal / IP langsung / domain master → lewat tanpa perubahan
+        $masterHosts = array_filter([
+            $masterDomain,
+            'localhost',
+            '127.0.0.1',
+            env('APP_MASTER_HOST'),
+        ]);
+        if (in_array($host, $masterHosts) || filter_var($host, FILTER_VALIDATE_IP)) {
             return $next($request);
         }
 
