@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,13 +13,15 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        $user = Auth::user();
+        $user = User::find(Auth::id());
         return view('admin.profile.edit', compact('user'));
     }
 
     public function update(Request $request)
     {
-        $user = Auth::user();
+        // Fresh load dari koneksi aktif (bisa tenant atau master) — Auth::user() bisa ter-cache
+        // dengan koneksi master sebelum TenantMiddleware jalan
+        $user = User::find(Auth::id());
 
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
@@ -61,7 +64,7 @@ class ProfileController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $user = Auth::user();
+        $user = User::find(Auth::id());
 
         $validated = $request->validate([
             'current_password' => 'required',

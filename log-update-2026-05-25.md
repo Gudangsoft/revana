@@ -278,6 +278,19 @@ Method `->connection()` tidak ada di `Illuminate\Validation\Rules\Unique`. Ini b
 | `app/Http/Controllers/Admin/ProfileController.php` | Hapus `->connection(config('database.default', 'mysql'))` dari `Rule::unique()` |
 
 
+## 22. Fix: Profile Update Tenant Duplicate Key — Auth::user() Cache Master Connection
+
+**Tujuan:** Memperbaiki `UniqueConstraintViolationException` saat admin tenant simpan profile.
+
+### Root Cause
+`AuthenticateSession` di grup `web` memanggil `Auth::user()` sebelum `TenantMiddleware` jalan. Ini meng-cache model User dengan koneksi `mysql` (master). Ketika `ProfileController::update()` memanggil `Auth::user()`, ia mendapat model yang ter-cache dengan koneksi master. Validasi `Rule::unique` berjalan di tenant DB (benar), tapi `$user->update()` berjalan di master DB (salah) — menyebabkan duplicate key karena email sudah ada di master.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ProfileController.php` | Ganti `Auth::user()` dengan `User::find(Auth::id())` di ketiga method (`edit`, `update`, `updatePassword`) — fresh load selalu menggunakan `database.default` yang sudah di-switch oleh TenantMiddleware |
+
+
 ## 21. 🔄 Update: a
 
 - **Commit:** `e2a52ce` — 23:24 oleh Gudangsoft
@@ -286,5 +299,13 @@ Method `->connection()` tidak ada di `Illuminate\Validation\Rules\Unique`. Ini b
 - `app/Http/Controllers/Admin/LeaderboardController.php`
 - `app/Http/Controllers/Marketing/DashboardController.php`
 - `app/Http/Controllers/Pic/AuthorController.php`
+- `log-update-2026-05-25.md`
+
+
+## 23. 🔄 Update: a
+
+- **Commit:** `5c56bee` — 23:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/ProfileController.php`
 - `log-update-2026-05-25.md`
 
