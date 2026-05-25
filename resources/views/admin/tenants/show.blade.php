@@ -168,6 +168,23 @@
                 </div>
             </div>
 
+            {{-- Buat / Reset Akun Admin --}}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-person-gear me-2 text-success"></i>Akun Admin Tenant
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">
+                        Buat atau reset akun admin di database tenant ini.<br>
+                        Jika email sudah ada, password akan direset.
+                    </p>
+                    <button type="button" class="btn btn-success w-100 btn-sm"
+                            data-bs-toggle="modal" data-bs-target="#modalResetAdmin">
+                        <i class="bi bi-person-plus me-1"></i>Buat / Reset Akun Admin
+                    </button>
+                </div>
+            </div>
+
             {{-- Impersonate --}}
             <div class="card shadow-sm border-0 mb-3">
                 <div class="card-header fw-semibold">
@@ -336,6 +353,49 @@
     </div>
 </div>
 
+{{-- Modal Reset Admin --}}
+<div class="modal fade" id="modalResetAdmin" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-person-gear me-2"></i>Buat / Reset Akun Admin</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email Admin <span class="text-danger">*</span></label>
+                    <input type="email" id="raEmail" class="form-control"
+                           value="{{ $tenant->admin_email }}" placeholder="admin@institusi.ac.id">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nama Admin</label>
+                    <input type="text" id="raName" class="form-control"
+                           value="{{ $tenant->admin_name }}" placeholder="Nama lengkap">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <input type="text" id="raPassword" class="form-control font-monospace"
+                               placeholder="Kosongkan untuk generate otomatis">
+                        <button type="button" class="btn btn-outline-secondary"
+                                onclick="document.getElementById('raPassword').value = generatePwd()">
+                            <i class="bi bi-shuffle"></i> Generate
+                        </button>
+                    </div>
+                    <div class="form-text">Kosongkan untuk password acak 10 karakter.</div>
+                </div>
+                <div id="raResult" class="d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-success px-4" id="raBtnSave" onclick="doResetAdmin()">
+                    <i class="bi bi-check-circle me-1"></i>Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Modal Hapus --}}
 <div class="modal fade" id="modalHapus" tabindex="-1">
     <div class="modal-dialog">
@@ -372,6 +432,70 @@
 document.querySelector('[name=primary_color]')?.addEventListener('input', function() {
     const hex = document.getElementById('colorHex');
     if (hex) hex.value = this.value;
+});
+
+function generatePwd() {
+    const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#';
+    return Array.from({length: 10}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+async function doResetAdmin() {
+    const email = document.getElementById('raEmail').value.trim();
+    const name  = document.getElementById('raName').value.trim();
+    const pass  = document.getElementById('raPassword').value.trim();
+    const result = document.getElementById('raResult');
+
+    if (!email) {
+        result.className = 'alert alert-danger small';
+        result.innerHTML = 'Email tidak boleh kosong.';
+        return;
+    }
+
+    document.getElementById('raBtnSave').disabled = true;
+    result.className = 'alert alert-secondary small';
+    result.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+
+    try {
+        const res  = await fetch('{{ route("admin.tenants.reset-admin", $tenant) }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ admin_email: email, admin_name: name, password: pass }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            result.className = 'alert alert-success small';
+            result.innerHTML = `
+                <div class="fw-semibold mb-2"><i class="bi bi-check-circle-fill me-1"></i>Akun berhasil dibuat/direset!</div>
+                <table class="table table-sm table-borderless mb-2">
+                    <tr><td class="text-muted pe-3">Email</td><td class="font-monospace fw-semibold">${data.email}</td></tr>
+                    <tr><td class="text-muted pe-3">Password</td><td><span class="font-monospace fw-bold text-danger fs-6">${data.password}</span></td></tr>
+                </table>
+                <div class="text-muted" style="font-size:0.78rem">Catat password ini — tidak akan ditampilkan lagi.</div>`;
+            document.getElementById('raBtnSave').textContent = 'Selesai';
+        } else {
+            result.className = 'alert alert-danger small';
+            result.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>' + data.message;
+            document.getElementById('raBtnSave').disabled = false;
+        }
+    } catch (e) {
+        result.className = 'alert alert-danger small';
+        result.innerHTML = 'Error: ' + e.message;
+        document.getElementById('raBtnSave').disabled = false;
+    }
+}
+
+// Reset modal saat ditutup
+document.getElementById('modalResetAdmin')?.addEventListener('hidden.bs.modal', function () {
+    document.getElementById('raResult').className = 'd-none';
+    document.getElementById('raResult').innerHTML = '';
+    document.getElementById('raBtnSave').disabled = false;
+    document.getElementById('raBtnSave').innerHTML = '<i class="bi bi-check-circle me-1"></i>Simpan';
+    document.getElementById('raPassword').value = '';
 });
 </script>
 @endpush

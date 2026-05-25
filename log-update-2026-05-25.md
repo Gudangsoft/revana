@@ -137,6 +137,24 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - `resources/views/admin/tenants/create.blade.php`
 
 
+## 12. Fitur: Buat / Reset Akun Admin Tenant dari Panel Super Admin
+
+**Tujuan:** Super admin bisa membuat atau mereset akun admin di database tenant langsung dari halaman detail tenant, tanpa perlu impersonate atau akses manual ke database.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah route `POST /{tenant}/reset-admin` |
+| `app/Http/Controllers/Admin/TenantController.php` | Tambah method `resetAdmin()` — validasi input, panggil service, update record tenant |
+| `app/Services/TenantManager.php` | Tambah method `resetAdminUser()` — switch ke DB tenant, upsert user admin dengan password baru |
+| `resources/views/admin/tenants/show.blade.php` | Tambah card "Akun Admin Tenant", modal form email/nama/password, JS AJAX + tampilkan kredensial hasil |
+
+### Cara Kerja
+- Klik "Buat / Reset Akun Admin" di halaman detail tenant
+- Isi email, nama (opsional), password (opsional — auto-generate jika kosong)
+- Klik Simpan → credentials ditampilkan langsung di modal (password tampil sekali)
+- Jika email sudah ada di DB tenant → password di-update; jika belum → user baru dibuat
+
 ## 11. 🔄 Update: up
 
 - **Commit:** `b72e6f3` — 22:13 oleh Gudangsoft
@@ -144,5 +162,13 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - `app/Http/Kernel.php`
 - `app/Http/Middleware/TenantMiddleware.php`
 - `config/tenants.php`
+- `log-update-2026-05-25.md`
+
+
+## 12. 🔄 Update: a
+
+- **Commit:** `83ba676` — 22:22 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Middleware/TenantMiddleware.php`
 - `log-update-2026-05-25.md`
 

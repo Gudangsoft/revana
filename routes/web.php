@@ -419,6 +419,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/{tenant}/change-plan', [TenantController::class, 'changePlan'])->name('change-plan');
             Route::post('/{tenant}/branding', [TenantController::class, 'updateBranding'])->name('branding');
             Route::post('/{tenant}/impersonate', [TenantImpersonateController::class, 'start'])->name('impersonate');
+            Route::post('/{tenant}/reset-admin', [TenantController::class, 'resetAdmin'])->name('reset-admin');
             Route::delete('/{tenant}', [TenantController::class, 'destroy'])->name('destroy');
         });
     });

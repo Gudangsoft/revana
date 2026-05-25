@@ -365,6 +365,35 @@ class TenantController extends Controller
         return back()->with('success', "Branding \"{$tenant->name}\" berhasil diperbarui.");
     }
 
+    public function resetAdmin(Request $request, Tenant $tenant)
+    {
+        $request->validate([
+            'admin_email' => 'required|email|max:255',
+            'admin_name'  => 'nullable|string|max:255',
+            'password'    => 'nullable|string|min:6|max:100',
+        ]);
+
+        $email    = $request->admin_email;
+        $name     = $request->admin_name ?: ($tenant->admin_name ?: 'Admin');
+        $password = $request->password ?: \Illuminate\Support\Str::random(10);
+
+        try {
+            $this->manager->resetAdminUser($tenant, $email, $name, $password);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+        // Update tenant record
+        $tenant->update(['admin_name' => $name, 'admin_email' => $email]);
+
+        return response()->json([
+            'success'  => true,
+            'email'    => $email,
+            'password' => $password,
+            'message'  => "Akun admin berhasil dibuat/direset.",
+        ]);
+    }
+
     public function destroy(Request $request, Tenant $tenant)
     {
         $request->validate(['confirm_name' => 'required|same:_tenant_name']);

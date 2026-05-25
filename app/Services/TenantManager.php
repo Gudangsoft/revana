@@ -283,6 +283,32 @@ class TenantManager
     /**
      * Buat database untuk tenant yang sudah ada record-nya (dipakai dari CLI/web retry).
      */
+    public function resetAdminUser(Tenant $tenant, string $email, string $name, string $password): void
+    {
+        $this->switchToTenant($tenant);
+
+        $exists = DB::table('users')->where('email', $email)->exists();
+        if ($exists) {
+            DB::table('users')->where('email', $email)->update([
+                'name'       => $name,
+                'password'   => Hash::make($password),
+                'role'       => 'admin',
+                'updated_at' => now(),
+            ]);
+        } else {
+            DB::table('users')->insert([
+                'name'       => $name,
+                'email'      => $email,
+                'password'   => Hash::make($password),
+                'role'       => 'admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->switchToMaster();
+    }
+
     public function setupDatabase(Tenant $tenant): void
     {
         $this->createDatabase($tenant);
