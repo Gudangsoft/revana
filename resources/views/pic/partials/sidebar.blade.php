@@ -163,6 +163,48 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0.2; }
     }
+
+    /* ===== DARK SIDEBAR THEME OVERRIDES ===== */
+    html[data-theme="dark-sidebar"] .nav-link {
+        color: #94a3b8;
+        border-left-color: transparent;
+    }
+    html[data-theme="dark-sidebar"] .nav-link:hover {
+        background-color: rgba(255,255,255,0.05);
+        color: #e2e8f0;
+        border-left-color: #6366f1;
+    }
+    html[data-theme="dark-sidebar"] .nav-link:hover i {
+        opacity: 1;
+        transform: none;
+    }
+    html[data-theme="dark-sidebar"] .nav-link.active {
+        background-color: rgba(99,102,241,0.13);
+        color: #a5b4fc;
+        font-weight: 600;
+        border-left-color: #6366f1;
+    }
+    html[data-theme="dark-sidebar"] .nav-link.active i {
+        color: #a5b4fc;
+        opacity: 1;
+    }
+    html[data-theme="dark-sidebar"] .sidebar-section-header {
+        color: #475569;
+    }
+    html[data-theme="dark-sidebar"] .sidebar-toggle {
+        color: #64748b !important;
+    }
+    html[data-theme="dark-sidebar"] .sidebar-toggle:hover {
+        background: rgba(255,255,255,0.04) !important;
+        color: #94a3b8 !important;
+    }
+    html[data-theme="dark-sidebar"] .sidebar-divider {
+        border-top-color: #334155;
+        opacity: 1;
+    }
+    html[data-theme="dark-sidebar"] .btn-submit-regular {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
 </style>
 
 <nav class="nav flex-column">

@@ -6,7 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+    {{-- Anti-flash: apply saved theme sebelum CSS render --}}
+    <script>(function(){var t=localStorage.getItem('picTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');})()</script>
+
     <title>@yield('title', 'PIC Dashboard') - {{ $appSettings['app_name'] }}</title>
     @if($appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">
@@ -96,6 +98,36 @@
             margin-left: 10px;
         }
         
+        /* ===== DARK SIDEBAR THEME ===== */
+        html[data-theme="dark-sidebar"] .navbar {
+            background: #0f172a !important;
+            border-bottom: 1px solid #1e293b;
+        }
+        html[data-theme="dark-sidebar"] .sidebar {
+            background: #1e293b;
+            box-shadow: 1px 0 0 rgba(255,255,255,0.06);
+        }
+        html[data-theme="dark-sidebar"] .page-header {
+            border-left: 3px solid #6366f1;
+        }
+
+        /* Tombol toggle tema */
+        #themeToggleBtn {
+            color: rgba(255,255,255,0.72);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 6px;
+            padding: 4px 8px;
+            line-height: 1;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+        #themeToggleBtn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.55);
+            background: rgba(255,255,255,0.08);
+        }
+
         @yield('styles')
     </style>
 </head>
@@ -141,6 +173,12 @@
                                 <span class="d-none d-md-inline"> Sync Point</span>
                             </button>
                         </form>
+                    </li>
+                    <li class="nav-item">
+                        <button id="themeToggleBtn" onclick="toggleTheme()" title="">
+                            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                            <span id="themeLabel" class="d-none d-lg-inline ms-1"></span>
+                        </button>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -326,6 +364,29 @@
             var btn = document.getElementById('btnPicSyncLogout');
             if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyinkronkan...'; }
         });
+    </script>
+    <script>
+    function applyTheme(theme) {
+        var isDark = theme === 'dark-sidebar';
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark-sidebar' : 'default');
+        var icon  = document.getElementById('themeIcon');
+        var label = document.getElementById('themeLabel');
+        var btn   = document.getElementById('themeToggleBtn');
+        if (icon)  icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        if (label) label.textContent = isDark ? 'Tema Terang' : 'Tema Gelap';
+        if (btn)   btn.title = isDark ? 'Kembali ke tema terang' : 'Coba tema gelap sidebar';
+    }
+    function toggleTheme() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark-sidebar';
+        var next = isDark ? 'default' : 'dark-sidebar';
+        localStorage.setItem('picTheme', next);
+        applyTheme(next);
+    }
+    // Init icon sesuai tema tersimpan
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('picTheme') || 'default';
+        applyTheme(saved);
+    });
     </script>
     @yield('scripts')
 </body>
