@@ -38,6 +38,18 @@ Log perubahan otomatis dari git commits.
 - Setiap role punya localStorage key sendiri (`adminTheme`, `mktTheme`, `picTheme`) — preferensi tidak saling mempengaruhi
 
 
+## 5. Fix: Setup DB Admin Modal Tidak Menampilkan Hasil
+
+**Tujuan:** Memperbaiki `#setupDbResult` yang tidak muncul sama sekali saat "Test Koneksi" diklik.
+
+### Root Cause
+Div `#setupDbResult` diletakkan di antara `.modal-body` dan `.modal-footer` (di luar keduanya), sehingga `document.getElementById()` kadang gagal menemukan elemen. Selain itu, JS error di dalam `callDbAdmin` tidak pernah terlihat karena tidak ada try-catch luar.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/tenants/create.blade.php` | Pindah `#setupDbResult` ke dalam `.modal-body` sebagai elemen terakhir. `setDbResult()` ditambah fallback 3 lapis (getElementById → querySelector → createElement). `callDbAdmin()` dibungkus try-catch luar untuk menangkap JS error yang selama ini senyap. |
+
 ## 2. 🔄 Update: a
 
 - **Commit:** `d6e1dde` — 20:35 oleh Gudangsoft

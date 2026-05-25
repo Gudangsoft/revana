@@ -404,6 +404,43 @@
             </div>
         </div>
     </div>
+    <!-- Pengumuman fitur tema (one-time) -->
+    <div class="modal fade" id="themeAnnouncementModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
+                <div class="modal-header border-0 pb-0" style="background:linear-gradient(135deg,#1e293b 0%,#334155 100%);">
+                    <div class="w-100 text-center py-3">
+                        <div style="font-size:2.8rem;">🎨</div>
+                        <h5 class="text-white fw-bold mt-2 mb-0">Fitur Baru: Pilih Tema</h5>
+                    </div>
+                </div>
+                <div class="modal-body text-center px-4 py-3">
+                    <p class="text-muted mb-3">Sekarang Anda bisa memilih tampilan yang paling nyaman.</p>
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <div class="p-3 rounded text-center flex-fill" style="background:#f8fafc;border:2px solid #e2e8f0;">
+                            <div style="font-size:1.6rem;">☀️</div>
+                            <div class="small fw-semibold mt-1">Tema Terang</div>
+                            <div class="small text-muted">Default seperti biasa</div>
+                        </div>
+                        <div class="p-3 rounded text-center flex-fill" style="background:#1e293b;border:2px solid #334155;">
+                            <div style="font-size:1.6rem;">🌙</div>
+                            <div class="small fw-semibold mt-1 text-white">Tema Gelap</div>
+                            <div class="small" style="color:#94a3b8;">Sidebar lebih elegan</div>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        Klik ikon <strong>🌙</strong> di pojok kanan atas navbar untuk berganti tema kapan saja.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-primary px-5 fw-semibold" data-bs-dismiss="modal">
+                        Oke, Mengerti!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     function applyTheme(theme) {
         var isDark = theme === 'dark-sidebar';
@@ -424,6 +461,16 @@
     document.addEventListener('DOMContentLoaded', function() {
         var saved = localStorage.getItem('mktTheme') || 'default';
         applyTheme(saved);
+
+        if (!localStorage.getItem('themeSwitcherNotified')) {
+            var el = document.getElementById('themeAnnouncementModal');
+            if (el) {
+                el.addEventListener('hidden.bs.modal', function() {
+                    localStorage.setItem('themeSwitcherNotified', '1');
+                });
+                bootstrap.Modal.getOrCreateInstance(el).show();
+            }
+        }
     });
     </script>
     @yield('scripts')

@@ -230,8 +230,9 @@
                     </div>
                 </div>
 
+                <div id="setupDbResult" class="mt-2" style="display:none"></div>
+
             </div>
-            <div id="setupDbResult" style="display:none" class="px-3 pb-2"></div>
             <div class="modal-footer">
                 <button type="button" id="btnTestDb" class="btn btn-outline-secondary" onclick="testDbAdmin()">
                     <i class="bi bi-plug me-1"></i>Test Koneksi
@@ -389,7 +390,23 @@ async function startCreate() {
 
 // ── DB Admin Setup ────────────────────────────────────────────────────────────
 function setDbResult(html) {
-    const el = document.getElementById('setupDbResult');
+    let el = document.getElementById('setupDbResult');
+    // Fallback: cari di dalam modal jika getElementById gagal
+    if (!el) {
+        el = document.querySelector('#modalSetupDb .modal-body #setupDbResult')
+          || document.querySelector('#modalSetupDb [id="setupDbResult"]');
+    }
+    if (!el) {
+        // Last resort: buat elemen baru di dalam modal-body
+        const body = document.querySelector('#modalSetupDb .modal-body');
+        if (body) {
+            el = document.createElement('div');
+            el.id = 'setupDbResult';
+            el.className = 'mt-2';
+            el.style.display = 'none';
+            body.appendChild(el);
+        }
+    }
     if (!el) return;
     if (html) {
         el.innerHTML = html;
@@ -408,36 +425,46 @@ function setBtnState(busy) {
 }
 
 async function callDbAdmin(url) {
-    const user = (document.getElementById('dbAdminUser')?.value || '').trim();
-    const pass = document.getElementById('dbAdminPass')?.value || '';
-    if (!user) { setDbResult('<div class="alert alert-danger py-2 small mb-0">Username tidak boleh kosong</div>'); return null; }
-
-    setDbResult('<div class="alert alert-secondary py-2 small mb-0"><span class="spinner-border spinner-border-sm me-2"></span>Memproses, harap tunggu (maks 15 detik)...</div>');
-    setBtnState(true);
-
-    const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), 15000);
     try {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ db_admin_username: user, db_admin_password: pass }),
-            signal: abort.signal,
-        });
-        clearTimeout(timer);
-        const ct = res.headers.get('content-type') || '';
-        if (!ct.includes('json')) {
-            const txt = await res.text();
-            throw new Error('Server error HTTP ' + res.status + ': ' + txt.replace(/<[^>]+>/g,'').substring(0,300));
+        const user = (document.getElementById('dbAdminUser')?.value || '').trim();
+        const pass = document.getElementById('dbAdminPass')?.value || '';
+        if (!user) {
+            setDbResult('<div class="alert alert-danger py-2 small mb-0">Username tidak boleh kosong</div>');
+            return null;
         }
-        return await res.json();
-    } catch (e) {
-        clearTimeout(timer);
-        const msg = e.name === 'AbortError' ? 'Timeout — server tidak merespons dalam 15 detik' : e.message;
-        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${msg}</div>`);
-        return null;
-    } finally {
+
+        setDbResult('<div class="alert alert-secondary py-2 small mb-0"><span class="spinner-border spinner-border-sm me-2"></span>Memproses, harap tunggu (maks 15 detik)...</div>');
+        setBtnState(true);
+
+        const abort = new AbortController();
+        const timer = setTimeout(() => abort.abort(), 15000);
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ db_admin_username: user, db_admin_password: pass }),
+                signal: abort.signal,
+            });
+            clearTimeout(timer);
+            const ct = res.headers.get('content-type') || '';
+            if (!ct.includes('json')) {
+                const txt = await res.text();
+                throw new Error('Server error HTTP ' + res.status + ': ' + txt.replace(/<[^>]+>/g,'').substring(0,300));
+            }
+            return await res.json();
+        } catch (e) {
+            clearTimeout(timer);
+            const msg = e.name === 'AbortError' ? 'Timeout — server tidak merespons dalam 15 detik' : e.message;
+            setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i>${msg}</div>`);
+            return null;
+        } finally {
+            setBtnState(false);
+        }
+    } catch (fatal) {
+        // Tangkap error JS apapun agar tidak senyap
+        setDbResult(`<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-bug me-1"></i>JS Error: ${fatal.message}</div>`);
         setBtnState(false);
+        return null;
     }
 }
 
