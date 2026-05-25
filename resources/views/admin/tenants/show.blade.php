@@ -475,11 +475,16 @@ async function doResetAdmin() {
                     <tr><td class="text-muted pe-3">Email</td><td class="font-monospace fw-semibold">${data.email}</td></tr>
                     <tr><td class="text-muted pe-3">Password</td><td><span class="font-monospace fw-bold text-danger fs-6">${data.password}</span></td></tr>
                 </table>
-                <div class="text-muted" style="font-size:0.78rem">Catat password ini — tidak akan ditampilkan lagi.</div>`;
-            document.getElementById('raBtnSave').textContent = 'Selesai';
+                <div class="text-muted" style="font-size:0.78rem">⚠️ Catat password ini — tidak akan ditampilkan lagi.</div>`;
+            document.getElementById('raBtnSave').innerHTML = '<i class="bi bi-check-circle me-1"></i>Selesai';
         } else {
+            // Tangani validasi (422) dan error lainnya
+            let errMsg = data.message || 'Terjadi kesalahan.';
+            if (data.errors) {
+                errMsg = Object.values(data.errors).flat().join('<br>');
+            }
             result.className = 'alert alert-danger small';
-            result.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>' + data.message;
+            result.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>' + errMsg;
             document.getElementById('raBtnSave').disabled = false;
         }
     } catch (e) {

@@ -285,18 +285,30 @@ class TenantManager
      */
     public function resetAdminUser(Tenant $tenant, string $email, string $name, string $password): void
     {
-        $this->switchToTenant($tenant);
+        if (!$tenant->db_name) {
+            throw new \RuntimeException("Tenant tidak memiliki db_name. Setup database terlebih dahulu.");
+        }
 
-        $exists = DB::table('users')->where('email', $email)->exists();
+        // Pastikan koneksi tenant aktif
+        $this->switchToTenant($tenant);
+        $conn = DB::connection('tenant');
+
+        // Verifikasi tabel users ada
+        if (!$conn->getSchemaBuilder()->hasTable('users')) {
+            $this->switchToMaster();
+            throw new \RuntimeException("Tabel 'users' tidak ditemukan di database {$tenant->db_name}. Jalankan migration terlebih dahulu.");
+        }
+
+        $exists = $conn->table('users')->where('email', $email)->exists();
         if ($exists) {
-            DB::table('users')->where('email', $email)->update([
+            $conn->table('users')->where('email', $email)->update([
                 'name'       => $name,
                 'password'   => Hash::make($password),
                 'role'       => 'admin',
                 'updated_at' => now(),
             ]);
         } else {
-            DB::table('users')->insert([
+            $conn->table('users')->insert([
                 'name'       => $name,
                 'email'      => $email,
                 'password'   => Hash::make($password),
@@ -306,6 +318,7 @@ class TenantManager
             ]);
         }
 
+        Log::info("resetAdminUser: {$email} di {$tenant->db_name} (" . ($exists ? 'update' : 'insert') . ")");
         $this->switchToMaster();
     }
 
