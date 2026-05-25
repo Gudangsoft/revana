@@ -13,8 +13,9 @@ class LeaderboardController extends Controller
 {
     public function index()
     {
-        $reviewers = Cache::remember('leaderboard.reviewers', 300, function () {
-        return $this->buildLeaderboard();
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        $reviewers = Cache::remember("leaderboard.reviewers.{$tenantKey}", 300, function () {
+            return $this->buildLeaderboard();
         });
 
         return view('admin.leaderboard.index', compact('reviewers'));

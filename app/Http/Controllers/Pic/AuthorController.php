@@ -24,11 +24,12 @@ class AuthorController extends Controller
             ->latest()
             ->get();
 
-        $topPics = Cache::remember('rankings.topPics', 300, fn () =>
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
             Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
 
-        $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
+        $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
             Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
 

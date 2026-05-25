@@ -18,6 +18,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+
         // Basic counts
         $totalJournals = JournalMaster::count();
         $totalReviewers = User::where('role', 'reviewer')->count();
@@ -83,7 +85,7 @@ class DashboardController extends Controller
             ->get();
 
         // Monthly breakdown per status for chart (cache 5 menit per tahun)
-        $chartData = Cache::remember('dashboard.monthlyStats.' . date('Y'), 300, function () {
+        $chartData = Cache::remember("dashboard.monthlyStats.{$tenantKey}." . date('Y'), 300, function () {
             $months = range(1, 12);
             $totals    = array_fill_keys($months, 0);
             $published = array_fill_keys($months, 0);
@@ -112,17 +114,17 @@ class DashboardController extends Controller
         $chartRejected  = array_values($chartData['rejected']);
 
         // PIC Point Rankings - Top 10 PIC dengan point tertinggi (cache 5 menit)
-        $topPics = Cache::remember('rankings.topPics', 300, fn () =>
+        $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
             Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
 
         // Marketing Point Rankings - Top 10 Marketing dengan point tertinggi (cache 5 menit)
-        $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
+        $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
             Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
 
         // Analytics: top 5 reviewer by total_points (cache 5 menit)
-        $topReviewers = Cache::remember('analytics.topReviewers', 300, fn () =>
+        $topReviewers = Cache::remember("analytics.topReviewers.{$tenantKey}", 300, fn () =>
             User::where('role', 'reviewer')
                 ->where('total_points', '>', 0)
                 ->orderBy('total_points', 'desc')
@@ -131,7 +133,7 @@ class DashboardController extends Controller
         );
 
         // Analytics: rata-rata hari penyelesaian submission (PUBLISHED)
-        $avgCompletionDays = Cache::remember('analytics.avgCompletion', 300, fn () =>
+        $avgCompletionDays = Cache::remember("analytics.avgCompletion.{$tenantKey}", 300, fn () =>
             (int) round(
                 Submission::where('status', 'PUBLISHED')
                     ->whereNotNull('tanggal_submit')

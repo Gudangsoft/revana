@@ -118,11 +118,12 @@ class DashboardController extends Controller
             'total_points' => $marketing->total_points,
         ];
 
-        $topMarketings = Cache::remember('rankings.topMarketings', 300, fn () =>
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
             \App\Models\Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
 
-        $topPics = Cache::remember('rankings.topPics', 300, fn () =>
+        $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
             \App\Models\Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
         

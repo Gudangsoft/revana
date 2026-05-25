@@ -229,3 +229,38 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - `log-update-2026-05-25.md`
 - `resources/views/admin/profile/edit.blade.php`
 
+
+## 19. 🔄 Update: e
+
+- **Commit:** `6d106fd` — 23:18 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Providers/AppServiceProvider.php`
+- `log-update-2026-05-25.md`
+- `resources/views/auth/login.blade.php`
+- `resources/views/layouts/app.blade.php`
+
+
+## 20. Fix: Dashboard Tenant Menampilkan Data Master — Cache Key Global
+
+**Tujuan:** Dashboard `mansipera.apji.org/admin/dashboard` menampilkan data dari master database karena cache key tidak per-tenant.
+
+### Root Cause
+`Cache::remember()` di beberapa controller menggunakan key statis (`rankings.topPics`, `dashboard.monthlyStats.2026`, dst.). Ketika master pertama kali membuka dashboard, data master tersimpan di cache dengan key tersebut. Saat tenant mengakses dashboard, cache yang sama dikembalikan — padahal DB sudah di-switch oleh `TenantMiddleware`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DashboardController.php` | Tambah `$tenantKey`, prefix semua 5 cache key dengan subdomain tenant (`rankings.topPics.mansipera`, dst.) |
+| `app/Http/Controllers/Pic/AuthorController.php` | Prefix cache key `rankings.topPics` dan `rankings.topMarketings` per tenant |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Prefix cache key `rankings.topMarketings` dan `rankings.topPics` per tenant |
+| `app/Http/Controllers/Admin/LeaderboardController.php` | Prefix cache key `leaderboard.reviewers` per tenant |
+
+### Pola Fix
+```php
+$tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+Cache::remember("rankings.topPics.{$tenantKey}", 300, ...);
+```
+
+### Catatan
+Setelah deploy, jalankan `php artisan cache:clear` di server agar cache lama (dengan key global) tidak tersisa.
+
