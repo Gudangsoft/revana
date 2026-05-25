@@ -3,6 +3,12 @@
 @section('title', ' - Edit Profile Admin')
 @section('page-title', 'Edit Profile Admin')
 
+@php
+    $brandColor  = $currentTenant->branding['primary_color'] ?? '#4f46e5';
+    $brandColor2 = $currentTenant->branding['primary_color'] ?? '#7c3aed';
+    $appLabel    = $currentTenant->branding['app_name'] ?? config('app.name', 'SIPERA');
+@endphp
+
 @section('sidebar')
     @include('admin.partials.sidebar')
 @endsection
@@ -175,6 +181,14 @@
                 </h5>
             </div>
             <div class="card-body">
+                @if(!empty($currentTenant))
+                <div class="mb-3">
+                    <label class="text-muted small">Sistem</label>
+                    <p class="mb-0 fw-semibold">{{ $appLabel }}</p>
+                    <small class="text-muted">{{ $currentTenant->subdomain }}.apji.org</small>
+                </div>
+                @endif
+
                 <div class="mb-3">
                     <label class="text-muted small">Role</label>
                     <p class="mb-0"><span class="badge bg-danger">Administrator</span></p>
@@ -231,19 +245,19 @@
     }
 
     .card-header {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        background: linear-gradient(135deg, {{ $brandColor }} 0%, {{ $brandColor2 }} 100%);
         color: white;
         border-radius: 10px 10px 0 0 !important;
         padding: 1rem 1.5rem;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        background: linear-gradient(135deg, {{ $brandColor }} 0%, {{ $brandColor2 }} 100%);
         border: none;
     }
 
     .btn-primary:hover {
-        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        opacity: 0.9;
     }
 
     .btn-warning {
