@@ -246,7 +246,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 const plans    = @json($plans);
 const features = @json($features);
@@ -487,4 +487,4 @@ async function saveDbAdmin() {
     }
 }
 </script>
-@endsection
+@endpush

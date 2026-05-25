@@ -686,7 +686,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 // Smooth scroll untuk daftar isi
 document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -697,4 +697,4 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     });
 });
 </script>
-@endsection
+@endpush
