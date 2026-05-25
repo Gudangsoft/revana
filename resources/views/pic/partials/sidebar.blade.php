@@ -260,10 +260,6 @@
     <div class="sidebar-divider"></div>
 
     <!-- Dashboard -->
-    <div class="sidebar-section-header">
-        <i class="bi bi-speedometer2"></i>
-        <span>Dashboard</span>
-    </div>
     <a href="{{ route('pic.dashboard') }}"
        class="nav-link {{ request()->routeIs('pic.dashboard', 'pic.author.dashboard') ? 'active' : '' }}"
        data-title="Dashboard">
@@ -272,10 +268,6 @@
     </a>
 
     <!-- Tugas Saya -->
-    <div class="sidebar-section-header">
-        <i class="bi bi-person-check"></i>
-        <span>Tugas Saya</span>
-    </div>
     <a href="{{ route('pic.my-tasks.index') }}"
        class="nav-link {{ request()->routeIs('pic.my-tasks.*') ? 'active' : '' }}"
        data-title="Tugas Saya">

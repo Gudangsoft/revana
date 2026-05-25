@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>(function(){var t=localStorage.getItem('mktTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');})()</script>
     <title>@yield('title', 'Marketing Dashboard') - REVANA</title>
     @if(isset($appSettings['favicon']) && $appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">
@@ -92,6 +93,58 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
+
+        /* ===== DARK SIDEBAR THEME (Marketing) ===== */
+        html[data-theme="dark-sidebar"] .navbar-marketing {
+            background: #0f172a !important;
+        }
+        html[data-theme="dark-sidebar"] .sidebar {
+            background: #1e293b;
+            box-shadow: 1px 0 0 rgba(255,255,255,0.06);
+        }
+        html[data-theme="dark-sidebar"] .sidebar .nav-link {
+            color: #94a3b8;
+            border-left-color: transparent;
+        }
+        html[data-theme="dark-sidebar"] .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.05);
+            border-left-color: #6366f1;
+            color: #e2e8f0;
+        }
+        html[data-theme="dark-sidebar"] .sidebar .nav-link.active {
+            background: rgba(99,102,241,0.13);
+            border-left-color: #6366f1;
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+        html[data-theme="dark-sidebar"] .sidebar-sec-toggle {
+            color: #475569 !important;
+        }
+        html[data-theme="dark-sidebar"] .sidebar-sec-toggle:hover {
+            background: rgba(255,255,255,0.04) !important;
+        }
+        html[data-theme="dark-sidebar"] .sidebar hr {
+            border-color: rgba(255,255,255,0.08);
+            opacity: 1;
+        }
+
+        /* Tombol toggle tema */
+        #mktThemeBtn {
+            color: rgba(255,255,255,0.75);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            line-height: 1;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        #mktThemeBtn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.08);
+        }
     </style>
 </head>
 <body>
@@ -109,6 +162,12 @@
                         <i class="bi bi-arrow-clockwise text-success"></i>
                     </a>
                 </span>
+                <li class="nav-item d-flex align-items-center me-1">
+                    <button id="mktThemeBtn" onclick="toggleTheme()" title="">
+                        <i class="bi bi-moon-stars-fill" id="mktThemeIcon"></i>
+                        <span id="mktThemeLabel" class="d-none d-lg-inline ms-1"></span>
+                    </button>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i> {{ auth()->guard('marketing')->user()->name }}
@@ -345,6 +404,27 @@
             </div>
         </div>
     </div>
+    <script>
+    function applyTheme(theme) {
+        var isDark = theme === 'dark-sidebar';
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark-sidebar' : 'default');
+        var icon  = document.getElementById('mktThemeIcon');
+        var label = document.getElementById('mktThemeLabel');
+        var btn   = document.getElementById('mktThemeBtn');
+        if (icon)  icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        if (label) label.textContent = isDark ? 'Tema Terang' : 'Tema Gelap';
+        if (btn)   btn.title = isDark ? 'Kembali ke tema terang' : 'Coba tema gelap sidebar';
+    }
+    function toggleTheme() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark-sidebar';
+        var next = isDark ? 'default' : 'dark-sidebar';
+        localStorage.setItem('mktTheme', next);
+        applyTheme(next);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('mktTheme') || 'default';
+        applyTheme(saved);
+    });
+    </script>
     @yield('scripts')
 </body>
-</html>

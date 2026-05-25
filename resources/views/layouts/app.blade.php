@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+    <script>(function(){var t=localStorage.getItem('adminTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');})()</script>
+
     <!-- SEO Meta Tags -->
     <meta name="description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI. Platform manajemen jurnal ilmiah, review artikel, dan penghargaan bagi reviewer di Indonesia.">
     <meta name="keywords" content="SIPERA, APJI, Asosiasi Penerbit Jurnal Indonesia, reviewer jurnal, insentif reviewer, penghargaan reviewer, manajemen jurnal ilmiah, jurnal Indonesia, peer review, publikasi ilmiah, akreditasi jurnal, LOA jurnal">
@@ -703,10 +704,46 @@
         .profile-photo {
             transition: all 0.3s ease;
         }
-        
+
         .profile-link:hover .profile-photo {
             transform: scale(1.1);
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* ===== DARK SIDEBAR THEME (Admin) ===== */
+        html[data-theme="dark-sidebar"] .sidebar {
+            background: #1e293b !important;
+        }
+        html[data-theme="dark-sidebar"] .sidebar .logo {
+            background: #0f172a !important;
+            border-bottom-color: rgba(255,255,255,0.06);
+        }
+        html[data-theme="dark-sidebar"] .sidebar-nav::before {
+            background: linear-gradient(to bottom, rgba(15,23,42,0.4), transparent);
+        }
+        html[data-theme="dark-sidebar"] .sidebar-nav::after {
+            background: linear-gradient(to top, rgba(15,23,42,0.4), transparent);
+        }
+        html[data-theme="dark-sidebar"] .sidebar .accordion-body {
+            background: rgba(0,0,0,0.15);
+        }
+
+        /* Tombol toggle tema — di navbar putih admin */
+        #adminThemeBtn {
+            color: #64748b;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            line-height: 1;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        #adminThemeBtn:hover {
+            color: #1e293b;
+            border-color: #94a3b8;
+            background: #f1f5f9;
         }
     </style>
     @stack('styles')
@@ -809,6 +846,10 @@
                             @endif
                         </span>
                     </a>
+                    <button id="adminThemeBtn" onclick="toggleTheme()" title="">
+                        <i class="bi bi-moon-stars-fill" id="adminThemeIcon"></i>
+                        <span id="adminThemeLabel" class="d-none d-lg-inline ms-1"></span>
+                    </button>
                     @if(auth()->user()->role === 'admin')
                     <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
                         <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
@@ -962,6 +1003,28 @@
         });
     </script>
     
+    <script>
+    function applyTheme(theme) {
+        var isDark = theme === 'dark-sidebar';
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark-sidebar' : 'default');
+        var icon  = document.getElementById('adminThemeIcon');
+        var label = document.getElementById('adminThemeLabel');
+        var btn   = document.getElementById('adminThemeBtn');
+        if (icon)  icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        if (label) label.textContent = isDark ? 'Tema Terang' : 'Tema Gelap';
+        if (btn)   btn.title = isDark ? 'Kembali ke tema terang' : 'Coba tema gelap sidebar';
+    }
+    function toggleTheme() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark-sidebar';
+        var next = isDark ? 'default' : 'dark-sidebar';
+        localStorage.setItem('adminTheme', next);
+        applyTheme(next);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('adminTheme') || 'default';
+        applyTheme(saved);
+    });
+    </script>
     @stack('scripts')
 
     @if(auth()->check() && auth()->user()->role === 'admin')
