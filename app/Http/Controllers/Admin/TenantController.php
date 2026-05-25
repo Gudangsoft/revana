@@ -87,8 +87,8 @@ class TenantController extends Controller
 
     public function testDbAdmin(Request $request)
     {
-        $username = trim($request->input('db_admin_username', ''));
-        $password = $request->input('db_admin_password', '');
+        $username = trim($request->input('db_admin_username') ?? '');
+        $password = (string) ($request->input('db_admin_password') ?? '');
 
         if (!$username) {
             return response()->json(['success' => false, 'message' => 'Username tidak boleh kosong']);
@@ -99,8 +99,8 @@ class TenantController extends Controller
 
     public function saveDbAdmin(Request $request)
     {
-        $username = trim($request->input('db_admin_username', ''));
-        $password = $request->input('db_admin_password', '');
+        $username = trim($request->input('db_admin_username') ?? '');
+        $password = (string) ($request->input('db_admin_password') ?? '');
 
         if (!$username) {
             return response()->json(['success' => false, 'message' => 'Username tidak boleh kosong']);
@@ -161,8 +161,9 @@ class TenantController extends Controller
         ]);
     }
 
-    private function tryConnectAdmin(string $username, string $password): \Illuminate\Http\JsonResponse
+    private function tryConnectAdmin(string $username, ?string $password): \Illuminate\Http\JsonResponse
     {
+        $password ??= '';
         $host = config('database.connections.mysql_admin.host', '127.0.0.1');
         $port = (int) config('database.connections.mysql_admin.port', 3306);
 

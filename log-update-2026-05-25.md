@@ -69,3 +69,12 @@ Div `#setupDbResult` diletakkan di antara `.modal-body` dan `.modal-footer` (di 
 - `resources/views/marketing/layouts/app.blade.php`
 - `resources/views/pic/layouts/app.blade.php`
 
+
+## 6. 🔄 Update: z
+
+- **Commit:** `9fdbd22` — 21:06 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-05-25.md`
+- `resources/views/admin/tenants/create.blade.php`
+- `resources/views/admin/tenants/tutorial.blade.php`
+
