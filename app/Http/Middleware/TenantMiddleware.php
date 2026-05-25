@@ -13,17 +13,10 @@ class TenantMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $host         = $request->getHost();
-        $masterDomain = config('tenants.master_domain', 'portal.apji.org');
+        $host = $request->getHost();
 
-        // Lokal / IP langsung / domain master → lewat tanpa perubahan
-        $masterHosts = array_filter([
-            $masterDomain,
-            'localhost',
-            '127.0.0.1',
-            env('APP_MASTER_HOST'),
-        ]);
-        if (in_array($host, $masterHosts) || filter_var($host, FILTER_VALIDATE_IP)) {
+        // Lokal / IP langsung → lewat tanpa perubahan
+        if (in_array($host, ['localhost', '127.0.0.1']) || filter_var($host, FILTER_VALIDATE_IP)) {
             return $next($request);
         }
 
@@ -33,8 +26,9 @@ class TenantMiddleware
                         ->orWhere('custom_domain', $host)
                         ->first();
 
+        // Bukan tenant terdaftar → domain master, lewat tanpa perubahan
         if (!$tenant) {
-            abort(404, 'Tenant tidak ditemukan.');
+            return $next($request);
         }
 
         if ($tenant->isSuspended()) {

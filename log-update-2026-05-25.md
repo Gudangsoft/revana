@@ -136,3 +136,13 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - `log-update-2026-05-25.md`
 - `resources/views/admin/tenants/create.blade.php`
 
+
+## 11. 🔄 Update: up
+
+- **Commit:** `b72e6f3` — 22:13 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Kernel.php`
+- `app/Http/Middleware/TenantMiddleware.php`
+- `config/tenants.php`
+- `log-update-2026-05-25.md`
+
