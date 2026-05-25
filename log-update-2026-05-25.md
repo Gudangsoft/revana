@@ -184,6 +184,26 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - `routes/web.php`
 
 
+## 16. Fitur: Branding Tenant Diterapkan Menyeluruh
+
+**Tujuan:** Setiap tenant melihat portal dengan warna, nama, logo, dan tagline sesuai setting branding mereka — bukan warna/nama default SIPERA.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Providers/AppServiceProvider.php` | Cache key `app_settings` dibuat per-tenant (`app_settings_mansipera`), override `app_name`/`tagline`/`logo` dari branding tenant, fallback jika tabel `settings` belum ada |
+| `resources/views/layouts/app.blade.php` | Inject CSS var override `--primary-color` dari tenant branding; meta SEO pakai `$appSettings` dinamis bukan hardcoded "SIPERA" |
+| `resources/views/auth/login.blade.php` | Background, panel kiri, tombol, focus color semua pakai `--bc` CSS var dari tenant `primary_color` |
+| `resources/views/admin/profile/edit.blade.php` | Card header dan tombol ikuti `primary_color` tenant; tampilkan nama sistem + subdomain di info akun |
+| `resources/views/admin/partials/sidebar.blade.php` | Sembunyikan menu Super Admin, Feature Management, Component Overview, Audit Log saat di subdomain tenant |
+| `resources/views/layouts/app.blade.php` (navbar) | Nama admin di navbar: portal master → "Admin [app_name]"; tenant → nama user asli dari DB tenant |
+
+### Cara Kerja Branding
+1. `TenantMiddleware` binding `tenant` ke container + share `currentTenant` ke semua view
+2. `AppServiceProvider` baca branding dari `$tenant->branding` saat build `$appSettings` per-tenant
+3. CSS variable `--primary-color` di-override via inline `<style>` sebelum CSS utama
+4. Warna di login page, sidebar header, tombol — semua ikut CSS variable yang sudah di-override
+
 ## 15. 🔄 Update: up
 
 - **Commit:** `daf2cff` — 22:47 oleh Gudangsoft
@@ -199,4 +219,13 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - **File berubah:** 2 file
 - `log-update-2026-05-25.md`
 - `resources/views/admin/partials/sidebar.blade.php`
+
+
+## 17. 🔄 Update: profile
+
+- **Commit:** `b3ea649` — 23:07 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/ProfileController.php`
+- `log-update-2026-05-25.md`
+- `resources/views/admin/profile/edit.blade.php`
 

@@ -9,9 +9,14 @@
     @endif
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    @php
+        $bc  = $currentTenant?->branding['primary_color'] ?? '#4f46e5';
+        $bc2 = $currentTenant?->branding['primary_color'] ?? '#7c3aed';
+    @endphp
     <style>
+        :root { --bc: {{ $bc }}; --bc2: {{ $bc2 }}; }
         body {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--bc) 0%, var(--bc2) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -28,7 +33,7 @@
         }
 
         .login-left {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--bc) 0%, var(--bc2) 100%);
             color: white;
             padding: 3rem;
             display: flex;
@@ -47,17 +52,17 @@
         }
 
         .form-control:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+            border-color: var(--bc);
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.15);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--bc) 0%, var(--bc2) 100%);
             border: none;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            opacity: 0.9;
         }
     </style>
 </head>

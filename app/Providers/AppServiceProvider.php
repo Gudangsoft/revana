@@ -35,20 +35,41 @@ class AppServiceProvider extends ServiceProvider
             return FeatureSettingService::roleHasCapability($role, $capability);
         });
         
-        // Share settings to all views (cached 10 menit)
+        // Share settings to all views (cached per-tenant 10 menit)
         View::composer('*', function ($view) {
-            $settings = Cache::remember('app_settings', 600, function () {
-                $language = Setting::get('app_language', 'id');
-                return [
-                    'app_name' => Setting::get('app_name', env('APP_NAME', 'SIPERA')),
-                    'full_name' => Setting::get('full_name', 'Sistem Informasi Peer Review Artikel'),
-                    'tagline' => Setting::get('tagline', 'Sistem Informasi Peer Review Artikel'),
-                    'address' => Setting::get('address', ''),
-                    'contact' => Setting::get('contact', ''),
-                    'logo' => Setting::get('logo', ''),
-                    'favicon' => Setting::get('favicon', ''),
-                    'language' => $language,
-                ];
+            // Cache key unik per tenant agar setting tidak bocor antar tenant
+            $tenant    = app()->bound('tenant') ? app('tenant') : null;
+            $cacheKey  = 'app_settings_' . ($tenant?->subdomain ?? 'master');
+
+            $settings = Cache::remember($cacheKey, 600, function () use ($tenant) {
+                // Jika di tenant dan ada branding, override app_name dari branding
+                $tenantAppName = $tenant?->branding['app_name'] ?? null;
+
+                try {
+                    $language = Setting::get('app_language', 'id');
+                    return [
+                        'app_name' => $tenantAppName ?: Setting::get('app_name', env('APP_NAME', 'SIPERA')),
+                        'full_name' => Setting::get('full_name', 'Sistem Informasi Peer Review Artikel'),
+                        'tagline'  => $tenant?->branding['tagline'] ?? Setting::get('tagline', 'Sistem Informasi Peer Review Artikel'),
+                        'address'  => Setting::get('address', ''),
+                        'contact'  => Setting::get('contact', ''),
+                        'logo'     => $tenant?->branding['logo_url'] ?? Setting::get('logo', ''),
+                        'favicon'  => Setting::get('favicon', ''),
+                        'language' => $language,
+                    ];
+                } catch (\Throwable) {
+                    // Fallback jika tabel settings belum ada (tenant baru)
+                    return [
+                        'app_name' => $tenantAppName ?: env('APP_NAME', 'SIPERA'),
+                        'full_name' => 'Sistem Informasi Peer Review Artikel',
+                        'tagline'  => $tenant?->branding['tagline'] ?? '',
+                        'address'  => '',
+                        'contact'  => '',
+                        'logo'     => $tenant?->branding['logo_url'] ?? '',
+                        'favicon'  => '',
+                        'language' => 'id',
+                    ];
+                }
             });
 
             App::setLocale($settings['language']);

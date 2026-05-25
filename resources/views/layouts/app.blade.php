@@ -8,22 +8,21 @@
     <script>(function(){var t=localStorage.getItem('adminTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');})()</script>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI. Platform manajemen jurnal ilmiah, review artikel, dan penghargaan bagi reviewer di Indonesia.">
-    <meta name="keywords" content="SIPERA, APJI, Asosiasi Penerbit Jurnal Indonesia, reviewer jurnal, insentif reviewer, penghargaan reviewer, manajemen jurnal ilmiah, jurnal Indonesia, peer review, publikasi ilmiah, akreditasi jurnal, LOA jurnal">
-    <meta name="author" content="APJI - Asosiasi Penerbit Jurnal Indonesia">
+    <meta name="description" content="{{ $appSettings['full_name'] ?? $appSettings['app_name'] }}">
+    <meta name="author" content="{{ $appSettings['app_name'] }}">
     <meta name="robots" content="index, follow">
     <meta name="language" content="Indonesian">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])">
-    <meta property="og:description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI untuk manajemen jurnal ilmiah dan penghargaan reviewer">
+    <meta property="og:description" content="{{ $appSettings['tagline'] ?? $appSettings['app_name'] }}">
     <meta property="og:site_name" content="{{ $appSettings['app_name'] }}">
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])">
-    <meta name="twitter:description" content="SIPERA - Sistem Insentif dan Penghargaan Reviewer APJI">
+    <meta name="twitter:description" content="{{ $appSettings['tagline'] ?? $appSettings['app_name'] }}">
     
     <title>@yield('title', $appSettings['app_name'] . ' - ' . $appSettings['tagline'])</title>
     @if($appSettings['favicon'])
@@ -34,6 +33,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Tenant Branding Color Override -->
+    @php $brandColor = $currentTenant?->branding['primary_color'] ?? null; @endphp
+    @if($brandColor)
+    <style>:root { --primary-color: {{ $brandColor }}; --secondary-color: {{ $brandColor }}; }</style>
+    @endif
+
     <!-- Custom CSS -->
     <style>
         :root {
@@ -817,30 +822,38 @@
                         @endif
                         <span>
                             @if(auth()->user()->role === 'admin')
-                                Admin {{ $appSettings['app_name'] }}
+                                @if(!empty($currentTenant))
+                                    {{ Str::limit(auth()->user()->name, 20) }}
+                                @else
+                                    Admin {{ $appSettings['app_name'] }}
+                                @endif
                             @else
                                 {{ auth()->user()->name }}
                             @endif
                         </span>
                     </a>
-                    <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif" 
+                    <a href="@if(auth()->user()->role === 'admin'){{ route('admin.profile.edit') }}@else{{ route('reviewer.profile.edit') }}@endif"
                        class="text-decoration-none text-dark me-2 d-md-none d-flex align-items-center profile-link">
                         @if(auth()->user()->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
-                                 alt="Profile Photo" 
-                                 class="rounded-circle me-2 profile-photo" 
-                                 width="32" 
-                                 height="32" 
+                            <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                 alt="Profile Photo"
+                                 class="rounded-circle me-2 profile-photo"
+                                 width="32"
+                                 height="32"
                                  style="object-fit: cover; border: 2px solid #4f46e5;">
                         @else
-                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center me-2" 
+                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center me-2"
                                  style="width: 32px; height: 32px; border: 2px solid #4f46e5;">
                                 <i class="bi bi-person-fill text-white" style="font-size: 1rem;"></i>
                             </div>
                         @endif
                         <span>
                             @if(auth()->user()->role === 'admin')
-                                Admin
+                                @if(!empty($currentTenant))
+                                    {{ Str::limit(auth()->user()->name, 15) }}
+                                @else
+                                    Admin
+                                @endif
                             @else
                                 {{ Str::limit(auth()->user()->name, 15) }}
                             @endif
