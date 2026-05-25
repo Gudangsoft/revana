@@ -380,6 +380,8 @@
         <span class="badge bg-warning text-dark ms-1 rounded-pill">{{ $syncOutOfSyncCount }}</span>
     @endif
 </a>
+{{-- ═══ SUPER ADMIN — hanya tampil di portal master, bukan di tenant ═══ --}}
+@if(empty($currentTenant))
 <a href="{{ route('admin.component-overview') }}"
    class="nav-link {{ $currentRoute == 'admin.component-overview' ? 'active' : '' }}">
     <i class="bi bi-puzzle-fill" style="color:#818cf8;"></i> Component Overview
@@ -392,8 +394,6 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.activity-logs') ? 'active' : '' }}">
     <i class="bi bi-shield-check" style="color:#4ade80;"></i> Audit Log
 </a>
-
-{{-- ═══ SUPER ADMIN ═══ --}}
 <div class="sidebar-section-label mt-2">Super Admin</div>
 <a href="{{ route('admin.tenants.index') }}"
    class="nav-link {{ $currentRoute === 'admin.tenants.index' || $currentRoute === 'admin.tenants.show' || $currentRoute === 'admin.tenants.create' ? 'active' : '' }}">
@@ -407,3 +407,4 @@
    class="nav-link {{ $currentRoute === 'admin.tenants.monitoring' ? 'active' : '' }}">
     <i class="bi bi-activity" style="color:#f472b6;"></i> Monitoring Tenant
 </a>
+@endif

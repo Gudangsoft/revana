@@ -183,3 +183,12 @@ TENANT_MASTER_DOMAIN=sipera.apji.org   # atau domain portal utama Anda
 - `resources/views/admin/tenants/show.blade.php`
 - `routes/web.php`
 
+
+## 15. 🔄 Update: up
+
+- **Commit:** `daf2cff` — 22:47 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Services/TenantManager.php`
+- `log-update-2026-05-25.md`
+- `resources/views/admin/tenants/show.blade.php`
+
