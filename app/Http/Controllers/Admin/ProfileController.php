@@ -25,7 +25,6 @@ class ProfileController extends Controller
             'email' => [
                 'required', 'email',
                 \Illuminate\Validation\Rule::unique('users', 'email')
-                    ->connection(config('database.default', 'mysql'))
                     ->ignore($user->id),
             ],
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^(0|62)[0-9]{9,13}$/'],

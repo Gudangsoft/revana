@@ -264,3 +264,27 @@ Cache::remember("rankings.topPics.{$tenantKey}", 300, ...);
 ### Catatan
 Setelah deploy, jalankan `php artisan cache:clear` di server agar cache lama (dengan key global) tidak tersisa.
 
+
+## 21. Fix: Error `Unique::connection()` di Profile Tenant
+
+**Tujuan:** Memperbaiki `Call to undefined method Illuminate\Validation\Rules\Unique::connection()` saat admin tenant update profile.
+
+### Root Cause
+Method `->connection()` tidak ada di `Illuminate\Validation\Rules\Unique`. Ini bukan method standar Laravel. Karena `TenantMiddleware` sudah men-switch `database.default` ke `tenant` sebelum controller berjalan, validasi unique otomatis menggunakan koneksi yang benar tanpa perlu override.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ProfileController.php` | Hapus `->connection(config('database.default', 'mysql'))` dari `Rule::unique()` |
+
+
+## 21. 🔄 Update: a
+
+- **Commit:** `e2a52ce` — 23:24 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/DashboardController.php`
+- `app/Http/Controllers/Admin/LeaderboardController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/AuthorController.php`
+- `log-update-2026-05-25.md`
+
