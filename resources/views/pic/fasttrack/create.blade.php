@@ -27,7 +27,7 @@
                     <br><small>Artikel akan langsung berstatus "Published" tanpa melalui workflow normal.</small>
                 </div>
 
-                <form action="{{ route('pic.fasttrack.store') }}" method="POST" enctype="multipart/form-data" novalidate>
+                <form action="{{ route('pic.fasttrack.store') }}" method="POST" enctype="multipart/form-data" novalidate id="picFastttrackForm">
                     @csrf
 
                     <div class="alert alert-info mb-3">
@@ -294,11 +294,40 @@
                         <a href="{{ route('pic.fasttrack.index') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="bi bi-lightning-charge"></i> Simpan Fasttrack
+                        <button type="button" class="btn btn-warning" onclick="showKonfirmasi()">
+                            <i class="bi bi-search"></i> Periksa &amp; Simpan
                         </button>
                     </div>
                 </form>
+
+                <!-- Modal Konfirmasi -->
+                <div class="modal fade" id="modalKonfirmasiFT" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title"><i class="bi bi-shield-check"></i> Konfirmasi Data Submission Fasttrack</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Periksa kembali data berikut sebelum disimpan:</p>
+                                <table class="table table-bordered table-sm" id="konfirmasiDataFT">
+                                    <tbody></tbody>
+                                </table>
+                                <div class="alert alert-warning mb-0">
+                                    <i class="bi bi-exclamation-triangle"></i> Pastikan semua data sudah benar sebelum menyimpan.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-pencil"></i> Koreksi Dulu
+                                </button>
+                                <button type="button" class="btn btn-warning" id="btnSimpanFinalFT">
+                                    <i class="bi bi-lightning-charge"></i> Sudah Benar — Simpan Sekarang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -312,25 +341,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchResults = document.getElementById('search_results');
     const journalMasterIdInput = document.getElementById('journal_master_id');
     const slotSelect = document.getElementById('journal_slot_id');
-    
-    // All journals data
+
     const allJournals = @json($journals);
-    
-    // Search functionality
+
     searchInput.addEventListener('input', function() {
         const query = this.value.toLowerCase().trim();
-        
-        if (query.length === 0) {
-            searchResults.style.display = 'none';
-            return;
-        }
-        
-        // Filter journals
-        const filtered = allJournals.filter(j => 
-            j.nama_jurnal.toLowerCase().includes(query) || 
+        if (query.length === 0) { searchResults.style.display = 'none'; return; }
+        const filtered = allJournals.filter(j =>
+            j.nama_jurnal.toLowerCase().includes(query) ||
             (j.publisher && j.publisher.toLowerCase().includes(query))
         ).slice(0, 15);
-        
         if (filtered.length === 0) {
             searchResults.innerHTML = '<div class="list-group-item text-muted">Tidak ada hasil</div>';
         } else {
@@ -341,11 +361,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </a>
             `).join('');
         }
-        
         searchResults.style.display = 'block';
     });
-    
-    // Click on search result
+
     searchResults.addEventListener('click', function(e) {
         e.preventDefault();
         const item = e.target.closest('.list-group-item');
@@ -353,30 +371,25 @@ document.addEventListener('DOMContentLoaded', function() {
             journalMasterIdInput.value = item.dataset.id;
             searchInput.value = item.dataset.name;
             searchResults.style.display = 'none';
-            
-            // Load slots
             loadSlots(item.dataset.id);
         }
     });
-    
-    // Hide results when clicking outside
+
     document.addEventListener('click', function(e) {
         if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
             searchResults.style.display = 'none';
         }
     });
-    
-    // Load slots by journal
+
     function loadSlots(journalId) {
         slotSelect.innerHTML = '<option value="">Memuat slot...</option>';
-        
         fetch(`{{ route('pic.journal-slots.get-by-journal') }}?journal_master_id=${journalId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.length === 0) {
                     slotSelect.innerHTML = '<option value="">-- Tidak ada slot tersedia --</option>';
                 } else {
-                    slotSelect.innerHTML = '<option value="">-- Pilih Slot --</option>' + 
+                    slotSelect.innerHTML = '<option value="">-- Pilih Slot --</option>' +
                         data.map(s => {
                             const sisa = s.sisa !== undefined ? s.sisa : Math.max(0, s.jumlah_slot - s.slot_terpakai);
                             const isFull = s.is_full !== undefined ? s.is_full : (sisa <= 0);
@@ -392,19 +405,107 @@ document.addEventListener('DOMContentLoaded', function() {
                 slotSelect.innerHTML = '<option value="">-- Error memuat slot --</option>';
             });
     }
-    
-    // Add validation when form is submitted
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        const selectedOption = slotSelect.options[slotSelect.selectedIndex];
-        if (selectedOption && selectedOption.disabled) {
-            e.preventDefault();
-            alert('⚠️ Slot yang Anda pilih sudah PENUH!\n\nSilakan pilih slot lain yang masih tersedia.');
-            slotSelect.value = '';
-            slotSelect.focus();
-            return false;
-        }
+
+    // Simpan final handler
+    document.getElementById('btnSimpanFinalFT').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+        document.getElementById('picFastttrackForm').submit();
     });
 });
+
+window.showKonfirmasi = function() {
+    const journalId = document.getElementById('journal_master_id').value;
+    const journalName = document.getElementById('search_journal').value.trim();
+    const slotSelect = document.getElementById('journal_slot_id');
+    const slotText = slotSelect.options[slotSelect.selectedIndex]?.text || '';
+    const slotVal = slotSelect.value;
+    const selectedSlotOption = slotSelect.options[slotSelect.selectedIndex];
+
+    if (!journalId) {
+        alert('⚠️ Pilih jurnal terlebih dahulu!');
+        document.getElementById('search_journal').focus();
+        return;
+    }
+    if (!slotVal) {
+        alert('⚠️ Pilih slot terlebih dahulu!');
+        slotSelect.focus();
+        return;
+    }
+    if (selectedSlotOption && selectedSlotOption.disabled) {
+        alert('⚠️ Slot yang dipilih sudah PENUH!\n\nSilakan pilih slot lain yang masih tersedia.');
+        slotSelect.value = '';
+        slotSelect.focus();
+        return;
+    }
+
+    const idArtikel = document.getElementById('id_artikel').value.trim();
+    const judulArtikel = document.getElementById('judul_artikel').value.trim();
+    const namaPenulis = document.getElementById('nama_penulis').value.trim();
+
+    if (!idArtikel) {
+        alert('⚠️ ID Artikel wajib diisi!');
+        document.getElementById('id_artikel').focus();
+        return;
+    }
+    if (!judulArtikel) {
+        alert('⚠️ Judul Artikel wajib diisi!');
+        document.getElementById('judul_artikel').focus();
+        return;
+    }
+    if (!namaPenulis) {
+        alert('⚠️ Nama Penulis wajib diisi!');
+        document.getElementById('nama_penulis').focus();
+        return;
+    }
+
+    // Kumpulkan data untuk tabel ringkasan
+    const rows = [
+        ['Jurnal', journalName],
+        ['Slot', slotText],
+        ['ID Artikel', idArtikel],
+        ['Judul Artikel', judulArtikel],
+    ];
+
+    const linkArtikel = document.getElementById('link_artikel').value.trim();
+    if (linkArtikel) rows.push(['Link Submit', `<a href="${linkArtikel}" target="_blank" class="text-truncate d-inline-block" style="max-width:300px">${linkArtikel}</a>`]);
+
+    const linkPublish = document.getElementById('link_publish').value.trim();
+    if (linkPublish) rows.push(['Link Publish', `<a href="${linkPublish}" target="_blank" class="text-truncate d-inline-block" style="max-width:300px">${linkPublish}</a>`]);
+
+    const fileInput = document.getElementById('file_artikel');
+    if (fileInput.files && fileInput.files.length > 0) rows.push(['File Artikel', fileInput.files[0].name]);
+
+    rows.push(['Nama Penulis', namaPenulis]);
+
+    const noHp = document.getElementById('no_hp_penulis').value.trim();
+    if (noHp) rows.push(['No HP Penulis', noHp]);
+
+    const username = document.getElementById('username_author').value.trim();
+    const password = document.getElementById('password_author').value.trim();
+    if (username || password) rows.push(['Username/Password Author', (username || '-') + ' / ' + (password || '-')]);
+
+    const catatan = document.getElementById('notes').value.trim();
+    if (catatan) rows.push(['Catatan', catatan]);
+
+    const marketingSelect = document.getElementById('marketing_id');
+    const marketingText = marketingSelect.options[marketingSelect.selectedIndex]?.text || '-';
+    if (marketingSelect.value) rows.push(['PIC Marketing', marketingText]);
+
+    const tbody = document.querySelector('#konfirmasiDataFT tbody');
+    tbody.innerHTML = rows.map(([label, val]) => `
+        <tr>
+            <th class="text-nowrap" style="width:35%">${label}</th>
+            <td>${val}</td>
+        </tr>
+    `).join('');
+
+    // Reset tombol simpan
+    const btnSimpan = document.getElementById('btnSimpanFinalFT');
+    btnSimpan.disabled = false;
+    btnSimpan.innerHTML = '<i class="bi bi-lightning-charge"></i> Sudah Benar — Simpan Sekarang';
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalKonfirmasiFT')).show();
+};
 </script>
 @endsection

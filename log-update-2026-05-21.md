@@ -65,3 +65,26 @@ Di MySQL, `WHERE process_type != 'fasttrack'` dengan nilai NULL menghasilkan NUL
 - `app/Http/Controllers/Pic/JournalManagementController.php`
 - `log-update-2026-05-21.md`
 
+
+## 6. 🔄 Update: cp
+
+- **Commit:** `3019b28` — 09:37 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-05-21.md`
+- `resources/views/marketing/fasttrack/create.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
+
+
+## 7. Modal Konfirmasi — Form Fasttrack PIC
+
+**Tujuan:** Menerapkan pola "Periksa & Simpan" yang sama ke form input fasttrack PIC, mencegah submit tidak sengaja dan memberikan ringkasan data sebelum simpan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/fasttrack/create.blade.php` | Tambah `id="picFastttrackForm"` pada `<form>`. Tombol submit diganti `type="button" onclick="showKonfirmasi()"`. Tambah modal konfirmasi `#modalKonfirmasiFT` dengan tabel ringkasan. Tambah fungsi `showKonfirmasi()` dengan validasi + populate tabel. Handler `#btnSimpanFinalFT` submit via `getElementById('picFastttrackForm')`. Hapus `document.querySelector('form')` yang berbahaya. |
+
+### Catatan
+- Form fasttrack PIC menggunakan layout PIC yang sama (ada 4 form sebelum konten) — `querySelector('form')` akan salah target, sudah diganti `getElementById`
+- BKD dan JAFA menggunakan `pic.submissions.create` (file yang sama, sudah fix sebelumnya) — tidak perlu perubahan terpisah
+
