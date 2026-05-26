@@ -309,3 +309,11 @@ Method `->connection()` tidak ada di `Illuminate\Validation\Rules\Unique`. Ini b
 - `app/Http/Controllers/Admin/ProfileController.php`
 - `log-update-2026-05-25.md`
 
+
+## 25. 🔄 Update: c
+
+- **Commit:** `4bdfda7` — 23:31 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/ProfileController.php`
+- `log-update-2026-05-25.md`
+

@@ -60,7 +60,7 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Point</label>
-                        <input type="number" name="points" class="form-control" required 
+                        <input type="number" name="points" class="form-control" required
                                placeholder="Contoh: 10 atau -5">
                         <small class="text-muted">Gunakan angka negatif untuk mengurangi</small>
                     </div>
@@ -75,6 +75,51 @@
                 </form>
             </div>
         </div>
+
+        <!-- Rekap Akreditasi -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="bi bi-bar-chart-fill"></i> Rekap Artikel
+                @if(request('tanggal_dari') || request('tanggal_sampai'))
+                <small class="text-muted ms-1">
+                    ({{ request('tanggal_dari') ? \Carbon\Carbon::parse(request('tanggal_dari'))->format('d/m/Y') : '...' }}
+                    – {{ request('tanggal_sampai') ? \Carbon\Carbon::parse(request('tanggal_sampai'))->format('d/m/Y') : '...' }})
+                </small>
+                @else
+                <small class="text-muted ms-1">(Semua)</small>
+                @endif
+            </div>
+            <div class="card-body p-0">
+                <div class="px-3 py-2 border-bottom bg-light d-flex justify-content-between">
+                    <span class="fw-semibold text-dark">Total Artikel</span>
+                    <span class="fw-bold text-primary">{{ number_format($recapTotal['count']) }}</span>
+                </div>
+                @if($recapByAccreditation->isEmpty())
+                <div class="px-3 py-3 text-center text-muted small">
+                    <i class="bi bi-journal-x"></i> Belum ada data jurnal
+                </div>
+                @else
+                <ul class="list-group list-group-flush">
+                    @foreach($recapByAccreditation as $accred => $data)
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                        <div>
+                            <span class="badge rounded-pill
+                                @if(str_contains(strtolower($accred), 'sinta 1') || str_contains(strtolower($accred), 'sinta1')) bg-danger
+                                @elseif(str_contains(strtolower($accred), 'sinta 2') || str_contains(strtolower($accred), 'sinta2')) bg-warning text-dark
+                                @elseif(str_contains(strtolower($accred), 'sinta 3') || str_contains(strtolower($accred), 'sinta3')) bg-info text-dark
+                                @elseif(str_contains(strtolower($accred), 'sinta 4') || str_contains(strtolower($accred), 'sinta4')) bg-success
+                                @elseif(str_contains(strtolower($accred), 'sinta 5') || str_contains(strtolower($accred), 'sinta5')) bg-secondary
+                                @elseif(str_contains(strtolower($accred), 'sinta 6') || str_contains(strtolower($accred), 'sinta6')) bg-secondary
+                                @else bg-dark @endif
+                            ">{{ $accred }}</span>
+                        </div>
+                        <span class="fw-semibold">{{ $data['count'] }} artikel</span>
+                    </li>
+                    @endforeach
+                </ul>
+                @endif
+            </div>
+        </div>
     </div>
 
     <!-- Point History -->
@@ -84,7 +129,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-clock-history"></i> Riwayat Point</span>
                     <div class="d-flex gap-2">
-                        @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Submission', 'Deskripsi', 'Point']])
+                        @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Tanggal', 'Submission', 'Nama Jurnal', 'Akreditasi', 'Deskripsi', 'Point']])
                         <a href="{{ route('admin.marketing-points.export', array_merge(['marketing' => $marketing->id], request()->only(['tanggal_dari', 'tanggal_sampai', 'process_type']))) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-file-earmark-excel"></i> Export Excel
                         </a>
@@ -128,24 +173,49 @@
                         <tr>
                             <th>Tanggal</th>
                             <th>Submission</th>
+                            <th>Nama Jurnal</th>
+                            <th>Akreditasi</th>
                             <th>Deskripsi</th>
                             <th class="text-center">Point</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($pointHistories as $history)
+                        @php
+                            $journal = $history->submission?->journalSlot?->journalMaster;
+                        @endphp
                         <tr>
-                            <td>{{ $history->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="text-nowrap">{{ $history->created_at->format('d/m/Y H:i') }}</td>
                             <td>
                                 @if($history->submission)
-                                <a href="{{ route('admin.submissions.show', $history->submission) }}">
-                                    {{ $history->submission->title }}
+                                <a href="{{ route('admin.submissions.show', $history->submission) }}" class="text-decoration-none">
+                                    <small>{{ $history->submission->kode_submit ?? $history->submission->title }}</small>
                                 </a>
                                 @else
                                 <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td>{{ $history->description }}</td>
+                            <td>
+                                @if($journal)
+                                <small>{{ $journal->nama_jurnal }}</small>
+                                @else
+                                <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td class="text-nowrap">
+                                @if($journal && $journal->accreditation)
+                                <span class="badge rounded-pill
+                                    @if(str_contains(strtolower($journal->accreditation), 'sinta 1') || str_contains(strtolower($journal->accreditation), 'sinta1')) bg-danger
+                                    @elseif(str_contains(strtolower($journal->accreditation), 'sinta 2') || str_contains(strtolower($journal->accreditation), 'sinta2')) bg-warning text-dark
+                                    @elseif(str_contains(strtolower($journal->accreditation), 'sinta 3') || str_contains(strtolower($journal->accreditation), 'sinta3')) bg-info text-dark
+                                    @elseif(str_contains(strtolower($journal->accreditation), 'sinta 4') || str_contains(strtolower($journal->accreditation), 'sinta4')) bg-success
+                                    @else bg-secondary @endif
+                                ">{{ $journal->accreditation }}</span>
+                                @else
+                                <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td><small>{{ $history->description }}</small></td>
                             <td class="text-center">
                                 @if($history->points_earned >= 0)
                                 <span class="badge bg-success">+{{ $history->points_earned }}</span>
@@ -156,7 +226,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">
+                            <td colspan="6" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 Belum ada riwayat point
                             </td>

@@ -65,8 +65,9 @@ class MarketingPointReportController extends Controller
      */
     public function show(Request $request, Marketing $marketing)
     {
-        $query = $marketing->pointHistories()->with('submission');
-        
+        $query = $marketing->pointHistories()
+            ->with('submission.journalSlot.journalMaster');
+
         // Filter by date range
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('created_at', '>=', $request->tanggal_dari);
@@ -74,38 +75,54 @@ class MarketingPointReportController extends Controller
         if ($request->filled('tanggal_sampai')) {
             $query->whereDate('created_at', '<=', $request->tanggal_sampai);
         }
-        
+
         // Filter by process type (normal/fasttrack)
         if ($request->filled('process_type') && $request->process_type !== 'all') {
             $processType = $request->process_type;
             $query->whereHas('submission', function($q) use ($processType) {
                 if ($processType === 'normal') {
                     $q->where(function($qq) {
-                        $qq->where('process_type', 'normal')
-                           ->orWhereNull('process_type');
+                        $qq->where('process_type', 'normal')->orWhereNull('process_type');
                     });
                 } else {
                     $q->where('process_type', $processType);
                 }
             });
         }
-        
-        $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
-        
-        // Stats
+
+        // Rekap akreditasi dari seluruh data terfilter (tanpa pagination)
+        $allFiltered = (clone $query)->get();
+        $recapByAccreditation = $allFiltered
+            ->filter(fn($h) => $h->submission?->journalSlot?->journalMaster)
+            ->groupBy(fn($h) => $h->submission->journalSlot->journalMaster->accreditation ?? 'Lainnya')
+            ->map(fn($group) => [
+                'count'  => $group->count(),
+                'points' => $group->sum('points_earned'),
+            ])
+            ->sortKeys();
+        $recapTotal = [
+            'count'  => $allFiltered->count(),
+            'points' => $allFiltered->sum('points_earned'),
+        ];
+
+        $pointHistories = (clone $query)->latest()->paginate(request()->input('per_page', 20));
+
+        // Stats keseluruhan (tidak terpengaruh filter)
         $stats = [
-            'total_points' => $marketing->total_points,
+            'total_points'      => $marketing->total_points,
             'total_submissions' => $marketing->pointHistories()->count(),
             'points_this_month' => $marketing->pointHistories()
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('points_earned'),
         ];
-        
+
         return view('admin.marketing-points.show', compact(
             'marketing',
             'pointHistories',
-            'stats'
+            'stats',
+            'recapByAccreditation',
+            'recapTotal'
         ));
     }
 
