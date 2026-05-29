@@ -29,7 +29,8 @@
         || str_starts_with($currentRoute, 'admin.accreditations')
         || str_starts_with($currentRoute, 'admin.kategoris')
         || str_starts_with($currentRoute, 'admin.jenis-jurnals')
-        || str_starts_with($currentRoute, 'admin.field-of-studies');
+        || str_starts_with($currentRoute, 'admin.field-of-studies')
+        || str_starts_with($currentRoute, 'admin.referensi-jurnals');
 
     $normalActive   = $isSubmissionRoute && !$currentProgram;
     $journalActive  = $isSharedJournalRoute;
@@ -99,6 +100,10 @@
                 <a href="{{ route('admin.field-of-studies.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.field-of-studies') ? 'active' : '' }}">
                     <i class="bi bi-mortarboard-fill" style="color:#818cf8;"></i> Bidang Ilmu
+                </a>
+                <a href="{{ route('admin.referensi-jurnals.index') }}"
+                   class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.referensi-jurnals') ? 'active' : '' }}">
+                    <i class="bi bi-bookmark-star-fill" style="color:#818cf8;"></i> Referensi Jurnal
                 </a>
             </div>
         </div>

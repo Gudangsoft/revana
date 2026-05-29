@@ -34,6 +34,7 @@ use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\TenantImpersonateController;
+use App\Http\Controllers\Admin\ReferensiJurnalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -145,6 +146,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/journals/monitoring', [JournalController::class, 'monitoringSlots'])->name('journals.monitoring');
         Route::resource('journals', JournalController::class);
         
+        // Referensi Jurnal
+        Route::resource('referensi-jurnals', ReferensiJurnalController::class);
+
         // Journal Masters (Data Jurnal)
         Route::any('/journal-masters-bulk-delete', [JournalMasterController::class, 'bulkDelete'])->name('journal-masters.bulk-delete');
         Route::get('/journal-masters/export', [JournalMasterController::class, 'export'])->name('journal-masters.export');

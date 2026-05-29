@@ -22,3 +22,13 @@ Log perubahan otomatis dari git commits.
   - Total artikel sesuai filter tanggal yang aktif
   - Rincian per level akreditasi: jumlah artikel
 - Rekap otomatis berubah saat filter tanggal / jalur proses diubah
+
+## 2. 🔄 Update: rekap
+
+- **Commit:** `ba75d81` — 16:48 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/MarketingPointReportController.php`
+- `log-update-2026-05-25.md`
+- `log-update-2026-05-26.md`
+- `resources/views/admin/marketing-points/show.blade.php`
+
