@@ -102,3 +102,10 @@
 - `resources/views/admin/referensi-jurnals/create.blade.php`
 - `resources/views/admin/referensi-jurnals/edit.blade.php`
 
+
+## 8. 🔄 Update: s
+
+- **Commit:** `08444f3` — 10:20 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-05-29.md`
+
