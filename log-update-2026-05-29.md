@@ -196,3 +196,15 @@
 - `log-update-2026-05-29.md`
 - `resources/views/admin/referensi-jurnals/index.blade.php`
 
+
+## 17. 🔄 Update: a
+
+- **Commit:** `f42f54a` — 13:52 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Imports/ReferensiJurnalImport.php`
+- `app/Services/CitationGenerator.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/create.blade.php`
+- `resources/views/admin/referensi-jurnals/edit.blade.php`
+
