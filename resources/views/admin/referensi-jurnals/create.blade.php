@@ -153,6 +153,8 @@
                         @enderror
                     </div>
 
+                    @include('admin.referensi-jurnals._format_sitasi')
+
                     <hr class="my-3">
                     <div class="d-flex gap-2 justify-content-end">
                         <a href="{{ route('admin.referensi-jurnals.index') }}" class="btn btn-outline-secondary">

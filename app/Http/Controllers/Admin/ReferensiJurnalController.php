@@ -72,6 +72,8 @@ class ReferensiJurnalController extends Controller
             'kutipan'      => 'nullable|string',
         ]);
 
+        $validated['format_sitasi'] = $this->buildFormatSitasi($request);
+
         ReferensiJurnal::create($validated);
 
         return redirect()->route('admin.referensi-jurnals.index')
@@ -96,10 +98,25 @@ class ReferensiJurnalController extends Controller
             'kutipan'      => 'nullable|string',
         ]);
 
+        $validated['format_sitasi'] = $this->buildFormatSitasi($request);
+
         $referensiJurnal->update($validated);
 
         return redirect()->route('admin.referensi-jurnals.index')
             ->with('success', 'Referensi Jurnal berhasil diupdate');
+    }
+
+    private function buildFormatSitasi(Request $request): ?string
+    {
+        $formats = [];
+        foreach (array_keys(\App\Models\ReferensiJurnal::STYLE_LABELS) as $style) {
+            $key = 'sitasi_' . strtolower($style);
+            $val = trim($request->input($key, ''));
+            if ($val !== '') {
+                $formats[$style] = $val;
+            }
+        }
+        return $formats ? json_encode($formats, JSON_UNESCAPED_UNICODE) : null;
     }
 
     public function destroy(ReferensiJurnal $referensiJurnal)

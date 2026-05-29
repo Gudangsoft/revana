@@ -233,28 +233,67 @@
         font-size: .68rem; font-weight: 700;
         text-transform: uppercase; letter-spacing: .06em;
         display: flex; align-items: center; gap: 5px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
     .label-ref  { color: #4f46e5; }
     .label-kut  { color: #7c3aed; }
 
-    /* Teks referensi */
-    .ref-text {
-        font-size: .87rem; line-height: 1.75; color: #1f2937;
-        background: #f8f9ff;
-        border: 1px solid #e0e7ff;
-        border-radius: 8px;
-        padding: 10px 14px;
+    /* ── Blok Referensi ── */
+    .ref-text-wrap {
+        position: relative;
+        background: linear-gradient(135deg, #f0f4ff 0%, #f8f9ff 100%);
+        border: 1px solid #c7d2fe;
+        border-left: 4px solid #6366f1;
+        border-radius: 0 10px 10px 0;
+        padding: 14px 16px 14px 18px;
+        overflow: hidden;
     }
+    .ref-text-wrap::before {
+        content: '\201C';
+        position: absolute; top: -4px; left: 8px;
+        font-size: 3rem; line-height: 1;
+        color: #c7d2fe; font-family: Georgia, serif;
+        pointer-events: none; select: none;
+    }
+    .ref-text {
+        font-size: .9rem;
+        line-height: 1.8;
+        color: #1e1b4b;
+        font-family: Georgia, 'Times New Roman', serif;
+        margin: 0; padding-left: 4px;
+    }
+    /* Highlight DOI/URL di dalam teks referensi */
+    .ref-text .ref-doi {
+        color: #4f46e5; font-style: italic;
+        text-decoration: none; font-size: .83rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .ref-text .ref-doi:hover { text-decoration: underline; }
 
-    /* Teks kutipan */
+    /* ── Blok Kutipan ── */
+    .kut-text-wrap {
+        position: relative;
+        background: linear-gradient(135deg, #fdf4ff 0%, #faf5ff 100%);
+        border: 1px solid #e9d5ff;
+        border-left: 4px solid #a78bfa;
+        border-radius: 0 10px 10px 0;
+        padding: 12px 16px 12px 18px;
+        overflow: hidden;
+    }
+    .kut-text-wrap::before {
+        content: '\201C';
+        position: absolute; top: -4px; left: 8px;
+        font-size: 3rem; line-height: 1;
+        color: #ddd6fe; font-family: Georgia, serif;
+        pointer-events: none;
+    }
     .kut-text {
-        font-size: .84rem; line-height: 1.7; color: #3b0764;
-        background: #faf5ff;
-        border-left: 3px solid #a78bfa;
-        border-radius: 0 8px 8px 0;
-        padding: 10px 14px;
-        font-style: italic;
+        font-size: .87rem; line-height: 1.75;
+        color: #3b0764;
+        font-family: 'Courier New', Courier, monospace;
+        font-style: normal;
+        margin: 0; padding-left: 4px;
+        word-break: break-word;
     }
 
     /* Copy btn */
@@ -267,6 +306,50 @@
     }
     .copy-btn:hover  { background: #f3f4f6; border-color: #9ca3af; }
     .copy-btn.copied { background: #d1fae5; border-color: #34d399; color: #065f46; }
+
+    /* ══ Citation Panel ══ */
+    .cite-panel {
+        margin-top: 12px;
+        border: 1px solid #e0e7ff;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .cite-panel-head {
+        background: linear-gradient(90deg,#f0f4ff,#f5f3ff);
+        padding: 9px 14px;
+        display: flex; align-items: center; gap: 8px;
+        font-size: .74rem; font-weight: 700;
+        color: #4338ca; text-transform: uppercase; letter-spacing: .05em;
+        cursor: pointer; user-select: none;
+    }
+    .cite-panel-head:hover { background: #ede9fe; }
+    .cite-count {
+        font-size: .65rem; font-weight: 700;
+        background: #c7d2fe; color: #3730a3;
+        border-radius: 999px; padding: 1px 8px;
+    }
+    .cite-toggle {
+        margin-left: auto; background: none; border: none;
+        color: #6366f1; cursor: pointer; font-size: .85rem; padding: 0;
+        transition: transform .2s;
+    }
+    .cite-body { padding: 12px 14px; background: #fafaff; }
+    .cite-tabs {
+        display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;
+        padding-bottom: 10px; border-bottom: 1px dashed #e0e7ff;
+    }
+    .cite-tab {
+        padding: 4px 13px; font-size: .76rem; font-weight: 600;
+        border-radius: 8px; border: 1px solid #c7d2fe;
+        background: #fff; color: #4f46e5; cursor: pointer;
+        transition: all .13s;
+    }
+    .cite-tab:hover  { background: #ede9fe; }
+    .cite-tab.active {
+        background: linear-gradient(135deg, var(--primary), var(--primary2));
+        color: #fff; border-color: transparent;
+        box-shadow: 0 2px 8px rgba(99,102,241,.28);
+    }
 
     /* ══ PAGINATION ══ */
     .pagination { gap: 4px; }
@@ -485,21 +568,67 @@
                             <i class="bi bi-clipboard"></i> Salin
                         </button>
                     </div>
-                    <div class="ref-text">{{ $item->referensi }}</div>
+                    <div class="ref-text-wrap">
+                        <p class="ref-text ref-linkified" data-raw="{{ $item->referensi }}">{{ $item->referensi }}</p>
+                    </div>
                 </div>
 
-                {{-- Kutipan --}}
-                @if($item->kutipan)
+                {{-- Citation Format Tabs --}}
+                @php
+                    $formats = [];
+                    if ($item->kutipan) $formats['Referensi'] = $item->kutipan;
+                    if ($item->format_sitasi) {
+                        foreach ($item->format_sitasi as $k => $v) {
+                            if (trim($v)) $formats[$k] = trim($v);
+                        }
+                    }
+                    $uid = 'ct' . $item->id;
+                @endphp
+                @if(count($formats) > 0)
+                <div class="cite-panel">
+                    <div class="cite-panel-head">
+                        <i class="bi bi-braces me-1"></i> Format Sitasi
+                        <span class="cite-count">{{ count($formats) }} format</span>
+                        <button class="cite-toggle" onclick="toggleCitePanel('{{ $uid }}')">
+                            <i class="bi bi-chevron-down" id="{{ $uid }}_chv"></i>
+                        </button>
+                    </div>
+                    <div id="{{ $uid }}" class="cite-body" style="display:none;">
+                        {{-- Tab buttons --}}
+                        <div class="cite-tabs" role="tablist">
+                            @foreach($formats as $fmt => $txt)
+                            <button class="cite-tab {{ $loop->first ? 'active' : '' }}"
+                                    onclick="switchTab('{{ $uid }}','{{ $loop->index }}',this)"
+                                    type="button">{{ $fmt }}</button>
+                            @endforeach
+                        </div>
+                        {{-- Tab panes --}}
+                        @foreach($formats as $fmt => $txt)
+                        <div class="cite-pane {{ $loop->first ? '' : 'd-none' }}"
+                             id="{{ $uid }}_pane_{{ $loop->index }}">
+                            <div class="kut-text-wrap">
+                                <p class="kut-text">{{ $txt }}</p>
+                            </div>
+                            <button class="copy-btn mt-2" data-text="{{ $txt }}" onclick="copyText(this)">
+                                <i class="bi bi-clipboard"></i> Salin format {{ $fmt }}
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @elseif($item->kutipan)
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="section-label label-kut">
-                            <i class="bi bi-quote"></i> Kutipan
+                            <i class="bi bi-braces"></i> Kutipan / Cite As
                         </div>
                         <button class="copy-btn" data-text="{{ $item->kutipan }}" onclick="copyText(this)">
                             <i class="bi bi-clipboard"></i> Salin
                         </button>
                     </div>
-                    <div class="kut-text">{{ $item->kutipan }}</div>
+                    <div class="kut-text-wrap">
+                        <p class="kut-text">{{ $item->kutipan }}</p>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -542,6 +671,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+/* ── Salin ke clipboard ── */
 function copyText(btn) {
     const text = btn.dataset.text;
     navigator.clipboard.writeText(text).then(() => {
@@ -551,7 +681,47 @@ function copyText(btn) {
         setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
     });
 }
-/* Auto-submit filter on select change */
+
+/* ── Auto-linkify URL/DOI dalam teks referensi ── */
+function linkify(el) {
+    const url = /((https?:\/\/|doi\.org\/|www\.)[^\s,;)\]]+)/gi;
+    const raw = el.dataset.raw || el.textContent;
+    el.innerHTML = raw.replace(url, match => {
+        const href = match.startsWith('http') ? match : 'https://' + match;
+        return `<a href="${href}" target="_blank" rel="noopener" class="ref-doi">${match}</a>`;
+    });
+}
+document.querySelectorAll('.ref-linkified').forEach(linkify);
+
+/* ── Citation panel toggle ── */
+function toggleCitePanel(uid) {
+    const body = document.getElementById(uid);
+    const chv  = document.getElementById(uid + '_chv');
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : '';
+    chv.className = open ? 'bi bi-chevron-down' : 'bi bi-chevron-up';
+}
+
+/* ── Citation tab switch ── */
+function switchTab(uid, idx, btn) {
+    // Deactivate all tabs
+    btn.closest('.cite-tabs').querySelectorAll('.cite-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    // Hide all panes
+    document.querySelectorAll(`[id^="${uid}_pane_"]`).forEach(p => p.classList.add('d-none'));
+    document.getElementById(`${uid}_pane_${idx}`).classList.remove('d-none');
+}
+
+/* ── Citation panel: click header row to toggle ── */
+document.querySelectorAll('.cite-panel-head').forEach(h => {
+    h.addEventListener('click', function(e) {
+        if (e.target.closest('.cite-toggle')) return; // already handled
+        const uid = this.nextElementSibling.id;
+        toggleCitePanel(uid);
+    });
+});
+
+/* ── Auto-submit filter saat dropdown berubah ── */
 document.querySelectorAll('#filterForm select').forEach(el => {
     el.addEventListener('change', () => document.getElementById('filterForm').submit());
 });

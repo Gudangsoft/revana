@@ -16,5 +16,22 @@ class ReferensiJurnal extends Model
         'tahun',
         'referensi',
         'kutipan',
+        'format_sitasi',
+    ];
+
+    protected $casts = [
+        'format_sitasi' => 'array',
+    ];
+
+    public const STYLE_LABELS = [
+        'APA'       => 'APA',
+        'IEEE'      => 'IEEE',
+        'Harvard'   => 'Harvard',
+        'Chicago'   => 'Chicago',
+        'Vancouver' => 'Vancouver',
+        'MLA'       => 'MLA',
+        'ABNT'      => 'ABNT',
+        'ACS'       => 'ACS',
+        'ACM'       => 'ACM',
     ];
 }

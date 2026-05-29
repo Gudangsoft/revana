@@ -109,3 +109,11 @@
 - **File berubah:** 1 file
 - `log-update-2026-05-29.md`
 
+
+## 9. 🔄 Update: refrensi
+
+- **Commit:** `c25938d` — 10:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-29.md`
+- `resources/views/public/referensi-jurnal.blade.php`
+

@@ -161,6 +161,8 @@
                         @enderror
                     </div>
 
+                    @include('admin.referensi-jurnals._format_sitasi', ['referensiJurnal' => $referensiJurnal])
+
                     <hr class="my-3">
                     <div class="d-flex gap-2 justify-content-between">
                         <form action="{{ route('admin.referensi-jurnals.destroy', $referensiJurnal) }}"
