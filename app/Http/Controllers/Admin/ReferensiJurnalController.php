@@ -170,8 +170,30 @@ class ReferensiJurnalController extends Controller
             public function array(): array
             {
                 return [
-                    ['Jurnal Informatika Nusantara', 'Jurnal Nasional', 'Teknik Informatika', 2024, 'Penulis, A. (2024). Judul artikel. Jurnal Informatika, 10(2), 1-10. https://doi.org/xxx', 'A. Penulis, "Judul," Jurnal Informatika, vol. 10, no. 2, pp. 1–10, 2024.'],
-                    ['International Journal of AI', 'Jurnal Internasional', 'Kecerdasan Buatan', 2023, 'Author, B. (2023). Title. Int. J. AI, 5(1), 20-35.', 'B. Author, "Title," Int. J. AI, vol. 5, no. 1, pp. 20–35, 2023.'],
+                    [
+                        'Konstruksi: Publikasi Ilmu Teknik',
+                        'Jurnal Nasional',
+                        'Teknik',
+                        2026,
+                        'Rahmadani, P. A., Tohar, I., & Hakim, R. (2026). Identifikasi Permasalahan Arsitektur Perpustakaan. Konstruksi: Publikasi Ilmu Teknik, 4(2), 01–10. https://doi.org/10.61132/konstruksi.v4i2.1349',
+                        '(Rahmadani et al., 2026)',
+                    ],
+                    [
+                        'Konstruksi: Publikasi Ilmu Teknik',
+                        'Jurnal Nasional',
+                        'Teknik',
+                        2026,
+                        'Mardian, N. A. P., Mufidah, M., & Hakim, R. (2026). Analisis Komparasi Panti Wreda. Konstruksi: Publikasi Ilmu Teknik, 4(2), 11–20. https://doi.org/10.61132/konstruksi.v4i2.1350',
+                        '(Mardian et al., 2026)',
+                    ],
+                    [
+                        'Jurnal Internasional Teknologi',
+                        'Jurnal Internasional',
+                        'Kecerdasan Buatan',
+                        2024,
+                        'Author, B. (2024). Deep Learning for Image Recognition. Int. J. Tech, 5(1), 20–35. https://doi.org/xxx',
+                        'B. Author, "Deep Learning for Image Recognition," Int. J. Tech, vol. 5, no. 1, pp. 20–35, 2024.',
+                    ],
                 ];
             }
 

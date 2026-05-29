@@ -478,7 +478,8 @@
                             <li>Download <strong>template</strong> terlebih dahulu untuk format yang benar</li>
                             <li>Kolom wajib: <code>nama_jurnal</code>, <code>jenis_jurnal</code>, <code>bidang_ilmu</code>, <code>tahun</code>, <code>referensi</code></li>
                             <li>Kolom opsional: <code>kutipan</code></li>
-                            <li>Jika <em>nama_jurnal + tahun</em> sudah ada → data diperbarui</li>
+                            <li><strong>Satu baris = satu artikel/referensi</strong> — boleh ada banyak artikel dari jurnal yang sama</li>
+                            <li>Kunci duplikat: teks <code>referensi</code> — jika sama persis, data diperbarui; jika beda, data baru ditambahkan</li>
                         </ul>
                     </div>
                 </div>

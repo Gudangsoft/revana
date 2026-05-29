@@ -117,3 +117,17 @@
 - `log-update-2026-05-29.md`
 - `resources/views/public/referensi-jurnal.blade.php`
 
+
+## 10. 🔄 Update: style
+
+- **Commit:** `8bde08d` — 10:36 oleh Gudangsoft
+- **File berubah:** 8 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Models/ReferensiJurnal.php`
+- `database/migrations/2026_05_29_103259_add_format_sitasi_to_referensi_jurnals_table.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/_format_sitasi.blade.php`
+- `resources/views/admin/referensi-jurnals/create.blade.php`
+- `resources/views/admin/referensi-jurnals/edit.blade.php`
+- `resources/views/public/referensi-jurnal.blade.php`
+

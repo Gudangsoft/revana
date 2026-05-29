@@ -14,27 +14,35 @@ class ReferensiJurnalImport implements ToModel, WithHeadingRow, WithValidation
 
     public function model(array $row)
     {
-        $namaJurnal  = $row['nama_jurnal']  ?? $row['nama']     ?? null;
-        $jenisJurnal = $row['jenis_jurnal'] ?? $row['jenis']    ?? null;
-        $bidangIlmu  = $row['bidang_ilmu']  ?? $row['bidang']   ?? null;
-        $tahun       = $row['tahun']                             ?? null;
-        $referensi   = $row['referensi']                         ?? null;
-        $kutipan     = $row['kutipan']                           ?? null;
+        $namaJurnal  = trim($row['nama_jurnal']  ?? $row['nama']   ?? '');
+        $jenisJurnal = trim($row['jenis_jurnal'] ?? $row['jenis']  ?? '');
+        $bidangIlmu  = trim($row['bidang_ilmu']  ?? $row['bidang'] ?? '');
+        $tahun       = $row['tahun']     ?? null;
+        $referensi   = trim($row['referensi']    ?? '');
+        $kutipan     = trim($row['kutipan']      ?? '');
 
-        if (empty($namaJurnal)) {
+        // Lewati baris kosong
+        if (empty($namaJurnal) && empty($referensi)) {
             return null;
         }
 
-        $existing = ReferensiJurnal::where('nama_jurnal', $namaJurnal)
-            ->where('tahun', (int) $tahun)
+        // Kunci unik: teks referensi (setiap artikel punya referensi berbeda)
+        // Fallback: nama_jurnal + 40 karakter pertama referensi
+        $refKey = $referensi ?: $namaJurnal;
+
+        $existing = ReferensiJurnal::where('referensi', $referensi)
+            ->when(!$referensi, fn($q) => $q->where('nama_jurnal', $namaJurnal)->where('tahun', (int) $tahun))
             ->first();
 
         if ($existing) {
+            // Replace penuh — semua field ditimpa dengan data dari Excel
             $existing->update([
-                'jenis_jurnal' => $jenisJurnal ?? $existing->jenis_jurnal,
-                'bidang_ilmu'  => $bidangIlmu  ?? $existing->bidang_ilmu,
-                'referensi'    => $referensi   ?? $existing->referensi,
-                'kutipan'      => $kutipan      ?? $existing->kutipan,
+                'nama_jurnal'  => $namaJurnal,
+                'jenis_jurnal' => $jenisJurnal,
+                'bidang_ilmu'  => $bidangIlmu,
+                'tahun'        => $tahun ? (int) $tahun : $existing->tahun,
+                'referensi'    => $referensi,
+                'kutipan'      => $kutipan ?: null,
             ]);
             $this->updated++;
             return null;
@@ -45,9 +53,9 @@ class ReferensiJurnalImport implements ToModel, WithHeadingRow, WithValidation
             'nama_jurnal'  => $namaJurnal,
             'jenis_jurnal' => $jenisJurnal,
             'bidang_ilmu'  => $bidangIlmu,
-            'tahun'        => (int) $tahun,
+            'tahun'        => $tahun ? (int) $tahun : null,
             'referensi'    => $referensi,
-            'kutipan'      => $kutipan,
+            'kutipan'      => $kutipan ?: null,
         ]);
     }
 
