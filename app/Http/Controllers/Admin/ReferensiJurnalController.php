@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Imports\ReferensiJurnalImport;
 use App\Models\ReferensiJurnal;
+use App\Services\CitationGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
@@ -79,7 +80,7 @@ class ReferensiJurnalController extends Controller
             'kutipan'       => 'nullable|string',
         ]);
 
-        $validated['format_sitasi'] = $this->buildFormatSitasi($request);
+        $validated['format_sitasi'] = $this->buildFormatSitasi($validated);
 
         ReferensiJurnal::create($validated);
 
@@ -111,7 +112,7 @@ class ReferensiJurnalController extends Controller
             'kutipan'       => 'nullable|string',
         ]);
 
-        $validated['format_sitasi'] = $this->buildFormatSitasi($request);
+        $validated['format_sitasi'] = $this->buildFormatSitasi($validated);
 
         $referensiJurnal->update($validated);
 
@@ -256,16 +257,9 @@ class ReferensiJurnalController extends Controller
         return $data;
     }
 
-    private function buildFormatSitasi(Request $request): ?string
+    private function buildFormatSitasi(array $data): ?string
     {
-        $formats = [];
-        foreach (array_keys(\App\Models\ReferensiJurnal::STYLE_LABELS) as $style) {
-            $key = 'sitasi_' . strtolower($style);
-            $val = trim($request->input($key, ''));
-            if ($val !== '') {
-                $formats[$style] = $val;
-            }
-        }
+        $formats = CitationGenerator::generate($data);
         return $formats ? json_encode($formats, JSON_UNESCAPED_UNICODE) : null;
     }
 
