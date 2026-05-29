@@ -599,32 +599,29 @@
                 {{-- Citation formats --}}
                 @if(count($formats) > 0)
                 <div class="cite-panel mt-3">
-                    <div class="cite-panel-head" onclick="toggleCite('{{ $uid }}')">
+                    <div class="cite-panel-head">
                         <i class="bi bi-braces"></i>
                         Format Sitasi
                         <span class="cite-count">{{ count($formats) }} format</span>
-                        <span class="cite-toggle"><i class="bi bi-chevron-down" id="{{ $uid }}_chv"></i></span>
                     </div>
-                    <div id="{{ $uid }}" style="display:none;">
-                        <div class="cite-body">
-                            <div class="cite-tabs">
-                                @foreach($formats as $fmt => $txt)
-                                <button class="cite-tab {{ $loop->first ? 'active' : '' }}"
-                                        onclick="switchCiteTab('{{ $uid }}', {{ $loop->index }}, this)"
-                                        type="button">{{ $fmt }}</button>
-                                @endforeach
-                            </div>
+                    <div class="cite-body">
+                        <div class="cite-tabs">
                             @foreach($formats as $fmt => $txt)
-                            <div id="{{ $uid }}_p{{ $loop->index }}" class="{{ $loop->first ? '' : 'd-none' }}">
-                                <div class="kut-text-wrap">
-                                    <p class="kut-text">{{ $txt }}</p>
-                                </div>
-                                <button class="copy-btn mt-2" data-text="{{ $txt }}" onclick="copyText(this)">
-                                    <i class="bi bi-clipboard"></i> Salin format {{ $fmt }}
-                                </button>
-                            </div>
+                            <button class="cite-tab {{ $loop->first ? 'active' : '' }}"
+                                    onclick="switchCiteTab('{{ $uid }}', {{ $loop->index }}, this)"
+                                    type="button">{{ $fmt }}</button>
                             @endforeach
                         </div>
+                        @foreach($formats as $fmt => $txt)
+                        <div id="{{ $uid }}_p{{ $loop->index }}" class="{{ $loop->first ? '' : 'd-none' }}">
+                            <div class="kut-text-wrap">
+                                <p class="kut-text">{{ $txt }}</p>
+                            </div>
+                            <button class="copy-btn mt-2" data-text="{{ $txt }}" onclick="copyText(this)">
+                                <i class="bi bi-clipboard"></i> Salin {{ $fmt }}
+                            </button>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
                 @elseif($item->kutipan)

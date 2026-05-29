@@ -152,6 +152,7 @@ Route::middleware('auth')->group(function () {
         // Referensi Jurnal
         Route::get('/referensi-jurnals/template', [ReferensiJurnalController::class, 'downloadTemplate'])->name('referensi-jurnals.template');
         Route::post('/referensi-jurnals/import', [ReferensiJurnalController::class, 'import'])->name('referensi-jurnals.import');
+        Route::post('/referensi-jurnals/fetch-url', [ReferensiJurnalController::class, 'fetchFromUrl'])->name('referensi-jurnals.fetch-url');
         Route::resource('referensi-jurnals', ReferensiJurnalController::class);
 
         // Journal Masters (Data Jurnal)

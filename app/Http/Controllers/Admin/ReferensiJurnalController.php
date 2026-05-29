@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\ReferensiJurnalImport;
 use App\Models\ReferensiJurnal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReferensiJurnalController extends Controller
@@ -116,6 +117,143 @@ class ReferensiJurnalController extends Controller
 
         return redirect()->route('admin.referensi-jurnals.index')
             ->with('success', 'Referensi Jurnal berhasil diupdate');
+    }
+
+    public function fetchFromUrl(Request $request)
+    {
+        $request->validate(['url' => 'required|url']);
+        $url = $request->input('url');
+
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; CitationFetcher/1.0; +https://apji.org)'])
+                ->get($url);
+
+            if (!$response->successful()) {
+                return response()->json(['error' => 'Halaman tidak dapat diakses (HTTP ' . $response->status() . ')'], 422);
+            }
+
+            $html = $response->body();
+            $data = $this->parseArticleMetadata($html, $url);
+
+            if (empty($data['judul_artikel']) && empty($data['penulis'])) {
+                return response()->json(['error' => 'Metadata artikel tidak ditemukan di halaman ini. Pastikan URL mengarah ke halaman artikel jurnal.'], 422);
+            }
+
+            return response()->json($data);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal mengakses URL: ' . $e->getMessage()], 422);
+        }
+    }
+
+    private function parseArticleMetadata(string $html, string $sourceUrl): array
+    {
+        $data = [
+            'judul_artikel' => '', 'penulis'     => '',
+            'nama_jurnal'   => '', 'tahun'       => '',
+            'volume'        => '', 'nomor'       => '',
+            'halaman'       => '', 'doi'         => '',
+            'jenis_jurnal'  => '', 'abstract'    => '',
+        ];
+
+        // ── 1. citation_* meta tags (Google Scholar / OJS standard) ──
+        $metaAuthors = [];
+
+        // Attribute order: name then content
+        preg_match_all('/<meta[^>]+name=["\']citation_([a-z_]+)["\'][^>]+content=["\']([^"\']*)["\'][^>]*\/?>/i', $html, $m1);
+        // Attribute order: content then name
+        preg_match_all('/<meta[^>]+content=["\']([^"\']*)["\'][^>]+name=["\']citation_([a-z_]+)["\'][^>]*\/?>/i', $html, $m2);
+
+        $metaTags = [];
+        foreach (array_map(null, $m1[1], $m1[2]) as [$k, $v]) {
+            if ($k === 'author') { $metaAuthors[] = trim($v); }
+            else { $metaTags[$k] = trim($v); }
+        }
+        foreach (array_map(null, $m2[2], $m2[1]) as [$k, $v]) {
+            if ($k === 'author') { $metaAuthors[] = trim($v); }
+            elseif (!isset($metaTags[$k])) { $metaTags[$k] = trim($v); }
+        }
+
+        if (!empty($metaTags['title']))         $data['judul_artikel'] = $metaTags['title'];
+        if (!empty($metaTags['journal_title'])) $data['nama_jurnal']   = $metaTags['journal_title'];
+        if (!empty($metaTags['volume']))        $data['volume']        = $metaTags['volume'];
+        if (!empty($metaTags['issue']))         $data['nomor']         = $metaTags['issue'];
+        if (!empty($metaTags['doi']))           $data['doi']           = $metaTags['doi'];
+        if (!empty($metaTags['abstract_html_url'])) {}
+
+        // Year
+        $rawDate = $metaTags['publication_date'] ?? $metaTags['date'] ?? $metaTags['year'] ?? '';
+        if ($rawDate) { preg_match('/(\d{4})/', $rawDate, $ym); if ($ym) $data['tahun'] = $ym[1]; }
+
+        // Pages
+        $fp = $metaTags['firstpage'] ?? ''; $lp = $metaTags['lastpage'] ?? '';
+        if ($fp && $lp) $data['halaman'] = "$fp–$lp";
+        elseif ($fp)    $data['halaman'] = $fp;
+
+        // Authors — keep original format, deduplicate
+        $metaAuthors = array_values(array_unique(array_filter($metaAuthors)));
+        if ($metaAuthors) {
+            if (count($metaAuthors) === 1) {
+                $data['penulis'] = $metaAuthors[0];
+            } else {
+                $last = array_pop($metaAuthors);
+                $data['penulis'] = implode(', ', $metaAuthors) . ', & ' . $last;
+            }
+        }
+
+        // ── 2. JSON-LD (schema.org) ──
+        if (empty($data['judul_artikel'])) {
+            preg_match_all('/<script[^>]+type=["\']application\/ld\+json["\'][^>]*>(.*?)<\/script>/si', $html, $jm);
+            foreach ($jm[1] as $jsonStr) {
+                $json = json_decode($jsonStr, true);
+                if (!$json) continue;
+                $items = isset($json['@graph']) ? $json['@graph'] : [$json];
+                foreach ($items as $item) {
+                    $type = $item['@type'] ?? '';
+                    if (!in_array($type, ['ScholarlyArticle','Article','NewsArticle'])) continue;
+                    if (!empty($item['headline']) && empty($data['judul_artikel'])) $data['judul_artikel'] = $item['headline'];
+                    if (!empty($item['name'])     && empty($data['judul_artikel'])) $data['judul_artikel'] = $item['name'];
+                    if (!empty($item['datePublished']) && empty($data['tahun'])) {
+                        preg_match('/(\d{4})/', $item['datePublished'], $dy);
+                        if ($dy) $data['tahun'] = $dy[1];
+                    }
+                    if (!empty($item['author']) && empty($data['penulis'])) {
+                        $authors = is_array($item['author']) ? $item['author'] : [$item['author']];
+                        $names = array_map(fn($a) => $a['name'] ?? '', $authors);
+                        $names = array_filter($names);
+                        $last  = array_pop($names);
+                        $data['penulis'] = $names ? implode(', ', $names) . ', & ' . $last : $last;
+                    }
+                    if (!empty($item['isPartOf']['volumeNumber']) && empty($data['volume'])) $data['volume'] = $item['isPartOf']['volumeNumber'];
+                    if (!empty($item['isPartOf']['issueNumber'])  && empty($data['nomor']))  $data['nomor']  = $item['isPartOf']['issueNumber'];
+                }
+            }
+        }
+
+        // ── 3. Dublin Core / Open Graph fallback ──
+        if (empty($data['judul_artikel'])) {
+            preg_match('/<meta[^>]+(?:name|property)=["\'](?:DC\.title|og:title)["\'][^>]+content=["\']([^"\']+)["\'][^>]*\/?>/i', $html, $og);
+            if ($og) $data['judul_artikel'] = html_entity_decode(trim($og[1]), ENT_QUOTES);
+        }
+        if (empty($data['nama_jurnal'])) {
+            preg_match('/<meta[^>]+(?:name|property)=["\'](?:og:site_name|DC\.source)["\'][^>]+content=["\']([^"\']+)["\'][^>]*\/?>/i', $html, $site);
+            if ($site) $data['nama_jurnal'] = html_entity_decode(trim($site[1]), ENT_QUOTES);
+        }
+
+        // Clean HTML entities
+        foreach ($data as &$v) { $v = html_entity_decode(trim($v), ENT_QUOTES | ENT_HTML5, 'UTF-8'); }
+        unset($v);
+
+        // Auto-detect jenis jurnal
+        $namaL = strtolower($data['nama_jurnal']);
+        if (str_contains($namaL, 'international') || str_contains($namaL, 'global') || str_contains($namaL, 'world')) {
+            $data['jenis_jurnal'] = 'Jurnal Internasional';
+        } elseif ($data['nama_jurnal']) {
+            $data['jenis_jurnal'] = 'Jurnal Nasional';
+        }
+
+        return $data;
     }
 
     private function buildFormatSitasi(Request $request): ?string

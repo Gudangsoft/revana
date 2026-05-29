@@ -142,3 +142,16 @@
 - `resources/views/admin/referensi-jurnals/index.blade.php`
 - `resources/views/public/referensi-jurnal.blade.php`
 
+
+## 12. 🔄 Update: ref
+
+- **Commit:** `a8cbee8` — 11:41 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Models/ReferensiJurnal.php`
+- `database/migrations/2026_05_29_113755_add_metadata_artikel_to_referensi_jurnals_table.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/_metadata_artikel.blade.php`
+- `resources/views/admin/referensi-jurnals/create.blade.php`
+- `resources/views/admin/referensi-jurnals/edit.blade.php`
+
