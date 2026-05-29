@@ -64,12 +64,18 @@ class ReferensiJurnalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_jurnal'  => 'required|string|max:255',
-            'jenis_jurnal' => 'required|string|max:100',
-            'bidang_ilmu'  => 'required|string|max:100',
-            'tahun'        => 'required|integer|min:1900|max:2100',
-            'referensi'    => 'required|string',
-            'kutipan'      => 'nullable|string',
+            'nama_jurnal'   => 'required|string|max:255',
+            'penulis'       => 'nullable|string',
+            'judul_artikel' => 'nullable|string',
+            'volume'        => 'nullable|string|max:20',
+            'nomor'         => 'nullable|string|max:20',
+            'halaman'       => 'nullable|string|max:40',
+            'doi'           => 'nullable|string|max:255',
+            'jenis_jurnal'  => 'required|string|max:100',
+            'bidang_ilmu'   => 'required|string|max:100',
+            'tahun'         => 'required|integer|min:1900|max:2100',
+            'referensi'     => 'nullable|string',
+            'kutipan'       => 'nullable|string',
         ]);
 
         $validated['format_sitasi'] = $this->buildFormatSitasi($request);
@@ -90,12 +96,18 @@ class ReferensiJurnalController extends Controller
     public function update(Request $request, ReferensiJurnal $referensiJurnal)
     {
         $validated = $request->validate([
-            'nama_jurnal'  => 'required|string|max:255',
-            'jenis_jurnal' => 'required|string|max:100',
-            'bidang_ilmu'  => 'required|string|max:100',
-            'tahun'        => 'required|integer|min:1900|max:2100',
-            'referensi'    => 'required|string',
-            'kutipan'      => 'nullable|string',
+            'nama_jurnal'   => 'required|string|max:255',
+            'penulis'       => 'nullable|string',
+            'judul_artikel' => 'nullable|string',
+            'volume'        => 'nullable|string|max:20',
+            'nomor'         => 'nullable|string|max:20',
+            'halaman'       => 'nullable|string|max:40',
+            'doi'           => 'nullable|string|max:255',
+            'jenis_jurnal'  => 'required|string|max:100',
+            'bidang_ilmu'   => 'required|string|max:100',
+            'tahun'         => 'required|integer|min:1900|max:2100',
+            'referensi'     => 'nullable|string',
+            'kutipan'       => 'nullable|string',
         ]);
 
         $validated['format_sitasi'] = $this->buildFormatSitasi($request);

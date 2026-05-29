@@ -131,3 +131,14 @@
 - `resources/views/admin/referensi-jurnals/edit.blade.php`
 - `resources/views/public/referensi-jurnal.blade.php`
 
+
+## 11. 🔄 Update: perbaikan import
+
+- **Commit:** `7dcbd0d` — 10:47 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Imports/ReferensiJurnalImport.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/index.blade.php`
+- `resources/views/public/referensi-jurnal.blade.php`
+

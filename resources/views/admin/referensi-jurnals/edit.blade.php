@@ -132,10 +132,13 @@
                         @enderror
                     </div>
 
+                    @include('admin.referensi-jurnals._metadata_artikel', ['referensiJurnal' => $referensiJurnal])
+
                     {{-- Referensi --}}
                     <div class="mb-3">
                         <label for="referensi" class="form-label">
-                            Referensi <span class="text-danger">*</span>
+                            Referensi
+                            <small class="text-muted fw-normal">(opsional jika metadata sudah diisi)</small>
                             <span class="char-counter" id="refCount">0 karakter</span>
                         </label>
                         <textarea class="form-control @error('referensi') is-invalid @enderror"

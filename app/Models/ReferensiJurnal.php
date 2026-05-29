@@ -11,6 +11,12 @@ class ReferensiJurnal extends Model
 
     protected $fillable = [
         'nama_jurnal',
+        'penulis',
+        'judul_artikel',
+        'volume',
+        'nomor',
+        'halaman',
+        'doi',
         'jenis_jurnal',
         'bidang_ilmu',
         'tahun',
