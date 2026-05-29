@@ -155,3 +155,16 @@
 - `resources/views/admin/referensi-jurnals/create.blade.php`
 - `resources/views/admin/referensi-jurnals/edit.blade.php`
 
+
+## 13. 🔄 Update: up
+
+- **Commit:** `aae5666` — 11:46 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/_fetch_url.blade.php`
+- `resources/views/admin/referensi-jurnals/create.blade.php`
+- `resources/views/admin/referensi-jurnals/edit.blade.php`
+- `resources/views/public/referensi-jurnal.blade.php`
+- `routes/web.php`
+
