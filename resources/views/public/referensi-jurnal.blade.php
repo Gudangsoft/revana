@@ -594,7 +594,7 @@
                         Pilih Format Sitasi
                         <span class="cite-count">{{ count($formats) }} format tersedia</span>
                     </div>
-                    <div class="cite-body">
+                    <div class="cite-body" id="{{ $uid }}">
                         {{-- Tab buttons --}}
                         <div class="cite-tabs">
                             @foreach($formats as $fmt => $txt)
@@ -709,11 +709,16 @@ function toggleCite(uid) {
 
 /* ── Citation tab switch ── */
 function switchCiteTab(uid, idx, btn) {
+    // Update active tab
     btn.closest('.cite-tabs').querySelectorAll('.cite-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
+
+    // Show correct pane
     const parent = document.getElementById(uid);
+    if (!parent) return;
     parent.querySelectorAll('[id^="' + uid + '_p"]').forEach(p => p.classList.add('d-none'));
-    document.getElementById(uid + '_p' + idx).classList.remove('d-none');
+    const pane = document.getElementById(uid + '_p' + idx);
+    if (pane) pane.classList.remove('d-none');
 }
 
 /* ── Auto-submit filter on select change ── */

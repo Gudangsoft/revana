@@ -217,3 +217,12 @@
 - `resources/views/admin/referensi-jurnals/create.blade.php`
 - `resources/views/admin/referensi-jurnals/edit.blade.php`
 
+
+## 19. 🔄 Update: sitasi
+
+- **Commit:** `ae98ac0` — 14:03 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/PublicReferensiJurnalController.php`
+- `log-update-2026-05-29.md`
+- `resources/views/public/referensi-jurnal.blade.php`
+
