@@ -132,7 +132,6 @@
                         @enderror
                     </div>
 
-                    @include('admin.referensi-jurnals._fetch_url')
                     @include('admin.referensi-jurnals._metadata_artikel', ['referensiJurnal' => $referensiJurnal])
 
                     {{-- Referensi --}}

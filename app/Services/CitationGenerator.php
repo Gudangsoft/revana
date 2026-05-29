@@ -6,6 +6,7 @@ class CitationGenerator
 {
     /**
      * Generate semua format sitasi dari metadata artikel.
+     * Jika metadata kosong, coba ekstrak otomatis dari field referensi (APA text).
      */
     public static function generate(array $m): array
     {
@@ -17,6 +18,19 @@ class CitationGenerator
         $no      = trim($m['nomor']         ?? '');
         $hal     = trim($m['halaman']       ?? '');
         $doi     = trim($m['doi']           ?? '');
+
+        // Auto-extract dari referensi jika metadata kosong
+        if (!$penulis && !$judul && !empty($m['referensi'])) {
+            $parsed = self::parseFromReference($m['referensi']);
+            if (!$penulis)  $penulis = $parsed['penulis'];
+            if (!$judul)    $judul   = $parsed['judul_artikel'];
+            if (!$tahun)    $tahun   = $parsed['tahun'];
+            if (!$vol)      $vol     = $parsed['volume'];
+            if (!$no)       $no      = $parsed['nomor'];
+            if (!$hal)      $hal     = $parsed['halaman'];
+            if (!$doi)      $doi     = $parsed['doi'];
+            if (!$jurnal)   $jurnal  = $parsed['nama_jurnal'] ?: $jurnal;
+        }
 
         if (!$penulis && !$judul) return [];
 
@@ -77,6 +91,82 @@ class CitationGenerator
         }
 
         return $authors;
+    }
+
+    /**
+     * Parse teks referensi (APA/Vancouver/Chicago) menjadi komponen metadata.
+     * Mendukung format: "Authors (Year). Title. Journal, Vol(No), Pages. DOI"
+     */
+    public static function parseFromReference(string $ref): array
+    {
+        $data = ['penulis'=>'','judul_artikel'=>'','nama_jurnal'=>'',
+                 'tahun'=>'','volume'=>'','nomor'=>'','halaman'=>'','doi'=>''];
+
+        // Ekstrak DOI terlebih dahulu (agar tidak tercampur di parse berikutnya)
+        if (preg_match('/https?:\/\/doi\.org\/([^\s,;]+)/i', $ref, $dm)) {
+            $data['doi'] = $dm[1];
+            $ref = trim(str_replace($dm[0], '', $ref));
+        } elseif (preg_match('/\bdoi[:\s]+([^\s,;]+)/i', $ref, $dm)) {
+            $data['doi'] = $dm[1];
+            $ref = trim(str_replace($dm[0], '', $ref));
+        }
+
+        $ref = trim($ref, ' .');
+
+        // ── Pola APA: "Authors (Year). Title. Journal, Vol(No), Pages." ──
+        if (preg_match(
+            '/^(.+?)\s*\((\d{4})\)\.\s*(.+?)\.\s*([^,]+?),\s*(\d+)\s*\((\d+)\)\s*,?\s*([\d\-–]+)?\s*\.?\s*$/u',
+            $ref, $m
+        )) {
+            $data['penulis']       = trim($m[1]);
+            $data['tahun']         = $m[2];
+            $data['judul_artikel'] = trim($m[3]);
+            $data['nama_jurnal']   = trim($m[4]);
+            $data['volume']        = $m[5];
+            $data['nomor']         = $m[6];
+            $data['halaman']       = isset($m[7]) ? trim($m[7]) : '';
+            return $data;
+        }
+
+        // ── Pola tanpa Vol/No: "Authors (Year). Title. Journal, Pages." ──
+        if (preg_match(
+            '/^(.+?)\s*\((\d{4})\)\.\s*(.+?)\.\s*([^,]+?),\s*([\d\-–]+)\s*\.?\s*$/u',
+            $ref, $m
+        )) {
+            $data['penulis']       = trim($m[1]);
+            $data['tahun']         = $m[2];
+            $data['judul_artikel'] = trim($m[3]);
+            $data['nama_jurnal']   = trim($m[4]);
+            $data['halaman']       = trim($m[5]);
+            return $data;
+        }
+
+        // ── Pola minimal: "Authors (Year). Title. Journal..." ──
+        if (preg_match('/^(.+?)\s*\((\d{4})\)\.\s*(.+?)\.\s*(.+)/u', $ref, $m)) {
+            $data['penulis']       = trim($m[1]);
+            $data['tahun']         = $m[2];
+            $data['judul_artikel'] = trim($m[3]);
+            $data['nama_jurnal']   = trim(explode(',', $m[4])[0]);
+
+            // Coba ambil volume(nomor) dari sisa
+            if (preg_match('/(\d+)\s*\((\d+)\)/', $m[4], $vn)) {
+                $data['volume'] = $vn[1];
+                $data['nomor']  = $vn[2];
+            }
+            // Coba ambil halaman
+            if (preg_match('/,\s*([\d\-–]+)\s*\.?\s*$/', $m[4], $hp)) {
+                $data['halaman'] = trim($hp[1]);
+            }
+            return $data;
+        }
+
+        // ── Fallback: hanya tahun + penulis ──
+        if (preg_match('/^(.+?)\s*\((\d{4})\)/u', $ref, $m)) {
+            $data['penulis'] = trim($m[1]);
+            $data['tahun']   = $m[2];
+        }
+
+        return $data;
     }
 
     /** Format inisial: pastikan diakhiri satu titik, tidak double */

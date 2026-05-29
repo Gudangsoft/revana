@@ -185,3 +185,14 @@
 - `log-update-2026-05-29.md`
 - `resources/views/admin/referensi-jurnals/_format_sitasi.blade.php`
 
+
+## 16. 🔄 Update: gen
+
+- **Commit:** `f43a009` — 13:36 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Imports/ReferensiJurnalImport.php`
+- `app/Services/CitationGenerator.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/index.blade.php`
+

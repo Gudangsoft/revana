@@ -259,6 +259,7 @@ class ReferensiJurnalController extends Controller
 
     private function buildFormatSitasi(array $data): ?string
     {
+        // Sertakan nama_jurnal dari validated data
         $formats = CitationGenerator::generate($data);
         return $formats ? json_encode($formats, JSON_UNESCAPED_UNICODE) : null;
     }

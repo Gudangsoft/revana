@@ -34,9 +34,10 @@ class ReferensiJurnalImport implements ToModel, WithHeadingRow, WithValidation
             return null;
         }
 
-        // Auto-generate semua format sitasi dari metadata
+        // Auto-generate semua format sitasi
+        // Prioritas: metadata kolom → parse dari referensi
         $formatSitasi = null;
-        if ($penulis || $judulArtikel) {
+        if ($penulis || $judulArtikel || $referensi) {
             $generated = CitationGenerator::generate([
                 'penulis'       => $penulis,
                 'judul_artikel' => $judulArtikel,
@@ -46,6 +47,7 @@ class ReferensiJurnalImport implements ToModel, WithHeadingRow, WithValidation
                 'nomor'         => $nomor,
                 'halaman'       => $halaman,
                 'doi'           => $doi,
+                'referensi'     => $referensi, // fallback parser
             ]);
             if ($generated) {
                 $formatSitasi = json_encode($generated, JSON_UNESCAPED_UNICODE);
