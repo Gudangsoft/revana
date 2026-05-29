@@ -44,34 +44,52 @@ class CitationGenerator
     {
         if (!$raw) return [];
 
-        $raw     = str_replace(' & ', ', ', $raw);
-        $raw     = str_replace([';','dan',' and '], ',', $raw);
+        // Normalise separators
+        $raw = preg_replace('/\s*[,;]?\s*&\s*/', ', ', $raw); // "& " → ", "
+        $raw = preg_replace('/\s+and\s+/i', ', ', $raw);
+
+        // Split on ", " that comes AFTER a period (end of initials like "A. W.")
+        // so "Pratama, A. W., Setiawan, B." → ["Pratama, A. W.", "Setiawan, B."]
+        $parts = preg_split('/(?<=\.),\s*/', $raw);
+
         $authors = [];
+        foreach ($parts as $part) {
+            $part = trim($part, " ,\t");
+            if (!$part) continue;
 
-        // Split on ", " sebelum huruf kapital (Lastname berikutnya)
-        $parts = preg_split('/,\s*(?=[A-Z\p{Lu}][a-z\p{Ll}])/u', $raw);
-
-        for ($i = 0; $i < count($parts); $i += 2) {
-            $last = trim($parts[$i] ?? '');
-            $init = trim($parts[$i + 1] ?? '');
-            // Remove trailing period
-            $last = rtrim($last, '.');
+            // Split on FIRST comma: "Lastname, Initials"
+            $comma = strpos($part, ',');
+            if ($comma !== false) {
+                $last = trim(substr($part, 0, $comma));
+                $init = trim(substr($part, $comma + 1));
+            } else {
+                // No comma — could be "FirstName LastName" natural order
+                $words = explode(' ', $part);
+                $last  = array_pop($words);
+                $init  = implode(' ', $words);
+            }
+            $last = rtrim($last, '.,');
             if ($last) $authors[] = ['last' => $last, 'init' => $init];
         }
 
-        // Fallback: jika tidak bisa parse (misalnya nama natural order "Budi Santoso")
-        if (count($authors) === 0 && $raw) {
-            $authors[] = ['last' => $raw, 'init' => ''];
+        if (!$authors && $raw) {
+            $authors[] = ['last' => trim($raw), 'init' => ''];
         }
 
         return $authors;
+    }
+
+    /** Format inisial: pastikan diakhiri satu titik, tidak double */
+    private static function init(string $i): string
+    {
+        return $i ? rtrim($i, '.') . '.' : '';
     }
 
     /* ─────────────────── FORMAT AUTHOR STRINGS ─────────────────── */
 
     private static function fmtAPA(array $authors): string
     {
-        $list = array_map(fn($a) => $a['last'] . ($a['init'] ? ', ' . $a['init'] . '.' : ''), $authors);
+        $list = array_map(fn($a) => $a['last'] . ($a['init'] ? ', ' . self::init($a['init']) : ''), $authors);
         if (count($list) <= 1) return implode('', $list);
         $last = array_pop($list);
         return implode(', ', $list) . ', & ' . $last;
@@ -79,7 +97,8 @@ class CitationGenerator
 
     private static function fmtIEEE(array $authors): string
     {
-        $list = array_map(fn($a) => ($a['init'] ? $a['init'] . '. ' : '') . $a['last'], $authors);
+        // IEEE: "F. M. Lastname" order
+        $list = array_map(fn($a) => ($a['init'] ? self::init($a['init']) . ' ' : '') . $a['last'], $authors);
         if (count($list) === 1) return $list[0];
         if (count($list) === 2) return implode(' and ', $list);
         $last = array_pop($list);
@@ -88,7 +107,7 @@ class CitationGenerator
 
     private static function fmtHarvard(array $authors): string
     {
-        $list = array_map(fn($a) => $a['last'] . ($a['init'] ? ', ' . $a['init'] . '.' : ''), $authors);
+        $list = array_map(fn($a) => $a['last'] . ($a['init'] ? ', ' . self::init($a['init']) : ''), $authors);
         if (count($list) === 1) return $list[0];
         $last = array_pop($list);
         return implode(', ', $list) . ' and ' . $last;
@@ -97,31 +116,31 @@ class CitationGenerator
     private static function fmtChicago(array $authors): string
     {
         if (!$authors) return '';
-        $first = $authors[0]['last'] . ($authors[0]['init'] ? ', ' . $authors[0]['init'] . '.' : '');
+        $first = $authors[0]['last'] . ($authors[0]['init'] ? ', ' . self::init($authors[0]['init']) : '');
         if (count($authors) === 1) return $first;
-        $rest = array_map(fn($a) => ($a['init'] ? $a['init'] . '. ' : '') . $a['last'], array_slice($authors, 1));
+        $rest = array_map(fn($a) => ($a['init'] ? self::init($a['init']) . ' ' : '') . $a['last'], array_slice($authors, 1));
         if (count($authors) === 2) return $first . ', and ' . $rest[0];
         return $first . ', ' . implode(', ', array_slice($rest, 0, -1)) . ', and ' . end($rest);
     }
 
     private static function fmtVancouver(array $authors): string
     {
-        $list = array_map(fn($a) => $a['last'] . ' ' . preg_replace('/[^A-Z]/i', '', $a['init']), $authors);
+        $list = array_map(fn($a) => $a['last'] . ' ' . preg_replace('/[^A-Za-z]/i', '', $a['init']), $authors);
         return implode(', ', $list);
     }
 
     private static function fmtMLAFirst(array $authors): string
     {
         if (!$authors) return '';
-        $first = $authors[0]['last'] . ($authors[0]['init'] ? ', ' . $authors[0]['init'] . '.' : '');
+        $first = $authors[0]['last'] . ($authors[0]['init'] ? ', ' . self::init($authors[0]['init']) : '');
         if (count($authors) === 1) return $first;
-        if (count($authors) === 2) return $first . ', and ' . ($authors[1]['init'] ? $authors[1]['init'] . '. ' : '') . $authors[1]['last'];
+        if (count($authors) === 2) return $first . ', and ' . ($authors[1]['init'] ? self::init($authors[1]['init']) . ' ' : '') . $authors[1]['last'];
         return $first . ', et al.';
     }
 
     private static function fmtABNT(array $authors): string
     {
-        $list = array_map(fn($a) => strtoupper($a['last']) . ($a['init'] ? ', ' . $a['init'] . '.' : ''), $authors);
+        $list = array_map(fn($a) => strtoupper($a['last']) . ($a['init'] ? ', ' . self::init($a['init']) : ''), $authors);
         return implode('; ', $list);
     }
 

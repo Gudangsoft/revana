@@ -175,3 +175,13 @@
 - **File berubah:** 1 file
 - `log-update-2026-05-29.md`
 
+
+## 15. 🔄 Update: up
+
+- **Commit:** `a190ec1` — 11:52 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Services/CitationGenerator.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/_format_sitasi.blade.php`
+

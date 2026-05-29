@@ -319,31 +319,36 @@ class ReferensiJurnalController extends Controller
                         'Jurnal Nasional',
                         'Teknik',
                         2026,
-                        'Rahmadani, P. A., Tohar, I., & Hakim, R. (2026). Identifikasi Permasalahan Arsitektur Perpustakaan. Konstruksi: Publikasi Ilmu Teknik, 4(2), 01–10. https://doi.org/10.61132/konstruksi.v4i2.1349',
-                        '(Rahmadani et al., 2026)',
+                        'Rahmadani, P. A., Tohar, I., & Hakim, R.',
+                        'Identifikasi Permasalahan Arsitektur Perpustakaan Umum Daerah Kabupaten',
+                        '4', '2', '01–10',
+                        '10.61132/konstruksi.v4i2.1349',
+                        'Rahmadani, P. A., Tohar, I., & Hakim, R. (2026). Identifikasi Permasalahan Arsitektur. Konstruksi, 4(2), 01–10.',
+                        '',
                     ],
                     [
                         'Konstruksi: Publikasi Ilmu Teknik',
                         'Jurnal Nasional',
                         'Teknik',
                         2026,
-                        'Mardian, N. A. P., Mufidah, M., & Hakim, R. (2026). Analisis Komparasi Panti Wreda. Konstruksi: Publikasi Ilmu Teknik, 4(2), 11–20. https://doi.org/10.61132/konstruksi.v4i2.1350',
-                        '(Mardian et al., 2026)',
-                    ],
-                    [
-                        'Jurnal Internasional Teknologi',
-                        'Jurnal Internasional',
-                        'Kecerdasan Buatan',
-                        2024,
-                        'Author, B. (2024). Deep Learning for Image Recognition. Int. J. Tech, 5(1), 20–35. https://doi.org/xxx',
-                        'B. Author, "Deep Learning for Image Recognition," Int. J. Tech, vol. 5, no. 1, pp. 20–35, 2024.',
+                        'Mardian, N. A. P., Mufidah, M., & Hakim, R.',
+                        'Analisis Komparasi Panti Wreda Berdasarkan Pelayanan Holistik',
+                        '4', '2', '11–20',
+                        '10.61132/konstruksi.v4i2.1350',
+                        'Mardian, N. A. P., Mufidah, M., & Hakim, R. (2026). Analisis Komparasi Panti Wreda. Konstruksi, 4(2), 11–20.',
+                        '',
                     ],
                 ];
             }
 
             public function headings(): array
             {
-                return ['nama_jurnal', 'jenis_jurnal', 'bidang_ilmu', 'tahun', 'referensi', 'kutipan'];
+                return [
+                    'nama_jurnal', 'jenis_jurnal', 'bidang_ilmu', 'tahun',
+                    'penulis', 'judul_artikel',
+                    'volume', 'nomor', 'halaman', 'doi',
+                    'referensi', 'kutipan',
+                ];
             }
 
             public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
