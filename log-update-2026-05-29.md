@@ -208,3 +208,12 @@
 - `resources/views/admin/referensi-jurnals/create.blade.php`
 - `resources/views/admin/referensi-jurnals/edit.blade.php`
 
+
+## 18. 🔄 Update: qa
+
+- **Commit:** `d8ebde4` — 13:58 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/create.blade.php`
+- `resources/views/admin/referensi-jurnals/edit.blade.php`
+

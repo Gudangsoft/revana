@@ -293,50 +293,41 @@
 
     /* ══ CITE PANEL ══ */
     .cite-panel {
-        margin-top: 12px;
-        border: 1px solid #e0e7ff;
-        border-radius: 10px;
+        margin-top: 14px;
+        border: 2px solid #e0e7ff;
+        border-radius: 12px;
         overflow: hidden;
-        transition: box-shadow .15s;
+        background: #fafbff;
     }
-    .cite-panel:hover { box-shadow: 0 2px 12px rgba(99,102,241,.1); }
     .cite-panel-head {
-        background: linear-gradient(90deg, #f0f4ff, #f5f3ff);
-        padding: 9px 14px;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        padding: 10px 16px;
         display: flex; align-items: center; gap: 8px;
-        font-size: .72rem; font-weight: 700;
-        color: #4338ca; text-transform: uppercase; letter-spacing: .05em;
-        cursor: pointer; user-select: none;
-        transition: background .15s;
+        font-size: .75rem; font-weight: 700;
+        color: #fff; letter-spacing: .04em;
     }
-    .cite-panel-head:hover { background: #ede9fe; }
     .cite-count {
-        font-size: .64rem; font-weight: 700;
-        background: #c7d2fe; color: #3730a3;
-        border-radius: 999px; padding: 1px 8px;
+        font-size: .65rem; font-weight: 700;
+        background: rgba(255,255,255,.25);
+        color: #fff;
+        border-radius: 999px; padding: 1px 9px;
     }
-    .cite-toggle {
-        margin-left: auto; background: none; border: none;
-        color: #6366f1; cursor: pointer; padding: 0;
-        transition: transform .2s;
-    }
-    .cite-body  { padding: 12px 14px 14px; background: #fafaff; }
-    .cite-tabs  {
-        display: flex; flex-wrap: wrap; gap: 5px;
-        margin-bottom: 10px; padding-bottom: 10px;
-        border-bottom: 1px dashed #e0e7ff;
+    .cite-body { padding: 14px 16px 16px; }
+    .cite-tabs {
+        display: flex; flex-wrap: wrap; gap: 6px;
+        margin-bottom: 12px;
     }
     .cite-tab {
-        padding: 4px 13px; font-size: .75rem; font-weight: 600;
-        border-radius: 8px; border: 1px solid #c7d2fe;
-        background: #fff; color: #4f46e5; cursor: pointer;
-        transition: all .13s;
+        padding: 5px 14px; font-size: .76rem; font-weight: 700;
+        border-radius: 8px; border: 1.5px solid #c7d2fe;
+        background: #fff; color: #4338ca; cursor: pointer;
+        transition: all .13s; letter-spacing: .02em;
     }
-    .cite-tab:hover  { background: #ede9fe; }
+    .cite-tab:hover  { background: #ede9fe; border-color: #818cf8; }
     .cite-tab.active {
         background: linear-gradient(135deg, var(--primary), var(--primary2));
         color: #fff; border-color: transparent;
-        box-shadow: 0 2px 8px rgba(99,102,241,.3);
+        box-shadow: 0 3px 10px rgba(99,102,241,.35);
     }
     .kut-text-wrap {
         position: relative;
@@ -549,9 +540,8 @@
             $badgeCls  = $isInt ? 'badge-int'      : ($isNas ? 'badge-nas'      : 'badge-oth');
             $no        = $loop->iteration + ($referensiJurnals->currentPage()-1)*$referensiJurnals->perPage();
 
-            // Build cite formats
+            // Build cite formats — hanya 7 format standar
             $formats = [];
-            if ($item->kutipan) $formats['Referensi'] = $item->kutipan;
             if ($item->format_sitasi) {
                 foreach ($item->format_sitasi as $k => $v) {
                     if (trim($v)) $formats[$k] = trim($v);
@@ -598,13 +588,14 @@
 
                 {{-- Citation formats --}}
                 @if(count($formats) > 0)
-                <div class="cite-panel mt-3">
+                <div class="cite-panel">
                     <div class="cite-panel-head">
-                        <i class="bi bi-braces"></i>
-                        Format Sitasi
-                        <span class="cite-count">{{ count($formats) }} format</span>
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                        Pilih Format Sitasi
+                        <span class="cite-count">{{ count($formats) }} format tersedia</span>
                     </div>
                     <div class="cite-body">
+                        {{-- Tab buttons --}}
                         <div class="cite-tabs">
                             @foreach($formats as $fmt => $txt)
                             <button class="cite-tab {{ $loop->first ? 'active' : '' }}"
@@ -612,30 +603,25 @@
                                     type="button">{{ $fmt }}</button>
                             @endforeach
                         </div>
+                        {{-- Tab panes --}}
                         @foreach($formats as $fmt => $txt)
                         <div id="{{ $uid }}_p{{ $loop->index }}" class="{{ $loop->first ? '' : 'd-none' }}">
-                            <div class="kut-text-wrap">
-                                <p class="kut-text">{{ $txt }}</p>
+                            <div style="background:#fff; border:1.5px solid #c7d2fe; border-left:4px solid #6366f1;
+                                        border-radius:0 9px 9px 0; padding:12px 16px 12px 18px; position:relative;">
+                                <span style="position:absolute;top:-4px;left:9px;font-size:2.8rem;
+                                             color:#e0e7ff;font-family:Georgia,serif;line-height:1;">&ldquo;</span>
+                                <p style="font-size:.87rem;line-height:1.8;color:#1e1b4b;
+                                          font-family:'Courier New',monospace;margin:0;padding-left:4px;
+                                          word-break:break-word;">{{ $txt }}</p>
                             </div>
-                            <button class="copy-btn mt-2" data-text="{{ $txt }}" onclick="copyText(this)">
-                                <i class="bi bi-clipboard"></i> Salin {{ $fmt }}
-                            </button>
+                            <div class="d-flex align-items-center gap-2 mt-2">
+                                <button class="copy-btn" data-text="{{ $txt }}" onclick="copyText(this)">
+                                    <i class="bi bi-clipboard"></i> Salin format {{ $fmt }}
+                                </button>
+                                <span style="font-size:.7rem;color:#9ca3af;">Klik salin lalu tempel ke dokumen Anda</span>
+                            </div>
                         </div>
                         @endforeach
-                    </div>
-                </div>
-                @elseif($item->kutipan)
-                <div class="mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="section-label" style="color:#7c3aed;">
-                            <i class="bi bi-braces"></i> Kutipan
-                        </div>
-                        <button class="copy-btn" data-text="{{ $item->kutipan }}" onclick="copyText(this)">
-                            <i class="bi bi-clipboard"></i> Salin
-                        </button>
-                    </div>
-                    <div class="kut-text-wrap">
-                        <p class="kut-text">{{ $item->kutipan }}</p>
                     </div>
                 </div>
                 @endif

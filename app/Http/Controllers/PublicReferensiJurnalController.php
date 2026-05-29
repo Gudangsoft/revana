@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ReferensiJurnal;
 use App\Models\Setting;
+use App\Services\CitationGenerator;
 use Illuminate\Http\Request;
 
 class PublicReferensiJurnalController extends Controller
@@ -19,23 +20,29 @@ class PublicReferensiJurnalController extends Controller
                   ->orWhere('jenis_jurnal','like', "%{$s}%")
                   ->orWhere('bidang_ilmu', 'like', "%{$s}%")
                   ->orWhere('referensi',   'like', "%{$s}%")
-                  ->orWhere('kutipan',     'like', "%{$s}%");
+                  ->orWhere('judul_artikel','like', "%{$s}%")
+                  ->orWhere('penulis',     'like', "%{$s}%");
             });
         }
 
-        if ($request->filled('jenis_jurnal')) {
-            $query->where('jenis_jurnal', $request->jenis_jurnal);
-        }
-
-        if ($request->filled('bidang_ilmu')) {
-            $query->where('bidang_ilmu', $request->bidang_ilmu);
-        }
-
-        if ($request->filled('tahun')) {
-            $query->where('tahun', $request->tahun);
-        }
+        if ($request->filled('jenis_jurnal')) $query->where('jenis_jurnal', $request->jenis_jurnal);
+        if ($request->filled('bidang_ilmu'))  $query->where('bidang_ilmu',  $request->bidang_ilmu);
+        if ($request->filled('tahun'))        $query->where('tahun',        $request->tahun);
 
         $referensiJurnals = $query->latest()->paginate($request->input('per_page', 15))->withQueryString();
+
+        // Pastikan setiap record punya format sitasi — generate on-the-fly jika belum ada
+        $referensiJurnals->getCollection()->transform(function ($item) {
+            if (empty($item->format_sitasi)) {
+                $formats = CitationGenerator::generate($item->toArray());
+                if ($formats) {
+                    $item->format_sitasi = $formats;
+                    // Simpan ke DB agar tidak perlu generate lagi berikutnya
+                    $item->saveQuietly();
+                }
+            }
+            return $item;
+        });
 
         $jenisOptions  = ReferensiJurnal::select('jenis_jurnal')->distinct()->orderBy('jenis_jurnal')->pluck('jenis_jurnal');
         $bidangOptions = ReferensiJurnal::select('bidang_ilmu')->distinct()->orderBy('bidang_ilmu')->pluck('bidang_ilmu');
