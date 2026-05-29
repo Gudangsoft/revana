@@ -86,3 +86,19 @@
 | `app/Http/Controllers/PublicReferensiJurnalController.php` | Controller baru — query dengan filter search/jenis/bidang/tahun, tanpa auth |
 | `resources/views/public/referensi-jurnal.blade.php` | Halaman publik full standalone: navbar dengan logo, hero banner dengan stat pills, filter card overlap hero, daftar kartu referensi dengan accent bar warna, tombol salin referensi & kutipan, pagination |
 | `resources/views/auth/login.blade.php` | Tambah tombol gradien "Daftar Referensi Jurnal" di bawah tombol Reviewer |
+
+## 7. 🔄 Update: up refrensi
+
+- **Commit:** `e7fa9e1` — 10:16 oleh Gudangsoft
+- **File berubah:** 14 file
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `app/Http/Controllers/Auth/LoginController.php`
+- `app/Http/Controllers/PublicReferensiJurnalController.php`
+- `app/Http/Middleware/AdminMiddleware.php`
+- `app/Imports/ReferensiJurnalImport.php`
+- `app/Models/ReferensiJurnal.php`
+- `database/migrations/2026_05_29_100505_add_kutipan_to_referensi_jurnals_table.php`
+- `log-update-2026-05-29.md`
+- `resources/views/admin/referensi-jurnals/create.blade.php`
+- `resources/views/admin/referensi-jurnals/edit.blade.php`
+
