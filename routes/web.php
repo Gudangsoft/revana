@@ -101,6 +101,9 @@ Route::get('/pic-login-test', function () {
 Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'showForm'])->name('reviewer-registration.form');
 Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store'])->name('reviewer-registration.store');
 
+// Public Referensi Jurnal (no login required)
+Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');
+
 // Public Slot Info (no login required)
 Route::get('/info-slot', [\App\Http\Controllers\PublicLoaController::class, 'index'])->name('public.slot.info');
 Route::get('/info-slot/{slot}', [\App\Http\Controllers\PublicLoaController::class, 'show'])->name('public.slot.detail');
@@ -147,6 +150,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('journals', JournalController::class);
         
         // Referensi Jurnal
+        Route::get('/referensi-jurnals/template', [ReferensiJurnalController::class, 'downloadTemplate'])->name('referensi-jurnals.template');
+        Route::post('/referensi-jurnals/import', [ReferensiJurnalController::class, 'import'])->name('referensi-jurnals.import');
         Route::resource('referensi-jurnals', ReferensiJurnalController::class);
 
         // Journal Masters (Data Jurnal)

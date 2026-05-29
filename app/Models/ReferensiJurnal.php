@@ -15,5 +15,6 @@ class ReferensiJurnal extends Model
         'bidang_ilmu',
         'tahun',
         'referensi',
+        'kutipan',
     ];
 }

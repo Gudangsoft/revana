@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\ReferensiJurnalImport;
 use App\Models\ReferensiJurnal;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReferensiJurnalController extends Controller
 {
@@ -18,8 +20,17 @@ class ReferensiJurnalController extends Controller
                 $q->where('nama_jurnal', 'like', "%{$search}%")
                   ->orWhere('jenis_jurnal', 'like', "%{$search}%")
                   ->orWhere('bidang_ilmu', 'like', "%{$search}%")
-                  ->orWhere('referensi', 'like', "%{$search}%");
+                  ->orWhere('referensi', 'like', "%{$search}%")
+                  ->orWhere('kutipan', 'like', "%{$search}%");
             });
+        }
+
+        if ($request->filled('jenis_jurnal')) {
+            $query->where('jenis_jurnal', $request->jenis_jurnal);
+        }
+
+        if ($request->filled('bidang_ilmu')) {
+            $query->where('bidang_ilmu', $request->bidang_ilmu);
         }
 
         if ($request->filled('tahun')) {
@@ -28,22 +39,37 @@ class ReferensiJurnalController extends Controller
 
         $referensiJurnals = $query->latest()->paginate($request->input('per_page', 20))->withQueryString();
 
-        return view('admin.referensi-jurnals.index', compact('referensiJurnals'));
+        // Data untuk stat cards & filter dropdowns
+        $totalCount         = ReferensiJurnal::count();
+        $nasionalCount      = ReferensiJurnal::where('jenis_jurnal', 'like', '%Nasional%')->count();
+        $internasionalCount = ReferensiJurnal::where('jenis_jurnal', 'like', '%Internasional%')->count();
+        $jenisOptions       = ReferensiJurnal::select('jenis_jurnal')->distinct()->orderBy('jenis_jurnal')->pluck('jenis_jurnal');
+        $bidangOptions      = ReferensiJurnal::select('bidang_ilmu')->distinct()->orderBy('bidang_ilmu')->pluck('bidang_ilmu');
+        $tahunOptions       = ReferensiJurnal::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+
+        return view('admin.referensi-jurnals.index', compact(
+            'referensiJurnals',
+            'totalCount', 'nasionalCount', 'internasionalCount',
+            'jenisOptions', 'bidangOptions', 'tahunOptions'
+        ));
     }
 
     public function create()
     {
-        return view('admin.referensi-jurnals.create');
+        $jenisOptions  = ReferensiJurnal::select('jenis_jurnal')->distinct()->orderBy('jenis_jurnal')->pluck('jenis_jurnal');
+        $bidangOptions = ReferensiJurnal::select('bidang_ilmu')->distinct()->orderBy('bidang_ilmu')->pluck('bidang_ilmu');
+        return view('admin.referensi-jurnals.create', compact('jenisOptions', 'bidangOptions'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_jurnal' => 'required|string|max:255',
+            'nama_jurnal'  => 'required|string|max:255',
             'jenis_jurnal' => 'required|string|max:100',
             'bidang_ilmu'  => 'required|string|max:100',
             'tahun'        => 'required|integer|min:1900|max:2100',
             'referensi'    => 'required|string',
+            'kutipan'      => 'nullable|string',
         ]);
 
         ReferensiJurnal::create($validated);
@@ -54,17 +80,20 @@ class ReferensiJurnalController extends Controller
 
     public function edit(ReferensiJurnal $referensiJurnal)
     {
-        return view('admin.referensi-jurnals.edit', compact('referensiJurnal'));
+        $jenisOptions  = ReferensiJurnal::select('jenis_jurnal')->distinct()->orderBy('jenis_jurnal')->pluck('jenis_jurnal');
+        $bidangOptions = ReferensiJurnal::select('bidang_ilmu')->distinct()->orderBy('bidang_ilmu')->pluck('bidang_ilmu');
+        return view('admin.referensi-jurnals.edit', compact('referensiJurnal', 'jenisOptions', 'bidangOptions'));
     }
 
     public function update(Request $request, ReferensiJurnal $referensiJurnal)
     {
         $validated = $request->validate([
-            'nama_jurnal' => 'required|string|max:255',
+            'nama_jurnal'  => 'required|string|max:255',
             'jenis_jurnal' => 'required|string|max:100',
             'bidang_ilmu'  => 'required|string|max:100',
             'tahun'        => 'required|integer|min:1900|max:2100',
             'referensi'    => 'required|string',
+            'kutipan'      => 'nullable|string',
         ]);
 
         $referensiJurnal->update($validated);
@@ -79,5 +108,65 @@ class ReferensiJurnalController extends Controller
 
         return redirect()->route('admin.referensi-jurnals.index')
             ->with('success', 'Referensi Jurnal berhasil dihapus');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'file.required' => 'File Excel wajib diunggah',
+            'file.mimes'    => 'File harus berformat .xlsx, .xls, atau .csv',
+            'file.max'      => 'Ukuran file maksimal 5MB',
+        ]);
+
+        try {
+            $import = new ReferensiJurnalImport();
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $updated  = $import->getUpdatedCount();
+
+            if ($imported === 0 && $updated === 0) {
+                $msg = 'Tidak ada data yang diimport atau diperbarui.';
+            } else {
+                $msg = 'Import berhasil! ';
+                if ($imported > 0) $msg .= "{$imported} data baru ditambahkan. ";
+                if ($updated  > 0) $msg .= "{$updated} data diperbarui.";
+            }
+
+            return redirect()->route('admin.referensi-jurnals.index')->with('success', $msg);
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.referensi-jurnals.index')
+                ->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new class implements
+            \Maatwebsite\Excel\Concerns\FromArray,
+            \Maatwebsite\Excel\Concerns\WithHeadings,
+            \Maatwebsite\Excel\Concerns\WithStyles
+        {
+            public function array(): array
+            {
+                return [
+                    ['Jurnal Informatika Nusantara', 'Jurnal Nasional', 'Teknik Informatika', 2024, 'Penulis, A. (2024). Judul artikel. Jurnal Informatika, 10(2), 1-10. https://doi.org/xxx', 'A. Penulis, "Judul," Jurnal Informatika, vol. 10, no. 2, pp. 1–10, 2024.'],
+                    ['International Journal of AI', 'Jurnal Internasional', 'Kecerdasan Buatan', 2023, 'Author, B. (2023). Title. Int. J. AI, 5(1), 20-35.', 'B. Author, "Title," Int. J. AI, vol. 5, no. 1, pp. 20–35, 2023.'],
+                ];
+            }
+
+            public function headings(): array
+            {
+                return ['nama_jurnal', 'jenis_jurnal', 'bidang_ilmu', 'tahun', 'referensi', 'kutipan'];
+            }
+
+            public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
+            {
+                return [1 => ['font' => ['bold' => true]]];
+            }
+        }, 'template_referensi_jurnal.xlsx');
     }
 }

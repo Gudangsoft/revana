@@ -125,6 +125,25 @@
                                 @foreach($errors->all() as $error)
                                     {{ $error }}
                                 @endforeach
+                                @if(session('session_conflict'))
+                                <div class="mt-2 pt-2 border-top border-danger-subtle">
+                                    <small class="d-block mb-2 text-muted">Jika Anda pemilik akun ini, masukkan ulang password lalu klik tombol di bawah untuk mengambil alih sesi.</small>
+                                    <form method="POST" action="{{ route('login') }}" id="forceLoginForm">
+                                        @csrf
+                                        <input type="hidden" name="email" value="{{ old('email') }}">
+                                        <input type="hidden" name="force_login" value="1">
+                                        <div class="mb-2">
+                                            <input type="password" class="form-control form-control-sm" name="password" required placeholder="Masukkan password Anda">
+                                        </div>
+                                        <div class="mb-2">
+                                            <input type="number" class="form-control form-control-sm" name="captcha_answer" required placeholder="Verifikasi: {{ $captcha_question }} = ?">
+                                        </div>
+                                        <button type="submit" class="btn btn-warning btn-sm w-100">
+                                            <i class="bi bi-shield-exclamation"></i> Paksa Login (Ambil Alih Sesi)
+                                        </button>
+                                    </form>
+                                </div>
+                                @endif
                             </div>
                             @endif
 
@@ -165,8 +184,12 @@
 
                             <div class="mt-3 text-center">
                                 <hr class="my-3">
-<a href="{{ route('reviewer-registration.form') }}" class="btn btn-success w-100 mb-2">
+                                <a href="{{ route('reviewer-registration.form') }}" class="btn btn-success w-100 mb-2">
                                     <i class="bi bi-person-plus-fill"></i> Daftar sebagai Reviewer
+                                </a>
+                                <a href="{{ route('public.referensi-jurnal') }}" class="btn w-100 mb-2"
+                                   style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;">
+                                    <i class="bi bi-bookmark-star-fill"></i> Daftar Referensi Jurnal
                                 </a>
                                 <a href="{{ route('pic.login') }}" class="btn btn-outline-secondary w-100" style="display: none;">
                                     <i class="bi bi-person-badge"></i> Login sebagai PIC

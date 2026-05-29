@@ -56,12 +56,19 @@ class LoginController extends Controller
                 $activeSession = Cache::get($cacheKey);
 
                 if ($activeSession && $activeSession !== session()->getId()) {
-                    Auth::logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-                    return back()->withErrors([
-                        'email' => 'Akun admin ini sedang aktif di sesi lain. Silakan logout dari sesi tersebut terlebih dahulu.',
-                    ])->onlyInput('email');
+                    if (!$request->boolean('force_login')) {
+                        Auth::logout();
+                        $request->session()->invalidate();
+                        $request->session()->regenerateToken();
+                        return back()
+                            ->withErrors([
+                                'email' => 'Akun admin ini sedang aktif di sesi lain.',
+                            ])
+                            ->onlyInput('email')
+                            ->with('session_conflict', true);
+                    }
+                    // Force login: hapus sesi lama, lanjutkan
+                    Cache::forget($cacheKey);
                 }
 
                 Cache::put($cacheKey, session()->getId(), now()->addMinutes(config('session.lifetime', 120)));
