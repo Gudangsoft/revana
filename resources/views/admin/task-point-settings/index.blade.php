@@ -59,11 +59,11 @@
                                                     <td><code>{{ $setting->task_key }}</code></td>
                                                     <td>{{ $setting->task_label }}</td>
                                                     <td>
-                                                        <input type="number" 
-                                                               name="points[{{ $setting->id }}]" 
-                                                               value="{{ $setting->points }}" 
+                                                        <input type="number"
+                                                               name="points[{{ $setting->id }}]"
+                                                               value="{{ $setting->points }}"
                                                                class="form-control form-control-sm text-center"
-                                                               min="0">
+                                                               min="0" step="0.01">
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="form-check form-switch d-flex justify-content-center">
@@ -112,11 +112,11 @@
                                                     <td><code>{{ $setting->task_key }}</code></td>
                                                     <td>{{ $setting->task_label }}</td>
                                                     <td>
-                                                        <input type="number" 
-                                                               name="points[{{ $setting->id }}]" 
-                                                               value="{{ $setting->points }}" 
+                                                        <input type="number"
+                                                               name="points[{{ $setting->id }}]"
+                                                               value="{{ $setting->points }}"
                                                                class="form-control form-control-sm text-center"
-                                                               min="0">
+                                                               min="0" step="0.01">
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="form-check form-switch d-flex justify-content-center">
@@ -141,8 +141,17 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="alert alert-warning mb-0 py-2 px-3" style="font-size:.82rem; max-width:680px;">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                <strong>Nilai desimal didukung</strong> (contoh: <code>0.25</code>, <code>0.33</code>, <code>1.5</code>).
+                                &nbsp;|&nbsp;
+                                <strong>Perubahan nilai hanya berlaku untuk transaksi baru ke depan.</strong>
+                                Data historis yang sudah tercatat <em>tidak berubah otomatis</em>.
+                                Gunakan tombol <strong>Sync Ulang Poin</strong> di halaman Laporan Point
+                                jika ingin recalculate semua data dengan nilai baru.
+                            </div>
+                            <button type="submit" class="btn btn-primary flex-shrink-0">
                                 <i class="fas fa-save me-2"></i>Simpan Pengaturan
                             </button>
                         </div>
@@ -187,8 +196,8 @@
                                     <div class="col-md-2">
                                         <div class="mb-3">
                                             <label class="form-label">Point</label>
-                                            <input type="number" name="points" class="form-control" 
-                                                   value="1" min="0" required>
+                                            <input type="number" name="points" class="form-control"
+                                                   value="1" min="0" step="0.01" required>
                                         </div>
                                     </div>
                                 </div>

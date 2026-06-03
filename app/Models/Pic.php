@@ -28,9 +28,9 @@ class Pic extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'password' => 'hashed',
-        'total_points' => 'integer',
+        'is_active'    => 'boolean',
+        'password'     => 'hashed',
+        'total_points' => 'float',
     ];
 
     /**

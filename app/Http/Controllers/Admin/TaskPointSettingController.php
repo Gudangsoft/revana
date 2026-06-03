@@ -25,9 +25,9 @@ class TaskPointSettingController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'points' => 'required|array',
-            'points.*' => 'required|integer|min:0',
-            'is_active' => 'nullable|array',
+            'points'      => 'required|array',
+            'points.*'    => 'required|numeric|min:0',
+            'is_active'   => 'nullable|array',
             'is_active.*' => 'nullable|boolean',
         ]);
 
@@ -51,10 +51,10 @@ class TaskPointSettingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_type' => 'required|in:pic,marketing',
-            'task_key' => 'required|string|max:50',
+            'user_type'  => 'required|in:pic,marketing',
+            'task_key'   => 'required|string|max:50',
             'task_label' => 'required|string|max:100',
-            'points' => 'required|integer|min:0',
+            'points'     => 'required|numeric|min:0',
         ]);
 
         // Check if already exists

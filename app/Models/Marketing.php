@@ -25,8 +25,8 @@ class Marketing extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'total_points' => 'integer',
+        'is_active'    => 'boolean',
+        'total_points' => 'float',
     ];
 
     /**

@@ -33,22 +33,25 @@ class PicPointHistory extends Model
         'submit' => ['points' => 1, 'label' => 'Submit Artikel'],
     ];
 
+    protected $casts = [
+        'points_earned' => 'float',
+    ];
+
     /**
      * Get points for a specific step (uses database config if available)
      */
-    public static function getPointsForStep(string $step): int
+    public static function getPointsForStep(string $step): float
     {
-        // Try to get from database first
         try {
             $dbPoints = TaskPointSetting::getPicPoints($step);
             if ($dbPoints !== null) {
-                return $dbPoints;
+                return (float) $dbPoints;
             }
         } catch (\Exception $e) {
             // Database not available, use fallback
         }
-        
-        return self::POINT_CONFIG[$step]['points'] ?? 0;
+
+        return (float) (self::POINT_CONFIG[$step]['points'] ?? 0);
     }
 
     /**

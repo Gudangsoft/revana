@@ -22,21 +22,25 @@ class MarketingPointHistory extends Model
      */
     public const POINT_PER_SUBMISSION = 1;
 
+    protected $casts = [
+        'points_earned' => 'float',
+    ];
+
     /**
      * Get points for submission (uses database config if available)
      */
-    public static function getPointsForSubmission(): int
+    public static function getPointsForSubmission(): float
     {
         try {
             $dbPoints = TaskPointSetting::getMarketingPoints('submit');
             if ($dbPoints !== null) {
-                return $dbPoints;
+                return (float) $dbPoints;
             }
         } catch (\Exception $e) {
             // Database not available, use fallback
         }
-        
-        return self::POINT_PER_SUBMISSION;
+
+        return (float) self::POINT_PER_SUBMISSION;
     }
 
     /**

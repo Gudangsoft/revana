@@ -226,3 +226,11 @@
 - `log-update-2026-05-29.md`
 - `resources/views/public/referensi-jurnal.blade.php`
 
+
+## 20. 🔄 Update: up
+
+- **Commit:** `cf20c48` — 17:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-05-29.md`
+- `resources/views/public/referensi-jurnal.blade.php`
+

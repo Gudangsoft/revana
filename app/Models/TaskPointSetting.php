@@ -19,32 +19,33 @@ class TaskPointSetting extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'points'    => 'float',
     ];
 
     /**
      * Get points for PIC task
      */
-    public static function getPicPoints(string $taskKey): int
+    public static function getPicPoints(string $taskKey): float
     {
         $setting = self::where('user_type', 'pic')
             ->where('task_key', $taskKey)
             ->where('is_active', true)
             ->first();
 
-        return $setting ? $setting->points : 1;
+        return $setting ? (float) $setting->points : 1.0;
     }
 
     /**
      * Get points for Marketing task
      */
-    public static function getMarketingPoints(string $taskKey = 'submit'): int
+    public static function getMarketingPoints(string $taskKey = 'submit'): float
     {
         $setting = self::where('user_type', 'marketing')
             ->where('task_key', $taskKey)
             ->where('is_active', true)
             ->first();
 
-        return $setting ? $setting->points : 1;
+        return $setting ? (float) $setting->points : 1.0;
     }
 
     /**
