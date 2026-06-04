@@ -524,6 +524,7 @@ Route::prefix('pic')->group(function () {
         Route::prefix('submissions')->name('pic.submissions.')->group(function () {
             Route::get('/', [PicJournalController::class, 'submissionsIndex'])->name('index');
             Route::get('/monitoring', [PicJournalController::class, 'submissionsMonitoring'])->name('monitoring');
+            Route::get('/monitoring/export', [PicJournalController::class, 'submissionsMonitoringExport'])->name('monitoring.export');
             Route::post('/update-credential', [PicJournalController::class, 'updateCredential'])->name('update-credential');
             Route::post('/toggle-validation', [PicJournalController::class, 'toggleValidation'])->name('toggle-validation');
             Route::post('/update-petugas', [PicJournalController::class, 'updatePetugas'])->name('update-petugas');

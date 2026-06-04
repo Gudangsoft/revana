@@ -427,21 +427,29 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="submit" class="btn btn-primary">
+                        <div class="col-md-2">
+                            <label for="sort_by" class="form-label small mb-1">Urutkan</label>
+                            <select class="form-select form-select-sm" id="sort_by" name="sort_by">
+                                <option value="date_desc" {{ request('sort_by', 'date_desc') == 'date_desc' ? 'selected' : '' }}>Terbaru</option>
+                                <option value="date_asc"  {{ request('sort_by') == 'date_asc'  ? 'selected' : '' }}>Terlama</option>
+                                <option value="title_asc" {{ request('sort_by') == 'title_asc' ? 'selected' : '' }}>Judul A → Z</option>
+                                <option value="title_desc"{{ request('sort_by') == 'title_desc'? 'selected' : '' }}>Judul Z → A</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small mb-1 invisible">.</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="bi bi-search"></i> Filter
                                 </button>
-                                <a href="{{ route('admin.submissions.monitoring', array_filter(['program' => $program ?? null])) }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                                <a href="{{ route('admin.submissions.monitoring', array_filter(['program' => $program ?? null])) }}" class="btn btn-outline-secondary btn-sm" title="Reset filter">
+                                    <i class="bi bi-arrow-clockwise"></i>
                                 </a>
-                            </div>
-                            <div class="btn-group btn-group-sm ms-2" role="group">
-                                <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-success">
-                                    <i class="bi bi-file-earmark-excel"></i> Export
+                                <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-success btn-sm" title="Export Excel">
+                                    <i class="bi bi-file-earmark-excel"></i>
                                 </a>
-                                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importModal">
-                                    <i class="bi bi-upload"></i> Import
+                                <button type="button" class="btn btn-outline-success btn-sm" title="Import" data-bs-toggle="modal" data-bs-target="#importModal">
+                                    <i class="bi bi-upload"></i>
                                 </button>
                             </div>
                         </div>
@@ -537,6 +545,9 @@
                                 <th rowspan="2" class="align-middle sticky-first">Kode Submit</th>
                                 <th rowspan="2" class="align-middle sticky-second">ID Artikel</th>
                                 <th rowspan="2" class="align-middle">Judul</th>
+                                <th rowspan="2" class="align-middle text-center" style="min-width:80px; background:#fff3cd; color:#856404;" title="Catatan dari Marketing">
+                                    <i class="bi bi-megaphone-fill"></i><br><small>Mkt Note</small>
+                                </th>
                                 <th rowspan="2" class="align-middle">Link</th>
                                 <th rowspan="2" class="align-middle">Penulis</th>
                                 <th rowspan="2" class="align-middle">No HP</th>
@@ -614,6 +625,20 @@
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>
+                                <td class="text-center" style="background:#fffbf0;">
+                                    @if($s->catatan_marketing)
+                                        <span class="badge"
+                                              style="background:#fd7e14;color:#fff;white-space:normal;line-height:1.3;max-width:90px;display:inline-block;cursor:help;"
+                                              title="{{ $s->catatan_marketing }}"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="top">
+                                            <i class="bi bi-megaphone-fill"></i>
+                                            {{ Str::limit($s->catatan_marketing, 25) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if($s->link_artikel)
                                         <a href="{{ $s->link_artikel }}" target="_blank"><i class="bi bi-link-45deg"></i></a>

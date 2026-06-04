@@ -30,6 +30,7 @@ class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithSty
     {
         $query = Submission::with([
             'journalSlot.journalMaster',
+            'marketing',
             'petugasSubmit',
             'petugasEditor1',
             'petugasAuthor1',
@@ -39,6 +40,7 @@ class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithSty
             'petugasEditor3',
             'petugasAuthor2',
             'petugasProduction',
+            'petugasValidator',
         ]);
 
         if (!empty($this->filters['tanggal_dari'])) {
@@ -75,6 +77,7 @@ class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithSty
             'No HP Penulis',
             'Username Author',
             'Password Author',
+            'Catatan Marketing',
             'PIC Marketing',
             'Petugas Submit',
             'Tanggal Submit',
@@ -106,6 +109,8 @@ class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithSty
             'Petugas Production',
             'Link Publish',
             'Production Valid',
+            'Petugas Validator',
+            'Validator Valid',
         ];
     }
 
@@ -137,7 +142,8 @@ class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithSty
             $submission->no_hp_penulis ?? '-',
             $submission->username_author ?? '-',
             $submission->password_author ?? '-',
-            $submission->pic_marketing ?? '-',
+            $submission->catatan_marketing ?? '-',
+            $submission->marketing?->name ?? '-',
             $submission->petugasSubmit?->name ?? '-',
             $tanggalSubmit,
             $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-',
@@ -168,6 +174,8 @@ class SubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithSty
             $submission->petugasProduction?->name ?? '-',
             $submission->link_publish ?? '-',
             $submission->production_valid ? 'Ya' : 'Tidak',
+            $submission->petugasValidator?->name ?? '-',
+            $submission->validator_valid ? 'Ya' : 'Tidak',
         ];
     }
 

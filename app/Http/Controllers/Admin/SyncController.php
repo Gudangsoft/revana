@@ -27,19 +27,21 @@ class SyncController extends Controller
         $totalSlots    = $slots->count();
 
         // --- Marketing Points ---
-        $marketings          = Marketing::withCount([
+        $marketings         = Marketing::withCount([
             'submissions as actual_points' => fn($q) => $q->where('status', '!=', 'REJECTED'),
         ])->get();
-        $marketingOutOfSync  = $marketings->filter(fn($m) => $m->total_points !== $m->actual_points)->count();
-        $totalMarketings     = $marketings->count();
+        // Use != (loose) — total_points is cast as float, actual_points is int from withCount
+        $marketingOutOfSync = $marketings->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
+        $totalMarketings    = $marketings->count();
 
         // --- PIC Points ---
         $pics = Pic::all()->map(function ($pic) {
-            $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+            $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
             $pic->actual_points = $actual;
             return $pic;
         });
-        $picOutOfSync = $pics->filter(fn($p) => $p->total_points !== (int) $p->actual_points)->count();
+        // round() handles float imprecision; compare as float with 2 decimal precision
+        $picOutOfSync = $pics->filter(fn($p) => round((float) $p->total_points, 4) !== round((float) $p->actual_points, 4))->count();
         $totalPics    = $pics->count();
 
         return [
@@ -93,7 +95,8 @@ class SyncController extends Controller
 
         foreach ($marketings as $marketing) {
             $actual = $marketing->submissions()->where('status', '!=', 'REJECTED')->count();
-            if ($marketing->total_points !== $actual) {
+            // Use loose comparison — total_points is float, $actual is int
+            if ((int) round($marketing->total_points) !== $actual) {
                 $marketing->update(['total_points' => $actual]);
                 $updated++;
             }
@@ -111,9 +114,10 @@ class SyncController extends Controller
         $updated = 0;
 
         foreach ($pics as $pic) {
-            $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            if ($pic->total_points !== (int) $actual) {
-                $pic->update(['total_points' => (int) $actual]);
+            $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+            // round() to 4 decimal places avoids float imprecision false positives
+            if (round((float) $pic->total_points, 4) !== round($actual, 4)) {
+                $pic->update(['total_points' => $actual]);
                 $updated++;
             }
         }
@@ -130,16 +134,17 @@ class SyncController extends Controller
             // Slots
             JournalSlot::recalculateAll();
 
-            // Marketing points
+            // Marketing points — 1 point per non-rejected submission
             foreach (Marketing::all() as $m) {
                 $actual = $m->submissions()->where('status', '!=', 'REJECTED')->count();
                 $m->update(['total_points' => $actual]);
             }
 
-            // PIC points
+            // PIC points — rebuild total_points from pic_point_histories sum.
+            // This also corrects any double-counted values from historical bugs.
             foreach (Pic::all() as $pic) {
-                $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-                $pic->update(['total_points' => (int) $actual]);
+                $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+                $pic->update(['total_points' => $actual]);
             }
         });
 
@@ -158,11 +163,11 @@ class SyncController extends Controller
 
         $marketingOutOfSync = Marketing::withCount([
             'submissions as actual_points' => fn($q) => $q->where('status', '!=', 'REJECTED'),
-        ])->get()->filter(fn($m) => $m->total_points !== $m->actual_points)->count();
+        ])->get()->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
 
         $picOutOfSync = Pic::all()->filter(function ($pic) {
-            $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            return $pic->total_points !== (int) $actual;
+            $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+            return round((float) $pic->total_points, 4) !== round($actual, 4);
         })->count();
 
         return $slotOutOfSync + $marketingOutOfSync + $picOutOfSync;

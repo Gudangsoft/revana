@@ -59,7 +59,8 @@ class Marketing extends Authenticatable
     public function syncPoints(): int
     {
         $actualPoints = $this->getActualPoints();
-        if ($this->total_points !== $actualPoints) {
+        // total_points is cast as float; compare loosely to avoid false positives
+        if ((int) round($this->total_points) !== $actualPoints) {
             $this->update(['total_points' => $actualPoints]);
         }
         return $actualPoints;

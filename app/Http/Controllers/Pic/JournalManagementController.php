@@ -704,32 +704,35 @@ class JournalManagementController extends Controller
     }
     
     /**
-     * PIC menandai pekerjaan sudah selesai dikerjakan
-     * Point akan diberikan setelah Admin memvalidasi
+     * PIC menandai pekerjaan sudah selesai dikerjakan.
+     * Poin otomatis diberikan saat PIC menyerahkan pekerjaan per tahap.
      */
     public function submitWork(Request $request, Submission $submission)
     {
         $picId = auth()->guard('pic')->id();
-        
+
         if (!$this->isUrgentForPic($submission, $picId)) {
             return back()->with('error', 'Anda tidak memiliki akses untuk submit pekerjaan ini.');
         }
-        
+
         $request->validate([
             'notes' => 'nullable|string|max:1000',
         ]);
-        
+
         $status = strtoupper($submission->status);
         $stepName = $this->getStepFromStatus($status);
-        
+
         // Change status to waiting validation (add _SUBMITTED suffix)
         // e.g. EDITOR1_PROCESS → EDITOR1_SUBMITTED
         $submittedStatus = str_replace('_PROCESS', '_SUBMITTED', $status);
         $submittedStatus = str_replace('_REVISION', '_SUBMITTED', $submittedStatus);
-        
+
         $submission->status = $submittedStatus;
         $submission->save();
-        
+
+        // Initialize early to avoid undefined variable warning
+        $pointHistory = null;
+
         // Record history - PIC submitted work
         if ($stepName) {
             \DB::table('submission_histories')->insert([
@@ -743,10 +746,24 @@ class JournalManagementController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            // Auto-award poin per tahap saat PIC menyerahkan pekerjaan.
+            // awardPoints() sudah menangani: cek duplikat, increment total_points, dan cache flush.
+            $pointHistory = PicPointHistory::awardPoints(
+                $picId,
+                $submission->id,
+                $stepName,
+                "Selesai " . PicPointHistory::getLabelForStep($stepName) . ": {$submission->kode_submit}"
+            );
         }
-        
+
+        $successMsg = 'Pekerjaan berhasil diserahkan! Menunggu validasi dari Admin.';
+        if ($pointHistory !== null) {
+            $successMsg .= " +{$pointHistory->points_earned} poin dicatat.";
+        }
+
         return redirect()->route('pic.submissions.show', $submission)
-            ->with('success', 'Pekerjaan berhasil diserahkan! Menunggu validasi dari Admin.');
+            ->with('success', $successMsg);
     }
     
     public function requestRevision(Request $request, Submission $submission)
@@ -850,13 +867,15 @@ class JournalManagementController extends Controller
     private function getStepFromStatus(string $status): ?string
     {
         $stepMapping = [
-            'EDITOR1' => 'editor1',
-            'AUTHOR1' => 'author1',
-            'EDITOR2' => 'editor2',
-            'EDITOR3' => 'editor3',
-            'AUTHOR2' => 'author2',
+            'REVIEWER1'  => 'reviewer1',
+            'REVIEWER2'  => 'reviewer2',
+            'EDITOR1'    => 'editor1',
+            'AUTHOR1'    => 'author1',
+            'EDITOR2'    => 'editor2',
+            'EDITOR3'    => 'editor3',
+            'AUTHOR2'    => 'author2',
             'PRODUCTION' => 'production',
-            'VALIDATOR' => 'validator',
+            'VALIDATOR'  => 'validator',
         ];
         
         foreach ($stepMapping as $key => $step) {
@@ -929,7 +948,16 @@ class JournalManagementController extends Controller
                   });
         }
 
-        $submissions = $query->latest()->paginate(request()->input('per_page', 50))->withQueryString();
+        // Sort
+        $sortBy = $request->input('sort_by', 'date_desc');
+        match ($sortBy) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+            'date_asc'   => $query->orderBy('created_at', 'asc'),
+            default      => $query->orderByDesc('created_at'),
+        };
+
+        $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
 
         // Statistics - based on PIC's assigned tasks (exclude fasttrack)
@@ -1002,12 +1030,96 @@ class JournalManagementController extends Controller
         }
         
         $stats['urgent'] = $urgentTasks;
-        
+
         // Additional counts for summary cards
         $myTaskCount = $mySubmissions->count();
         $totalSubmissions = Submission::count();
-        
-        return view('pic.submissions.monitoring', compact('submissions', 'journals', 'stats', 'myTaskCount', 'totalSubmissions'));
+
+        // Determine which step columns to show (only steps this PIC has ever been assigned to).
+        // Uses exists() per step — fast index lookups, avoids aliasing issues with get([assoc]).
+        $stepFieldMap = [
+            'submit'     => 'petugas_submit_id',
+            'editor1'    => 'petugas_editor1_id',
+            'author1'    => 'petugas_author1_id',
+            'editor2'    => 'petugas_editor2_id',
+            'reviewer1'  => 'petugas_reviewer1_id',
+            'reviewer2'  => 'petugas_reviewer2_id',
+            'editor3'    => 'petugas_editor3_id',
+            'author2'    => 'petugas_author2_id',
+            'production' => 'petugas_production_id',
+            'validator'  => 'petugas_validator_id',
+        ];
+        $mySteps = [];
+        foreach ($stepFieldMap as $step => $field) {
+            if (Submission::where($field, $picId)->exists()) {
+                $mySteps[] = $step;
+            }
+        }
+
+        return view('pic.submissions.monitoring', compact(
+            'submissions', 'journals', 'stats', 'myTaskCount', 'totalSubmissions', 'mySteps'
+        ));
+    }
+
+    /**
+     * Export PIC monitoring submissions to Excel
+     */
+    public function submissionsMonitoringExport(Request $request)
+    {
+        $picId = auth()->guard('pic')->id();
+
+        $query = Submission::with([
+            'journalSlot.journalMaster', 'marketing',
+            'petugasSubmit', 'petugasEditor1', 'petugasEditor2', 'petugasEditor3',
+            'petugasAuthor1', 'petugasAuthor2', 'petugasReviewer1', 'petugasReviewer2',
+            'petugasProduction', 'petugasValidator',
+        ])->where(function ($q) {
+            $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+        })->where(function ($q) use ($picId) {
+            $q->where('petugas_submit_id', $picId)
+              ->orWhere('petugas_editor1_id', $picId)
+              ->orWhere('petugas_author1_id', $picId)
+              ->orWhere('petugas_editor2_id', $picId)
+              ->orWhere('petugas_editor3_id', $picId)
+              ->orWhere('petugas_author2_id', $picId)
+              ->orWhere('petugas_reviewer1_id', $picId)
+              ->orWhere('petugas_reviewer2_id', $picId)
+              ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
+        });
+
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
+        if ($request->filled('journal_id')) {
+            $query->whereHas('journalSlot', fn($q) => $q->where('journal_master_id', $request->journal_id));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('sort_by')) {
+            match ($request->sort_by) {
+                'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+                'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+                'date_asc'   => $query->orderBy('created_at', 'asc'),
+                default      => $query->orderByDesc('created_at'),
+            };
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        $submissions = $query->get();
+        $picName = auth()->guard('pic')->user()->name ?? 'pic';
+
+        $filename = 'monitoring_pic_' . \Str::slug($picName) . '_' . date('Ymd_His') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PicMonitoringExport($submissions, $picId),
+            $filename
+        );
     }
 
     /**

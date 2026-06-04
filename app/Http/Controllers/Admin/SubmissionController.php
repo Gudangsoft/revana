@@ -175,17 +175,14 @@ class SubmissionController extends Controller
         }
 
         // Award points to PIC submit
+        // awardPoints() handles: duplicate-check, increment total_points, and cache flush internally.
         if (!empty($validated['petugas_submit_id'])) {
-            $picHistory = PicPointHistory::awardPoints(
+            PicPointHistory::awardPoints(
                 $validated['petugas_submit_id'],
                 $submission->id,
                 'submit',
                 "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
             );
-            if ($picHistory) {
-                $pic = Pic::find($validated['petugas_submit_id']);
-                $pic->increment('total_points', $picHistory->points_earned);
-            }
         }
 
         // Kirim notifikasi WhatsApp ke penulis via Fonnte
@@ -581,11 +578,13 @@ class SubmissionController extends Controller
         
         // Map step to petugas field for point awarding
         $stepToPetugasField = [
-            'editor1' => 'petugas_editor1_id',
-            'author1' => 'petugas_author1_id',
-            'editor2' => 'petugas_editor2_id',
-            'editor3' => 'petugas_editor3_id',
-            'author2' => 'petugas_author2_id',
+            'editor1'   => 'petugas_editor1_id',
+            'author1'   => 'petugas_author1_id',
+            'editor2'   => 'petugas_editor2_id',
+            'reviewer1' => 'petugas_reviewer1_id',
+            'reviewer2' => 'petugas_reviewer2_id',
+            'editor3'   => 'petugas_editor3_id',
+            'author2'   => 'petugas_author2_id',
             'production' => 'petugas_production_id',
             'validator' => 'petugas_validator_id',
         ];
@@ -795,8 +794,17 @@ class SubmissionController extends Controller
 
         $this->applyProgramFilter($query, $request);
 
+        // Sort
+        $sortBy = $request->input('sort_by', 'date_desc');
+        match ($sortBy) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit'),
+        };
+
         // Get paginated submissions
-        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50))->withQueryString();
+        $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
 
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
