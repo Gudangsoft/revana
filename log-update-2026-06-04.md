@@ -193,11 +193,46 @@ Model `Pic` dan `Marketing` memiliki `total_points` di-cast sebagai `float`. Sem
 - `resources/views/pic/fasttrack/monitoring.blade.php`
 
 
-## 10. 🔄 Update: as
+## 11. Fix Lag Admin Fasttrack Monitoring — Lazy-Select Dropdown
+
+**Tujuan:** Halaman admin fasttrack monitoring terasa sangat lambat karena me-render semua opsi dropdown langsung di HTML (50 baris × 9 dropdown × 71 PIC = ~32.000 DOM elements). Diperbaiki dengan menerapkan pola lazy-select.
+
+### Root Cause
+Monitoring regular pakai `lazy-select` — opsi dimuat saat hover via JS.
+Monitoring fasttrack pakai `@foreach($pics as $pic)` langsung di setiap baris tabel.
+
+### Hasil
+- HTML size: dari ~32.000 nodes → **~450 nodes** (50 baris × 9 opsi terpilih)
+- Render time turun drastis
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | 9 dropdown per baris: ganti `@foreach($pics)` → lazy-select pattern + JS loader |
+
+---
+
+## 12. 🔄 Update: as
 
 - **Commit:** `808f07a` — 20:19 oleh Gudangsoft
 - **File berubah:** 3 file
 - `log-update-2026-06-04.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
 - `resources/views/pic/submissions/monitoring.blade.php`
+
+
+## 12. 🔄 Update: update
+
+- **Commit:** `2295b53` — 20:34 oleh Gudangsoft
+- **File berubah:** 10 file
+- `app/Http/Controllers/Admin/LaporanKinerjaController.php`
+- `app/Http/Controllers/Admin/SyncController.php`
+- `app/Providers/ViewServiceProvider.php`
+- `database/migrations/2026_06_04_203005_add_performance_indexes_to_tables.php`
+- `log-update-2026-06-04.md`
+- `resources/views/admin/partials/sidebar.blade.php`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/marketing/layouts/app.blade.php`
+- `resources/views/partials/auto-refresh.blade.php`
+- `resources/views/pic/partials/sidebar.blade.php`
 

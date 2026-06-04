@@ -630,15 +630,16 @@
                                 </td>
                                 <!-- Author Access: PIC Marketing, Petugas Submit, Username, Password -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->marketing_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
+                                    <select class="inline-assign-select lazy-select {{ $s->marketing_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
                                             data-type="marketing"
                                             data-model="marketing"
+                                            data-selected="{{ $s->marketing_id }}"
                                             onchange="quickAssignMarketing(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($marketings as $mkt)
-                                            <option value="{{ $mkt->id }}" {{ $s->marketing_id == $mkt->id ? 'selected' : '' }}>{{ $mkt->name }}</option>
-                                        @endforeach
+                                        @if($s->marketing_id)
+                                            <option value="{{ $s->marketing_id }}" selected>{{ $marketings->firstWhere('id', $s->marketing_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td>
@@ -655,15 +656,15 @@
                                 
                                 <!-- Editor 1 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_editor1_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="editor1"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_editor1_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="editor1" data-model="pic"
+                                            data-selected="{{ $s->petugas_editor1_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_editor1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_editor1_id)
+                                            <option value="{{ $s->petugas_editor1_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_editor1_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td>
@@ -687,45 +688,45 @@
                                 
                                 <!-- Author 1 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_author1_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="author1"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_author1_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="author1" data-model="pic"
+                                            data-selected="{{ $s->petugas_author1_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_author1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_author1_id)
+                                            <option value="{{ $s->petugas_author1_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_author1_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Editor 2 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_editor2_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="editor2"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_editor2_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="editor2" data-model="pic"
+                                            data-selected="{{ $s->petugas_editor2_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_editor2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_editor2_id)
+                                            <option value="{{ $s->petugas_editor2_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_editor2_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Reviewer 1 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="reviewer1"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="reviewer1" data-model="pic"
+                                            data-selected="{{ $s->petugas_reviewer1_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_reviewer1_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_reviewer1_id)
+                                            <option value="{{ $s->petugas_reviewer1_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_reviewer1_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td>
@@ -750,15 +751,15 @@
                                 
                                 <!-- Reviewer 2 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_reviewer2_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="reviewer2"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer2_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="reviewer2" data-model="pic"
+                                            data-selected="{{ $s->petugas_reviewer2_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_reviewer2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_reviewer2_id)
+                                            <option value="{{ $s->petugas_reviewer2_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_reviewer2_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td>
@@ -783,45 +784,45 @@
                                 
                                 <!-- Editor 3 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_editor3_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="editor3"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_editor3_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="editor3" data-model="pic"
+                                            data-selected="{{ $s->petugas_editor3_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_editor3_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_editor3_id)
+                                            <option value="{{ $s->petugas_editor3_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_editor3_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Author 2 -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_author2_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="author2"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_author2_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="author2" data-model="pic"
+                                            data-selected="{{ $s->petugas_author2_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_author2_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_author2_id)
+                                            <option value="{{ $s->petugas_author2_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_author2_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
                                 
                                 <!-- Production -->
                                 <td>
-                                    <select class="inline-assign-select {{ $s->petugas_production_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
-                                            data-type="production"
-                                            data-model="pic"
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_production_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
+                                            data-type="production" data-model="pic"
+                                            data-selected="{{ $s->petugas_production_id }}"
                                             onchange="quickAssign(this)">
                                         <option value="">-- Pilih --</option>
-                                        @foreach($pics as $pic)
-                                            <option value="{{ $pic->id }}" {{ $s->petugas_production_id == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                                        @endforeach
+                                        @if($s->petugas_production_id)
+                                            <option value="{{ $s->petugas_production_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_production_id)?->name }}</option>
+                                        @endif
                                     </select>
                                 </td>
                                 <td>
@@ -1202,6 +1203,28 @@ document.addEventListener('DOMContentLoaded', function() {
         cb.addEventListener('change', updateSelectedCount);
     });
 });
+
+// Lazy-load dropdown options on hover — prevents 30K+ DOM nodes on page load
+(function() {
+    const listPics       = @json($pics->map(fn($p) => ['id' => $p->id, 'name' => $p->name]));
+    const listMarketings = @json($marketings->map(fn($m) => ['id' => $m->id, 'name' => $m->name]));
+
+    document.addEventListener('mouseover', function(e) {
+        const sel = e.target;
+        if (!sel.classList.contains('lazy-select') || sel.dataset.loaded) return;
+        const items = sel.dataset.model === 'marketing' ? listMarketings : listPics;
+        const selectedVal = sel.dataset.selected;
+        items.forEach(function(item) {
+            if (String(item.id) !== String(selectedVal)) {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name;
+                sel.appendChild(opt);
+            }
+        });
+        sel.dataset.loaded = '1';
+    });
+})();
 </script>
 
 <!-- Bulk Editor Assignment Modal -->
