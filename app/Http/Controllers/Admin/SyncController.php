@@ -9,6 +9,7 @@ use App\Models\Pic;
 use App\Models\PicPointHistory;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class SyncController extends Controller
@@ -34,13 +35,15 @@ class SyncController extends Controller
         $marketingOutOfSync = $marketings->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
         $totalMarketings    = $marketings->count();
 
-        // --- PIC Points ---
-        $pics = Pic::all()->map(function ($pic) {
-            $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            $pic->actual_points = $actual;
+        // --- PIC Points --- (single aggregated query instead of N per-PIC queries)
+        $picActuals = PicPointHistory::selectRaw('pic_id, SUM(points_earned) as total')
+            ->groupBy('pic_id')
+            ->pluck('total', 'pic_id');
+
+        $pics = Pic::all()->map(function ($pic) use ($picActuals) {
+            $pic->actual_points = (float) ($picActuals[$pic->id] ?? 0);
             return $pic;
         });
-        // round() handles float imprecision; compare as float with 2 decimal precision
         $picOutOfSync = $pics->filter(fn($p) => round((float) $p->total_points, 4) !== round((float) $p->actual_points, 4))->count();
         $totalPics    = $pics->count();
 
@@ -82,6 +85,7 @@ class SyncController extends Controller
     public function syncSlots()
     {
         $count = JournalSlot::recalculateAll();
+        self::clearSyncCache();
         return back()->with('success', "✅ Sinkronisasi slot berhasil. {$count} slot jurnal telah diperbarui berdasarkan data submission aktual.");
     }
 
@@ -102,6 +106,7 @@ class SyncController extends Controller
             }
         }
 
+        self::clearSyncCache();
         return back()->with('success', "✅ Sinkronisasi point marketing berhasil. {$updated} dari {$marketings->count()} marketing diperbarui.");
     }
 
@@ -122,6 +127,7 @@ class SyncController extends Controller
             }
         }
 
+        self::clearSyncCache();
         return back()->with('success', "✅ Sinkronisasi point PIC berhasil. {$updated} dari {$pics->count()} PIC diperbarui.");
     }
 
@@ -148,28 +154,43 @@ class SyncController extends Controller
             }
         });
 
+        self::clearSyncCache();
         return back()->with('success', '✅ Sinkronisasi semua data berhasil! Slot jurnal, point marketing, dan point PIC telah diperbarui.');
     }
 
     /**
-     * Cek apakah ada data yang tidak sinkron (digunakan oleh login hook).
-     * Mengembalikan jumlah total item yang tidak sinkron.
+     * Cek apakah ada data yang tidak sinkron (digunakan sidebar — hasil di-cache 5 menit).
      */
     public static function countOutOfSync(): int
     {
-        $slotOutOfSync = JournalSlot::withCount([
-            'submissions as actual_used' => fn($q) => $q->where('status', '!=', 'REJECTED'),
-        ])->get()->filter(fn($s) => $s->slot_terpakai !== $s->actual_used)->count();
+        return Cache::remember('sync.out_of_sync_count', 300, function () {
+            // Slots — single withCount query
+            $slotOutOfSync = JournalSlot::withCount([
+                'submissions as actual_used' => fn($q) => $q->where('status', '!=', 'REJECTED'),
+            ])->get()->filter(fn($s) => $s->slot_terpakai !== $s->actual_used)->count();
 
-        $marketingOutOfSync = Marketing::withCount([
-            'submissions as actual_points' => fn($q) => $q->where('status', '!=', 'REJECTED'),
-        ])->get()->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
+            // Marketing — single withCount query
+            $marketingOutOfSync = Marketing::withCount([
+                'submissions as actual_points' => fn($q) => $q->where('status', '!=', 'REJECTED'),
+            ])->get()->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
 
-        $picOutOfSync = Pic::all()->filter(function ($pic) {
-            $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            return round((float) $pic->total_points, 4) !== round($actual, 4);
-        })->count();
+            // PIC — single aggregated query instead of N per-PIC queries
+            $picActuals = PicPointHistory::selectRaw('pic_id, SUM(points_earned) as total')
+                ->groupBy('pic_id')
+                ->pluck('total', 'pic_id');
 
-        return $slotOutOfSync + $marketingOutOfSync + $picOutOfSync;
+            $picOutOfSync = Pic::all()->filter(function ($pic) use ($picActuals) {
+                $actual = (float) ($picActuals[$pic->id] ?? 0);
+                return round((float) $pic->total_points, 4) !== round($actual, 4);
+            })->count();
+
+            return $slotOutOfSync + $marketingOutOfSync + $picOutOfSync;
+        });
+    }
+
+    /** Bersihkan cache sinkronisasi. */
+    private static function clearSyncCache(): void
+    {
+        Cache::forget('sync.out_of_sync_count');
     }
 }

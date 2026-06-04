@@ -504,6 +504,16 @@
                             </select>
                         </div>
                         <div class="col-auto">
+                            <label for="sort_by_ft" class="form-label small mb-1">Urutkan</label>
+                            <select class="form-select form-select-sm" style="width:130px;" id="sort_by_ft" name="sort_by">
+                                <option value="date_desc" {{ request('sort_by','date_desc')=='date_desc'?'selected':'' }}>↓ Terbaru</option>
+                                <option value="date_asc"  {{ request('sort_by')=='date_asc' ?'selected':'' }}>↑ Terlama</option>
+                                <option value="title_asc" {{ request('sort_by')=='title_asc'?'selected':'' }}>↑ Judul A→Z</option>
+                                <option value="title_desc"{{ request('sort_by')=='title_desc'?'selected':'' }}>↓ Judul Z→A</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-label small mb-1 invisible">.</label>
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i> Filter
@@ -576,6 +586,9 @@
                                 <th rowspan="2" class="sticky-first">Kode Submit</th>
                                 <th rowspan="2" class="sticky-second">ID Artikel</th>
                                 <th rowspan="2">Judul</th>
+                                <th rowspan="2" class="text-center" style="min-width:80px; background:#fff3cd; color:#856404;" title="Catatan dari Marketing">
+                                    <i class="bi bi-megaphone-fill"></i><br><small>Mkt Note</small>
+                                </th>
                                 <th rowspan="2">Volume</th>
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
@@ -678,6 +691,15 @@
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 30) }}</td>
+                                <td class="text-center" style="background:#fffbf0;">
+                                    @if($s->catatan_marketing)
+                                        <span class="badge" style="background:#fd7e14;color:#fff;white-space:normal;line-height:1.3;max-width:90px;display:inline-block;font-size:0.68rem;cursor:help;" title="{{ $s->catatan_marketing }}">
+                                            <i class="bi bi-megaphone-fill"></i> {{ Str::limit($s->catatan_marketing, 25) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td title="{{ $s->journalSlot?->display_name }}">{{ $s->journalSlot ? 'Vol.' . $s->journalSlot->volume . ' No.' . $s->journalSlot->nomor : '-' }}</td>
                                 <td class="text-center">
                                     @if($s->link_artikel)

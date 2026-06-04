@@ -613,8 +613,16 @@ class DashboardController extends Controller
                   });
         }
 
+        // Sort
+        match ($request->input('sort_by', 'date_desc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit'),
+        };
+
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 50;
-        $submissions = $query->latest('tanggal_submit')->paginate($perPage)->withQueryString();
+        $submissions = $query->paginate($perPage)->withQueryString();
         $slots = JournalSlot::with('journalMaster')->where('is_active', true)->get();
 
         return view('marketing.submissions-monitoring', compact('marketing', 'submissions', 'slots'));
@@ -884,9 +892,17 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
+        // Sort
+        match ($request->input('sort_by', 'date_desc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit'),
+        };
+
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
-        $submissions = $query->latest()->paginate($perPage)->withQueryString();
-        
+        $submissions = $query->paginate($perPage)->withQueryString();
+
         // Statistics
         $totalFasttrack = Submission::where('process_type', 'fasttrack')
             ->where('marketing_id', $marketing->id)

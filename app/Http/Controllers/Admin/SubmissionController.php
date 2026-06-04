@@ -1788,8 +1788,16 @@ class SubmissionController extends Controller
 
         $this->applyProgramFilter($query, $request);
 
+        // Sort
+        match ($request->input('sort_by', 'date_desc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit'),
+        };
+
         // Get paginated submissions
-        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50))->withQueryString();
+        $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
 
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();

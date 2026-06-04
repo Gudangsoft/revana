@@ -1036,7 +1036,7 @@ class JournalManagementController extends Controller
         $totalSubmissions = Submission::count();
 
         // Determine which step columns to show (only steps this PIC has ever been assigned to).
-        // Uses exists() per step — fast index lookups, avoids aliasing issues with get([assoc]).
+        // Single conditional-aggregation query instead of 10 separate exists() queries.
         $stepFieldMap = [
             'submit'     => 'petugas_submit_id',
             'editor1'    => 'petugas_editor1_id',
@@ -1049,12 +1049,12 @@ class JournalManagementController extends Controller
             'production' => 'petugas_production_id',
             'validator'  => 'petugas_validator_id',
         ];
-        $mySteps = [];
-        foreach ($stepFieldMap as $step => $field) {
-            if (Submission::where($field, $picId)->exists()) {
-                $mySteps[] = $step;
-            }
-        }
+        $safePicId   = (int) $picId;
+        $selectParts = collect($stepFieldMap)->map(
+            fn($field, $step) => "MAX(CASE WHEN {$field} = {$safePicId} THEN 1 ELSE 0 END) as has_{$step}"
+        )->implode(', ');
+        $row = DB::selectOne("SELECT {$selectParts} FROM submissions");
+        $mySteps = $row ? collect($stepFieldMap)->keys()->filter(fn($step) => $row->{"has_{$step}"})->values()->toArray() : [];
 
         return view('pic.submissions.monitoring', compact(
             'submissions', 'journals', 'stats', 'myTaskCount', 'totalSubmissions', 'mySteps'
@@ -2021,10 +2021,18 @@ class JournalManagementController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
-        $submissions = $query->latest()->paginate(request()->input('per_page', 50))->withQueryString();
+        // Sort
+        match ($request->input('sort_by', 'date_desc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit'),
+        };
+
+        $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
-        
+
         // Statistics - semua fasttrack
         $totalFasttrack = Submission::where('process_type', 'fasttrack')->count();
         $thisMonthFasttrack = Submission::where('process_type', 'fasttrack')

@@ -66,3 +66,60 @@ Model `Pic` dan `Marketing` memiliki `total_points` di-cast sebagai `float`. Sem
 | `app/Http/Controllers/Admin/SyncController.php` | `gatherStats()`, `syncMarketingPoints()`, `syncPicPoints()`, `countOutOfSync()` — ganti strict `!==` dengan `round(..., 4) !== round(...)` untuk float-safe comparison |
 | `app/Http/Controllers/Admin/SyncController.php` | `syncAll()` — PIC total_points di-cast ke float agar konsisten dengan model cast |
 | `app/Models/Marketing.php` | `syncPoints()` — ganti `!==` dengan `(int) round()` comparison |
+
+## 6. Optimasi Performa — Eliminasi Query Berlebih per Page Load
+
+**Tujuan:** `countOutOfSync()` dipanggil di setiap halaman admin (sidebar). Dengan 71 PIC, setiap page load memicu 71+ query DB → halaman terasa lambat.
+
+### Root Cause
+- `countOutOfSync()` tanpa cache: dipanggil setiap request, menjalankan N query (1 per PIC) untuk menjumlahkan poin
+- `$mySteps` di PIC monitoring: 10 query `exists()` terpisah per page load
+
+### Perbaikan
+| Sebelum | Sesudah |
+|---------|---------|
+| `countOutOfSync()` = 71+ query per page load | Cached 5 menit → **0 query** saat cache masih valid |
+| PIC sum: N query `WHERE pic_id=X SUM(...)` per PIC | 1 query `GROUP BY pic_id` untuk semua PIC sekaligus |
+| `$mySteps`: 10x `exists()` per page | 1 query `MAX(CASE WHEN...)` conditional aggregation |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SyncController.php` | `countOutOfSync()` → `Cache::remember('sync.out_of_sync_count', 300, ...)` + optimasi PIC aggregation; `clearSyncCache()` dipanggil setiap kali sync berhasil |
+| `app/Http/Controllers/Admin/SyncController.php` | `gatherStats()` — PIC sum dari N query → 1 GROUP BY query |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `$mySteps` dari 10x `exists()` → 1 query `MAX(CASE WHEN)` conditional aggregation |
+
+---
+
+## 7. Kolom Mkt Note + Filter Sort By di Semua Halaman Monitoring
+
+**Tujuan:** Terapkan kolom Catatan Marketing (badge oranye) dan filter sortir A→Z/Z→A ke semua halaman monitoring: Admin Normal/BKD/JAFA (sudah ada), Admin Fasttrack, Marketing Normal, Marketing Fasttrack, PIC Normal (sudah ada), PIC Fasttrack.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | `fasttrackMonitoring()` — tambah sort_by match |
+| `app/Http/Controllers/Marketing/DashboardController.php` | `submissionsMonitoring()` dan `fasttrackMonitoring()` — tambah sort_by match |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `fasttrackMonitoring()` — tambah sort_by match |
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | Tambah dropdown Urutkan ↑↓ di filter form; tambah kolom Mkt Note |
+| `resources/views/marketing/submissions-monitoring.blade.php` | Tambah dropdown Urutkan ↑↓ inline di filter; tambah kolom Catatan Marketing |
+| `resources/views/marketing/fasttrack/monitoring.blade.php` | Tambah dropdown Urutkan ↑↓; tambah kolom Catatan Marketing |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Tambah dropdown Urutkan ↑↓; tambah kolom Mkt Note |
+
+---
+
+## 8. 🔄 Update: update
+
+- **Commit:** `3e3ae15` — 19:58 oleh Gudangsoft
+- **File berubah:** 11 file
+- `app/Exports/PicMonitoringExport.php`
+- `app/Exports/SubmissionsExport.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Admin/SyncController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `app/Models/Marketing.php`
+- `log-update-2026-06-03.md`
+- `log-update-2026-06-04.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
+

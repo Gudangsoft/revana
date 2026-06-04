@@ -42,13 +42,22 @@
                 <label class="form-label small mb-1">Sampai Tanggal</label>
                 <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
             </div>
-            <div class="col-md-4 d-flex align-items-end gap-2">
+            <div class="col-md-4 d-flex align-items-end gap-2 flex-wrap">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-search"></i> Filter
                 </button>
                 <a href="{{ route('marketing.fasttrack.monitoring') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-clockwise"></i> Reset
                 </a>
+                <div class="d-flex align-items-center gap-1">
+                    <small class="text-muted fw-semibold">Urut:</small>
+                    <select name="sort_by" class="form-select form-select-sm" style="width:auto;">
+                        <option value="date_desc" {{ request('sort_by','date_desc')=='date_desc'?'selected':'' }}>↓ Terbaru</option>
+                        <option value="date_asc"  {{ request('sort_by')=='date_asc' ?'selected':'' }}>↑ Terlama</option>
+                        <option value="title_asc" {{ request('sort_by')=='title_asc'?'selected':'' }}>↑ A→Z</option>
+                        <option value="title_desc"{{ request('sort_by')=='title_desc'?'selected':'' }}>↓ Z→A</option>
+                    </select>
+                </div>
                 <div class="ms-auto d-flex align-items-center gap-1">
                     <small class="text-muted">Tampilkan:</small>
                     <select name="per_page" class="form-select form-select-sm" style="width:auto;"
@@ -126,6 +135,7 @@
                     <tr>
                         <th class="px-3">Kode Submit</th>
                         <th>Judul Artikel</th>
+                        <th class="text-center" style="background:#fff3cd;color:#856404;" title="Catatan Marketing"><i class="bi bi-megaphone-fill"></i> Catatan</th>
                         <th>Jurnal / Slot</th>
                         <th>Akreditasi</th>
                         <th>Tanggal Submit</th>
@@ -147,6 +157,15 @@
                         <td>
                             <div class="fw-semibold">{{ Str::limit($submission->judul_artikel, 45) }}</div>
                             <small class="text-muted">{{ $submission->nama_penulis }}</small>
+                        </td>
+                        <td class="text-center" style="background:#fffbf0;">
+                            @if($submission->catatan_marketing)
+                                <span class="badge" style="background:#fd7e14;color:#fff;white-space:normal;line-height:1.3;max-width:110px;display:inline-block;font-size:0.72rem;cursor:help;" title="{{ $submission->catatan_marketing }}">
+                                    <i class="bi bi-megaphone-fill"></i> {{ Str::limit($submission->catatan_marketing, 30) }}
+                                </span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
                         </td>
                         <td>
                             <small class="text-primary fw-semibold">
