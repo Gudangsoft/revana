@@ -179,15 +179,29 @@
     background-color: #e8f4fd !important;
 }
 
-/* Alternating row colors */
-.table-monitoring tbody tr:nth-child(even) td {
-    background-color: #f8f9fa;
-}
-
-.table-monitoring tbody tr:nth-child(even) td.sticky-first,
-.table-monitoring tbody tr:nth-child(even) td.sticky-second {
-    background-color: #f8f9fa;
-}
+/* Row colors by workflow stage */
+.row-new      td { background-color: #fff !important; }
+.row-pending  td { background-color: #fffbeb !important; }
+.row-pending  td.sticky-first, .row-pending  td.sticky-second { background-color: #fffbeb !important; }
+.row-progress td { background-color: #f0f7ff !important; }
+.row-progress td.sticky-first, .row-progress td.sticky-second { background-color: #f0f7ff !important; }
+.row-published td { background-color: #d1fae5 !important; }
+.row-published td.sticky-first, .row-published td.sticky-second { background-color: #d1fae5 !important; }
+.row-rejected td { background-color: #fee2e2 !important; }
+.row-rejected td.sticky-first, .row-rejected td.sticky-second { background-color: #fee2e2 !important; }
+.table-monitoring tbody tr:hover td { background-color: #dbeafe !important; }
+.status-badge { display:inline-block;padding:2px 6px;border-radius:10px;font-size:0.62rem;font-weight:600;white-space:nowrap;line-height:1.4; }
+.status-badge.status-submitted  { background:#e2e8f0;color:#475569; }
+.status-badge.status-editor     { background:#dbeafe;color:#1d4ed8; }
+.status-badge.status-author     { background:#fef9c3;color:#a16207; }
+.status-badge.status-reviewer   { background:#ede9fe;color:#6d28d9; }
+.status-badge.status-production { background:#dcfce7;color:#15803d; }
+.status-badge.status-validator  { background:#f3e8ff;color:#7e22ce; }
+.status-badge.status-published  { background:#bbf7d0;color:#166534;border:1px solid #86efac; }
+.status-badge.status-rejected   { background:#fee2e2;color:#b91c1c; }
+.status-badge.status-pending    { background:#fef08a;color:#854d0e; }
+.progress-counter { font-size:0.6rem;color:#6b7280;white-space:nowrap; }
+.progress-counter .done { color:#16a34a;font-weight:700; }
 
 /* Scroll controls */
 .scroll-controls {
@@ -508,6 +522,8 @@
                                 </th>
                                 <th rowspan="2" class="align-middle sticky-first">Kode Submit</th>
                                 <th rowspan="2" class="align-middle sticky-second">ID Artikel</th>
+                                <th rowspan="2" class="align-middle text-center" style="min-width:90px;">Status</th>
+                                <th rowspan="2" class="align-middle text-center" style="min-width:75px;">Tgl Submit</th>
                                 <th rowspan="2" class="align-middle">Judul</th>
                                 <th rowspan="2" class="align-middle text-center" style="min-width:80px; background:#fff3cd; color:#856404;" title="Catatan dari Marketing">
                                     <i class="bi bi-megaphone-fill"></i><br><small>Mkt Note</small>
@@ -566,10 +582,30 @@
                         <tbody>
                             @forelse($submissions as $s)
                             @php
-                                // Check if all workflow is completed
-                                $isCompleted = $s->production_valid == 1;
+                                $isCompleted  = $s->production_valid == 1;
+                                $rowClass = match(true) {
+                                    $s->status === 'PUBLISHED'             => 'row-published',
+                                    $s->status === 'REJECTED'              => 'row-rejected',
+                                    str_contains($s->status, '_SUBMITTED') => 'row-pending',
+                                    $s->status === 'SUBMITTED'             => 'row-new',
+                                    default                                => 'row-progress',
+                                };
+                                $statusBadgeClass = match(true) {
+                                    $s->status === 'PUBLISHED'                 => 'status-published',
+                                    $s->status === 'REJECTED'                  => 'status-rejected',
+                                    str_contains($s->status, '_SUBMITTED')     => 'status-pending',
+                                    $s->status === 'SUBMITTED'                 => 'status-submitted',
+                                    str_contains($s->status, 'EDITOR')         => 'status-editor',
+                                    str_contains($s->status, 'AUTHOR')         => 'status-author',
+                                    str_contains($s->status, 'REVIEWER')       => 'status-reviewer',
+                                    str_contains($s->status, 'PRODUCTION')     => 'status-production',
+                                    default                                    => 'status-submitted',
+                                };
+                                $statusLabel = $statusOptions[$s->status] ?? $s->status;
+                                $validCount  = collect(['editor1_valid','author1_valid','editor2_valid','reviewer1_valid','reviewer2_valid','editor3_valid','author2_valid','production_valid'])
+                                    ->filter(fn($f) => $s->$f)->count();
                             @endphp
-                            <tr class="{{ $isCompleted ? 'table-success' : '' }}">
+                            <tr class="{{ $rowClass }}">
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
@@ -588,6 +624,15 @@
                                     @endif
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
+                                <td class="text-center">
+                                    <span class="status-badge {{ $statusBadgeClass }}">{{ $statusLabel }}</span>
+                                    <div class="progress-counter mt-1">
+                                        <span class="done">{{ $validCount }}</span><span>/8 ✓</span>
+                                    </div>
+                                </td>
+                                <td class="text-center" style="font-size:0.65rem;color:#6b7280;">
+                                    {{ $s->tanggal_submit ? \Carbon\Carbon::parse($s->tanggal_submit)->format('d/m/y') : '—' }}
+                                </td>
                                 <td title="{{ $s->judul_artikel }}">{{ Str::limit($s->judul_artikel, 25) }}</td>
                                 <td class="text-center" style="background:#fffbf0;">
                                     @if($s->catatan_marketing)

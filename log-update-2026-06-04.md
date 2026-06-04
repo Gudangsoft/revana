@@ -236,3 +236,11 @@ Monitoring fasttrack pakai `@foreach($pics as $pic)` langsung di setiap baris ta
 - `resources/views/partials/auto-refresh.blade.php`
 - `resources/views/pic/partials/sidebar.blade.php`
 
+
+## 14. 🔄 Update: as
+
+- **Commit:** `9b40299` — 20:45 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-04.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+
