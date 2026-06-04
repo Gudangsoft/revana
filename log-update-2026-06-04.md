@@ -124,7 +124,61 @@ Model `Pic` dan `Marketing` memiliki `total_points` di-cast sebagai `float`. Sem
 - `resources/views/pic/submissions/monitoring.blade.php`
 
 
-## 9. 🔄 Update: a
+## 9. Audit Performa Menyeluruh — Sistem Lebih Ringan
+
+**Tujuan:** Eliminasi semua titik berat yang menyebabkan lambat: query berulang di setiap halaman, N+1 queries, groupBy di PHP memory, query langsung di view, dan kolom DB tanpa index.
+
+### Perubahan per Kategori
+
+#### A. Cache — Menghilangkan Query Berulang per Page Load
+| File | Sebelum | Sesudah |
+|------|---------|---------|
+| `admin/partials/sidebar.blade.php` | `Submission::count()` tiap halaman | Cache 2 menit |
+| `pic/partials/sidebar.blade.php` | Loop O(n×m) + get() tanpa batas | SQL COUNT 1 query + cache 60 detik per PIC |
+| `app/Providers/ViewServiceProvider.php` | `ReviewRequest::count()` tiap admin view | Cache 5 menit |
+| `marketing/layouts/app.blade.php` | `submissions()->count()` tiap navbar | Cache 2 menit per marketing user |
+
+#### B. Query di View — Dihapus
+| File | Baris | Fix |
+|------|-------|-----|
+| `resources/views/admin/submissions/monitoring.blade.php` | 1315, 1383 | Ganti `Pic::where()->get()` → `$pics` (sudah di-pass controller) |
+
+#### C. Aggregasi di DB — Bukan PHP Memory
+| File | Sebelum | Sesudah |
+|------|---------|---------|
+| `LaporanKinerjaController.php` | `->get()->groupBy('pic_id')` memuat ribuan baris | `selectRaw(...)->groupBy()` langsung di DB |
+
+#### D. Optimasi Query
+| File | Perubahan |
+|------|-----------|
+| `SyncController.php` | `Pic::all()` → `Pic::select('id','total_points')->get()` (kurangi memori) |
+| `partials/auto-refresh.blade.php` | Default interval 30s → 60s (kurangi 50% frekuensi reload) |
+
+#### E. Database Indexes (17 index baru — migration dijalankan)
+| Tabel | Kolom | Dampak |
+|-------|-------|--------|
+| `submissions` | `marketing_id` | Query marketing & sync |
+| `submissions` | `petugas_*_id` (11 kolom) | Filter penugasan PIC |
+| `submissions` | `journal_slot_id`, `process_type`, `created_by` | Filter workflow |
+| `journal_slots` | `journal_master_id`, `is_active` | Join & filter jurnal |
+| `marketing_point_histories` | `marketing_id` | Aggregasi poin marketing |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/partials/sidebar.blade.php` | Cache pendingValidationCount |
+| `resources/views/pic/partials/sidebar.blade.php` | Refactor O(n×m) → SQL COUNT + cache |
+| `resources/views/admin/submissions/monitoring.blade.php` | Hapus Pic::where() di view |
+| `app/Providers/ViewServiceProvider.php` | Cache ReviewRequest count |
+| `resources/views/marketing/layouts/app.blade.php` | Cache submission count navbar |
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | DB-level aggregation |
+| `app/Http/Controllers/Admin/SyncController.php` | Select kolom minimal |
+| `resources/views/partials/auto-refresh.blade.php` | Default interval 30→60 detik |
+| `database/migrations/2026_06_04_203005_add_performance_indexes_to_tables.php` | **[Baru]** 17 index baru, migration dijalankan |
+
+---
+
+## 10. 🔄 Update: a
 
 - **Commit:** `e5069d2` — 20:14 oleh Gudangsoft
 - **File berubah:** 9 file
@@ -137,4 +191,13 @@ Model `Pic` dan `Marketing` memiliki `total_points` di-cast sebagai `float`. Sem
 - `resources/views/marketing/fasttrack/monitoring.blade.php`
 - `resources/views/marketing/submissions-monitoring.blade.php`
 - `resources/views/pic/fasttrack/monitoring.blade.php`
+
+
+## 10. 🔄 Update: as
+
+- **Commit:** `808f07a` — 20:19 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-04.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
 

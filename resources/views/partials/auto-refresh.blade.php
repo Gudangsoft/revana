@@ -5,7 +5,7 @@
       $arId      : ID unik jika ada beberapa instance (default: 'default')
 --}}
 @php
-    $arInterval = $interval ?? 30;
+    $arInterval = $interval ?? 60;
     $arId       = $arId ?? 'default';
 @endphp
 

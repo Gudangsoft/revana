@@ -212,41 +212,20 @@
         $picUser = Auth::guard('pic')->user();
         $picId = $picUser ? $picUser->id : 0;
 
-        // Count pending tasks that require PIC's action
+        // Count pending tasks — single SQL query with OR conditions, cached 60s per PIC
         $pendingTasks = 0;
         if ($picId) {
-            $allTasks = \App\Models\Submission::where(function($q) use ($picId) {
-                $q->where('petugas_editor1_id', $picId)
-                  ->orWhere('petugas_author1_id', $picId)
-                  ->orWhere('petugas_editor2_id', $picId)
-                  ->orWhere('petugas_editor3_id', $picId)
-                  ->orWhere('petugas_author2_id', $picId)
-                  ->orWhere('petugas_production_id', $picId)
-                  ->orWhere('petugas_validator_id', $picId);
-            })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->get();
-
-            $urgentMappings = [
-                'EDITOR1' => ['petugas_editor1_id'],
-                'AUTHOR1' => ['petugas_author1_id'],
-                'EDITOR2' => ['petugas_editor2_id'],
-                'EDITOR3' => ['petugas_editor3_id'],
-                'AUTHOR2' => ['petugas_author2_id'],
-                'PRODUCTION' => ['petugas_production_id'],
-                'VALIDATOR' => ['petugas_validator_id'],
-            ];
-            foreach ($allTasks as $task) {
-                $status = strtoupper($task->status);
-                foreach ($urgentMappings as $statusKey => $fields) {
-                    if (str_contains($status, $statusKey)) {
-                        foreach ($fields as $field) {
-                            if ($task->$field == $picId) {
-                                $pendingTasks++;
-                                break 2;
-                            }
-                        }
-                    }
-                }
-            }
+            $pendingTasks = \Illuminate\Support\Facades\Cache::remember("pic.pending_tasks.{$picId}", 60, function () use ($picId) {
+                return \App\Models\Submission::where(function($q) use ($picId) {
+                    $q->where(fn($s) => $s->where('petugas_editor1_id', $picId)->where('status', 'like', '%EDITOR1%'))
+                      ->orWhere(fn($s) => $s->where('petugas_author1_id', $picId)->where('status', 'like', '%AUTHOR1%'))
+                      ->orWhere(fn($s) => $s->where('petugas_editor2_id', $picId)->where('status', 'like', '%EDITOR2%'))
+                      ->orWhere(fn($s) => $s->where('petugas_editor3_id', $picId)->where('status', 'like', '%EDITOR3%'))
+                      ->orWhere(fn($s) => $s->where('petugas_author2_id', $picId)->where('status', 'like', '%AUTHOR2%'))
+                      ->orWhere(fn($s) => $s->where('petugas_production_id', $picId)->where('status', 'like', '%PRODUCTION%'))
+                      ->orWhere(fn($s) => $s->where('petugas_validator_id', $picId)->where('status', 'like', '%VALIDATOR%'));
+                })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->count();
+            });
         }
         $totalPoints = $picUser ? $picUser->total_points : 0;
 

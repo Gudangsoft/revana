@@ -156,7 +156,13 @@
             <div class="navbar-nav ms-auto">
                 <span class="nav-link d-flex align-items-center gap-2">
                     <span class="points-badge">
-                        <i class="bi bi-star-fill"></i> {{ auth()->guard('marketing')->user()->submissions()->count() }} Point
+                        @php
+                            $mktId = auth()->guard('marketing')->id();
+                            $mktPoints = \Illuminate\Support\Facades\Cache::remember("marketing.point_count.{$mktId}", 120, fn() =>
+                                auth()->guard('marketing')->user()->submissions()->count()
+                            );
+                        @endphp
+                        <i class="bi bi-star-fill"></i> {{ $mktPoints }} Point
                     </span>
                     <a href="{{ route('marketing.refresh-points') }}" class="btn btn-sm btn-light rounded-circle" title="Refresh Point" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-clockwise text-success"></i>

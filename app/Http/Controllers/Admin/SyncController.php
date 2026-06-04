@@ -40,7 +40,7 @@ class SyncController extends Controller
             ->groupBy('pic_id')
             ->pluck('total', 'pic_id');
 
-        $pics = Pic::all()->map(function ($pic) use ($picActuals) {
+        $pics = Pic::select('id', 'total_points')->get()->map(function ($pic) use ($picActuals) {
             $pic->actual_points = (float) ($picActuals[$pic->id] ?? 0);
             return $pic;
         });
@@ -115,7 +115,7 @@ class SyncController extends Controller
      */
     public function syncPicPoints()
     {
-        $pics    = Pic::all();
+        $pics    = Pic::select('id', 'total_points')->get();
         $updated = 0;
 
         foreach ($pics as $pic) {
@@ -148,7 +148,7 @@ class SyncController extends Controller
 
             // PIC points — rebuild total_points from pic_point_histories sum.
             // This also corrects any double-counted values from historical bugs.
-            foreach (Pic::all() as $pic) {
+            foreach (Pic::select('id', 'total_points')->get() as $pic) {
                 $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
                 $pic->update(['total_points' => $actual]);
             }
@@ -179,7 +179,7 @@ class SyncController extends Controller
                 ->groupBy('pic_id')
                 ->pluck('total', 'pic_id');
 
-            $picOutOfSync = Pic::all()->filter(function ($pic) use ($picActuals) {
+            $picOutOfSync = Pic::select('id', 'total_points')->get()->filter(function ($pic) use ($picActuals) {
                 $actual = (float) ($picActuals[$pic->id] ?? 0);
                 return round((float) $pic->total_points, 4) !== round($actual, 4);
             })->count();

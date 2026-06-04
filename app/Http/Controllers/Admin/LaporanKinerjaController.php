@@ -49,52 +49,58 @@ class LaporanKinerjaController extends Controller
         // --- Rekap PIC ---
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
 
-        $picQuery = PicPointHistory::with('pic');
+        // DB-level aggregation — avoid loading thousands of history rows into PHP memory
+        $picQuery = PicPointHistory::selectRaw('pic_id, step, COUNT(*) as task_count, SUM(points_earned) as step_points');
         if ($isRange) {
             $picQuery->whereDate('created_at', '>=', $dariTanggal)
                      ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
             $picQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
-        $picHistories = $picQuery->get()->groupBy('pic_id');
+        $picAggregates = $picQuery->groupBy('pic_id', 'step')->get()->groupBy('pic_id');
 
-        $picRekap = $pics->map(function ($pic) use ($picHistories) {
-            $histories = $picHistories->get($pic->id, collect());
-            $byStep    = $histories->groupBy('step');
-
+        $picRekap = $pics->map(function ($pic) use ($picAggregates) {
+            $stepData   = $picAggregates->get($pic->id, collect());
             $stepCounts = [];
+            $totalTugas = 0;
+            $totalPoin  = 0.0;
+
             foreach (self::STEPS as $key => $label) {
-                $stepCounts[$key] = $byStep->get($key, collect())->count();
+                $row              = $stepData->firstWhere('step', $key);
+                $count            = $row ? (int) $row->task_count : 0;
+                $stepCounts[$key] = $count;
+                $totalTugas      += $count;
+                $totalPoin       += $row ? (float) $row->step_points : 0;
             }
 
             return [
                 'pic'         => $pic,
                 'step_counts' => $stepCounts,
-                'total_tugas' => $histories->count(),
-                'total_poin'  => $histories->sum('points_earned'),
+                'total_tugas' => $totalTugas,
+                'total_poin'  => $totalPoin,
             ];
         })->filter(fn($row) => $row['total_tugas'] > 0)
           ->sortByDesc('total_poin')
           ->values();
 
-        // --- Rekap Marketing ---
+        // --- Rekap Marketing --- (single aggregated query)
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
 
-        $mktQuery = MarketingPointHistory::query();
+        $mktQuery = MarketingPointHistory::selectRaw('marketing_id, COUNT(*) as task_count, SUM(points_earned) as total_points');
         if ($isRange) {
             $mktQuery->whereDate('created_at', '>=', $dariTanggal)
                      ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
             $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
-        $mktHistories = $mktQuery->get()->groupBy('marketing_id');
+        $mktAggregates = $mktQuery->groupBy('marketing_id')->get()->keyBy('marketing_id');
 
-        $mktRekap = $marketings->map(function ($mkt) use ($mktHistories) {
-            $histories = $mktHistories->get($mkt->id, collect());
+        $mktRekap = $marketings->map(function ($mkt) use ($mktAggregates) {
+            $row = $mktAggregates->get($mkt->id);
             return [
                 'marketing'    => $mkt,
-                'total_submit' => $histories->count(),
-                'total_poin'   => $histories->sum('points_earned'),
+                'total_submit' => $row ? (int) $row->task_count : 0,
+                'total_poin'   => $row ? (float) $row->total_points : 0,
             ];
         })->filter(fn($row) => $row['total_submit'] > 0)
           ->sortByDesc('total_submit')

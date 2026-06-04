@@ -1312,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
                             <select class="form-select" name="petugas_id" required>
                                 <option value="">-- Pilih Petugas --</option>
-                                @foreach(\App\Models\Pic::where('is_active', true)->orderBy('name')->get() as $pic)
+                                @foreach($pics as $pic)
                                     <option value="{{ $pic->id }}">{{ $pic->name }}</option>
                                 @endforeach
                             </select>
@@ -1380,7 +1380,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
                         <select class="form-select" name="petugas_id" required>
                             <option value="">-- Pilih Petugas --</option>
-                            @foreach(\App\Models\Pic::where('is_active', true)->orderBy('name')->get() as $pic)
+                            @foreach($pics as $pic)
                                 <option value="{{ $pic->id }}">{{ $pic->name }}</option>
                             @endforeach
                         </select>

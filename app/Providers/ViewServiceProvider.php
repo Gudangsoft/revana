@@ -3,27 +3,21 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use App\Models\ReviewRequest;
 
 class ViewServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
-        // Share pending review requests count with all admin views
+        // Cached 5 menit — runs on every admin view render otherwise
         View::composer('admin.*', function ($view) {
-            $pendingReviewRequests = ReviewRequest::where('status', 'pending')->count();
+            $pendingReviewRequests = Cache::remember('admin.pending_review_requests', 300, fn() =>
+                ReviewRequest::where('status', 'pending')->count()
+            );
             $view->with('pendingReviewRequests', $pendingReviewRequests);
         });
     }

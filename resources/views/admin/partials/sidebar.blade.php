@@ -15,7 +15,9 @@
 </style>
 @php
     $currentRoute = Route::currentRouteName();
-    $pendingValidationCount = \App\Models\Submission::where('status', 'like', '%_SUBMITTED')->count();
+    $pendingValidationCount = \Illuminate\Support\Facades\Cache::remember('admin.pending_validation_count', 120, fn() =>
+        \App\Models\Submission::where('status', 'like', '%_SUBMITTED')->count()
+    );
     try {
         $syncOutOfSyncCount = \App\Http\Controllers\Admin\SyncController::countOutOfSync();
     } catch (\Exception $e) {
