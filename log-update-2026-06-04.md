@@ -123,3 +123,18 @@ Model `Pic` dan `Marketing` memiliki `total_points` di-cast sebagai `float`. Sem
 - `resources/views/admin/submissions/monitoring.blade.php`
 - `resources/views/pic/submissions/monitoring.blade.php`
 
+
+## 9. 🔄 Update: a
+
+- **Commit:** `e5069d2` — 20:14 oleh Gudangsoft
+- **File berubah:** 9 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Admin/SyncController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-04.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/marketing/fasttrack/monitoring.blade.php`
+- `resources/views/marketing/submissions-monitoring.blade.php`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+
