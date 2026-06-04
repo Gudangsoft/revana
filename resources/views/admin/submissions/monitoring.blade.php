@@ -169,12 +169,13 @@
     z-index: 2;
     background: #fff;
     min-width: 120px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.12);
 }
 
 .table-monitoring thead th.sticky-first {
-    z-index: 5;
-    background: #212529 !important;
+    z-index: 6;
+    background: #0f172a !important;
+    box-shadow: none;
 }
 
 /* Sticky second column (ID Artikel) */
@@ -185,12 +186,13 @@
     z-index: 2;
     background: #fff;
     min-width: 100px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.12);
 }
 
 .table-monitoring thead th.sticky-second {
-    z-index: 5;
-    background: #212529 !important;
+    z-index: 6;
+    background: #0f172a !important;
+    box-shadow: none;
 }
 
 .table-monitoring tbody td {

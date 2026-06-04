@@ -129,37 +129,23 @@
 .table-monitoring thead th.sticky-first,
 .table-monitoring thead th.sticky-second { z-index:5;background:#0f172a !important;color:#e2e8f0 !important; }
 
-/* Sticky first column (Kode Submit) */
+/* Sticky first column */
 .table-monitoring th.sticky-first,
 .table-monitoring td.sticky-first {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    background: #fff;
-    min-width: 120px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    position: sticky; left: 0; z-index: 2;
+    background: #fff; min-width: 120px;
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.12);
 }
+.table-monitoring thead th.sticky-first { z-index: 6; background: #0f172a !important; box-shadow: none; }
 
-.table-monitoring thead th.sticky-first {
-    z-index: 5;
-    background: #212529 !important;
-}
-
-/* Sticky second column (ID Artikel) */
+/* Sticky second column */
 .table-monitoring th.sticky-second,
 .table-monitoring td.sticky-second {
-    position: sticky;
-    left: 120px;
-    z-index: 2;
-    background: #fff;
-    min-width: 100px;
-    box-shadow: 3px 0 6px -3px rgba(0,0,0,0.15);
+    position: sticky; left: 120px; z-index: 2;
+    background: #fff; min-width: 100px;
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.12);
 }
-
-.table-monitoring thead th.sticky-second {
-    z-index: 5;
-    background: #212529 !important;
-}
+.table-monitoring thead th.sticky-second { z-index: 6; background: #0f172a !important; box-shadow: none; }
 
 .table-monitoring tbody td {
     white-space: nowrap;

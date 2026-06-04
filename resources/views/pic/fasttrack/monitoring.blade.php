@@ -144,36 +144,20 @@
 /* Sticky first column */
 .table-monitoring th.sticky-first,
 .table-monitoring td.sticky-first {
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: #fff;
-    min-width: 110px;
+    position: sticky; left: 0; z-index: 3;
+    background: #fff; min-width: 110px;
     box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1);
 }
-
-.table-monitoring thead th.sticky-first {
-    z-index: 21;
-    background-color: #212529 !important;
-    color: #fff !important;
-}
+.table-monitoring thead th.sticky-first { z-index: 23 !important; background: #0f172a !important; color: #e2e8f0 !important; box-shadow: none; }
 
 /* Sticky second column */
 .table-monitoring th.sticky-second,
 .table-monitoring td.sticky-second {
-    position: sticky;
-    left: 110px;
-    z-index: 3;
-    background: #fff;
-    min-width: 90px;
+    position: sticky; left: 110px; z-index: 3;
+    background: #fff; min-width: 90px;
     box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1);
 }
-
-.table-monitoring thead th.sticky-second {
-    z-index: 21;
-    background-color: #212529 !important;
-    color: #fff !important;
-}
+.table-monitoring thead th.sticky-second { z-index: 23 !important; background: #0f172a !important; color: #e2e8f0 !important; box-shadow: none; }
 
 /* Non-sticky columns */
 .table-monitoring td:not(.sticky-first):not(.sticky-second),
