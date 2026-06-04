@@ -112,15 +112,15 @@
 /* ── HEADER REDESIGN ─────────────────────────────────────────────── */
 .table-monitoring thead th {
     position: sticky; top: 0; z-index: 20;
-    white-space: nowrap; padding: 5px 7px;
+    white-space: nowrap; padding: 3px 7px;
+    height: 28px; line-height: 1; vertical-align: middle;
     font-size: 0.68rem; font-weight: 700;
     letter-spacing: 0.3px; text-transform: uppercase;
     border: 1px solid #0a0e1a !important;
-    vertical-align: middle;
 }
 .table-monitoring thead tr:first-child th {
     background: #0f172a !important; color: #cbd5e1 !important;
-    border-bottom: 1px solid #1e293b !important;
+    height: 28px; border-bottom: 1px solid #0a0e1a !important;
 }
 .table-monitoring thead th.bg-dark { background:#1e293b !important;color:#94a3b8 !important;border-left:1px solid #0a0e1a !important; }
 .table-monitoring thead th.bg-info      { background:#075985 !important;color:#bae6fd !important;border-left:3px solid #38bdf8 !important; }
@@ -130,9 +130,10 @@
 .table-monitoring thead th.bg-validator { background:#4a1d96 !important;color:#ddd6fe !important;border-left:3px solid #a78bfa !important; }
 .table-monitoring thead th.text-dark    { color:#fde68a !important; }
 .table-monitoring thead tr:nth-child(2) th {
-    position: sticky; top: 32px; z-index: 20;
+    position: sticky; top: 29px; z-index: 20;
+    height: 26px; line-height: 1; vertical-align: middle;
     font-size: 0.62rem; font-weight: 600;
-    border-top: 1px solid #0a0e1a !important; vertical-align: middle;
+    border-top: 1px solid #0a0e1a !important; border-bottom: 2px solid #0a0e1a !important;
 }
 .table-monitoring thead tr:nth-child(2) th.bg-dark    { background:#334155 !important;color:#e2e8f0 !important;border-left:1px solid #0a0e1a !important; }
 .table-monitoring thead tr:nth-child(2) th.bg-info    { background:#0c4a6e !important;color:#e0f2fe !important;border-left:3px solid #38bdf8 !important; }

@@ -107,19 +107,23 @@
     top: 0;
     z-index: 3;
     white-space: nowrap;
-    padding: 5px 7px;
+    padding: 3px 7px;
+    height: 28px;
+    line-height: 1;
+    vertical-align: middle;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.3px;
     text-transform: uppercase;
-    border: 1px solid #0a0e1a !important;   /* dark border — no white gaps */
+    border: 1px solid #0a0e1a !important;
 }
 
-/* Row 1 — group label (base = dark slate) */
+/* Row 1 — group label */
 .table-monitoring thead tr:first-child th {
     background: #0f172a !important;
     color: #cbd5e1 !important;
-    border-bottom: 1px solid #1e293b !important;
+    border-bottom: 1px solid #0a0e1a !important;
+    height: 28px;
 }
 
 /* Colored group headers — row 1
@@ -135,9 +139,12 @@
 
 /* Row 2 — sub-headers */
 .table-monitoring thead tr:nth-child(2) th {
-    top: 32px;
+    top: 29px;
+    height: 26px;
+    line-height: 1;
     font-size: 0.62rem;
     font-weight: 600;
+    vertical-align: middle;
     border-top: 1px solid #0a0e1a !important;
     border-bottom: 2px solid #0a0e1a !important;
 }
