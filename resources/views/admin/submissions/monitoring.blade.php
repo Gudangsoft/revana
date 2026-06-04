@@ -101,51 +101,63 @@
     line-height: 1.2;
 }
 
+/* ── HEADER REDESIGN ─────────────────────────────────────────────── */
 .table-monitoring thead th {
     position: sticky;
     top: 0;
     z-index: 3;
-    background: #212529 !important;
-    color: white !important;
-    border: 1px solid #212529 !important;
     white-space: nowrap;
-    padding: 4px 5px;
-    font-size: 0.7rem;
+    padding: 5px 7px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    border: 1px solid rgba(0,0,0,0.18) !important;
 }
 
+/* Row 1 — group label (base = dark slate) */
+.table-monitoring thead tr:first-child th {
+    background: #0f172a !important;
+    color: #cbd5e1 !important;
+    border-bottom: 2px solid rgba(255,255,255,0.12) !important;
+}
+
+/* Colored group headers — row 1 */
+.table-monitoring thead th.bg-dark      { background: #1e293b !important; color: #94a3b8 !important; border-left: 3px solid #475569 !important; }
+.table-monitoring thead th.bg-info      { background: #075985 !important; color: #bae6fd !important; border-left: 3px solid #38bdf8 !important; }
+.table-monitoring thead th.bg-warning   { background: #78350f !important; color: #fde68a !important; border-left: 3px solid #fbbf24 !important; }
+.table-monitoring thead th.bg-primary   { background: #3730a3 !important; color: #c7d2fe !important; border-left: 3px solid #818cf8 !important; }
+.table-monitoring thead th.bg-success   { background: #14532d !important; color: #86efac !important; border-left: 3px solid #4ade80 !important; }
+.table-monitoring thead th.bg-validator { background: #4a1d96 !important; color: #ddd6fe !important; border-left: 3px solid #a78bfa !important; }
+.table-monitoring thead th.text-dark    { color: #fde68a !important; }
+
+/* Row 2 — sub-headers (slightly lighter per group) */
 .table-monitoring thead tr:nth-child(2) th {
     top: 32px;
-    background: #343a40 !important;
-    color: white !important;
-    border: 1px solid #343a40 !important;
+    font-size: 0.62rem;
+    font-weight: 600;
+    border-top: none !important;
 }
+.table-monitoring thead tr:nth-child(2) th.bg-dark      { background: #334155 !important; color: #e2e8f0 !important; border-left: 3px solid #64748b !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-info      { background: #0c4a6e !important; color: #e0f2fe !important; border-left: 3px solid #38bdf8 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-warning   { background: #92400e !important; color: #fef3c7 !important; border-left: 3px solid #fbbf24 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-primary   { background: #312e81 !important; color: #e0e7ff !important; border-left: 3px solid #818cf8 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-success   { background: #166534 !important; color: #d1fae5 !important; border-left: 3px solid #4ade80 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-validator { background: #5b21b6 !important; color: #ede9fe !important; border-left: 3px solid #a78bfa !important; }
 
-/* Override Bootstrap bg-* classes in header to ensure white text and no white borders */
-.table-monitoring thead th.bg-info,
-.table-monitoring thead th.bg-warning,
-.table-monitoring thead th.bg-primary,
-.table-monitoring thead th.bg-success,
-.table-monitoring thead th.bg-dark {
-    color: white !important;
-    border-color: #212529 !important;
-}
-
-.table-monitoring thead th.bg-validator {
-    background: #6f42c1 !important;
-    color: white !important;
-    border-color: #212529 !important;
+/* Sticky header overrides */
+.table-monitoring thead th.sticky-first,
+.table-monitoring thead th.sticky-second {
+    z-index: 5;
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
 }
 
 .table-monitoring tbody td.td-validator {
     background-color: #f3e8ff;
 }
-
 .table-monitoring tbody tr:hover td.td-validator {
     background-color: #e9d5ff !important;
-}
-
-.table-monitoring thead th.text-dark {
-    color: white !important;
 }
 
 /* Sticky first column (Kode Submit) */
@@ -583,16 +595,16 @@
                                 <th rowspan="2" class="align-middle">Link</th>
                                 <th rowspan="2" class="align-middle">Penulis</th>
                                 <th rowspan="2" class="align-middle">No HP</th>
-                                <th colspan="4" class="text-center bg-dark" id="colSubmit">Author Access</th>
-                                <th colspan="3" class="text-center bg-info" id="colEditor1">Editor 1</th>
-                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
-                                <th colspan="2" class="text-center bg-info" id="colEditor2">Editor 2</th>
-                                <th colspan="4" class="text-center bg-primary" id="colReviewer1">Reviewer 1</th>
-                                <th colspan="4" class="text-center bg-primary" id="colReviewer2">Reviewer 2</th>
-                                <th colspan="2" class="text-center bg-info" id="colEditor3">Editor 3</th>
-                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
-                                <th colspan="3" class="text-center bg-success" id="colProduction">Production</th>
-                                <th colspan="3" class="text-center bg-validator" id="colValidator">Validasi</th>
+                                <th colspan="4" class="text-center bg-dark" id="colSubmit">🔑 Author Access</th>
+                                <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
+                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
+                                <th colspan="2" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
+                                <th colspan="4" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
+                                <th colspan="4" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
+                                <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
+                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
+                                <th colspan="3" class="text-center bg-success" id="colProduction">⑧ Production</th>
+                                <th colspan="3" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers (4 cols) -->

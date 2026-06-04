@@ -109,75 +109,39 @@
     border-spacing: 0;
 }
 
+/* ── HEADER REDESIGN ─────────────────────────────────────────────── */
 .table-monitoring thead th {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    font-size: 0.7rem;
-    padding: 4px;
-    border: 1px solid #dee2e6;
-    white-space: nowrap;
-    background-color: #212529 !important;
-    color: #fff !important;
-    line-height: 1;
+    position: sticky; top: 0; z-index: 20;
+    white-space: nowrap; padding: 5px 7px;
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.3px; text-transform: uppercase;
+    border: 1px solid rgba(0,0,0,0.18) !important;
     vertical-align: middle;
-    height: 32px;
 }
-
+.table-monitoring thead tr:first-child th {
+    background: #0f172a !important; color: #cbd5e1 !important;
+    border-bottom: 2px solid rgba(255,255,255,0.12) !important;
+}
+.table-monitoring thead th.bg-dark      { background:#1e293b !important;color:#94a3b8 !important;border-left:3px solid #475569 !important; }
+.table-monitoring thead th.bg-info      { background:#075985 !important;color:#bae6fd !important;border-left:3px solid #38bdf8 !important; }
+.table-monitoring thead th.bg-warning   { background:#78350f !important;color:#fde68a !important;border-left:3px solid #fbbf24 !important; }
+.table-monitoring thead th.bg-primary   { background:#3730a3 !important;color:#c7d2fe !important;border-left:3px solid #818cf8 !important; }
+.table-monitoring thead th.bg-success   { background:#14532d !important;color:#86efac !important;border-left:3px solid #4ade80 !important; }
+.table-monitoring thead th.bg-validator { background:#4a1d96 !important;color:#ddd6fe !important;border-left:3px solid #a78bfa !important; }
+.table-monitoring thead th.text-dark    { color:#fde68a !important; }
 .table-monitoring thead tr:nth-child(2) th {
-    position: sticky;
-    top: 32px;
-    z-index: 20;
-    line-height: 1;
-    vertical-align: middle;
-    height: 32px;
+    position: sticky; top: 32px; z-index: 20;
+    font-size: 0.62rem; font-weight: 600;
+    border-top: none !important; vertical-align: middle;
 }
-
-.table-monitoring thead th.bg-info {
-    background-color: #0dcaf0 !important;
-    color: #000 !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-primary {
-    background-color: #0d6efd !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-success {
-    background-color: #198754 !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-validator {
-    background-color: #20c997 !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.bg-dark {
-    background-color: #212529 !important;
-    color: #fff !important;
-    z-index: 20 !important;
-    position: sticky !important;
-}
-
-.table-monitoring thead th.text-dark {
-    color: #000 !important;
-}
+.table-monitoring thead tr:nth-child(2) th.bg-dark    { background:#334155 !important;color:#e2e8f0 !important;border-left:3px solid #64748b !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-info    { background:#0c4a6e !important;color:#e0f2fe !important;border-left:3px solid #38bdf8 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-warning { background:#92400e !important;color:#fef3c7 !important;border-left:3px solid #fbbf24 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-primary { background:#312e81 !important;color:#e0e7ff !important;border-left:3px solid #818cf8 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-success { background:#166534 !important;color:#d1fae5 !important;border-left:3px solid #4ade80 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-validator { background:#5b21b6 !important;color:#ede9fe !important;border-left:3px solid #a78bfa !important; }
+.table-monitoring thead th.sticky-first,
+.table-monitoring thead th.sticky-second { z-index:22 !important;background:#0f172a !important;color:#e2e8f0 !important; }
 
 /* Sticky first column */
 .table-monitoring th.sticky-first,
@@ -628,37 +592,37 @@
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
                                 <th rowspan="2">No HP</th>
-                                <th colspan="2" class="text-center bg-dark text-white" id="colAuthorAccess">Author Access</th>
+                                <th colspan="2" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
                                 <th rowspan="2">PIC Marketing</th>
                                 @if(in_array('submit', $mySteps))
                                 <th rowspan="2" id="colSubmit">Petugas Submit</th>
                                 @endif
                                 @if(in_array('editor1', $mySteps))
-                                <th colspan="3" class="text-center bg-info text-dark" id="colEditor1">Editor 1</th>
+                                <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
                                 @endif
                                 @if(in_array('author1', $mySteps))
-                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">Author 1</th>
+                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
                                 @endif
                                 @if(in_array('editor2', $mySteps))
-                                <th colspan="4" class="text-center bg-info text-dark" id="colEditor2">Editor 2</th>
+                                <th colspan="4" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
                                 @endif
                                 @if(in_array('reviewer1', $mySteps))
-                                <th colspan="2" class="text-center bg-primary text-white" id="colReviewer1">Reviewer 1</th>
+                                <th colspan="2" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
                                 @endif
                                 @if(in_array('reviewer2', $mySteps))
-                                <th colspan="2" class="text-center bg-primary text-white" id="colReviewer2">Reviewer 2</th>
+                                <th colspan="2" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
                                 @endif
                                 @if(in_array('editor3', $mySteps))
-                                <th colspan="2" class="text-center bg-info text-dark" id="colEditor3">Editor 3</th>
+                                <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
                                 @endif
                                 @if(in_array('author2', $mySteps))
-                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">Author 2</th>
+                                <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
                                 @endif
                                 @if(in_array('production', $mySteps))
-                                <th colspan="3" class="text-center bg-success text-white" id="colProduction">Production</th>
+                                <th colspan="3" class="text-center bg-success" id="colProduction">⑧ Production</th>
                                 @endif
                                 @if(in_array('validator', $mySteps))
-                                <th colspan="2" class="text-center bg-validator" id="colValidator">Validasi</th>
+                                <th colspan="2" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
                                 @endif
                             </tr>
                             <tr>
