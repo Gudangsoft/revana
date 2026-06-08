@@ -145,6 +145,8 @@
     font-size: 0.62rem;
     font-weight: 600;
     vertical-align: middle;
+    background: #1e293b !important;
+    color: #94a3b8 !important;
     border-top: 1px solid #0a0e1a !important;
     border-bottom: 2px solid #0a0e1a !important;
 }
@@ -990,11 +992,13 @@
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td style="max-width:120px;">
                                     @if($s->link_publish)
-                                        <a href="{{ $s->link_publish }}" target="_blank"><i class="bi bi-link-45deg"></i></a>
+                                        <a href="{{ $s->link_publish }}" target="_blank" title="{{ $s->link_publish }}" style="font-size:0.68rem; word-break:break-all;">
+                                            <i class="bi bi-link-45deg"></i> {{ Str::limit($s->link_publish, 30) }}
+                                        </a>
                                     @else
-                                        -
+                                        <span class="text-muted">—</span>
                                     @endif
                                 </td>
                                 <td class="text-center">{!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>

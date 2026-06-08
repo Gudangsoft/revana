@@ -133,6 +133,7 @@
     position: sticky; top: 29px; z-index: 20;
     height: 26px; line-height: 1; vertical-align: middle;
     font-size: 0.62rem; font-weight: 600;
+    background: #1e293b !important; color: #94a3b8 !important;
     border-top: 1px solid #0a0e1a !important; border-bottom: 2px solid #0a0e1a !important;
 }
 .table-monitoring thead tr:nth-child(2) th.bg-dark    { background:#334155 !important;color:#e2e8f0 !important;border-left:1px solid #0a0e1a !important; }

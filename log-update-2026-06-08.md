@@ -15,3 +15,15 @@
 ### Detail Perubahan
 - **Editor1 & Editor2 (PIC view)**: Kolom User/Pass dihapus dari tampilan tabel monitoring PIC. Kredensial editor tetap bisa diisi/diedit melalui halaman proses submission (bukan monitoring).
 - **Production (semua monitoring)**: Ditambahkan 2 kolom baru — "User Editor" dan "Pass Editor" — yang menampilkan `username_editor` dan `password_editor` dengan highlight hijau muda, sehingga petugas Production dapat langsung melihat kredensial yang diperlukan untuk upload ke sistem jurnal.
+
+## 2. 🔄 Update: petugas
+
+- **Commit:** `b3bef25` — 16:11 oleh Gudangsoft
+- **File berubah:** 6 file
+- `log-update-2026-06-04.md`
+- `log-update-2026-06-08.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
+
