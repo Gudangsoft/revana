@@ -615,7 +615,7 @@
                                 <th colspan="4" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
-                                <th colspan="3" class="text-center bg-success" id="colProduction">⑧ Production</th>
+                                <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
                                 <th colspan="3" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
                             </tr>
                             <tr>
@@ -650,8 +650,10 @@
                                 <!-- Author 2 sub-headers (2 cols) -->
                                 <th class="bg-warning">Petugas</th>
                                 <th class="bg-warning">Valid</th>
-                                <!-- Production sub-headers (3 cols) -->
+                                <!-- Production sub-headers (5 cols) -->
                                 <th class="bg-success">Petugas</th>
+                                <th class="bg-success">User Editor</th>
+                                <th class="bg-success">Pass Editor</th>
                                 <th class="bg-success">Link Publish</th>
                                 <th class="bg-success">Valid</th>
                                 <!-- Validator sub-headers (3 cols) -->
@@ -962,8 +964,8 @@
                                 
                                 <!-- Production -->
                                 <td>
-                                                                        <select class="inline-assign-select lazy-select {{ $s->petugas_production_id ? 'has-value' : '' }}" 
-                                            data-submission="{{ $s->id }}" 
+                                    <select class="inline-assign-select lazy-select {{ $s->petugas_production_id ? 'has-value' : '' }}"
+                                            data-submission="{{ $s->id }}"
                                             data-type="production"
                                             data-model="pic"
                                             data-selected="{{ $s->petugas_production_id }}"
@@ -973,6 +975,20 @@
                                             <option value="{{ $s->petugas_production_id }}" selected>{{ $pics->firstWhere('id', $s->petugas_production_id)?->name }}</option>
                                         @endif
                                     </select>
+                                </td>
+                                <td title="Username Editor">
+                                    @if($s->username_editor)
+                                        <code style="font-size:0.67rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->username_editor }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td title="Password Editor">
+                                    @if($s->password_editor)
+                                        <code style="font-size:0.67rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->password_editor }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($s->link_publish)

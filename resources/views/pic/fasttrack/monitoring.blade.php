@@ -570,7 +570,7 @@
                                 <th colspan="2" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
-                                <th colspan="3" class="text-center bg-success" id="colProduction">⑧ Production</th>
+                                <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
                             </tr>
                             <tr>
                                 <!-- Author Access sub-headers -->
@@ -600,8 +600,10 @@
                                 <!-- Author 2 sub-headers (2 cols) -->
                                 <th class="bg-warning text-dark">Petugas</th>
                                 <th class="bg-warning text-dark">Valid</th>
-                                <!-- Production sub-headers (3 cols) -->
+                                <!-- Production sub-headers (5 cols) -->
                                 <th class="bg-success text-white">Petugas</th>
+                                <th class="bg-success text-white">User Editor</th>
+                                <th class="bg-success text-white">Pass Editor</th>
                                 <th class="bg-success text-white">Link Publish</th>
                                 <th class="bg-success text-white">Valid</th>
                             </tr>
@@ -930,11 +932,25 @@
                                         <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
                                     @endif
                                 </td>
+                                {{-- Editor credentials for production PIC --}}
+                                <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}" title="Username Editor">
+                                    @if($s->username_editor)
+                                        <code style="font-size:0.68rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->username_editor }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}" title="Password Editor">
+                                    @if($s->password_editor)
+                                        <code style="font-size:0.68rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->password_editor }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_production_id == $picId || !$s->petugas_production_id)
-                                        {{-- Show input if assigned to current PIC OR if no one is assigned yet --}}
-                                        <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;" 
-                                               value="{{ $s->link_publish }}" placeholder="Link Publish" 
+                                        <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;"
+                                               value="{{ $s->link_publish }}" placeholder="Link Publish"
                                                data-submission="{{ $s->id }}" data-field="link_publish"
                                                {{ $s->production_valid ? 'readonly' : '' }}
                                                title="{{ $s->production_valid ? 'Link terkunci. Matikan validasi untuk mengedit.' : 'Masukkan link publish (Anda akan otomatis menjadi petugas)' }}">

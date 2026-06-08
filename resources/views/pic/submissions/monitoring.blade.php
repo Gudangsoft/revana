@@ -583,13 +583,13 @@
                                 <th rowspan="2" id="colSubmit">Petugas Submit</th>
                                 @endif
                                 @if(in_array('editor1', $mySteps))
-                                <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
+                                <th colspan="2" class="text-center bg-info" id="colEditor1">① Editor 1</th>
                                 @endif
                                 @if(in_array('author1', $mySteps))
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
                                 @endif
                                 @if(in_array('editor2', $mySteps))
-                                <th colspan="4" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
+                                <th colspan="2" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
                                 @endif
                                 @if(in_array('reviewer1', $mySteps))
                                 <th colspan="2" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
@@ -604,7 +604,7 @@
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
                                 @endif
                                 @if(in_array('production', $mySteps))
-                                <th colspan="3" class="text-center bg-success" id="colProduction">⑧ Production</th>
+                                <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
                                 @endif
                                 @if(in_array('validator', $mySteps))
                                 <th colspan="2" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
@@ -616,7 +616,6 @@
                                 <th class="bg-dark text-white">Password</th>
                                 @if(in_array('editor1', $mySteps))
                                 <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">User/Pass</th>
                                 <th class="bg-info text-dark">Valid</th>
                                 @endif
                                 @if(in_array('author1', $mySteps))
@@ -625,8 +624,6 @@
                                 @endif
                                 @if(in_array('editor2', $mySteps))
                                 <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">User/Pass R1</th>
-                                <th class="bg-info text-dark">User/Pass R2</th>
                                 <th class="bg-info text-dark">Valid</th>
                                 @endif
                                 @if(in_array('reviewer1', $mySteps))
@@ -647,6 +644,8 @@
                                 @endif
                                 @if(in_array('production', $mySteps))
                                 <th class="bg-success text-white">Petugas</th>
+                                <th class="bg-success text-white">User Editor</th>
+                                <th class="bg-success text-white">Pass Editor</th>
                                 <th class="bg-success text-white">Link Publish</th>
                                 <th class="bg-success text-white">Valid</th>
                                 @endif
@@ -788,29 +787,9 @@
                                         <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
                                     @endif
                                 </td>
-                                <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
-                                    @if($s->petugas_editor1_id == $picId)
-                                        <div class="editable-credential" data-submission="{{ $s->id }}" data-field-user="username_editor" data-field-pass="password_editor">
-                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->username_editor }}" placeholder="Username">
-                                            <span>/</span>
-                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->password_editor }}" placeholder="Password">
-                                        </div>
-                                    @else
-                                        @if($s->username_editor || $s->password_editor)
-                                            <div class="credential-group">
-                                                <code>{{ $s->username_editor ?? '-' }}</code>
-                                                <span>/</span>
-                                                <code>{{ $s->password_editor ?? '-' }}</code>
-                                            </div>
-                                        @else
-                                            -
-                                        @endif
-                                    @endif
-                                </td>
                                 <td class="text-center {{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_editor1_id == $picId)
-                                        {{-- Editor1 is first stage, always enabled --}}
-                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->editor1_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->editor1_valid ? 'btn-success' : 'btn-outline-secondary' }}"
                                                 data-submission="{{ $s->id }}" data-field="editor1_valid" data-current="{{ $s->editor1_valid ? '1' : '0' }}"
                                                 data-stage-index="0">
                                             <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
@@ -848,44 +827,6 @@
                                     {{ $s->petugasEditor2?->name ?? '-' }}
                                     @if($s->petugas_editor2_id == $picId)
                                         <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
-                                </td>
-                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
-                                    @if($s->petugas_editor2_id == $picId)
-                                        <div class="editable-credential" data-submission="{{ $s->id }}" data-field-user="username_reviewer1" data-field-pass="password_reviewer1">
-                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->username_reviewer1 }}" placeholder="Username">
-                                            <span>/</span>
-                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->password_reviewer1 }}" placeholder="Password">
-                                        </div>
-                                    @else
-                                        @if($s->username_reviewer1 || $s->password_reviewer1)
-                                            <div class="credential-group">
-                                                <code>{{ $s->username_reviewer1 ?? '-' }}</code>
-                                                <span>/</span>
-                                                <code>{{ $s->password_reviewer1 ?? '-' }}</code>
-                                            </div>
-                                        @else
-                                            -
-                                        @endif
-                                    @endif
-                                </td>
-                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
-                                    @if($s->petugas_editor2_id == $picId)
-                                        <div class="editable-credential" data-submission="{{ $s->id }}" data-field-user="username_reviewer2" data-field-pass="password_reviewer2">
-                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->username_reviewer2 }}" placeholder="Username">
-                                            <span>/</span>
-                                            <input type="text" class="form-control form-control-sm d-inline-block" style="width: 45%; font-size: 0.7rem;" value="{{ $s->password_reviewer2 }}" placeholder="Password">
-                                        </div>
-                                    @else
-                                        @if($s->username_reviewer2 || $s->password_reviewer2)
-                                            <div class="credential-group">
-                                                <code>{{ $s->username_reviewer2 ?? '-' }}</code>
-                                                <span>/</span>
-                                                <code>{{ $s->password_reviewer2 ?? '-' }}</code>
-                                            </div>
-                                        @else
-                                            -
-                                        @endif
                                     @endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
@@ -993,10 +934,25 @@
                                         <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
                                     @endif
                                 </td>
+                                {{-- Editor credentials for production PIC --}}
+                                <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}" title="Username Editor">
+                                    @if($s->username_editor)
+                                        <code style="font-size:0.68rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->username_editor }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}" title="Password Editor">
+                                    @if($s->password_editor)
+                                        <code style="font-size:0.68rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->password_editor }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_production_id == $picId)
-                                        <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;" 
-                                               value="{{ $s->link_publish }}" placeholder="Link Publish" 
+                                        <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;"
+                                               value="{{ $s->link_publish }}" placeholder="Link Publish"
                                                data-submission="{{ $s->id }}" data-field="link_publish"
                                                {{ $s->production_valid ? 'readonly' : '' }}
                                                title="{{ $s->production_valid ? 'Link terkunci. Matikan validasi untuk mengedit.' : 'Masukkan link publish' }}">
@@ -1012,7 +968,7 @@
                                 </td>
                                 <td class="text-center {{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_production_id == $picId)
-                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->production_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->production_valid ? 'btn-success' : 'btn-outline-secondary' }}"
                                                 data-submission="{{ $s->id }}" data-field="production_valid" data-current="{{ $s->production_valid ? '1' : '0' }}"
                                                 data-stage-index="7">
                                             <i class="bi {{ $s->production_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
