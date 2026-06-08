@@ -1736,4 +1736,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 
+<script>
+/* Force sub-header row dark colors — bypasses Bootstrap/CSS conflicts */
+document.addEventListener('DOMContentLoaded', function () {
+    var colorMap = {
+        'bg-dark':      { bg: '#334155', color: '#e2e8f0' },
+        'bg-info':      { bg: '#0c4a6e', color: '#e0f2fe' },
+        'bg-warning':   { bg: '#92400e', color: '#fef3c7' },
+        'bg-primary':   { bg: '#312e81', color: '#e0e7ff' },
+        'bg-success':   { bg: '#166534', color: '#d1fae5' },
+        'bg-validator': { bg: '#5b21b6', color: '#ede9fe' }
+    };
+    document.querySelectorAll('.table-monitoring thead tr:nth-child(2) th').forEach(function (th) {
+        var matched = false;
+        for (var cls in colorMap) {
+            if (th.classList.contains(cls)) {
+                th.style.setProperty('background', colorMap[cls].bg, 'important');
+                th.style.setProperty('color', colorMap[cls].color, 'important');
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            th.style.setProperty('background', '#1e293b', 'important');
+            th.style.setProperty('color', '#94a3b8', 'important');
+        }
+    });
+});
+</script>
+
 @endsection
