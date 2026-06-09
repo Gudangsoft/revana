@@ -53,3 +53,28 @@
 ### Cara Kerja
 Script berjalan saat `DOMContentLoaded`. Setiap `th` di baris sub-header di-cek class-nya (`bg-primary`, `bg-success`, dll.), lalu diaplikasikan warna gelap yang sesuai via `element.style.setProperty('background', color, 'important')`. Ini membuat inline `!important` style yang tidak bisa di-override oleh CSS rule manapun.
 
+## 5. Reviewer User/Pass + Link Publish di PIC Monitoring
+
+**Tujuan:** PIC Reviewer tidak bisa melihat username/password reviewer di tabel monitoring. Link Publish di kolom Production hanya tampil ikon, bukan teks URL.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/monitoring.blade.php` | Reviewer 1 & 2: colspan 2→3, tambah sub-header "User/Pass", tambah td kredensial reviewer dengan highlight biru; Link Publish: tampilkan teks URL + icon |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Sama — Reviewer 1 & 2 colspan 2→3, tambah User/Pass column; Link Publish tampilkan teks URL |
+
+### Detail
+- Kredensial reviewer ditampilkan sebagai `<code>` read-only dengan background `#e0e7ff` (biru muda), format: `user / pass`
+- Link Publish: `{{ Str::limit($s->link_publish, 30) }}` dengan `title` full URL saat hover
+
+
+## 5. 🔄 Update: s
+
+- **Commit:** `ec47f5f` — 17:00 oleh Gudangsoft
+- **File berubah:** 5 file
+- `log-update-2026-06-08.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
+
