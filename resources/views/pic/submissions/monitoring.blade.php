@@ -136,10 +136,12 @@
     background: #f1f5f9; color: #334155;
     border-top: 2px solid #0a0e1a !important; border-bottom: 1px solid #cbd5e1 !important;
 }
-/* === TEST DIAGNOSTIC: apakah CSS update terlihat? === */
+/* Paksa row 2 sub-header — override Bootstrap box-shadow overlay */
 .table-monitoring thead tr:nth-child(2) th {
     background: #dc2626 !important;
     color: #ffffff !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
 }
 .table-monitoring thead th.sticky-first,
 .table-monitoring thead th.sticky-second { z-index:22 !important;background:#0f172a !important;color:#e2e8f0 !important; }
