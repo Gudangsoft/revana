@@ -132,15 +132,9 @@
     position:sticky;top:29px;z-index:20;
     height:28px;line-height:1;vertical-align:middle;
     font-size:0.65rem;font-weight:700;
-    background:#f1f5f9 !important;color:#334155 !important;
+    background:#f1f5f9;color:#334155;
     border-top:2px solid #0a0e1a !important;border-bottom:1px solid #cbd5e1 !important;
 }
-.table-monitoring thead tr:nth-child(2) th.bg-dark    { background:#e2e8f0 !important;color:#1e293b !important;border-left:1px solid #94a3b8 !important; }
-.table-monitoring thead tr:nth-child(2) th.bg-info    { background:#bae6fd !important;color:#0369a1 !important;border-left:3px solid #0ea5e9 !important; }
-.table-monitoring thead tr:nth-child(2) th.bg-warning { background:#fde68a !important;color:#92400e !important;border-left:3px solid #f59e0b !important; }
-.table-monitoring thead tr:nth-child(2) th.bg-primary { background:#c7d2fe !important;color:#3730a3 !important;border-left:3px solid #6366f1 !important; }
-.table-monitoring thead tr:nth-child(2) th.bg-success   { background:#bbf7d0 !important;color:#15803d !important;border-left:3px solid #22c55e !important; }
-.table-monitoring thead tr:nth-child(2) th.bg-validator { background:#e9d5ff !important;color:#7c3aed !important;border-left:3px solid #8b5cf6 !important; }
 .table-monitoring thead th.sticky-first,
 .table-monitoring thead th.sticky-second { z-index:22 !important;background:#0f172a !important;color:#e2e8f0 !important; }
 
@@ -573,54 +567,45 @@
                                 <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
                             </tr>
                             <tr>
-                                @php
-                                $sh = [
-                                    'dark'    => 'background:#e2e8f0!important;color:#1e293b!important;font-weight:700;font-size:0.7rem;',
-                                    'info'    => 'background:#bae6fd!important;color:#0369a1!important;font-weight:700;font-size:0.7rem;',
-                                    'warning' => 'background:#fde68a!important;color:#92400e!important;font-weight:700;font-size:0.7rem;',
-                                    'primary' => 'background:#c7d2fe!important;color:#3730a3!important;font-weight:700;font-size:0.7rem;',
-                                    'success' => 'background:#bbf7d0!important;color:#15803d!important;font-weight:700;font-size:0.7rem;',
-                                ];
-                                @endphp
-                                <!-- Author Access sub-headers (4 cols) -->
-                                <th class="bg-dark" style="{{ $sh['dark'] }}">PIC Marketing</th>
-                                <th class="bg-dark" style="{{ $sh['dark'] }}">Petugas Submit</th>
-                                <th class="bg-dark" style="{{ $sh['dark'] }}">Username</th>
-                                <th class="bg-dark" style="{{ $sh['dark'] }}">Password</th>
-                                <!-- Editor 1 sub-headers (3 cols) -->
-                                <th class="bg-info" style="{{ $sh['info'] }}">Petugas</th>
-                                <th class="bg-info" style="{{ $sh['info'] }}">User/Pass</th>
-                                <th class="bg-info" style="{{ $sh['info'] }}">Valid</th>
-                                <!-- Author 1 sub-headers (2 cols) -->
-                                <th class="bg-warning" style="{{ $sh['warning'] }}">Petugas</th>
-                                <th class="bg-warning" style="{{ $sh['warning'] }}">Valid</th>
-                                <!-- Editor 2 sub-headers (4 cols) -->
-                                <th class="bg-info" style="{{ $sh['info'] }}">Petugas</th>
-                                <th class="bg-info" style="{{ $sh['info'] }}">User/Pass R1</th>
-                                <th class="bg-info" style="{{ $sh['info'] }}">User/Pass R2</th>
-                                <th class="bg-info" style="{{ $sh['info'] }}">Valid</th>
-                                <!-- Reviewer 1 sub-headers (4 cols) -->
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">Petugas</th>
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">User/Pass</th>
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">Catatan</th>
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">Valid</th>
-                                <!-- Reviewer 2 sub-headers (4 cols) -->
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">Petugas</th>
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">User/Pass</th>
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">Catatan</th>
-                                <th class="bg-primary" style="{{ $sh['primary'] }}">Valid</th>
-                                <!-- Editor 3 sub-headers (2 cols) -->
-                                <th class="bg-info" style="{{ $sh['info'] }}">Petugas</th>
-                                <th class="bg-info" style="{{ $sh['info'] }}">Valid</th>
-                                <!-- Author 2 sub-headers (2 cols) -->
-                                <th class="bg-warning" style="{{ $sh['warning'] }}">Petugas</th>
-                                <th class="bg-warning" style="{{ $sh['warning'] }}">Valid</th>
-                                <!-- Production sub-headers (5 cols) -->
-                                <th class="bg-success" style="{{ $sh['success'] }}">Petugas</th>
-                                <th class="bg-success" style="{{ $sh['success'] }}">User Editor</th>
-                                <th class="bg-success" style="{{ $sh['success'] }}">Pass Editor</th>
-                                <th class="bg-success" style="{{ $sh['success'] }}">Link Publish</th>
-                                <th class="bg-success" style="{{ $sh['success'] }}">Valid</th>
+                                <!-- Author Access (4 cols) — inline style tanpa Bootstrap class agar tidak konflik -->
+                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;border-left:1px solid #94a3b8;">PIC Marketing</th>
+                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;">Petugas Submit</th>
+                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;">Username</th>
+                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;">Password</th>
+                                <!-- Editor 1 (3 cols) -->
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;border-left:3px solid #0ea5e9;">Petugas</th>
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">User/Pass</th>
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Author 1 (2 cols) -->
+                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;border-left:3px solid #f59e0b;">Petugas</th>
+                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Editor 2 (4 cols) -->
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;border-left:3px solid #0ea5e9;">Petugas</th>
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">User/Pass R1</th>
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">User/Pass R2</th>
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Reviewer 1 (4 cols) -->
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;border-left:3px solid #6366f1;">Petugas</th>
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">User/Pass</th>
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Catatan</th>
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Reviewer 2 (4 cols) -->
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;border-left:3px solid #6366f1;">Petugas</th>
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">User/Pass</th>
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Catatan</th>
+                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Editor 3 (2 cols) -->
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;border-left:3px solid #0ea5e9;">Petugas</th>
+                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Author 2 (2 cols) -->
+                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;border-left:3px solid #f59e0b;">Petugas</th>
+                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <!-- Production (5 cols) -->
+                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;border-left:3px solid #22c55e;">Petugas</th>
+                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">User Editor</th>
+                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">Pass Editor</th>
+                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">Link Publish</th>
+                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1424,37 +1409,6 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Terjadi kesalahan saat menyimpan');
         });
     }
-});
-</script>
-
-<script>
-/* Force sub-header row colors — light tint + dark text, always readable */
-document.addEventListener('DOMContentLoaded', function () {
-    var colorMap = {
-        'bg-dark':      { bg: '#e2e8f0', color: '#1e293b' },
-        'bg-info':      { bg: '#bae6fd', color: '#0369a1' },
-        'bg-warning':   { bg: '#fde68a', color: '#92400e' },
-        'bg-primary':   { bg: '#c7d2fe', color: '#3730a3' },
-        'bg-success':   { bg: '#bbf7d0', color: '#15803d' },
-        'bg-validator': { bg: '#e9d5ff', color: '#7c3aed' }
-    };
-    document.querySelectorAll('.table-monitoring thead tr:nth-child(2) th').forEach(function (th) {
-        var matched = false;
-        for (var cls in colorMap) {
-            if (th.classList.contains(cls)) {
-                th.style.setProperty('background', colorMap[cls].bg, 'important');
-                th.style.setProperty('color', colorMap[cls].color, 'important');
-                th.style.setProperty('font-weight', '700', 'important');
-                matched = true;
-                break;
-            }
-        }
-        if (!matched) {
-            th.style.setProperty('background', '#f1f5f9', 'important');
-            th.style.setProperty('color', '#334155', 'important');
-            th.style.setProperty('font-weight', '700', 'important');
-        }
-    });
 });
 </script>
 

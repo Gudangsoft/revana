@@ -113,6 +113,22 @@ Script berjalan saat `DOMContentLoaded`. Setiap `th` di baris sub-header di-cek 
 - PIC hanya bisa toggle validasi untuk submission yang menjadi tugasnya (highlighted dengan star ★)
 - Data lain ditampilkan read-only (code display, bukan input editable)
 
+## 9. Fix Sub-Header Row 2 Definitif — Hapus Bootstrap Classes + CSS !important
+
+**Tujuan:** Sub-header row 2 masih putih/kosong setelah semua upaya sebelumnya. Root cause sebenarnya: (1) Bootstrap utility class `bg-dark`/`bg-info`/dll. punya `background-color: ...!important` sendiri yang berkonflik; (2) CSS catch-all `.table-monitoring thead tr:nth-child(2) th { background: #f1f5f9 !important }` override inline style tanpa `!important`; (3) JS force-color script menimpa semua cell dengan `#f1f5f9` via `setProperty('background','#f1f5f9','important')` karena tidak ada class yang cocok.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/monitoring.blade.php` | Row 2 th: hapus Bootstrap classes (`bg-dark`, `bg-info`, dll.), ganti dengan hardcoded inline style literal; hapus JS force-color script; CSS catch-all row 2 hilangkan `!important` dari `background`/`color` |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Sama |
+
+### Cara Kerja
+- Inline `style="background:#e2e8f0;color:#1e293b;..."` pada setiap th menang atas CSS non-`!important`
+- Tidak ada lagi Bootstrap class yang membawa `!important` sendiri
+- Tidak ada lagi JS yang menimpa inline style
+- CSS catch-all tetap ada (tanpa `!important`) sebagai fallback warna abu jika inline style tidak ada
+
 ## 7. Fix Sub-Header Row 2 Tidak Terlihat — Hapus text-white/text-dark
 
 **Tujuan:** Sub-header row 2 di PIC monitoring masih tidak terlihat meski sudah ada CSS/JS light palette. Root cause: th elements di row 2 punya class `text-white` atau `text-dark` yang di-override oleh Bootstrap `!important`, sehingga teks putih di atas background putih = tidak kelihatan.
