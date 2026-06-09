@@ -206,40 +206,50 @@ class PicPointReportController extends Controller
 
         // --- BACKFILL workflow steps (only validated) ---
         $workflowSteps = [
-            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1'],
-            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1'],
-            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2'],
-            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1'],
-            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2'],
-            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3'],
-            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2'],
-            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production'],
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1',   'validated_at' => 'editor1_validated_at'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1',   'validated_at' => 'author1_validated_at'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2',   'validated_at' => 'editor2_validated_at'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1', 'validated_at' => 'reviewer1_validated_at'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2', 'validated_at' => 'reviewer2_validated_at'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3',   'validated_at' => 'editor3_validated_at'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2',   'validated_at' => 'author2_validated_at'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production','validated_at' => 'production_validated_at'],
         ];
 
+        $repaired = 0;
         foreach ($workflowSteps as $ws) {
             $rows = \DB::table('submissions')
                 ->whereNotNull($ws['field'])
                 ->where($ws['valid'], true)
-                ->select('id', $ws['field'] . ' as pic_id', 'kode_submit', 'judul_artikel')
+                ->select('id', $ws['field'] . ' as pic_id', 'kode_submit', 'judul_artikel', $ws['validated_at'])
                 ->get();
 
             foreach ($rows as $row) {
-                $exists = PicPointHistory::where('pic_id', $row->pic_id)
+                $validatedAt = $row->{$ws['validated_at']} ?? null;
+                $existingHistory = PicPointHistory::where('pic_id', $row->pic_id)
                     ->where('submission_id', $row->id)
                     ->where('step', $ws['step'])
-                    ->exists();
-                if (!$exists) {
+                    ->first();
+
+                if (!$existingHistory) {
                     $points = PicPointHistory::getPointsForStep($ws['step']);
                     if ($points > 0) {
+                        $ts = $validatedAt ?? now();
                         PicPointHistory::create([
                             'pic_id'        => $row->pic_id,
                             'submission_id' => $row->id,
                             'step'          => $ws['step'],
                             'points_earned' => $points,
                             'description'   => "Menyelesaikan tugas {$ws['step']} untuk: {$row->kode_submit}",
+                            'created_at'    => $ts,
+                            'updated_at'    => $ts,
                         ]);
                         $backfilled++;
                     }
+                } elseif ($validatedAt && $existingHistory->created_at->toDateString() !== \Carbon\Carbon::parse($validatedAt)->toDateString()) {
+                    // Repair: history created_at mismatch with actual validated_at (e.g. created by old sync)
+                    $existingHistory->update(['created_at' => $validatedAt, 'updated_at' => $validatedAt]);
+                    $repaired++;
                 }
             }
         }
@@ -264,7 +274,7 @@ class PicPointReportController extends Controller
             PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
         }
 
-        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$synced} PIC diperbarui, {$unchanged} sudah sesuai";
+        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$repaired} tanggal dikoreksi, {$synced} PIC diperbarui, {$unchanged} sudah sesuai";
         if ($orphanCount > 0) {
             $msg .= ", {$orphanCount} riwayat orphan dihapus";
         }
@@ -325,29 +335,34 @@ class PicPointReportController extends Controller
         }
 
         $workflowSteps = [
-            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1'],
-            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1'],
-            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2'],
-            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1'],
-            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2'],
-            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3'],
-            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2'],
-            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production'],
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1',   'validated_at' => 'editor1_validated_at'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1',   'validated_at' => 'author1_validated_at'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2',   'validated_at' => 'editor2_validated_at'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1', 'validated_at' => 'reviewer1_validated_at'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2', 'validated_at' => 'reviewer2_validated_at'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3',   'validated_at' => 'editor3_validated_at'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2',   'validated_at' => 'author2_validated_at'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production','validated_at' => 'production_validated_at'],
         ];
         foreach ($workflowSteps as $ws) {
             $rows = \DB::table('submissions')->whereNotNull($ws['field'])->where($ws['valid'], true)
-                ->select('id', $ws['field'].' as pic_id', 'kode_submit', 'judul_artikel')->get();
+                ->select('id', $ws['field'].' as pic_id', 'kode_submit', 'judul_artikel', $ws['validated_at'])->get();
             foreach ($rows as $row) {
-                $exists = PicPointHistory::where('pic_id', $row->pic_id)
-                    ->where('submission_id', $row->id)->where('step', $ws['step'])->exists();
-                if (!$exists) {
+                $validatedAt = $row->{$ws['validated_at']} ?? null;
+                $existingHistory = PicPointHistory::where('pic_id', $row->pic_id)
+                    ->where('submission_id', $row->id)->where('step', $ws['step'])->first();
+                if (!$existingHistory) {
                     $pts = PicPointHistory::getPointsForStep($ws['step']);
                     if ($pts > 0) {
+                        $ts = $validatedAt ?? now();
                         PicPointHistory::create(['pic_id' => $row->pic_id, 'submission_id' => $row->id,
                             'step' => $ws['step'], 'points_earned' => $pts,
-                            'description' => "Tugas {$ws['step']}: {$row->kode_submit}"]);
+                            'description' => "Tugas {$ws['step']}: {$row->kode_submit}",
+                            'created_at' => $ts, 'updated_at' => $ts]);
                         $backfilled++;
                     }
+                } elseif ($validatedAt && $existingHistory->created_at->toDateString() !== \Carbon\Carbon::parse($validatedAt)->toDateString()) {
+                    $existingHistory->update(['created_at' => $validatedAt, 'updated_at' => $validatedAt]);
                 }
             }
         }

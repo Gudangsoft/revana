@@ -97,6 +97,27 @@ Log perubahan otomatis dari git commits.
 - Anti-flash: state diaplikasikan inline script sebelum CSS render
 - Animasi transition 0.25s smooth
 
+## 10. Fix Laporan Kinerja — Poin Hilang akibat Salah Tanggal History
+
+**Tujuan:** Laporan kinerja menampilkan angka lebih rendah dari sebenarnya (contoh: Aji harusnya 78, tampil 66). Root cause: `syncAllPoints()` tidak menyertakan `{step}_validated_at` saat SELECT, sehingga record backfill memakai `created_at = tanggal sync dijalankan` (bukan tanggal validasi sebenarnya). Laporan kemudian memfilter `pic_point_histories.created_at` berdasarkan range tanggal → record yang sync-nya sebelum range tidak ikut terhitung.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `syncAllPoints()` dan `syncAllAndLogout()`: (1) Tambah `{step}_validated_at` ke SELECT query; (2) Record baru pakai `created_at = validated_at` (fallback `now()` jika null); (3) **Repair pass**: record lama yang `created_at`-nya beda hari dengan `validated_at` otomatis dikoreksi saat sync dijalankan |
+
+### Alur Fix
+1. Admin klik **Sync Point** → sync berjalan
+2. Untuk setiap submission yang sudah di-validasi:
+   - Jika belum ada history → buat dengan `created_at = {step}_validated_at`
+   - Jika sudah ada tapi tanggalnya salah → update `created_at` ke `{step}_validated_at`
+3. Laporan kinerja filter by `created_at` → kini cocok dengan tanggal validasi sebenarnya
+
+### Catatan
+- Field `{step}_validated_at` sudah ada di tabel submissions sejak awal (di-set saat toggle)
+- Pesan sukses sync kini menampilkan jumlah record yang dikoreksi ("N tanggal dikoreksi")
+- Step `validator` tidak termasuk workflowSteps sync (hanya real-time toggle) — tidak terpengaruh
+
 ## 7. 🔄 Update: a
 
 - **Commit:** `7a90ae0` — 14:11 oleh Gudangsoft
@@ -125,4 +146,14 @@ Log perubahan otomatis dari git commits.
 ### Catatan
 - Controller (`updateCredential()`) sudah mengizinkan Editor 2 untuk field `username_reviewer1/2` dan `password_reviewer1/2`
 - Reviewer 1/2 juga tetap bisa input kredensialnya sendiri via kolom Reviewer 1/2 (jika sudah di-assign oleh admin)
+
+
+## 10. 🔄 Update: a
+
+- **Commit:** `79376c4` — 14:46 oleh Gudangsoft
+- **File berubah:** 4 file
+- `log-update-2026-06-09.md`
+- `resources/views/marketing/layouts/app.blade.php`
+- `resources/views/pic/layouts/app.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
 
