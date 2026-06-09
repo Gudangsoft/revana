@@ -130,19 +130,18 @@
 .table-monitoring thead th.bg-validator { background:#4a1d96 !important;color:#ddd6fe !important;border-left:3px solid #a78bfa !important; }
 .table-monitoring thead th.text-dark    { color:#fde68a !important; }
 .table-monitoring thead tr:nth-child(2) th {
-    position: sticky; top: 29px; z-index: 20;
+    top: 29px;
     height: 28px; line-height: 1; vertical-align: middle;
     font-size: 0.65rem; font-weight: 700;
-    background: #f1f5f9; color: #334155;
+    background: #f1f5f9 !important; color: #334155 !important;
     border-top: 2px solid #0a0e1a !important; border-bottom: 1px solid #cbd5e1 !important;
 }
-/* Paksa row 2 sub-header — override Bootstrap box-shadow overlay */
-.table-monitoring thead tr:nth-child(2) th {
-    background: #dc2626 !important;
-    color: #ffffff !important;
-    box-shadow: none !important;
-    -webkit-box-shadow: none !important;
-}
+.table-monitoring thead tr:nth-child(2) th.bg-dark      { background:#e2e8f0 !important;color:#1e293b !important;border-left:1px solid #94a3b8 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-info      { background:#bae6fd !important;color:#0369a1 !important;border-left:4px solid #0ea5e9 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-warning   { background:#fde68a !important;color:#92400e !important;border-left:4px solid #f59e0b !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-primary   { background:#c7d2fe !important;color:#3730a3 !important;border-left:4px solid #6366f1 !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-success   { background:#bbf7d0 !important;color:#15803d !important;border-left:4px solid #22c55e !important; }
+.table-monitoring thead tr:nth-child(2) th.bg-validator { background:#e9d5ff !important;color:#7c3aed !important;border-left:4px solid #8b5cf6 !important; }
 .table-monitoring thead th.sticky-first,
 .table-monitoring thead th.sticky-second { z-index:22 !important;background:#0f172a !important;color:#e2e8f0 !important; }
 
@@ -164,12 +163,6 @@
 }
 .table-monitoring thead th.sticky-second { z-index: 23 !important; background: #0f172a !important; color: #e2e8f0 !important; box-shadow: none; }
 
-/* Non-sticky columns */
-.table-monitoring td:not(.sticky-first):not(.sticky-second),
-.table-monitoring th:not(.sticky-first):not(.sticky-second) {
-    z-index: 1;
-    position: relative;
-}
 
 .table-monitoring tbody td {
     padding: 4px;
@@ -592,46 +585,46 @@
                             </tr>
                             <tr>
                                 <!-- Author Access (4 cols) -->
-                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;border-left:2px solid #64748b;">PIC Mkt</th>
-                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;">Petugas</th>
-                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;">Username</th>
-                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;">Password</th>
+                                <th class="bg-dark">PIC Mkt</th>
+                                <th class="bg-dark">Petugas</th>
+                                <th class="bg-dark">Username</th>
+                                <th class="bg-dark">Password</th>
                                 <!-- Editor 1 (3 cols) -->
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;border-left:3px solid #0284c7;">Petugas</th>
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">User/Pass</th>
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">User/Pass</th>
+                                <th class="bg-info">Valid</th>
                                 <!-- Author 1 (2 cols) -->
-                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;border-left:3px solid #d97706;">Petugas</th>
-                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
                                 <!-- Editor 2 (2 cols) -->
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;border-left:3px solid #0284c7;">Petugas</th>
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
                                 <!-- Reviewer 1 (4 cols) -->
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;border-left:3px solid #4f46e5;">Petugas</th>
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">User/Pass</th>
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Catatan</th>
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
                                 <!-- Reviewer 2 (4 cols) -->
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;border-left:3px solid #4f46e5;">Petugas</th>
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">User/Pass</th>
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Catatan</th>
-                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
                                 <!-- Editor 3 (2 cols) -->
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;border-left:3px solid #0284c7;">Petugas</th>
-                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
                                 <!-- Author 2 (2 cols) -->
-                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;border-left:3px solid #d97706;">Petugas</th>
-                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
                                 <!-- Production (5 cols) -->
-                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;border-left:3px solid #16a34a;">Petugas</th>
-                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">User Editor</th>
-                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">Pass Editor</th>
-                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">Link Publish</th>
-                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-success">Petugas</th>
+                                <th class="bg-success">User Editor</th>
+                                <th class="bg-success">Pass Editor</th>
+                                <th class="bg-success">Link Publish</th>
+                                <th class="bg-success">Valid</th>
                                 <!-- Validator (3 cols) -->
-                                <th style="background:#c084fc;color:#3b0764;font-weight:700;font-size:0.72rem;border-left:3px solid #9333ea;">Petugas</th>
-                                <th style="background:#c084fc;color:#3b0764;font-weight:700;font-size:0.72rem;">Catatan</th>
-                                <th style="background:#c084fc;color:#3b0764;font-weight:700;font-size:0.72rem;">Valid</th>
+                                <th class="bg-validator">Petugas</th>
+                                <th class="bg-validator">Catatan</th>
+                                <th class="bg-validator">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
