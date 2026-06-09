@@ -161,9 +161,8 @@
 }
 .table-monitoring thead th.sticky-second { z-index: 23 !important; background: #0f172a !important; color: #e2e8f0 !important; box-shadow: none; }
 
-/* Non-sticky columns */
-.table-monitoring td:not(.sticky-first):not(.sticky-second),
-.table-monitoring th:not(.sticky-first):not(.sticky-second) {
+/* Non-sticky body cells */
+.table-monitoring td:not(.sticky-first):not(.sticky-second) {
     z-index: 1;
     position: relative;
 }
