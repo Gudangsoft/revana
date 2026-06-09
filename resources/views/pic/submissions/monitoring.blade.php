@@ -584,47 +584,47 @@
                                 <th colspan="3" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
                             </tr>
                             <tr>
-                                <!-- Author Access (4 cols) — inline style tanpa Bootstrap class agar tidak konflik -->
-                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;border-left:1px solid #94a3b8;">PIC Marketing</th>
-                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;">Petugas Submit</th>
-                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;">Username</th>
-                                <th style="background:#e2e8f0;color:#1e293b;font-weight:700;font-size:0.7rem;">Password</th>
+                                <!-- Author Access (4 cols) -->
+                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;border-left:2px solid #64748b;">PIC Mkt</th>
+                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;">Petugas</th>
+                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;">Username</th>
+                                <th style="background:#94a3b8;color:#f8fafc;font-weight:700;font-size:0.72rem;">Password</th>
                                 <!-- Editor 1 (3 cols) -->
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;border-left:3px solid #0ea5e9;">Petugas</th>
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">User/Pass</th>
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;border-left:3px solid #0284c7;">Petugas</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">User/Pass</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Author 1 (2 cols) -->
-                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;border-left:3px solid #f59e0b;">Petugas</th>
-                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;border-left:3px solid #d97706;">Petugas</th>
+                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Editor 2 (2 cols) -->
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;border-left:3px solid #0ea5e9;">Petugas</th>
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;border-left:3px solid #0284c7;">Petugas</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Reviewer 1 (4 cols) -->
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;border-left:3px solid #6366f1;">Petugas</th>
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">User/Pass</th>
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Catatan</th>
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;border-left:3px solid #4f46e5;">Petugas</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">User/Pass</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Catatan</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Reviewer 2 (4 cols) -->
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;border-left:3px solid #6366f1;">Petugas</th>
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">User/Pass</th>
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Catatan</th>
-                                <th style="background:#c7d2fe;color:#3730a3;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;border-left:3px solid #4f46e5;">Petugas</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">User/Pass</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Catatan</th>
+                                <th style="background:#818cf8;color:#f0f9ff;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Editor 3 (2 cols) -->
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;border-left:3px solid #0ea5e9;">Petugas</th>
-                                <th style="background:#bae6fd;color:#0369a1;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;border-left:3px solid #0284c7;">Petugas</th>
+                                <th style="background:#38bdf8;color:#0c4a6e;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Author 2 (2 cols) -->
-                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;border-left:3px solid #f59e0b;">Petugas</th>
-                                <th style="background:#fde68a;color:#92400e;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;border-left:3px solid #d97706;">Petugas</th>
+                                <th style="background:#fcd34d;color:#78350f;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Production (5 cols) -->
-                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;border-left:3px solid #22c55e;">Petugas</th>
-                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">User Editor</th>
-                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">Pass Editor</th>
-                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">Link Publish</th>
-                                <th style="background:#bbf7d0;color:#15803d;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;border-left:3px solid #16a34a;">Petugas</th>
+                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">User Editor</th>
+                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">Pass Editor</th>
+                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">Link Publish</th>
+                                <th style="background:#4ade80;color:#14532d;font-weight:700;font-size:0.72rem;">Valid</th>
                                 <!-- Validator (3 cols) -->
-                                <th style="background:#e9d5ff;color:#7c3aed;font-weight:700;font-size:0.7rem;border-left:3px solid #8b5cf6;">Petugas</th>
-                                <th style="background:#e9d5ff;color:#7c3aed;font-weight:700;font-size:0.7rem;">Catatan</th>
-                                <th style="background:#e9d5ff;color:#7c3aed;font-weight:700;font-size:0.7rem;">Valid</th>
+                                <th style="background:#c084fc;color:#3b0764;font-weight:700;font-size:0.72rem;border-left:3px solid #9333ea;">Petugas</th>
+                                <th style="background:#c084fc;color:#3b0764;font-weight:700;font-size:0.72rem;">Catatan</th>
+                                <th style="background:#c084fc;color:#3b0764;font-weight:700;font-size:0.72rem;">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
