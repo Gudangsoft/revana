@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- Anti-flash: apply saved theme sebelum CSS render --}}
-    <script>(function(){var t=localStorage.getItem('picTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');})()</script>
+    <script>(function(){var t=localStorage.getItem('picTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');if(localStorage.getItem('picSidebarCollapsed')==='1')document.documentElement.setAttribute('data-sidebar','collapsed');})()</script>
 
     <title>@yield('title', 'PIC Dashboard') - {{ $appSettings['app_name'] }}</title>
     @if($appSettings['favicon'])
@@ -41,6 +41,32 @@
             overflow-y: auto;
             overflow-x: hidden;
             position: relative;
+            transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease, box-shadow 0.25s ease;
+        }
+        html[data-sidebar="collapsed"] .sidebar,
+        .sidebar.sidebar-collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            box-shadow: none !important;
+        }
+        /* Sidebar toggle button */
+        #sidebarToggleBtn {
+            color: rgba(255,255,255,0.8);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            padding: 4px 8px;
+            line-height: 1;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #sidebarToggleBtn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.1);
         }
         
         .sidebar .nav-link {
@@ -164,6 +190,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    {{-- Tombol toggle sidebar --}}
+                    <li class="nav-item">
+                        <button id="sidebarToggleBtn" onclick="toggleSidebar()" title="Sembunyikan/Tampilkan Menu">
+                            <i class="bi bi-layout-sidebar" id="sidebarToggleIcon"></i>
+                        </button>
+                    </li>
                     {{-- Tombol sync point strategis di navbar --}}
                     <li class="nav-item">
                         <form method="POST" action="{{ route('pic.points.sync') }}" class="d-inline" id="navSyncForm">
@@ -314,7 +346,22 @@
                 if (el) { new bootstrap.Toast(el).show(); }
             });
         });
-        // No sidebar collapse functionality
+        // Sidebar toggle
+        function toggleSidebar() {
+            var sidebar = document.querySelector('.sidebar');
+            var isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('picSidebarCollapsed', isCollapsed ? '1' : '0');
+            document.documentElement.setAttribute('data-sidebar', isCollapsed ? 'collapsed' : 'visible');
+            var icon = document.getElementById('sidebarToggleIcon');
+            if (icon) icon.className = isCollapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var collapsed = localStorage.getItem('picSidebarCollapsed') === '1';
+            var sidebar = document.querySelector('.sidebar');
+            var icon = document.getElementById('sidebarToggleIcon');
+            if (collapsed && sidebar) sidebar.classList.add('sidebar-collapsed');
+            if (icon) icon.className = collapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar';
+        });
         // Sync button loading state
         var nsf = document.getElementById('navSyncForm');
         if (nsf) nsf.addEventListener('submit', function() {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>(function(){var t=localStorage.getItem('mktTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');})()</script>
+    <script>(function(){var t=localStorage.getItem('mktTheme');if(t==='dark-sidebar')document.documentElement.setAttribute('data-theme','dark-sidebar');if(localStorage.getItem('mktSidebarCollapsed')==='1')document.documentElement.setAttribute('data-sidebar','collapsed');})()</script>
     <title>@yield('title', 'Marketing Dashboard') - REVANA</title>
     @if(isset($appSettings['favicon']) && $appSettings['favicon'])
     <link rel="icon" href="{{ asset('storage/' . $appSettings['favicon']) }}" type="image/x-icon">
@@ -128,6 +128,40 @@
             opacity: 1;
         }
 
+        /* Sidebar toggle */
+        .sidebar {
+            transition: max-width 0.25s ease, padding 0.25s ease, opacity 0.2s ease;
+            max-width: 16.6667%;
+        }
+        html[data-sidebar="collapsed"] .sidebar,
+        .sidebar.sidebar-collapsed {
+            max-width: 0 !important;
+            flex: 0 0 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            min-height: 0 !important;
+        }
+        html[data-sidebar="collapsed"] .col-content,
+        .col-content.sidebar-expanded {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        #mktSidebarBtn {
+            color: rgba(255,255,255,0.8);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 1rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #mktSidebarBtn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.1);
+        }
         /* Tombol toggle tema */
         #mktThemeBtn {
             color: rgba(255,255,255,0.75);
@@ -153,7 +187,12 @@
             <a class="navbar-brand" href="{{ route('marketing.dashboard') }}">
                 <i class="bi bi-megaphone-fill"></i> Marketing Portal
             </a>
-            <div class="navbar-nav ms-auto">
+            <div class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-1">
+                    <button id="mktSidebarBtn" onclick="toggleSidebar()" title="Sembunyikan/Tampilkan Menu">
+                        <i class="bi bi-layout-sidebar" id="mktSidebarIcon"></i>
+                    </button>
+                </li>
                 <span class="nav-link d-flex align-items-center gap-2">
                     <span class="points-badge">
                         @php
@@ -358,7 +397,7 @@
                     <i class="bi bi-person-circle"></i> Profile Saya
                 </a>
             </div>
-            <div class="col-md-10 content">
+            <div class="col-md-10 col-content content">
                 @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     <i class="bi bi-check-circle"></i> {{ session('success') }}
@@ -448,6 +487,16 @@
     </div>
 
     <script>
+    function toggleSidebar() {
+        var sidebar = document.querySelector('.sidebar');
+        var content = document.querySelector('.col-content');
+        var isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
+        if (content) content.classList.toggle('sidebar-expanded', isCollapsed);
+        localStorage.setItem('mktSidebarCollapsed', isCollapsed ? '1' : '0');
+        document.documentElement.setAttribute('data-sidebar', isCollapsed ? 'collapsed' : 'visible');
+        var icon = document.getElementById('mktSidebarIcon');
+        if (icon) icon.className = isCollapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar';
+    }
     function applyTheme(theme) {
         var isDark = theme === 'dark-sidebar';
         document.documentElement.setAttribute('data-theme', isDark ? 'dark-sidebar' : 'default');
@@ -465,6 +514,17 @@
         applyTheme(next);
     }
     document.addEventListener('DOMContentLoaded', function() {
+        // Apply sidebar state
+        var sidebarCollapsed = localStorage.getItem('mktSidebarCollapsed') === '1';
+        var sidebar = document.querySelector('.sidebar');
+        var content = document.querySelector('.col-content');
+        var icon = document.getElementById('mktSidebarIcon');
+        if (sidebarCollapsed && sidebar) {
+            sidebar.classList.add('sidebar-collapsed');
+            if (content) content.classList.add('sidebar-expanded');
+        }
+        if (icon) icon.className = sidebarCollapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar';
+
         var saved = localStorage.getItem('mktTheme') || 'default';
         applyTheme(saved);
 

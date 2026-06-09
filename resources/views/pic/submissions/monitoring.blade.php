@@ -599,7 +599,7 @@
                                 <th colspan="4" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
                                 <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
-                                <th colspan="2" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
+                                <th colspan="4" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
                                 <th colspan="4" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
                                 <th colspan="4" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
@@ -620,8 +620,10 @@
                                 <!-- Author 1 (2 cols) -->
                                 <th class="bg-warning">Petugas</th>
                                 <th class="bg-warning">Valid</th>
-                                <!-- Editor 2 (2 cols) -->
+                                <!-- Editor 2 (4 cols) -->
                                 <th class="bg-info">Petugas</th>
+                                <th class="bg-info">User/Pass R1</th>
+                                <th class="bg-info">User/Pass R2</th>
                                 <th class="bg-info">Valid</th>
                                 <!-- Reviewer 1 (4 cols) -->
                                 <th class="bg-primary">Petugas</th>
@@ -823,10 +825,48 @@
                                     @endif
                                 </td>
 
-                                <!-- Editor 2 (2 cols) -->
+                                <!-- Editor 2 (4 cols) -->
                                 <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasEditor2?->name ?? '-' }}
                                     @if($s->petugas_editor2_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
+                                </td>
+                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor2_id == $picId)
+                                        <div class="cred-group">
+                                            <input type="text" class="pic-input {{ $s->username_reviewer1 ? 'has-value' : '' }}"
+                                                   value="{{ $s->username_reviewer1 }}" placeholder="user"
+                                                   data-submission="{{ $s->id }}" data-field="username_reviewer1">
+                                            <span>/</span>
+                                            <input type="text" class="pic-input {{ $s->password_reviewer1 ? 'has-value' : '' }}"
+                                                   value="{{ $s->password_reviewer1 }}" placeholder="pass"
+                                                   data-submission="{{ $s->id }}" data-field="password_reviewer1">
+                                        </div>
+                                    @elseif($s->username_reviewer1 || $s->password_reviewer1)
+                                        <code style="font-size:0.65rem">{{ $s->username_reviewer1 ?: '—' }}</code>
+                                        <span class="text-muted">/</span>
+                                        <code style="font-size:0.65rem">{{ $s->password_reviewer1 ?: '—' }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor2_id == $picId)
+                                        <div class="cred-group">
+                                            <input type="text" class="pic-input {{ $s->username_reviewer2 ? 'has-value' : '' }}"
+                                                   value="{{ $s->username_reviewer2 }}" placeholder="user"
+                                                   data-submission="{{ $s->id }}" data-field="username_reviewer2">
+                                            <span>/</span>
+                                            <input type="text" class="pic-input {{ $s->password_reviewer2 ? 'has-value' : '' }}"
+                                                   value="{{ $s->password_reviewer2 }}" placeholder="pass"
+                                                   data-submission="{{ $s->id }}" data-field="password_reviewer2">
+                                        </div>
+                                    @elseif($s->username_reviewer2 || $s->password_reviewer2)
+                                        <code style="font-size:0.65rem">{{ $s->username_reviewer2 ?: '—' }}</code>
+                                        <span class="text-muted">/</span>
+                                        <code style="font-size:0.65rem">{{ $s->password_reviewer2 ?: '—' }}</code>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_editor2_id == $picId)

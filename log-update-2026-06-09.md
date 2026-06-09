@@ -80,3 +80,49 @@ Log perubahan otomatis dari git commits.
 - `log-update-2026-06-09.md`
 - `resources/views/pic/submissions/monitoring.blade.php`
 
+
+## 8. Sidebar Toggle — PIC dan Marketing
+
+**Tujuan:** PIC dan Marketing bisa menyembunyikan/menampilkan sidebar dengan satu klik agar area konten lebih luas, terutama saat melihat tabel monitoring yang lebar.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/layouts/app.blade.php` | Tambah CSS `.sidebar-collapsed` (width 0, no overflow), tombol `#sidebarToggleBtn` di navbar, JS `toggleSidebar()` + restore state dari localStorage |
+| `resources/views/marketing/layouts/app.blade.php` | Sama — `#mktSidebarBtn`, CSS untuk Bootstrap grid collapse, `col-content.sidebar-expanded` untuk fill konten |
+
+### Behavior
+- Klik ikon sidebar di navbar untuk toggle hide/show
+- State tersimpan di `localStorage` (picSidebarCollapsed / mktSidebarCollapsed)
+- Anti-flash: state diaplikasikan inline script sebelum CSS render
+- Animasi transition 0.25s smooth
+
+## 7. 🔄 Update: a
+
+- **Commit:** `7a90ae0` — 14:11 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-09.md`
+
+
+## 9. Editor 2 — Tambah Kolom User/Pass R1 dan R2 di Submissions Monitoring
+
+**Tujuan:** PIC Editor 2 (mis. Graciella) perlu input username/password reviewer 1 dan reviewer 2 langsung dari tabel monitoring submissions. Sebelumnya, Editor 2 hanya punya 2 kolom (Petugas + Valid) — tidak ada kolom untuk isi kredensial reviewer.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/monitoring.blade.php` | Header row 1: colspan Editor 2 dari `2` → `4`; Header row 2: tambah `<th>User/Pass R1</th>` dan `<th>User/Pass R2</th>`; Tbody: insert 2 sel baru antara Petugas dan Valid — input `username_reviewer1/password_reviewer1` dan `username_reviewer2/password_reviewer2`, editable jika `petugas_editor2_id == $picId` |
+
+### Struktur Kolom Editor 2 (baru)
+| # | Sub-header | Editable oleh |
+|---|-----------|--------------|
+| 1 | Petugas | — (read only, admin yg assign) |
+| 2 | User/Pass R1 | Editor 2 PIC |
+| 3 | User/Pass R2 | Editor 2 PIC |
+| 4 | Valid | Editor 2 PIC |
+
+### Catatan
+- Controller (`updateCredential()`) sudah mengizinkan Editor 2 untuk field `username_reviewer1/2` dan `password_reviewer1/2`
+- Reviewer 1/2 juga tetap bisa input kredensialnya sendiri via kolom Reviewer 1/2 (jika sudah di-assign oleh admin)
+
