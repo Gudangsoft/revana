@@ -254,6 +254,20 @@ class PicPointReportController extends Controller
             }
         }
 
+        // Backfill NULL validated_at from history.created_at (for records toggled by admin without validated_at)
+        foreach ($workflowSteps as $ws) {
+            \DB::statement("
+                UPDATE submissions s
+                INNER JOIN pic_point_histories h
+                    ON h.submission_id = s.id
+                    AND h.pic_id = s.{$ws['field']}
+                    AND h.step = '{$ws['step']}'
+                SET s.{$ws['validated_at']} = h.created_at
+                WHERE s.{$ws['validated_at']} IS NULL
+                  AND s.{$ws['valid']} = 1
+            ");
+        }
+
         // Recalculate total_points for all PICs from histories
         $synced = 0;
         $unchanged = 0;
@@ -365,6 +379,20 @@ class PicPointReportController extends Controller
                     $existingHistory->update(['created_at' => $validatedAt, 'updated_at' => $validatedAt]);
                 }
             }
+        }
+
+        // Backfill NULL validated_at from history (for records toggled by admin without validated_at)
+        foreach ($workflowSteps as $ws) {
+            \DB::statement("
+                UPDATE submissions s
+                INNER JOIN pic_point_histories h
+                    ON h.submission_id = s.id
+                    AND h.pic_id = s.{$ws['field']}
+                    AND h.step = '{$ws['step']}'
+                SET s.{$ws['validated_at']} = h.created_at
+                WHERE s.{$ws['validated_at']} IS NULL
+                  AND s.{$ws['valid']} = 1
+            ");
         }
 
         foreach (Pic::all() as $pic) {

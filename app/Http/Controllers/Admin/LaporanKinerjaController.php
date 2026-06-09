@@ -49,28 +49,72 @@ class LaporanKinerjaController extends Controller
         // --- Rekap PIC ---
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
 
-        // DB-level aggregation — avoid loading thousands of history rows into PHP memory
-        $picQuery = PicPointHistory::selectRaw('pic_id, step, COUNT(*) as task_count, SUM(points_earned) as step_points');
+        // Step config: query submissions by validated_at (authoritative date)
+        // Falls back to pic_point_histories for submit step (no validated_at column)
+        $stepCfg = [
+            'submit'     => ['petugas' => 'petugas_submit_id',     'valid' => null,               'date' => 'created_at'],
+            'editor1'    => ['petugas' => 'petugas_editor1_id',    'valid' => 'editor1_valid',    'date' => 'editor1_validated_at'],
+            'author1'    => ['petugas' => 'petugas_author1_id',    'valid' => 'author1_valid',    'date' => 'author1_validated_at'],
+            'editor2'    => ['petugas' => 'petugas_editor2_id',    'valid' => 'editor2_valid',    'date' => 'editor2_validated_at'],
+            'reviewer1'  => ['petugas' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid',  'date' => 'reviewer1_validated_at'],
+            'reviewer2'  => ['petugas' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid',  'date' => 'reviewer2_validated_at'],
+            'editor3'    => ['petugas' => 'petugas_editor3_id',    'valid' => 'editor3_valid',    'date' => 'editor3_validated_at'],
+            'author2'    => ['petugas' => 'petugas_author2_id',    'valid' => 'author2_valid',    'date' => 'author2_validated_at'],
+            'production' => ['petugas' => 'petugas_production_id', 'valid' => 'production_valid', 'date' => 'production_validated_at'],
+            'validator'  => ['petugas' => 'petugas_validator_id',  'valid' => 'validator_valid',  'date' => 'validator_validated_at'],
+        ];
+
+        // Build count aggregates from submissions (one query per step, fast with index)
+        $submissionCounts = []; // [pic_id][step] = count
+        foreach ($stepCfg as $step => $cfg) {
+            $q = \DB::table('submissions')->whereNotNull($cfg['petugas']);
+            if ($cfg['valid']) {
+                $q->where($cfg['valid'], true);
+            }
+            if ($isRange) {
+                $q->whereDate($cfg['date'], '>=', $dariTanggal)
+                  ->whereDate($cfg['date'], '<=', $sampaiTanggal);
+            } else {
+                $q->whereMonth($cfg['date'], $bulan)->whereYear($cfg['date'], $tahun);
+            }
+            foreach ($q->selectRaw("{$cfg['petugas']} as pic_id, COUNT(*) as cnt")->groupBy($cfg['petugas'])->get() as $row) {
+                $submissionCounts[$row->pic_id][$step] = (int) $row->cnt;
+            }
+        }
+
+        // Point value per step
+        $pointValues = [];
+        foreach (array_keys(self::STEPS) as $step) {
+            $pointValues[$step] = PicPointHistory::getPointsForStep($step);
+        }
+
+        // Manual adjustments still from history (date-filtered)
+        $adjQuery = PicPointHistory::where('step', 'adjustment');
         if ($isRange) {
-            $picQuery->whereDate('created_at', '>=', $dariTanggal)
+            $adjQuery->whereDate('created_at', '>=', $dariTanggal)
                      ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
-            $picQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+            $adjQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
-        $picAggregates = $picQuery->groupBy('pic_id', 'step')->get()->groupBy('pic_id');
+        $adjustments = $adjQuery->selectRaw('pic_id, SUM(points_earned) as total_adj')
+                                ->groupBy('pic_id')->get()->keyBy('pic_id');
 
-        $picRekap = $pics->map(function ($pic) use ($picAggregates) {
-            $stepData   = $picAggregates->get($pic->id, collect());
+        $picRekap = $pics->map(function ($pic) use ($submissionCounts, $pointValues, $adjustments) {
+            $picCounts  = $submissionCounts[$pic->id] ?? [];
             $stepCounts = [];
             $totalTugas = 0;
             $totalPoin  = 0.0;
 
             foreach (self::STEPS as $key => $label) {
-                $row              = $stepData->firstWhere('step', $key);
-                $count            = $row ? (int) $row->task_count : 0;
+                $count            = $picCounts[$key] ?? 0;
                 $stepCounts[$key] = $count;
                 $totalTugas      += $count;
-                $totalPoin       += $row ? (float) $row->step_points : 0;
+                $totalPoin       += $count * ($pointValues[$key] ?? 0);
+            }
+
+            $adj = $adjustments->get($pic->id);
+            if ($adj) {
+                $totalPoin += (float) $adj->total_adj;
             }
 
             return [

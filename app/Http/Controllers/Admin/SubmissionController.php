@@ -1379,17 +1379,39 @@ class SubmissionController extends Controller
 
         $submission = Submission::findOrFail($request->submission_id);
         $field = $request->field;
-        
+
         // Toggle the value
-        $submission->{$field} = !$submission->{$field};
-        
+        $newValue = !$submission->{$field};
+        $submission->{$field} = $newValue;
+
+        // Sync validated_at timestamp
+        $validatedAtMap = [
+            'editor1_valid'    => 'editor1_validated_at',
+            'author1_valid'    => 'author1_validated_at',
+            'editor2_valid'    => 'editor2_validated_at',
+            'reviewer1_valid'  => 'reviewer1_validated_at',
+            'reviewer2_valid'  => 'reviewer2_validated_at',
+            'editor3_valid'    => 'editor3_validated_at',
+            'author2_valid'    => 'author2_validated_at',
+            'production_valid' => 'production_validated_at',
+            'validator_valid'  => 'validator_validated_at',
+        ];
+        if (isset($validatedAtMap[$field])) {
+            $tsField = $validatedAtMap[$field];
+            if ($newValue && empty($submission->{$tsField})) {
+                $submission->{$tsField} = now();
+            } elseif (!$newValue) {
+                $submission->{$tsField} = null;
+            }
+        }
+
         // Recalculate status based on current validation flags
         $submission->recalculateStatus();
-        
+
         $submission->save();
-        
+
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Berhasil disimpan',
             'is_valid' => $submission->{$field}
         ]);

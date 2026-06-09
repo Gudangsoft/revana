@@ -148,6 +148,24 @@ Log perubahan otomatis dari git commits.
 - Reviewer 1/2 juga tetap bisa input kredensialnya sendiri via kolom Reviewer 1/2 (jika sudah di-assign oleh admin)
 
 
+## 11. Fix Laporan Kinerja — Root Cause Admin toggleValidField + Query by validated_at
+
+**Tujuan:** Laporan kinerja Aji menampilkan 66 padahal harusnya 78. Root cause penuh ditemukan: admin `toggleValidField()` tidak pernah set `{step}_validated_at`, sehingga semua toggle dari halaman admin monitoring menghasilkan `production_validated_at = NULL`. Akibatnya sync membuat history dengan `created_at = tanggal sync`, dan laporan (yang filter by created_at) tidak dapat mencocokkan dengan periode yang benar.
+
+### Fix 3 Lapis
+
+| # | File | Perubahan |
+|---|------|-----------|
+| 1 | `app/Http/Controllers/Admin/SubmissionController.php` | `toggleValidField()`: tambah sync `{step}_validated_at = now()` saat toggle ON, clear saat toggle OFF |
+| 2 | `app/Http/Controllers/Admin/PicPointReportController.php` | `syncAllPoints()` + `syncAllAndLogout()`: tambah pass `UPDATE submissions JOIN pic_point_histories SET validated_at = h.created_at WHERE validated_at IS NULL` — backfill data lama |
+| 3 | `app/Http/Controllers/Admin/LaporanKinerjaController.php` | Query PIC rekap diubah total: bukan dari `pic_point_histories.created_at`, tapi langsung dari `submissions.{step}_validated_at` (sumber kebenaran sebenarnya). Submit step pakai `submissions.created_at`. Poin = count × points_per_step. Adjustment tetap dari history |
+
+### Alur Setelah Fix
+1. Admin toggle production_valid → `production_validated_at = now()` ✓
+2. PIC toggle production_valid → `production_validated_at = now()` ✓ (sudah ada sebelumnya)
+3. Laporan kinerja filter: `production_validated_at BETWEEN '01' AND '08'` → akurat ✓
+4. Untuk data lama: admin klik **Sync Point** → backfill `validated_at` dari history → laporan langsung benar
+
 ## 10. 🔄 Update: a
 
 - **Commit:** `79376c4` — 14:46 oleh Gudangsoft
@@ -156,4 +174,12 @@ Log perubahan otomatis dari git commits.
 - `resources/views/marketing/layouts/app.blade.php`
 - `resources/views/pic/layouts/app.blade.php`
 - `resources/views/pic/submissions/monitoring.blade.php`
+
+
+## 12. 🔄 Update: up
+
+- **Commit:** `cb49101` — 18:32 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `log-update-2026-06-09.md`
 
