@@ -68,6 +68,29 @@ Script berjalan saat `DOMContentLoaded`. Setiap `th` di baris sub-header di-cek 
 - Link Publish: `{{ Str::limit($s->link_publish, 30) }}` dengan `title` full URL saat hover
 
 
+## 6. Sub-Header Row 2 — Ganti ke Light Pastel + Dark Text
+
+**Tujuan:** Saat JavaScript force-color gagal diaplikasikan, teks terang di atas background putih menjadi tidak terlihat (seolah sel kosong). Solusi: ganti ke background pastel muda + teks gelap — jika background gagal, teks gelap tetap terbaca di atas putih.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | CSS row 2 + JS colorMap: dark→light palette |
+| `resources/views/pic/submissions/monitoring.blade.php` | CSS row 2 + JS colorMap: dark→light palette |
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | CSS row 2 + JS colorMap: dark→light palette |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | CSS row 2 (bg-success & bg-validator diperbaiki) + JS colorMap: dark→light palette |
+
+### Palet Warna Baru (Sub-header Row 2)
+| Class | Background | Text |
+|-------|-----------|------|
+| `bg-dark` | `#e2e8f0` (abu muda) | `#1e293b` |
+| `bg-info` | `#bae6fd` (biru muda) | `#0369a1` |
+| `bg-warning` | `#fde68a` (kuning muda) | `#92400e` |
+| `bg-primary` | `#c7d2fe` (indigo muda) | `#3730a3` |
+| `bg-success` | `#bbf7d0` (hijau muda) | `#15803d` |
+| `bg-validator` | `#e9d5ff` (ungu muda) | `#7c3aed` |
+| default | `#f1f5f9` | `#334155` |
+
 ## 5. 🔄 Update: s
 
 - **Commit:** `ec47f5f` — 17:00 oleh Gudangsoft
