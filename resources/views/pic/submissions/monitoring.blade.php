@@ -578,84 +578,59 @@
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
                                 <th rowspan="2">No HP</th>
-                                <th colspan="2" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
-                                <th rowspan="2">PIC Marketing</th>
-                                @if(in_array('submit', $mySteps))
-                                <th rowspan="2" id="colSubmit">Petugas Submit</th>
-                                @endif
-                                @if(in_array('editor1', $mySteps))
-                                <th colspan="2" class="text-center bg-info" id="colEditor1">① Editor 1</th>
-                                @endif
-                                @if(in_array('author1', $mySteps))
+                                <th colspan="4" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
+                                <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
-                                @endif
-                                @if(in_array('editor2', $mySteps))
                                 <th colspan="2" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
-                                @endif
-                                @if(in_array('reviewer1', $mySteps))
-                                <th colspan="3" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
-                                @endif
-                                @if(in_array('reviewer2', $mySteps))
-                                <th colspan="3" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
-                                @endif
-                                @if(in_array('editor3', $mySteps))
+                                <th colspan="4" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
+                                <th colspan="4" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
-                                @endif
-                                @if(in_array('author2', $mySteps))
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
-                                @endif
-                                @if(in_array('production', $mySteps))
                                 <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
-                                @endif
-                                @if(in_array('validator', $mySteps))
-                                <th colspan="2" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
-                                @endif
+                                <th colspan="3" class="text-center bg-validator" id="colValidator">⑨ Validasi</th>
                             </tr>
                             <tr>
-                                <!-- Author Access sub-headers -->
-                                <th class="bg-dark text-white">Username</th>
-                                <th class="bg-dark text-white">Password</th>
-                                @if(in_array('editor1', $mySteps))
-                                <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">Valid</th>
-                                @endif
-                                @if(in_array('author1', $mySteps))
-                                <th class="bg-warning text-dark">Petugas</th>
-                                <th class="bg-warning text-dark">Valid</th>
-                                @endif
-                                @if(in_array('editor2', $mySteps))
-                                <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">Valid</th>
-                                @endif
-                                @if(in_array('reviewer1', $mySteps))
-                                <th class="bg-primary text-white">Petugas</th>
-                                <th class="bg-primary text-white">User/Pass</th>
-                                <th class="bg-primary text-white">Valid</th>
-                                @endif
-                                @if(in_array('reviewer2', $mySteps))
-                                <th class="bg-primary text-white">Petugas</th>
-                                <th class="bg-primary text-white">User/Pass</th>
-                                <th class="bg-primary text-white">Valid</th>
-                                @endif
-                                @if(in_array('editor3', $mySteps))
-                                <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">Valid</th>
-                                @endif
-                                @if(in_array('author2', $mySteps))
-                                <th class="bg-warning text-dark">Petugas</th>
-                                <th class="bg-warning text-dark">Valid</th>
-                                @endif
-                                @if(in_array('production', $mySteps))
-                                <th class="bg-success text-white">Petugas</th>
-                                <th class="bg-success text-white">User Editor</th>
-                                <th class="bg-success text-white">Pass Editor</th>
-                                <th class="bg-success text-white">Link Publish</th>
-                                <th class="bg-success text-white">Valid</th>
-                                @endif
-                                @if(in_array('validator', $mySteps))
+                                <!-- Author Access sub-headers (4 cols) -->
+                                <th class="bg-dark">PIC Marketing</th>
+                                <th class="bg-dark">Petugas Submit</th>
+                                <th class="bg-dark">Username</th>
+                                <th class="bg-dark">Password</th>
+                                <!-- Editor 1 sub-headers (3 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">User/Pass</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Author 1 sub-headers (2 cols) -->
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
+                                <!-- Editor 2 sub-headers (2 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Reviewer 1 sub-headers (4 cols) -->
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
+                                <!-- Reviewer 2 sub-headers (4 cols) -->
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
+                                <!-- Editor 3 sub-headers (2 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Author 2 sub-headers (2 cols) -->
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
+                                <!-- Production sub-headers (5 cols) -->
+                                <th class="bg-success">Petugas</th>
+                                <th class="bg-success">User Editor</th>
+                                <th class="bg-success">Pass Editor</th>
+                                <th class="bg-success">Link Publish</th>
+                                <th class="bg-success">Valid</th>
+                                <!-- Validator sub-headers (3 cols) -->
                                 <th class="bg-validator">Petugas</th>
+                                <th class="bg-validator">Catatan</th>
                                 <th class="bg-validator">Valid</th>
-                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -775,251 +750,207 @@
                                         -
                                     @endif
                                 </td>
+                                <!-- Author Access (4 cols) -->
+                                <td>{{ $s->marketing?->name ?? '-' }}</td>
+                                <td>{{ $s->petugasSubmit?->name ?? ($s->marketing?->name ? '('.$s->marketing->name.')' : '-') }}</td>
                                 <td><code>{{ $s->username_author ?? '-' }}</code></td>
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
-                                <td>{{ $s->marketing?->name ?? '-' }}</td>
-                                @if(in_array('submit', $mySteps))
-                                <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
-                                @endif
 
-                                @if(in_array('editor1', $mySteps))
-                                <!-- Editor 1 -->
+                                <!-- Editor 1 (3 cols) -->
                                 <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasEditor1?->name ?? '-' }}
-                                    @if($s->petugas_editor1_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_editor1_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
+                                </td>
+                                <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}" title="Username / Password Editor">
+                                    @if($s->username_editor || $s->password_editor)
+                                        <code style="font-size:0.68rem;background:#bae6fd;padding:1px 4px;border-radius:3px;">{{ $s->username_editor ?: '—' }}</code>
+                                        <span class="text-muted">/</span>
+                                        <code style="font-size:0.68rem;background:#bae6fd;padding:1px 4px;border-radius:3px;">{{ $s->password_editor ?: '—' }}</code>
+                                    @else<span class="text-muted">—</span>@endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_editor1_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->editor1_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="editor1_valid" data-current="{{ $s->editor1_valid ? '1' : '0' }}"
-                                                data-stage-index="0">
+                                                data-submission="{{ $s->id }}" data-field="editor1_valid" data-current="{{ $s->editor1_valid ? '1' : '0' }}" data-stage-index="0">
                                             <i class="bi {{ $s->editor1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end editor1 --}}
 
-                                @if(in_array('author1', $mySteps))
-                                <!-- Author 1 -->
+                                <!-- Author 1 (2 cols) -->
                                 <td class="{{ $s->petugas_author1_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasAuthor1?->name ?? '-' }}
-                                    @if($s->petugas_author1_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_author1_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_author1_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_author1_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->author1_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="author1_valid" data-current="{{ $s->author1_valid ? '1' : '0' }}"
-                                                data-stage-index="1">
+                                                data-submission="{{ $s->id }}" data-field="author1_valid" data-current="{{ $s->author1_valid ? '1' : '0' }}" data-stage-index="1">
                                             <i class="bi {{ $s->author1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end author1 --}}
 
-                                @if(in_array('editor2', $mySteps))
-                                <!-- Editor 2 -->
+                                <!-- Editor 2 (2 cols) -->
                                 <td class="{{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasEditor2?->name ?? '-' }}
-                                    @if($s->petugas_editor2_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_editor2_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_editor2_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_editor2_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->editor2_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="editor2_valid" data-current="{{ $s->editor2_valid ? '1' : '0' }}"
-                                                data-stage-index="2">
+                                                data-submission="{{ $s->id }}" data-field="editor2_valid" data-current="{{ $s->editor2_valid ? '1' : '0' }}" data-stage-index="2">
                                             <i class="bi {{ $s->editor2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end editor2 --}}
 
-                                @if(in_array('reviewer1', $mySteps))
-                                <!-- Reviewer 1 -->
+                                <!-- Reviewer 1 (4 cols) -->
                                 <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasReviewer1?->name ?? '-' }}
-                                    @if($s->petugas_reviewer1_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_reviewer1_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}" title="Username / Password Reviewer 1">
                                     @if($s->username_reviewer1 || $s->password_reviewer1)
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->username_reviewer1 ?: '—' }}</code>
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->username_reviewer1 ?: '—' }}</code>
                                         <span class="text-muted">/</span>
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->password_reviewer1 ?: '—' }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->password_reviewer1 ?: '—' }}</code>
+                                    @else<span class="text-muted">—</span>@endif
+                                </td>
+                                <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_reviewer1 }}">
+                                    {{ $s->catatan_reviewer1 ? Str::limit($s->catatan_reviewer1, 15) : '-' }}
                                 </td>
                                 <td class="text-center {{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_reviewer1_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="reviewer1_valid" data-current="{{ $s->reviewer1_valid ? '1' : '0' }}"
-                                                data-stage-index="3">
+                                                data-submission="{{ $s->id }}" data-field="reviewer1_valid" data-current="{{ $s->reviewer1_valid ? '1' : '0' }}" data-stage-index="3">
                                             <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end reviewer1 --}}
 
-                                @if(in_array('reviewer2', $mySteps))
-                                <!-- Reviewer 2 -->
+                                <!-- Reviewer 2 (4 cols) -->
                                 <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasReviewer2?->name ?? '-' }}
-                                    @if($s->petugas_reviewer2_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_reviewer2_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}" title="Username / Password Reviewer 2">
                                     @if($s->username_reviewer2 || $s->password_reviewer2)
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->username_reviewer2 ?: '—' }}</code>
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->username_reviewer2 ?: '—' }}</code>
                                         <span class="text-muted">/</span>
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->password_reviewer2 ?: '—' }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->password_reviewer2 ?: '—' }}</code>
+                                    @else<span class="text-muted">—</span>@endif
+                                </td>
+                                <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_reviewer2 }}">
+                                    {{ $s->catatan_reviewer2 ? Str::limit($s->catatan_reviewer2, 15) : '-' }}
                                 </td>
                                 <td class="text-center {{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_reviewer2_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="reviewer2_valid" data-current="{{ $s->reviewer2_valid ? '1' : '0' }}"
-                                                data-stage-index="4">
+                                                data-submission="{{ $s->id }}" data-field="reviewer2_valid" data-current="{{ $s->reviewer2_valid ? '1' : '0' }}" data-stage-index="4">
                                             <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end reviewer2 --}}
 
-                                @if(in_array('editor3', $mySteps))
-                                <!-- Editor 3 -->
+                                <!-- Editor 3 (2 cols) -->
                                 <td class="{{ $s->petugas_editor3_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasEditor3?->name ?? '-' }}
-                                    @if($s->petugas_editor3_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_editor3_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_editor3_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_editor3_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->editor3_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="editor3_valid" data-current="{{ $s->editor3_valid ? '1' : '0' }}"
-                                                data-stage-index="5">
+                                                data-submission="{{ $s->id }}" data-field="editor3_valid" data-current="{{ $s->editor3_valid ? '1' : '0' }}" data-stage-index="5">
                                             <i class="bi {{ $s->editor3_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end editor3 --}}
 
-                                @if(in_array('author2', $mySteps))
-                                <!-- Author 2 -->
+                                <!-- Author 2 (2 cols) -->
                                 <td class="{{ $s->petugas_author2_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasAuthor2?->name ?? '-' }}
-                                    @if($s->petugas_author2_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_author2_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_author2_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_author2_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->author2_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="author2_valid" data-current="{{ $s->author2_valid ? '1' : '0' }}"
-                                                data-stage-index="6">
+                                                data-submission="{{ $s->id }}" data-field="author2_valid" data-current="{{ $s->author2_valid ? '1' : '0' }}" data-stage-index="6">
                                             <i class="bi {{ $s->author2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end author2 --}}
-                                
-                                @if(in_array('production', $mySteps))
-                                <!-- Production -->
+
+                                <!-- Production (5 cols) -->
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasProduction?->name ?? '-' }}
-                                    @if($s->petugas_production_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_production_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
-                                {{-- Editor credentials for production PIC --}}
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}" title="Username Editor">
                                     @if($s->username_editor)
-                                        <code style="font-size:0.68rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->username_editor }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                        <code style="font-size:0.68rem;background:#d1fae5;padding:1px 4px;border-radius:3px;">{{ $s->username_editor }}</code>
+                                    @else<span class="text-muted">—</span>@endif
                                 </td>
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}" title="Password Editor">
                                     @if($s->password_editor)
-                                        <code style="font-size:0.68rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->password_editor }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                        <code style="font-size:0.68rem;background:#d1fae5;padding:1px 4px;border-radius:3px;">{{ $s->password_editor }}</code>
+                                    @else<span class="text-muted">—</span>@endif
                                 </td>
                                 <td class="{{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_production_id == $picId)
-                                        <input type="text" class="form-control form-control-sm {{ $s->production_valid ? 'bg-light' : '' }}" style="font-size: 0.7rem; min-width: 150px;"
+                                        <input type="text" class="form-control form-control-sm" style="font-size:0.7rem;min-width:150px;"
                                                value="{{ $s->link_publish }}" placeholder="Link Publish"
                                                data-submission="{{ $s->id }}" data-field="link_publish"
-                                               {{ $s->production_valid ? 'readonly' : '' }}
-                                               title="{{ $s->production_valid ? 'Link terkunci. Matikan validasi untuk mengedit.' : 'Masukkan link publish' }}">
-                                    @else
-                                        @if($s->link_publish)
-                                            <a href="{{ $s->link_publish }}" target="_blank" title="{{ $s->link_publish }}" style="font-size:0.68rem; word-break:break-all;">
-                                                <i class="bi bi-link-45deg"></i> {{ Str::limit($s->link_publish, 30) }}
-                                            </a>
-                                        @else
-                                            <span class="text-muted">—</span>
-                                        @endif
-                                    @endif
+                                               {{ $s->production_valid ? 'readonly' : '' }}>
+                                    @elseif($s->link_publish)
+                                        <a href="{{ $s->link_publish }}" target="_blank" title="{{ $s->link_publish }}" style="font-size:0.68rem;word-break:break-all;">
+                                            <i class="bi bi-link-45deg"></i> {{ Str::limit($s->link_publish, 30) }}
+                                        </a>
+                                    @else<span class="text-muted">—</span>@endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_production_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_production_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->production_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="production_valid" data-current="{{ $s->production_valid ? '1' : '0' }}"
-                                                data-stage-index="7">
+                                                data-submission="{{ $s->id }}" data-field="production_valid" data-current="{{ $s->production_valid ? '1' : '0' }}" data-stage-index="7">
                                             <i class="bi {{ $s->production_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end production --}}
 
-                                @if(in_array('validator', $mySteps))
-                                <!-- Validator -->
+                                <!-- Validator (3 cols) -->
                                 <td class="{{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasValidator?->name ?? '-' }}
-                                    @if($s->petugas_validator_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_validator_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
+                                </td>
+                                <td class="{{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_validator }}">
+                                    {{ $s->catatan_validator ? Str::limit($s->catatan_validator, 15) : '-' }}
                                 </td>
                                 <td class="text-center {{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_validator_id == $picId)
-                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->validator_valid ? 'btn-success' : 'btn-outline-secondary' }}" 
-                                                data-submission="{{ $s->id }}" data-field="validator_valid" data-current="{{ $s->validator_valid ? '1' : '0' }}"
-                                                data-stage-index="8">
+                                        <button type="button" class="btn btn-sm validation-toggle {{ $s->validator_valid ? 'btn-success' : 'btn-outline-secondary' }}"
+                                                data-submission="{{ $s->id }}" data-field="validator_valid" data-current="{{ $s->validator_valid ? '1' : '0' }}" data-stage-index="8">
                                             <i class="bi {{ $s->validator_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
                                         {!! $s->validator_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
                                     @endif
                                 </td>
-                                @endif {{-- end validator --}}
                             </tr>
                             @empty
                             <tr>

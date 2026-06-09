@@ -91,6 +91,41 @@ Script berjalan saat `DOMContentLoaded`. Setiap `th` di baris sub-header di-cek 
 | `bg-validator` | `#e9d5ff` (ungu muda) | `#7c3aed` |
 | default | `#f1f5f9` | `#334155` |
 
+## 8. PIC Monitoring — Tampilkan Semua Proses Seperti Admin
+
+**Tujuan:** Tabel monitoring PIC sebelumnya hanya menampilkan kolom sesuai `$mySteps` (role PIC). Sekarang semua proses selalu terlihat, sama seperti admin monitoring.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/monitoring.blade.php` | Hapus semua `@if(in_array(..., $mySteps))`, samakan colspan dengan admin (Author Access 4, Reviewer 4, Validator 3), tambah kolom Catatan Reviewer 1/2 dan Catatan Validator, reorder td Author Access |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Samakan struktur: Author Access 4 cols (PIC Marketing + Petugas Submit masuk ke grup), Reviewer 1/2 colspan 3→4 (tambah Catatan), reorder td |
+
+### Perubahan Struktur Kolom
+| Section | Sebelum | Sesudah |
+|---------|---------|---------|
+| Author Access | 2 cols (Username, Password) + PIC Marketing & Submit terpisah | 4 cols (PIC Marketing, Petugas Submit, Username, Password) |
+| Editor 1 | 2 cols (Petugas, Valid) | 3 cols (Petugas, User/Pass, Valid) |
+| Reviewer 1 & 2 | 3 cols (Petugas, User/Pass, Valid) | 4 cols (Petugas, User/Pass, Catatan, Valid) |
+| Validator | 2 cols (Petugas, Valid) | 3 cols (Petugas, Catatan, Valid) |
+
+### Behavior Tetap
+- PIC hanya bisa toggle validasi untuk submission yang menjadi tugasnya (highlighted dengan star ★)
+- Data lain ditampilkan read-only (code display, bukan input editable)
+
+## 7. Fix Sub-Header Row 2 Tidak Terlihat — Hapus text-white/text-dark
+
+**Tujuan:** Sub-header row 2 di PIC monitoring masih tidak terlihat meski sudah ada CSS/JS light palette. Root cause: th elements di row 2 punya class `text-white` atau `text-dark` yang di-override oleh Bootstrap `!important`, sehingga teks putih di atas background putih = tidak kelihatan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/monitoring.blade.php` | Hapus `text-white`/`text-dark` dari semua `th` di row 2 thead |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Sama |
+
+### Penjelasan
+Row 1 (group headers) boleh tetap pakai `text-dark` karena ada CSS `.text-dark { color:#fde68a }` yang memang intended untuk label kuning di background gelap. Row 2 sub-headers tidak perlu class teks karena warnanya sudah dihandle oleh CSS `.table-monitoring thead tr:nth-child(2) th.bg-*` dan JS colorMap.
+
 ## 5. 🔄 Update: s
 
 - **Commit:** `ec47f5f` — 17:00 oleh Gudangsoft

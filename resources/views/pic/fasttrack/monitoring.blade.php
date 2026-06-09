@@ -562,54 +562,56 @@
                                 <th rowspan="2">Penulis</th>
                                 <th rowspan="2">No HP</th>
                                 <th rowspan="2">Status</th>
-                                <th colspan="2" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
-                                <th rowspan="2">PIC Marketing</th>
-                                <th rowspan="2" id="colSubmit">Petugas Submit</th>
+                                <th colspan="4" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
                                 <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
                                 <th colspan="4" class="text-center bg-info" id="colEditor2">③ Editor 2</th>
-                                <th colspan="3" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
-                                <th colspan="3" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
+                                <th colspan="4" class="text-center bg-primary" id="colReviewer1">④ Reviewer 1</th>
+                                <th colspan="4" class="text-center bg-primary" id="colReviewer2">⑤ Reviewer 2</th>
                                 <th colspan="2" class="text-center bg-info" id="colEditor3">⑥ Editor 3</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor2">⑦ Author 2</th>
                                 <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
                             </tr>
                             <tr>
-                                <!-- Author Access sub-headers -->
-                                <th class="bg-dark text-white">Username</th>
-                                <th class="bg-dark text-white">Password</th>
+                                <!-- Author Access sub-headers (4 cols) -->
+                                <th class="bg-dark">PIC Marketing</th>
+                                <th class="bg-dark">Petugas Submit</th>
+                                <th class="bg-dark">Username</th>
+                                <th class="bg-dark">Password</th>
                                 <!-- Editor 1 sub-headers (3 cols) -->
-                                <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">User/Pass</th>
-                                <th class="bg-info text-dark">Valid</th>
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">User/Pass</th>
+                                <th class="bg-info">Valid</th>
                                 <!-- Author 1 sub-headers (2 cols) -->
-                                <th class="bg-warning text-dark">Petugas</th>
-                                <th class="bg-warning text-dark">Valid</th>
-                                <!-- Editor 2 sub-headers (5 cols) -->
-                                <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">User/Pass R1</th>
-                                <th class="bg-info text-dark">User/Pass R2</th>
-                                <th class="bg-info text-dark">Valid</th>
-                                <!-- Reviewer 1 sub-headers (3 cols) -->
-                                <th class="bg-primary text-white">Petugas</th>
-                                <th class="bg-primary text-white">User/Pass</th>
-                                <th class="bg-primary text-white">Valid</th>
-                                <!-- Reviewer 2 sub-headers (3 cols) -->
-                                <th class="bg-primary text-white">Petugas</th>
-                                <th class="bg-primary text-white">User/Pass</th>
-                                <th class="bg-primary text-white">Valid</th>
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
+                                <!-- Editor 2 sub-headers (4 cols) -->
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">User/Pass R1</th>
+                                <th class="bg-info">User/Pass R2</th>
+                                <th class="bg-info">Valid</th>
+                                <!-- Reviewer 1 sub-headers (4 cols) -->
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
+                                <!-- Reviewer 2 sub-headers (4 cols) -->
+                                <th class="bg-primary">Petugas</th>
+                                <th class="bg-primary">User/Pass</th>
+                                <th class="bg-primary">Catatan</th>
+                                <th class="bg-primary">Valid</th>
                                 <!-- Editor 3 sub-headers (2 cols) -->
-                                <th class="bg-info text-dark">Petugas</th>
-                                <th class="bg-info text-dark">Valid</th>
+                                <th class="bg-info">Petugas</th>
+                                <th class="bg-info">Valid</th>
                                 <!-- Author 2 sub-headers (2 cols) -->
-                                <th class="bg-warning text-dark">Petugas</th>
-                                <th class="bg-warning text-dark">Valid</th>
+                                <th class="bg-warning">Petugas</th>
+                                <th class="bg-warning">Valid</th>
                                 <!-- Production sub-headers (5 cols) -->
-                                <th class="bg-success text-white">Petugas</th>
-                                <th class="bg-success text-white">User Editor</th>
-                                <th class="bg-success text-white">Pass Editor</th>
-                                <th class="bg-success text-white">Link Publish</th>
-                                <th class="bg-success text-white">Valid</th>
+                                <th class="bg-success">Petugas</th>
+                                <th class="bg-success">User Editor</th>
+                                <th class="bg-success">Pass Editor</th>
+                                <th class="bg-success">Link Publish</th>
+                                <th class="bg-success">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -733,10 +735,11 @@
                                         <span class="badge bg-danger">Butuh Penugasan</span>
                                     @endif
                                 </td>
-                                <td><code>{{ $s->username_author ?? '-' }}</code></td>
-                                <td><code>{{ $s->password_author ?? '-' }}</code></td>
+                                <!-- Author Access (4 cols) -->
                                 <td>{{ $s->marketing?->name ?? '-' }}</td>
                                 <td>{{ $s->petugasSubmit?->name ?? '-' }}</td>
+                                <td><code>{{ $s->username_author ?? '-' }}</code></td>
+                                <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1 -->
                                 <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
@@ -853,27 +856,25 @@
                                     @endif
                                 </td>
                                 
-                                <!-- Reviewer 1 -->
+                                <!-- Reviewer 1 (4 cols) -->
                                 <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasReviewer1?->name ?? '-' }}
-                                    @if($s->petugas_reviewer1_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_reviewer1_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}" title="Username / Password Reviewer 1">
                                     @if($s->username_reviewer1 || $s->password_reviewer1)
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->username_reviewer1 ?: '—' }}</code>
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->username_reviewer1 ?: '—' }}</code>
                                         <span class="text-muted">/</span>
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->password_reviewer1 ?: '—' }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->password_reviewer1 ?: '—' }}</code>
+                                    @else<span class="text-muted">—</span>@endif
+                                </td>
+                                <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_reviewer1 }}">
+                                    {{ $s->catatan_reviewer1 ? Str::limit($s->catatan_reviewer1, 15) : '-' }}
                                 </td>
                                 <td class="text-center {{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_reviewer1_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->reviewer1_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="reviewer1_valid" data-current="{{ $s->reviewer1_valid ? '1' : '0' }}"
-                                                data-stage-index="3">
+                                                data-submission="{{ $s->id }}" data-field="reviewer1_valid" data-current="{{ $s->reviewer1_valid ? '1' : '0' }}" data-stage-index="3">
                                             <i class="bi {{ $s->reviewer1_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
@@ -881,27 +882,25 @@
                                     @endif
                                 </td>
 
-                                <!-- Reviewer 2 -->
+                                <!-- Reviewer 2 (4 cols) -->
                                 <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
                                     {{ $s->petugasReviewer2?->name ?? '-' }}
-                                    @if($s->petugas_reviewer2_id == $picId)
-                                        <i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>
-                                    @endif
+                                    @if($s->petugas_reviewer2_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}" title="Username / Password Reviewer 2">
                                     @if($s->username_reviewer2 || $s->password_reviewer2)
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->username_reviewer2 ?: '—' }}</code>
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->username_reviewer2 ?: '—' }}</code>
                                         <span class="text-muted">/</span>
-                                        <code style="font-size:0.68rem; background:#e0e7ff; padding:1px 4px; border-radius:3px;">{{ $s->password_reviewer2 ?: '—' }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                        <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->password_reviewer2 ?: '—' }}</code>
+                                    @else<span class="text-muted">—</span>@endif
+                                </td>
+                                <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_reviewer2 }}">
+                                    {{ $s->catatan_reviewer2 ? Str::limit($s->catatan_reviewer2, 15) : '-' }}
                                 </td>
                                 <td class="text-center {{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_reviewer2_id == $picId)
                                         <button type="button" class="btn btn-sm validation-toggle {{ $s->reviewer2_valid ? 'btn-success' : 'btn-outline-secondary' }}"
-                                                data-submission="{{ $s->id }}" data-field="reviewer2_valid" data-current="{{ $s->reviewer2_valid ? '1' : '0' }}"
-                                                data-stage-index="4">
+                                                data-submission="{{ $s->id }}" data-field="reviewer2_valid" data-current="{{ $s->reviewer2_valid ? '1' : '0' }}" data-stage-index="4">
                                             <i class="bi {{ $s->reviewer2_valid ? 'bi-check-circle-fill' : 'bi-circle' }}"></i>
                                         </button>
                                     @else
