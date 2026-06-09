@@ -573,45 +573,54 @@
                                 <th colspan="5" class="text-center bg-success" id="colProduction">⑧ Production</th>
                             </tr>
                             <tr>
+                                @php
+                                $sh = [
+                                    'dark'    => 'background:#e2e8f0!important;color:#1e293b!important;font-weight:700;font-size:0.7rem;',
+                                    'info'    => 'background:#bae6fd!important;color:#0369a1!important;font-weight:700;font-size:0.7rem;',
+                                    'warning' => 'background:#fde68a!important;color:#92400e!important;font-weight:700;font-size:0.7rem;',
+                                    'primary' => 'background:#c7d2fe!important;color:#3730a3!important;font-weight:700;font-size:0.7rem;',
+                                    'success' => 'background:#bbf7d0!important;color:#15803d!important;font-weight:700;font-size:0.7rem;',
+                                ];
+                                @endphp
                                 <!-- Author Access sub-headers (4 cols) -->
-                                <th class="bg-dark">PIC Marketing</th>
-                                <th class="bg-dark">Petugas Submit</th>
-                                <th class="bg-dark">Username</th>
-                                <th class="bg-dark">Password</th>
+                                <th class="bg-dark" style="{{ $sh['dark'] }}">PIC Marketing</th>
+                                <th class="bg-dark" style="{{ $sh['dark'] }}">Petugas Submit</th>
+                                <th class="bg-dark" style="{{ $sh['dark'] }}">Username</th>
+                                <th class="bg-dark" style="{{ $sh['dark'] }}">Password</th>
                                 <!-- Editor 1 sub-headers (3 cols) -->
-                                <th class="bg-info">Petugas</th>
-                                <th class="bg-info">User/Pass</th>
-                                <th class="bg-info">Valid</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">Petugas</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">User/Pass</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">Valid</th>
                                 <!-- Author 1 sub-headers (2 cols) -->
-                                <th class="bg-warning">Petugas</th>
-                                <th class="bg-warning">Valid</th>
+                                <th class="bg-warning" style="{{ $sh['warning'] }}">Petugas</th>
+                                <th class="bg-warning" style="{{ $sh['warning'] }}">Valid</th>
                                 <!-- Editor 2 sub-headers (4 cols) -->
-                                <th class="bg-info">Petugas</th>
-                                <th class="bg-info">User/Pass R1</th>
-                                <th class="bg-info">User/Pass R2</th>
-                                <th class="bg-info">Valid</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">Petugas</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">User/Pass R1</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">User/Pass R2</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">Valid</th>
                                 <!-- Reviewer 1 sub-headers (4 cols) -->
-                                <th class="bg-primary">Petugas</th>
-                                <th class="bg-primary">User/Pass</th>
-                                <th class="bg-primary">Catatan</th>
-                                <th class="bg-primary">Valid</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">Petugas</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">User/Pass</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">Catatan</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">Valid</th>
                                 <!-- Reviewer 2 sub-headers (4 cols) -->
-                                <th class="bg-primary">Petugas</th>
-                                <th class="bg-primary">User/Pass</th>
-                                <th class="bg-primary">Catatan</th>
-                                <th class="bg-primary">Valid</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">Petugas</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">User/Pass</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">Catatan</th>
+                                <th class="bg-primary" style="{{ $sh['primary'] }}">Valid</th>
                                 <!-- Editor 3 sub-headers (2 cols) -->
-                                <th class="bg-info">Petugas</th>
-                                <th class="bg-info">Valid</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">Petugas</th>
+                                <th class="bg-info" style="{{ $sh['info'] }}">Valid</th>
                                 <!-- Author 2 sub-headers (2 cols) -->
-                                <th class="bg-warning">Petugas</th>
-                                <th class="bg-warning">Valid</th>
+                                <th class="bg-warning" style="{{ $sh['warning'] }}">Petugas</th>
+                                <th class="bg-warning" style="{{ $sh['warning'] }}">Valid</th>
                                 <!-- Production sub-headers (5 cols) -->
-                                <th class="bg-success">Petugas</th>
-                                <th class="bg-success">User Editor</th>
-                                <th class="bg-success">Pass Editor</th>
-                                <th class="bg-success">Link Publish</th>
-                                <th class="bg-success">Valid</th>
+                                <th class="bg-success" style="{{ $sh['success'] }}">Petugas</th>
+                                <th class="bg-success" style="{{ $sh['success'] }}">User Editor</th>
+                                <th class="bg-success" style="{{ $sh['success'] }}">Pass Editor</th>
+                                <th class="bg-success" style="{{ $sh['success'] }}">Link Publish</th>
+                                <th class="bg-success" style="{{ $sh['success'] }}">Valid</th>
                             </tr>
                         </thead>
                         <tbody>
