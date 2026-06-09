@@ -58,8 +58,8 @@ Log perubahan otomatis dari git commits.
 | Field | Yang boleh edit |
 |-------|----------------|
 | `username_editor`, `password_editor` | Editor 1 PIC |
-| `username_reviewer1`, `password_reviewer1`, `catatan_reviewer1` | Reviewer 1 PIC |
-| `username_reviewer2`, `password_reviewer2`, `catatan_reviewer2` | Reviewer 2 PIC |
+| `username_reviewer1`, `password_reviewer1`, `catatan_reviewer1` | Reviewer 1 PIC **atau** Editor 2 PIC (fasttrack) |
+| `username_reviewer2`, `password_reviewer2`, `catatan_reviewer2` | Reviewer 2 PIC **atau** Editor 2 PIC (fasttrack) |
 | `catatan_validator` | Validator PIC |
 | `link_publish` | Production PIC |
 
@@ -69,5 +69,14 @@ Log perubahan otomatis dari git commits.
 - **File berubah:** 3 file
 - `log-update-2026-06-09.md`
 - `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
+
+
+## 6. 🔄 Update: ip
+
+- **Commit:** `d4dced0` — 13:48 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-09.md`
 - `resources/views/pic/submissions/monitoring.blade.php`
 

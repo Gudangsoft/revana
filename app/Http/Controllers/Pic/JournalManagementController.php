@@ -1143,9 +1143,11 @@ class JournalManagementController extends Controller
         if (in_array($request->field, ['username_editor', 'password_editor'])) {
             $allowed = $submission->petugas_editor1_id == $picId;
         } elseif (in_array($request->field, ['username_reviewer1', 'password_reviewer1', 'catatan_reviewer1'])) {
-            $allowed = $submission->petugas_reviewer1_id == $picId;
+            $allowed = $submission->petugas_reviewer1_id == $picId
+                    || $submission->petugas_editor2_id == $picId;
         } elseif (in_array($request->field, ['username_reviewer2', 'password_reviewer2', 'catatan_reviewer2'])) {
-            $allowed = $submission->petugas_reviewer2_id == $picId;
+            $allowed = $submission->petugas_reviewer2_id == $picId
+                    || $submission->petugas_editor2_id == $picId;
         } elseif ($request->field === 'catatan_validator') {
             $allowed = $submission->petugas_validator_id == $picId;
         } elseif ($request->field === 'link_publish') {
