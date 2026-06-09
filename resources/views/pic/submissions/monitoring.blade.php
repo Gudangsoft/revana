@@ -102,6 +102,25 @@
     cursor: pointer;
 }
 
+/* Inline editable inputs (PIC task cells) */
+.pic-input {
+    font-size: 0.68rem; padding: 2px 4px; width: 68px;
+    border: 1px solid #cbd5e1; border-radius: 3px;
+    background: #fff; font-family: monospace;
+    transition: border-color 0.15s;
+}
+.pic-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+.pic-input.has-value { background: #fffbeb; border-color: #f59e0b; }
+.pic-input.saving { opacity: 0.5; pointer-events: none; }
+.pic-textarea {
+    font-size: 0.68rem; padding: 2px 4px; width: 110px; min-height: 28px; resize: vertical;
+    border: 1px solid #cbd5e1; border-radius: 3px; background: #fff;
+    transition: border-color 0.15s;
+}
+.pic-textarea:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+.pic-textarea.has-value { background: #fffbeb; border-color: #f59e0b; }
+.cred-group { display: flex; gap: 2px; align-items: center; }
+
 .table-monitoring {
     border-collapse: collapse;
     font-size: 0.8rem;
@@ -760,8 +779,18 @@
                                     {{ $s->petugasEditor1?->name ?? '-' }}
                                     @if($s->petugas_editor1_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
-                                <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}" title="Username / Password Editor">
-                                    @if($s->username_editor || $s->password_editor)
+                                <td class="{{ $s->petugas_editor1_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_editor1_id == $picId)
+                                        <div class="cred-group">
+                                            <input type="text" class="pic-input {{ $s->username_editor ? 'has-value' : '' }}"
+                                                   value="{{ $s->username_editor }}" placeholder="user"
+                                                   data-submission="{{ $s->id }}" data-field="username_editor">
+                                            <span>/</span>
+                                            <input type="text" class="pic-input {{ $s->password_editor ? 'has-value' : '' }}"
+                                                   value="{{ $s->password_editor }}" placeholder="pass"
+                                                   data-submission="{{ $s->id }}" data-field="password_editor">
+                                        </div>
+                                    @elseif($s->username_editor || $s->password_editor)
                                         <code style="font-size:0.68rem;background:#bae6fd;padding:1px 4px;border-radius:3px;">{{ $s->username_editor ?: '—' }}</code>
                                         <span class="text-muted">/</span>
                                         <code style="font-size:0.68rem;background:#bae6fd;padding:1px 4px;border-radius:3px;">{{ $s->password_editor ?: '—' }}</code>
@@ -815,15 +844,31 @@
                                     {{ $s->petugasReviewer1?->name ?? '-' }}
                                     @if($s->petugas_reviewer1_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
-                                <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}" title="Username / Password Reviewer 1">
-                                    @if($s->username_reviewer1 || $s->password_reviewer1)
+                                <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_reviewer1_id == $picId)
+                                        <div class="cred-group">
+                                            <input type="text" class="pic-input {{ $s->username_reviewer1 ? 'has-value' : '' }}"
+                                                   value="{{ $s->username_reviewer1 }}" placeholder="user"
+                                                   data-submission="{{ $s->id }}" data-field="username_reviewer1">
+                                            <span>/</span>
+                                            <input type="text" class="pic-input {{ $s->password_reviewer1 ? 'has-value' : '' }}"
+                                                   value="{{ $s->password_reviewer1 }}" placeholder="pass"
+                                                   data-submission="{{ $s->id }}" data-field="password_reviewer1">
+                                        </div>
+                                    @elseif($s->username_reviewer1 || $s->password_reviewer1)
                                         <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->username_reviewer1 ?: '—' }}</code>
                                         <span class="text-muted">/</span>
                                         <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->password_reviewer1 ?: '—' }}</code>
                                     @else<span class="text-muted">—</span>@endif
                                 </td>
                                 <td class="{{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_reviewer1 }}">
-                                    {{ $s->catatan_reviewer1 ? Str::limit($s->catatan_reviewer1, 15) : '-' }}
+                                    @if($s->petugas_reviewer1_id == $picId)
+                                        <textarea class="pic-textarea {{ $s->catatan_reviewer1 ? 'has-value' : '' }}"
+                                                  data-submission="{{ $s->id }}" data-field="catatan_reviewer1"
+                                                  placeholder="Catatan...">{{ $s->catatan_reviewer1 }}</textarea>
+                                    @else
+                                        {{ $s->catatan_reviewer1 ? Str::limit($s->catatan_reviewer1, 15) : '-' }}
+                                    @endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_reviewer1_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_reviewer1_id == $picId)
@@ -841,15 +886,31 @@
                                     {{ $s->petugasReviewer2?->name ?? '-' }}
                                     @if($s->petugas_reviewer2_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
-                                <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}" title="Username / Password Reviewer 2">
-                                    @if($s->username_reviewer2 || $s->password_reviewer2)
+                                <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
+                                    @if($s->petugas_reviewer2_id == $picId)
+                                        <div class="cred-group">
+                                            <input type="text" class="pic-input {{ $s->username_reviewer2 ? 'has-value' : '' }}"
+                                                   value="{{ $s->username_reviewer2 }}" placeholder="user"
+                                                   data-submission="{{ $s->id }}" data-field="username_reviewer2">
+                                            <span>/</span>
+                                            <input type="text" class="pic-input {{ $s->password_reviewer2 ? 'has-value' : '' }}"
+                                                   value="{{ $s->password_reviewer2 }}" placeholder="pass"
+                                                   data-submission="{{ $s->id }}" data-field="password_reviewer2">
+                                        </div>
+                                    @elseif($s->username_reviewer2 || $s->password_reviewer2)
                                         <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->username_reviewer2 ?: '—' }}</code>
                                         <span class="text-muted">/</span>
                                         <code style="font-size:0.68rem;background:#e0e7ff;padding:1px 4px;border-radius:3px;">{{ $s->password_reviewer2 ?: '—' }}</code>
                                     @else<span class="text-muted">—</span>@endif
                                 </td>
                                 <td class="{{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_reviewer2 }}">
-                                    {{ $s->catatan_reviewer2 ? Str::limit($s->catatan_reviewer2, 15) : '-' }}
+                                    @if($s->petugas_reviewer2_id == $picId)
+                                        <textarea class="pic-textarea {{ $s->catatan_reviewer2 ? 'has-value' : '' }}"
+                                                  data-submission="{{ $s->id }}" data-field="catatan_reviewer2"
+                                                  placeholder="Catatan...">{{ $s->catatan_reviewer2 }}</textarea>
+                                    @else
+                                        {{ $s->catatan_reviewer2 ? Str::limit($s->catatan_reviewer2, 15) : '-' }}
+                                    @endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_reviewer2_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_reviewer2_id == $picId)
@@ -938,7 +999,13 @@
                                     @if($s->petugas_validator_id == $picId)<i class="bi bi-star-fill text-warning" title="Tugas Anda"></i>@endif
                                 </td>
                                 <td class="{{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}" title="{{ $s->catatan_validator }}">
-                                    {{ $s->catatan_validator ? Str::limit($s->catatan_validator, 15) : '-' }}
+                                    @if($s->petugas_validator_id == $picId)
+                                        <textarea class="pic-textarea {{ $s->catatan_validator ? 'has-value' : '' }}"
+                                                  data-submission="{{ $s->id }}" data-field="catatan_validator"
+                                                  placeholder="Catatan...">{{ $s->catatan_validator }}</textarea>
+                                    @else
+                                        {{ $s->catatan_validator ? Str::limit($s->catatan_validator, 15) : '-' }}
+                                    @endif
                                 </td>
                                 <td class="text-center {{ $s->petugas_validator_id == $picId ? 'my-task' : '' }}">
                                     @if($s->petugas_validator_id == $picId)
@@ -1100,6 +1167,25 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // PIC inline credential inputs (pic-input)
+    document.querySelectorAll('.pic-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const submissionId = this.dataset.submission;
+            const field = this.dataset.field;
+            this.classList.add('saving');
+            saveCredential(submissionId, field, this.value, this);
+        });
+    });
+
+    // PIC inline textarea (catatan)
+    document.querySelectorAll('.pic-textarea').forEach(textarea => {
+        textarea.addEventListener('blur', function() {
+            const submissionId = this.dataset.submission;
+            const field = this.dataset.field;
+            saveCredential(submissionId, field, this.value, this);
+        });
+    });
 
     // Inline credential editing
     document.querySelectorAll('.editable-credential input').forEach(input => {
@@ -1288,7 +1374,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function saveCredential(submissionId, field, value) {
+    function saveCredential(submissionId, field, value, el) {
         fetch('{{ route("pic.submissions.update-credential") }}', {
             method: 'POST',
             headers: {
@@ -1303,13 +1389,20 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            if (!data.success) {
+            if (data.success) {
+                if (el) {
+                    el.classList.remove('saving');
+                    el.classList.toggle('has-value', value.trim() !== '');
+                }
+            } else {
                 alert('Gagal menyimpan: ' + (data.message || 'Unknown error'));
+                if (el) el.classList.remove('saving');
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Terjadi kesalahan saat menyimpan');
+            if (el) el.classList.remove('saving');
         });
     }
 });

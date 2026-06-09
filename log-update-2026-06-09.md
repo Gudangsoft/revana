@@ -43,3 +43,31 @@ Log perubahan otomatis dari git commits.
 - `resources/views/pic/fasttrack/monitoring.blade.php`
 - `resources/views/pic/submissions/monitoring.blade.php`
 
+
+## 5. PIC Monitoring — Input Inline Sesuai Tugas
+
+**Tujuan:** PIC bisa langsung edit/input data di tabel monitoring untuk kolom yang menjadi tugasnya (username, password, catatan) tanpa membuka halaman proses submission.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/submissions/monitoring.blade.php` | CSS: tambah `.pic-input`, `.pic-textarea`, `.cred-group`; HTML: Editor1 User/Pass, Reviewer1/2 User/Pass+Catatan, Validator Catatan → editable input/textarea jika PIC bertugas; JS: event listener `change`/`blur` → `saveCredential()` |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `updateCredential()`: perluas allowed fields + perbaiki permission per role |
+
+### Logika Permission
+| Field | Yang boleh edit |
+|-------|----------------|
+| `username_editor`, `password_editor` | Editor 1 PIC |
+| `username_reviewer1`, `password_reviewer1`, `catatan_reviewer1` | Reviewer 1 PIC |
+| `username_reviewer2`, `password_reviewer2`, `catatan_reviewer2` | Reviewer 2 PIC |
+| `catatan_validator` | Validator PIC |
+| `link_publish` | Production PIC |
+
+## 4. 🔄 Update: s
+
+- **Commit:** `2b1fd4e` — 13:29 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-09.md`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
+

@@ -1129,22 +1129,25 @@ class JournalManagementController extends Controller
     {
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
-            'field' => 'required|string|in:username_editor,password_editor,username_reviewer1,password_reviewer1,username_reviewer2,password_reviewer2,link_publish',
-            'value' => 'nullable|string|max:255',
+            'field' => 'required|string|in:username_editor,password_editor,username_reviewer1,password_reviewer1,username_reviewer2,password_reviewer2,catatan_reviewer1,catatan_reviewer2,catatan_validator,link_publish',
+            'value' => 'nullable|string|max:1000',
         ]);
-        
+
         $submission = Submission::findOrFail($request->submission_id);
-        
+
         // Verify that current PIC is assigned to this task
         $picId = auth()->guard('pic')->id();
         $allowed = false;
-        
+
         // Check which field is being updated and verify assignment
         if (in_array($request->field, ['username_editor', 'password_editor'])) {
             $allowed = $submission->petugas_editor1_id == $picId;
-        } elseif (in_array($request->field, ['username_reviewer1', 'password_reviewer1', 'username_reviewer2', 'password_reviewer2'])) {
-            // Editor2 can edit reviewer credentials
-            $allowed = $submission->petugas_editor2_id == $picId;
+        } elseif (in_array($request->field, ['username_reviewer1', 'password_reviewer1', 'catatan_reviewer1'])) {
+            $allowed = $submission->petugas_reviewer1_id == $picId;
+        } elseif (in_array($request->field, ['username_reviewer2', 'password_reviewer2', 'catatan_reviewer2'])) {
+            $allowed = $submission->petugas_reviewer2_id == $picId;
+        } elseif ($request->field === 'catatan_validator') {
+            $allowed = $submission->petugas_validator_id == $picId;
         } elseif ($request->field === 'link_publish') {
             // Allow if already assigned OR if no one is assigned yet
             $allowed = $submission->petugas_production_id == $picId || !$submission->petugas_production_id;
