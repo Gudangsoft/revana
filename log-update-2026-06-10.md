@@ -599,7 +599,20 @@
 
 ---
 
-## 46. Fix Email Settings: data hilang setelah simpan + error handling
+## 46. Widget Peringkat Point: tampilkan "Belum ada peringkat" saat semua point = 0
+
+**Tujuan:** Setelah reset, widget peringkat masih menampilkan daftar nama dengan badge rank 1/2/3 meski semua point 0 — terlihat tidak logis. Ubah agar tampil pesan "Belum ada peringkat" jika semua point nol.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/partials/point-rankings.blade.php` | Cek `sum('total_points') == 0` → tampil placeholder "Belum ada peringkat"; tabel hanya tampil jika ada point > 0; filter row dengan 0 point dari foreach |
+| `resources/views/pic/author/dashboard.blade.php` | Sama untuk widget PIC di dashboard PIC |
+| `resources/views/marketing/dashboard.blade.php` | Sama untuk widget Marketing dan PIC di dashboard Marketing |
+
+---
+
+## 47. Fix Email Settings: data hilang setelah simpan + error handling
 
 **Tujuan:** Setelah klik "Simpan Perubahan", nilai kembali ke placeholder/default karena `File::put()` mengembalikan `false` (permission denied) tanpa throw exception — redirect ke "success" padahal `.env` tidak terupdate. Perbaiki dengan cek permission, cek hasil tulis, dan verifikasi baca-ulang.
 
@@ -617,4 +630,14 @@
 - `app/Http/Controllers/Admin/EmailSettingController.php`
 - `log-update-2026-06-10.md`
 - `resources/views/admin/email-settings/index.blade.php`
+
+
+## 48. 🔄 Update: reset
+
+- **Commit:** `08e4c21` — 20:24 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/pic-points/index.blade.php`
+- `routes/web.php`
 

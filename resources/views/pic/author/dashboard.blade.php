@@ -255,6 +255,13 @@
                 </a>
             </div>
             <div class="card-body p-0">
+                @if($topPics->isEmpty() || $topPics->sum('total_points') == 0)
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-hourglass-split" style="font-size: 2.5rem; opacity:.4;"></i>
+                    <p class="mb-0 mt-2">Belum ada peringkat</p>
+                    <small>Selesaikan tugas untuk mendapatkan point</small>
+                </div>
+                @else
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
@@ -265,7 +272,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($topPics as $index => $pic)
+                            @foreach($topPics->filter(fn($p) => ($p->total_points ?? 0) > 0) as $index => $pic)
                             <tr class="{{ $pic->id == auth()->guard('pic')->user()->id ? 'table-info' : '' }}">
                                 <td class="text-center">
                                     @if($index == 0)
@@ -301,17 +308,11 @@
                                     </span>
                                 </td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                    <p class="mb-0">Belum ada data PIC</p>
-                                </td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
+                @endif
             </div>
         </div>
     </div>

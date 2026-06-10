@@ -119,8 +119,8 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard PIC</span>
-                <div class="d-flex gap-2">
-                    <form method="POST" action="{{ route('admin.pic-points.sync-all') }}" class="d-inline" id="syncPointForm">
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="POST" action="{{ route('admin.pic-points.sync-all') }}" id="syncPointForm" class="m-0">
                         @csrf
                         <button type="submit" class="btn btn-warning btn-sm" id="btnSyncPoint">
                             <i class="bi bi-arrow-repeat" id="syncIcon"></i>
