@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class JournalSlotsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
 {
     protected $filters;
+    protected int $rowNumber = 0;
 
     public function __construct($filters = [])
     {
@@ -21,7 +22,7 @@ class JournalSlotsExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function collection()
     {
-        $query = JournalSlot::with(['journalMaster', 'creator', 'submissions']);
+        $query = JournalSlot::with(['journalMaster', 'creator']);
 
         if (!empty($this->filters['journal_master_id'])) {
             $query->where('journal_master_id', $this->filters['journal_master_id']);
@@ -61,15 +62,14 @@ class JournalSlotsExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function map($slot): array
     {
-        static $rowNumber = 0;
-        $rowNumber++;
+        $this->rowNumber++;
 
         return [
-            $rowNumber,
+            $this->rowNumber,
             $slot->kode_slot ?? '-',
-            $slot->journalMaster->nama_jurnal ?? '-',
-            $slot->journalMaster->publisher ?? '-',
-            $slot->journalMaster->accreditation ?? '-',
+            $slot->journalMaster?->nama_jurnal ?? '-',
+            $slot->journalMaster?->publisher ?? '-',
+            $slot->journalMaster?->accreditation ?? '-',
             $slot->volume ?? '-',
             $slot->nomor ?? '-',
             $slot->bulan ?? '-',
@@ -78,7 +78,7 @@ class JournalSlotsExport implements FromCollection, WithHeadings, WithMapping, W
             $slot->slot_terpakai ?? 0,
             $slot->slot_tersedia ?? 0,
             $slot->is_active ? 'Aktif' : 'Nonaktif',
-            $slot->creator->name ?? '-',
+            $slot->creator?->name ?? '-',
             $slot->created_at ? $slot->created_at->format('d/m/Y H:i') : '-',
         ];
     }
