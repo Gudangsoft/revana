@@ -163,9 +163,35 @@
 
 ---
 
-## 13. 🔄 Update: admin
+## 13. Rapikan Tampilan Tabel Monitoring — Hapus Border Vertikal & Input Transparan
+
+**Tujuan:** Tabel monitoring terlihat "ramai" karena `table-bordered` memberi border di semua sisi setiap cell. Input credential yang kosong tampil sebagai kotak-kotak mengambang. Perlu: (A) hapus border vertikal internal, hanya sisakan garis horizontal per baris + border kiri berwarna per group boundary; (B) input transparan saat kosong, muncul saat hover/focus.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | CSS: `border-left/right/top: none` pada `tbody td`; class `grp-dark/info/warning/primary/success/validator` untuk border kiri berwarna di first td setiap group; CSS input: `border-color/background: transparent` saat kosong, reveal on hover/focus, `has-value` tetap kuning tanpa border; tambah 10 class `grp-*` ke first td setiap group di tbody |
+
+### Detail
+- Group boundary colors matching header: info=`#38bdf8`, warning=`#fbbf24`, primary=`#818cf8`, success=`#4ade80`, validator=`#a78bfa`, dark=`#64748b`
+- Input empty: transparan → hover: `border #ced4da` + `bg #fff` → focus: border biru + box-shadow
+- Input has-value: `bg #fff3cd` (kuning) tanpa border → hover/focus: `border #fbbf24`
+- Separator "/" di credential-group diubah warna ke `#cbd5e1` (abu sangat tipis)
+
+---
+
+## 14. 🔄 Update: admin
 
 - **Commit:** `8e22f8e` — 13:24 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+
+
+## 14. 🔄 Update: update
+
+- **Commit:** `43cc25b` — 13:33 oleh Gudangsoft
 - **File berubah:** 3 file
 - `app/Http/Controllers/Admin/SubmissionController.php`
 - `log-update-2026-06-10.md`

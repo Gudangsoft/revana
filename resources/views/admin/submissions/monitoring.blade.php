@@ -348,6 +348,50 @@
 .pending-validation-alert {
     animation: pulse-warning 2s infinite;
 }
+
+/* ── BORDER CLEANUP ─────────────────────────────────────────────── */
+/* Hapus semua border vertikal di tbody — hanya sisakan garis horizontal bawah */
+.table-monitoring tbody td {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* Group boundary — border kiri berwarna sesuai aksen header */
+.table-monitoring tbody td.grp-dark     { border-left: 2px solid #64748b !important; }
+.table-monitoring tbody td.grp-info     { border-left: 4px solid #38bdf8 !important; }
+.table-monitoring tbody td.grp-warning  { border-left: 4px solid #fbbf24 !important; }
+.table-monitoring tbody td.grp-primary  { border-left: 4px solid #818cf8 !important; }
+.table-monitoring tbody td.grp-success  { border-left: 4px solid #4ade80 !important; }
+.table-monitoring tbody td.grp-validator{ border-left: 4px solid #a78bfa !important; }
+
+/* ── INPUT CLEANUP ──────────────────────────────────────────────── */
+/* Input transparan saat kosong, muncul saat hover/focus */
+.inline-credential-input {
+    border-color: transparent !important;
+    background: transparent !important;
+}
+.inline-credential-input:hover {
+    border-color: #ced4da !important;
+    background: #fff !important;
+}
+.inline-credential-input:focus {
+    border-color: #86b7fe !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.15) !important;
+}
+/* Saat has-value: tetap kuning tanpa border */
+.inline-credential-input.has-value {
+    background: #fff3cd !important;
+    border-color: transparent !important;
+}
+.inline-credential-input.has-value:hover,
+.inline-credential-input.has-value:focus {
+    border-color: #fbbf24 !important;
+}
+/* Separator "/" di credential-group jadi abu tipis */
+.credential-group span { color: #cbd5e1; }
 </style>
 
 @include('partials.auto-refresh', ['interval' => 60, 'arId' => 'admin-mon'])
@@ -774,7 +818,7 @@
                                     @endif
                                 </td>
                                 <!-- Author Access: PIC Marketing, Petugas Submit, Username, Password -->
-                                <td>
+                                <td class="grp-dark">
                                                                         <select class="inline-assign-select lazy-select {{ $s->marketing_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="marketing"
@@ -800,7 +844,7 @@
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1 -->
-                                <td>
+                                <td class="grp-info">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_editor1_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="editor1"
@@ -842,7 +886,7 @@
                                 </td>
 
                                 <!-- Author 1 -->
-                                <td>
+                                <td class="grp-warning">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_author1_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="author1"
@@ -867,7 +911,7 @@
                                 </td>
 
                                 <!-- Editor 2 -->
-                                <td>
+                                <td class="grp-info">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_editor2_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="editor2"
@@ -892,7 +936,7 @@
                                 </td>
 
                                 <!-- Reviewer 1 -->
-                                <td>
+                                <td class="grp-primary">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="reviewer1"
@@ -943,7 +987,7 @@
                                 </td>
                                 
                                 <!-- Reviewer 2 -->
-                                <td>
+                                <td class="grp-primary">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer2_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="reviewer2"
@@ -994,7 +1038,7 @@
                                 </td>
                                 
                                 <!-- Editor 3 -->
-                                <td>
+                                <td class="grp-info">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_editor3_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="editor3"
@@ -1019,7 +1063,7 @@
                                 </td>
 
                                 <!-- Author 2 -->
-                                <td>
+                                <td class="grp-warning">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_author2_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="author2"
@@ -1044,7 +1088,7 @@
                                 </td>
 
                                 <!-- Production -->
-                                <td>
+                                <td class="grp-success">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_production_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="production"
@@ -1101,7 +1145,7 @@
                                 </td>
 
                                 <!-- Validator -->
-                                <td class="td-validator">
+                                <td class="td-validator grp-validator">
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_validator_id ? 'has-value' : '' }}" 
                                             data-submission="{{ $s->id }}" 
                                             data-type="validator"
