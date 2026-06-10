@@ -64,3 +64,37 @@
 | `app/Http/Controllers/Admin/ReferensiJurnalController.php` | Tambah `export()` |
 | `routes/web.php` | Tambah route `field-of-studies-export` dan `referensi-jurnals/export` |
 
+
+## 6. Export & Import Excel — Kategori dan Jenis Jurnal
+
+**Tujuan:** Halaman `/admin/kategoris` dan `/admin/jenis-jurnals` belum punya fitur Export/Import Excel.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Exports/KategorisExport.php` | Baru — export: No, Nama, Deskripsi, Status |
+| `app/Exports/JenisJurnalsExport.php` | Baru — export: No, Nama, Deskripsi, Status |
+| `app/Imports/KategoriImport.php` | Baru — import dengan upsert by name, kolom: name, description, is_active |
+| `app/Imports/JenisJurnalImport.php` | Baru — sama dengan KategoriImport |
+| `app/Http/Controllers/Admin/KategoriController.php` | Tambah `export()`, `import()`, `downloadTemplate()` |
+| `app/Http/Controllers/Admin/JenisJurnalController.php` | Sama |
+| `routes/web.php` | Tambah 3 route per halaman: export, import, template |
+| `resources/views/admin/kategoris/index.blade.php` | Tambah tombol Export/Import/Template + import modal |
+| `resources/views/admin/jenis-jurnals/index.blade.php` | Sama |
+
+---
+
+## 7. 🔄 Update: export excel bidang ilmu & referensi jurnal + rapikan tombol journal slots
+
+- **Commit:** `4c8a0ab` — 11:21 oleh Gudangsoft
+- **File berubah:** 9 file
+- `app/Exports/FieldOfStudiesExport.php`
+- `app/Exports/ReferensiJurnalsExport.php`
+- `app/Http/Controllers/Admin/FieldOfStudyController.php`
+- `app/Http/Controllers/Admin/ReferensiJurnalController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/field-of-studies/index.blade.php`
+- `resources/views/admin/journal-slots/index.blade.php`
+- `resources/views/admin/referensi-jurnals/index.blade.php`
+- `routes/web.php`
+

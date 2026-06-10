@@ -11,9 +11,18 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-journal-bookmark"></i> Data Jenis Jurnal</span>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
             @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Deskripsi', 'Status', 'Aksi'], 'columnOffset' => 1])
-            <a href="{{ route('admin.jenis-jurnals.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('admin.jenis-jurnals.export') }}" class="btn btn-sm btn-info">
+                <i class="bi bi-download"></i> Export Excel
+            </a>
+            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bi bi-upload"></i> Import Excel
+            </button>
+            <a href="{{ route('admin.jenis-jurnals.template') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-file-earmark-arrow-down"></i> Template
+            </a>
+            <a href="{{ route('admin.jenis-jurnals.create') }}" class="btn btn-sm btn-primary">
                 <i class="bi bi-plus-circle"></i> Tambah
             </a>
         </div>
@@ -22,6 +31,13 @@
         @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             <i class="bi bi-check-circle"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         @endif
@@ -82,6 +98,42 @@
         </div>
 
         @include('partials.per-page-selector', ['paginator' => $jenisJurnals])
+    </div>
+</div>
+
+{{-- Import Modal --}}
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-upload"></i> Import Jenis Jurnal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.jenis-jurnals.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">File Excel / CSV</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                        <div class="form-text">Format: .xlsx, .xls, .csv — Maks 2MB</div>
+                    </div>
+                    <div class="alert alert-info py-2 mb-0" style="font-size:0.85rem;">
+                        <strong>Kolom yang diperlukan:</strong><br>
+                        <code>name</code> (wajib), <code>description</code>, <code>is_active</code> (1/0 atau Aktif/Nonaktif)<br>
+                        <small class="text-muted">Data yang sudah ada (nama sama) akan diperbarui.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ route('admin.jenis-jurnals.template') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Download Template
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

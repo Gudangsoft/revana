@@ -234,10 +234,16 @@ Route::middleware('auth')->group(function () {
         Route::resource('accreditations', \App\Http\Controllers\Admin\AccreditationController::class);
         
         // Kategori
+        Route::get('/kategoris/export', [\App\Http\Controllers\Admin\KategoriController::class, 'export'])->name('kategoris.export');
+        Route::post('/kategoris/import', [\App\Http\Controllers\Admin\KategoriController::class, 'import'])->name('kategoris.import');
+        Route::get('/kategoris/template', [\App\Http\Controllers\Admin\KategoriController::class, 'downloadTemplate'])->name('kategoris.template');
         Route::patch('/kategoris/{kategori}/toggle-active', [\App\Http\Controllers\Admin\KategoriController::class, 'toggleActive'])->name('kategoris.toggle-active');
         Route::resource('kategoris', \App\Http\Controllers\Admin\KategoriController::class);
-        
+
         // Jenis Jurnal
+        Route::get('/jenis-jurnals/export', [\App\Http\Controllers\Admin\JenisJurnalController::class, 'export'])->name('jenis-jurnals.export');
+        Route::post('/jenis-jurnals/import', [\App\Http\Controllers\Admin\JenisJurnalController::class, 'import'])->name('jenis-jurnals.import');
+        Route::get('/jenis-jurnals/template', [\App\Http\Controllers\Admin\JenisJurnalController::class, 'downloadTemplate'])->name('jenis-jurnals.template');
         Route::patch('/jenis-jurnals/{jenisJurnal}/toggle-active', [\App\Http\Controllers\Admin\JenisJurnalController::class, 'toggleActive'])->name('jenis-jurnals.toggle-active');
         Route::resource('jenis-jurnals', \App\Http\Controllers\Admin\JenisJurnalController::class)->parameters([
             'jenis-jurnals' => 'jenisJurnal'

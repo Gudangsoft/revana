@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\KategorisExport;
 use App\Http\Controllers\Controller;
+use App\Imports\KategoriImport;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KategoriController extends Controller
 {
@@ -65,5 +68,57 @@ class KategoriController extends Controller
         $kategori->update(['is_active' => !$kategori->is_active]);
         return redirect()->route('admin.kategoris.index')
             ->with('success', 'Status kategori berhasil diubah');
+    }
+
+    public function export()
+    {
+        return Excel::download(new KategorisExport, 'kategoris.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ], [
+            'file.required' => 'File Excel wajib dipilih',
+            'file.mimes'    => 'File harus berformat .xlsx, .xls, atau .csv',
+            'file.max'      => 'Ukuran file maksimal 2MB',
+        ]);
+
+        try {
+            $import = new KategoriImport;
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $updated  = $import->getUpdatedCount();
+
+            $msg = 'Import berhasil!';
+            if ($imported > 0) $msg .= " {$imported} data baru ditambahkan.";
+            if ($updated  > 0) $msg .= " {$updated} data diperbarui.";
+            if ($imported === 0 && $updated === 0) $msg = 'Tidak ada data yang diimport.';
+
+            return redirect()->route('admin.kategoris.index')->with('success', $msg);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.kategoris.index')
+                ->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_kategori.csv"',
+        ];
+
+        $callback = function () {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['name', 'description', 'is_active']);
+            fputcsv($file, ['Nasional', 'Jurnal nasional terakreditasi', 1]);
+            fputcsv($file, ['Internasional', 'Jurnal internasional bereputasi', 1]);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
