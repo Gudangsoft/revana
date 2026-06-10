@@ -158,10 +158,18 @@
                 <label class="form-label small mb-1">Status</label>
                 <select name="status" class="form-select">
                     <option value="">Semua Status</option>
-                    <option value="SUBMITTED" {{ request('status') == 'SUBMITTED' ? 'selected' : '' }}>Baru</option>
-                    <option value="EDITOR1_PROCESS" {{ request('status') == 'EDITOR1_PROCESS' ? 'selected' : '' }}>Editor 1</option>
-                    <option value="REVIEWER1_PROCESS" {{ request('status') == 'REVIEWER1_PROCESS' ? 'selected' : '' }}>Review</option>
-                    <option value="PUBLISHED" {{ request('status') == 'PUBLISHED' ? 'selected' : '' }}>Published</option>
+                    <option value="SUBMITTED"   {{ request('status') == 'SUBMITTED'   ? 'selected' : '' }}>Baru / Submitted</option>
+                    <option value="EDITOR1"    {{ request('status') == 'EDITOR1'    ? 'selected' : '' }}>Editor 1</option>
+                    <option value="AUTHOR1"    {{ request('status') == 'AUTHOR1'    ? 'selected' : '' }}>Author 1</option>
+                    <option value="EDITOR2"    {{ request('status') == 'EDITOR2'    ? 'selected' : '' }}>Editor 2</option>
+                    <option value="REVIEWER1"  {{ request('status') == 'REVIEWER1'  ? 'selected' : '' }}>Reviewer 1</option>
+                    <option value="REVIEWER2"  {{ request('status') == 'REVIEWER2'  ? 'selected' : '' }}>Reviewer 2</option>
+                    <option value="EDITOR3"    {{ request('status') == 'EDITOR3'    ? 'selected' : '' }}>Editor 3</option>
+                    <option value="AUTHOR2"    {{ request('status') == 'AUTHOR2'    ? 'selected' : '' }}>Author 2</option>
+                    <option value="PRODUCTION" {{ request('status') == 'PRODUCTION' ? 'selected' : '' }}>Production</option>
+                    <option value="VALIDATOR"  {{ request('status') == 'VALIDATOR'  ? 'selected' : '' }}>Validator</option>
+                    <option value="PUBLISHED"  {{ request('status') == 'PUBLISHED'  ? 'selected' : '' }}>Published</option>
+                    <option value="REJECTED"   {{ request('status') == 'REJECTED'   ? 'selected' : '' }}>Rejected</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -250,8 +258,8 @@
                             'EDITOR1' => ['petugas_editor1_id'],
                             'AUTHOR1' => ['petugas_author1_id'],
                             'EDITOR2' => ['petugas_editor2_id'],
-                            'REVIEWER1' => ['petugas_editor1_id', 'petugas_editor2_id'],
-                            'REVIEWER2' => ['petugas_editor1_id', 'petugas_editor2_id'],
+                            'REVIEWER1' => ['petugas_reviewer1_id'],
+                            'REVIEWER2' => ['petugas_reviewer2_id'],
                             'EDITOR3' => ['petugas_editor3_id'],
                             'AUTHOR2' => ['petugas_author2_id'],
                             'PRODUCTION' => ['petugas_production_id'],

@@ -362,3 +362,26 @@
 | `resources/views/admin/laporan-harian/rekap.blade.php` | Tambah tombol Export Excel (hijau) di samping tombol Export CSV (sekarang abu-abu outline) |
 | `app/Exports/LaporanKinerjaPicSheet.php` | Fix duplicate `font` key di array styles row 1 — PHP silently drops first key, sekarang dibersihkan jadi satu definisi |
 
+
+## 29. 🔄 Update: laporan
+
+- **Commit:** `11a3c6f` — 15:03 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Exports/LaporanHarianRekapExport.php`
+- `app/Exports/LaporanKinerjaPicSheet.php`
+- `app/Http/Controllers/Admin/LaporanHarianController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/laporan-harian/rekap.blade.php`
+- `routes/web.php`
+
+## 30. Fix Bug Halaman PIC: My Tasks & Points
+
+**Tujuan:** Perbaiki 4 bug di dua halaman PIC berdasarkan analisa halaman.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/my-tasks/index.blade.php` | (1) Fix `$urgentMappings` REVIEWER1/REVIEWER2 — salah pakai `petugas_editor1_id`/`editor2` padahal seharusnya `petugas_reviewer1_id`/`reviewer2_id`; (2) Perluas dropdown filter status dari 4 opsi (tidak lengkap) menjadi 12 opsi mencakup semua tahap alur |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Fix query filter status: dari exact `WHERE status = 'X'` menjadi prefix `LIKE 'X%'` untuk stage values (EDITOR1, AUTHOR1, dll.), sehingga filter "Editor 1" menangkap EDITOR1_PROCESS maupun EDITOR1_REVISION |
+| `resources/views/pic/points/index.blade.php` | (3) Fix tampilan poin negatif — sebelumnya selalu tampil `+X` walau negatif; sekarang badge merah + nilai tanpa prefix `+` untuk poin ≤ 0; (4) Tambah opsi "Penyesuaian Point" di dropdown filter Tipe Tugas |
+

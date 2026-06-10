@@ -1620,7 +1620,12 @@ class JournalManagementController extends Controller
             });
         
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $status = $request->status;
+            if (in_array($status, ['SUBMITTED', 'PUBLISHED', 'REJECTED'])) {
+                $query->where('status', $status);
+            } else {
+                $query->where('status', 'like', $status . '%');
+            }
         }
         if ($request->filled('search')) {
             $search = $request->search;

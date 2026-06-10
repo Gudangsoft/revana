@@ -164,6 +164,7 @@
                     @foreach($stepConfig as $step => $config)
                     <option value="{{ $step }}" {{ request('step') == $step ? 'selected' : '' }}>{{ $config['label'] }}</option>
                     @endforeach
+                    <option value="adjustment" {{ request('step') == 'adjustment' ? 'selected' : '' }}>Penyesuaian Point</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end">
@@ -207,7 +208,9 @@
                         </td>
                         <td>{{ $history->description ?? '-' }}</td>
                         <td class="text-end">
-                            <span class="badge bg-success fs-6">+{{ $history->points_earned }}</span>
+                            <span class="badge {{ $history->points_earned >= 0 ? 'bg-success' : 'bg-danger' }} fs-6">
+                                {{ $history->points_earned >= 0 ? '+' : '' }}{{ $history->points_earned }}
+                            </span>
                         </td>
                     </tr>
                     @empty
