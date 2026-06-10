@@ -612,7 +612,24 @@
 
 ---
 
-## 47. Fix Email Settings: data hilang setelah simpan + error handling
+## 47. Point PIC Dikurangi Otomatis Saat Validasi Dibatalkan
+
+**Tujuan:** Ketika admin membatalkan validasi step (toggle valid dari ✓ menjadi ✗), point PIC yang sudah diberikan harus dicabut kembali. Sebelumnya tidak ada logika deduct sama sekali.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/PicPointHistory.php` | Tambah static method `revokePoints(picId, submissionId, step)`: hapus history record, recalculate `total_points` dari sum history (aman dari drift), flush cache `rankings.topPics` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `toggleValidField()`: tambah mapping `$fieldToStep` (7 step PIC, tidak termasuk reviewer1/2); saat `$newValue=true` → `awardPoints()`; saat `$newValue=false` → `revokePoints()` |
+
+### Detail
+- Step yang didukung: editor1, author1, editor2, editor3, author2, production, validator
+- reviewer1/reviewer2 tidak dimasukkan karena bukan tugas PIC
+- `revokePoints()` recalculate dari SUM history untuk mencegah drift
+
+---
+
+## 48. Fix Email Settings: data hilang setelah simpan + error handling
 
 **Tujuan:** Setelah klik "Simpan Perubahan", nilai kembali ke placeholder/default karena `File::put()` mengembalikan `false` (permission denied) tanpa throw exception — redirect ke "success" padahal `.env` tidak terupdate. Perbaiki dengan cek permission, cek hasil tulis, dan verifikasi baca-ulang.
 
@@ -651,4 +668,14 @@
 - `resources/views/admin/pic-points/index.blade.php`
 - `resources/views/marketing/dashboard.blade.php`
 - `resources/views/pic/author/dashboard.blade.php`
+
+
+## 51. 🔄 Update: up rank
+
+- **Commit:** `c114025` — 20:44 oleh Gudangsoft
+- **File berubah:** 4 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/point-rankings.blade.php`
+- `resources/views/marketing/point-rankings.blade.php`
+- `resources/views/pic/points/rankings.blade.php`
 

@@ -1409,6 +1409,37 @@ class SubmissionController extends Controller
             }
         }
 
+        // Point award/revoke mapping (only PIC steps, not reviewer1/2)
+        $fieldToStep = [
+            'editor1_valid'    => ['step' => 'editor1',    'petugas' => 'petugas_editor1_id'],
+            'author1_valid'    => ['step' => 'author1',    'petugas' => 'petugas_author1_id'],
+            'editor2_valid'    => ['step' => 'editor2',    'petugas' => 'petugas_editor2_id'],
+            'editor3_valid'    => ['step' => 'editor3',    'petugas' => 'petugas_editor3_id'],
+            'author2_valid'    => ['step' => 'author2',    'petugas' => 'petugas_author2_id'],
+            'production_valid' => ['step' => 'production', 'petugas' => 'petugas_production_id'],
+            'validator_valid'  => ['step' => 'validator',  'petugas' => 'petugas_validator_id'],
+        ];
+
+        if (isset($fieldToStep[$field])) {
+            $stepCfg  = $fieldToStep[$field];
+            $petugasId = $submission->{$stepCfg['petugas']};
+
+            if ($petugasId) {
+                if ($newValue) {
+                    // Validasi diaktifkan → beri point
+                    PicPointHistory::awardPoints(
+                        $petugasId,
+                        $submission->id,
+                        $stepCfg['step'],
+                        "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($stepCfg['step'])
+                    );
+                } else {
+                    // Validasi dibatalkan → cabut point
+                    PicPointHistory::revokePoints($petugasId, $submission->id, $stepCfg['step']);
+                }
+            }
+        }
+
         // Recalculate status based on current validation flags
         $submission->recalculateStatus();
 

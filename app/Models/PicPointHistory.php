@@ -129,4 +129,35 @@ class PicPointHistory extends Model
 
         return $history;
     }
+
+    /**
+     * Revoke points when a step validation is cancelled
+     */
+    public static function revokePoints(int $picId, int $submissionId, string $step): bool
+    {
+        $history = self::where('pic_id', $picId)
+            ->where('submission_id', $submissionId)
+            ->where('step', $step)
+            ->first();
+
+        if (!$history) {
+            return false;
+        }
+
+        $points = $history->points_earned;
+        $history->delete();
+
+        // Decrement but never go below 0
+        Pic::where('id', $picId)
+            ->where('total_points', '>=', $points)
+            ->decrement('total_points', $points);
+
+        // Safety: recalculate from history sum to avoid drift
+        $actual = self::where('pic_id', $picId)->sum('points_earned');
+        Pic::where('id', $picId)->update(['total_points' => max(0, $actual)]);
+
+        Cache::forget('rankings.topPics');
+
+        return true;
+    }
 }
