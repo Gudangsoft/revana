@@ -979,29 +979,40 @@
                                     </select>
                                 </td>
                                 <td title="Username Editor">
-                                    @if($s->username_editor)
-                                        <code style="font-size:0.67rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->username_editor }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                    <input type="text" class="inline-credential-input {{ $s->username_editor ? 'has-value' : '' }}"
+                                           value="{{ $s->username_editor }}"
+                                           placeholder="user"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="username_editor"
+                                           onchange="quickUpdateCredential(this)">
                                 </td>
                                 <td title="Password Editor">
-                                    @if($s->password_editor)
-                                        <code style="font-size:0.67rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->password_editor }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                    <input type="text" class="inline-credential-input {{ $s->password_editor ? 'has-value' : '' }}"
+                                           value="{{ $s->password_editor }}"
+                                           placeholder="pass"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="password_editor"
+                                           onchange="quickUpdateCredential(this)">
                                 </td>
-                                <td style="max-width:120px;">
-                                    @if($s->link_publish)
-                                        <a href="{{ $s->link_publish }}" target="_blank" title="{{ $s->link_publish }}" style="font-size:0.68rem; word-break:break-all;">
-                                            <i class="bi bi-link-45deg"></i> {{ Str::limit($s->link_publish, 30) }}
-                                        </a>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                <td title="Link Publish">
+                                    <input type="text" class="inline-credential-input {{ $s->link_publish ? 'has-value' : '' }}"
+                                           value="{{ $s->link_publish }}"
+                                           placeholder="https://..."
+                                           style="min-width:90px;"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="link_publish"
+                                           onchange="quickUpdateCredential(this)">
                                 </td>
-                                <td class="text-center">{!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="production_valid"
+                                            data-valid="{{ $s->production_valid ? '1' : '0' }}"
+                                            title="Toggle Production Valid">
+                                        {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
 
                                 <!-- Validator -->
                                 <td class="td-validator">
@@ -1017,10 +1028,25 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="td-validator" title="{{ $s->catatan_validator }}">
-                                    {{ $s->catatan_validator ? Str::limit($s->catatan_validator, 20) : '-' }}
+                                <td class="td-validator">
+                                    <input type="text" class="inline-credential-input {{ $s->catatan_validator ? 'has-value' : '' }}"
+                                           value="{{ $s->catatan_validator }}"
+                                           placeholder="catatan..."
+                                           style="min-width:80px;"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="catatan_validator"
+                                           onchange="quickUpdateCredential(this)">
                                 </td>
-                                <td class="text-center td-validator">{!! $s->validator_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center td-validator">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="validator_valid"
+                                            data-valid="{{ $s->validator_valid ? '1' : '0' }}"
+                                            title="Toggle Validator Valid">
+                                        {!! $s->validator_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                             </tr>
                             @empty
                             <tr>
@@ -1180,6 +1206,41 @@ function quickUpdateCredential(inputEl) {
     .catch(error => {
         inputEl.classList.remove('saving');
         console.error('Error:', error);
+        alert('Terjadi kesalahan jaringan');
+    });
+}
+
+function quickToggleValid(btn) {
+    const submissionId = btn.dataset.submission;
+    const field = btn.dataset.field;
+    const currentValid = btn.dataset.valid === '1';
+
+    btn.disabled = true;
+
+    fetch('{{ route("admin.submissions.toggle-valid-field") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ submission_id: submissionId, field: field })
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        if (data.success) {
+            const newValid = !currentValid;
+            btn.dataset.valid = newValid ? '1' : '0';
+            btn.innerHTML = newValid
+                ? '<i class="bi bi-check-circle-fill text-success"></i>'
+                : '<i class="bi bi-circle text-muted"></i>';
+        } else {
+            alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
         alert('Terjadi kesalahan jaringan');
     });
 }

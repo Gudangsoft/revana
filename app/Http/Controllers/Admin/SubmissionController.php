@@ -1338,12 +1338,14 @@ class SubmissionController extends Controller
             'password_reviewer1',
             'username_reviewer2',
             'password_reviewer2',
+            'link_publish',
+            'catatan_validator',
         ];
 
         $request->validate([
             'submission_id' => 'required|exists:submissions,id',
             'field' => 'required|in:' . implode(',', $allowedFields),
-            'value' => 'nullable|string|max:255',
+            'value' => 'nullable|string|max:500',
         ]);
 
         $submission = Submission::findOrFail($request->submission_id);
