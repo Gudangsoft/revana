@@ -329,12 +329,14 @@ class JournalManagementController extends Controller
             });
         }
 
-        if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $request->program)
-                  ->where(function ($q) {
-                      $q->where('process_type', '!=', 'fasttrack')
-                        ->orWhereNull('process_type');
-                  });
+        // Filter program: Normal hanya null, BKD/JAFA sesuai program_type
+        $program = $request->input('program');
+        if ($program === 'bkd') {
+            $query->where('program_type', 'bkd');
+        } elseif ($program === 'jafa') {
+            $query->where('program_type', 'jafa');
+        } else {
+            $query->whereNull('program_type');
         }
 
         $submissions = $query->latest()->paginate(request()->input('per_page', 20));

@@ -938,3 +938,30 @@
 - `?program=bkd` → `WHERE program_type = 'bkd'` → data BKD saja
 - `?program=jafa` → `WHERE program_type = 'jafa'` → data JAFA saja
 - Fasttrack: route terpisah, filter `process_type = 'fasttrack'`
+
+## 75. 🔄 Update: up
+
+- **Commit:** `6e7b646` — 22:45 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-10.md`
+
+
+## 76. Verifikasi & Sinkronisasi Penuh: Admin, PIC, Marketing
+
+**Tujuan:** Memastikan semua halaman monitoring dan data submit di ketiga portal (Admin, PIC, Marketing) sudah sinkron — menampilkan data sesuai program masing-masing dan tidak ada data yang bocor antar section.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Fix `submissionsIndex()`: tambah `else { whereNull('program_type') }` untuk isolasi data Normal di halaman Data Submit PIC |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Fix `submissions()`: tambah `else { whereNull('program_type') }` untuk isolasi data Normal di halaman Data Submit Marketing |
+
+### Hasil Verifikasi DB
+- Normal: 45 records (`program_type IS NULL`, `process_type != fasttrack`)
+- BKD: 0 records
+- JAFA: 0 records  
+- Fasttrack: 3 records (`process_type = fasttrack`)
+- Total: 48 = 45+0+0+3, tidak ada overlap ✓
