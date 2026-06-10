@@ -846,3 +846,43 @@
 - Migration juga handle prefix `JAFA` (4 huruf) yang mungkin sudah terlanjur masuk → diubah ke `JAF`
 - Admin bisa buka Edit submission → pilih Program dropdown → simpan → `kode_submit` auto-update prefix
 - Migration sudah dijalankan (205ms, DONE)
+
+## 68. 🔄 Update: up
+
+- **Commit:** `d02ff17` — 22:24 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_10_221620_sync_kode_submit_prefix_bkd_jaf.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/edit.blade.php`
+- `resources/views/pic/my-tasks/index.blade.php`
+
+
+## 68. Fix Monitoring PIC — Hanya Tampilkan Tugas yang Ditugaskan
+
+**Tujuan:** Halaman Monitoring Proses (normal dan fasttrack) PIC menampilkan SEMUA data, bukan hanya yang ditugaskan ke PIC tersebut. Harusnya sinkron dengan halaman "Tugas Saya".
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `fasttrackMonitoring()`: tambah `$picFilter` + terapkan ke query dan statistik; `submissionsMonitoring()`: ganti `Submission::count()` → query terfilter PIC |
+| `resources/views/pic/submissions/monitoring.blade.php` | Label "Total Submit" → "Total Ditugaskan" |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Label diupdate ke "(Saya)" |
+
+## 69. Default Urutan Monitoring PIC: Terlama di Atas
+
+**Tujuan:** PIC perlu mengerjakan data secara FIFO (pertama masuk, pertama dikerjakan). Default "Terbaru" menyebabkan data lama terlupakan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `submissionsMonitoring()` dan `fasttrackMonitoring()`: ubah default sort dari `'date_desc'` → `'date_asc'`; tambah secondary sort `id ASC` sebagai tiebreaker |
+| `resources/views/pic/submissions/monitoring.blade.php` | Pindah `date_asc` ke urutan pertama di dropdown, default selected |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Sama seperti di atas |
+
+### Detail
+- Default baru: `↑ Terlama` (oldest first) — data pertama disubmit muncul di atas
+- Secondary sort `id ASC` memastikan urutan konsisten ketika `tanggal_submit` sama
+- Admin monitoring tetap `↓ Terbaru` (untuk overview terbaru)

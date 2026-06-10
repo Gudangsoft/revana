@@ -425,11 +425,11 @@
                 <!-- Summary Cards -->
                 <div class="summary-cards mb-3">
                     <div class="summary-card my-tasks">
-                        <h6>Bulan Ini</h6>
+                        <h6>Bulan Ini (Saya)</h6>
                         <div class="value">{{ $thisMonthFasttrack }}</div>
                     </div>
                     <div class="summary-card all-tasks">
-                        <h6>Total Fasttrack</h6>
+                        <h6>Total Tugas Saya</h6>
                         <div class="value">{{ $totalFasttrack }}</div>
                     </div>
                 </div>
@@ -475,8 +475,8 @@
                         <div class="col-auto">
                             <label for="sort_by_ft" class="form-label small mb-1">Urutkan</label>
                             <select class="form-select form-select-sm" style="width:130px;" id="sort_by_ft" name="sort_by">
-                                <option value="date_desc" {{ request('sort_by','date_desc')=='date_desc'?'selected':'' }}>↓ Terbaru</option>
-                                <option value="date_asc"  {{ request('sort_by')=='date_asc' ?'selected':'' }}>↑ Terlama</option>
+                                <option value="date_asc"  {{ request('sort_by','date_asc')=='date_asc' ?'selected':'' }}>↑ Terlama</option>
+                                <option value="date_desc" {{ request('sort_by')=='date_desc'?'selected':'' }}>↓ Terbaru</option>
                                 <option value="title_asc" {{ request('sort_by')=='title_asc'?'selected':'' }}>↑ Judul A→Z</option>
                                 <option value="title_desc"{{ request('sort_by')=='title_desc'?'selected':'' }}>↓ Judul Z→A</option>
                             </select>

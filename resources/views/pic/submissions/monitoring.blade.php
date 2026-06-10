@@ -453,7 +453,7 @@
                         <div class="value">{{ $myTaskCount }}</div>
                     </div>
                     <div class="summary-card all-tasks">
-                        <h6>Total Submit</h6>
+                        <h6>Total Ditugaskan</h6>
                         <div class="value">{{ $totalSubmissions }}</div>
                     </div>
                 </div>
@@ -500,8 +500,8 @@
                         <div class="col-auto">
                             <label for="sort_by" class="form-label small mb-1">Urutkan</label>
                             <select class="form-select form-select-sm" style="width: 140px;" id="sort_by" name="sort_by">
-                                <option value="date_desc" {{ request('sort_by', 'date_desc') == 'date_desc' ? 'selected' : '' }}>↓ Terbaru</option>
-                                <option value="date_asc"  {{ request('sort_by') == 'date_asc'  ? 'selected' : '' }}>↑ Terlama</option>
+                                <option value="date_asc"  {{ request('sort_by', 'date_asc') == 'date_asc'  ? 'selected' : '' }}>↑ Terlama</option>
+                                <option value="date_desc" {{ request('sort_by') == 'date_desc' ? 'selected' : '' }}>↓ Terbaru</option>
                                 <option value="title_asc" {{ request('sort_by') == 'title_asc' ? 'selected' : '' }}>↑ Judul A→Z</option>
                                 <option value="title_desc"{{ request('sort_by') == 'title_desc'? 'selected' : '' }}>↓ Judul Z→A</option>
                             </select>

@@ -948,13 +948,13 @@ class JournalManagementController extends Controller
                   });
         }
 
-        // Sort
-        $sortBy = $request->input('sort_by', 'date_desc');
+        // Sort — default Terlama agar pengerjaan urut dari data pertama
+        $sortBy = $request->input('sort_by', 'date_asc');
         match ($sortBy) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
-            'date_asc'   => $query->orderBy('created_at', 'asc'),
-            default      => $query->orderByDesc('created_at'),
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
+            'date_desc'  => $query->orderByDesc('created_at')->orderByDesc('id'),
+            default      => $query->orderBy('created_at', 'asc')->orderBy('id', 'asc'),
         };
 
         $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
@@ -1032,8 +1032,22 @@ class JournalManagementController extends Controller
         $stats['urgent'] = $urgentTasks;
 
         // Additional counts for summary cards
-        $myTaskCount = $mySubmissions->count();
-        $totalSubmissions = Submission::count();
+        $myTaskCount      = $stats['total'];
+        $totalSubmissions = Submission::where(function($q) {
+                $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+            })
+            ->where(function($q) use ($picId) {
+                $q->where('petugas_submit_id', $picId)
+                  ->orWhere('petugas_editor1_id', $picId)
+                  ->orWhere('petugas_author1_id', $picId)
+                  ->orWhere('petugas_editor2_id', $picId)
+                  ->orWhere('petugas_editor3_id', $picId)
+                  ->orWhere('petugas_author2_id', $picId)
+                  ->orWhere('petugas_reviewer1_id', $picId)
+                  ->orWhere('petugas_reviewer2_id', $picId)
+                  ->orWhere('petugas_production_id', $picId)
+                  ->orWhere('petugas_validator_id', $picId);
+            })->count();
 
         // Determine which step columns to show (only steps this PIC has ever been assigned to).
         // Single conditional-aggregation query instead of 10 separate exists() queries.
@@ -2002,10 +2016,23 @@ class JournalManagementController extends Controller
     {
         $pic = Auth::guard('pic')->user();
         $picId = $pic->id;
-        
+
+        $picFilter = function($q) use ($picId) {
+            $q->where('petugas_submit_id', $picId)
+              ->orWhere('petugas_editor1_id', $picId)
+              ->orWhere('petugas_author1_id', $picId)
+              ->orWhere('petugas_editor2_id', $picId)
+              ->orWhere('petugas_editor3_id', $picId)
+              ->orWhere('petugas_author2_id', $picId)
+              ->orWhere('petugas_reviewer1_id', $picId)
+              ->orWhere('petugas_reviewer2_id', $picId)
+              ->orWhere('petugas_production_id', $picId)
+              ->orWhere('petugas_validator_id', $picId);
+        };
+
         $query = Submission::with([
-                'journalSlot.journalMaster', 
-                'marketing', 
+                'journalSlot.journalMaster',
+                'marketing',
                 'petugasSubmit',
                 'petugasEditor1',
                 'petugasAuthor1',
@@ -2016,8 +2043,9 @@ class JournalManagementController extends Controller
                 'petugasAuthor2',
                 'petugasProduction'
             ])
-            ->where('process_type', 'fasttrack');
-        
+            ->where('process_type', 'fasttrack')
+            ->where($picFilter);
+
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
@@ -2043,23 +2071,26 @@ class JournalManagementController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
-        // Sort
-        match ($request->input('sort_by', 'date_desc')) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit'),
+        // Sort — default Terlama agar pengerjaan urut dari data pertama
+        match ($request->input('sort_by', 'date_asc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
+            'date_desc'  => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+            default      => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
         };
 
         $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $pics = \App\Models\Pic::where('is_active', true)->orderBy('name')->get();
 
-        // Statistics - semua fasttrack
-        $totalFasttrack = Submission::where('process_type', 'fasttrack')->count();
+        // Statistics - hanya fasttrack milik PIC ini
+        $totalFasttrack = Submission::where('process_type', 'fasttrack')
+            ->where($picFilter)
+            ->count();
         $thisMonthFasttrack = Submission::where('process_type', 'fasttrack')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
+            ->where($picFilter)
             ->count();
         
         return view('pic.fasttrack.monitoring', compact('submissions', 'journals', 'pics', 'totalFasttrack', 'thisMonthFasttrack', 'picId'));
