@@ -259,10 +259,40 @@
 - Kolom "Breakdown" menggabungkan semua step sebagai teks: "Editor1: 15pt (3x), Reviewer1: 20pt (4x)"
 - `getLabelForStep()` digunakan untuk human-readable step labels
 
+---
+
+## 21. Fix Laporan Jurnal — Sidebar Kosong & Card Layout Aneh
+
+**Tujuan:** Halaman `/admin/reports/journal-articles` saat dibuka: (1) sidebar navigasi kosong karena view tidak mendefinisikan `@section('sidebar')`; (2) summary cards tidak rata — "Rejected" pakai `col-md-1` yang sangat sempit (~83px); (3) tidak ada `@section('page-title')` sehingga title bar menampilkan "Dashboard".
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/reports/journal-article.blade.php` | Tambah `@section('page-title')`; tambah `@section('sidebar')` dengan deteksi guard (admin/pic/marketing); ganti summary cards dari `col-md-3/3/3/2/1` → `row-cols-2 row-cols-md-5 g-3` agar semua 5 card sama lebar |
+
+### Detail
+- Sidebar kosong karena `layouts.app` menggunakan `@yield('sidebar')` tapi view ini tidak mendefinisikan section tersebut
+- `row-cols-md-5` membagi 5 card secara merata tanpa hardcode angka kolom
+- Guard detection di sidebar section: pic → pic sidebar, marketing → marketing sidebar, else → admin sidebar
+
 ## 18. 🔄 Update: up
 
 - **Commit:** `e88216a` — 13:47 oleh Gudangsoft
 - **File berubah:** 2 file
 - `log-update-2026-06-10.md`
 - `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+
+
+## 21. 🔄 Update: point
+
+- **Commit:** `2e47800` — 14:19 oleh Gudangsoft
+- **File berubah:** 8 file
+- `app/Exports/MarketingLeaderboardExport.php`
+- `app/Exports/PicActivityReportExport.php`
+- `app/Http/Controllers/Admin/MarketingPointReportController.php`
+- `app/Http/Controllers/Admin/PicController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/marketing-points/index.blade.php`
+- `resources/views/admin/pics/activity-report.blade.php`
+- `routes/web.php`
 

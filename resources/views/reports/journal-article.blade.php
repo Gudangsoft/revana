@@ -1,6 +1,17 @@
 @extends($layout ?? 'layouts.app')
 
 @section('title', 'Laporan Artikel per Jurnal')
+@section('page-title', 'Laporan Artikel per Jurnal')
+
+@section('sidebar')
+    @if(auth()->guard('pic')->check())
+        @include('pic.partials.sidebar')
+    @elseif(auth()->guard('marketing')->check())
+        @include('marketing.partials.sidebar')
+    @else
+        @include('admin.partials.sidebar')
+    @endif
+@endsection
 
 @section('content')
 <div class="container-fluid">
@@ -58,41 +69,41 @@
     </div>
 
     {{-- Summary Cards --}}
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+    <div class="row row-cols-2 row-cols-md-5 g-3 mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h3 class="fw-bold text-primary mb-0">{{ $grandTotal['total_artikel'] }}</h3>
                     <small class="text-muted">Total Artikel</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h3 class="fw-bold text-info mb-0">{{ $grandTotal['submitted'] }}</h3>
                     <small class="text-muted">Submitted</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h3 class="fw-bold text-warning mb-0">{{ $grandTotal['in_process'] }}</h3>
                     <small class="text-muted">Dalam Proses</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="card border-0 shadow-sm">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h3 class="fw-bold text-success mb-0">{{ $grandTotal['published'] }}</h3>
                     <small class="text-muted">Published</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-1">
-            <div class="card border-0 shadow-sm">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h3 class="fw-bold text-danger mb-0">{{ $grandTotal['rejected'] }}</h3>
                     <small class="text-muted">Rejected</small>
