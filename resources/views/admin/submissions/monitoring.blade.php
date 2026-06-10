@@ -17,30 +17,52 @@
     border-radius: 4px;
     scrollbar-width: thin;
     scrollbar-color: #6c757d #dee2e6;
+    cursor: grab;
+    user-select: none;
+}
+
+.monitoring-scroll-wrapper.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto !important;
+}
+
+.monitoring-scroll-wrapper.is-dragging * {
+    pointer-events: none;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar {
-    height: 12px;
+    height: 14px;
     width: 12px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #e9ecef;
     border-radius: 6px;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #0d6efd;
     border-radius: 6px;
-    border: 2px solid #f1f1f1;
+    border: 3px solid #e9ecef;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #0b5ed7;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar-corner {
     background: #dee2e6;
+}
+
+.drag-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: #6c757d;
+    background: #e9ecef;
+    padding: 3px 8px;
+    border-radius: 12px;
 }
 
 /* Inline assignment dropdown */
@@ -611,6 +633,9 @@
                                 <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
                             </div>
                             <small class="text-muted" id="scrollPositionText">0%</small>
+                            <span class="drag-hint" title="Klik dan tahan lalu geser untuk scroll">
+                                <i class="bi bi-arrows-move"></i> Geser Tabel
+                            </span>
                         </div>
                         <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
                             <i class="bi bi-chevron-right"></i>
@@ -1470,7 +1495,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
     });
-    
+
+    // ── Drag-to-scroll (mouse) ──────────────────────────────────────
+    var isDragging = false;
+    var dragStartX = 0;
+    var scrollStartLeft = 0;
+
+    wrapper.addEventListener('mousedown', function(e) {
+        // Ignore clicks on interactive elements
+        if (e.target.closest('input,select,button,a,label')) return;
+        isDragging = true;
+        dragStartX = e.pageX - wrapper.getBoundingClientRect().left;
+        scrollStartLeft = wrapper.scrollLeft;
+        wrapper.classList.add('is-dragging');
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        var x = e.pageX - wrapper.getBoundingClientRect().left;
+        var walk = (x - dragStartX) * 1.5;
+        wrapper.scrollLeft = scrollStartLeft - walk;
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (!isDragging) return;
+        isDragging = false;
+        wrapper.classList.remove('is-dragging');
+    });
+
+    // ── Touch / swipe (mobile & tablet) ────────────────────────────
+    var touchStartX = 0;
+    var touchScrollLeft = 0;
+
+    wrapper.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].pageX;
+        touchScrollLeft = wrapper.scrollLeft;
+    }, { passive: true });
+
+    wrapper.addEventListener('touchmove', function(e) {
+        var dx = touchStartX - e.touches[0].pageX;
+        wrapper.scrollLeft = touchScrollLeft + dx;
+    }, { passive: true });
+
     // Initial state
     updateScrollPosition();
     

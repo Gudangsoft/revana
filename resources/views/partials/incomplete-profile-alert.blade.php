@@ -24,13 +24,26 @@
                 <ul class="list-group list-group-flush mb-3">
                     @foreach($missingFields as $field)
                     <li class="list-group-item d-flex align-items-center gap-2 text-danger">
-                        <i class="bi bi-x-circle-fill"></i> <strong>{{ $field }}</strong> belum diisi
+                        <i class="bi bi-x-circle-fill"></i>
+                        <div>
+                            <strong>{{ $field }}</strong> belum diisi
+                            @if($field === 'Email')
+                            <div class="small text-muted">Gunakan Gmail atau email aktif yang benar-benar Anda gunakan sehari-hari</div>
+                            @endif
+                            @if($field === 'Tanggal Lahir')
+                            <div class="small text-muted">Digunakan untuk notifikasi ulang tahun dari tim</div>
+                            @endif
+                        </div>
                     </li>
                     @endforeach
                 </ul>
-                <p class="text-muted small text-center mb-0">
-                    Lengkapi data profil agar sistem dapat mengirimkan notifikasi dan informasi penting kepada Anda.
-                </p>
+                <div class="alert alert-light border-start border-warning border-3 py-2 px-3 mb-0 text-start">
+                    <p class="small mb-1"><i class="bi bi-info-circle text-warning me-1"></i><strong>Catatan penting:</strong></p>
+                    <ul class="small mb-0 text-muted ps-3">
+                        <li>Gunakan <strong>email/Gmail yang aktif</strong> dan rutin Anda cek</li>
+                        <li>Notifikasi tugas dan pengumuman dikirim ke email tersebut</li>
+                    </ul>
+                </div>
             </div>
             <div class="modal-footer justify-content-center gap-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"

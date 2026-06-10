@@ -728,3 +728,23 @@
 | `resources/views/pic/author/dashboard.blade.php` | Tambah `@include('partials.incomplete-profile-alert', ['profileUser' => auth()->guard('pic')->user(), 'profileRoute' => route('pic.profile.edit')])` |
 | `resources/views/marketing/dashboard.blade.php` | Tambah `@include('partials.incomplete-profile-alert', ['profileUser' => $marketing, 'profileRoute' => route('marketing.profile.edit')])` |
 
+
+## 58. 🔄 Update: ultah popup
+
+- **Commit:** `d382e57` — 21:37 oleh Gudangsoft
+- **File berubah:** 4 file
+- `log-update-2026-06-10.md`
+- `resources/views/marketing/dashboard.blade.php`
+- `resources/views/partials/incomplete-profile-alert.blade.php`
+- `resources/views/pic/author/dashboard.blade.php`
+
+## 58. Drag-to-Scroll Tabel Monitoring + Update Teks Popup Profil
+
+**Tujuan:** (1) Tabel monitoring sulit digeser secara horizontal — tambah drag-to-scroll dan touch swipe. (2) Popup profil belum lengkap tidak cukup informatif — tambah penjelasan tentang menggunakan email/gmail yang aktif.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | CSS: `cursor:grab/grabbing`, `.is-dragging` class, scrollbar biru lebih tebal; HTML: badge "Geser Tabel"; JS: drag-to-scroll via mousedown/mousemove/mouseup + touch swipe via touchstart/touchmove |
+| `resources/views/partials/incomplete-profile-alert.blade.php` | Tambah sub-teks per field (Email: gunakan Gmail aktif; Tanggal Lahir: untuk notif ulang tahun); tambah kotak catatan penting dengan bullet "Gunakan email/Gmail yang aktif dan rutin dicek" |
+
