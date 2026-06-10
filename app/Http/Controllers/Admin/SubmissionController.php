@@ -1339,6 +1339,8 @@ class SubmissionController extends Controller
             'username_reviewer2',
             'password_reviewer2',
             'link_publish',
+            'catatan_reviewer1',
+            'catatan_reviewer2',
             'catatan_validator',
         ];
 

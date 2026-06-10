@@ -761,7 +761,7 @@
                                             $waMessage = "Selamat Artikel anda sudah terpublikasi:\n\n";
                                             $waMessage .= "Kode artikel: *{$s->id_artikel}*\n";
                                             $waMessage .= "Nama Penulis: *{$s->nama_penulis}*\n";
-                                            $waMessage .= "Link Publikasi: {$s->link_publikasi}\n\n";
+                                            $waMessage .= "Link Publikasi: {$s->link_publish}\n\n";
                                             $waMessage .= "Jangan lupa di referensikan ke teman2 nya.\n\n";
                                             $waMessage .= "SALAM APJI";
                                             $waUrl = "https://wa.me/{$waNumber}?text=" . urlencode($waMessage);
@@ -830,8 +830,17 @@
                                                onchange="quickUpdateCredential(this)">
                                     </div>
                                 </td>
-                                <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="editor1_valid"
+                                            data-valid="{{ $s->editor1_valid ? '1' : '0' }}"
+                                            title="Toggle Editor1 Valid">
+                                        {!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Author 1 -->
                                 <td>
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_author1_id ? 'has-value' : '' }}" 
@@ -846,8 +855,17 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="author1_valid"
+                                            data-valid="{{ $s->author1_valid ? '1' : '0' }}"
+                                            title="Toggle Author1 Valid">
+                                        {!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Editor 2 -->
                                 <td>
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_editor2_id ? 'has-value' : '' }}" 
@@ -862,8 +880,17 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="editor2_valid"
+                                            data-valid="{{ $s->editor2_valid ? '1' : '0' }}"
+                                            title="Toggle Editor2 Valid">
+                                        {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Reviewer 1 -->
                                 <td>
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}" 
@@ -895,8 +922,25 @@
                                                onchange="quickUpdateCredential(this)">
                                     </div>
                                 </td>
-                                <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
-                                <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td>
+                                    <input type="text" class="inline-credential-input {{ $s->catatan_reviewer1 ? 'has-value' : '' }}"
+                                           value="{{ $s->catatan_reviewer1 }}"
+                                           placeholder="catatan..."
+                                           style="min-width:80px;"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="catatan_reviewer1"
+                                           onchange="quickUpdateCredential(this)">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="reviewer1_valid"
+                                            data-valid="{{ $s->reviewer1_valid ? '1' : '0' }}"
+                                            title="Toggle Reviewer1 Valid">
+                                        {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Reviewer 2 -->
                                 <td>
@@ -929,8 +973,25 @@
                                                onchange="quickUpdateCredential(this)">
                                     </div>
                                 </td>
-                                <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
-                                <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td>
+                                    <input type="text" class="inline-credential-input {{ $s->catatan_reviewer2 ? 'has-value' : '' }}"
+                                           value="{{ $s->catatan_reviewer2 }}"
+                                           placeholder="catatan..."
+                                           style="min-width:80px;"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="catatan_reviewer2"
+                                           onchange="quickUpdateCredential(this)">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="reviewer2_valid"
+                                            data-valid="{{ $s->reviewer2_valid ? '1' : '0' }}"
+                                            title="Toggle Reviewer2 Valid">
+                                        {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                                 
                                 <!-- Editor 3 -->
                                 <td>
@@ -946,8 +1007,17 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="editor3_valid"
+                                            data-valid="{{ $s->editor3_valid ? '1' : '0' }}"
+                                            title="Toggle Editor3 Valid">
+                                        {!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Author 2 -->
                                 <td>
                                                                         <select class="inline-assign-select lazy-select {{ $s->petugas_author2_id ? 'has-value' : '' }}" 
@@ -962,8 +1032,17 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="author2_valid"
+                                            data-valid="{{ $s->author2_valid ? '1' : '0' }}"
+                                            title="Toggle Author2 Valid">
+                                        {!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Production -->
                                 <td>
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_production_id ? 'has-value' : '' }}"
@@ -995,13 +1074,20 @@
                                            onchange="quickUpdateCredential(this)">
                                 </td>
                                 <td title="Link Publish">
-                                    <input type="text" class="inline-credential-input {{ $s->link_publish ? 'has-value' : '' }}"
-                                           value="{{ $s->link_publish }}"
-                                           placeholder="https://..."
-                                           style="min-width:90px;"
-                                           data-submission="{{ $s->id }}"
-                                           data-field="link_publish"
-                                           onchange="quickUpdateCredential(this)">
+                                    <div style="display:flex;align-items:center;gap:2px;">
+                                        <input type="text" class="inline-credential-input {{ $s->link_publish ? 'has-value' : '' }}"
+                                               value="{{ $s->link_publish }}"
+                                               placeholder="https://..."
+                                               style="min-width:90px;"
+                                               data-submission="{{ $s->id }}"
+                                               data-field="link_publish"
+                                               onchange="quickUpdateCredential(this)">
+                                        <button type="button" class="btn btn-link p-0 border-0" style="font-size:0.8rem;line-height:1;"
+                                                onclick="var u=this.previousElementSibling.value.trim();if(u)window.open(u,'_blank');"
+                                                title="Buka Link">
+                                            <i class="bi bi-box-arrow-up-right text-info"></i>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-link p-0 border-0"

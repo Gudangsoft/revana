@@ -145,3 +145,29 @@
 - Toggle button update icon in-place tanpa reload
 - Input credential Production menggunakan pola sama dengan editor1/reviewer credential (class `inline-credential-input`, event `onchange`)
 
+
+## 12. Fix Bug & Peningkatan UX Monitoring — Link WA, Toggle Valid Semua Tahap, Catatan Reviewer Editable
+
+**Tujuan:** 4 perbaikan pada `/admin/submissions/monitoring`: (1) bug link_publikasi di pesan WA selalu kosong, (2) input link_publish tidak bisa diklik untuk verifikasi URL, (3) catatan_reviewer1/2 read-only padahal admin perlu edit, (4) semua kolom Valid tahap editor/author/reviewer masih icon statis.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | Fix typo `link_publikasi` → `link_publish` di template WA; tambah tombol buka URL di samping input link_publish; catatan_reviewer1 & catatan_reviewer2 → editable input; semua kolom Valid (editor1/author1/editor2/editor3/author2/reviewer1/reviewer2) → toggle button |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah `catatan_reviewer1` dan `catatan_reviewer2` ke whitelist `quickUpdateCredential` |
+
+### Detail
+- Tombol buka link: `onclick="var u=this.previousElementSibling.value.trim();if(u)window.open(u,'_blank')"` — baca nilai input terkini tanpa reload
+- Semua 9 kolom Valid sekarang bisa di-toggle (backend `toggleValidField` sudah support semua dari awal)
+- Catatan reviewer menggunakan `onchange="quickUpdateCredential(this)"` yang sama dengan credential lainnya
+
+---
+
+## 13. 🔄 Update: admin
+
+- **Commit:** `8e22f8e` — 13:24 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+
