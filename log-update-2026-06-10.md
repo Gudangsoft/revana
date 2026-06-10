@@ -261,6 +261,25 @@
 
 ---
 
+## 22. Redesign Pengaturan Point — Formula Live, Label Editable, Sinkron PIC & Marketing
+
+**Tujuan:** Halaman `/admin/task-point-settings` tampil sebagai tabel statis tanpa penjelasan formula, label tidak bisa diedit, dan form "Tambah Task Baru" memungkinkan input task_key sembarangan yang tidak terhubung ke kode. Admin perlu halaman yang benar-benar menunjukkan formula aktif secara live dan terbukti sinkron dengan sistem pemberian point.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/task-point-settings/index.blade.php` | Tulis ulang penuh: formula preview live (PIC workflow chain + Marketing), tabel PIC diurutkan sesuai alur (submit→...→production), label bisa diedit inline, badge inactive-row, alert step yang belum dikonfigurasi, footer dengan link sync ke laporan PIC & Marketing; JS `updateFormula()` update display otomatis saat nilai diubah |
+| `app/Http/Controllers/Admin/TaskPointSettingController.php` | Tambah konstanta `PIC_STEP_ORDER` dan `MARKETING_STEPS`; `index()` pass `$picOrder`, `$picByKey`, `$missingPic`, `$missingMarketing`; `update()` tambah support simpan `task_label`; tambah `initializeDefaults()` — buat rows yang belum ada dengan nilai default 1 pt |
+| `routes/web.php` | Tambah `POST /task-point-settings/init-defaults` → `initializeDefaults` |
+
+### Bagaimana Sistem Sinkronisasi Bekerja
+- Nilai dari `TaskPointSetting` DB langsung dibaca saat `PicPointHistory::awardPoints()` dan `MarketingPointHistory::awardPoints()` dipanggil
+- Tidak ada hardcode — semua nilai point diambil dari DB via `TaskPointSetting::getPicPoints($step)` / `getMarketingPoints()`
+- Jika step belum ada di DB → fallback 1 pt (ditampilkan sebagai warning di halaman)
+- Perubahan berlaku untuk transaksi baru; data lama perlu di-sync via tombol Sync di laporan masing-masing
+
+---
+
 ## 21. Fix Laporan Jurnal — Sidebar Kosong & Card Layout Aneh
 
 **Tujuan:** Halaman `/admin/reports/journal-articles` saat dibuka: (1) sidebar navigasi kosong karena view tidak mendefinisikan `@section('sidebar')`; (2) summary cards tidak rata — "Rejected" pakai `col-md-1` yang sangat sempit (~83px); (3) tidak ada `@section('page-title')` sehingga title bar menampilkan "Dashboard".
@@ -295,4 +314,12 @@
 - `resources/views/admin/marketing-points/index.blade.php`
 - `resources/views/admin/pics/activity-report.blade.php`
 - `routes/web.php`
+
+
+## 23. 🔄 Update: up
+
+- **Commit:** `20d7c32` — 14:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-10.md`
+- `resources/views/reports/journal-article.blade.php`
 

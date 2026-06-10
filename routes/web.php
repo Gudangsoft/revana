@@ -378,6 +378,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'index'])->name('task-point-settings.index');
         Route::put('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'update'])->name('task-point-settings.update');
         Route::post('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'store'])->name('task-point-settings.store');
+        Route::post('/task-point-settings/init-defaults', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'initializeDefaults'])->name('task-point-settings.init-defaults');
         Route::delete('/task-point-settings/{id}', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'destroy'])->name('task-point-settings.destroy');
         
         // Email Settings
