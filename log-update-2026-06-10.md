@@ -992,3 +992,19 @@
 | `routes/web.php` | Tambah 2 route: `auth.google.redirect` dan `auth.google.callback` |
 | `resources/views/pic/auth/login.blade.php` | Tambah tombol "Login dengan Google" + divider |
 | `resources/views/marketing/login.blade.php` | Tambah tombol "Login dengan Google" + divider |
+
+## 79. 🔄 Update: google login
+
+- **Commit:** `fef72d0` — 23:18 oleh Gudangsoft
+- **File berubah:** 11 file
+- `app/Http/Controllers/Auth/GoogleAuthController.php`
+- `app/Models/Marketing.php`
+- `app/Models/Pic.php`
+- `composer.json`
+- `composer.lock`
+- `config/services.php`
+- `database/migrations/2026_06_10_231103_add_google_oauth_to_pics_and_marketings.php`
+- `log-update-2026-06-10.md`
+- `resources/views/marketing/login.blade.php`
+- `resources/views/pic/auth/login.blade.php`
+

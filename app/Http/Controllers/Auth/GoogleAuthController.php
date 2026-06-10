@@ -20,9 +20,21 @@ class GoogleAuthController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'Portal tidak valid.']);
         }
 
+        $loginRoute = $portal === 'pic' ? 'pic.login' : 'marketing.login';
+
+        if (! config('services.google.client_id') || ! config('services.google.client_secret')) {
+            return redirect()->route($loginRoute)
+                ->withErrors(['email' => 'Fitur Login Google belum dikonfigurasi. Silakan hubungi administrator.']);
+        }
+
         session(['google_portal' => $portal]);
 
-        return Socialite::driver('google')->redirect();
+        try {
+            return Socialite::driver('google')->redirect();
+        } catch (\Exception $e) {
+            return redirect()->route($loginRoute)
+                ->withErrors(['email' => 'Gagal menghubungi Google. Silakan coba lagi.']);
+        }
     }
 
     /**
