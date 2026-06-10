@@ -198,6 +198,13 @@ else
     echo '⚠ WARNING: No .env backup found! Check /var/www/revana/.env manually!'
 fi
 
+echo '→ Fix session & env untuk production...'
+sed -i 's/SESSION_DRIVER=file/SESSION_DRIVER=cookie/' `$APP_DIR/.env
+sed -i 's/APP_ENV=local/APP_ENV=production/' `$APP_DIR/.env
+sed -i 's/APP_DEBUG=true/APP_DEBUG=false/' `$APP_DIR/.env
+grep -E "APP_ENV|APP_DEBUG|SESSION_DRIVER" `$APP_DIR/.env
+echo '✓ Production env settings applied'
+
 echo '→ Install dependencies...'
 composer install --optimize-autoloader --no-dev --no-interaction
 

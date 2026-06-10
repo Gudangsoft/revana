@@ -1027,6 +1027,23 @@
 | `app/Http/Controllers/Auth/LoginController.php` | Tambah kondisi `if (!force_login)` sebelum cek captcha |
 | `resources/views/auth/login.blade.php` | Force login form: hapus input captcha manual, auto-isi via hidden field + focus otomatis ke password |
 
+## 84. Fix: Production 419 Session Error
+
+**Tujuan:** Login production `portal.apji.org` selalu 419 karena session tidak bisa ditulis ke filesystem.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `deploy-from-local.ps1` | Tambah step otomatis `SESSION_DRIVER=cookie`, `APP_ENV=production`, `APP_DEBUG=false` setelah restore `.env` |
+
+### Root Cause
+`SESSION_DRIVER=file` gagal di production karena permission issue pada `storage/framework/sessions/`. Session tidak bisa ditulis → CSRF token tidak tersimpan → setiap form submit → 419.
+
+### Solusi
+Ganti ke `SESSION_DRIVER=cookie`: session disimpan di browser cookie terenkripsi (APP_KEY), tidak butuh akses filesystem.
+
+---
+
 ## 83. Revert: Hapus Fitur Login Google OAuth
 
 **Tujuan:** Fitur login Google belum dibutuhkan, dikembalikan ke login normal.
