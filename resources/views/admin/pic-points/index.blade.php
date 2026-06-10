@@ -130,6 +130,9 @@
                     <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
                         <i class="bi bi-download"></i> Export Excel
                     </a>
+                    <button type="button" class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#recalculateAllPointsModal">
+                        <i class="bi bi-calculator"></i> Hitung Ulang Point
+                    </button>
                     <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#resetAllPointsModal">
                         <i class="bi bi-trash3"></i> Reset Semua Point
                     </button>
@@ -324,12 +327,77 @@
     </div>
 </div>
 
+{{-- Modal Hitung Ulang Semua Point --}}
+<div class="modal fade" id="recalculateAllPointsModal" tabindex="-1" aria-labelledby="recalculateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-info">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="recalculateModalLabel">
+                    <i class="bi bi-calculator me-2"></i>Hitung Ulang Semua Point PIC
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.pic-points.recalculate-all') }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>ℹ Apa yang terjadi?</strong><br>
+                        Proses ini akan memperbarui nilai <code>points_earned</code> di setiap riwayat point sesuai dengan konfigurasi point terkini (dari Pengaturan Point Tugas), lalu menghitung ulang total point semua PIC.
+                        <ul class="mb-0 mt-1">
+                            <li>Riwayat <em>adjustment</em> manual <strong>tidak ikut diubah</strong></li>
+                            <li>Riwayat lama yang sudah ada akan disesuaikan ke nilai point baru</li>
+                            <li>Berguna setelah Anda mengubah konfigurasi point per tugas</li>
+                        </ul>
+                    </div>
+                    <div class="row mb-3 text-center">
+                        <div class="col-4">
+                            <div class="border rounded p-2">
+                                <div class="fw-bold text-success">{{ number_format($totalPoints) }}</div>
+                                <small class="text-muted">Total Point Sekarang</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-2">
+                                <div class="fw-bold text-primary">{{ number_format($totalTasks) }}</div>
+                                <small class="text-muted">Riwayat Point</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-2">
+                                <div class="fw-bold text-info">{{ number_format($totalPics) }}</div>
+                                <small class="text-muted">PIC Aktif</small>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-1">Ketik <strong>HITUNG ULANG</strong> (huruf kapital) untuk konfirmasi:</p>
+                    <input type="text" name="konfirmasi"
+                           class="form-control @error('konfirmasi') is-invalid @enderror"
+                           placeholder="Ketik HITUNG ULANG di sini..." autocomplete="off" required>
+                    @error('konfirmasi')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info text-white">
+                        <i class="bi bi-calculator me-1"></i>Ya, Hitung Ulang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
 <script>
-    // Jika ada error konfirmasi, buka modal otomatis
+    // Jika ada error konfirmasi, buka modal yang sesuai
     @if($errors->has('konfirmasi'))
     document.addEventListener('DOMContentLoaded', function() {
+        @if(old('_token') && \Illuminate\Support\Str::contains(url()->previous(), 'recalculate'))
+        new bootstrap.Modal(document.getElementById('recalculateAllPointsModal')).show();
+        @else
         new bootstrap.Modal(document.getElementById('resetAllPointsModal')).show();
+        @endif
     });
     @endif
 

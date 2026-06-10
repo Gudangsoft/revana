@@ -325,6 +325,53 @@ class PicPointReportController extends Controller
     }
 
     /**
+     * Recalculate all point histories using current TaskPointSetting values
+     */
+    public function recalculateAllPoints(Request $request)
+    {
+        $request->validate([
+            'konfirmasi' => 'required|in:HITUNG ULANG',
+        ], [
+            'konfirmasi.required' => 'Ketik HITUNG ULANG untuk konfirmasi.',
+            'konfirmasi.in'       => 'Konfirmasi tidak valid. Ketik HITUNG ULANG (huruf kapital).',
+        ]);
+
+        $updated  = 0;
+        $skipped  = 0;
+        $pointsBefore = Pic::sum('total_points');
+
+        \DB::transaction(function () use (&$updated, &$skipped) {
+            // Update points_earned for every non-adjustment history record
+            $histories = PicPointHistory::whereNotIn('step', ['adjustment'])->get();
+
+            foreach ($histories as $history) {
+                $newPoints = PicPointHistory::getPointsForStep($history->step);
+                if ($newPoints > 0 && (float) $newPoints !== (float) $history->points_earned) {
+                    $history->update(['points_earned' => $newPoints]);
+                    $updated++;
+                } else {
+                    $skipped++;
+                }
+            }
+
+            // Recalculate total_points for every PIC from the updated history SUM
+            foreach (Pic::all() as $pic) {
+                $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
+                $pic->update(['total_points' => max(0, $actual)]);
+            }
+        });
+
+        \Illuminate\Support\Facades\Cache::forget('rankings.topPics');
+
+        $pointsAfter = Pic::sum('total_points');
+        $diff = $pointsAfter - $pointsBefore;
+        $diffStr = $diff >= 0 ? "+{$diff}" : "{$diff}";
+
+        return redirect()->route('admin.pic-points.index')
+            ->with('success', "Hitung ulang selesai! {$updated} riwayat diperbarui nilai pointnya, {$skipped} tidak berubah. Total point: " . number_format($pointsBefore) . " → " . number_format($pointsAfter) . " ({$diffStr}).");
+    }
+
+    /**
      * Hard reset: hapus semua riwayat point dan set total_points = 0
      */
     public function resetAllPoints(Request $request)
