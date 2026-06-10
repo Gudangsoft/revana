@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -21,6 +21,8 @@ class Pic extends Authenticatable
         'tanggal_lahir',
         'is_active',
         'total_points',
+        'google_id',
+        'avatar',
     ];
 
     protected $hidden = [
@@ -91,7 +93,7 @@ class Pic extends Authenticatable
      *  - the submission is currently AT that step (status = X_PROCESS)
      *  - the step is not yet validated (X_valid is null or false)
      *
-     * petugas_submit_id is excluded — submission is a one-time action, not a validatable task.
+     * petugas_submit_id is excluded â€” submission is a one-time action, not a validatable task.
      */
     public function getPendingTasksCountAttribute()
     {
@@ -135,3 +137,4 @@ class Pic extends Authenticatable
         return in_array($this->role, ['REVIEWER 1', 'REVIEWER 2']);
     }
 }
+

@@ -965,3 +965,30 @@
 - JAFA: 0 records  
 - Fasttrack: 3 records (`process_type = fasttrack`)
 - Total: 48 = 45+0+0+3, tidak ada overlap ✓
+
+## 77. 🔄 Update: chekall
+
+- **Commit:** `95aef76` — 23:01 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-10.md`
+
+
+## 77. Fitur Login Google OAuth (Whitelist PIC & Marketing)
+
+**Tujuan:** Memungkinkan PIC dan Marketing login menggunakan akun Google, tanpa auto-registrasi — hanya email yang sudah terdaftar di tabel `pics` atau `marketings` yang bisa masuk.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `composer.json` | Install `laravel/socialite ^5.27` |
+| `config/services.php` | **CREATE** — konfigurasi Google OAuth (client_id, client_secret, redirect) |
+| `.env` | Tambah `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` |
+| `database/migrations/2026_06_10_231103_add_google_oauth_to_pics_and_marketings.php` | **CREATE** — tambah kolom `google_id` (unique nullable) dan `avatar` ke tabel `pics` dan `marketings` |
+| `app/Models/Pic.php` | Tambah `google_id`, `avatar` ke `$fillable` |
+| `app/Models/Marketing.php` | Tambah `google_id`, `avatar` ke `$fillable` |
+| `app/Http/Controllers/Auth/GoogleAuthController.php` | **CREATE** — controller OAuth: `redirect($portal)` dan `callback()` |
+| `routes/web.php` | Tambah 2 route: `auth.google.redirect` dan `auth.google.callback` |
+| `resources/views/pic/auth/login.blade.php` | Tambah tombol "Login dengan Google" + divider |
+| `resources/views/marketing/login.blade.php` | Tambah tombol "Login dengan Google" + divider |

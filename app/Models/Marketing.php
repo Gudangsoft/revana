@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -19,6 +19,8 @@ class Marketing extends Authenticatable
         'password',
         'is_active',
         'total_points',
+        'google_id',
+        'avatar',
     ];
 
     protected $hidden = [
@@ -80,3 +82,4 @@ class Marketing extends Authenticatable
         return $actualPoints;
     }
 }
+
