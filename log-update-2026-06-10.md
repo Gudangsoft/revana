@@ -415,3 +415,30 @@
 | `app/Http/Controllers/Pic/AuthorController.php` | (1) Hapus query `$journals` yang dimuat tapi tidak digunakan di view (buang 4 query sia-sia); (2) Ganti streak loop N+1 (hingga 365 query) dengan satu query SELECT DATE GROUP BY + lookup O(1) di PHP; (3) Fix streak reset pagi: kalau hari ini belum diisi, mulai streak dari kemarin sehingga user tidak kehilangan streak hanya karena belum sempat isi |
 | `resources/views/pic/author/dashboard.blade.php` | (4) Fix title & teks "PIC Author" yang hardcoded → pakai `auth()->guard('pic')->user()->role` dinamis; (5) Fix grid menu 7 item dari `col-md-4` (3+3+1 tidak rata) ke `col-6 col-md-3` (4+3 dua baris rapi, sekaligus lebih compact di mobile) |
 
+
+## 34. 🔄 Update: up dashbord
+
+- **Commit:** `7adb676` — 15:26 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Pic/AuthorController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/pic/author/dashboard.blade.php`
+- `resources/views/pic/layouts/app.blade.php`
+- `resources/views/pic/partials/sidebar.blade.php`
+
+---
+
+## 33. Tambah Tombol "Lihat Fasttrack" di Monitoring BKD, JAFA, dan Submit
+
+**Tujuan:** Halaman Monitoring Proses (Submit, BKD, JAFA) belum memiliki akses cepat ke halaman Monitoring Fasttrack. Sebelumnya hanya ada info-alert teks di monitoring Submit saja, dan disembunyikan untuk BKD/JAFA.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | Card-header: tambah tombol "Lihat Fasttrack" (btn-warning) di samping tombol Kembali; tombol hanya muncul jika fitur fasttrack aktif (`@feature`); hapus info-alert lama yang redundan |
+
+### Detail
+- Tombol `⚡ Lihat Fasttrack` mengarah ke `admin.fasttrack-management.monitoring.index`
+- Dibungkus `@feature('fasttrack') ... @endfeature` agar tidak tampil jika fitur dinonaktifkan
+- Berlaku untuk semua program: Submit (tanpa program), BKD (`?program=bkd`), dan JAFA (`?program=jafa`) — karena ketiganya pakai view yang sama
+

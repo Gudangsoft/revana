@@ -483,14 +483,21 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>
-                    <i class="bi bi-bar-chart"></i> Monitoring Proses Submit (Filter Tanggal)
+                    <i class="bi bi-bar-chart"></i> Monitoring Proses Submit
                     @if(isset($program) && $program)
                         <span class="badge bg-{{ $program == 'bkd' ? 'info' : 'success' }} ms-2">{{ strtoupper($program) }}</span>
                     @endif
                 </span>
-                <a href="{{ route('admin.submissions.index', array_filter(['program' => $program ?? null])) }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Kembali
-                </a>
+                <div class="d-flex gap-2">
+                    @feature('fasttrack')
+                    <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="btn btn-warning btn-sm fw-semibold">
+                        <i class="bi bi-lightning-charge-fill"></i> Lihat Fasttrack
+                    </a>
+                    @endfeature
+                    <a href="{{ route('admin.submissions.index', array_filter(['program' => $program ?? null])) }}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Kembali
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- Filter -->
@@ -626,13 +633,6 @@
                         <button type="button" class="quick-nav-btn" data-target="validator" style="background:#6f42c1;color:white;border-color:#6f42c1;">Validasi</button>
                     </div>
                 </div>
-
-                <!-- Info Alert -->
-                @if(!in_array(request('program'), ['bkd', 'jafa']))
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> <strong>Submissions Monitoring:</strong> Halaman ini menampilkan data submissions dengan workflow normal. Untuk monitoring Fasttrack, silakan kunjungi <a href="{{ route('admin.fasttrack-management.monitoring.index') }}" class="text-decoration-none"><strong>Monitoring Fasttrack</strong></a>.
-                </div>
-                @endif
 
                 <!-- Data Table with Full Process Columns -->
                 <div class="monitoring-scroll-wrapper" id="monitoringScrollWrapper">
