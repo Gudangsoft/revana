@@ -341,3 +341,24 @@
 - `log-update-2026-06-10.md`
 - `resources/views/admin/task-point-settings/index.blade.php`
 
+
+## 27. 🔄 Update: up
+
+- **Commit:** `be61f75` — 14:48 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/task-point-settings/index.blade.php`
+
+## 28. Export Excel Laporan Harian Rekap + Fix Styling Laporan Kinerja
+
+**Tujuan:** (1) Tambah fitur Export Excel di halaman `/admin/laporan-harian/rekap` — sebelumnya hanya ada Export CSV dari halaman detail. (2) Fix duplicate PHP array key `font` di `LaporanKinerjaPicSheet::styles()` yang menyebabkan salah satu style definition diam-diam diabaikan oleh PHP.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Exports/LaporanHarianRekapExport.php` | **BARU** — Export rekap harian per PIC: kolom No, Nama PIC, Hari Aktif, Total Kegiatan, Rata-rata Capaian %, Tervalidasi, % Validasi + baris TOTAL di footer |
+| `app/Http/Controllers/Admin/LaporanHarianController.php` | Tambah `use` imports + method `exportRekap(Request $request)` |
+| `routes/web.php` | Tambah route `GET /laporan-harian/rekap/export` (sebelum route dinamis `{picId}/{tanggal}`) |
+| `resources/views/admin/laporan-harian/rekap.blade.php` | Tambah tombol Export Excel (hijau) di samping tombol Export CSV (sekarang abu-abu outline) |
+| `app/Exports/LaporanKinerjaPicSheet.php` | Fix duplicate `font` key di array styles row 1 — PHP silently drops first key, sekarang dibersihkan jadi satu definisi |
+

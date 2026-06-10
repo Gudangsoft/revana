@@ -78,10 +78,9 @@ class LaporanKinerjaPicSheet implements FromArray, WithHeadings, WithTitle, With
 
         return [
             1 => [
-                'font' => ['bold' => true, 'size' => 13],
+                'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 13],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1d4ed8']],
-                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 13],
+                'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1d4ed8']],
             ],
             2 => [
                 'font' => ['bold' => true],

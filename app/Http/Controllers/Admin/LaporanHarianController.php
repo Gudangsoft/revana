@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\LaporanHarianRekapExport;
 use App\Http\Controllers\Controller;
 use App\Models\LaporanHarian;
 use App\Models\LaporanHarianLog;
 use App\Models\Pic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanHarianController extends Controller
 {
@@ -155,6 +157,37 @@ class LaporanHarianController extends Controller
         $chartData = $chartQuery->get();
 
         return view('admin.laporan-harian.rekap', compact('rekap', 'pics', 'bulan', 'picId', 'chartData'));
+    }
+
+    public function exportRekap(Request $request)
+    {
+        $bulan = $request->input('bulan', now()->format('Y-m'));
+        $picId = $request->input('pic_id');
+
+        [$year, $month] = explode('-', $bulan);
+
+        $query = LaporanHarian::with('pic')
+            ->whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $month)
+            ->select(
+                'pic_id',
+                DB::raw('COUNT(*) as total_kegiatan'),
+                DB::raw('ROUND(AVG(capaian_hasil)) as avg_capaian'),
+                DB::raw('SUM(CASE WHEN validated_at IS NOT NULL THEN 1 ELSE 0 END) as total_validated'),
+                DB::raw('COUNT(DISTINCT tanggal) as total_hari')
+            )
+            ->groupBy('pic_id')
+            ->orderByDesc('avg_capaian');
+
+        if ($picId) {
+            $query->where('pic_id', $picId);
+        }
+
+        $rekap      = $query->get();
+        $bulanLabel = \Carbon\Carbon::parse($bulan)->locale('id')->translatedFormat('F Y');
+        $filename   = 'rekap-kinerja-harian-' . $bulan . '.xlsx';
+
+        return Excel::download(new LaporanHarianRekapExport($rekap, $bulanLabel), $filename);
     }
 
     public function show($picId, $tanggal)

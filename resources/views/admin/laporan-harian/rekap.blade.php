@@ -33,13 +33,17 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 d-flex gap-2">
+                <div class="col-md-3 d-flex gap-2 flex-wrap">
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="bi bi-search me-1"></i>Tampilkan
                     </button>
+                    <a href="{{ route('admin.laporan-harian.rekap.export') }}?{{ http_build_query(request()->only(['bulan','pic_id'])) }}"
+                       class="btn btn-success btn-sm">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                    </a>
                     <a href="{{ route('admin.laporan-harian.export') }}?bulan={{ $bulan }}&pic_id={{ $picId }}&dari_tanggal={{ \Carbon\Carbon::parse($bulan)->startOfMonth()->toDateString() }}&sampai_tanggal={{ \Carbon\Carbon::parse($bulan)->endOfMonth()->toDateString() }}"
-                       class="btn btn-outline-success btn-sm">
-                        <i class="bi bi-download me-1"></i>Export CSV
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-filetype-csv me-1"></i>Export CSV
                     </a>
                 </div>
             </form>
