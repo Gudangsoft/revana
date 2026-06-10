@@ -122,9 +122,9 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-bar-chart"></i> Laporan Aktivitas Per PIC</span>
         <div>
-            <button type="button" class="btn btn-sm btn-success" onclick="exportToExcel()">
+            <a href="{{ route('admin.pics.activity-report.export') }}?{{ http_build_query(request()->all()) }}" class="btn btn-sm btn-success">
                 <i class="bi bi-file-excel"></i> Export Excel
-            </button>
+            </a>
         </div>
     </div>
     <div class="card-body">
@@ -200,9 +200,4 @@
     </div>
 </div>
 
-<script>
-function exportToExcel() {
-    alert('Fitur export akan segera tersedia');
-}
-</script>
 @endsection

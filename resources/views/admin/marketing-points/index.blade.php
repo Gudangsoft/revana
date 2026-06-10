@@ -94,6 +94,9 @@
                             <i class="bi bi-arrow-repeat"></i> Sinkronkan Point
                         </button>
                     </form>
+                    <a href="{{ route('admin.marketing-points.export-leaderboard') }}{{ request('search') ? '?search=' . urlencode(request('search')) : '' }}" class="btn btn-sm btn-info">
+                        <i class="bi bi-file-excel"></i> Export Excel
+                    </a>
                     @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'Phone', 'Total Submission', 'Total Point', 'Aksi'], 'columnOffset' => 1])
                 <form method="GET" class="d-flex gap-2">
                     <input type="text" name="search" class="form-control form-control-sm" 
@@ -149,13 +152,19 @@
                                     <span class="badge bg-info">{{ $marketing->submissions_count ?? $marketing->submissions->count() }}</span>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-success fs-6">{{ $marketing->submissions_count ?? $marketing->submissions->count() }}</span>
+                                    <span class="badge bg-success fs-6">{{ $marketing->total_points ?? $marketing->submissions_count ?? 0 }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.marketing-points.show', $marketing) }}" 
-                                       class="btn btn-sm btn-outline-primary" title="Detail">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.marketing-points.show', $marketing) }}"
+                                           class="btn btn-sm btn-outline-primary" title="Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Sesuaikan Point"
+                                            onclick="openAdjustModal({{ $marketing->id }}, '{{ addslashes($marketing->name) }}')">
+                                            <i class="bi bi-sliders"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -176,11 +185,46 @@
 </div>
 @endsection
 
+{{-- Adjust Point Modal --}}
+<div class="modal fade" id="adjustModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-sliders"></i> Sesuaikan Point — <span id="adjustModalName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="adjustForm" method="POST" action="">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Penyesuaian Point</label>
+                        <input type="number" name="points" class="form-control" placeholder="Positif = tambah, negatif = kurangi" required>
+                        <div class="form-text">Contoh: <code>5</code> untuk tambah 5 point, <code>-3</code> untuk kurangi 3 point</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Alasan</label>
+                        <input type="text" name="reason" class="form-control" maxlength="255" placeholder="Misal: bonus kinerja bulan ini" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="bi bi-check-circle"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
 <script>
-    // Auto refresh every 30 seconds
-    setTimeout(function() {
-        location.reload();
-    }, 30000);
+    setTimeout(function() { location.reload(); }, 30000);
+
+    function openAdjustModal(id, name) {
+        document.getElementById('adjustModalName').textContent = name;
+        document.getElementById('adjustForm').action = '{{ url("/admin/marketing-points") }}/' + id + '/adjust';
+        new bootstrap.Modal(document.getElementById('adjustModal')).show();
+    }
 </script>
 @endsection

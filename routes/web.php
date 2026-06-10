@@ -307,6 +307,7 @@ Route::middleware('auth')->group(function () {
         
         // Marketing Point Report
         Route::get('/marketing-points', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'index'])->name('marketing-points.index');
+        Route::get('/marketing-points/export-leaderboard', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'exportLeaderboard'])->name('marketing-points.export-leaderboard');
         Route::get('/marketing-points/{marketing}', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'show'])->name('marketing-points.show');
         Route::post('/marketing-points/{marketing}/adjust', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'adjustPoints'])->name('marketing-points.adjust');
         Route::get('/marketing-points/{marketing}/export', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'exportExcel'])->name('marketing-points.export');
@@ -318,6 +319,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics-import', [PicController::class, 'import'])->name('pics.import');
         Route::get('/pics-template', [PicController::class, 'downloadTemplate'])->name('pics.template');
         Route::get('/pics-activity-report', [PicController::class, 'activityReport'])->name('pics.activity-report');
+        Route::get('/pics-activity-report/export', [PicController::class, 'exportActivityReport'])->name('pics.activity-report.export');
         Route::get('/team-submit-report', [PicController::class, 'teamSubmitReport'])->name('team-submit-report');
         Route::get('/team-reviewer-report', [PicController::class, 'teamReviewerReport'])->name('team-reviewer-report');
         Route::get('/team-marketing-report', [PicController::class, 'teamMarketingReport'])->name('team-marketing-report');

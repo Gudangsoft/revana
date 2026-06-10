@@ -7,6 +7,7 @@ use App\Models\Pic;
 use App\Models\PicPointHistory;
 use App\Models\Submission;
 use App\Exports\PicsExport;
+use App\Exports\PicActivityReportExport;
 use App\Exports\TeamPerformanceExport;
 use App\Exports\AllTeamPerformanceExport;
 use App\Imports\PicsImport;
@@ -257,6 +258,42 @@ class PicController extends Controller
         $allPics = Pic::orderBy('name')->get();
         
         return view('admin.pics.activity-report', compact('pics', 'stats', 'allPics'));
+    }
+
+    /**
+     * Export activity report to Excel
+     */
+    public function exportActivityReport(Request $request)
+    {
+        $query = Pic::query();
+        if ($request->filled('pic_id')) {
+            $query->where('id', $request->pic_id);
+        }
+        if (!$request->filled('show_inactive')) {
+            $query->where('is_active', true);
+        }
+        $pics = $query->orderBy('total_points', 'desc')->get();
+
+        $pics->each(function($pic) use ($request) {
+            $pointQuery = PicPointHistory::where('pic_id', $pic->id);
+            if ($request->filled('tanggal_dari')) {
+                $pointQuery->whereDate('created_at', '>=', $request->tanggal_dari);
+            }
+            if ($request->filled('tanggal_sampai')) {
+                $pointQuery->whereDate('created_at', '<=', $request->tanggal_sampai);
+            }
+            $pic->filtered_points = $pointQuery->sum('points_earned');
+            $pic->filtered_tasks  = $pointQuery->count();
+            $pic->step_breakdown  = PicPointHistory::where('pic_id', $pic->id)
+                ->when($request->filled('tanggal_dari'), fn($q) => $q->whereDate('created_at', '>=', $request->tanggal_dari))
+                ->when($request->filled('tanggal_sampai'), fn($q) => $q->whereDate('created_at', '<=', $request->tanggal_sampai))
+                ->select('step', DB::raw('COUNT(*) as count'), DB::raw('SUM(points_earned) as total'))
+                ->groupBy('step')
+                ->get();
+        });
+
+        $filename = 'laporan-aktivitas-pic-' . now()->format('Y-m-d') . '.xlsx';
+        return Excel::download(new PicActivityReportExport($pics), $filename);
     }
 
     /**

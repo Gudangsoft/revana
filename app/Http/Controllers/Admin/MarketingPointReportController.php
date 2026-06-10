@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Exports\MarketingPointHistoryExport;
+use App\Exports\MarketingLeaderboardExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
@@ -141,6 +142,16 @@ class MarketingPointReportController extends Controller
             new MarketingPointHistoryExport($marketing, $tanggalDari, $tanggalSampai, $processType),
             $filename
         );
+    }
+
+    /**
+     * Export leaderboard to Excel
+     */
+    public function exportLeaderboard(Request $request)
+    {
+        $search = $request->filled('search') ? $request->search : null;
+        $filename = 'leaderboard-marketing-' . now()->format('Y-m-d') . '.xlsx';
+        return Excel::download(new MarketingLeaderboardExport($search), $filename);
     }
 
     /**

@@ -221,3 +221,48 @@
 - `log-update-2026-06-10.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
 
+
+---
+
+## 19. Fix Bug Total Point + Export Excel + Adjust Point — Marketing Leaderboard
+
+**Tujuan:** (1) Kolom "Total Point" di halaman leaderboard marketing selalu menampilkan nilai `submissions_count` bukan `total_points`. (2) Tidak ada tombol Export Excel di index. (3) Tidak ada fitur sesuaikan point langsung dari index (hanya tersedia di halaman detail).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/marketing-points/index.blade.php` | Fix line 152: `submissions_count` → `total_points ?? submissions_count ?? 0`; tambah tombol Export Excel di card-header; tambah tombol Adjust (sliders) per baris; tambah modal Adjust Point + JS `openAdjustModal()` |
+| `app/Exports/MarketingLeaderboardExport.php` | Baru — export leaderboard: Rank, Nama, Email, Phone, Total Submission, Total Point; dengan filter search |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | Tambah `exportLeaderboard(Request $request)`; tambah import `MarketingLeaderboardExport` |
+| `routes/web.php` | Tambah `GET /marketing-points/export-leaderboard` (didefinisikan sebelum `{marketing}` agar tidak clash) |
+
+### Detail
+- Total Point kini menampilkan `$marketing->total_points` (kolom DB) — bukan `submissions_count` yang merupakan jumlah relasi
+- Modal Adjust Point menggunakan satu modal bersama dengan action URL diupdate via `openAdjustModal(id, name)` JS
+- Route `export-leaderboard` sengaja ditempatkan sebelum `{marketing}` di routes/web.php agar Laravel tidak menganggapnya sebagai Marketing ID
+
+
+## 20. Implementasi Export Excel — Laporan Aktivitas PIC
+
+**Tujuan:** Tombol "Export Excel" di `/admin/pics-activity-report` hanya menampilkan `alert('Fitur export akan segera tersedia')`. Export harus bekerja dengan menghormati semua filter aktif (PIC, tanggal dari/sampai, show_inactive).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/pics/activity-report.blade.php` | Ganti `<button onclick="exportToExcel()">` dengan `<a href="{{ route('admin.pics.activity-report.export') }}?{{ http_build_query(request()->all()) }}"`; hapus JS alert placeholder |
+| `app/Exports/PicActivityReportExport.php` | Baru — export: No, Nama PIC, Email, Status, Total Point, Tugas Selesai, Breakdown Per Pekerjaan (text) |
+| `app/Http/Controllers/Admin/PicController.php` | Tambah `exportActivityReport(Request $request)` — rebuild query sama dengan `activityReport()` tapi tanpa pagination; tambah import `PicActivityReportExport` |
+| `routes/web.php` | Tambah `GET /pics-activity-report/export` → `pics.activity-report.export` |
+
+### Detail
+- Filter pic_id, tanggal_dari, tanggal_sampai, show_inactive diteruskan via query string ke export URL
+- Kolom "Breakdown" menggabungkan semua step sebagai teks: "Editor1: 15pt (3x), Reviewer1: 20pt (4x)"
+- `getLabelForStep()` digunakan untuk human-readable step labels
+
+## 18. 🔄 Update: up
+
+- **Commit:** `e88216a` — 13:47 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+
