@@ -282,7 +282,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
 
-                    <input type="hidden" name="program_type" value="{{ $submission->program_type }}">
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label">Program</label>
+                            <select class="form-select" name="program_type">
+                                <option value=""      {{ !$submission->program_type ? 'selected' : '' }}>-- Normal (SUB) --</option>
+                                <option value="bkd"  {{ $submission->program_type == 'bkd'  ? 'selected' : '' }}>BKD</option>
+                                <option value="jafa" {{ $submission->program_type == 'jafa' ? 'selected' : '' }}>JAF (JAFA)</option>
+                            </select>
+                            <div class="form-text text-warning"><i class="bi bi-info-circle"></i> Mengubah program akan menyesuaikan prefix Kode Submit (SUB→BKD/JAF)</div>
+                        </div>
+                    </div>
 
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-file-text"></i> Data Artikel</h6>

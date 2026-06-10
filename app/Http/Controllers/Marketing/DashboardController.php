@@ -345,7 +345,7 @@ class DashboardController extends Controller
             $programType = $request->input('program_type');
             $prefix = match($programType) {
                 'bkd'  => 'BKD',
-                'jafa' => 'JAFA',
+                'jafa' => 'JAF',
                 default => 'SUB',
             };
 

@@ -338,6 +338,27 @@ class SubmissionController extends Controller
             $newSlot->increment('slot_terpakai');
         }
 
+        // Sync kode_submit prefix when program_type changes
+        $newProgramType = $validated['program_type'] ?? null;
+        $oldProgramType = $submission->program_type;
+        if ($newProgramType !== $oldProgramType) {
+            $newPrefix = match($newProgramType) {
+                'bkd'  => 'BKD',
+                'jafa' => 'JAF',
+                default => 'SUB',
+            };
+            $oldPrefixLen = match(true) {
+                str_starts_with($submission->kode_submit, 'BKD')  => 3,
+                str_starts_with($submission->kode_submit, 'JAF')  => 3,
+                str_starts_with($submission->kode_submit, 'JAFA') => 4,
+                str_starts_with($submission->kode_submit, 'SUB')  => 3,
+                default => 3,
+            };
+            $numericSuffix         = substr($submission->kode_submit, $oldPrefixLen);
+            $validated['kode_submit'] = $newPrefix . $numericSuffix;
+            $validated['kode_loa']    = $validated['kode_submit'] . 'SIPERA';
+        }
+
         $submission->update($validated);
 
         // Activity log — catat field yang berubah
@@ -797,10 +818,10 @@ class SubmissionController extends Controller
         // Sort
         $sortBy = $request->input('sort_by', 'date_desc');
         match ($sortBy) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit'),
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderByDesc('id'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderByDesc('id'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
         };
 
         // Get paginated submissions
@@ -1847,10 +1868,10 @@ class SubmissionController extends Controller
 
         // Sort
         match ($request->input('sort_by', 'date_desc')) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit'),
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderByDesc('id'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderByDesc('id'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
         };
 
         // Get paginated submissions

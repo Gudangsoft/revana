@@ -135,7 +135,7 @@ class Submission extends Model
             if (empty($submission->kode_submit)) {
                 $prefix = match($submission->program_type) {
                     'bkd'  => 'BKD',
-                    'jafa' => 'JAFA',
+                    'jafa' => 'JAF',
                     default => 'SUB',
                 };
                 $submission->kode_submit = self::generateKodeSubmit($prefix);

@@ -791,3 +791,58 @@
 |------|-----------|
 | `resources/views/pic/my-tasks/index.blade.php` | Tambah `<th>Tgl Submit</th>` (width 110px) setelah kolom Artikel; tambah `<td>` dengan `tanggal_submit` diformat `d M Y`, fallback ke `created_at` jika null; update `colspan` empty state dari 7 ke 8 |
 
+
+## 64. 🔄 Update: up tgl submit
+
+- **Commit:** `7bb4f57` — 21:57 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-10.md`
+- `resources/views/pic/my-tasks/index.blade.php`
+
+## 65. Kolom Tgl Ditugaskan + Indikator Urgency di Tugas Saya PIC
+
+**Tujuan:** Menampilkan kapan tugas aktif PIC dimulai dan memberi tanda visual urgency agar PIC tahu mana yang harus segera dikerjakan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/my-tasks/index.blade.php` | Tambah kolom `Tgl Ditugaskan` (width 130px); hitung `$assignedAt` dari `validated_at` step sebelumnya; hitung `$daysWaiting` dan `$urgencyLevel`; tampilkan badge urgency bertingkat (success/warning/danger) jika `$isUrgent` |
+
+### Detail
+- `$assignedAt` dihitung dari peta step: `AUTHOR1` ← `editor1_validated_at`, `EDITOR2` ← `author1_validated_at`, dst; `NEW`/`EDITOR1` fallback ke `tanggal_submit` atau `created_at`
+- `$daysWaiting` = selisih hari antara `$assignedAt` dan `now()`
+- `$urgencyLevel`: `success` (< 3 hari, "Baru ditugaskan"), `warning` (3–6 hari), `danger` (≥ 7 hari, badge pulsing "Segera!")
+- Jika step sudah selesai (bukan `$isUrgent`), tampilkan teks kecil "selesai"
+- `colspan` empty state diupdate dari 8 → 9
+
+## 66. Fix Default Urutan Monitoring: Terbaru di Atas
+
+**Tujuan:** Tabel monitoring tampak mengurutkan dari terlama karena `tanggal_submit` adalah kolom DATE (bukan DATETIME); records pada tanggal yang sama diurutkan oleh MySQL secara internal berdasarkan `id ASC` → record lama muncul pertama.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah secondary sort `orderByDesc('id')` untuk semua opsi sort di method `monitoring()` dan `fasttrackMonitoring()`; `date_asc` secondary sort `orderBy('id', 'asc')` |
+
+### Detail
+- Root cause: `tanggal_submit` adalah DATE → saat semua record punya tanggal sama (hari ini), MySQL pakai urutan internal (primary key ASC) → tampak "Terlama"
+- Fix: tambah `->orderByDesc('id')` sebagai tiebreaker untuk `date_desc`, `title_asc`, `title_desc`; tambah `->orderBy('id', 'asc')` untuk `date_asc`
+
+## 67. Sinkronisasi Prefix Kode Submit BKD → BKD, JAFA → JAF
+
+**Tujuan:** Kode submit untuk program BKD harus berawalan `BKD` dan JAFA berawalan `JAF` (bukan `JAFA`); data lama yang masih `SUB` perlu disinkronkan sesuai `program_type`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/Submission.php` | Ubah prefix JAFA → JAF di `boot()` creating hook |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Ubah prefix JAFA → JAF saat generate kode submit |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah logika sinkronisasi prefix `kode_submit`/`kode_loa` saat `program_type` berubah di method `update()` |
+| `resources/views/admin/submissions/edit.blade.php` | Ubah `program_type` dari hidden input → dropdown editable (SUB/BKD/JAF) dengan info teks |
+| `database/migrations/2026_06_10_221620_sync_kode_submit_prefix_bkd_jaf.php` | Migration: UPDATE submissions SET kode_submit = CONCAT('BKD'/'JAF', SUBSTR) WHERE program_type = 'bkd'/'jafa' AND kode_submit LIKE 'SUB%' |
+
+### Detail
+- Prefix baru: BKD → `BKD`, JAFA → `JAF` (3 huruf, konsisten)
+- Migration juga handle prefix `JAFA` (4 huruf) yang mungkin sudah terlanjur masuk → diubah ke `JAF`
+- Admin bisa buka Edit submission → pilih Program dropdown → simpan → `kode_submit` auto-update prefix
+- Migration sudah dijalankan (205ms, DONE)

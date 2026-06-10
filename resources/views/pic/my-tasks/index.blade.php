@@ -211,6 +211,7 @@
                         <th>Kode</th>
                         <th>Artikel</th>
                         <th style="width: 110px">Tgl Submit</th>
+                        <th style="width: 130px">Tgl Ditugaskan</th>
                         <th>Peran</th>
                         <th style="width: 180px">Progress</th>
                         <th>Status</th>
@@ -279,6 +280,40 @@
                         
                         // Check if this is a new task
                         $isNewTask = isset($newTaskIds) && in_array($submission->id, $newTaskIds);
+
+                        // Compute "assigned date" = when the current/active step became available
+                        $assignedAtFieldMap = [
+                            'NEW'        => null,
+                            'EDITOR1'    => null,
+                            'AUTHOR1'    => 'editor1_validated_at',
+                            'EDITOR2'    => 'author1_validated_at',
+                            'REVIEWER1'  => 'editor2_validated_at',
+                            'REVIEWER2'  => 'reviewer1_validated_at',
+                            'EDITOR3'    => 'reviewer2_validated_at',
+                            'AUTHOR2'    => 'editor3_validated_at',
+                            'PRODUCTION' => 'author2_validated_at',
+                            'VALIDATOR'  => 'production_validated_at',
+                        ];
+                        $assignedAt = null;
+                        foreach ($assignedAtFieldMap as $stepKey => $dateField) {
+                            if (str_contains($status, $stepKey)) {
+                                if ($dateField && !empty($submission->$dateField)) {
+                                    $assignedAt = \Carbon\Carbon::parse($submission->$dateField);
+                                } else {
+                                    $assignedAt = $submission->tanggal_submit
+                                        ? \Carbon\Carbon::parse($submission->tanggal_submit)
+                                        : ($submission->created_at ?? null);
+                                }
+                                break;
+                            }
+                        }
+                        if (!$assignedAt) {
+                            $assignedAt = $submission->tanggal_submit
+                                ? \Carbon\Carbon::parse($submission->tanggal_submit)
+                                : ($submission->created_at ?? null);
+                        }
+                        $daysWaiting  = $assignedAt ? (int) $assignedAt->diffInDays(\Carbon\Carbon::now()) : 0;
+                        $urgencyLevel = $isUrgent ? ($daysWaiting >= 7 ? 'danger' : ($daysWaiting >= 3 ? 'warning' : 'success')) : '';
                     @endphp
                     <tr class="{{ $isUrgent ? 'table-danger' : '' }} {{ $isNewTask ? 'table-info' : '' }}">
                         <td class="text-muted">
@@ -306,6 +341,30 @@
                                 <span class="fw-semibold">{{ \Carbon\Carbon::parse($submission->tanggal_submit)->format('d M Y') }}</span>
                             @elseif($submission->created_at)
                                 <span class="text-muted">{{ $submission->created_at->format('d M Y') }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="text-nowrap">
+                            @if($assignedAt)
+                                <div class="small fw-semibold">{{ $assignedAt->format('d M Y') }}</div>
+                                @if($isUrgent)
+                                    @if($urgencyLevel === 'danger')
+                                        <span class="badge bg-danger badge-urgent mt-1">
+                                            <i class="bi bi-alarm-fill"></i> {{ $daysWaiting }} hari &mdash; Segera!
+                                        </span>
+                                    @elseif($urgencyLevel === 'warning')
+                                        <span class="badge bg-warning text-dark mt-1">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> {{ $daysWaiting }} hari
+                                        </span>
+                                    @else
+                                        <span class="badge bg-success mt-1">
+                                            <i class="bi bi-clock"></i> Baru ditugaskan
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="small text-muted">selesai</span>
+                                @endif
                             @else
                                 <span class="text-muted">—</span>
                             @endif
@@ -354,7 +413,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5">
+                        <td colspan="9" class="text-center py-5">
                             <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
                             <p class="text-muted mt-2 mb-0">Belum ada tugas yang ditugaskan</p>
                         </td>
