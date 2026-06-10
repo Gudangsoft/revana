@@ -1085,6 +1085,7 @@
         }
     });
     </script>
+    @include('partials.drag-to-scroll')
     @stack('scripts')
 
     @if(auth()->check() && auth()->user()->role === 'admin')

@@ -748,3 +748,25 @@
 | `resources/views/admin/submissions/monitoring.blade.php` | CSS: `cursor:grab/grabbing`, `.is-dragging` class, scrollbar biru lebih tebal; HTML: badge "Geser Tabel"; JS: drag-to-scroll via mousedown/mousemove/mouseup + touch swipe via touchstart/touchmove |
 | `resources/views/partials/incomplete-profile-alert.blade.php` | Tambah sub-teks per field (Email: gunakan Gmail aktif; Tanggal Lahir: untuk notif ulang tahun); tambah kotak catatan penting dengan bullet "Gunakan email/Gmail yang aktif dan rutin dicek" |
 
+
+## 60. 🔄 Update: up
+
+- **Commit:** `4fb1d90` — 21:44 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/partials/incomplete-profile-alert.blade.php`
+
+## 61. Drag-to-Scroll Global — Semua Tabel di Seluruh Portal
+
+**Tujuan:** Drag-to-scroll hanya ada di tabel admin monitoring. Terapkan ke semua tabel horizontal (PIC, Marketing, Admin) tanpa harus edit satu per satu.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/drag-to-scroll.blade.php` | Baru — CSS `cursor:grab/grabbing` + JS drag-to-scroll + touch swipe global untuk `.table-responsive` dan `.monitoring-scroll-wrapper`; satu event listener global (tidak duplikat per elemen) |
+| `resources/views/layouts/app.blade.php` | Tambah `@include('partials.drag-to-scroll')` sebelum `@stack('scripts')` |
+| `resources/views/pic/layouts/app.blade.php` | Sama, sebelum `@yield('scripts')` |
+| `resources/views/marketing/layouts/app.blade.php` | Sama |
+| `resources/views/admin/submissions/monitoring.blade.php` | Hapus duplikat CSS dan JS drag-to-scroll (sekarang ditangani partial global); hapus `is-dragging` CSS class yang sudah tidak dipakai |
+

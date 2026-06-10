@@ -484,6 +484,7 @@
         }
     });
     </script>
+    @include('partials.drag-to-scroll')
     @yield('scripts')
 </body>
 </html>

@@ -17,17 +17,6 @@
     border-radius: 4px;
     scrollbar-width: thin;
     scrollbar-color: #6c757d #dee2e6;
-    cursor: grab;
-    user-select: none;
-}
-
-.monitoring-scroll-wrapper.is-dragging {
-    cursor: grabbing;
-    scroll-behavior: auto !important;
-}
-
-.monitoring-scroll-wrapper.is-dragging * {
-    pointer-events: none;
 }
 
 .monitoring-scroll-wrapper::-webkit-scrollbar {
@@ -1496,49 +1485,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ── Drag-to-scroll (mouse) ──────────────────────────────────────
-    var isDragging = false;
-    var dragStartX = 0;
-    var scrollStartLeft = 0;
-
-    wrapper.addEventListener('mousedown', function(e) {
-        // Ignore clicks on interactive elements
-        if (e.target.closest('input,select,button,a,label')) return;
-        isDragging = true;
-        dragStartX = e.pageX - wrapper.getBoundingClientRect().left;
-        scrollStartLeft = wrapper.scrollLeft;
-        wrapper.classList.add('is-dragging');
-    });
-
-    document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        var x = e.pageX - wrapper.getBoundingClientRect().left;
-        var walk = (x - dragStartX) * 1.5;
-        wrapper.scrollLeft = scrollStartLeft - walk;
-    });
-
-    document.addEventListener('mouseup', function() {
-        if (!isDragging) return;
-        isDragging = false;
-        wrapper.classList.remove('is-dragging');
-    });
-
-    // ── Touch / swipe (mobile & tablet) ────────────────────────────
-    var touchStartX = 0;
-    var touchScrollLeft = 0;
-
-    wrapper.addEventListener('touchstart', function(e) {
-        touchStartX = e.touches[0].pageX;
-        touchScrollLeft = wrapper.scrollLeft;
-    }, { passive: true });
-
-    wrapper.addEventListener('touchmove', function(e) {
-        var dx = touchStartX - e.touches[0].pageX;
-        wrapper.scrollLeft = touchScrollLeft + dx;
-    }, { passive: true });
-
-    // Initial state
+    // Initial state (drag-to-scroll handled globally by partials/drag-to-scroll.blade.php)
     updateScrollPosition();
     
     // ========== BULK ASSIGNMENT FUNCTIONALITY ==========
