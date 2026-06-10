@@ -1026,3 +1026,32 @@
 |------|-----------|
 | `app/Http/Controllers/Auth/LoginController.php` | Tambah kondisi `if (!force_login)` sebelum cek captcha |
 | `resources/views/auth/login.blade.php` | Force login form: hapus input captcha manual, auto-isi via hidden field + focus otomatis ke password |
+
+## 83. Revert: Hapus Fitur Login Google OAuth
+
+**Tujuan:** Fitur login Google belum dibutuhkan, dikembalikan ke login normal.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/login.blade.php` | Hapus tombol "Login dengan Google" dan divider "atau" |
+| `app/Models/Pic.php` | Hapus `google_id` dan `avatar` dari `$fillable` |
+| `app/Models/Marketing.php` | Hapus `google_id` dan `avatar` dari `$fillable` |
+| `.env` | Hapus blok `# Google OAuth` (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI) |
+
+### Sudah Dibersihkan Sebelumnya (sesi sebelum kompaksi)
+- Migration di-rollback: kolom `google_id` dan `avatar` dihapus dari tabel `pics` dan `marketings`
+- `laravel/socialite` di-remove dari composer
+- `app/Http/Controllers/Auth/GoogleAuthController.php` dihapus
+- `config/services.php` dihapus
+- `routes/web.php` — `use GoogleAuthController` dan Google routes dihapus
+- `resources/views/pic/auth/login.blade.php` — tombol Google dihapus
+
+## 82. 🔄 Update: a
+
+- **Commit:** `84b9c6c` — 23:51 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Auth/LoginController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/auth/login.blade.php`
+

@@ -174,19 +174,28 @@ if [ -f "`$APP_DIR/artisan" ]; then
     php artisan down --message='Sistem sedang update' --retry=60 || true
 fi
 
+echo '→ Save .env production before extract...'
+if [ -f "`$APP_DIR/.env" ]; then
+    cp `$APP_DIR/.env /tmp/.env.production.bak
+    cp `$APP_DIR/.env `$BACKUP_DIR/.env.backup
+    echo '✓ .env production saved'
+fi
+
 echo '→ Extract new files...'
 mkdir -p `$APP_DIR
 cd `$APP_DIR
 unzip -o /tmp/`$ARCHIVE_NAME
 
-echo '→ Restore .env from backup...'
-if [ -f "`$BACKUP_DIR/.env.backup" ]; then
+echo '→ Restore .env production (NEVER allow deploy to overwrite .env)...'
+if [ -f "/tmp/.env.production.bak" ]; then
+    cp /tmp/.env.production.bak `$APP_DIR/.env
+    rm /tmp/.env.production.bak
+    echo '✓ .env production restored'
+elif [ -f "`$BACKUP_DIR/.env.backup" ]; then
     cp `$BACKUP_DIR/.env.backup `$APP_DIR/.env
+    echo '✓ .env restored from permanent backup'
 else
-    # Backup current .env for future use
-    if [ -f "`$APP_DIR/.env" ]; then
-        cp `$APP_DIR/.env `$BACKUP_DIR/.env.backup
-    fi
+    echo '⚠ WARNING: No .env backup found! Check /var/www/revana/.env manually!'
 fi
 
 echo '→ Install dependencies...'

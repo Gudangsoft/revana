@@ -35,7 +35,6 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\TenantImpersonateController;
 use App\Http\Controllers\Admin\ReferensiJurnalController;
-use App\Http\Controllers\Auth\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -113,15 +112,6 @@ Route::get('/info-slot/{slot}', [\App\Http\Controllers\PublicLoaController::clas
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
-});
-
-// Google OAuth (PIC & Marketing only — whitelist, no auto-register)
-Route::middleware('throttle:10,1')->group(function () {
-    Route::get('/auth/google/{portal}', [GoogleAuthController::class, 'redirect'])
-        ->name('auth.google.redirect')
-        ->where('portal', 'pic|marketing');
-    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
-        ->name('auth.google.callback');
 });
 
 // Authenticated routes

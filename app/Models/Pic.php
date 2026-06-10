@@ -21,8 +21,6 @@ class Pic extends Authenticatable
         'tanggal_lahir',
         'is_active',
         'total_points',
-        'google_id',
-        'avatar',
     ];
 
     protected $hidden = [
