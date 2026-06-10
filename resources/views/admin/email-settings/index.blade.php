@@ -25,6 +25,14 @@
     </div>
     @endif
 
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-octagon me-2"></i>
+        <strong>Gagal menyimpan:</strong> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
     @if($errors->any())
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="bi bi-exclamation-triangle me-2"></i>
@@ -68,6 +76,11 @@
                                 @error('mail_host')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <div id="smtpMismatchWarn" class="alert alert-warning py-1 px-2 mt-1 small d-none">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    <strong>Peringatan:</strong> <code>smtp.gmail.com</code> hanya untuk akun <strong>@gmail.com</strong> atau Google Workspace.
+                                    Untuk email <strong>@apji.org</strong> gunakan SMTP hosting (mis: <code>mail.apji.org</code>).
+                                </div>
                             </div>
 
                             <div class="col-md-3 mb-3">
@@ -258,23 +271,37 @@
         }
     });
 
+    // Warning jika smtp.gmail.com dipakai tapi username bukan @gmail.com
+    function checkSmtpMismatch() {
+        const host = (document.getElementById('mail_host').value || '').trim().toLowerCase();
+        const user = (document.getElementById('mail_username').value || '').trim().toLowerCase();
+        const warn = document.getElementById('smtpMismatchWarn');
+        if (!warn) return;
+        const isGmailHost = host === 'smtp.gmail.com';
+        const isGmailUser = user.endsWith('@gmail.com') || user === '';
+        warn.classList.toggle('d-none', !(isGmailHost && !isGmailUser));
+    }
+    ['mail_host','mail_username'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', checkSmtpMismatch);
+    });
+    checkSmtpMismatch();
+
     // Test email functionality
     document.getElementById('sendTestEmail').addEventListener('click', function() {
         const email = document.getElementById('test_email').value;
         const button = this;
         const resultDiv = document.getElementById('testEmailResult');
-        
+
         if (!email) {
             resultDiv.innerHTML = '<div class="alert alert-danger">Silakan masukkan alamat email!</div>';
             return;
         }
-        
-        // Disable button and show loading
+
         button.disabled = true;
         button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
         resultDiv.innerHTML = '';
-        
-        // Send test email
+
         fetch('{{ route("admin.email-settings.test-email") }}', {
             method: 'POST',
             headers: {
@@ -284,26 +311,39 @@
             },
             body: JSON.stringify({ email: email })
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error('Server error: ' + (text || response.statusText));
-                });
-            }
-            return response.json();
-        })
+        .then(response => response.json())   // parse JSON regardless of status code
         .then(data => {
             if (data.success) {
-                resultDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>' + data.message + '</div>';
+                resultDiv.innerHTML =
+                    '<div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i>' + data.message + '</div>';
             } else {
-                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>' + data.message + '<br><small>' + (data.error || '') + '</small></div>';
+                let hint = '';
+                const err = (data.error || '').toLowerCase();
+                if (err.includes('authentication failed') || err.includes('535')) {
+                    hint = '<hr class="my-2"><strong>💡 Kemungkinan penyebab:</strong><ul class="mb-0 mt-1">'
+                         + '<li>Username atau password salah</li>'
+                         + '<li>Menggunakan <code>smtp.gmail.com</code> dengan email non-Gmail (mis: @apji.org) → gunakan SMTP hosting Anda</li>'
+                         + '<li>Untuk Gmail: wajib gunakan <strong>App Password</strong>, bukan password biasa</li>'
+                         + '<li>Akses "Less Secure Apps" atau 2FA belum dikonfigurasi</li>'
+                         + '</ul>';
+                } else if (err.includes('connection') || err.includes('timeout') || err.includes('refused')) {
+                    hint = '<hr class="my-2"><strong>💡 Kemungkinan penyebab:</strong><ul class="mb-0 mt-1">'
+                         + '<li>Host SMTP salah atau tidak dapat dijangkau</li>'
+                         + '<li>Port/enkripsi tidak cocok (coba port 587 + TLS atau 465 + SSL)</li>'
+                         + '<li>Firewall server memblok koneksi keluar</li>'
+                         + '</ul>';
+                }
+                resultDiv.innerHTML =
+                    '<div class="alert alert-danger"><i class="bi bi-x-circle-fill me-2"></i><strong>' + data.message + '</strong>'
+                    + '<br><small class="font-monospace">' + (data.error || '') + '</small>'
+                    + hint + '</div>';
             }
         })
         .catch(error => {
-            resultDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Terjadi kesalahan: ' + error.message + '</div>';
+            resultDiv.innerHTML =
+                '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Koneksi gagal: ' + error.message + '</div>';
         })
         .finally(() => {
-            // Re-enable button
             button.disabled = false;
             button.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Test Email';
         });

@@ -577,3 +577,22 @@
 - `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
 - `resources/views/pic/fasttrack/monitoring.blade.php`
 
+
+## 44. 🔄 Update: mail
+
+- **Commit:** `a5b7e0b` — 16:59 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/EmailSettingController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/email-settings/index.blade.php`
+
+## 45. Fix Email Settings: data hilang setelah simpan + error handling
+
+**Tujuan:** Setelah klik "Simpan Perubahan", nilai kembali ke placeholder/default karena `File::put()` mengembalikan `false` (permission denied) tanpa throw exception — redirect ke "success" padahal `.env` tidak terupdate. Perbaiki dengan cek permission, cek hasil tulis, dan verifikasi baca-ulang.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/EmailSettingController.php` | `update()`: tambah `is_writable()` check, `file_put_contents($path, $content, LOCK_EX)` dengan cek return value, verifikasi baca-ulang setelah tulis, `try/catch` di artisan calls |
+| `resources/views/admin/email-settings/index.blade.php` | Tampilkan `session('error')` jika write gagal; perbaiki JS error handler agar parse JSON dari response 500; tambah warning otomatis jika smtp.gmail.com dipakai dengan username non-Gmail; tambah element `#smtpMismatchWarn` |
+

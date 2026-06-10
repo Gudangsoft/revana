@@ -85,10 +85,25 @@ class EmailSettingController extends Controller
             'mail_from_name'    => 'nullable|string|max:255',
         ]);
 
-        $envPath    = base_path('.env');
-        $envContent = File::get($envPath);
+        $envPath = base_path('.env');
 
-        // If password is blank, keep the existing value
+        // Pre-flight: cek keberadaan dan permission file
+        if (!file_exists($envPath)) {
+            return back()->withInput()->with('error', 'File .env tidak ditemukan di: ' . $envPath);
+        }
+        if (!is_writable($envPath)) {
+            return back()->withInput()->with('error',
+                'File .env tidak dapat ditulis (permission denied). '
+                . 'Jalankan: chmod 664 .env && chown www-data:www-data .env di server.'
+            );
+        }
+
+        $envContent = file_get_contents($envPath);
+        if ($envContent === false) {
+            return back()->withInput()->with('error', 'Gagal membaca file .env.');
+        }
+
+        // Pertahankan password lama jika field dikosongkan
         if (empty($validated['mail_password'])) {
             $existing = $this->parseEnvFile();
             $validated['mail_password'] = $existing['MAIL_PASSWORD'] ?? '';
@@ -109,14 +124,27 @@ class EmailSettingController extends Controller
             $envContent = $this->setEnvLine($envContent, $key, $value);
         }
 
-        File::put($envPath, $envContent);
+        $written = file_put_contents($envPath, $envContent, LOCK_EX);
+        if ($written === false) {
+            return back()->withInput()->with('error',
+                'Gagal menyimpan ke file .env. Periksa permission write di server (chmod 664 .env).'
+            );
+        }
 
-        // Clear ALL caches so the next request picks up the new .env values
-        \Artisan::call('config:clear');
-        \Artisan::call('cache:clear');
+        // Verifikasi: baca ulang dan pastikan nilai tersimpan
+        $verify = $this->parseEnvFile();
+        if (($verify['MAIL_HOST'] ?? '') !== $validated['mail_host']) {
+            return back()->withInput()->with('error',
+                'Data tertulis (' . $written . ' bytes) tapi verifikasi gagal — '
+                . 'kemungkinan ada proses lain yang menimpa file .env.'
+            );
+        }
+
+        try { \Artisan::call('config:clear'); } catch (\Exception $e) {}
+        try { \Artisan::call('cache:clear');  } catch (\Exception $e) {}
 
         return redirect()->route('admin.email-settings.index')
-            ->with('success', 'Pengaturan email berhasil diperbarui!');
+            ->with('success', 'Pengaturan email berhasil diperbarui! (' . $written . ' bytes ditulis)');
     }
 
     public function testEmail(Request $request)
