@@ -770,3 +770,24 @@
 | `resources/views/marketing/layouts/app.blade.php` | Sama |
 | `resources/views/admin/submissions/monitoring.blade.php` | Hapus duplikat CSS dan JS drag-to-scroll (sekarang ditangani partial global); hapus `is-dragging` CSS class yang sudah tidak dipakai |
 
+
+## 62. 🔄 Update: up tabel
+
+- **Commit:** `e72ea72` — 21:52 oleh Gudangsoft
+- **File berubah:** 6 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/layouts/app.blade.php`
+- `resources/views/marketing/layouts/app.blade.php`
+- `resources/views/partials/drag-to-scroll.blade.php`
+- `resources/views/pic/layouts/app.blade.php`
+
+## 62. Tambah Kolom Tanggal Submit di Tabel My-Tasks PIC
+
+**Tujuan:** Tabel "Tugas Saya" PIC tidak menampilkan tanggal submit sehingga PIC sulit memprioritaskan tugas. Tambahkan kolom Tgl Submit setelah kolom Artikel.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/my-tasks/index.blade.php` | Tambah `<th>Tgl Submit</th>` (width 110px) setelah kolom Artikel; tambah `<td>` dengan `tanggal_submit` diformat `d M Y`, fallback ke `created_at` jika null; update `colspan` empty state dari 7 ke 8 |
+

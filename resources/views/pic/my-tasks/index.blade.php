@@ -210,6 +210,7 @@
                         <th style="width: 50px">#</th>
                         <th>Kode</th>
                         <th>Artikel</th>
+                        <th style="width: 110px">Tgl Submit</th>
                         <th>Peran</th>
                         <th style="width: 180px">Progress</th>
                         <th>Status</th>
@@ -300,6 +301,15 @@
                                 @endif
                             </small>
                         </td>
+                        <td class="text-nowrap">
+                            @if($submission->tanggal_submit)
+                                <span class="fw-semibold">{{ \Carbon\Carbon::parse($submission->tanggal_submit)->format('d M Y') }}</span>
+                            @elseif($submission->created_at)
+                                <span class="text-muted">{{ $submission->created_at->format('d M Y') }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>
                             @foreach($roles as $role)
                                 <span class="badge bg-{{ $role[1] }} badge-role">{{ $role[0] }}</span>
@@ -344,7 +354,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5">
+                        <td colspan="8" class="text-center py-5">
                             <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
                             <p class="text-muted mt-2 mb-0">Belum ada tugas yang ditugaskan</p>
                         </td>
