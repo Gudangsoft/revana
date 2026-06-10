@@ -6,7 +6,7 @@
 <h4 class="mb-4"><i class="bi bi-bar-chart-fill text-warning"></i> Peringkat Point</h4>
 
 {{-- My Rank Banner --}}
-@if($currentMarketingRank)
+@if($currentMarketingRank && $totalMarketingPoints > 0)
 <div class="card border-success mb-4">
     <div class="card-header bg-success text-white">
         <i class="bi bi-megaphone-fill me-2"></i> Posisi Peringkat Saya
@@ -112,6 +112,14 @@
                 <i class="bi bi-trophy-fill"></i> Peringkat Point Marketing
             </div>
             <div class="card-body p-0">
+                @if($totalMarketingPoints <= 0)
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-hourglass-split" style="font-size: 3rem; opacity:.35;"></i>
+                    <p class="mb-0 mt-2 fw-semibold">Belum ada peringkat</p>
+                    <small>Selesaikan tugas untuk mendapatkan point pertama</small>
+                </div>
+                @else
+                @php $rmkt = $marketingRankings->filter(fn($m) => ($m->total_points ?? 0) > 0)->values(); @endphp
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table table-hover mb-0">
                         <thead class="table-light sticky-top">
@@ -122,58 +130,37 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($marketingRankings as $marketing)
-                            <tr class="{{ $marketing->id == $currentMarketing->id ? 'table-success' : ($marketing->rank <= 3 ? 'table-warning' : '') }}">
+                            @foreach($rmkt as $i => $mkt)
+                            <tr class="{{ $mkt->id == $currentMarketing->id ? 'table-success' : ($i < 3 ? 'table-warning' : '') }}">
                                 <td class="text-center">
-                                    @if($marketing->rank == 1)
-                                        <span class="badge bg-warning text-dark" style="font-size: 1.1rem;">
-                                            <i class="bi bi-trophy-fill"></i> 1
-                                        </span>
-                                    @elseif($marketing->rank == 2)
-                                        <span class="badge bg-secondary" style="font-size: 1.1rem;">
-                                            <i class="bi bi-award-fill"></i> 2
-                                        </span>
-                                    @elseif($marketing->rank == 3)
-                                        <span class="badge bg-danger" style="font-size: 1.1rem;">
-                                            <i class="bi bi-award"></i> 3
-                                        </span>
-                                    @else
-                                        <span class="text-muted fw-bold">{{ $marketing->rank }}</span>
+                                    @if($i == 0) <span class="badge bg-warning text-dark" style="font-size:1.1rem;"><i class="bi bi-trophy-fill"></i> 1</span>
+                                    @elseif($i == 1) <span class="badge bg-secondary" style="font-size:1.1rem;"><i class="bi bi-award-fill"></i> 2</span>
+                                    @elseif($i == 2) <span class="badge bg-danger" style="font-size:1.1rem;"><i class="bi bi-award"></i> 3</span>
+                                    @else <span class="text-muted fw-bold">{{ $i + 1 }}</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle bg-success me-2">
-                                            {{ strtoupper(substr($marketing->name, 0, 1)) }}
-                                        </div>
+                                        <div class="avatar-circle bg-success me-2">{{ strtoupper(substr($mkt->name, 0, 1)) }}</div>
                                         <div>
-                                            <strong>{{ $marketing->name }}</strong>
-                                            @if($marketing->id == $currentMarketing->id)
-                                                <span class="badge bg-success ms-1">Anda</span>
-                                            @endif
+                                            <strong>{{ $mkt->name }}</strong>
+                                            @if($mkt->id == $currentMarketing->id) <span class="badge bg-success ms-1">Anda</span> @endif
                                         </div>
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-success" style="font-size: 1rem;">
-                                        {{ number_format($marketing->total_points ?? 0) }}
-                                    </span>
+                                    <span class="badge bg-success" style="font-size:1rem;">{{ number_format($mkt->total_points ?? 0) }}</span>
                                 </td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                    <p class="mb-0">Belum ada data Marketing</p>
-                                </td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
+                @endif
             </div>
             <div class="card-footer text-muted">
-                Total {{ $marketingRankings->count() }} Marketing aktif
+                @if($totalMarketingPoints > 0) Total {{ $rmkt->count() }} Marketing dengan point
+                @else {{ $marketingRankings->count() }} Marketing aktif — belum ada point @endif
             </div>
         </div>
     </div>
@@ -185,6 +172,14 @@
                 <i class="bi bi-trophy-fill"></i> Peringkat Point PIC
             </div>
             <div class="card-body p-0">
+                @if($totalPicPoints <= 0)
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-hourglass-split" style="font-size: 3rem; opacity:.35;"></i>
+                    <p class="mb-0 mt-2 fw-semibold">Belum ada peringkat</p>
+                    <small>Point akan muncul setelah PIC menyelesaikan tugas</small>
+                </div>
+                @else
+                @php $rpic = $picRankings->filter(fn($p) => ($p->total_points ?? 0) > 0)->values(); @endphp
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table table-hover mb-0">
                         <thead class="table-light sticky-top">
@@ -195,53 +190,34 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($picRankings as $pic)
-                            <tr class="{{ $pic->rank <= 3 ? 'table-warning' : '' }}">
+                            @foreach($rpic as $i => $pic)
+                            <tr class="{{ $i < 3 ? 'table-warning' : '' }}">
                                 <td class="text-center">
-                                    @if($pic->rank == 1)
-                                        <span class="badge bg-warning text-dark" style="font-size: 1.1rem;">
-                                            <i class="bi bi-trophy-fill"></i> 1
-                                        </span>
-                                    @elseif($pic->rank == 2)
-                                        <span class="badge bg-secondary" style="font-size: 1.1rem;">
-                                            <i class="bi bi-award-fill"></i> 2
-                                        </span>
-                                    @elseif($pic->rank == 3)
-                                        <span class="badge bg-danger" style="font-size: 1.1rem;">
-                                            <i class="bi bi-award"></i> 3
-                                        </span>
-                                    @else
-                                        <span class="text-muted fw-bold">{{ $pic->rank }}</span>
+                                    @if($i == 0) <span class="badge bg-warning text-dark" style="font-size:1.1rem;"><i class="bi bi-trophy-fill"></i> 1</span>
+                                    @elseif($i == 1) <span class="badge bg-secondary" style="font-size:1.1rem;"><i class="bi bi-award-fill"></i> 2</span>
+                                    @elseif($i == 2) <span class="badge bg-danger" style="font-size:1.1rem;"><i class="bi bi-award"></i> 3</span>
+                                    @else <span class="text-muted fw-bold">{{ $i + 1 }}</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle bg-primary me-2">
-                                            {{ strtoupper(substr($pic->name, 0, 1)) }}
-                                        </div>
+                                        <div class="avatar-circle bg-primary me-2">{{ strtoupper(substr($pic->name, 0, 1)) }}</div>
                                         <strong>{{ $pic->name }}</strong>
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-primary" style="font-size: 1rem;">
-                                        {{ number_format($pic->total_points ?? 0) }}
-                                    </span>
+                                    <span class="badge bg-primary" style="font-size:1rem;">{{ number_format($pic->total_points ?? 0) }}</span>
                                 </td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                    <p class="mb-0">Belum ada data PIC</p>
-                                </td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
+                @endif
             </div>
             <div class="card-footer text-muted">
-                Total {{ $picRankings->count() }} PIC aktif
+                @if($totalPicPoints > 0) Total {{ $rpic->count() }} PIC dengan point
+                @else {{ $picRankings->count() }} PIC aktif — belum ada point @endif
             </div>
         </div>
     </div>
