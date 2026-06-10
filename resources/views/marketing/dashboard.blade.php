@@ -16,6 +16,11 @@
     'wishRoute' => route('marketing.birthday.wish'),
 ])
 
+@include('partials.incomplete-profile-alert', [
+    'profileUser'  => $marketing,
+    'profileRoute' => route('marketing.profile.edit'),
+])
+
 {{-- Sync Point Reminder --}}
 @include('partials.sync-point-reminder', [
     'reminderId' => 'marketing_sync_point',

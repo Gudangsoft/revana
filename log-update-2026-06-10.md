@@ -709,3 +709,22 @@
 - `resources/views/admin/pic-points/index.blade.php`
 - `routes/web.php`
 
+
+## 56. 🔄 Update: timeout fix
+
+- **Commit:** `0a88e83` — 21:30 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `log-update-2026-06-10.md`
+
+## 57. Notifikasi Profil Belum Lengkap di Dashboard PIC dan Marketing
+
+**Tujuan:** Saat PIC atau Marketing login, tidak ada notifikasi/pengingat untuk melengkapi email dan tanggal lahir yang kosong. Tambahkan alert banner di dashboard agar user segera melengkapi data profil.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/incomplete-profile-alert.blade.php` | Baru — partial reusable: cek `email` dan `tanggal_lahir` kosong, tampilkan alert warning dengan tombol "Lengkapi Sekarang" menuju halaman profil |
+| `resources/views/pic/author/dashboard.blade.php` | Tambah `@include('partials.incomplete-profile-alert', ['profileUser' => auth()->guard('pic')->user(), 'profileRoute' => route('pic.profile.edit')])` |
+| `resources/views/marketing/dashboard.blade.php` | Tambah `@include('partials.incomplete-profile-alert', ['profileUser' => $marketing, 'profileRoute' => route('marketing.profile.edit')])` |
+
