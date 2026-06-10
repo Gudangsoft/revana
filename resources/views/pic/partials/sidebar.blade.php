@@ -208,6 +208,21 @@
 </style>
 
 <nav class="nav flex-column">
+    {{-- Tombol kembali ke admin (hanya muncul saat impersonasi) --}}
+    @if(session('admin_impersonating'))
+    <div class="px-3 pt-3 pb-2">
+        <form method="POST" action="{{ route('admin.pics.return-to-admin') }}">
+            @csrf
+            <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">
+                <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin
+            </button>
+        </form>
+        <div class="text-center mt-1" style="font-size:.7rem; color:#f59e0b; opacity:.85;">
+            <i class="bi bi-eye-fill me-1"></i>Sedang melihat sebagai PIC
+        </div>
+    </div>
+    <hr class="my-1">
+    @endif
     @php
         $picUser = Auth::guard('pic')->user();
         $picId = $picUser ? $picUser->id : 0;

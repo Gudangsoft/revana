@@ -385,3 +385,33 @@
 | `app/Http/Controllers/Pic/JournalManagementController.php` | Fix query filter status: dari exact `WHERE status = 'X'` menjadi prefix `LIKE 'X%'` untuk stage values (EDITOR1, AUTHOR1, dll.), sehingga filter "Editor 1" menangkap EDITOR1_PROCESS maupun EDITOR1_REVISION |
 | `resources/views/pic/points/index.blade.php` | (3) Fix tampilan poin negatif — sebelumnya selalu tampil `+X` walau negatif; sekarang badge merah + nilai tanpa prefix `+` untuk poin ≤ 0; (4) Tambah opsi "Penyesuaian Point" di dropdown filter Tipe Tugas |
 
+
+## 31. 🔄 Update: pic point
+
+- **Commit:** `ffc5272` — 15:16 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/pic/my-tasks/index.blade.php`
+- `resources/views/pic/points/index.blade.php`
+
+## 31. Pindah Tombol "Kembali ke Admin" ke Lokasi yang Lebih Jelas
+
+**Tujuan:** Tombol "Kembali ke Admin" sebelumnya ada di banner tersendiri di atas navbar — pada mobile terpotong dan membingungkan. Dipindah ke dua tempat yang intuitif dan selalu terlihat.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/layouts/app.blade.php` | Hapus banner terpisah di atas navbar; tambah badge "Mode Admin" kecil di sebelah brand (selalu terlihat di navbar); tambah tombol "Kembali ke Admin" di dalam dropdown user (bawah Point Saya, atas Logout) |
+| `resources/views/pic/partials/sidebar.blade.php` | Tambah tombol "Kembali ke Admin" di bagian paling atas sidebar (dengan keterangan "Sedang melihat sebagai PIC"), hanya tampil saat session impersonasi aktif |
+
+## 32. Fix Bug Dashboard PIC (`/pic/dashboard`)
+
+**Tujuan:** Perbaiki 5 masalah di halaman dashboard PIC yang ditemukan dari analisa.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/AuthorController.php` | (1) Hapus query `$journals` yang dimuat tapi tidak digunakan di view (buang 4 query sia-sia); (2) Ganti streak loop N+1 (hingga 365 query) dengan satu query SELECT DATE GROUP BY + lookup O(1) di PHP; (3) Fix streak reset pagi: kalau hari ini belum diisi, mulai streak dari kemarin sehingga user tidak kehilangan streak hanya karena belum sempat isi |
+| `resources/views/pic/author/dashboard.blade.php` | (4) Fix title & teks "PIC Author" yang hardcoded → pakai `auth()->guard('pic')->user()->role` dinamis; (5) Fix grid menu 7 item dari `col-md-4` (3+3+1 tidak rata) ke `col-6 col-md-3` (4+3 dua baris rapi, sekaligus lebih compact di mobile) |
+

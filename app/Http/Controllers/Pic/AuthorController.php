@@ -19,11 +19,6 @@ class AuthorController extends Controller
     {
         $pic = Auth::guard('pic')->user();
 
-        $journals = Journal::where('pic_author_id', $pic->id)
-            ->with(['accreditationModel', 'picMarketing', 'picEditor'])
-            ->latest()
-            ->get();
-
         $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
         $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
             Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
@@ -44,23 +39,29 @@ class AuthorController extends Controller
                                 ->whereYear('tanggal', now()->year)
                                 ->whereMonth('tanggal', now()->month)
                                 ->count();
-        // Streak: hitung hari berturut-turut yang sudah diisi
+
+        // Streak: satu query ambil semua tanggal 365 hari terakhir, hitung di PHP
+        $entryDates = LaporanHarian::where('pic_id', $pic->id)
+            ->where('tanggal', '>=', now()->subDays(365)->toDateString())
+            ->selectRaw('DATE(tanggal) as d')
+            ->groupBy('d')
+            ->pluck('d')
+            ->flip()
+            ->toArray();
+
         $streak = 0;
-        $checkDate = now()->startOfDay();
-        while (true) {
-            $hasEntry = LaporanHarian::where('pic_id', $pic->id)
-                ->whereDate('tanggal', $checkDate->toDateString())
-                ->exists();
-            if (!$hasEntry) break;
+        // Jika hari ini belum diisi, mulai dari kemarin (jangan hukum user di pagi hari)
+        $startDate = isset($entryDates[$today]) ? $today : now()->subDay()->toDateString();
+        $d = \Carbon\Carbon::parse($startDate);
+        while ($streak <= 365 && isset($entryDates[$d->toDateString()])) {
             $streak++;
-            $checkDate->subDay();
-            if ($streak > 365) break;
+            $d->subDay();
         }
 
         $showReminder = $todayEntries->isEmpty() && now()->hour >= 14;
 
         return view('pic.author.dashboard', compact(
-            'journals', 'topPics', 'topMarketings',
+            'topPics', 'topMarketings',
             'todayEntries', 'monthAvgCapaian', 'monthTotalEntries', 'streak', 'today', 'showReminder'
         ));
     }

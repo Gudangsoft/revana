@@ -158,24 +158,6 @@
     </style>
 </head>
 <body>
-    {{-- Banner impersonasi admin --}}
-    @if(session('admin_impersonating'))
-    <div style="background:#f59e0b;color:#1c1917;padding:7px 20px;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
-        <span>
-            <i class="bi bi-eye-fill me-1"></i>
-            Admin sedang <strong>melihat sebagai PIC: {{ auth()->guard('pic')->user()->name }}</strong>
-            — data yang tampil adalah milik PIC ini
-        </span>
-        <form method="POST" action="{{ route('admin.pics.return-to-admin') }}" style="margin:0;">
-            @csrf
-            <button type="submit"
-                    style="background:#92400e;color:white;border:none;border-radius:4px;padding:3px 14px;font-size:0.78rem;cursor:pointer;font-weight:600;">
-                <i class="bi bi-arrow-left me-1"></i>Kembali ke Admin
-            </button>
-        </form>
-    </div>
-    @endif
-
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('pic.author.dashboard') }}">
@@ -185,6 +167,15 @@
                     <i class="bi bi-person-badge"></i> {{ $appSettings['app_name'] }} PIC
                 @endif
             </a>
+
+            {{-- Indikator impersonasi di kiri navbar (selalu terlihat, tidak perlu expand) --}}
+            @if(session('admin_impersonating'))
+            <span class="badge bg-warning text-dark ms-2 d-flex align-items-center gap-1 flex-shrink-0" style="font-size:.72rem;">
+                <i class="bi bi-eye-fill"></i>
+                <span class="d-none d-sm-inline">Mode Admin</span>
+            </span>
+            @endif
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -224,6 +215,17 @@
                                     <i class="bi bi-trophy text-warning"></i> Point Saya
                                 </a>
                             </li>
+                            @if(session('admin_impersonating'))
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('admin.pics.return-to-admin') }}" class="px-1 py-1">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">
+                                        <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin
+                                    </button>
+                                </form>
+                            </li>
+                            @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#picLogoutModal">
