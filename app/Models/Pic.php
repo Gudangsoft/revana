@@ -18,6 +18,7 @@ class Pic extends Authenticatable
         'photo',
         'password',
         'phone',
+        'tanggal_lahir',
         'is_active',
         'total_points',
     ];
@@ -28,10 +29,23 @@ class Pic extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active'    => 'boolean',
-        'password'     => 'hashed',
-        'total_points' => 'float',
+        'is_active'     => 'boolean',
+        'password'      => 'hashed',
+        'total_points'  => 'float',
+        'tanggal_lahir' => 'date',
     ];
+
+    public function isBirthdayToday(): bool
+    {
+        if (!$this->tanggal_lahir) return false;
+        return $this->tanggal_lahir->month === now()->month
+            && $this->tanggal_lahir->day === now()->day;
+    }
+
+    public function getUmurAttribute(): ?int
+    {
+        return $this->tanggal_lahir ? $this->tanggal_lahir->age : null;
+    }
 
     /**
      * Relationship to point histories

@@ -459,6 +459,40 @@
 - `isUrgentForPic()` mapping sebelumnya untuk REVIEWER memakai `petugas_editor1_id` (salah dari implementasi lama) — menyebabkan stat card menunjukkan angka berbeda dengan icon warning di tabel
 - Sidebar badge juga tidak menghitung REVIEWER — kini sudah ditambahkan
 
+---
+
+## 35. Fitur Ulang Tahun — Tanggal Lahir, Gmail Wajib, Halaman Perayaan, Notif Email & WA
+
+**Tujuan:** PIC dan Marketing belum mengisi tanggal lahir dan Gmail aktif. Perlu fitur otomatis: saat user login di hari ulang tahunnya, tampilkan halaman perayaan animasi, kirim email ucapan, dan kirim WA jika notifikasi WA aktif.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_10_200000_add_tanggal_lahir_to_pics_and_marketings.php` | Baru — tambah kolom `tanggal_lahir DATE nullable` ke tabel `pics` dan `marketings` |
+| `app/Models/Pic.php` | Tambah `tanggal_lahir` ke fillable + casts date; tambah `isBirthdayToday()` dan accessor `$umur` |
+| `app/Models/Marketing.php` | Sama dengan Pic |
+| `app/Services/WaNotificationService.php` | Tambah `notifyBirthday(Pic\|Marketing $user)` — kirim WA ucapan ulang tahun via Fonnte |
+| `app/Http/Controllers/Pic/ProfileController.php` | Tambah validasi `tanggal_lahir` required + Gmail regex; tambah method `birthday()` |
+| `app/Http/Controllers/Marketing/ProfileController.php` | Sama |
+| `app/Http/Controllers/Pic/Auth/LoginController.php` | Cek `isBirthdayToday()` setelah login berhasil → flash session → kirim WA + email → redirect ke `/pic/birthday` |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Sama untuk Marketing |
+| `resources/views/pic/profile/edit.blade.php` | Tambah field `tanggal_lahir` (date picker wajib), label Gmail hint, pesan info umur, banner warning jika belum diisi |
+| `resources/views/marketing/profile/edit.blade.php` | Sama |
+| `resources/views/birthday.blade.php` | Baru — standalone full-screen celebration page: canvas confetti, balon mengambang CSS, fireworks JS, teks ucapan animasi, tombol lanjut ke dashboard |
+| `routes/web.php` | Tambah `GET /pic/birthday` → `pic.birthday` dan `GET /marketing/birthday` → `marketing.birthday` |
+
+### Flow Lengkap
+1. User isi `tanggal_lahir` + Gmail di `/profile` (wajib setiap update)
+2. Saat login → `isBirthdayToday()` cek bulan & tanggal cocok
+3. Jika ya: flash `birthday_celebration` session → kirim WA (jika Fonnte configured) → kirim email → redirect `/birthday`
+4. Halaman birthday: standalone page, animasi canvas confetti + balon CSS + fireworks JS
+5. Tombol "Lanjut ke Dashboard" setelah selesai menikmati
+
+### Catatan Deployment
+- **Wajib jalankan migration di server:** `php artisan migrate`
+- Email + WA masing-masing dibungkus `try-catch` — gagal kirim tidak menghalangi user login
+- Halaman birthday tetap bisa diakses manual jika user mengunjungi URL di hari ulang tahunnya (backup check di controller)
+
 **Tujuan:** Halaman Monitoring Proses (Submit, BKD, JAFA) belum memiliki akses cepat ke halaman Monitoring Fasttrack. Sebelumnya hanya ada info-alert teks di monitoring Submit saja, dan disembunyikan untuk BKD/JAFA.
 
 ### File yang Diubah
@@ -478,4 +512,34 @@
 - **File berubah:** 2 file
 - `log-update-2026-06-10.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
+
+
+## 38. 🔄 Update: tugas notif
+
+- **Commit:** `29f945e` — 15:50 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/pic/partials/sidebar.blade.php`
+
+## 39. Notifikasi Ulang Tahun di Dashboard + Fitur Kirim & Tampilkan Ucapan
+
+**Tujuan:** Menampilkan notifikasi di dashboard admin/marketing/PIC ketika ada yang berulang tahun hari ini, memungkinkan semua pengguna kirim ucapan selamat, dan menampilkan ucapan yang diterima di halaman perayaan ulang tahun.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_10_210000_create_birthday_wishes_table.php` | Buat tabel `birthday_wishes` (sender_type, sender_id, sender_name, recipient_type, recipient_id, recipient_name, message, wish_year) |
+| `app/Models/BirthdayWish.php` | Model baru untuk ucapan ulang tahun |
+| `resources/views/partials/birthday-notification.blade.php` | Partial widget: banner perayaan, daftar orang yang ulang tahun, form kirim ucapan, status "Terkirim" |
+| `app/Http/Controllers/Admin/DashboardController.php` | Tambah query `todayBirthdays` + `myWishes`, method `storeWish()` + helper `todayBirthdayData()` |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah `BirthdayWish` import, query `todayBirthdays`/`myWishes` di `dashboard()`, method `storeWish()` + `todayBirthdayData()` (dengan exclude current user) |
+| `app/Http/Controllers/Pic/AuthorController.php` | Tambah `BirthdayWish` import, query `todayBirthdays`/`myWishes` di `dashboard()`, method `storeWish()` + `todayBirthdayData()` |
+| `app/Http/Controllers/Pic/ProfileController.php` | Tambah `BirthdayWish` import; `birthday()` kini query `$wishes` yang diterima dan pass ke view |
+| `app/Http/Controllers/Marketing/ProfileController.php` | Tambah `BirthdayWish` import; `birthday()` kini query `$wishes` yang diterima dan pass ke view |
+| `resources/views/admin/dashboard.blade.php` | Include `partials.birthday-notification` di awal konten |
+| `resources/views/marketing/dashboard.blade.php` | Include `partials.birthday-notification` di awal konten |
+| `resources/views/pic/author/dashboard.blade.php` | Include `partials.birthday-notification` di awal konten |
+| `resources/views/birthday.blade.php` | Tambah section "Ucapan dari rekan-rekanmu" untuk menampilkan wish yang diterima |
+| `routes/web.php` | Tambah 3 POST routes: `admin.birthday.wish`, `pic.birthday.wish`, `marketing.birthday.wish` |
 

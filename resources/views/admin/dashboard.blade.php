@@ -17,6 +17,10 @@
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
 </div>
 @endif
+@include('partials.birthday-notification', [
+    'wishRoute' => route('admin.birthday.wish'),
+])
+
 <!-- Notification Alert for Submitted Reviews -->
 @if($submittedReviews > 0)
 <div class="alert alert-info alert-dismissible fade show" role="alert">

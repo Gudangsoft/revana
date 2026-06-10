@@ -24,6 +24,10 @@
 </div>
 @endif
 
+@include('partials.birthday-notification', [
+    'wishRoute' => route('pic.birthday.wish'),
+])
+
 {{-- Pengingat kinerja harian --}}
 @if($showReminder)
 <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-3 shadow-sm" role="alert">

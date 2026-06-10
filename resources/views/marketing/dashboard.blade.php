@@ -12,6 +12,10 @@
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
 </div>
 @endif
+@include('partials.birthday-notification', [
+    'wishRoute' => route('marketing.birthday.wish'),
+])
+
 {{-- Sync Point Reminder --}}
 @include('partials.sync-point-reminder', [
     'reminderId' => 'marketing_sync_point',

@@ -15,6 +15,7 @@ class Marketing extends Authenticatable
         'email',
         'photo',
         'phone',
+        'tanggal_lahir',
         'password',
         'is_active',
         'total_points',
@@ -25,9 +26,22 @@ class Marketing extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active'    => 'boolean',
-        'total_points' => 'float',
+        'is_active'     => 'boolean',
+        'total_points'  => 'float',
+        'tanggal_lahir' => 'date',
     ];
+
+    public function isBirthdayToday(): bool
+    {
+        if (!$this->tanggal_lahir) return false;
+        return $this->tanggal_lahir->month === now()->month
+            && $this->tanggal_lahir->day === now()->day;
+    }
+
+    public function getUmurAttribute(): ?int
+    {
+        return $this->tanggal_lahir ? $this->tanggal_lahir->age : null;
+    }
 
     /**
      * Submissions yang dibawa oleh marketing ini

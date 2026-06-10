@@ -334,6 +334,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics/{pic}/reset-password', [PicController::class, 'resetPassword'])->name('pics.reset-password');
         Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         
+        // Birthday wish
+        Route::post('/birthday-wish', [\App\Http\Controllers\Admin\DashboardController::class, 'storeWish'])->name('birthday.wish');
+
         // PIC Point Report
         Route::get('/point-rankings', [\App\Http\Controllers\Admin\DashboardController::class, 'pointRankings'])->name('point-rankings');
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
@@ -584,6 +587,10 @@ Route::prefix('pic')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\Pic\ProfileController::class, 'edit'])->name('pic.profile.edit');
         Route::post('/profile', [\App\Http\Controllers\Pic\ProfileController::class, 'update'])->name('pic.profile.update');
         Route::post('/profile/password', [\App\Http\Controllers\Pic\ProfileController::class, 'updatePassword'])->name('pic.profile.update-password');
+
+        // Birthday celebration
+        Route::get('/birthday', [\App\Http\Controllers\Pic\ProfileController::class, 'birthday'])->name('pic.birthday');
+        Route::post('/birthday-wish', [\App\Http\Controllers\Pic\AuthorController::class, 'storeWish'])->name('pic.birthday.wish');
         
         // Reviewers
         Route::get('/reviewers', [PicJournalController::class, 'reviewersIndex'])->name('pic.reviewers.index');
@@ -647,5 +654,9 @@ Route::prefix('marketing')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'edit'])->name('marketing.profile.edit');
         Route::post('/profile', [\App\Http\Controllers\Marketing\ProfileController::class, 'update'])->name('marketing.profile.update');
         Route::post('/profile/password', [\App\Http\Controllers\Marketing\ProfileController::class, 'updatePassword'])->name('marketing.profile.update-password');
+
+        // Birthday celebration
+        Route::get('/birthday', [\App\Http\Controllers\Marketing\ProfileController::class, 'birthday'])->name('marketing.birthday');
+        Route::post('/birthday-wish', [\App\Http\Controllers\Marketing\DashboardController::class, 'storeWish'])->name('marketing.birthday.wish');
     });
 });

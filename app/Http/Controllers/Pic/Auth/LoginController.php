@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Pic\Auth;
 use App\Helpers\MotivationalMessage;
 use App\Http\Controllers\Controller;
 use App\Models\Pic;
+use App\Services\WaNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
 {
@@ -25,49 +27,74 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        // Verify math CAPTCHA
         if ((int) $request->input('captcha_answer') !== (int) session('captcha_pic')) {
             return back()->withErrors(['email' => 'Jawaban verifikasi salah. Silakan coba lagi.'])->withInput($request->only('email'));
         }
         session()->forget('captcha_pic');
 
-        $email = $request->input('email');
+        $email    = $request->input('email');
         $password = $request->input('password');
         $remember = $request->filled('remember');
 
-        // Find PIC by email
         $pic = Pic::where('email', $email)->first();
-        
+
         if (!$pic) {
-            return back()->withErrors([
-                'email' => 'PIC dengan email ini tidak ditemukan.',
-            ])->withInput($request->only('email'));
+            return back()->withErrors(['email' => 'PIC dengan email ini tidak ditemukan.'])->withInput($request->only('email'));
         }
 
-        // Check if PIC is active
         if (!$pic->is_active) {
-            return back()->withErrors([
-                'email' => 'Akun Anda tidak aktif. Hubungi administrator.',
-            ])->withInput($request->only('email'));
+            return back()->withErrors(['email' => 'Akun Anda tidak aktif. Hubungi administrator.'])->withInput($request->only('email'));
         }
 
-        // Check password
         if (!Hash::check($password, $pic->password)) {
-            Log::warning('PIC login failed: wrong password', [
-                'email' => $email, 'ip' => $request->ip(), 'user_agent' => $request->userAgent(),
-            ]);
-            return back()->withErrors([
-                'email' => 'Password salah.',
-            ])->withInput($request->only('email'));
+            Log::warning('PIC login failed: wrong password', ['email' => $email, 'ip' => $request->ip()]);
+            return back()->withErrors(['email' => 'Password salah.'])->withInput($request->only('email'));
         }
 
-        // Login the PIC
         Auth::guard('pic')->login($pic, $remember);
         $request->session()->regenerate();
+
+        // Cek ulang tahun
+        if ($pic->isBirthdayToday()) {
+            $umur = $pic->umur ?? 0;
+
+            $request->session()->flash('birthday_celebration', [
+                'name' => $pic->name,
+                'umur' => $umur,
+            ]);
+
+            // Kirim WA
+            try {
+                app(WaNotificationService::class)->notifyBirthday($pic);
+            } catch (\Throwable $e) {
+                Log::error('Birthday WA gagal', ['pic' => $pic->id, 'error' => $e->getMessage()]);
+            }
+
+            // Kirim email
+            if ($pic->email) {
+                try {
+                    $name = $pic->name;
+                    $body = "Selamat Ulang Tahun ke-{$umur}, {$name}!\n\n"
+                        . "Di hari yang istimewa ini, seluruh Tim SIPERA mengucapkan:\n"
+                        . "✨ Semoga panjang umur & selalu sehat\n"
+                        . "🌟 Semua impian dan cita-citamu terwujud\n"
+                        . "💪 Semakin sukses dalam setiap langkahmu\n\n"
+                        . "Tetap semangat berkarya!\n\n— Tim SIPERA";
+
+                    Mail::raw($body, function ($m) use ($pic) {
+                        $m->to($pic->email)->subject("🎂 Selamat Ulang Tahun, {$pic->name}!");
+                    });
+                } catch (\Throwable $e) {
+                    Log::error('Birthday email gagal', ['pic' => $pic->id, 'error' => $e->getMessage()]);
+                }
+            }
+
+            return redirect()->route('pic.birthday');
+        }
 
         $request->session()->flash('motivational_message', MotivationalMessage::random());
         return redirect()->intended(route('pic.dashboard'));

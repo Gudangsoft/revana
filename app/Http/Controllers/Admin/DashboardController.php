@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BirthdayWish;
 use App\Models\JournalMaster;
 use App\Models\Submission;
 use App\Models\User;
@@ -142,6 +143,9 @@ class DashboardController extends Controller
             )
         );
 
+        // Birthday widget
+        [$todayBirthdays, $myWishes] = $this->todayBirthdayData('admin', auth()->id());
+
         return view('admin.dashboard', compact(
             'totalJournals',
             'totalReviewers',
@@ -168,7 +172,9 @@ class DashboardController extends Controller
             'bkdStats',
             'jafaStats',
             'topReviewers',
-            'avgCompletionDays'
+            'avgCompletionDays',
+            'todayBirthdays',
+            'myWishes'
         ));
     }
 
@@ -507,6 +513,73 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             // Don't fail the save if notification fails
         }
+    }
+
+    // ── Birthday ──────────────────────────────────────────────────────────────
+
+    public function storeWish(Request $request)
+    {
+        $request->validate([
+            'recipient_type' => 'required|in:pic,marketing',
+            'recipient_id'   => 'required|integer',
+            'message'        => 'required|string|max:200',
+        ]);
+
+        $recipient = $request->recipient_type === 'pic'
+            ? Pic::find($request->recipient_id)
+            : Marketing::find($request->recipient_id);
+
+        if (!$recipient) {
+            return back()->with('error', 'Penerima tidak ditemukan.');
+        }
+
+        BirthdayWish::updateOrCreate(
+            [
+                'sender_type'    => 'admin',
+                'sender_id'      => auth()->id(),
+                'recipient_type' => $request->recipient_type,
+                'recipient_id'   => $request->recipient_id,
+                'wish_year'      => now()->year,
+            ],
+            [
+                'sender_name'    => auth()->user()->name ?? 'Admin',
+                'recipient_name' => $recipient->name,
+                'message'        => $request->message,
+            ]
+        );
+
+        return back()->with('wish_sent', 'Ucapan untuk ' . $recipient->name . ' berhasil dikirim! 🎉');
+    }
+
+    private function todayBirthdayData(string $senderType, int $senderId): array
+    {
+        $month = now()->month;
+        $day   = now()->day;
+
+        $pics = Pic::whereNotNull('tanggal_lahir')
+            ->whereMonth('tanggal_lahir', $month)
+            ->whereDay('tanggal_lahir', $day)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
+
+        $mktgs = Marketing::whereNotNull('tanggal_lahir')
+            ->whereMonth('tanggal_lahir', $month)
+            ->whereDay('tanggal_lahir', $day)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
+
+        $todayBirthdays = $pics->merge($mktgs);
+
+        $myWishes = BirthdayWish::where('sender_type', $senderType)
+            ->where('sender_id', $senderId)
+            ->where('wish_year', now()->year)
+            ->get()
+            ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
+            ->toArray();
+
+        return [$todayBirthdays, $myWishes];
     }
 
     /**

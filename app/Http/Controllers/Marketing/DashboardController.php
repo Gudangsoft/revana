@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Helpers\MotivationalMessage;
 use App\Http\Controllers\Controller;
+use App\Models\BirthdayWish;
 use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Models\Submission;
@@ -12,12 +13,14 @@ use App\Models\JournalSlot;
 use App\Models\Accreditation;
 use App\Models\Setting;
 use App\Services\FonnteService;
+use App\Services\WaNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
@@ -73,6 +76,42 @@ class DashboardController extends Controller
 
         Auth::guard('marketing')->login($marketing);
 
+        // Cek ulang tahun
+        if ($marketing->isBirthdayToday()) {
+            $umur = $marketing->umur ?? 0;
+
+            $request->session()->flash('birthday_celebration', [
+                'name' => $marketing->name,
+                'umur' => $umur,
+            ]);
+
+            try {
+                app(WaNotificationService::class)->notifyBirthday($marketing);
+            } catch (\Throwable $e) {
+                Log::error('Birthday WA gagal', ['marketing' => $marketing->id, 'error' => $e->getMessage()]);
+            }
+
+            if ($marketing->email) {
+                try {
+                    $name = $marketing->name;
+                    $body = "Selamat Ulang Tahun ke-{$umur}, {$name}!\n\n"
+                        . "Di hari yang istimewa ini, seluruh Tim SIPERA mengucapkan:\n"
+                        . "✨ Semoga panjang umur & selalu sehat\n"
+                        . "🌟 Semua impian dan cita-citamu terwujud\n"
+                        . "💪 Semakin sukses dalam setiap langkahmu\n\n"
+                        . "Tetap semangat berkarya!\n\n— Tim SIPERA";
+
+                    Mail::raw($body, function ($m) use ($marketing) {
+                        $m->to($marketing->email)->subject("🎂 Selamat Ulang Tahun, {$marketing->name}!");
+                    });
+                } catch (\Throwable $e) {
+                    Log::error('Birthday email gagal', ['marketing' => $marketing->id, 'error' => $e->getMessage()]);
+                }
+            }
+
+            return redirect()->route('marketing.birthday');
+        }
+
         $request->session()->flash('motivational_message', MotivationalMessage::random());
         return redirect()->route('marketing.dashboard');
     }
@@ -126,8 +165,11 @@ class DashboardController extends Controller
         $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
             \App\Models\Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
         );
-        
-        return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats', 'topMarketings', 'topPics'));
+
+        // Birthday widget
+        [$todayBirthdays, $myWishes] = $this->todayBirthdayData('marketing', $marketing->id, 'marketing', $marketing->id);
+
+        return view('marketing.dashboard', compact('marketing', 'submissions', 'pointHistories', 'stats', 'topMarketings', 'topPics', 'todayBirthdays', 'myWishes'));
     }
 
     /**
@@ -1116,5 +1158,76 @@ class DashboardController extends Controller
             [$nama, $kode, $judul, $namaJurnal, $linkSubmit, $username, $password],
             $template
         );
+    }
+
+    // ── Birthday ──────────────────────────────────────────────────────────────
+
+    public function storeWish(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'recipient_type' => 'required|in:pic,marketing',
+            'recipient_id'   => 'required|integer',
+            'message'        => 'required|string|max:200',
+        ]);
+
+        $marketing = Auth::guard('marketing')->user();
+
+        $recipient = $request->recipient_type === 'pic'
+            ? \App\Models\Pic::find($request->recipient_id)
+            : \App\Models\Marketing::find($request->recipient_id);
+
+        if (!$recipient) {
+            return back()->with('error', 'Penerima tidak ditemukan.');
+        }
+
+        BirthdayWish::updateOrCreate(
+            [
+                'sender_type'    => 'marketing',
+                'sender_id'      => $marketing->id,
+                'recipient_type' => $request->recipient_type,
+                'recipient_id'   => $request->recipient_id,
+                'wish_year'      => now()->year,
+            ],
+            [
+                'sender_name'    => $marketing->name,
+                'recipient_name' => $recipient->name,
+                'message'        => $request->message,
+            ]
+        );
+
+        return back()->with('wish_sent', 'Ucapan untuk ' . $recipient->name . ' berhasil dikirim! 🎉');
+    }
+
+    private function todayBirthdayData(string $senderType, int $senderId, ?string $excludeType = null, ?int $excludeId = null): array
+    {
+        $month = now()->month;
+        $day   = now()->day;
+
+        $pics = \App\Models\Pic::whereNotNull('tanggal_lahir')
+            ->whereMonth('tanggal_lahir', $month)
+            ->whereDay('tanggal_lahir', $day)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
+
+        $mktgs = \App\Models\Marketing::whereNotNull('tanggal_lahir')
+            ->whereMonth('tanggal_lahir', $month)
+            ->whereDay('tanggal_lahir', $day)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
+
+        $todayBirthdays = $pics->merge($mktgs)->filter(
+            fn($p) => !($excludeType && $p->type === $excludeType && $p->id === $excludeId)
+        )->values();
+
+        $myWishes = BirthdayWish::where('sender_type', $senderType)
+            ->where('sender_id', $senderId)
+            ->where('wish_year', now()->year)
+            ->get()
+            ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
+            ->toArray();
+
+        return [$todayBirthdays, $myWishes];
     }
 }

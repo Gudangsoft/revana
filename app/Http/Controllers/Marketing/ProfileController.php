@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Controller;
+use App\Models\BirthdayWish;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -19,25 +21,32 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $marketing = Auth::guard('marketing')->user();
-        
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:marketings,username,' . $marketing->id,
-            'email' => 'required|email|max:255|unique:marketings,email,' . $marketing->id,
-            'phone' => 'nullable|string|max:20',
-            'photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048', // 2MB max
+            'name'          => 'required|string|max:255',
+            'username'      => ['required','string','max:255', Rule::unique('marketings','username')->ignore($marketing->id)],
+            'email'         => ['required','email','max:255',
+                                Rule::unique('marketings','email')->ignore($marketing->id),
+                                function ($attr, $value, $fail) {
+                                    if (!str_ends_with(strtolower($value), '@gmail.com')) {
+                                        $fail('Email harus berakhiran @gmail.com (gunakan Gmail aktif).');
+                                    }
+                                }],
+            'phone'         => 'nullable|string|max:20',
+            'tanggal_lahir' => 'required|date|before:today',
+            'photo'         => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+        ], [
+            'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+            'tanggal_lahir.before'   => 'Tanggal lahir harus sebelum hari ini.',
         ]);
 
-        // Handle photo upload
         if ($request->hasFile('photo')) {
-            // Delete old photo if exists
             if ($marketing->photo && Storage::disk('public')->exists($marketing->photo)) {
                 Storage::disk('public')->delete($marketing->photo);
             }
-            
-            $file = $request->file('photo');
+            $file     = $request->file('photo');
             $filename = 'marketing_' . $marketing->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('photos/marketings', $filename, 'public');
+            $path     = $file->storeAs('photos/marketings', $filename, 'public');
             $validated['photo'] = $path;
         }
 
@@ -50,27 +59,47 @@ class ProfileController extends Controller
     public function updatePassword(Request $request)
     {
         $marketing = Auth::guard('marketing')->user();
-        
+
         $validated = $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:6|confirmed',
+            'new_password'     => 'required|min:6|confirmed',
         ], [
             'current_password.required' => 'Password saat ini harus diisi',
-            'new_password.required' => 'Password baru harus diisi',
-            'new_password.min' => 'Password baru minimal 6 karakter',
-            'new_password.confirmed' => 'Konfirmasi password tidak cocok',
+            'new_password.required'     => 'Password baru harus diisi',
+            'new_password.min'          => 'Password baru minimal 6 karakter',
+            'new_password.confirmed'    => 'Konfirmasi password tidak cocok',
         ]);
 
-        // Check if current password is correct
         if (!Hash::check($validated['current_password'], $marketing->password)) {
             return back()->withErrors(['current_password' => 'Password saat ini salah']);
         }
 
-        // Update password
         $marketing->password = Hash::make($validated['new_password']);
         $marketing->save();
 
         return redirect()->route('marketing.profile.edit')
             ->with('success', 'Password berhasil diubah');
+    }
+
+    public function birthday()
+    {
+        $marketing = Auth::guard('marketing')->user();
+        $data      = session('birthday_celebration');
+
+        if (!$data && !$marketing->isBirthdayToday()) {
+            return redirect()->route('marketing.dashboard');
+        }
+
+        $name      = $data['name']  ?? $marketing->name;
+        $umur      = $data['umur']  ?? $marketing->umur;
+        $dashboard = route('marketing.dashboard');
+
+        $wishes = BirthdayWish::where('recipient_type', 'marketing')
+            ->where('recipient_id', $marketing->id)
+            ->where('wish_year', now()->year)
+            ->latest()
+            ->get();
+
+        return view('birthday', compact('name', 'umur', 'dashboard', 'wishes'));
     }
 }

@@ -10,6 +10,14 @@
 @section('content')
 <div class="row">
     <div class="col-md-8 mx-auto">
+
+        @if(!$pic->tanggal_lahir || !$pic->email)
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>Lengkapi profil Anda: <strong>Tanggal Lahir</strong> dan <strong>Gmail aktif</strong> wajib diisi agar bisa menerima ucapan ulang tahun.</div>
+        </div>
+        @endif
+
         <!-- Profile Information Card -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
@@ -87,13 +95,18 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" 
-                                       class="form-control @error('email') is-invalid @enderror" 
-                                       id="email" 
-                                       name="email" 
-                                       value="{{ old('email', $pic->email) }}" 
+                                <label for="email" class="form-label">
+                                    Gmail Aktif <span class="text-danger">*</span>
+                                    <i class="bi bi-google text-danger ms-1" title="Harus Gmail (@gmail.com)"></i>
+                                </label>
+                                <input type="email"
+                                       class="form-control @error('email') is-invalid @enderror"
+                                       id="email"
+                                       name="email"
+                                       value="{{ old('email', $pic->email) }}"
+                                       placeholder="nama@gmail.com"
                                        required>
+                                <div class="form-text text-muted"><i class="bi bi-info-circle"></i> Digunakan untuk notifikasi ulang tahun & komunikasi.</div>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -101,17 +114,51 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="phone" class="form-label">No. Telepon</label>
-                                <input type="text" 
-                                       class="form-control @error('phone') is-invalid @enderror" 
-                                       id="phone" 
-                                       name="phone" 
-                                       value="{{ old('phone', $pic->phone) }}">
+                                <label for="phone" class="form-label">No. Telepon / WhatsApp</label>
+                                <input type="text"
+                                       class="form-control @error('phone') is-invalid @enderror"
+                                       id="phone"
+                                       name="phone"
+                                       value="{{ old('phone', $pic->phone) }}"
+                                       placeholder="628xxx">
+                                <div class="form-text text-muted"><i class="bi bi-whatsapp text-success"></i> Format: 628xxx. Digunakan untuk notifikasi WhatsApp.</div>
                                 @error('phone')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tanggal_lahir" class="form-label">
+                                    Tanggal Lahir <span class="text-danger">*</span>
+                                    <i class="bi bi-cake2 text-warning ms-1"></i>
+                                </label>
+                                <input type="date"
+                                       class="form-control @error('tanggal_lahir') is-invalid @enderror"
+                                       id="tanggal_lahir"
+                                       name="tanggal_lahir"
+                                       value="{{ old('tanggal_lahir', $pic->tanggal_lahir?->format('Y-m-d')) }}"
+                                       max="{{ now()->subDay()->format('Y-m-d') }}"
+                                       required>
+                                <div class="form-text text-muted"><i class="bi bi-gift"></i> Kami akan mengirim ucapan di hari ulang tahunmu!</div>
+                                @error('tanggal_lahir')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        @if($pic->tanggal_lahir)
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="alert alert-info py-2 w-100 mb-0">
+                                <i class="bi bi-cake2-fill text-warning"></i>
+                                Ulang tahun ke-<strong>{{ $pic->umur }}</strong> pada
+                                <strong>{{ $pic->tanggal_lahir->locale('id')->translatedFormat('j F') }}</strong>
+                                @if($pic->isBirthdayToday()) <span class="badge bg-warning text-dark ms-1">🎉 Hari ini!</span> @endif
+                            </div>
+                        </div>
+                        @endif
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">

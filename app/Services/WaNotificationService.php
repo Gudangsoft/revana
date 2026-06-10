@@ -154,6 +154,33 @@ class WaNotificationService
         $this->send($reviewer->phone, $msg, "sendDeadlineReminder[{$step}]");
     }
 
+    /**
+     * Ucapan ulang tahun ke PIC / Marketing saat mereka login di hari ulang tahunnya
+     */
+    public function notifyBirthday(Pic|Marketing $user): void
+    {
+        if (!$this->fonnte->isConfigured()) return;
+        if (!$user->phone) return;
+
+        $umur = $user->umur ?? '?';
+        $msg  = implode("\n", [
+            "🎂 *Selamat Ulang Tahun ke-{$umur}, {$user->name}!* 🎉",
+            "",
+            "Di hari yang istimewa ini, kami seluruh Team SIPERA mengucapkan:",
+            "",
+            "✨ Semoga panjang umur & selalu sehat",
+            "🌟 Semua impian dan cita-citamu terwujud",
+            "💪 Semakin sukses dalam setiap langkahmu",
+            "❤️  Dikelilingi orang-orang yang menyayangimu",
+            "",
+            "Tetap semangat berkarya ya! 🚀",
+            "",
+            "— Team SIPERA",
+        ]);
+
+        $this->send($user->phone, $msg, "notifyBirthday[{$user->name}]");
+    }
+
     private function send(string $phone, string $message, string $context): void
     {
         try {

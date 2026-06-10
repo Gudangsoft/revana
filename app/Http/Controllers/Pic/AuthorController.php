@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pic;
 
 use App\Http\Controllers\Controller;
+use App\Models\BirthdayWish;
 use App\Models\Journal;
 use App\Models\LaporanHarian;
 use App\Models\Marketing;
@@ -60,9 +61,13 @@ class AuthorController extends Controller
 
         $showReminder = $todayEntries->isEmpty() && now()->hour >= 14;
 
+        // Birthday widget
+        [$todayBirthdays, $myWishes] = $this->todayBirthdayData('pic', $pic->id, 'pic', $pic->id);
+
         return view('pic.author.dashboard', compact(
             'topPics', 'topMarketings',
-            'todayEntries', 'monthAvgCapaian', 'monthTotalEntries', 'streak', 'today', 'showReminder'
+            'todayEntries', 'monthAvgCapaian', 'monthTotalEntries', 'streak', 'today', 'showReminder',
+            'todayBirthdays', 'myWishes'
         ));
     }
 
@@ -117,7 +122,78 @@ class AuthorController extends Controller
         }
 
         $journal->load(['accreditationModel', 'picMarketing', 'picEditor', 'reviewAssignments.reviewer', 'reviewAssignments.reviewResult']);
-        
+
         return view('pic.author.show', compact('journal'));
+    }
+
+    // ── Birthday ──────────────────────────────────────────────────────────────
+
+    public function storeWish(Request $request)
+    {
+        $request->validate([
+            'recipient_type' => 'required|in:pic,marketing',
+            'recipient_id'   => 'required|integer',
+            'message'        => 'required|string|max:200',
+        ]);
+
+        $pic = Auth::guard('pic')->user();
+
+        $recipient = $request->recipient_type === 'pic'
+            ? Pic::find($request->recipient_id)
+            : Marketing::find($request->recipient_id);
+
+        if (!$recipient) {
+            return back()->with('error', 'Penerima tidak ditemukan.');
+        }
+
+        BirthdayWish::updateOrCreate(
+            [
+                'sender_type'    => 'pic',
+                'sender_id'      => $pic->id,
+                'recipient_type' => $request->recipient_type,
+                'recipient_id'   => $request->recipient_id,
+                'wish_year'      => now()->year,
+            ],
+            [
+                'sender_name'    => $pic->name,
+                'recipient_name' => $recipient->name,
+                'message'        => $request->message,
+            ]
+        );
+
+        return back()->with('wish_sent', 'Ucapan untuk ' . $recipient->name . ' berhasil dikirim! 🎉');
+    }
+
+    private function todayBirthdayData(string $senderType, int $senderId, ?string $excludeType = null, ?int $excludeId = null): array
+    {
+        $month = now()->month;
+        $day   = now()->day;
+
+        $pics = Pic::whereNotNull('tanggal_lahir')
+            ->whereMonth('tanggal_lahir', $month)
+            ->whereDay('tanggal_lahir', $day)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
+
+        $mktgs = Marketing::whereNotNull('tanggal_lahir')
+            ->whereMonth('tanggal_lahir', $month)
+            ->whereDay('tanggal_lahir', $day)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
+
+        $todayBirthdays = $pics->merge($mktgs)->filter(
+            fn($p) => !($excludeType && $p->type === $excludeType && $p->id === $excludeId)
+        )->values();
+
+        $myWishes = BirthdayWish::where('sender_type', $senderType)
+            ->where('sender_id', $senderId)
+            ->where('wish_year', now()->year)
+            ->get()
+            ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
+            ->toArray();
+
+        return [$todayBirthdays, $myWishes];
     }
 }
