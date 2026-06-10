@@ -276,6 +276,43 @@
 .pending-validation-alert {
     animation: pulse-warning 2s infinite;
 }
+
+/* ── BORDER CLEANUP ─────────────────────────────────────────────── */
+.table-monitoring tbody td {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+.table-monitoring tbody td.grp-dark     { border-left: 2px solid #64748b !important; }
+.table-monitoring tbody td.grp-info     { border-left: 4px solid #38bdf8 !important; }
+.table-monitoring tbody td.grp-warning  { border-left: 4px solid #fbbf24 !important; }
+.table-monitoring tbody td.grp-primary  { border-left: 4px solid #818cf8 !important; }
+.table-monitoring tbody td.grp-success  { border-left: 4px solid #4ade80 !important; }
+
+/* ── INPUT CLEANUP ──────────────────────────────────────────────── */
+.inline-credential-input {
+    border-color: transparent !important;
+    background: transparent !important;
+}
+.inline-credential-input:hover {
+    border-color: #ced4da !important;
+    background: #fff !important;
+}
+.inline-credential-input:focus {
+    border-color: #86b7fe !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.15) !important;
+}
+.inline-credential-input.has-value {
+    background: #fff3cd !important;
+    border-color: transparent !important;
+}
+.inline-credential-input.has-value:hover,
+.inline-credential-input.has-value:focus {
+    border-color: #fbbf24 !important;
+}
+.credential-group span { color: #cbd5e1; }
 </style>
 
 {{-- Notifikasi Tugas Menunggu Validasi --}}
@@ -663,7 +700,7 @@
                                     @endif
                                 </td>
                                 <!-- Author Access: PIC Marketing, Petugas Submit, Username, Password -->
-                                <td>
+                                <td class="grp-dark">
                                     <select class="inline-assign-select lazy-select {{ $s->marketing_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="marketing"
@@ -689,7 +726,7 @@
                                 <td><code>{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1 -->
-                                <td>
+                                <td class="grp-info">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_editor1_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="editor1" data-model="pic"
@@ -718,10 +755,19 @@
                                                onchange="quickUpdateCredential(this)">
                                     </div>
                                 </td>
-                                <td class="text-center">{!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="editor1_valid"
+                                            data-valid="{{ $s->editor1_valid ? '1' : '0' }}"
+                                            title="Toggle Editor1 Valid">
+                                        {!! $s->editor1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Author 1 -->
-                                <td>
+                                <td class="grp-warning">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_author1_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="author1" data-model="pic"
@@ -733,10 +779,19 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="author1_valid"
+                                            data-valid="{{ $s->author1_valid ? '1' : '0' }}"
+                                            title="Toggle Author1 Valid">
+                                        {!! $s->author1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Editor 2 -->
-                                <td>
+                                <td class="grp-info">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_editor2_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="editor2" data-model="pic"
@@ -748,10 +803,19 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="editor2_valid"
+                                            data-valid="{{ $s->editor2_valid ? '1' : '0' }}"
+                                            title="Toggle Editor2 Valid">
+                                        {!! $s->editor2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Reviewer 1 -->
-                                <td>
+                                <td class="grp-primary">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer1_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="reviewer1" data-model="pic"
@@ -780,11 +844,28 @@
                                                onchange="quickUpdateCredential(this)">
                                     </div>
                                 </td>
-                                <td title="{{ $s->catatan_reviewer1 }}">{{ Str::limit($s->catatan_reviewer1, 15) ?? '-' }}</td>
-                                <td class="text-center">{!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
-                                <!-- Reviewer 2 -->
                                 <td>
+                                    <input type="text" class="inline-credential-input {{ $s->catatan_reviewer1 ? 'has-value' : '' }}"
+                                           value="{{ $s->catatan_reviewer1 }}"
+                                           placeholder="catatan..."
+                                           style="min-width:80px;"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="catatan_reviewer1"
+                                           onchange="quickUpdateCredential(this)">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="reviewer1_valid"
+                                            data-valid="{{ $s->reviewer1_valid ? '1' : '0' }}"
+                                            title="Toggle Reviewer1 Valid">
+                                        {!! $s->reviewer1_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
+                                <!-- Reviewer 2 -->
+                                <td class="grp-primary">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_reviewer2_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="reviewer2" data-model="pic"
@@ -813,11 +894,28 @@
                                                onchange="quickUpdateCredential(this)">
                                     </div>
                                 </td>
-                                <td title="{{ $s->catatan_reviewer2 }}">{{ Str::limit($s->catatan_reviewer2, 15) ?? '-' }}</td>
-                                <td class="text-center">{!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
-                                <!-- Editor 3 -->
                                 <td>
+                                    <input type="text" class="inline-credential-input {{ $s->catatan_reviewer2 ? 'has-value' : '' }}"
+                                           value="{{ $s->catatan_reviewer2 }}"
+                                           placeholder="catatan..."
+                                           style="min-width:80px;"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="catatan_reviewer2"
+                                           onchange="quickUpdateCredential(this)">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="reviewer2_valid"
+                                            data-valid="{{ $s->reviewer2_valid ? '1' : '0' }}"
+                                            title="Toggle Reviewer2 Valid">
+                                        {!! $s->reviewer2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
+                                <!-- Editor 3 -->
+                                <td class="grp-info">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_editor3_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="editor3" data-model="pic"
@@ -829,10 +927,19 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="editor3_valid"
+                                            data-valid="{{ $s->editor3_valid ? '1' : '0' }}"
+                                            title="Toggle Editor3 Valid">
+                                        {!! $s->editor3_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Author 2 -->
-                                <td>
+                                <td class="grp-warning">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_author2_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="author2" data-model="pic"
@@ -844,10 +951,19 @@
                                         @endif
                                     </select>
                                 </td>
-                                <td class="text-center">{!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
-                                
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="author2_valid"
+                                            data-valid="{{ $s->author2_valid ? '1' : '0' }}"
+                                            title="Toggle Author2 Valid">
+                                        {!! $s->author2_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
+
                                 <!-- Production -->
-                                <td>
+                                <td class="grp-success">
                                     <select class="inline-assign-select lazy-select {{ $s->petugas_production_id ? 'has-value' : '' }}"
                                             data-submission="{{ $s->id }}"
                                             data-type="production" data-model="pic"
@@ -860,29 +976,47 @@
                                     </select>
                                 </td>
                                 <td title="Username Editor">
-                                    @if($s->username_editor)
-                                        <code style="font-size:0.67rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->username_editor }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                    <input type="text" class="inline-credential-input {{ $s->username_editor ? 'has-value' : '' }}"
+                                           value="{{ $s->username_editor }}"
+                                           placeholder="user"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="username_editor"
+                                           onchange="quickUpdateCredential(this)">
                                 </td>
                                 <td title="Password Editor">
-                                    @if($s->password_editor)
-                                        <code style="font-size:0.67rem; background:#d1fae5; padding:1px 4px; border-radius:3px;">{{ $s->password_editor }}</code>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                    <input type="text" class="inline-credential-input {{ $s->password_editor ? 'has-value' : '' }}"
+                                           value="{{ $s->password_editor }}"
+                                           placeholder="pass"
+                                           data-submission="{{ $s->id }}"
+                                           data-field="password_editor"
+                                           onchange="quickUpdateCredential(this)">
                                 </td>
-                                <td style="max-width:120px;">
-                                    @if($s->link_publish)
-                                        <a href="{{ $s->link_publish }}" target="_blank" title="{{ $s->link_publish }}" style="font-size:0.68rem; word-break:break-all;">
-                                            <i class="bi bi-link-45deg"></i> {{ Str::limit($s->link_publish, 30) }}
-                                        </a>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
+                                <td title="Link Publish">
+                                    <div style="display:flex;align-items:center;gap:2px;">
+                                        <input type="text" class="inline-credential-input {{ $s->link_publish ? 'has-value' : '' }}"
+                                               value="{{ $s->link_publish }}"
+                                               placeholder="https://..."
+                                               style="min-width:90px;"
+                                               data-submission="{{ $s->id }}"
+                                               data-field="link_publish"
+                                               onchange="quickUpdateCredential(this)">
+                                        <button type="button" class="btn btn-link p-0 border-0" style="font-size:0.8rem;line-height:1;"
+                                                onclick="var u=this.previousElementSibling.value.trim();if(u)window.open(u,'_blank');"
+                                                title="Buka Link">
+                                            <i class="bi bi-box-arrow-up-right text-info"></i>
+                                        </button>
+                                    </div>
                                 </td>
-                                <td class="text-center">{!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-link p-0 border-0"
+                                            onclick="quickToggleValid(this)"
+                                            data-submission="{{ $s->id }}"
+                                            data-field="production_valid"
+                                            data-valid="{{ $s->production_valid ? '1' : '0' }}"
+                                            title="Toggle Production Valid">
+                                        {!! $s->production_valid ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>' !!}
+                                    </button>
+                                </td>
                             </tr>
                             @empty
                             <tr>
@@ -1038,6 +1172,41 @@ function quickUpdateCredential(inputEl) {
     .catch(error => {
         inputEl.classList.remove('saving');
         console.error('Error:', error);
+        alert('Terjadi kesalahan jaringan');
+    });
+}
+
+function quickToggleValid(btn) {
+    const submissionId = btn.dataset.submission;
+    const field = btn.dataset.field;
+    const currentValid = btn.dataset.valid === '1';
+
+    btn.disabled = true;
+
+    fetch('{{ route("admin.submissions.toggle-valid-field") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ submission_id: submissionId, field: field })
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        if (data.success) {
+            const newValid = !currentValid;
+            btn.dataset.valid = newValid ? '1' : '0';
+            btn.innerHTML = newValid
+                ? '<i class="bi bi-check-circle-fill text-success"></i>'
+                : '<i class="bi bi-circle text-muted"></i>';
+        } else {
+            alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
         alert('Terjadi kesalahan jaringan');
     });
 }

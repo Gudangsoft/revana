@@ -180,7 +180,23 @@
 
 ---
 
-## 14. 🔄 Update: admin
+## 14. Sinkronisasi Desain ke Monitoring Fasttrack
+
+**Tujuan:** Monitoring Fasttrack (`/admin/fasttrack-management/monitoring`) belum mendapat perubahan desain dan fungsionalitas yang sudah diterapkan ke monitoring submissions. BKD dan JAFA sudah otomatis terupdate karena memakai view yang sama (`submissions/monitoring.blade.php`).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | CSS border cleanup + input transparan (sama dengan submissions/monitoring); 9 class `grp-*` di first td setiap group; 8 kolom Valid → toggle button; catatan_reviewer1 & catatan_reviewer2 → editable input; Production User Editor/Pass Editor/Link Publish → editable input; tambah `quickToggleValid()` JS function |
+
+### Detail
+- Fasttrack tidak punya Validator section (hanya 8 tahap s.d. Production) — tidak ada `grp-validator`
+- Production user/pass masih pakai `<code>` read-only di fasttrack → disamakan dengan submissions monitoring (jadi `<input>` editable)
+- Semua route yang dipanggil sama: `admin.submissions.quick-update-credential`, `admin.submissions.toggle-valid-field`, `admin.submissions.quick-assign`
+
+---
+
+## 15. 🔄 Update: admin
 
 - **Commit:** `8e22f8e` — 13:24 oleh Gudangsoft
 - **File berubah:** 3 file
@@ -194,6 +210,14 @@
 - **Commit:** `43cc25b` — 13:33 oleh Gudangsoft
 - **File berubah:** 3 file
 - `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+
+
+## 16. 🔄 Update: monitor
+
+- **Commit:** `faf8398` — 13:39 oleh Gudangsoft
+- **File berubah:** 2 file
 - `log-update-2026-06-10.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
 
