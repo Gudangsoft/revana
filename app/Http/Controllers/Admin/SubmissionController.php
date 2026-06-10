@@ -2066,13 +2066,19 @@ class SubmissionController extends Controller
     private function applyProgramFilter(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
     {
         $program = $request->input('program');
-        if (in_array($program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $program);
-            // BKD dan JAFA hanya proses normal, tidak ada fasttrack
-            $query->where(function ($q) {
-                $q->where('process_type', '!=', 'fasttrack')
-                  ->orWhereNull('process_type');
-            });
+        if ($program === 'bkd') {
+            $query->where('program_type', 'bkd')
+                  ->where(function ($q) {
+                      $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+                  });
+        } elseif ($program === 'jafa') {
+            $query->where('program_type', 'jafa')
+                  ->where(function ($q) {
+                      $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
+                  });
+        } else {
+            // Normal: hanya submission tanpa program khusus
+            $query->whereNull('program_type');
         }
     }
 }

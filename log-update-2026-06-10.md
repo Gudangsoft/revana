@@ -909,3 +909,32 @@
 | `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | Sama |
 | `resources/views/marketing/submissions-monitoring.blade.php` | Sama |
 | `resources/views/marketing/fasttrack/monitoring.blade.php` | Sama |
+
+## 73. 🔄 Update: short
+
+- **Commit:** `7f0a7ae` — 22:36 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/admin/submissions/monitoring.blade.php`
+- `resources/views/marketing/fasttrack/monitoring.blade.php`
+- `resources/views/marketing/submissions-monitoring.blade.php`
+
+## 71. Isolasi Data Monitoring per Program: Normal/BKD/JAFA/Fasttrack
+
+**Tujuan:** Halaman Monitoring Normal menampilkan semua data termasuk BKD dan JAFA. Harusnya tiap section (Normal, BKD, JAFA) hanya menampilkan datanya sendiri.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | `applyProgramFilter()`: tambah `else { whereNull('program_type') }` — Normal hanya tampilkan yang tidak punya program khusus |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `submissionsMonitoring()`: ganti blok `if filled program` → if/elseif/else dengan `whereNull` untuk Normal; `$statsQuery` juga difilter program |
+| `app/Http/Controllers/Marketing/DashboardController.php` | `submissionsMonitoring()`: sama dengan PIC — if/elseif/else program filter |
+
+### Logic
+- `?program=` (kosong/null) → `WHERE program_type IS NULL` → data Normal saja
+- `?program=bkd` → `WHERE program_type = 'bkd'` → data BKD saja
+- `?program=jafa` → `WHERE program_type = 'jafa'` → data JAFA saja
+- Fasttrack: route terpisah, filter `process_type = 'fasttrack'`

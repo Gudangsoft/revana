@@ -940,12 +940,14 @@ class JournalManagementController extends Controller
             });
         }
 
-        if ($request->filled('program') && in_array($request->program, ['bkd', 'jafa'])) {
-            $query->where('program_type', $request->program)
-                  ->where(function ($q) {
-                      $q->where('process_type', '!=', 'fasttrack')
-                        ->orWhereNull('process_type');
-                  });
+        // Filter program: Normal hanya null, BKD/JAFA sesuai program_type
+        $program = $request->input('program');
+        if ($program === 'bkd') {
+            $query->where('program_type', 'bkd');
+        } elseif ($program === 'jafa') {
+            $query->where('program_type', 'jafa');
+        } else {
+            $query->whereNull('program_type');
         }
 
         // Sort — default Terlama agar pengerjaan urut dari data pertama
@@ -960,13 +962,19 @@ class JournalManagementController extends Controller
         $submissions = $query->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
 
-        // Statistics - based on PIC's assigned tasks (exclude fasttrack)
+        // Statistics - based on PIC's assigned tasks (exclude fasttrack), filtered by program
         $statsQuery = Submission::where(function($q) {
             $q->where('process_type', '!=', 'fasttrack')->orWhereNull('process_type');
         });
+        if ($program === 'bkd') {
+            $statsQuery->where('program_type', 'bkd');
+        } elseif ($program === 'jafa') {
+            $statsQuery->where('program_type', 'jafa');
+        } else {
+            $statsQuery->whereNull('program_type');
+        }
         $statsQuery->where(function($q) use ($picId) {
-            $q->where('created_by', $picId)
-              ->orWhere('petugas_submit_id', $picId)
+            $q->where('petugas_submit_id', $picId)
               ->orWhere('petugas_editor1_id', $picId)
               ->orWhere('petugas_author1_id', $picId)
               ->orWhere('petugas_editor2_id', $picId)
