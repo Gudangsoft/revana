@@ -655,12 +655,12 @@ class DashboardController extends Controller
                   });
         }
 
-        // Sort
-        match ($request->input('sort_by', 'date_desc')) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit'),
+        // Sort — default Terlama (FIFO)
+        match ($request->input('sort_by', 'date_asc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
+            'date_desc'  => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+            default      => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
         };
 
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 50;
@@ -934,12 +934,12 @@ class DashboardController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->to_date);
         }
         
-        // Sort
-        match ($request->input('sort_by', 'date_desc')) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit'),
+        // Sort — default Terlama (FIFO)
+        match ($request->input('sort_by', 'date_asc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
+            'date_desc'  => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+            default      => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
         };
 
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;

@@ -52,8 +52,8 @@
                 <div class="d-flex align-items-center gap-1">
                     <small class="text-muted fw-semibold">Urut:</small>
                     <select name="sort_by" class="form-select form-select-sm" style="width:auto;">
-                        <option value="date_desc" {{ request('sort_by','date_desc')=='date_desc'?'selected':'' }}>↓ Terbaru</option>
-                        <option value="date_asc"  {{ request('sort_by')=='date_asc' ?'selected':'' }}>↑ Terlama</option>
+                        <option value="date_asc"  {{ request('sort_by','date_asc')=='date_asc' ?'selected':'' }}>↑ Terlama</option>
+                        <option value="date_desc" {{ request('sort_by')=='date_desc'?'selected':'' }}>↓ Terbaru</option>
                         <option value="title_asc" {{ request('sort_by')=='title_asc'?'selected':'' }}>↑ A→Z</option>
                         <option value="title_desc"{{ request('sort_by')=='title_desc'?'selected':'' }}>↓ Z→A</option>
                     </select>

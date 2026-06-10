@@ -815,13 +815,13 @@ class SubmissionController extends Controller
 
         $this->applyProgramFilter($query, $request);
 
-        // Sort
-        $sortBy = $request->input('sort_by', 'date_desc');
+        // Sort — default Terlama (FIFO)
+        $sortBy = $request->input('sort_by', 'date_asc');
         match ($sortBy) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderByDesc('id'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderByDesc('id'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
+            'date_desc'  => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+            default      => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
         };
 
         // Get paginated submissions
@@ -1867,11 +1867,11 @@ class SubmissionController extends Controller
         $this->applyProgramFilter($query, $request);
 
         // Sort
-        match ($request->input('sort_by', 'date_desc')) {
-            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderByDesc('id'),
-            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderByDesc('id'),
-            'date_asc'   => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
-            default      => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+        match ($request->input('sort_by', 'date_asc')) {
+            'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
+            'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
+            'date_desc'  => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
+            default      => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
         };
 
         // Get paginated submissions

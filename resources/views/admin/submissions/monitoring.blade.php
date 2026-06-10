@@ -548,8 +548,8 @@
                         <div class="col-md-2">
                             <label for="sort_by" class="form-label small mb-1">Urutkan</label>
                             <select class="form-select form-select-sm" id="sort_by" name="sort_by">
-                                <option value="date_desc" {{ request('sort_by', 'date_desc') == 'date_desc' ? 'selected' : '' }}>↓ Terbaru</option>
-                                <option value="date_asc"  {{ request('sort_by') == 'date_asc'  ? 'selected' : '' }}>↑ Terlama</option>
+                                <option value="date_asc"  {{ request('sort_by', 'date_asc') == 'date_asc'   ? 'selected' : '' }}>↑ Terlama</option>
+                                <option value="date_desc" {{ request('sort_by') == 'date_desc' ? 'selected' : '' }}>↓ Terbaru</option>
                                 <option value="title_asc" {{ request('sort_by') == 'title_asc' ? 'selected' : '' }}>↑ Judul A→Z</option>
                                 <option value="title_desc"{{ request('sort_by') == 'title_desc'? 'selected' : '' }}>↓ Judul Z→A</option>
                             </select>

@@ -886,3 +886,26 @@
 - Default baru: `↑ Terlama` (oldest first) — data pertama disubmit muncul di atas
 - Secondary sort `id ASC` memastikan urutan konsisten ketika `tanggal_submit` sama
 - Admin monitoring tetap `↓ Terbaru` (untuk overview terbaru)
+
+## 71. 🔄 Update: up
+
+- **Commit:** `f0c2175` — 22:32 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
+
+## 70. Default Urutan "Terlama" Diterapkan ke Semua Tabel Monitoring
+
+**Tujuan:** Semua halaman monitoring (Admin, Marketing, PIC — normal & fasttrack) default ke urutan terlama di atas agar pengerjaan FIFO dari data pertama masuk.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | `monitoring()` dan `fasttrackMonitoring()`: default `'date_desc'` → `'date_asc'`; secondary sort `id ASC` |
+| `app/Http/Controllers/Marketing/DashboardController.php` | `submissionsMonitoring()` dan `fasttrackMonitoring()`: default `'date_desc'` → `'date_asc'`; secondary sort `id ASC` |
+| `resources/views/admin/submissions/monitoring.blade.php` | Opsi `↑ Terlama` pindah ke urutan pertama, jadi default selected |
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | Sama |
+| `resources/views/marketing/submissions-monitoring.blade.php` | Sama |
+| `resources/views/marketing/fasttrack/monitoring.blade.php` | Sama |
