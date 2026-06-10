@@ -39,3 +39,28 @@
 - `log-update-2026-06-09.md`
 - `log-update-2026-06-10.md`
 
+
+## 4. 🔄 Update: update log
+
+- **Commit:** `ad75d9c` — 11:15 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-06-10.md`
+
+---
+
+## 5. Rapikan Tombol Journal Slots + Tambah Export Excel ke Bidang Ilmu & Referensi Jurnal
+
+**Tujuan:** (1) Tombol Kolom di `/admin/journal-slots` tidak rapi karena pakai `btn-group` tanpa `btn-sm`. (2) Halaman `/admin/field-of-studies` dan `/admin/referensi-jurnals` belum ada tombol Export Excel.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/journal-slots/index.blade.php` | Ganti `btn-group` → `d-flex gap-2 flex-wrap`; tambah `btn-sm` ke semua tombol |
+| `resources/views/admin/field-of-studies/index.blade.php` | Tambah tombol Export Excel (btn-info) |
+| `resources/views/admin/referensi-jurnals/index.blade.php` | Tambah tombol Export Excel (btn-sm btn-info) dengan filter diteruskan |
+| `app/Exports/FieldOfStudiesExport.php` | Baru — export: No, Nama, Deskripsi, Urutan, Reviewer, Pendaftar, Status |
+| `app/Exports/ReferensiJurnalsExport.php` | Baru — export dengan filter search, jenis, bidang, tahun |
+| `app/Http/Controllers/Admin/FieldOfStudyController.php` | Tambah `export()` |
+| `app/Http/Controllers/Admin/ReferensiJurnalController.php` | Tambah `export()` |
+| `routes/web.php` | Tambah route `field-of-studies-export` dan `referensi-jurnals/export` |
+

@@ -241,7 +241,10 @@
             @endif
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ route('admin.referensi-jurnals.template') }}" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ route('admin.referensi-jurnals.export', request()->query()) }}" class="btn btn-sm btn-info">
+                <i class="bi bi-download"></i> Export Excel
+            </a>
+            <a href="{{ route('admin.referensi-jurnals.template') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-file-earmark-arrow-down"></i> Template
             </a>
             <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importModal">

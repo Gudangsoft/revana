@@ -150,6 +150,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('journals', JournalController::class);
         
         // Referensi Jurnal
+        Route::get('/referensi-jurnals/export', [ReferensiJurnalController::class, 'export'])->name('referensi-jurnals.export');
         Route::get('/referensi-jurnals/template', [ReferensiJurnalController::class, 'downloadTemplate'])->name('referensi-jurnals.template');
         Route::post('/referensi-jurnals/import', [ReferensiJurnalController::class, 'import'])->name('referensi-jurnals.import');
         Route::post('/referensi-jurnals/fetch-url', [ReferensiJurnalController::class, 'fetchFromUrl'])->name('referensi-jurnals.fetch-url');
@@ -355,6 +356,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/field-of-studies/{fieldOfStudy}/toggle', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'toggleStatus'])->name('field-of-studies.toggle');
         Route::post('/field-of-studies-import', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'import'])->name('field-of-studies.import');
         Route::get('/field-of-studies-template', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'downloadTemplate'])->name('field-of-studies.template');
+        Route::get('/field-of-studies-export', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'export'])->name('field-of-studies.export');
         Route::delete('/field-of-studies-bulk-delete', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'bulkDelete'])->name('field-of-studies.bulk-delete');
         
         // Audit Log

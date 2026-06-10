@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\FieldOfStudiesExport;
 use App\Http\Controllers\Controller;
+use App\Imports\FieldOfStudyImport;
 use App\Models\FieldOfStudy;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\FieldOfStudyImport;
 
 class FieldOfStudyController extends Controller
 {
@@ -182,6 +183,11 @@ class FieldOfStudyController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function export()
+    {
+        return Excel::download(new FieldOfStudiesExport, 'bidang-ilmu.xlsx');
     }
 
     /**

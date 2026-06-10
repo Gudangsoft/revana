@@ -12,10 +12,13 @@
             <button type="button" class="btn btn-danger" id="bulkDeleteBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal">
                 <i class="fas fa-trash"></i> Hapus Massal (<span id="selectedCount">0</span>)
             </button>
+            <a href="{{ route('admin.field-of-studies.export') }}" class="btn btn-info">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </a>
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fas fa-file-excel"></i> Import Excel
             </button>
-            <a href="{{ route('admin.field-of-studies.template') }}" class="btn btn-info">
+            <a href="{{ route('admin.field-of-studies.template') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-download"></i> Template
             </a>
             <a href="{{ route('admin.field-of-studies.create') }}" class="btn btn-primary">

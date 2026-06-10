@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\ReferensiJurnalsExport;
 use App\Http\Controllers\Controller;
 use App\Imports\ReferensiJurnalImport;
 use App\Models\ReferensiJurnal;
@@ -270,6 +271,12 @@ class ReferensiJurnalController extends Controller
 
         return redirect()->route('admin.referensi-jurnals.index')
             ->with('success', 'Referensi Jurnal berhasil dihapus');
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->only(['search', 'jenis_jurnal', 'bidang_ilmu', 'tahun']);
+        return Excel::download(new ReferensiJurnalsExport($filters), 'referensi-jurnal.xlsx');
     }
 
     public function import(Request $request)

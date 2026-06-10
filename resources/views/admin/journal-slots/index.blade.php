@@ -13,24 +13,24 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-calendar3"></i> Data Slot & Monitoring</span>
-                <div class="btn-group">
+                <div class="d-flex gap-2 flex-wrap align-items-center">
                     @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Kode Slot', 'Nama Jurnal', 'Publisher', 'Kategori', 'Jenis', 'Akreditasi', 'Volume', 'Nomor', 'Bulan', 'Tahun', 'Jumlah Slot', 'Terpakai', 'Tersedia', 'Status', 'Aksi'], 'columnOffset' => 1])
-                    <a href="{{ route('admin.journal-slots.template') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('admin.journal-slots.template') }}" class="btn btn-sm btn-outline-secondary">
                         <i class="bi bi-file-earmark-arrow-down"></i> Template
                     </a>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="bi bi-upload"></i> Import
                     </button>
-                    <a href="{{ route('admin.journal-slots.export', request()->query()) }}" class="btn btn-info">
-                        <i class="bi bi-download"></i> Export
+                    <a href="{{ route('admin.journal-slots.export', request()->query()) }}" class="btn btn-sm btn-info">
+                        <i class="bi bi-download"></i> Export Excel
                     </a>
                     <form method="POST" action="{{ route('admin.journal-slots.sync-all') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi slot_terpakai semua slot berdasarkan data submission aktual?\n\nProses ini akan memperbaiki counter slot yang tidak sinkron.')">
                         @csrf
-                        <button type="submit" class="btn btn-warning">
+                        <button type="submit" class="btn btn-sm btn-warning">
                             <i class="bi bi-arrow-repeat"></i> Sync Semua Slot
                         </button>
                     </form>
-                    <a href="{{ route('admin.journal-slots.create') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.journal-slots.create') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-circle"></i> Tambah
                     </a>
                 </div>
