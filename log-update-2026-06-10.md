@@ -98,3 +98,19 @@
 - `resources/views/admin/referensi-jurnals/index.blade.php`
 - `routes/web.php`
 
+
+## 8. 🔄 Update: export import excel kategori & jenis jurnal
+
+- **Commit:** `819e2d4` — 11:26 oleh Gudangsoft
+- **File berubah:** 10 file
+- `app/Exports/JenisJurnalsExport.php`
+- `app/Exports/KategorisExport.php`
+- `app/Http/Controllers/Admin/JenisJurnalController.php`
+- `app/Http/Controllers/Admin/KategoriController.php`
+- `app/Imports/JenisJurnalImport.php`
+- `app/Imports/KategoriImport.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/jenis-jurnals/index.blade.php`
+- `resources/views/admin/kategoris/index.blade.php`
+- `routes/web.php`
+
