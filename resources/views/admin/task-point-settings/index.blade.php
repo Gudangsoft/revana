@@ -320,10 +320,14 @@
         'points' => (float) $s->points,
         'active' => (bool)  $s->is_active,
     ]);
+    $picDefaultsJs = array_combine(
+        $picOrder,
+        array_map(fn($k) => ['label' => $k, 'points' => 1, 'active' => false], $picOrder)
+    );
 @endphp
 <script>
 const PIC_STEPS = @json($picOrder);
-const PIC_STEP_DEFAULTS = @json(array_combine(array_values($picOrder), array_fill(0, count($picOrder), ['label'=>'—','points'=>1,'active'=>false])));
+const PIC_STEP_DEFAULTS = @json($picDefaultsJs);
 const PIC_INIT_DATA = @json($picDataJs);
 
 // Merge defaults with actual DB data

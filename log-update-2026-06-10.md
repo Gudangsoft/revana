@@ -323,3 +323,13 @@
 - `log-update-2026-06-10.md`
 - `resources/views/reports/journal-article.blade.php`
 
+
+## 25. 🔄 Update: point
+
+- **Commit:** `1c22df4` — 14:40 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/TaskPointSettingController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/task-point-settings/index.blade.php`
+- `routes/web.php`
+
