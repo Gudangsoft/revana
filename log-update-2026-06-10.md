@@ -29,3 +29,13 @@
 ### Catatan
 - Sebelumnya `index()` sudah benar (query by `validated_at`) tapi `exportExcel` dan `exportPdf` masih pakai `buildData()` lama
 - Setelah fix, Export Excel dan PDF kini menampilkan angka yang sama dengan tampilan halaman
+
+## 3. 🔄 Update: export
+
+- **Commit:** `303d6a3` — 11:11 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Exports/JournalSlotsExport.php`
+- `app/Http/Controllers/Admin/LaporanKinerjaController.php`
+- `log-update-2026-06-09.md`
+- `log-update-2026-06-10.md`
+
