@@ -106,7 +106,7 @@
                                        value="{{ old('email', $pic->email) }}"
                                        placeholder="nama@gmail.com"
                                        required>
-                                <div class="form-text text-muted"><i class="bi bi-info-circle"></i> Digunakan untuk notifikasi ulang tahun & komunikasi.</div>
+                                <div class="form-text text-muted"><i class="bi bi-envelope-check"></i> Pastikan Gmail aktif dan bisa menerima email</div>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -143,7 +143,7 @@
                                        value="{{ old('tanggal_lahir', $pic->tanggal_lahir?->format('Y-m-d')) }}"
                                        max="{{ now()->subDay()->format('Y-m-d') }}"
                                        required>
-                                <div class="form-text text-muted"><i class="bi bi-gift"></i> Kami akan mengirim ucapan di hari ulang tahunmu!</div>
+                                <div class="form-text text-muted"><i class="bi bi-calendar-check"></i> Pastikan data lahir terisi dengan benar</div>
                                 @error('tanggal_lahir')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

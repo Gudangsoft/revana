@@ -543,3 +543,19 @@
 | `resources/views/birthday.blade.php` | Tambah section "Ucapan dari rekan-rekanmu" untuk menampilkan wish yang diterima |
 | `routes/web.php` | Tambah 3 POST routes: `admin.birthday.wish`, `pic.birthday.wish`, `marketing.birthday.wish` |
 
+
+## 41. 🔄 Update: bird day staf
+
+- **Commit:** `98c4e6b` — 16:35 oleh Gudangsoft
+- **File berubah:** 21 file
+- `app/Http/Controllers/Admin/DashboardController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Marketing/ProfileController.php`
+- `app/Http/Controllers/Pic/Auth/LoginController.php`
+- `app/Http/Controllers/Pic/AuthorController.php`
+- `app/Http/Controllers/Pic/ProfileController.php`
+- `app/Models/BirthdayWish.php`
+- `app/Models/Marketing.php`
+- `app/Models/Pic.php`
+- `app/Services/WaNotificationService.php`
+
