@@ -442,3 +442,40 @@
 - Dibungkus `@feature('fasttrack') ... @endfeature` agar tidak tampil jika fitur dinonaktifkan
 - Berlaku untuk semua program: Submit (tanpa program), BKD (`?program=bkd`), dan JAFA (`?program=jafa`) — karena ketiganya pakai view yang sama
 
+---
+
+## 34. Tugas Urgent Muncul Paling Atas di /pic/my-tasks + Sinkronkan Jumlah
+
+**Tujuan:** Di halaman Tugas Saya (/pic/my-tasks), tugas dengan icon warning (merah) muncul tersebar di mana saja tergantung urutan tanggal. User ingin tugas urgent langsung muncul di paling atas. Selain itu, jumlah "Harus Dikerjakan" di stat card dan badge sidebar tidak sinkron dengan icon warning yang tampil di tabel karena mapping REVIEWER1/REVIEWER2 salah.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `myTasks()`: ganti `->latest()` dengan `->orderByRaw(CASE urgent...0 ELSE 1 END) + orderBy(created_at desc)`; `isUrgentForPic()`: perbaiki mapping REVIEWER1/REVIEWER2 dari `petugas_editor1_id/editor2_id` → `petugas_reviewer1_id/reviewer2_id` |
+| `resources/views/pic/partials/sidebar.blade.php` | Tambah `petugas_reviewer1_id`+REVIEWER1 dan `petugas_reviewer2_id`+REVIEWER2 ke query badge sidebar |
+
+### Detail
+- SQL `CASE WHEN (status LIKE 'EDITOR1%' AND petugas_editor1_id = ?) THEN 0 ... ELSE 1 END ASC` — semua 9 tahap — memindahkan urgent tasks ke atas tanpa memuat semua record ke PHP
+- `isUrgentForPic()` mapping sebelumnya untuk REVIEWER memakai `petugas_editor1_id` (salah dari implementasi lama) — menyebabkan stat card menunjukkan angka berbeda dengan icon warning di tabel
+- Sidebar badge juga tidak menghitung REVIEWER — kini sudah ditambahkan
+
+**Tujuan:** Halaman Monitoring Proses (Submit, BKD, JAFA) belum memiliki akses cepat ke halaman Monitoring Fasttrack. Sebelumnya hanya ada info-alert teks di monitoring Submit saja, dan disembunyikan untuk BKD/JAFA.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | Card-header: tambah tombol "Lihat Fasttrack" (btn-warning) di samping tombol Kembali; tombol hanya muncul jika fitur fasttrack aktif (`@feature`); hapus info-alert lama yang redundan |
+
+### Detail
+- Tombol `⚡ Lihat Fasttrack` mengarah ke `admin.fasttrack-management.monitoring.index`
+- Dibungkus `@feature('fasttrack') ... @endfeature` agar tidak tampil jika fitur dinonaktifkan
+- Berlaku untuk semua program: Submit (tanpa program), BKD (`?program=bkd`), dan JAFA (`?program=jafa`) — karena ketiganya pakai view yang sama
+
+
+## 36. 🔄 Update: up pic
+
+- **Commit:** `88e76de` — 15:40 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+

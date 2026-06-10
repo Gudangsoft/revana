@@ -1643,8 +1643,27 @@ class JournalManagementController extends Controller
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
 
-        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
-        
+        // Urgent tasks first, then newest — using SQL CASE to avoid loading all records
+        $urgentBindings = array_fill(0, 9, $picId);
+        $submissions = $query
+            ->orderByRaw(
+                "CASE
+                    WHEN (status LIKE 'EDITOR1%'    AND petugas_editor1_id    = ?) THEN 0
+                    WHEN (status LIKE 'AUTHOR1%'    AND petugas_author1_id    = ?) THEN 0
+                    WHEN (status LIKE 'EDITOR2%'    AND petugas_editor2_id    = ?) THEN 0
+                    WHEN (status LIKE 'REVIEWER1%'  AND petugas_reviewer1_id  = ?) THEN 0
+                    WHEN (status LIKE 'REVIEWER2%'  AND petugas_reviewer2_id  = ?) THEN 0
+                    WHEN (status LIKE 'EDITOR3%'    AND petugas_editor3_id    = ?) THEN 0
+                    WHEN (status LIKE 'AUTHOR2%'    AND petugas_author2_id    = ?) THEN 0
+                    WHEN (status LIKE 'PRODUCTION%' AND petugas_production_id = ?) THEN 0
+                    WHEN (status LIKE 'VALIDATOR%'  AND petugas_validator_id  = ?) THEN 0
+                    ELSE 1 END ASC",
+                $urgentBindings
+            )
+            ->orderBy('created_at', 'desc')
+            ->paginate(request()->input('per_page', 20))
+            ->withQueryString();
+
         // Statistics for current PIC - all assigned submissions
         $baseQuery = function() use ($picId) {
             return Submission::where(function($q) use ($picId) {
@@ -1742,22 +1761,15 @@ class JournalManagementController extends Controller
         
         // Check if current status matches PIC's assigned role
         $urgentMappings = [
-            'NEW' => ['petugas_submit_id'],
-            'EDITOR1_PROCESS' => ['petugas_editor1_id'],
-            'EDITOR1_REVISION' => ['petugas_editor1_id'],
-            'AUTHOR1_REVISION' => ['petugas_author1_id'],
-            'AUTHOR1_PROCESS' => ['petugas_author1_id'],
-            'EDITOR2_PROCESS' => ['petugas_editor2_id'],
-            'EDITOR2_REVISION' => ['petugas_editor2_id'],
-            'REVIEWER1_PROCESS' => ['petugas_editor1_id', 'petugas_editor2_id'],
-            'REVIEWER2_PROCESS' => ['petugas_editor1_id', 'petugas_editor2_id'],
-            'EDITOR3_PROCESS' => ['petugas_editor3_id'],
-            'EDITOR3_REVISION' => ['petugas_editor3_id'],
-            'AUTHOR2_REVISION' => ['petugas_author2_id'],
-            'AUTHOR2_PROCESS' => ['petugas_author2_id'],
-            'PRODUCTION_PROCESS' => ['petugas_production_id'],
-            'PRODUCTION_REVISION' => ['petugas_production_id'],
-            'VALIDATOR_PROCESS' => ['petugas_validator_id'],
+            'EDITOR1'    => ['petugas_editor1_id'],
+            'AUTHOR1'    => ['petugas_author1_id'],
+            'EDITOR2'    => ['petugas_editor2_id'],
+            'REVIEWER1'  => ['petugas_reviewer1_id'],
+            'REVIEWER2'  => ['petugas_reviewer2_id'],
+            'EDITOR3'    => ['petugas_editor3_id'],
+            'AUTHOR2'    => ['petugas_author2_id'],
+            'PRODUCTION' => ['petugas_production_id'],
+            'VALIDATOR'  => ['petugas_validator_id'],
         ];
         
         foreach ($urgentMappings as $statusKey => $fields) {

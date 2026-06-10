@@ -232,12 +232,14 @@
         if ($picId) {
             $pendingTasks = \Illuminate\Support\Facades\Cache::remember("pic.pending_tasks.{$picId}", 60, function () use ($picId) {
                 return \App\Models\Submission::where(function($q) use ($picId) {
-                    $q->where(fn($s) => $s->where('petugas_editor1_id', $picId)->where('status', 'like', '%EDITOR1%'))
-                      ->orWhere(fn($s) => $s->where('petugas_author1_id', $picId)->where('status', 'like', '%AUTHOR1%'))
-                      ->orWhere(fn($s) => $s->where('petugas_editor2_id', $picId)->where('status', 'like', '%EDITOR2%'))
-                      ->orWhere(fn($s) => $s->where('petugas_editor3_id', $picId)->where('status', 'like', '%EDITOR3%'))
-                      ->orWhere(fn($s) => $s->where('petugas_author2_id', $picId)->where('status', 'like', '%AUTHOR2%'))
-                      ->orWhere(fn($s) => $s->where('petugas_production_id', $picId)->where('status', 'like', '%PRODUCTION%'))
+                    $q->where(fn($s) => $s->where('petugas_editor1_id',    $picId)->where('status', 'like', '%EDITOR1%'))
+                      ->orWhere(fn($s) => $s->where('petugas_author1_id',   $picId)->where('status', 'like', '%AUTHOR1%'))
+                      ->orWhere(fn($s) => $s->where('petugas_editor2_id',   $picId)->where('status', 'like', '%EDITOR2%'))
+                      ->orWhere(fn($s) => $s->where('petugas_reviewer1_id', $picId)->where('status', 'like', '%REVIEWER1%'))
+                      ->orWhere(fn($s) => $s->where('petugas_reviewer2_id', $picId)->where('status', 'like', '%REVIEWER2%'))
+                      ->orWhere(fn($s) => $s->where('petugas_editor3_id',   $picId)->where('status', 'like', '%EDITOR3%'))
+                      ->orWhere(fn($s) => $s->where('petugas_author2_id',   $picId)->where('status', 'like', '%AUTHOR2%'))
+                      ->orWhere(fn($s) => $s->where('petugas_production_id',$picId)->where('status', 'like', '%PRODUCTION%'))
                       ->orWhere(fn($s) => $s->where('petugas_validator_id', $picId)->where('status', 'like', '%VALIDATOR%'));
                 })->whereNotIn('status', ['PUBLISHED', 'REJECTED'])->count();
             });
