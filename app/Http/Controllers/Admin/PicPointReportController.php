@@ -336,39 +336,44 @@ class PicPointReportController extends Controller
             'konfirmasi.in'       => 'Konfirmasi tidak valid. Ketik HITUNG ULANG (huruf kapital).',
         ]);
 
-        $updated  = 0;
-        $skipped  = 0;
-        $pointsBefore = Pic::sum('total_points');
+        $pointsBefore = (float) Pic::sum('total_points');
+        $updated      = 0;
 
-        \DB::transaction(function () use (&$updated, &$skipped) {
-            // Update points_earned for every non-adjustment history record
-            $histories = PicPointHistory::whereNotIn('step', ['adjustment'])->get();
+        \DB::transaction(function () use (&$updated) {
+            // Bulk UPDATE per step — no PHP loop over records
+            $settings = TaskPointSetting::where('user_type', 'pic')
+                ->where('is_active', true)
+                ->get();
 
-            foreach ($histories as $history) {
-                $newPoints = PicPointHistory::getPointsForStep($history->step);
-                if ($newPoints > 0 && (float) $newPoints !== (float) $history->points_earned) {
-                    $history->update(['points_earned' => $newPoints]);
-                    $updated++;
-                } else {
-                    $skipped++;
-                }
+            foreach ($settings as $setting) {
+                $affected = PicPointHistory::where('step', $setting->task_key)
+                    ->whereNotIn('step', ['adjustment'])
+                    ->where('points_earned', '!=', (float) $setting->points)
+                    ->update(['points_earned' => (float) $setting->points]);
+                $updated += $affected;
             }
 
-            // Recalculate total_points for every PIC from the updated history SUM
-            foreach (Pic::all() as $pic) {
-                $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-                $pic->update(['total_points' => max(0, $actual)]);
-            }
+            // Recalculate total_points for all PICs via single SQL subquery
+            \DB::statement('
+                UPDATE pics
+                SET total_points = (
+                    SELECT COALESCE(SUM(points_earned), 0)
+                    FROM pic_point_histories
+                    WHERE pic_point_histories.pic_id = pics.id
+                )
+            ');
         });
 
         \Illuminate\Support\Facades\Cache::forget('rankings.topPics');
 
-        $pointsAfter = Pic::sum('total_points');
-        $diff = $pointsAfter - $pointsBefore;
-        $diffStr = $diff >= 0 ? "+{$diff}" : "{$diff}";
+        $pointsAfter = (float) Pic::sum('total_points');
+        $diff        = $pointsAfter - $pointsBefore;
+        $sign        = $diff >= 0 ? '+' : '';
 
         return redirect()->route('admin.pic-points.index')
-            ->with('success', "Hitung ulang selesai! {$updated} riwayat diperbarui nilai pointnya, {$skipped} tidak berubah. Total point: " . number_format($pointsBefore) . " → " . number_format($pointsAfter) . " ({$diffStr}).");
+            ->with('success', "Hitung ulang selesai! {$updated} riwayat diperbarui. Total point: "
+                . number_format($pointsBefore) . ' ke ' . number_format($pointsAfter)
+                . ' (' . $sign . number_format($diff) . ').');
     }
 
     /**

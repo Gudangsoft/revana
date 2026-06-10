@@ -688,14 +688,24 @@
 - `app/Models/PicPointHistory.php`
 - `log-update-2026-06-10.md`
 
-## 54. Fitur Hitung Ulang Point Berdasarkan Komposisi Baru
+## 54. Fix 500 + Fitur Hitung Ulang Point Berdasarkan Komposisi Baru
 
 **Tujuan:** Ketika admin mengubah nilai point per tugas di konfigurasi, riwayat point lama masih menggunakan nilai lama. Fitur ini memungkinkan admin menghitung ulang semua `points_earned` di riwayat sesuai nilai point terkini, lalu memperbarui `total_points` semua PIC.
 
 ### File yang Diubah
 | File | Perubahan |
 |------|-----------|
-| `app/Http/Controllers/Admin/PicPointReportController.php` | Tambah method `recalculateAllPoints()` — update `points_earned` tiap history ke nilai setting terkini, skip step `adjustment`, recalculate `total_points` semua PIC via SUM, flush cache |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Tambah method `recalculateAllPoints()` — bulk UPDATE per step (bukan loop PHP), subquery SQL UPDATE untuk recalculate `total_points` semua PIC, flush cache; fix 500 akibat load semua history ke memory |
 | `routes/web.php` | Tambah route `POST /pic-points/recalculate-all` → `recalculateAllPoints` |
 | `resources/views/admin/pic-points/index.blade.php` | Tambah tombol "Hitung Ulang Point" (btn-info) di header leaderboard + modal konfirmasi dengan input `HITUNG ULANG` |
+
+
+## 55. 🔄 Update: Hitung Ulang Point
+
+- **Commit:** `08e3930` — 21:18 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/pic-points/index.blade.php`
+- `routes/web.php`
 
