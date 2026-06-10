@@ -130,6 +130,9 @@
                     <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
                         <i class="bi bi-download"></i> Export Excel
                     </a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#resetAllPointsModal">
+                        <i class="bi bi-trash3"></i> Reset Semua Point
+                    </button>
                     @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Belum Selesai', 'Total Point', 'Bulan Ini', 'Tugas', 'Aksi'], 'columnOffset' => 1])
                 </div>
             </div>
@@ -280,8 +283,56 @@
 </div>
 @endsection
 
+{{-- Modal Konfirmasi Reset Semua Point --}}
+<div class="modal fade" id="resetAllPointsModal" tabindex="-1" aria-labelledby="resetAllPointsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="resetAllPointsModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Reset Semua Point PIC
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.pic-points.reset-all') }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <strong>⚠ Peringatan Keras!</strong><br>
+                        Tindakan ini akan:
+                        <ul class="mb-0 mt-1">
+                            <li>Menghapus <strong>SEMUA riwayat point</strong> dari semua PIC secara permanen</li>
+                            <li>Mengeset <strong>total_points = 0</strong> untuk semua PIC</li>
+                            <li><strong>Tidak bisa dibatalkan</strong> setelah dikonfirmasi</li>
+                        </ul>
+                    </div>
+                    <p class="mb-1">Total sekarang: <strong class="text-success">{{ number_format($totalPoints) }} point</strong> dari <strong>{{ number_format($totalPics) }} PIC</strong> dan <strong>{{ number_format($totalTasks) }} riwayat</strong>.</p>
+                    <p class="mb-3">Ketik <strong>RESET</strong> (huruf kapital) untuk mengkonfirmasi:</p>
+                    <input type="text" name="konfirmasi" class="form-control @error('konfirmasi') is-invalid @enderror"
+                           placeholder="Ketik RESET di sini..." autocomplete="off" required>
+                    @error('konfirmasi')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3-fill me-1"></i>Ya, Reset Semua Point
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
 <script>
+    // Jika ada error konfirmasi, buka modal otomatis
+    @if($errors->has('konfirmasi'))
+    document.addEventListener('DOMContentLoaded', function() {
+        new bootstrap.Modal(document.getElementById('resetAllPointsModal')).show();
+    });
+    @endif
+
     // Auto refresh every 30 seconds
     setTimeout(function() {
         location.reload();

@@ -325,6 +325,30 @@ class PicPointReportController extends Controller
     }
 
     /**
+     * Hard reset: hapus semua riwayat point dan set total_points = 0
+     */
+    public function resetAllPoints(Request $request)
+    {
+        $request->validate([
+            'konfirmasi' => 'required|in:RESET',
+        ], [
+            'konfirmasi.required' => 'Ketik RESET untuk konfirmasi.',
+            'konfirmasi.in'       => 'Konfirmasi tidak valid. Ketik RESET (huruf kapital).',
+        ]);
+
+        $totalHistories = PicPointHistory::count();
+        $affectedPics   = Pic::where('total_points', '!=', 0)->count();
+
+        \DB::transaction(function () {
+            PicPointHistory::truncate();
+            Pic::query()->update(['total_points' => 0]);
+        });
+
+        return redirect()->route('admin.pic-points.index')
+            ->with('success', "Reset berhasil! {$totalHistories} riwayat dihapus, {$affectedPics} PIC diset ke 0 point.");
+    }
+
+    /**
      * Sync all PIC points then logout admin
      */
     public function syncAllAndLogout()

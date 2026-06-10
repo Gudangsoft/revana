@@ -342,6 +342,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
         Route::get('/pic-points/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'export'])->name('pic-points.export');
         Route::post('/pic-points/sync-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllPoints'])->name('pic-points.sync-all');
+        Route::post('/pic-points/reset-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'resetAllPoints'])->name('pic-points.reset-all');
         Route::post('/sync-and-logout', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllAndLogout'])->name('sync-and-logout');
         Route::get('/pic-points/{pic}', [\App\Http\Controllers\Admin\PicPointReportController::class, 'show'])->name('pic-points.show');
         Route::get('/pic-points/{pic}/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'exportShow'])->name('pic-points.export-show');

@@ -586,7 +586,20 @@
 - `log-update-2026-06-10.md`
 - `resources/views/admin/email-settings/index.blade.php`
 
-## 45. Fix Email Settings: data hilang setelah simpan + error handling
+## 45. Fitur Reset Semua Point PIC ke 0
+
+**Tujuan:** Admin bisa mereset semua point PIC kembali ke 0 (hard reset) — menghapus seluruh `pic_point_histories` dan mengeset `total_points = 0` di tabel `pics`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Tambah method `resetAllPoints()`: validasi konfirmasi "RESET", truncate `pic_point_histories`, update `pics.total_points = 0` dalam transaction |
+| `routes/web.php` | Tambah `POST /pic-points/reset-all` → `resetAllPoints()` dengan nama `admin.pic-points.reset-all` |
+| `resources/views/admin/pic-points/index.blade.php` | Tambah tombol "Reset Semua Point" (btn-danger) di header leaderboard; tambah modal konfirmasi dengan warning keras, tampil jumlah total point/PIC/riwayat, input field harus diisi "RESET" (kapital); auto-buka modal jika ada validation error |
+
+---
+
+## 46. Fix Email Settings: data hilang setelah simpan + error handling
 
 **Tujuan:** Setelah klik "Simpan Perubahan", nilai kembali ke placeholder/default karena `File::put()` mengembalikan `false` (permission denied) tanpa throw exception — redirect ke "success" padahal `.env` tidak terupdate. Perbaiki dengan cek permission, cek hasil tulis, dan verifikasi baca-ulang.
 
@@ -595,4 +608,13 @@
 |------|-----------|
 | `app/Http/Controllers/Admin/EmailSettingController.php` | `update()`: tambah `is_writable()` check, `file_put_contents($path, $content, LOCK_EX)` dengan cek return value, verifikasi baca-ulang setelah tulis, `try/catch` di artisan calls |
 | `resources/views/admin/email-settings/index.blade.php` | Tampilkan `session('error')` jika write gagal; perbaiki JS error handler agar parse JSON dari response 500; tambah warning otomatis jika smtp.gmail.com dipakai dengan username non-Gmail; tambah element `#smtpMismatchWarn` |
+
+
+## 46. 🔄 Update: mail
+
+- **Commit:** `c5cfae8` — 20:08 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/EmailSettingController.php`
+- `log-update-2026-06-10.md`
+- `resources/views/admin/email-settings/index.blade.php`
 
