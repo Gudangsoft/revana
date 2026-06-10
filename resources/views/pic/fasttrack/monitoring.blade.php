@@ -404,16 +404,21 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-3">
-                    <span><i class="bi bi-lightning-charge"></i> Monitoring Fasttrack</span>
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span><i class="bi bi-lightning-charge"></i> Monitoring Fasttrack</span>
+                <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ route('pic.submissions.monitoring') }}" class="btn btn-info btn-sm">
                         <i class="bi bi-speedometer2"></i> Lihat Reguler
                     </a>
-                </div>
-                <div class="alert alert-info mb-0 py-2 px-3" style="font-size: 0.875rem;">
-                    <i class="bi bi-info-circle"></i> 
-                    Halaman ini menampilkan data <strong>submissions normal</strong> saja.
+                    <a href="{{ route('pic.fasttrack.monitoring') }}" class="btn btn-info btn-sm fw-semibold">
+                        <i class="bi bi-lightning-charge-fill"></i> Lihat FS
+                    </a>
+                    <a href="{{ route('pic.submissions.monitoring', ['program' => 'bkd']) }}" class="btn btn-info btn-sm">
+                        <i class="bi bi-building"></i> Lihat BKD
+                    </a>
+                    <a href="{{ route('pic.submissions.monitoring', ['program' => 'jafa']) }}" class="btn btn-info btn-sm">
+                        <i class="bi bi-journal-text"></i> Lihat JAFA
+                    </a>
                 </div>
             </div>
             <div class="card-body">

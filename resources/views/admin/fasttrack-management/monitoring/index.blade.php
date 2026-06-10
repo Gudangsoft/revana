@@ -400,16 +400,25 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>
-                    <i class="bi bi-lightning-charge"></i> Monitoring Proses Fasttrack (Filter Tanggal)
-                    @if(isset($program) && $program)
-                        <span class="badge bg-{{ $program == 'bkd' ? 'info' : 'success' }} ms-2">{{ strtoupper($program) }}</span>
-                    @endif
-                </span>
-                <a href="{{ route('admin.fasttrack-management.submissions.index', array_filter(['program' => $program ?? null])) }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Kembali
-                </a>
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span><i class="bi bi-lightning-charge"></i> Monitoring Fasttrack</span>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-info btn-sm">
+                        <i class="bi bi-speedometer2"></i> Lihat Reguler
+                    </a>
+                    <a href="{{ route('admin.fasttrack-management.monitoring.index') }}"
+                       class="btn btn-info btn-sm{{ (!isset($program) || !$program) ? ' fw-semibold' : '' }}">
+                        <i class="bi bi-lightning-charge-fill"></i> Lihat FS
+                    </a>
+                    <a href="{{ route('admin.fasttrack-management.monitoring.index', ['program' => 'bkd']) }}"
+                       class="btn btn-info btn-sm{{ (isset($program) && $program === 'bkd') ? ' fw-semibold' : '' }}">
+                        <i class="bi bi-building"></i> Lihat BKD
+                    </a>
+                    <a href="{{ route('admin.fasttrack-management.monitoring.index', ['program' => 'jafa']) }}"
+                       class="btn btn-info btn-sm{{ (isset($program) && $program === 'jafa') ? ' fw-semibold' : '' }}">
+                        <i class="bi bi-journal-text"></i> Lihat JAFA
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- Filter -->
