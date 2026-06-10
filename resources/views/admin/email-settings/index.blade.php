@@ -93,8 +93,9 @@
                                         id="mail_encryption" 
                                         name="mail_encryption" 
                                         required>
-                                    <option value="ssl" {{ old('mail_encryption', $settings['mail_encryption'] ?? 'ssl') == 'ssl' ? 'selected' : '' }}>SSL</option>
-                                    <option value="tls" {{ old('mail_encryption', $settings['mail_encryption'] ?? 'ssl') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                    <option value="ssl"      {{ old('mail_encryption', $settings['mail_encryption'] ?? 'ssl') == 'ssl'      ? 'selected' : '' }}>SSL (Port 465)</option>
+                                    <option value="tls"      {{ old('mail_encryption', $settings['mail_encryption'] ?? 'ssl') == 'tls'      ? 'selected' : '' }}>TLS (Port 587)</option>
+                                    <option value="starttls" {{ old('mail_encryption', $settings['mail_encryption'] ?? 'ssl') == 'starttls' ? 'selected' : '' }}>STARTTLS</option>
                                 </select>
                                 @error('mail_encryption')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -171,7 +172,7 @@
 
                         <hr class="my-4">
 
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 mb-4">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save me-2"></i>Simpan Perubahan
                             </button>
@@ -180,6 +181,26 @@
                             </button>
                         </div>
                     </form>
+
+                    {{-- Panduan SMTP --}}
+                    <div class="alert alert-light border mt-2">
+                        <p class="fw-semibold mb-2"><i class="bi bi-lightbulb text-warning me-1"></i> Panduan Konfigurasi SMTP Umum:</p>
+                        <table class="table table-sm table-bordered mb-0 small">
+                            <thead class="table-light"><tr><th>Provider</th><th>Host</th><th>Port</th><th>Enkripsi</th><th>Username</th></tr></thead>
+                            <tbody>
+                                <tr><td>Gmail (App Password)</td><td>smtp.gmail.com</td><td>465</td><td>SSL</td><td>nama@gmail.com</td></tr>
+                                <tr><td>Gmail (App Password)</td><td>smtp.gmail.com</td><td>587</td><td>TLS</td><td>nama@gmail.com</td></tr>
+                                <tr class="table-warning"><td><strong>cPanel / Hosting</strong></td><td>mail.domainanda.com</td><td>465</td><td>SSL</td><td>email@domainanda.com</td></tr>
+                                <tr><td>Titan Email</td><td>smtp.titan.email</td><td>465</td><td>SSL</td><td>nama@domainanda.com</td></tr>
+                                <tr><td>Mailpit (lokal/dev)</td><td>localhost</td><td>1025</td><td>(kosong)</td><td>(kosong)</td></tr>
+                            </tbody>
+                        </table>
+                        <p class="mb-0 mt-2 text-danger small"><i class="bi bi-exclamation-triangle me-1"></i>
+                            <strong>Perhatian:</strong> Untuk email domain sendiri (misal: sipera@apji.org), gunakan SMTP hosting Anda — bukan smtp.gmail.com.
+                            Gmail hanya menerima <em>@gmail.com</em> atau akun Google Workspace.
+                            Untuk Gmail, wajib gunakan <strong>App Password</strong> (bukan password biasa).
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

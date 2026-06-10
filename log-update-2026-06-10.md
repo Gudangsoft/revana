@@ -568,3 +568,12 @@
 - `resources/views/marketing/profile/edit.blade.php`
 - `resources/views/pic/profile/edit.blade.php`
 
+
+## 43. 🔄 Update: up
+
+- **Commit:** `96851c3` — 16:48 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-10.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+
