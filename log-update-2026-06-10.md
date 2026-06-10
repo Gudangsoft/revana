@@ -1008,3 +1008,21 @@
 - `resources/views/marketing/login.blade.php`
 - `resources/views/pic/auth/login.blade.php`
 
+
+## 80. 🔄 Update: a
+
+- **Commit:** `32db1e6` — 23:25 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Auth/GoogleAuthController.php`
+- `log-update-2026-06-10.md`
+
+
+## 78. Fix Force Login Admin: Hapus Captcha dari Form Ambil Alih Sesi
+
+**Tujuan:** Form "Paksa Login (Ambil Alih Sesi)" memiliki captcha yang hanya tampil sebagai placeholder, membuat user bingung dan tidak bisa login. Fix: captcha di-bypass untuk force_login (password sudah cukup sebagai verifikasi keamanan).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Auth/LoginController.php` | Tambah kondisi `if (!force_login)` sebelum cek captcha |
+| `resources/views/auth/login.blade.php` | Force login form: hapus input captcha manual, auto-isi via hidden field + focus otomatis ke password |

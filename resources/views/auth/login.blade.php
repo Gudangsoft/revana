@@ -127,16 +127,15 @@
                                 @endforeach
                                 @if(session('session_conflict'))
                                 <div class="mt-2 pt-2 border-top border-danger-subtle">
-                                    <small class="d-block mb-2 text-muted">Jika Anda pemilik akun ini, masukkan ulang password lalu klik tombol di bawah untuk mengambil alih sesi.</small>
+                                    <small class="d-block mb-2 text-muted">Masukkan password Anda untuk mengambil alih sesi.</small>
                                     <form method="POST" action="{{ route('login') }}" id="forceLoginForm">
                                         @csrf
                                         <input type="hidden" name="email" value="{{ old('email') }}">
                                         <input type="hidden" name="force_login" value="1">
+                                        <input type="hidden" name="captcha_answer" value="{{ session('captcha_admin') }}">
                                         <div class="mb-2">
-                                            <input type="password" class="form-control form-control-sm" name="password" required placeholder="Masukkan password Anda">
-                                        </div>
-                                        <div class="mb-2">
-                                            <input type="number" class="form-control form-control-sm" name="captcha_answer" required placeholder="Verifikasi: {{ $captcha_question }} = ?">
+                                            <input type="password" class="form-control form-control-sm" name="password" required
+                                                   placeholder="Masukkan password Anda" id="forcePassword" autofocus>
                                         </div>
                                         <button type="submit" class="btn btn-warning btn-sm w-100">
                                             <i class="bi bi-shield-exclamation"></i> Paksa Login (Ambil Alih Sesi)

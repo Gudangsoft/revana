@@ -39,9 +39,11 @@ class LoginController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        // Verify math CAPTCHA
-        if ((int) $request->input('captcha_answer') !== (int) session('captcha_admin')) {
-            return back()->withErrors(['email' => 'Jawaban verifikasi salah. Silakan coba lagi.'])->onlyInput('email');
+        // Verify math CAPTCHA (skip for force_login — password sudah cukup sebagai verifikasi)
+        if (! $request->boolean('force_login')) {
+            if ((int) $request->input('captcha_answer') !== (int) session('captcha_admin')) {
+                return back()->withErrors(['email' => 'Jawaban verifikasi salah. Silakan coba lagi.'])->onlyInput('email');
+            }
         }
         session()->forget('captcha_admin');
 
