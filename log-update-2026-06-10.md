@@ -1123,3 +1123,19 @@ Ganti ke `SESSION_DRIVER=cookie`: session disimpan di browser cookie terenkripsi
 ### Cara Copy
 - **Kolom Username/Password author** (teks `<code>`): klik sekali → tersalin otomatis, latar hijau sesaat
 - **Kolom User/Pass Editor & Reviewer** (input): klik pada input → seleksi Ctrl+A atau drag dalam input
+
+## 88. Fix: Geser Tabel + Seleksi Teks Monitoring Bisa Keduanya
+
+**Tujuan:** User ingin bisa scroll tabel dengan drag tangan DAN bisa seleksi/copy teks dari area data — kedua fitur aktif bersamaan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/drag-to-scroll.blade.php` | Tidak berubah signifikan, tetap hanya untuk .table-responsive |
+| `resources/views/admin/submissions/monitoring.blade.php` | Drag-scroll hanya aktif dari `thead` (header kolom sticky); `tbody` bebas seleksi teks; CSS `cursor: grab` di thead |
+
+### Cara Penggunaan
+- **Scroll tabel**: Klik tahan di baris **header kolom** (EDITOR 1, REVIEWER, dll) lalu geser kiri/kanan
+- **Seleksi teks**: Klik langsung di area data (tbody) → drag untuk seleksi, atau klik 2x untuk pilih kata
+- **Copy username/password author**: Klik sekali pada teks yang tampil → otomatis tersalin (latar hijau sesaat)
+- **Copy credential editor/reviewer** (input field): Klik → Ctrl+A → Ctrl+C
