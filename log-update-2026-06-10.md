@@ -1027,6 +1027,28 @@
 | `app/Http/Controllers/Auth/LoginController.php` | Tambah kondisi `if (!force_login)` sebelum cek captcha |
 | `resources/views/auth/login.blade.php` | Force login form: hapus input captcha manual, auto-isi via hidden field + focus otomatis ke password |
 
+## 85. Fitur: Login Google untuk PIC dan Marketing
+
+**Tujuan:** PIC dan Marketing bisa login pakai akun Google tanpa perlu ingat password, tapi hanya email yang sudah terdaftar yang bisa masuk.
+
+### File yang Dibuat/Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Auth/GoogleAuthController.php` | Controller baru untuk handle redirect dan callback Google |
+| `config/services.php` | File baru (standard Laravel) — konfigurasi Google OAuth |
+| `routes/web.php` | Tambah 2 route: `/auth/google/{portal}` dan `/auth/google/callback` |
+| `resources/views/pic/auth/login.blade.php` | Tambah tombol "Login dengan Google" |
+| `resources/views/marketing/login.blade.php` | Tambah tombol "Login dengan Google" |
+| `.env` | Tambah `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` (perlu diisi) |
+
+### Catatan Penting
+- Admin login **tidak diubah sama sekali**
+- Semua file PHP ditulis tanpa BOM (UTF-8 no BOM via PowerShell)
+- Butuh Client ID & Secret dari Google Cloud Console untuk aktif
+- Perlu ditambahkan ke `.env` production di server
+
+---
+
 ## 84. Fix: Production 419 Session Error
 
 **Tujuan:** Login production `portal.apji.org` selalu 419 karena session tidak bisa ditulis ke filesystem.
@@ -1072,3 +1094,18 @@ Ganti ke `SESSION_DRIVER=cookie`: session disimpan di browser cookie terenkripsi
 - `log-update-2026-06-10.md`
 - `resources/views/auth/login.blade.php`
 
+
+## 86. Fix: Teks Tidak Bisa Diseleksi di Tabel Admin
+
+**Tujuan:** Fitur drag-to-scroll menerapkan `user-select: none` secara permanen pada semua `.table-responsive`, sehingga teks seperti username/password di tabel monitoring tidak bisa diseleksi dan dicopy.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/drag-to-scroll.blade.php` | Hapus `user-select: none` dari state default; pindah ke `.drag-scrolling` saja; tambah threshold 6px sebelum drag aktif |
+
+### Perubahan Logika
+- Sebelum: mousedown langsung aktifkan drag + `user-select: none` → klik biasa pun tidak bisa seleksi
+- Sesudah: mousedown *menunggu* gerakan > 6px, baru aktifkan drag mode (tambah class `.drag-scrolling` + `user-select: none`)
+- Klik tanpa gerak = teks bisa diseleksi normal
+- Drag > 6px = scroll aktif, teks tidak terseleksi saat drag

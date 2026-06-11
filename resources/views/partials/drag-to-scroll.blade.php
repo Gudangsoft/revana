@@ -2,14 +2,14 @@
 <style>
 .table-responsive,
 .monitoring-scroll-wrapper {
-    cursor: grab;
-    -webkit-user-select: none;
-    user-select: none;
+    cursor: default;
 }
 .table-responsive.drag-scrolling,
 .monitoring-scroll-wrapper.drag-scrolling {
     cursor: grabbing !important;
     scroll-behavior: auto !important;
+    -webkit-user-select: none;
+    user-select: none;
 }
 .table-responsive.drag-scrolling *,
 .monitoring-scroll-wrapper.drag-scrolling * {
@@ -38,11 +38,31 @@
 
         el.addEventListener('mousedown', function (e) {
             if (e.target.closest('input,select,button,a,label,textarea')) return;
-            dragEl = el;
-            startX = e.pageX - el.getBoundingClientRect().left;
-            startLeft = el.scrollLeft;
-            el.classList.add('drag-scrolling');
-            e.preventDefault();
+
+            var pending = {
+                el: el,
+                startX: e.pageX - el.getBoundingClientRect().left,
+                startLeft: el.scrollLeft,
+                pageX: e.pageX
+            };
+
+            function onMove(e2) {
+                if (Math.abs(e2.pageX - pending.pageX) > 6) {
+                    dragEl     = pending.el;
+                    startX     = pending.startX;
+                    startLeft  = pending.startLeft;
+                    el.classList.add('drag-scrolling');
+                    cleanup();
+                }
+            }
+            function cleanup() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onCancel);
+            }
+            function onCancel() { cleanup(); }
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup',   onCancel);
         });
 
         // Touch / swipe
