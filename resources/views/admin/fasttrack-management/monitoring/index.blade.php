@@ -132,6 +132,8 @@
 .table-monitoring thead tr:nth-child(2) th.bg-success { background:#bbf7d0 !important;color:#15803d !important;border-left:3px solid #22c55e !important; }
 .table-monitoring thead th.sticky-first,
 .table-monitoring thead th.sticky-second { z-index:5;background:#0f172a !important;color:#e2e8f0 !important; }
+.table-monitoring thead { cursor: grab; }
+.table-monitoring thead:active { cursor: grabbing; }
 
 /* Sticky first column */
 .table-monitoring th.sticky-first,
@@ -1229,18 +1231,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollStartBtn = document.getElementById('scrollStartBtn');
     const scrollEndBtn = document.getElementById('scrollEndBtn');
     
-    // Column positions for quick navigation
-    const columnPositions = {
-        'submit': 0,
-        'editor1': 600,
-        'author1': 850,
-        'editor2': 1000,
-        'reviewer1': 1150,
-        'reviewer2': 1500,
-        'editor3': 1850,
-        'author2': 2000,
-        'production': 2150
+    // Peta data-target → id <th> group header
+    const colIdMap = {
+        'submit':     'colSubmit',
+        'editor1':    'colEditor1',
+        'author1':    'colAuthor1',
+        'editor2':    'colEditor2',
+        'reviewer1':  'colReviewer1',
+        'reviewer2':  'colReviewer2',
+        'editor3':    'colEditor3',
+        'author2':    'colAuthor2',
+        'production': 'colProduction'
     };
+
+    function getStickyWidth() {
+        var s2 = wrapper.querySelector('th.sticky-second');
+        if (!s2) return 0;
+        return parseFloat(getComputedStyle(s2).left) + s2.offsetWidth;
+    }
+
+    function scrollToGroup(target) {
+        var th = document.getElementById(colIdMap[target]);
+        if (!th) { wrapper.scrollTo({ left: 0, behavior: 'smooth' }); return; }
+        var stickyWidth = getStickyWidth();
+        var wRect = wrapper.getBoundingClientRect();
+        var thRect = th.getBoundingClientRect();
+        var targetScroll = wrapper.scrollLeft + (thRect.left - wRect.left) - stickyWidth;
+        wrapper.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+    }
     
     // Update scroll position indicator
     function updateScrollPosition() {
@@ -1283,14 +1301,10 @@ document.addEventListener('DOMContentLoaded', function() {
         wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
     });
     
-    // Quick navigation
+    // Quick navigation — posisi dihitung dinamis dari DOM
     document.querySelectorAll('.quick-nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const target = this.dataset.target;
-            const position = columnPositions[target] || 0;
-            
-            wrapper.scrollTo({ left: position, behavior: 'smooth' });
-            
+            scrollToGroup(this.dataset.target);
             document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
         });
@@ -1694,6 +1708,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+</script>
+
+<script>
+// Drag-to-scroll dari thead — tbody bebas untuk seleksi teks
+(function () {
+    var wrapper = document.querySelector('.monitoring-scroll-wrapper');
+    if (!wrapper) return;
+    var thead = wrapper.querySelector('thead');
+    if (!thead) return;
+    thead.style.cursor = 'grab';
+    var dragging = false, startX = 0, startLeft = 0;
+    thead.addEventListener('mousedown', function (e) {
+        if (e.target.closest('select,button,a,input')) return;
+        dragging = true; startX = e.pageX; startLeft = wrapper.scrollLeft;
+        thead.style.cursor = 'grabbing';
+        thead.style.userSelect = 'none';
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        wrapper.scrollLeft = startLeft - (e.pageX - startX) * 1.5;
+    });
+    document.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        thead.style.cursor = 'grab';
+        thead.style.userSelect = '';
+    });
+    var tX = 0, tL = 0;
+    wrapper.addEventListener('touchstart', function (e) { tX = e.touches[0].pageX; tL = wrapper.scrollLeft; }, { passive: true });
+    wrapper.addEventListener('touchmove',  function (e) { wrapper.scrollLeft = tL - (e.touches[0].pageX - tX); }, { passive: true });
+})();
 </script>
 
 @endsection
