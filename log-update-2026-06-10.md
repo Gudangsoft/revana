@@ -1139,3 +1139,19 @@ Ganti ke `SESSION_DRIVER=cookie`: session disimpan di browser cookie terenkripsi
 - **Seleksi teks**: Klik langsung di area data (tbody) → drag untuk seleksi, atau klik 2x untuk pilih kata
 - **Copy username/password author**: Klik sekali pada teks yang tampil → otomatis tersalin (latar hijau sesaat)
 - **Copy credential editor/reviewer** (input field): Klik → Ctrl+A → Ctrl+C
+
+## 89. Feat: Terapkan Drag/Seleksi/Tombol Lompat ke Semua Tabel Monitoring
+
+**Tujuan:** Fitur drag-scroll dari thead, seleksi teks di tbody, dan tombol "Lompat ke" yang akurat diterapkan ke seluruh tabel monitoring di sistem.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | Ganti columnPositions → scrollToGroup dinamis; thead drag; CSS grab |
+| `resources/views/pic/submissions/monitoring.blade.php` | Sama; colIdMap pakai `colAuthorAccess` (bukan colSubmit) |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Sama; tanpa validator |
+
+### Fitur yang Diterapkan di Setiap File
+- **Drag scroll**: klik tahan di header kolom (thead) lalu geser kiri/kanan
+- **Seleksi teks**: area data (tbody) bebas diseleksi/copy normal
+- **Tombol Lompat ke**: posisi dihitung dari DOM bukan angka hardcode — akurat di semua resolusi
