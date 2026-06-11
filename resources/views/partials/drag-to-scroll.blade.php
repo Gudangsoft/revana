@@ -1,5 +1,4 @@
-{{-- Global drag-to-scroll: hanya untuk .table-responsive biasa --}}
-{{-- .monitoring-scroll-wrapper dikecualikan karena punya scrollbar sendiri + butuh seleksi teks --}}
+{{-- Global drag-to-scroll untuk .table-responsive biasa (bukan monitoring) --}}
 <style>
 .table-responsive {
     cursor: default;
@@ -43,7 +42,7 @@
 
         el.addEventListener('mousedown', function (e) {
             if (dblclickRecent) return;
-            if (e.target.closest('input,select,button,a,label,textarea,code,td,th')) return;
+            if (e.target.closest('input,select,button,a,label,textarea,td,th,code')) return;
 
             var pending = {
                 el:        el,
@@ -57,7 +56,7 @@
                 var dx = Math.abs(e2.pageX - pending.pageX);
                 var dy = Math.abs(e2.pageY - pending.pageY);
                 if (dy > 6) { cleanup(); return; }
-                if (dx > 15 && dy < 5) {
+                if (dx > 12 && dy < 5) {
                     dragEl     = pending.el;
                     startX     = pending.startX;
                     startLeft  = pending.startLeft;
@@ -86,7 +85,6 @@
     }
 
     function initAll() {
-        // Hanya .table-responsive — bukan .monitoring-scroll-wrapper
         document.querySelectorAll('.table-responsive').forEach(initDrag);
     }
 

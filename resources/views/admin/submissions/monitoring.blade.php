@@ -298,6 +298,14 @@ code.copyable.copied {
 }
 .progress-counter .done { color: #16a34a; font-weight: 700; }
 
+/* Thead drag-scroll cursor */
+.table-monitoring thead {
+    cursor: grab;
+}
+.table-monitoring thead:active {
+    cursor: grabbing;
+}
+
 /* Scroll controls */
 .scroll-controls {
     display: flex;
@@ -647,8 +655,8 @@ code.copyable.copied {
                                 <div class="scroll-position-fill" id="scrollPositionFill" style="width: 0%"></div>
                             </div>
                             <small class="text-muted" id="scrollPositionText">0%</small>
-                            <span class="drag-hint" title="Klik dan tahan lalu geser untuk scroll">
-                                <i class="bi bi-arrows-move"></i> Geser Tabel
+                            <span class="drag-hint" title="Klik dan tahan di area HEADER KOLOM lalu geser kiri/kanan untuk scroll. Area data dapat diseleksi teks.">
+                                <i class="bi bi-grip-horizontal"></i> Geser di header kolom
                             </span>
                         </div>
                         <button type="button" class="scroll-nav-btn" id="scrollRightBtn" title="Scroll Kanan">
@@ -2014,6 +2022,51 @@ document.addEventListener('click', function (e) {
         }, 1200);
     });
 });
+
+// Drag-to-scroll monitoring: hanya dari area thead (header sticky)
+// tbody tetap bebas untuk seleksi teks
+(function () {
+    var wrapper = document.querySelector('.monitoring-scroll-wrapper');
+    if (!wrapper) return;
+    var thead = wrapper.querySelector('thead');
+    if (!thead) return;
+
+    thead.style.cursor = 'grab';
+
+    var dragging = false, startX = 0, startLeft = 0;
+
+    thead.addEventListener('mousedown', function (e) {
+        if (e.target.closest('select,button,a,input')) return;
+        dragging  = true;
+        startX    = e.pageX;
+        startLeft = wrapper.scrollLeft;
+        thead.style.cursor = 'grabbing';
+        thead.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        wrapper.scrollLeft = startLeft - (e.pageX - startX) * 1.5;
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        thead.style.cursor = 'grab';
+        thead.style.userSelect = '';
+    });
+
+    // Touch
+    var tStartX = 0, tStartLeft = 0;
+    wrapper.addEventListener('touchstart', function (e) {
+        tStartX    = e.touches[0].pageX;
+        tStartLeft = wrapper.scrollLeft;
+    }, { passive: true });
+    wrapper.addEventListener('touchmove', function (e) {
+        wrapper.scrollLeft = tStartLeft - (e.touches[0].pageX - tStartX);
+    }, { passive: true });
+})();
 </script>
 
 @endsection
