@@ -19,6 +19,7 @@
 <script>
 (function () {
     var dragEl = null, startX = 0, startLeft = 0;
+    var dblclickRecent = false;
 
     document.addEventListener('mousemove', function (e) {
         if (!dragEl) return;
@@ -36,18 +37,37 @@
         if (el._dragInit) return;
         el._dragInit = true;
 
+        // Double-click: batalkan drag agar seleksi kata berjalan normal
+        el.addEventListener('dblclick', function () {
+            dblclickRecent = true;
+            if (dragEl) {
+                dragEl.classList.remove('drag-scrolling');
+                dragEl = null;
+            }
+            setTimeout(function () { dblclickRecent = false; }, 300);
+        });
+
         el.addEventListener('mousedown', function (e) {
+            if (dblclickRecent) return;
             if (e.target.closest('input,select,button,a,label,textarea')) return;
 
             var pending = {
-                el: el,
-                startX: e.pageX - el.getBoundingClientRect().left,
+                el:        el,
+                startX:    e.pageX - el.getBoundingClientRect().left,
                 startLeft: el.scrollLeft,
-                pageX: e.pageX
+                pageX:     e.pageX,
+                pageY:     e.pageY
             };
 
             function onMove(e2) {
-                if (Math.abs(e2.pageX - pending.pageX) > 6) {
+                var dx = Math.abs(e2.pageX - pending.pageX);
+                var dy = Math.abs(e2.pageY - pending.pageY);
+
+                // Ada gerakan vertikal → user seleksi teks, batalkan drag-scroll
+                if (dy > 6) { cleanup(); return; }
+
+                // Gerakan horizontal dominan → aktifkan scroll
+                if (dx > 15 && dy < 5) {
                     dragEl     = pending.el;
                     startX     = pending.startX;
                     startLeft  = pending.startLeft;
@@ -55,6 +75,7 @@
                     cleanup();
                 }
             }
+
             function cleanup() {
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup', onCancel);
