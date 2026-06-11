@@ -54,6 +54,28 @@
     border-radius: 12px;
 }
 
+/* Credential code: klik untuk copy */
+code.copyable {
+    cursor: pointer;
+    user-select: all;
+    -webkit-user-select: all;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    transition: background 0.15s;
+    display: inline-block;
+}
+code.copyable:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+code.copyable.copied {
+    background: #dcfce7 !important;
+    border-color: #86efac !important;
+    color: #166534;
+}
+
 /* Inline assignment dropdown */
 .inline-assign-select {
     font-size: 0.7rem;
@@ -87,6 +109,9 @@
     border-radius: 3px;
     background: #fff;
     font-family: monospace;
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
 }
 .inline-credential-input:focus {
     border-color: #0d6efd;
@@ -854,8 +879,8 @@
                                         -
                                     @endif
                                 </td>
-                                <td><code>{{ $s->username_author ?? '-' }}</code></td>
-                                <td><code>{{ $s->password_author ?? '-' }}</code></td>
+                                <td><code class="{{ $s->username_author ? 'copyable' : '' }}" title="Klik untuk copy">{{ $s->username_author ?? '-' }}</code></td>
+                                <td><code class="{{ $s->password_author ? 'copyable' : '' }}" title="Klik untuk copy">{{ $s->password_author ?? '-' }}</code></td>
                                 
                                 <!-- Editor 1 -->
                                 <td class="grp-info">
@@ -1968,6 +1993,25 @@ document.addEventListener('DOMContentLoaded', function () {
             th.style.setProperty('color', '#334155', 'important');
             th.style.setProperty('font-weight', '700', 'important');
         }
+    });
+});
+</script>
+
+<script>
+// Copy-on-click untuk code.copyable
+document.addEventListener('click', function (e) {
+    var el = e.target.closest('code.copyable');
+    if (!el) return;
+    var text = el.textContent.trim();
+    if (!text || text === '-') return;
+    navigator.clipboard.writeText(text).then(function () {
+        el.classList.add('copied');
+        var orig = el.title;
+        el.title = 'Tersalin!';
+        setTimeout(function () {
+            el.classList.remove('copied');
+            el.title = orig;
+        }, 1200);
     });
 });
 </script>

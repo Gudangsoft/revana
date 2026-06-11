@@ -1,18 +1,16 @@
-{{-- Global drag-to-scroll: berlaku untuk .table-responsive dan .monitoring-scroll-wrapper --}}
+{{-- Global drag-to-scroll: hanya untuk .table-responsive biasa --}}
+{{-- .monitoring-scroll-wrapper dikecualikan karena punya scrollbar sendiri + butuh seleksi teks --}}
 <style>
-.table-responsive,
-.monitoring-scroll-wrapper {
+.table-responsive {
     cursor: default;
 }
-.table-responsive.drag-scrolling,
-.monitoring-scroll-wrapper.drag-scrolling {
+.table-responsive.drag-scrolling {
     cursor: grabbing !important;
     scroll-behavior: auto !important;
     -webkit-user-select: none;
     user-select: none;
 }
-.table-responsive.drag-scrolling *,
-.monitoring-scroll-wrapper.drag-scrolling * {
+.table-responsive.drag-scrolling * {
     pointer-events: none;
 }
 </style>
@@ -37,19 +35,15 @@
         if (el._dragInit) return;
         el._dragInit = true;
 
-        // Double-click: batalkan drag agar seleksi kata berjalan normal
         el.addEventListener('dblclick', function () {
             dblclickRecent = true;
-            if (dragEl) {
-                dragEl.classList.remove('drag-scrolling');
-                dragEl = null;
-            }
+            if (dragEl) { dragEl.classList.remove('drag-scrolling'); dragEl = null; }
             setTimeout(function () { dblclickRecent = false; }, 300);
         });
 
         el.addEventListener('mousedown', function (e) {
             if (dblclickRecent) return;
-            if (e.target.closest('input,select,button,a,label,textarea')) return;
+            if (e.target.closest('input,select,button,a,label,textarea,code,td,th')) return;
 
             var pending = {
                 el:        el,
@@ -62,11 +56,7 @@
             function onMove(e2) {
                 var dx = Math.abs(e2.pageX - pending.pageX);
                 var dy = Math.abs(e2.pageY - pending.pageY);
-
-                // Ada gerakan vertikal → user seleksi teks, batalkan drag-scroll
                 if (dy > 6) { cleanup(); return; }
-
-                // Gerakan horizontal dominan → aktifkan scroll
                 if (dx > 15 && dy < 5) {
                     dragEl     = pending.el;
                     startX     = pending.startX;
@@ -75,7 +65,6 @@
                     cleanup();
                 }
             }
-
             function cleanup() {
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup', onCancel);
@@ -86,7 +75,6 @@
             document.addEventListener('mouseup',   onCancel);
         });
 
-        // Touch / swipe
         var tStartX = 0, tStartLeft = 0;
         el.addEventListener('touchstart', function (e) {
             tStartX    = e.touches[0].pageX;
@@ -98,8 +86,8 @@
     }
 
     function initAll() {
-        document.querySelectorAll('.table-responsive, .monitoring-scroll-wrapper')
-            .forEach(initDrag);
+        // Hanya .table-responsive — bukan .monitoring-scroll-wrapper
+        document.querySelectorAll('.table-responsive').forEach(initDrag);
     }
 
     if (document.readyState === 'loading') {
