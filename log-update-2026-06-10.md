@@ -1109,3 +1109,17 @@ Ganti ke `SESSION_DRIVER=cookie`: session disimpan di browser cookie terenkripsi
 - Sesudah: mousedown *menunggu* gerakan > 6px, baru aktifkan drag mode (tambah class `.drag-scrolling` + `user-select: none`)
 - Klik tanpa gerak = teks bisa diseleksi normal
 - Drag > 6px = scroll aktif, teks tidak terseleksi saat drag
+
+## 87. Fix: Seleksi Teks + Copy Credential di Tabel Monitoring
+
+**Tujuan:** Kolom username/password di tabel monitoring tidak bisa diseleksi/dicopy karena drag-to-scroll menginterferensi semua gerakan mouse.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/drag-to-scroll.blade.php` | Hapus `.monitoring-scroll-wrapper` dari JS; `td/th/code` dikecualikan dari trigger drag |
+| `resources/views/admin/submissions/monitoring.blade.php` | `code.copyable` → klik sekali copy clipboard; `inline-credential-input` tambah `cursor:text` + `user-select:text` |
+
+### Cara Copy
+- **Kolom Username/Password author** (teks `<code>`): klik sekali → tersalin otomatis, latar hijau sesaat
+- **Kolom User/Pass Editor & Reviewer** (input): klik pada input → seleksi Ctrl+A atau drag dalam input
