@@ -1431,20 +1431,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollStartBtn = document.getElementById('scrollStartBtn');
     const scrollEndBtn = document.getElementById('scrollEndBtn');
     
-    // Column positions for quick navigation
-    const columnPositions = {
-        'submit': 0,
-        'editor1': 600,
-        'author1': 850,
-        'editor2': 1000,
-        'reviewer1': 1150,
-        'reviewer2': 1500,
-        'editor3': 1850,
-        'author2': 2000,
-        'production': 2150,
-        'validator': 2500
+    // Peta data-target → id <th> group header
+    const colIdMap = {
+        'submit':     'colSubmit',
+        'editor1':    'colEditor1',
+        'author1':    'colAuthor1',
+        'editor2':    'colEditor2',
+        'reviewer1':  'colReviewer1',
+        'reviewer2':  'colReviewer2',
+        'editor3':    'colEditor3',
+        'author2':    'colAuthor2',
+        'production': 'colProduction',
+        'validator':  'colValidator'
     };
-    
+
+    // Hitung lebar sticky area dari CSS (konstan, tidak tergantung scroll)
+    function getStickyWidth() {
+        var s2 = wrapper.querySelector('th.sticky-second');
+        if (!s2) return 0;
+        return parseFloat(getComputedStyle(s2).left) + s2.offsetWidth;
+    }
+
+    function scrollToGroup(target) {
+        var th = document.getElementById(colIdMap[target]);
+        if (!th) { wrapper.scrollTo({ left: 0, behavior: 'smooth' }); return; }
+        var stickyWidth = getStickyWidth();
+        var wRect = wrapper.getBoundingClientRect();
+        var thRect = th.getBoundingClientRect();
+        // wrapper.scrollLeft + (thRect.left - wRect.left) = posisi natural th dalam tabel
+        var targetScroll = wrapper.scrollLeft + (thRect.left - wRect.left) - stickyWidth;
+        wrapper.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+    }
+
     // Update scroll position indicator
     function updateScrollPosition() {
         const scrollLeft = wrapper.scrollLeft;
@@ -1486,14 +1504,10 @@ document.addEventListener('DOMContentLoaded', function() {
         wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' });
     });
     
-    // Quick navigation
+    // Quick navigation — posisi dihitung dinamis dari DOM
     document.querySelectorAll('.quick-nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const target = this.dataset.target;
-            const position = columnPositions[target] || 0;
-            
-            wrapper.scrollTo({ left: position, behavior: 'smooth' });
-            
+            scrollToGroup(this.dataset.target);
             document.querySelectorAll('.quick-nav-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
         });
