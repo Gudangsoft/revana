@@ -113,3 +113,19 @@
 - `resources/views/admin/email-templates/index.blade.php`
 - `routes/web.php`
 
+
+## 7. 🔄 Update: mail view
+
+- **Commit:** `eb470f3` — 14:15 oleh Gudangsoft
+- **File berubah:** 16 file
+- `app/Http/Controllers/Admin/ScreeningFormController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Models/EmailTemplate.php`
+- `app/Models/ScreeningForm.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_12_020000_create_screening_forms_table.php`
+- `database/migrations/2026_06_12_030000_add_email_penulis_to_submissions.php`
+- `log-update-2026-06-12.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/admin/partials/sidebar.blade.php`
+

@@ -17,7 +17,7 @@ use App\Models\ScreeningForm;
 
 <div class="container-fluid">
     <div class="d-flex gap-2 mb-3 align-items-center">
-        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+        <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Kembali ke Monitoring</a>
         @if($screening)
             <a href="{{ route('admin.screenings.edit', [$submission, $screening]) }}" class="btn btn-warning btn-sm">
                 <i class="bi bi-pencil"></i> Edit Screening

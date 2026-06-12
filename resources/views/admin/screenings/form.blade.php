@@ -29,9 +29,14 @@ foreach($definition as $sec) { foreach($sec['items'] as $k=>$l) { $totalItems++;
 
 <div class="container-fluid">
     <div class="mb-3">
-        <a href="{{ route('admin.screenings.show', $submission) }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Kembali
+        <a href="{{ route('admin.submissions.monitoring') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Kembali ke Monitoring
         </a>
+        @if($screening)
+        <a href="{{ route('admin.screenings.show', $submission) }}" class="btn btn-outline-info btn-sm ms-1">
+            <i class="bi bi-eye"></i> Lihat Hasil
+        </a>
+        @endif
     </div>
 
     {{-- Header submission --}}
