@@ -402,6 +402,14 @@ Route::middleware('auth')->group(function () {
         Route::put('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'update'])->name('email-settings.update');
         Route::post('/email-settings/test-email', [\App\Http\Controllers\Admin\EmailSettingController::class, 'testEmail'])->name('email-settings.test-email');
         
+        // Screening Awal
+        Route::get('/submissions/{submission}/screening', [\App\Http\Controllers\Admin\ScreeningFormController::class, 'show'])->name('screenings.show');
+        Route::get('/submissions/{submission}/screening/create', [\App\Http\Controllers\Admin\ScreeningFormController::class, 'create'])->name('screenings.create');
+        Route::post('/submissions/{submission}/screening', [\App\Http\Controllers\Admin\ScreeningFormController::class, 'store'])->name('screenings.store');
+        Route::get('/submissions/{submission}/screening/{screening}/edit', [\App\Http\Controllers\Admin\ScreeningFormController::class, 'edit'])->name('screenings.edit');
+        Route::put('/submissions/{submission}/screening/{screening}', [\App\Http\Controllers\Admin\ScreeningFormController::class, 'update'])->name('screenings.update');
+        Route::post('/submissions/{submission}/screening/{screening}/send-email', [\App\Http\Controllers\Admin\ScreeningFormController::class, 'sendEmail'])->name('screenings.send-email');
+
         // Email Templates
         Route::get('/email-templates', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'index'])->name('email-templates.index');
         Route::get('/email-templates/create', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'create'])->name('email-templates.create');

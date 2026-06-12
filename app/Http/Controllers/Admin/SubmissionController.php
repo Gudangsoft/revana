@@ -1400,6 +1400,8 @@ class SubmissionController extends Controller
             'catatan_reviewer1',
             'catatan_reviewer2',
             'catatan_validator',
+            'email_penulis',
+            'no_hp_penulis',
         ];
 
         $request->validate([

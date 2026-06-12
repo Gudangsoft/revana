@@ -55,7 +55,7 @@
     <i class="bi bi-house-fill text-white"></i> Dashboard
 </a>
 <a href="{{ route('admin.monitoring') }}"
-   class="nav-link {{ str_starts_with($currentRoute, 'admin.monitoring') ? 'active' : '' }}">
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.monitoring') && !str_starts_with($currentRoute, 'admin.screenings') ? 'active' : '' }}">
     <i class="bi bi-activity" style="color:#34d399;"></i> Monitoring Review
 </a>
 <a href="{{ route('public.slot.info') }}" class="nav-link" target="_blank">

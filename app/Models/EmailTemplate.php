@@ -28,6 +28,9 @@ class EmailTemplate extends Model
         'validate_author2'    => 'Validasi Selesai: Author 2',
         'validate_production' => 'Validasi Selesai: Production',
         'validate_validator'  => 'Validasi Selesai: Validator',
+        'screening_diterima'  => 'Screening: Artikel Diterima (Proceed to Review)',
+        'screening_revisi'    => 'Screening: Artikel Perlu Revisi Awal',
+        'screening_ditolak'   => 'Screening: Artikel Ditolak (Desk Reject)',
     ];
 
     /** Render subject & body dengan substitusi variabel */

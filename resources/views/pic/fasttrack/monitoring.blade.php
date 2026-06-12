@@ -565,7 +565,7 @@
                                 <th rowspan="2">Volume</th>
                                 <th rowspan="2">Link</th>
                                 <th rowspan="2">Penulis</th>
-                                <th rowspan="2">No HP</th>
+                                <th rowspan="2">No HP / Email</th>
                                 <th rowspan="2">Status</th>
                                 <th colspan="4" class="text-center bg-dark" id="colAuthorAccess">🔑 Author Access</th>
                                 <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
@@ -709,27 +709,24 @@
                                     @endif
                                 </td>
                                 <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
-                                <td>
+                                <td style="min-width:80px;">
                                     @if($s->no_hp_penulis)
                                         @php
                                             $waNumber = preg_replace('/[^0-9]/', '', $s->no_hp_penulis);
-                                            if (substr($waNumber, 0, 1) === '0') {
-                                                $waNumber = '62' . substr($waNumber, 1);
-                                            }
-                                            $waMessage = "Selamat Artikel anda sudah terpublikasi:\n\n";
-                                            $waMessage .= "Kode artikel: *{$s->id_artikel}*\n";
-                                            $waMessage .= "Nama Penulis: *{$s->nama_penulis}*\n";
-                                            $waMessage .= "Link Publikasi: {$s->link_publikasi}\n\n";
-                                            $waMessage .= "Jangan lupa di referensikan ke teman2 nya.\n\n";
-                                            $waMessage .= "SALAM APJI";
+                                            if (substr($waNumber, 0, 1) === '0') { $waNumber = '62' . substr($waNumber, 1); }
+                                            $waMessage = "Selamat Artikel anda sudah terpublikasi:\n\nKode artikel: *{$s->id_artikel}*\nNama Penulis: *{$s->nama_penulis}*\nLink Publikasi: {$s->link_publikasi}\n\nJangan lupa di referensikan ke teman2 nya.\n\nSALAM APJI";
                                             $waUrl = "https://wa.me/{$waNumber}?text=" . urlencode($waMessage);
                                         @endphp
                                         <a href="{{ $waUrl }}" target="_blank" class="btn btn-success btn-sm" style="padding: 2px 6px; font-size: 0.7rem;" title="Chat WhatsApp {{ $s->no_hp_penulis }}">
                                             <i class="bi bi-whatsapp"></i>
                                         </a>
-                                    @else
-                                        -
                                     @endif
+                                    @if($s->email_penulis)
+                                        <a href="mailto:{{ $s->email_penulis }}" class="btn btn-outline-primary btn-sm mt-1 d-block" style="padding:2px 5px;font-size:0.65rem;" title="{{ $s->email_penulis }}">
+                                            <i class="bi bi-envelope-fill"></i> <span style="font-size:0.6rem;">{{ Str::limit($s->email_penulis, 14) }}</span>
+                                        </a>
+                                    @endif
+                                    @if(!$s->no_hp_penulis && !$s->email_penulis) - @endif
                                 </td>
                                 <td class="text-center">
                                     @if($s->production_valid)

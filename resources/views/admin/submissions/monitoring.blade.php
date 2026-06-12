@@ -699,7 +699,7 @@ code.copyable.copied {
                                 </th>
                                 <th rowspan="2" class="align-middle">Link</th>
                                 <th rowspan="2" class="align-middle">Penulis</th>
-                                <th rowspan="2" class="align-middle">No HP</th>
+                                <th rowspan="2" class="align-middle">No HP / Email</th>
                                 <th colspan="4" class="text-center bg-dark" id="colSubmit">🔑 Author Access</th>
                                 <th colspan="3" class="text-center bg-info" id="colEditor1">① Editor 1</th>
                                 <th colspan="2" class="text-center bg-warning text-dark" id="colAuthor1">② Author 1</th>
@@ -808,6 +808,13 @@ code.copyable.copied {
                                     <div style="margin-top:3px; background:#e5e7eb; border-radius:3px; height:3px; width:80px;">
                                         <div style="background:{{ $validCount>=9 ? '#16a34a' : ($validCount>=5 ? '#2563eb' : '#f59e0b') }};width:{{ round($validCount/9*100) }}%;height:3px;border-radius:3px;"></div>
                                     </div>
+                                    @php $scr = $s->screeningForm; @endphp
+                                    <a href="{{ route('admin.screenings.show', $s) }}"
+                                       class="badge mt-1 text-decoration-none {{ $scr ? ($scr->keputusan === 'diterima' ? 'bg-success' : ($scr->keputusan === 'revisi' ? 'bg-warning text-dark' : 'bg-danger')) : 'bg-light text-secondary border' }}"
+                                       style="font-size:0.55rem;" title="Screening Awal">
+                                        <i class="bi bi-clipboard2-check"></i>
+                                        {{ $scr ? strtoupper($scr->keputusan) : 'SCREENING' }}
+                                    </a>
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td class="text-center">
@@ -842,27 +849,33 @@ code.copyable.copied {
                                     @endif
                                 </td>
                                 <td>{{ Str::limit($s->nama_penulis, 15) }}</td>
-                                <td>
+                                <td style="min-width:110px;">
                                     @if($s->no_hp_penulis)
                                         @php
                                             $waNumber = preg_replace('/[^0-9]/', '', $s->no_hp_penulis);
-                                            if (substr($waNumber, 0, 1) === '0') {
-                                                $waNumber = '62' . substr($waNumber, 1);
-                                            }
-                                            $waMessage = "Selamat Artikel anda sudah terpublikasi:\n\n";
-                                            $waMessage .= "Kode artikel: *{$s->id_artikel}*\n";
-                                            $waMessage .= "Nama Penulis: *{$s->nama_penulis}*\n";
-                                            $waMessage .= "Link Publikasi: {$s->link_publish}\n\n";
-                                            $waMessage .= "Jangan lupa di referensikan ke teman2 nya.\n\n";
-                                            $waMessage .= "SALAM APJI";
+                                            if (substr($waNumber, 0, 1) === '0') { $waNumber = '62' . substr($waNumber, 1); }
+                                            $waMessage = "Selamat Artikel anda sudah terpublikasi:\n\nKode artikel: *{$s->id_artikel}*\nNama Penulis: *{$s->nama_penulis}*\nLink Publikasi: {$s->link_publish}\n\nJangan lupa di referensikan ke teman2 nya.\n\nSALAM APJI";
                                             $waUrl = "https://wa.me/{$waNumber}?text=" . urlencode($waMessage);
                                         @endphp
                                         <a href="{{ $waUrl }}" target="_blank" class="btn btn-success btn-sm" style="padding: 2px 6px; font-size: 0.7rem;" title="Chat WhatsApp {{ $s->no_hp_penulis }}">
                                             <i class="bi bi-whatsapp"></i>
                                         </a>
-                                    @else
-                                        -
                                     @endif
+                                    <div class="mt-1 d-flex align-items-center gap-1">
+                                        @if($s->email_penulis)
+                                            <a href="mailto:{{ $s->email_penulis }}" class="btn btn-outline-primary btn-sm" style="padding:2px 5px;font-size:0.65rem;" title="{{ $s->email_penulis }}">
+                                                <i class="bi bi-envelope-fill"></i>
+                                            </a>
+                                        @endif
+                                        <input type="text" class="inline-credential-input {{ $s->email_penulis ? 'has-value' : '' }}"
+                                               value="{{ $s->email_penulis }}"
+                                               placeholder="email@..."
+                                               style="width:90px;"
+                                               data-submission="{{ $s->id }}"
+                                               data-field="email_penulis"
+                                               onchange="quickUpdateCredential(this)"
+                                               title="Email penulis">
+                                    </div>
                                 </td>
                                 <!-- Author Access: PIC Marketing, Petugas Submit, Username, Password -->
                                 <td class="grp-dark">

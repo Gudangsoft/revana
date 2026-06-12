@@ -33,6 +33,7 @@ class Submission extends Model
         'file_artikel_original_name',
         'nama_penulis',
         'no_hp_penulis',
+        'email_penulis',
         'username_author',
         'password_author',
         'pic_marketing',
@@ -209,6 +210,11 @@ class Submission extends Model
     }
 
     // Relationships
+    public function screeningForm()
+    {
+        return $this->hasOne(\App\Models\ScreeningForm::class);
+    }
+
     public function journalSlot()
     {
         return $this->belongsTo(JournalSlot::class, 'journal_slot_id');
