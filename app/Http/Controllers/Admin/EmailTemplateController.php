@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EmailTemplate;
+use App\Models\EmailTemplateAttachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EmailTemplateController extends Controller
 {
     public function index()
     {
-        $templates = EmailTemplate::orderBy('trigger_key')->get();
+        $templates = EmailTemplate::withCount('attachments')->orderBy('trigger_key')->get();
         $allKeys   = EmailTemplate::$triggerLabels;
         return view('admin.email-templates.index', compact('templates', 'allKeys'));
     }
@@ -33,9 +35,10 @@ class EmailTemplateController extends Controller
             'subject'     => 'required|string|max:255',
             'body'        => 'required|string',
             'is_active'   => 'boolean',
+            'attachments.*' => 'file|max:10240',
         ]);
 
-        EmailTemplate::create([
+        $template = EmailTemplate::create([
             'name'        => $request->name,
             'trigger_key' => $request->trigger_key,
             'subject'     => $request->subject,
@@ -43,26 +46,29 @@ class EmailTemplateController extends Controller
             'is_active'   => $request->boolean('is_active', true),
         ]);
 
+        $this->handleAttachmentUploads($request, $template);
+
         return redirect()->route('admin.email-templates.index')
             ->with('success', 'Template email berhasil dibuat.');
     }
 
     public function edit(EmailTemplate $emailTemplate)
     {
-        $allKeys      = EmailTemplate::$triggerLabels;
-        $availableKeys = $allKeys; // semua tersedia saat edit (boleh tetap di key yang sama)
-        $template     = $emailTemplate;
-        $selectedKey  = $emailTemplate->trigger_key;
+        $allKeys       = EmailTemplate::$triggerLabels;
+        $availableKeys = $allKeys;
+        $template      = $emailTemplate->load('attachments');
+        $selectedKey   = $emailTemplate->trigger_key;
         return view('admin.email-templates.form', compact('template', 'allKeys', 'availableKeys', 'selectedKey'));
     }
 
     public function update(Request $request, EmailTemplate $emailTemplate)
     {
         $request->validate([
-            'name'      => 'required|string|max:100',
-            'subject'   => 'required|string|max:255',
-            'body'      => 'required|string',
-            'is_active' => 'boolean',
+            'name'          => 'required|string|max:100',
+            'subject'       => 'required|string|max:255',
+            'body'          => 'required|string',
+            'is_active'     => 'boolean',
+            'attachments.*' => 'file|max:10240',
         ]);
 
         $emailTemplate->update([
@@ -72,12 +78,29 @@ class EmailTemplateController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        // Hapus attachment yang diminta
+        if ($request->has('delete_attachments')) {
+            foreach ($request->delete_attachments as $attachId) {
+                $att = EmailTemplateAttachment::where('id', $attachId)
+                        ->where('email_template_id', $emailTemplate->id)->first();
+                if ($att) {
+                    Storage::delete($att->stored_path);
+                    $att->delete();
+                }
+            }
+        }
+
+        $this->handleAttachmentUploads($request, $emailTemplate);
+
         return redirect()->route('admin.email-templates.index')
             ->with('success', 'Template email berhasil diperbarui.');
     }
 
     public function destroy(EmailTemplate $emailTemplate)
     {
+        foreach ($emailTemplate->attachments as $att) {
+            Storage::delete($att->stored_path);
+        }
         $emailTemplate->delete();
         return redirect()->route('admin.email-templates.index')
             ->with('success', 'Template email berhasil dihapus.');
@@ -86,22 +109,27 @@ class EmailTemplateController extends Controller
     public function preview(Request $request, EmailTemplate $emailTemplate)
     {
         $vars = [
-            'nama_artikel'      => 'Judul Artikel Contoh - Lorem Ipsum Dolor Sit Amet',
-            'kode_submit'       => 'BKD2024001',
-            'id_artikel'        => 'ART-2024-001',
-            'nama_pic'          => 'Dr. Siti Rahayu, M.Pd',
-            'email_pic'         => 'siti.rahayu@apji.org',
-            'nama_tahap'        => EmailTemplate::$triggerLabels[$emailTemplate->trigger_key] ?? $emailTemplate->trigger_key,
-            'tanggal'           => now()->format('d/m/Y H:i'),
-            'username_editor'   => 'editor_user',
-            'password_editor'   => 'pass1234',
-            'username_reviewer1'=> 'reviewer1_user',
-            'password_reviewer1'=> 'rev_pass1',
-            'username_reviewer2'=> 'reviewer2_user',
-            'password_reviewer2'=> 'rev_pass2',
-            'app_name'          => config('app.name'),
+            'nama_artikel'       => 'Judul Artikel Contoh - Lorem Ipsum Dolor Sit Amet',
+            'kode_submit'        => 'BKD2024001',
+            'id_artikel'         => 'ART-2024-001',
+            'nama_pic'           => 'Dr. Siti Rahayu, M.Pd',
+            'email_pic'          => 'siti.rahayu@apji.org',
+            'nama_tahap'         => EmailTemplate::$triggerLabels[$emailTemplate->trigger_key] ?? $emailTemplate->trigger_key,
+            'tanggal'            => now()->format('d/m/Y H:i'),
+            'username_editor'    => 'editor_user',
+            'password_editor'    => 'pass1234',
+            'username_reviewer1' => 'reviewer1_user',
+            'password_reviewer1' => 'rev_pass1',
+            'username_reviewer2' => 'reviewer2_user',
+            'password_reviewer2' => 'rev_pass2',
+            'app_name'           => config('app.name'),
         ];
         $rendered = $emailTemplate->render($vars);
+        $rendered['attachments'] = $emailTemplate->attachments->map(fn($a) => [
+            'id'   => $a->id,
+            'name' => $a->original_name,
+            'size' => $this->formatBytes($a->size),
+        ])->values()->toArray();
         return response()->json($rendered);
     }
 
@@ -109,5 +137,34 @@ class EmailTemplateController extends Controller
     {
         $emailTemplate->update(['is_active' => !$emailTemplate->is_active]);
         return response()->json(['success' => true, 'is_active' => $emailTemplate->is_active]);
+    }
+
+    public function deleteAttachment(EmailTemplateAttachment $attachment)
+    {
+        Storage::delete($attachment->stored_path);
+        $attachment->delete();
+        return response()->json(['success' => true]);
+    }
+
+    private function handleAttachmentUploads(Request $request, EmailTemplate $template): void
+    {
+        if (!$request->hasFile('attachments')) return;
+        foreach ($request->file('attachments') as $file) {
+            $path = $file->store('email-attachments/' . $template->id);
+            EmailTemplateAttachment::create([
+                'email_template_id' => $template->id,
+                'original_name'     => $file->getClientOriginalName(),
+                'stored_path'       => $path,
+                'mime_type'         => $file->getMimeType(),
+                'size'              => $file->getSize(),
+            ]);
+        }
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1048576) return round($bytes / 1048576, 1) . ' MB';
+        if ($bytes >= 1024)    return round($bytes / 1024, 1) . ' KB';
+        return $bytes . ' B';
     }
 }

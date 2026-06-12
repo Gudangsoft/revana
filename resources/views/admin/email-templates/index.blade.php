@@ -108,7 +108,14 @@
                             <code class="small">{{ $t->trigger_key }}</code><br>
                             <small class="text-muted">{{ $allKeys[$t->trigger_key] ?? $t->trigger_key }}</small>
                         </td>
-                        <td>{{ Str::limit($t->subject, 60) }}</td>
+                        <td>
+                            {{ Str::limit($t->subject, 55) }}
+                            @if($t->attachments_count)
+                                <span class="badge bg-secondary ms-1" title="{{ $t->attachments_count }} lampiran">
+                                    <i class="bi bi-paperclip"></i> {{ $t->attachments_count }}
+                                </span>
+                            @endif
+                        </td>
                         <td class="text-center">
                             <button type="button" class="btn btn-sm {{ $t->is_active ? 'btn-success' : 'btn-secondary' }}"
                                     onclick="toggleActive({{ $t->id }}, this)" title="{{ $t->is_active ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan' }}">
@@ -152,6 +159,10 @@
             <div class="modal-body">
                 <div class="mb-2"><strong>Subjek:</strong> <span id="previewSubject" class="text-primary"></span></div>
                 <div id="previewBody" class="preview-body"></div>
+                <div id="previewAttachments" class="mt-3 d-none">
+                    <small class="text-muted fw-semibold"><i class="bi bi-paperclip"></i> Lampiran:</small>
+                    <ul id="previewAttachList" class="mb-0 mt-1 ps-3 small"></ul>
+                </div>
             </div>
         </div>
     </div>
@@ -164,6 +175,16 @@ function previewTemplate(id) {
         .then(data => {
             document.getElementById('previewSubject').textContent = data.subject;
             document.getElementById('previewBody').innerHTML = data.body;
+            var attBox  = document.getElementById('previewAttachments');
+            var attList = document.getElementById('previewAttachList');
+            if (data.attachments && data.attachments.length) {
+                attList.innerHTML = data.attachments.map(a =>
+                    '<li><i class="bi bi-file-earmark me-1"></i>' + a.name + ' <span class="text-muted">(' + a.size + ')</span></li>'
+                ).join('');
+                attBox.classList.remove('d-none');
+            } else {
+                attBox.classList.add('d-none');
+            }
             new bootstrap.Modal(document.getElementById('previewModal')).show();
         });
 }

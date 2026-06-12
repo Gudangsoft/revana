@@ -47,4 +47,9 @@ class EmailTemplate extends Model
     {
         return static::where('trigger_key', $triggerKey)->where('is_active', true)->first();
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(EmailTemplateAttachment::class);
+    }
 }

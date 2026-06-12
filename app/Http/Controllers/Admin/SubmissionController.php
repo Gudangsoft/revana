@@ -1341,8 +1341,14 @@ class SubmissionController extends Controller
                         'password_reviewer2'=> $submission->password_reviewer2 ?? '-',
                         'app_name'          => config('app.name'),
                     ]);
-                    Mail::html($rendered['body'], function ($message) use ($rendered, $petugas) {
+                    $atts = $tpl->attachments;
+                    Mail::html($rendered['body'], function ($message) use ($rendered, $petugas, $atts) {
                         $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
+                        foreach ($atts as $att) {
+                            if (file_exists($att->getFullPath())) {
+                                $message->attach($att->getFullPath(), ['as' => $att->original_name, 'mime' => $att->mime_type]);
+                            }
+                        }
                     });
                 } catch (\Exception $e) {
                     Log::warning('Email template send failed [assign_' . $assignmentType . ']: ' . $e->getMessage());
@@ -1534,8 +1540,14 @@ class SubmissionController extends Controller
                             'password_reviewer2'=> $submission->password_reviewer2 ?? '-',
                             'app_name'          => config('app.name'),
                         ]);
-                        Mail::html($rendered['body'], function ($message) use ($rendered, $petugas) {
+                        $atts = $tpl->attachments;
+                        Mail::html($rendered['body'], function ($message) use ($rendered, $petugas, $atts) {
                             $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
+                            foreach ($atts as $att) {
+                                if (file_exists($att->getFullPath())) {
+                                    $message->attach($att->getFullPath(), ['as' => $att->original_name, 'mime' => $att->mime_type]);
+                                }
+                            }
                         });
                     } catch (\Exception $e) {
                         Log::warning('Email template send failed [validate_' . $stageName . ']: ' . $e->getMessage());
