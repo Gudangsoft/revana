@@ -376,6 +376,10 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.email-settings') ? 'active' : '' }}">
     <i class="bi bi-envelope-at-fill" style="color:#fcd34d;"></i> Pengaturan Email
 </a>
+<a href="{{ route('admin.email-templates.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.email-templates') ? 'active' : '' }}">
+    <i class="bi bi-envelope-paper-fill" style="color:#fb923c;"></i> Template Email
+</a>
 <a href="{{ route('admin.sms-gateway.index') }}"
    class="nav-link {{ str_starts_with($currentRoute, 'admin.sms-gateway') ? 'active' : '' }}">
     <i class="bi bi-whatsapp" style="color:#4ade80;"></i> SMS Gateway

@@ -19,8 +19,10 @@ use App\Services\WaNotificationService;
 use App\Models\ActivityLog;
 use App\Models\Setting;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\EmailTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class SubmissionController extends Controller
@@ -1312,11 +1314,40 @@ class SubmissionController extends Controller
         
         // Log history
         if ($petugasId) {
-            $petugasName = Pic::find($petugasId)->name;
+            $petugas = Pic::find($petugasId);
+            $petugasName = $petugas->name;
             $submission->logHistory($assignmentType, 'assigned', "Ditugaskan ke {$petugasName} (Quick Assign)", [
                 'petugas_id' => $petugasId,
                 'petugas_name' => $petugasName,
             ]);
+
+            // Kirim email notifikasi jika template aktif
+            $tpl = EmailTemplate::findActive('assign_' . $assignmentType);
+            if ($tpl && $petugas->email) {
+                try {
+                    $rendered = $tpl->render([
+                        'nama_artikel'      => $submission->judul_artikel ?? '-',
+                        'kode_submit'       => $submission->kode_submit ?? '-',
+                        'id_artikel'        => $submission->id,
+                        'nama_pic'          => $petugasName,
+                        'email_pic'         => $petugas->email,
+                        'nama_tahap'        => EmailTemplate::$triggerLabels['assign_' . $assignmentType] ?? $assignmentType,
+                        'tanggal'           => now()->format('d/m/Y H:i'),
+                        'username_editor'   => $submission->username_editor ?? '-',
+                        'password_editor'   => $submission->password_editor ?? '-',
+                        'username_reviewer1'=> $submission->username_reviewer1 ?? '-',
+                        'password_reviewer1'=> $submission->password_reviewer1 ?? '-',
+                        'username_reviewer2'=> $submission->username_reviewer2 ?? '-',
+                        'password_reviewer2'=> $submission->password_reviewer2 ?? '-',
+                        'app_name'          => config('app.name'),
+                    ]);
+                    Mail::html($rendered['body'], function ($message) use ($rendered, $petugas) {
+                        $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
+                    });
+                } catch (\Exception $e) {
+                    Log::warning('Email template send failed [assign_' . $assignmentType . ']: ' . $e->getMessage());
+                }
+            }
         } else {
             $submission->logHistory($assignmentType, 'unassigned', "Penugasan dihapus (Quick Assign)", []);
         }
@@ -1465,6 +1496,53 @@ class SubmissionController extends Controller
         $submission->recalculateStatus();
 
         $submission->save();
+
+        // Kirim email notifikasi validasi jika baru divalidasi & template aktif
+        if ($newValue) {
+            $stageName = str_replace('_valid', '', $field); // e.g. 'editor1_valid' → 'editor1'
+            $tpl = EmailTemplate::findActive('validate_' . $stageName);
+            if ($tpl) {
+                // Ambil PIC yang terkait tahap ini
+                $picFieldMap = [
+                    'editor1'    => 'petugas_editor1_id',
+                    'author1'    => 'petugas_author1_id',
+                    'editor2'    => 'petugas_editor2_id',
+                    'reviewer1'  => 'petugas_reviewer1_id',
+                    'reviewer2'  => 'petugas_reviewer2_id',
+                    'editor3'    => 'petugas_editor3_id',
+                    'author2'    => 'petugas_author2_id',
+                    'production' => 'petugas_production_id',
+                    'validator'  => 'petugas_validator_id',
+                ];
+                $picField  = $picFieldMap[$stageName] ?? null;
+                $petugas   = $picField ? Pic::find($submission->{$picField}) : null;
+                if ($petugas && $petugas->email) {
+                    try {
+                        $rendered = $tpl->render([
+                            'nama_artikel'      => $submission->judul_artikel ?? '-',
+                            'kode_submit'       => $submission->kode_submit ?? '-',
+                            'id_artikel'        => $submission->id,
+                            'nama_pic'          => $petugas->name,
+                            'email_pic'         => $petugas->email,
+                            'nama_tahap'        => EmailTemplate::$triggerLabels['validate_' . $stageName] ?? $stageName,
+                            'tanggal'           => now()->format('d/m/Y H:i'),
+                            'username_editor'   => $submission->username_editor ?? '-',
+                            'password_editor'   => $submission->password_editor ?? '-',
+                            'username_reviewer1'=> $submission->username_reviewer1 ?? '-',
+                            'password_reviewer1'=> $submission->password_reviewer1 ?? '-',
+                            'username_reviewer2'=> $submission->username_reviewer2 ?? '-',
+                            'password_reviewer2'=> $submission->password_reviewer2 ?? '-',
+                            'app_name'          => config('app.name'),
+                        ]);
+                        Mail::html($rendered['body'], function ($message) use ($rendered, $petugas) {
+                            $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
+                        });
+                    } catch (\Exception $e) {
+                        Log::warning('Email template send failed [validate_' . $stageName . ']: ' . $e->getMessage());
+                    }
+                }
+            }
+        }
 
         return response()->json([
             'success' => true,

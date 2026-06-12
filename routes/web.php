@@ -402,6 +402,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/email-settings', [\App\Http\Controllers\Admin\EmailSettingController::class, 'update'])->name('email-settings.update');
         Route::post('/email-settings/test-email', [\App\Http\Controllers\Admin\EmailSettingController::class, 'testEmail'])->name('email-settings.test-email');
         
+        // Email Templates
+        Route::get('/email-templates', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'index'])->name('email-templates.index');
+        Route::get('/email-templates/create', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'create'])->name('email-templates.create');
+        Route::post('/email-templates', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'store'])->name('email-templates.store');
+        Route::get('/email-templates/{emailTemplate}/edit', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'edit'])->name('email-templates.edit');
+        Route::put('/email-templates/{emailTemplate}', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'update'])->name('email-templates.update');
+        Route::delete('/email-templates/{emailTemplate}', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'destroy'])->name('email-templates.destroy');
+        Route::get('/email-templates/{emailTemplate}/preview', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'preview'])->name('email-templates.preview');
+        Route::post('/email-templates/{emailTemplate}/toggle-active', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'toggleActive'])->name('email-templates.toggle-active');
+
         // SMS Gateway Settings (Fonnte)
         Route::get('/sms-gateway', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'index'])->name('sms-gateway.index');
         Route::put('/sms-gateway', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'update'])->name('sms-gateway.update');
