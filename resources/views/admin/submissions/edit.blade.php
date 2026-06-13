@@ -419,6 +419,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label for="email_penulis" class="form-label">Email Penulis</label>
+                                <input type="email" class="form-control @error('email_penulis') is-invalid @enderror" id="email_penulis" name="email_penulis" value="{{ old('email_penulis', $submission->email_penulis) }}" placeholder="email@domain.com">
+                                @error('email_penulis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label for="username_author" class="form-label">Username Akses Author</label>
                                 <input type="text" class="form-control @error('username_author') is-invalid @enderror" id="username_author" name="username_author" value="{{ old('username_author', $submission->username_author) }}">
                                 @error('username_author')

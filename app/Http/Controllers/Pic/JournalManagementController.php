@@ -416,6 +416,7 @@ class JournalManagementController extends Controller
             'link_artikel' => ['nullable', 'url', 'max:500', Rule::unique('submissions', 'link_artikel')],
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
+            'email_penulis' => 'nullable|email|max:255',
             'username_author' => 'nullable|string|max:100',
             'password_author' => 'nullable|string|max:100',
             'marketing_id' => 'nullable|exists:marketings,id',

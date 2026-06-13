@@ -28,7 +28,25 @@
 
 **Catatan:** Email tidak akan terkirim sampai `MAIL_USERNAME` dan `MAIL_PASSWORD` diisi di `.env` production. Kegagalan kirim email di-log di Laravel log, tidak mempengaruhi respons AJAX.
 
-## 2. Form Screening Awal Penerimaan Artikel
+## 2. Tambah Input Email Penulis di Semua Form Submission
+
+**Tujuan:** Melengkapi form submit artikel dengan kolom Email Penulis agar tersimpan ke database dan bisa digunakan untuk notifikasi.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/create.blade.php` | Tambah input `email_penulis` di seksi Data Penulis |
+| `resources/views/admin/submissions/edit.blade.php` | Tambah input `email_penulis` dengan value `$submission->email_penulis` |
+| `resources/views/pic/submissions/create.blade.php` | Tambah input `email_penulis` |
+| `resources/views/marketing/create-submission.blade.php` | Tambah input `email_penulis` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah rule `nullable\|email\|max:255` di store + update |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Tambah rule `nullable\|email\|max:255` di submissionsStore |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah rule + field `email_penulis` di storeSubmission |
+
+*Database column `email_penulis` sudah tersedia (migrasi sebelumnya).*
+
+## 3. Form Screening Awal Penerimaan Artikel
 
 **Tujuan:** Form screening sesuai SOP APJI — editor mengisi checklist 7 seksi (29 item), memilih keputusan, lalu mengirim email hasil ke penulis.
 
@@ -128,4 +146,13 @@
 - `log-update-2026-06-12.md`
 - `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
 - `resources/views/admin/partials/sidebar.blade.php`
+
+
+## 8. 🔄 Update: up
+
+- **Commit:** `a97b492` — 14:18 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-12.md`
+- `resources/views/admin/screenings/form.blade.php`
+- `resources/views/admin/screenings/show.blade.php`
 

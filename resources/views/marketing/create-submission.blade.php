@@ -117,7 +117,17 @@
                     @enderror
                 </div>
             </div>
-            
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Email Penulis</label>
+                    <input type="email" name="email_penulis" class="form-control @error('email_penulis') is-invalid @enderror" value="{{ old('email_penulis') }}" placeholder="email@domain.com">
+                    @error('email_penulis')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Username Author</label>
