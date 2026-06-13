@@ -182,7 +182,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="mb-3">
                                 <label for="no_hp_penulis" class="form-label">No HP Penulis</label>
                                 <input type="text" class="form-control @error('no_hp_penulis') is-invalid @enderror" id="no_hp_penulis" name="no_hp_penulis" value="{{ old('no_hp_penulis') }}">
@@ -191,10 +191,7 @@
                                 @enderror
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="mb-3">
                                 <label for="email_penulis" class="form-label">Email Penulis</label>
                                 <input type="email" class="form-control @error('email_penulis') is-invalid @enderror" id="email_penulis" name="email_penulis" value="{{ old('email_penulis') }}" placeholder="email@domain.com">

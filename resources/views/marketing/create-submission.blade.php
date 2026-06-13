@@ -109,17 +109,14 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <label class="form-label">No. HP Penulis</label>
                     <input type="text" name="no_hp_penulis" class="form-control @error('no_hp_penulis') is-invalid @enderror" value="{{ old('no_hp_penulis') }}">
                     @error('no_hp_penulis')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <label class="form-label">Email Penulis</label>
                     <input type="email" name="email_penulis" class="form-control @error('email_penulis') is-invalid @enderror" value="{{ old('email_penulis') }}" placeholder="email@domain.com">
                     @error('email_penulis')
