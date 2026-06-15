@@ -191,6 +191,9 @@ class SubmissionController extends Controller
         // Kirim notifikasi WhatsApp ke penulis via Fonnte
         $this->sendWhatsAppNotification($submission);
 
+        // Kirim email acknowledgement ke penulis jika template aktif
+        $this->sendPenulisEmail($submission);
+
         return redirect()->route('admin.submissions.index')
             ->with('success', 'Data Submit berhasil ditambahkan.' . $pointMessage);
     }
@@ -1758,6 +1761,9 @@ class SubmissionController extends Controller
             }
         }
 
+        // Kirim email acknowledgement ke penulis jika template aktif
+        $this->sendPenulisEmail($submission);
+
         return redirect()->route('admin.fasttrack.monitoring')
             ->with('success', 'Fasttrack submission berhasil ditambahkan dengan kode: ' . $validated['kode_submit'] . $pointMessage);
     }
@@ -2062,6 +2068,48 @@ class SubmissionController extends Controller
         $this->sendWhatsAppNotification($submission, false);
 
         return back()->with('success', 'Notifikasi WhatsApp berhasil dikirim ulang ke ' . $submission->no_hp_penulis . '.');
+    }
+
+    private function sendPenulisEmail(Submission $submission): void
+    {
+        try {
+            if (empty($submission->email_penulis)) {
+                return;
+            }
+            $tpl = EmailTemplate::findActive('notify_penulis');
+            if (!$tpl) {
+                return;
+            }
+            $submission->loadMissing('journalSlot.journalMaster');
+            $rendered = $tpl->render([
+                'nama_artikel'   => $submission->judul_artikel ?? '-',
+                'kode_submit'    => $submission->kode_submit ?? '-',
+                'id_artikel'     => $submission->id_artikel ?? '-',
+                'nama_jurnal'    => $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-',
+                'url_jurnal'     => $submission->journalSlot?->journalMaster?->link_jurnal ?? '-',
+                'nama_penulis'   => $submission->nama_penulis ?? '-',
+                'username_author'=> $submission->username_author ?? '-',
+                'password_author'=> $submission->password_author ?? '-',
+                'tanggal'        => now()->format('d/m/Y H:i'),
+                'app_name'       => config('app.name'),
+            ]);
+            $recipientEmail = $submission->email_penulis;
+            $recipientName  = $submission->nama_penulis ?? $recipientEmail;
+            $atts = $tpl->attachments;
+            Mail::html($rendered['body'], function ($message) use ($rendered, $recipientEmail, $recipientName, $atts) {
+                $message->to($recipientEmail, $recipientName)->subject($rendered['subject']);
+                foreach ($atts as $att) {
+                    if (file_exists(storage_path('app/' . $att->file_path))) {
+                        $message->attach(storage_path('app/' . $att->file_path), ['as' => $att->original_name]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            Log::error('Email notify_penulis gagal', [
+                'submission_id' => $submission->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function sendWhatsAppNotification(Submission $submission, bool $isUpdate = false): void

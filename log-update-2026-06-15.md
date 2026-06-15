@@ -122,7 +122,24 @@ Username: {username_author} | Password: {password_author}
 | `app/Http/Controllers/Marketing/DashboardController.php` | `submissionsMonitoring()`: default `sort_by` dari `date_asc` → `date_desc`; `date_asc` dijadikan case eksplisit |
 | `resources/views/marketing/submissions-monitoring.blade.php` | Option "↓ Terbaru" dipindah ke urutan pertama dan dijadikan default selected; "↑ Terlama" dipindah ke urutan kedua |
 
-## 7. 🔄 Update: fix sincron
+## 7. Tambah Trigger `assign_submit` dan `notify_penulis` ke Email Template
+
+**Tujuan:** `assign_submit` ada di controller tapi tidak muncul di UI karena belum ada di `$triggerLabels`. Tambah juga trigger `notify_penulis` untuk email acknowledgement ke penulis saat submission pertama kali masuk.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `app/Models/EmailTemplate.php` | Tambah `notify_penulis` dan `assign_submit` ke `$triggerLabels` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah private method `sendPenulisEmail()`; panggil di `store()` dan `fasttrackStore()` |
+
+### Detail
+
+**`assign_submit`** — trigger sudah ada di controller (`findActive('assign_submit')`) sejak awal tapi tidak bisa dikonfigurasi karena tidak ada di `$triggerLabels`. Sekarang muncul di dropdown.
+
+**`notify_penulis`** — trigger baru, kirim email ke `email_penulis` saat submission dibuat. Email tidak terkirim jika `email_penulis` kosong atau tidak ada template aktif untuk trigger ini. Variables tersedia: `{nama_penulis}`, `{nama_artikel}`, `{kode_submit}`, `{id_artikel}`, `{nama_jurnal}`, `{url_jurnal}`, `{username_author}`, `{password_author}`, `{tanggal}`, `{app_name}`.
+
+## 8. 🔄 Update: fix sincron
 
 - **Commit:** `d5b709c` — 08:56 oleh Gudangsoft
 - **File berubah:** 7 file
@@ -159,4 +176,16 @@ Username: {username_author} | Password: {password_author}
 - `app/Http/Controllers/Admin/SubmissionController.php`
 - `log-update-2026-06-15.md`
 - `resources/views/admin/email-templates/form.blade.php`
+
+
+## 10. 🔄 Update: up
+
+- **Commit:** `234b1c9` — 10:19 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/EmailTemplateController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/email-templates/form.blade.php`
+- `resources/views/marketing/submissions-monitoring.blade.php`
 

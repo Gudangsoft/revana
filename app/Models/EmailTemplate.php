@@ -10,6 +10,8 @@ class EmailTemplate extends Model
     protected $casts    = ['is_active' => 'boolean'];
 
     public static array $triggerLabels = [
+        'notify_penulis'    => 'Notifikasi ke Penulis (saat submission masuk)',
+        'assign_submit'     => 'Penugasan Submit',
         'assign_editor1'    => 'Penugasan Editor 1',
         'assign_author1'    => 'Penugasan Author 1',
         'assign_editor2'    => 'Penugasan Editor 2',
