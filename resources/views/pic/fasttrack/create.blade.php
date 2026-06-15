@@ -210,6 +210,22 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label for="email_penulis" class="form-label">Email Penulis</label>
+                                <input type="email"
+                                       class="form-control @error('email_penulis') is-invalid @enderror"
+                                       id="email_penulis"
+                                       name="email_penulis"
+                                       value="{{ old('email_penulis') }}">
+                                @error('email_penulis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label for="username_author" class="form-label">Username Akses Author</label>
                                 <input type="text" 
                                        class="form-control @error('username_author') is-invalid @enderror" 
@@ -480,6 +496,9 @@ window.showKonfirmasi = function() {
 
     const noHp = document.getElementById('no_hp_penulis').value.trim();
     if (noHp) rows.push(['No HP Penulis', noHp]);
+
+    const emailPenulis = document.getElementById('email_penulis').value.trim();
+    if (emailPenulis) rows.push(['Email Penulis', emailPenulis]);
 
     const username = document.getElementById('username_author').value.trim();
     const password = document.getElementById('password_author').value.trim();

@@ -162,6 +162,16 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
+                    <label class="form-label">Email Penulis</label>
+                    <input type="email" name="email_penulis" class="form-control @error('email_penulis') is-invalid @enderror" value="{{ old('email_penulis') }}">
+                    @error('email_penulis')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
                     <label class="form-label">Username Akses Author</label>
                     <input type="text" name="username_author" class="form-control @error('username_author') is-invalid @enderror" value="{{ old('username_author') }}">
                     @error('username_author')
@@ -362,6 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fileInput      = document.querySelector('[name="file_artikel"]');
         const fileText       = fileInput && fileInput.files.length > 0 ? fileInput.files[0].name : '(tidak ada)';
         const noHp           = document.querySelector('[name="no_hp_penulis"]').value.trim();
+        const emailPenulis   = document.querySelector('[name="email_penulis"]').value.trim();
         const usernameAuthor = document.querySelector('[name="username_author"]').value.trim();
         const passwordAuthor = document.querySelector('[name="password_author"]').value.trim();
         const notes          = document.querySelector('[name="notes"]').value.trim();
@@ -376,6 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ['File Artikel',  fileText],
             ['Nama Penulis',  namaPenulis],
             ...(noHp           ? [['No HP Penulis',   noHp]]           : []),
+            ...(emailPenulis   ? [['Email Penulis',   emailPenulis]]   : []),
             ...(usernameAuthor ? [['Username Author', usernameAuthor]] : []),
             ...(passwordAuthor ? [['Password Author', passwordAuthor]] : []),
             ...(notes          ? [['Catatan',         notes]]          : []),

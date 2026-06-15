@@ -171,6 +171,10 @@
                                 <td class="text-muted">No HP Penulis</td>
                                 <td>{{ $submission->no_hp_penulis ?? '-' }}</td>
                             </tr>
+                            <tr>
+                                <td class="text-muted">Email Penulis</td>
+                                <td>{{ $submission->email_penulis ?? '-' }}</td>
+                            </tr>
                         </table>
                     </div>
                 </div>

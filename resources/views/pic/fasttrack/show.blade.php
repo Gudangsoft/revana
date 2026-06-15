@@ -146,6 +146,10 @@
                 <strong>No. HP Penulis:</strong>
                 <div>{{ $submission->no_hp_penulis ?? '-' }}</div>
             </div>
+            <div class="col-md-6 mt-2">
+                <strong>Email Penulis:</strong>
+                <div>{{ $submission->email_penulis ?? '-' }}</div>
+            </div>
         </div>
 
         {{-- Username / Password Author --}}

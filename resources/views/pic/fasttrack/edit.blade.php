@@ -131,6 +131,17 @@
                             </div>
 
                             <div class="form-group">
+                                <label for="email_penulis">
+                                    <i class="fas fa-envelope mr-1"></i>
+                                    Email Penulis
+                                </label>
+                                <input type="email" name="email_penulis" id="email_penulis" class="form-control" value="{{ old('email_penulis', $submission->email_penulis) }}">
+                                @error('email_penulis')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
                                 <label for="notes">
                                     <i class="fas fa-file-alt mr-1"></i>
                                     Catatan

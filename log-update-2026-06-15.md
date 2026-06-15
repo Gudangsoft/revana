@@ -51,3 +51,35 @@
 - `points_this_month` & `total_tasks_completed` = 1 query per PIC masing-masing → diperbaiki via `withSum`/`withCount` preloading di controller, accessor memanfaatkan nilai preloaded
 
 **HTML invalid:** Modal `<div>` ditempatkan langsung di dalam `<tbody>` (bukan di dalam `<tr>`). Browser auto-fix tapi tidak valid. Modals dipindahkan ke setelah `</table>` dalam loop `@foreach` terpisah.
+
+## 3. Tambah Field "Email Penulis" ke Semua Menu Submission Fasttrack
+
+**Tujuan:** Terapkan field `email_penulis` ke semua menu submission fasttrack (admin, PIC, marketing) — form create, edit, dan halaman show/detail. Normal/BKD/JAFA sudah memiliki field ini sebelumnya.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/fasttrack/create.blade.php` | Tambah input `email_penulis` setelah field `no_hp_penulis` |
+| `resources/views/admin/fasttrack/edit.blade.php` | Tambah input `email_penulis` setelah field `no_hp_penulis` |
+| `resources/views/admin/fasttrack/show.blade.php` | Tambah baris tampilan `email_penulis` di tabel detail |
+| `resources/views/pic/fasttrack/create.blade.php` | Tambah input `email_penulis` + tambah ke JS preview konfirmasi |
+| `resources/views/pic/fasttrack/edit.blade.php` | Tambah input `email_penulis` (style `form-group`/`fas fa-envelope`) |
+| `resources/views/pic/fasttrack/show.blade.php` | Tambah tampilan `email_penulis` di section detail penulis |
+| `resources/views/marketing/fasttrack/create.blade.php` | Tambah input `email_penulis` + tambah ke JS preview rows array |
+| `resources/views/marketing/fasttrack/show.blade.php` | Tambah baris tampilan `email_penulis` di tabel detail |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Tambah validasi `email_penulis` di `fasttrackStore()` dan `fasttrackUpdate()`; tambah ke array `$submission->update()` |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah validasi `email_penulis` di `fasttrackStore()`; tambah ke `Submission::create()` |
+
+## 4. 🔄 Update: fix sincron
+
+- **Commit:** `d5b709c` — 08:56 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Exports/PicPointHistoryExport.php`
+- `app/Exports/PicPointsExport.php`
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `app/Models/Pic.php`
+- `app/Models/TaskPointSetting.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/pic-points/index.blade.php`
+
