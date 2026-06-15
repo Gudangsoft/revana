@@ -661,12 +661,12 @@ class DashboardController extends Controller
             $query->whereNull('program_type');
         }
 
-        // Sort — default Terlama (FIFO)
-        match ($request->input('sort_by', 'date_asc')) {
+        // Sort — default Terbaru
+        match ($request->input('sort_by', 'date_desc')) {
             'title_asc'  => $query->orderBy('judul_artikel', 'asc')->orderBy('id', 'asc'),
             'title_desc' => $query->orderBy('judul_artikel', 'desc')->orderBy('id', 'asc'),
-            'date_desc'  => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
-            default      => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
+            'date_asc'   => $query->orderBy('tanggal_submit', 'asc')->orderBy('id', 'asc'),
+            default      => $query->orderByDesc('tanggal_submit')->orderByDesc('id'),
         };
 
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 50;

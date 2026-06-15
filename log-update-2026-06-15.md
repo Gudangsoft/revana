@@ -83,7 +83,46 @@
 | `app/Http/Controllers/Admin/SubmissionController.php` | Tambah `'nama_jurnal'` ke dua render() call (assign & validate email) via `$submission->journalSlot?->journalMaster?->nama_jurnal` |
 | `app/Http/Controllers/Admin/EmailTemplateController.php` | Tambah `'nama_jurnal'` ke preview vars (sample: 'Jurnal Pendidikan Indonesia') |
 
-## 5. 🔄 Update: fix sincron
+## 5. Tambah Variabel `{url_jurnal}`, `{nama_penulis}`, `{username_author}`, `{password_author}` ke Email Template
+
+**Tujuan:** Lengkapi variabel email template untuk mendukung email "Submission Acknowledgement" — nama penulis, credential OJS author, dan URL website jurnal (untuk hyperlink nama jurnal).
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/email-templates/form.blade.php` | Tambah 4 chip variabel baru + sample preview JS |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah 4 variabel ke dua render() call (assign & validate) |
+| `app/Http/Controllers/Admin/EmailTemplateController.php` | Tambah 4 variabel ke preview vars |
+
+### Variabel Baru
+
+| Variabel | Sumber Data |
+|----------|-------------|
+| `{url_jurnal}` | `journalSlot → journalMaster → link_jurnal` |
+| `{nama_penulis}` | `submission → nama_penulis` |
+| `{username_author}` | `submission → username_author` |
+| `{password_author}` | `submission → password_author` |
+
+Contoh penggunaan di body template:
+```html
+Dear {nama_penulis},<br>
+Thank you for submitting "<b>{nama_artikel}</b>" to <a href="{url_jurnal}">{nama_jurnal}</a>.<br>
+Username: {username_author} | Password: {password_author}
+```
+
+## 6. Default Urutan Monitoring Marketing → Terbaru
+
+**Tujuan:** Ubah default urutan halaman Monitoring Artikel marketing dari "Terlama" menjadi "Terbaru".
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Marketing/DashboardController.php` | `submissionsMonitoring()`: default `sort_by` dari `date_asc` → `date_desc`; `date_asc` dijadikan case eksplisit |
+| `resources/views/marketing/submissions-monitoring.blade.php` | Option "↓ Terbaru" dipindah ke urutan pertama dan dijadikan default selected; "↑ Terlama" dipindah ke urutan kedua |
+
+## 7. 🔄 Update: fix sincron
 
 - **Commit:** `d5b709c` — 08:56 oleh Gudangsoft
 - **File berubah:** 7 file
@@ -110,4 +149,14 @@
 - `resources/views/marketing/fasttrack/show.blade.php`
 - `resources/views/pic/fasttrack/create.blade.php`
 - `resources/views/pic/fasttrack/edit.blade.php`
+
+
+## 7. 🔄 Update: emailup
+
+- **Commit:** `4ce538c` — 10:13 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/EmailTemplateController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/email-templates/form.blade.php`
 
