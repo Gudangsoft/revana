@@ -71,7 +71,19 @@
 | `app/Http/Controllers/Pic/JournalManagementController.php` | Tambah validasi `email_penulis` di `fasttrackStore()` dan `fasttrackUpdate()`; tambah ke array `$submission->update()` |
 | `app/Http/Controllers/Marketing/DashboardController.php` | Tambah validasi `email_penulis` di `fasttrackStore()`; tambah ke `Submission::create()` |
 
-## 4. 🔄 Update: fix sincron
+## 4. Tambah Variabel `{nama_jurnal}` ke Email Template
+
+**Tujuan:** Tambahkan variabel `{nama_jurnal}` agar bisa disisipkan ke subjek/isi template email, diisi otomatis dengan nama jurnal dari submission.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/email-templates/form.blade.php` | Tambah `{nama_jurnal}` ke chip variabel + sample preview JS |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah `'nama_jurnal'` ke dua render() call (assign & validate email) via `$submission->journalSlot?->journalMaster?->nama_jurnal` |
+| `app/Http/Controllers/Admin/EmailTemplateController.php` | Tambah `'nama_jurnal'` ke preview vars (sample: 'Jurnal Pendidikan Indonesia') |
+
+## 5. 🔄 Update: fix sincron
 
 - **Commit:** `d5b709c` — 08:56 oleh Gudangsoft
 - **File berubah:** 7 file
@@ -82,4 +94,20 @@
 - `app/Models/TaskPointSetting.php`
 - `log-update-2026-06-15.md`
 - `resources/views/admin/pic-points/index.blade.php`
+
+
+## 5. 🔄 Update: email
+
+- **Commit:** `edc8015` — 10:05 oleh Gudangsoft
+- **File berubah:** 11 file
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/fasttrack/create.blade.php`
+- `resources/views/admin/fasttrack/edit.blade.php`
+- `resources/views/admin/fasttrack/show.blade.php`
+- `resources/views/marketing/fasttrack/create.blade.php`
+- `resources/views/marketing/fasttrack/show.blade.php`
+- `resources/views/pic/fasttrack/create.blade.php`
+- `resources/views/pic/fasttrack/edit.blade.php`
 

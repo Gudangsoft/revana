@@ -112,6 +112,7 @@ class EmailTemplateController extends Controller
             'nama_artikel'       => 'Judul Artikel Contoh - Lorem Ipsum Dolor Sit Amet',
             'kode_submit'        => 'BKD2024001',
             'id_artikel'         => 'ART-2024-001',
+            'nama_jurnal'        => 'Jurnal Pendidikan Indonesia',
             'nama_pic'           => 'Dr. Siti Rahayu, M.Pd',
             'email_pic'          => 'siti.rahayu@apji.org',
             'nama_tahap'         => EmailTemplate::$triggerLabels[$emailTemplate->trigger_key] ?? $emailTemplate->trigger_key,

@@ -92,6 +92,7 @@
                                             '{nama_artikel}' => 'Judul artikel',
                                             '{kode_submit}' => 'Kode submit',
                                             '{id_artikel}' => 'ID artikel',
+                                            '{nama_jurnal}' => 'Nama jurnal',
                                             '{nama_pic}' => 'Nama PIC yang ditugaskan',
                                             '{email_pic}' => 'Email PIC',
                                             '{nama_tahap}' => 'Label tahap',
@@ -206,6 +207,7 @@ function livePreview() {
     var sampleVars = {
         'nama_artikel': 'Judul Artikel Contoh – Lorem Ipsum Dolor Sit Amet',
         'kode_submit': 'BKD2024001', 'id_artikel': 'ART-2024-001',
+        'nama_jurnal': 'Jurnal Pendidikan Indonesia',
         'nama_pic': 'Dr. Siti Rahayu, M.Pd', 'email_pic': 'siti.rahayu@apji.org',
         'nama_tahap': 'Editor 1', 'tanggal': new Date().toLocaleString('id-ID'),
         'username_editor': 'editor_user', 'password_editor': 'pass1234',
