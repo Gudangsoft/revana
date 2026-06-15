@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TaskPointSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TaskPointSettingController extends Controller
 {
@@ -69,8 +70,10 @@ class TaskPointSettingController extends Controller
             $setting->update($update);
         }
 
+        $this->syncTotals();
+
         return redirect()->route('admin.task-point-settings.index')
-            ->with('success', 'Pengaturan point berhasil disimpan!');
+            ->with('success', 'Pengaturan point berhasil disimpan & total poin telah disinkronkan!');
     }
 
     public function store(Request $request)
@@ -99,8 +102,10 @@ class TaskPointSettingController extends Controller
             'is_active'  => true,
         ]);
 
+        $this->syncTotals();
+
         return redirect()->route('admin.task-point-settings.index')
-            ->with('success', 'Task point baru berhasil ditambahkan!');
+            ->with('success', 'Task point baru berhasil ditambahkan & poin disinkronkan!');
     }
 
     public function initializeDefaults()
@@ -145,9 +150,35 @@ class TaskPointSettingController extends Controller
     public function destroy($id)
     {
         $setting = TaskPointSetting::findOrFail($id);
+        $label   = $setting->task_label;
         $setting->delete();
 
+        $this->syncTotals();
+
         return redirect()->route('admin.task-point-settings.index')
-            ->with('success', 'Task point berhasil dihapus.');
+            ->with('success', "Task \"{$label}\" berhasil dihapus & poin disinkronkan.");
+    }
+
+    private function syncTotals(): void
+    {
+        // Recalculate total_points for all PICs from sum of pic_point_histories
+        DB::statement('
+            UPDATE pics
+            SET total_points = COALESCE((
+                SELECT SUM(pph.points_earned)
+                FROM pic_point_histories pph
+                WHERE pph.pic_id = pics.id
+            ), 0)
+        ');
+
+        // Recalculate total_points for all Marketings from actual submission count
+        DB::statement('
+            UPDATE marketings
+            SET total_points = (
+                SELECT COUNT(*)
+                FROM submissions s
+                WHERE s.marketing_id = marketings.id
+            )
+        ');
     }
 }

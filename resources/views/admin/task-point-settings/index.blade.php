@@ -46,7 +46,7 @@
 @endif
 
 {{-- ================================================================
-     MAIN FORM
+     MAIN FORM (update existing settings)
      ================================================================ --}}
 <form action="{{ route('admin.task-point-settings.update') }}" method="POST" id="settingsForm">
     @csrf
@@ -59,17 +59,23 @@
                 <i class="bi bi-person-badge-fill text-primary me-1"></i>
                 <strong class="text-primary">Point PIC per Tahap</strong>
             </div>
-            <small class="text-muted">Point diberikan saat tahap selesai divalidasi</small>
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-muted d-none d-md-block">Point diberikan saat tahap selesai divalidasi</small>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddPic">
+                    <i class="bi bi-plus-lg"></i> Tambah Task
+                </button>
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="picTable">
                 <thead style="background:#f1f5f9;">
                     <tr>
                         <th width="48" class="text-center text-muted">#</th>
-                        <th width="110">Step</th>
+                        <th width="120">Step Key</th>
                         <th>Label Tugas <small class="text-muted fw-normal">(klik untuk edit)</small></th>
                         <th width="160" class="text-center">Point per Tugas</th>
                         <th width="80" class="text-center">Aktif</th>
+                        <th width="48" class="text-center"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,6 +122,12 @@
                                        {{ $setting->is_active ? 'checked' : '' }}>
                             </div>
                         </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-link btn-sm text-danger p-0" title="Hapus task"
+                                    onclick="confirmDelete({{ $setting->id }}, '{{ addslashes($setting->task_label) }}', '{{ route('admin.task-point-settings.destroy', $setting->id) }}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                     @else
                     <tr class="table-light step-row-missing">
@@ -128,8 +140,64 @@
                             Belum dikonfigurasi — sistem menggunakan fallback <strong>1 pt</strong>.
                             Klik <strong>Inisialisasi Default</strong> di atas.
                         </td>
+                        <td></td>
                     </tr>
                     @endif
+                    @endforeach
+
+                    {{-- Custom PIC tasks (not in default step order) --}}
+                    @php
+                        $customPicSettings = $picSettings->filter(fn($s) => !in_array($s->task_key, $picOrder));
+                    @endphp
+                    @foreach($customPicSettings as $setting)
+                    <tr class="step-row {{ $setting->is_active ? '' : 'inactive-row' }}" data-step="{{ $setting->task_key }}">
+                        <td class="text-center">
+                            <span class="badge rounded-pill {{ $setting->is_active ? 'text-bg-info' : 'text-bg-secondary' }} step-num-badge">
+                                <i class="bi bi-asterisk" style="font-size:.6rem;"></i>
+                            </span>
+                        </td>
+                        <td>
+                            <code class="text-info" style="font-size:.8rem;">{{ $setting->task_key }}</code>
+                            <span class="badge text-bg-light border ms-1" style="font-size:.6rem;">custom</span>
+                        </td>
+                        <td>
+                            <input type="text"
+                                   name="task_label[{{ $setting->id }}]"
+                                   value="{{ $setting->task_label }}"
+                                   class="form-control form-control-sm inline-label-input"
+                                   placeholder="Label tahap..."
+                                   maxlength="100">
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <input type="number"
+                                       name="points[{{ $setting->id }}]"
+                                       value="{{ $setting->points }}"
+                                       class="form-control form-control-sm text-center pic-point-input"
+                                       data-step="{{ $setting->task_key }}"
+                                       min="0" step="0.01"
+                                       style="width:90px;">
+                                <small class="text-muted">pt</small>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-flex justify-content-center mb-0">
+                                <input type="checkbox"
+                                       class="form-check-input pic-active-toggle"
+                                       name="is_active[{{ $setting->id }}]"
+                                       data-step="{{ $setting->task_key }}"
+                                       value="1"
+                                       role="switch"
+                                       {{ $setting->is_active ? 'checked' : '' }}>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-link btn-sm text-danger p-0" title="Hapus task"
+                                    onclick="confirmDelete({{ $setting->id }}, '{{ addslashes($setting->task_label) }}', '{{ route('admin.task-point-settings.destroy', $setting->id) }}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
                     @endforeach
                 </tbody>
                 <tfoot style="background:#f8fafc;">
@@ -139,7 +207,7 @@
                             <strong class="text-primary fs-5" id="picTableTotal">—</strong>
                             <small class="text-muted"> pt</small>
                         </td>
-                        <td></td>
+                        <td colspan="2"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -153,22 +221,30 @@
                 <i class="bi bi-megaphone-fill text-success me-1"></i>
                 <strong class="text-success">Point Marketing per Submission</strong>
             </div>
-            <small class="text-muted">Point diberikan saat submission baru masuk dengan kode Marketing</small>
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-muted d-none d-md-block">Point diberikan saat submission baru masuk dengan kode Marketing</small>
+                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalAddMarketing">
+                    <i class="bi bi-plus-lg"></i> Tambah Task
+                </button>
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead style="background:#f1f5f9;">
                     <tr>
-                        <th width="110">Step</th>
+                        <th width="120">Step Key</th>
                         <th>Label</th>
                         <th width="160" class="text-center">Point per Submission</th>
                         <th width="80" class="text-center">Aktif</th>
+                        <th width="48" class="text-center"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($marketingSettings as $setting)
                     <tr>
-                        <td><code class="text-success" style="font-size:.8rem;">{{ $setting->task_key }}</code></td>
+                        <td>
+                            <code class="text-success" style="font-size:.8rem;">{{ $setting->task_key }}</code>
+                        </td>
                         <td>
                             <input type="text"
                                    name="task_label[{{ $setting->id }}]"
@@ -197,10 +273,16 @@
                                        {{ $setting->is_active ? 'checked' : '' }}>
                             </div>
                         </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-link btn-sm text-danger p-0" title="Hapus task"
+                                    onclick="confirmDelete({{ $setting->id }}, '{{ addslashes($setting->task_label) }}', '{{ route('admin.task-point-settings.destroy', $setting->id) }}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-3 fst-italic">
+                        <td colspan="5" class="text-center text-muted py-3 fst-italic">
                             Belum ada setting Marketing — klik <strong>Inisialisasi Default</strong> di atas.
                         </td>
                     </tr>
@@ -213,10 +295,9 @@
     {{-- === FOOTER === --}}
     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
         <div class="alert alert-info mb-0 py-2 px-3" style="font-size:.82rem; max-width:680px;">
-            <i class="bi bi-lightbulb-fill me-1"></i>
-            <strong>Perubahan point hanya berlaku untuk transaksi baru ke depan.</strong>
-            Data historis tidak berubah otomatis.
-            Gunakan tombol <strong>Sync Ulang Poin</strong> di halaman laporan point untuk recalculate:
+            <i class="bi bi-info-circle-fill me-1"></i>
+            <strong>Simpan & Sync</strong> akan menyimpan pengaturan dan menghitung ulang total poin semua PIC dan Marketing secara otomatis.
+            Untuk menyinkronkan data historis secara penuh, gunakan <strong>Sync Ulang Poin</strong> di:
             <a href="{{ route('admin.pic-points.index') }}" class="alert-link" target="_blank">
                 <i class="bi bi-box-arrow-up-right"></i> Laporan Poin PIC
             </a>
@@ -226,10 +307,114 @@
             </a>
         </div>
         <button type="submit" class="btn btn-primary px-5 flex-shrink-0">
-            <i class="bi bi-save me-1"></i> Simpan Pengaturan
+            <i class="bi bi-save me-1"></i> Simpan & Sync
         </button>
     </div>
 </form>
+
+{{-- ================================================================
+     DELETE FORM (shared, action set dynamically by JS)
+     ================================================================ --}}
+<form id="deleteTaskForm" method="POST" action="">
+    @csrf
+    @method('DELETE')
+</form>
+
+{{-- ================================================================
+     MODAL: Tambah Task PIC
+     ================================================================ --}}
+<div class="modal fade" id="modalAddPic" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('admin.task-point-settings.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="user_type" value="pic">
+                <div class="modal-header py-2" style="background:#e0e7ff; border-bottom:2px solid #818cf8;">
+                    <h6 class="modal-title fw-bold mb-0">
+                        <i class="bi bi-person-badge-fill text-primary me-1"></i> Tambah Task PIC Baru
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Task Key <span class="text-danger">*</span></label>
+                        <input type="text" name="task_key" class="form-control form-control-sm" required
+                               placeholder="contoh: proof_reading, reviewer3"
+                               pattern="[a-z0-9_]+" title="Huruf kecil, angka, dan underscore saja">
+                        <div class="form-text">Huruf kecil + underscore saja. Contoh: <code>proof_reading</code></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Label Tugas <span class="text-danger">*</span></label>
+                        <input type="text" name="task_label" class="form-control form-control-sm" required
+                               placeholder="contoh: Proof Reading" maxlength="100">
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold small">Point <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm" style="max-width:160px;">
+                            <input type="number" name="points" class="form-control" required
+                                   value="1" min="0" step="0.01">
+                            <span class="input-group-text">pt</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- ================================================================
+     MODAL: Tambah Task Marketing
+     ================================================================ --}}
+<div class="modal fade" id="modalAddMarketing" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('admin.task-point-settings.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="user_type" value="marketing">
+                <div class="modal-header py-2" style="background:#dcfce7; border-bottom:2px solid #4ade80;">
+                    <h6 class="modal-title fw-bold mb-0">
+                        <i class="bi bi-megaphone-fill text-success me-1"></i> Tambah Task Marketing Baru
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Task Key <span class="text-danger">*</span></label>
+                        <input type="text" name="task_key" class="form-control form-control-sm" required
+                               placeholder="contoh: referral, bonus_target"
+                               pattern="[a-z0-9_]+" title="Huruf kecil, angka, dan underscore saja">
+                        <div class="form-text">Huruf kecil + underscore saja. Contoh: <code>referral</code></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Label Tugas <span class="text-danger">*</span></label>
+                        <input type="text" name="task_label" class="form-control form-control-sm" required
+                               placeholder="contoh: Referral Marketing" maxlength="100">
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold small">Point <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm" style="max-width:160px;">
+                            <input type="number" name="points" class="form-control" required
+                                   value="1" min="0" step="0.01">
+                            <span class="input-group-text">pt</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success btn-sm px-4">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <style>
 .inline-label-input {
@@ -281,6 +466,15 @@ function syncRowStyle(toggle) {
     const badge = row.querySelector('.step-num-badge');
     if (badge) badge.className = 'badge rounded-pill step-num-badge ' + (toggle.checked ? 'text-bg-primary' : 'text-bg-secondary');
     recalc();
+}
+
+function confirmDelete(id, label, url) {
+    if (!confirm('Hapus task "' + label + '"?\n\nData historis poin yang sudah tercatat tidak akan terhapus, tetapi task ini tidak akan muncul lagi di pengaturan.')) {
+        return;
+    }
+    const form = document.getElementById('deleteTaskForm');
+    form.action = url;
+    form.submit();
 }
 
 document.querySelectorAll('.pic-point-input').forEach(el => el.addEventListener('input', recalc));

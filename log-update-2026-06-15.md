@@ -235,3 +235,44 @@ Username: {username_author} | Password: {password_author}
 - `resources/views/admin/partials/sidebar.blade.php`
 - `routes/web.php`
 
+
+## 10. Pengaturan Point Dinamis: Tambah Task & Sync Otomatis (`/admin/task-point-settings`)
+
+**Tujuan:** Jadikan halaman pengaturan point dinamis — admin bisa menambahkan task/step baru untuk PIC dan Marketing, menghapus task yang tidak diperlukan, dan setelah disimpan total poin langsung disinkronkan otomatis.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/TaskPointSettingController.php` | Tambah private `syncTotals()` — 2 bulk SQL untuk recalculate `total_points` pada `pics` dan `marketings`; panggil di `update()`, `store()`, `destroy()` |
+| `resources/views/admin/task-point-settings/index.blade.php` | Tombol "Tambah Task" di header tiap card; modal form tambah task PIC/Marketing; kolom Aksi (trash) tiap baris; hidden delete form (JS confirmDelete); tampilkan custom task di bawah default steps |
+
+### Detail Fitur Baru
+
+**Tambah Task Baru:**
+- Tombol "+ Tambah Task" di header card PIC (biru) dan Marketing (hijau)
+- Modal berisi: Task Key (validasi lowercase+underscore), Label Tugas, Point
+- Submit → POST `/admin/task-point-settings` → `store()` → sync → redirect
+
+**Hapus Task:**
+- Icon trash di setiap baris (default & custom)
+- Konfirmasi JS sebelum hapus (tidak menghapus histori poin)
+- Delete → `destroy()` → sync → redirect
+
+**Custom Tasks:**
+- Task yang ditambahkan manual (bukan 9 default PIC / 1 default Marketing) tampil di bagian bawah tabel dengan badge "custom" dan warna biru-info
+- Bisa diedit (label, point, aktif) dan dihapus sama seperti task default
+
+**Sync Otomatis (`syncTotals()`):**
+- Setiap save/tambah/hapus otomatis menjalankan 2 query:
+  - `UPDATE pics SET total_points = COALESCE(SUM(pic_point_histories.points_earned), 0)`
+  - `UPDATE marketings SET total_points = COUNT(submissions WHERE marketing_id = marketings.id)`
+- Tidak mengubah data historis, hanya recalculate total
+
+## 15. 🔄 Update: up
+
+- **Commit:** `3ec594a` — 11:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-06-15.md`
+
