@@ -155,6 +155,42 @@ class MarketingPointReportController extends Controller
     }
 
     /**
+     * Bulk sync: backfill missing marketing_point_histories + recalculate totals.
+     * Called from TaskPointSettingController after saving settings.
+     * Returns [$created, $synced].
+     */
+    public static function runBulkSync(): array
+    {
+        $submitPoints = (float) (\App\Models\TaskPointSetting::getMarketingPoints('submit') ?? 1);
+
+        // Bulk INSERT missing history records for all submissions without a record
+        $created = \DB::affectingStatement("
+            INSERT INTO marketing_point_histories (marketing_id, submission_id, points_earned, description, created_at, updated_at)
+            SELECT s.marketing_id, s.id, ?,
+                   CONCAT('Sinkronisasi: ', COALESCE(s.kode_submit,''), ' - ', COALESCE(SUBSTR(s.judul_artikel, 1, 200),'')),
+                   COALESCE(s.created_at, NOW()), COALESCE(s.updated_at, NOW())
+            FROM submissions s
+            WHERE s.marketing_id IS NOT NULL
+              AND NOT EXISTS (
+                  SELECT 1 FROM marketing_point_histories mph
+                  WHERE mph.marketing_id = s.marketing_id AND mph.submission_id = s.id
+              )
+        ", [$submitPoints]);
+
+        // Recalculate total_points = count of submissions for each marketing
+        $synced = \DB::affectingStatement('
+            UPDATE marketings
+            SET total_points = (
+                SELECT COUNT(*)
+                FROM submissions s
+                WHERE s.marketing_id = marketings.id
+            )
+        ');
+
+        return [$created, $synced];
+    }
+
+    /**
      * Sync all marketing points (1 submission = 1 point)
      */
     public function syncAllPoints()

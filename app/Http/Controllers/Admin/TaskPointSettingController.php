@@ -161,24 +161,22 @@ class TaskPointSettingController extends Controller
 
     private function syncTotals(): void
     {
-        // Recalculate total_points for all PICs from sum of pic_point_histories
-        DB::statement('
-            UPDATE pics
-            SET total_points = COALESCE((
-                SELECT SUM(pph.points_earned)
-                FROM pic_point_histories pph
-                WHERE pph.pic_id = pics.id
-            ), 0)
+        // Backfill missing pic_point_histories for all completed standard workflow steps
+        PicPointReportController::runBulkSync();
+
+        // Recalculate pics.total_points from sum of all pic_point_histories
+        DB::affectingStatement('
+            UPDATE pics p
+            LEFT JOIN (
+                SELECT pic_id, COALESCE(SUM(points_earned), 0) AS actual
+                FROM pic_point_histories
+                GROUP BY pic_id
+            ) h ON h.pic_id = p.id
+            SET p.total_points = COALESCE(h.actual, 0)
+            WHERE p.total_points != COALESCE(h.actual, 0)
         ');
 
-        // Recalculate total_points for all Marketings from actual submission count
-        DB::statement('
-            UPDATE marketings
-            SET total_points = (
-                SELECT COUNT(*)
-                FROM submissions s
-                WHERE s.marketing_id = marketings.id
-            )
-        ');
+        // Backfill missing marketing_point_histories + recalculate marketings.total_points
+        MarketingPointReportController::runBulkSync();
     }
 }

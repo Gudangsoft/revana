@@ -269,10 +269,39 @@ Username: {username_author} | Password: {password_author}
   - `UPDATE marketings SET total_points = COUNT(submissions WHERE marketing_id = marketings.id)`
 - Tidak mengubah data historis, hanya recalculate total
 
+## 11. Fix: Sync Penuh saat Simpan Task-Point-Settings
+
+**Tujuan:** Setelah tambah/simpan/hapus task di pengaturan point, sistem harus backfill semua history record yang belum ada (tidak hanya recalculate total), sehingga laporan PIC dan Marketing langsung terupdate.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `runBulkSync()` diubah dari `private` ke `public static` agar bisa dipanggil dari controller lain |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | Tambah `public static runBulkSync()` — INSERT bulk untuk marketing_point_histories yang belum ada + UPDATE total_points |
+| `app/Http/Controllers/Admin/TaskPointSettingController.php` | `syncTotals()` sekarang memanggil `PicPointReportController::runBulkSync()` (backfill + repair PIC) + `MarketingPointReportController::runBulkSync()` (backfill Marketing), bukan hanya simple UPDATE totals |
+
+### Alur Sync Sekarang
+
+Setiap kali Simpan/Tambah/Hapus task di `/admin/task-point-settings`:
+1. **PIC backfill** — INSERT `pic_point_histories` untuk semua submission yang sudah selesai step-nya tapi belum ada record
+2. **PIC recalculate** — UPDATE `pics.total_points` = SUM(pic_point_histories.points_earned)
+3. **Marketing backfill** — INSERT `marketing_point_histories` untuk semua submission yang sudah ada tapi belum ada record
+4. **Marketing recalculate** — UPDATE `marketings.total_points` = COUNT(submissions)
+
 ## 15. 🔄 Update: up
 
 - **Commit:** `3ec594a` — 11:27 oleh Gudangsoft
 - **File berubah:** 2 file
 - `app/Http/Controllers/Admin/SubmissionController.php`
 - `log-update-2026-06-15.md`
+
+
+## 17. 🔄 Update: task
+
+- **Commit:** `14e9958` — 16:15 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/TaskPointSettingController.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/task-point-settings/index.blade.php`
 

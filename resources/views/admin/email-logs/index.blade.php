@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Pengiriman Email')
+@section('title', 'Log Pengiriman Email')
+@section('page-title', 'Log Pengiriman Email')
+
+@section('sidebar')@include('admin.partials.sidebar')@endsection
 
 @section('content')
 <div class="container-fluid py-3">

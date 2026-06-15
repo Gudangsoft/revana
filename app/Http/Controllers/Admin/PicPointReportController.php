@@ -213,7 +213,7 @@ class PicPointReportController extends Controller
      */
     public function syncAllPoints()
     {
-        [$backfilled, $repaired] = $this->runBulkSync();
+        [$backfilled, $repaired] = self::runBulkSync();
 
         // Recalculate total_points for all PICs via single SQL UPDATE
         $synced = \DB::affectingStatement('
@@ -243,10 +243,10 @@ class PicPointReportController extends Controller
     }
 
     /**
-     * Core bulk sync logic shared by syncAllPoints() and syncAllAndLogout().
+     * Core bulk sync logic shared by syncAllPoints(), syncAllAndLogout(), and TaskPointSettingController.
      * Returns [$backfilled, $repaired].
      */
-    private function runBulkSync(): array
+    public static function runBulkSync(): array
     {
         $workflowSteps = [
             ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1',   'validated_at' => 'editor1_validated_at'],
@@ -435,7 +435,7 @@ class PicPointReportController extends Controller
      */
     public function syncAllAndLogout()
     {
-        [$backfilled] = $this->runBulkSync();
+        [$backfilled] = self::runBulkSync();
 
         // Recalculate total_points for all PICs
         \DB::statement('
