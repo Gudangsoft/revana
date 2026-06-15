@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 class PicPointsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
 {
     protected $request;
+    protected int $rank = 0;
 
     public function __construct(Request $request)
     {
@@ -44,11 +45,10 @@ class PicPointsExport implements FromCollection, WithHeadings, WithMapping, With
 
     public function map($pic): array
     {
-        static $rank = 0;
-        $rank++;
+        $this->rank++;
 
         return [
-            $rank,
+            $this->rank,
             $pic->name,
             $pic->username,
             $pic->role,

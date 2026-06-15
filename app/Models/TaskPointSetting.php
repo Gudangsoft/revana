@@ -25,14 +25,14 @@ class TaskPointSetting extends Model
     /**
      * Get points for PIC task
      */
-    public static function getPicPoints(string $taskKey): float
+    public static function getPicPoints(string $taskKey): ?float
     {
         $setting = self::where('user_type', 'pic')
             ->where('task_key', $taskKey)
             ->where('is_active', true)
             ->first();
 
-        return $setting ? (float) $setting->points : 1.0;
+        return $setting ? (float) $setting->points : null;
     }
 
     /**

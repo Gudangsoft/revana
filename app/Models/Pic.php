@@ -56,10 +56,14 @@ class Pic extends Authenticatable
     }
 
     /**
-     * Get points earned this month
+     * Get points earned this month.
+     * Uses preloaded value from withSum('pointHistories as points_this_month') when available.
      */
     public function getPointsThisMonthAttribute()
     {
+        if (array_key_exists('points_this_month', $this->attributes)) {
+            return (float) ($this->attributes['points_this_month'] ?? 0);
+        }
         return $this->pointHistories()
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
@@ -77,10 +81,14 @@ class Pic extends Authenticatable
     }
 
     /**
-     * Get total tasks completed (count of point histories)
+     * Get total tasks completed (count of point histories).
+     * Uses preloaded value from withCount('pointHistories as total_tasks_completed') when available.
      */
     public function getTotalTasksCompletedAttribute()
     {
+        if (array_key_exists('total_tasks_completed', $this->attributes)) {
+            return (int) ($this->attributes['total_tasks_completed'] ?? 0);
+        }
         return $this->pointHistories()->count();
     }
 

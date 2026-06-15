@@ -189,8 +189,9 @@
                                     <small class="text-muted">{{ $pic->username }}</small>
                                 </td>
                                 <td class="text-center">
-                                    @if($pic->pending_tasks_count > 0)
-                                        <span class="badge bg-danger fs-6">{{ $pic->pending_tasks_count }}</span>
+                                    @php $pendingCount = $pendingCounts[$pic->id] ?? 0; @endphp
+                                    @if($pendingCount > 0)
+                                        <span class="badge bg-danger fs-6">{{ $pendingCount }}</span>
                                     @else
                                         <span class="badge bg-success">0</span>
                                     @endif
@@ -211,42 +212,6 @@
                                     </button>
                                 </td>
                             </tr>
-                            
-                            <!-- Adjust Modal -->
-                            <div class="modal fade" id="adjustModal{{ $pic->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form action="{{ route('admin.pic-points.adjust', $pic) }}" method="POST">
-                                            @csrf
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Adjust Point - {{ $pic->name }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Point Saat Ini</label>
-                                                    <input type="text" class="form-control" value="{{ number_format($pic->total_points) }}" readonly>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Penyesuaian <span class="text-danger">*</span></label>
-                                                    <input type="number" class="form-control" name="adjustment" required placeholder="Contoh: 10 atau -5">
-                                                    <small class="text-muted">Gunakan angka negatif untuk mengurangi point</small>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Alasan <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="reason" required placeholder="Masukkan alasan penyesuaian">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-warning">
-                                                    <i class="bi bi-check-circle"></i> Adjust Point
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-muted py-4">
@@ -258,7 +223,45 @@
                         </tbody>
                     </table>
                 </div>
-                
+
+                {{-- Adjust Modals (di luar <table> agar valid HTML) --}}
+                @foreach($pics as $pic)
+                <div class="modal fade" id="adjustModal{{ $pic->id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{{ route('admin.pic-points.adjust', $pic) }}" method="POST">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Adjust Point - {{ $pic->name }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Point Saat Ini</label>
+                                        <input type="text" class="form-control" value="{{ number_format($pic->total_points) }}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Penyesuaian <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="adjustment" required placeholder="Contoh: 10 atau -5">
+                                        <small class="text-muted">Gunakan angka negatif untuk mengurangi point</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Alasan <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="reason" required placeholder="Masukkan alasan penyesuaian">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-check-circle"></i> Adjust Point
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+
                 @include('partials.per-page-selector', ['paginator' => $pics])
             </div>
         </div>

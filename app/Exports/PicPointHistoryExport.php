@@ -19,6 +19,7 @@ class PicPointHistoryExport implements FromCollection, WithHeadings, WithMapping
     protected ?string $tanggalSampai;
     protected ?string $step;
     protected ?string $processType;
+    protected int $no = 0;
 
     public function __construct(Pic $pic, ?string $tanggalDari = null, ?string $tanggalSampai = null, ?string $step = null, ?string $processType = null)
     {
@@ -74,11 +75,10 @@ class PicPointHistoryExport implements FromCollection, WithHeadings, WithMapping
 
     public function map($history): array
     {
-        static $no = 0;
-        $no++;
+        $this->no++;
 
         return [
-            $no,
+            $this->no,
             $history->created_at->format('d/m/Y H:i'),
             $history->submission ? $history->submission->kode_submit : '-',
             $history->submission ? $history->submission->judul_artikel : '-',

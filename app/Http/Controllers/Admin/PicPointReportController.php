@@ -19,8 +19,13 @@ class PicPointReportController extends Controller
     public function index(Request $request)
     {
         $query = Pic::where('is_active', true)
-            ->orderBy('total_points', 'desc');
-        
+            ->orderBy('total_points', 'desc')
+            ->withCount(['pointHistories as total_tasks_completed'])
+            ->withSum(['pointHistories as points_this_month' => function($q) {
+                $q->whereMonth('created_at', now()->month)
+                  ->whereYear('created_at', now()->year);
+            }], 'points_earned');
+
         // Filter by search
         if ($request->filled('search')) {
             $search = $request->search;
@@ -30,14 +35,44 @@ class PicPointReportController extends Controller
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
-        
+
         $pics = $query->paginate(request()->input('per_page', 20));
-        
+
+        // Batch calculate pending tasks count for all PICs on this page (avoids N×8 queries)
+        $picIds = $pics->pluck('id')->toArray();
+        $pendingCounts = array_fill_keys($picIds, 0);
+        if (!empty($picIds)) {
+            $pendingSteps = [
+                ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'status' => 'EDITOR1_PROCESS'],
+                ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'status' => 'AUTHOR1_PROCESS'],
+                ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'status' => 'EDITOR2_PROCESS'],
+                ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'status' => 'REVIEWER1_PROCESS'],
+                ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'status' => 'REVIEWER2_PROCESS'],
+                ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'status' => 'EDITOR3_PROCESS'],
+                ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'status' => 'AUTHOR2_PROCESS'],
+                ['field' => 'petugas_production_id', 'valid' => 'production_valid','status' => 'PRODUCTION_PROCESS'],
+            ];
+            foreach ($pendingSteps as $ps) {
+                $rows = \DB::table('submissions')
+                    ->whereIn($ps['field'], $picIds)
+                    ->where('status', $ps['status'])
+                    ->where(function($q) use ($ps) {
+                        $q->whereNull($ps['valid'])->orWhere($ps['valid'], false);
+                    })
+                    ->selectRaw($ps['field'] . ' as pic_id, COUNT(*) as cnt')
+                    ->groupBy($ps['field'])
+                    ->get();
+                foreach ($rows as $row) {
+                    $pendingCounts[$row->pic_id] = ($pendingCounts[$row->pic_id] ?? 0) + $row->cnt;
+                }
+            }
+        }
+
         // Get overall statistics
         $totalPics = Pic::where('is_active', true)->count();
         $totalPoints = Pic::where('is_active', true)->sum('total_points');
         $totalTasks = PicPointHistory::count();
-        
+
         // Top performer this month
         $topPerformerThisMonth = Pic::where('is_active', true)
             ->whereHas('pointHistories', function($q) {
@@ -50,18 +85,19 @@ class PicPointReportController extends Controller
             }], 'points_earned')
             ->orderByDesc('points_this_month')
             ->first();
-        
+
         // Points distribution by step
         $pointsByStep = \DB::table('pic_point_histories')
             ->selectRaw('step, SUM(points_earned) as total, COUNT(*) as count')
             ->groupBy('step')
             ->orderByRaw('SUM(points_earned) desc')
             ->get();
-        
+
         $stepConfig = TaskPointSetting::getPicPointConfig();
-        
+
         return view('admin.pic-points.index', compact(
             'pics',
+            'pendingCounts',
             'totalPics',
             'totalPoints',
             'totalTasks',
@@ -172,39 +208,46 @@ class PicPointReportController extends Controller
     }
 
     /**
-     * Sync all PIC points from point history (comprehensive sync with backfill)
+     * Sync all PIC points from point history (comprehensive sync with backfill).
+     * Uses bulk INSERT/UPDATE to avoid N+1 timeouts on large datasets.
      */
     public function syncAllPoints()
     {
-        $backfilled = 0;
+        [$backfilled, $repaired] = $this->runBulkSync();
 
-        // --- BACKFILL step submit ---
-        $submitRows = \DB::table('submissions')
-            ->whereNotNull('petugas_submit_id')
-            ->select('id', 'petugas_submit_id', 'kode_submit', 'judul_artikel')
-            ->get();
+        // Recalculate total_points for all PICs via single SQL UPDATE
+        $synced = \DB::affectingStatement('
+            UPDATE pics p
+            LEFT JOIN (
+                SELECT pic_id, COALESCE(SUM(points_earned), 0) AS actual
+                FROM pic_point_histories
+                GROUP BY pic_id
+            ) h ON h.pic_id = p.id
+            SET p.total_points = COALESCE(h.actual, 0)
+            WHERE p.total_points != COALESCE(h.actual, 0)
+        ');
 
-        foreach ($submitRows as $row) {
-            $exists = PicPointHistory::where('pic_id', $row->petugas_submit_id)
-                ->where('submission_id', $row->id)
-                ->where('step', 'submit')
-                ->exists();
-            if (!$exists) {
-                $points = PicPointHistory::getPointsForStep('submit');
-                if ($points > 0) {
-                    PicPointHistory::create([
-                        'pic_id'        => $row->petugas_submit_id,
-                        'submission_id' => $row->id,
-                        'step'          => 'submit',
-                        'points_earned' => $points,
-                        'description'   => "Submit artikel: {$row->kode_submit} - {$row->judul_artikel}",
-                    ]);
-                    $backfilled++;
-                }
-            }
+        // Remove orphan point histories
+        $validPicIds = Pic::pluck('id');
+        $orphanCount = PicPointHistory::whereNotIn('pic_id', $validPicIds)->count();
+        if ($orphanCount > 0) {
+            PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
         }
 
-        // --- BACKFILL workflow steps (only validated) ---
+        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$repaired} tanggal dikoreksi, {$synced} PIC diperbarui";
+        if ($orphanCount > 0) {
+            $msg .= ", {$orphanCount} riwayat orphan dihapus";
+        }
+
+        return redirect()->route('admin.pic-points.index')->with('success', $msg . '.');
+    }
+
+    /**
+     * Core bulk sync logic shared by syncAllPoints() and syncAllAndLogout().
+     * Returns [$backfilled, $repaired].
+     */
+    private function runBulkSync(): array
+    {
         $workflowSteps = [
             ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1',   'validated_at' => 'editor1_validated_at'],
             ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1',   'validated_at' => 'author1_validated_at'],
@@ -216,84 +259,71 @@ class PicPointReportController extends Controller
             ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production','validated_at' => 'production_validated_at'],
         ];
 
-        $repaired = 0;
-        foreach ($workflowSteps as $ws) {
-            $rows = \DB::table('submissions')
-                ->whereNotNull($ws['field'])
-                ->where($ws['valid'], true)
-                ->select('id', $ws['field'] . ' as pic_id', 'kode_submit', 'judul_artikel', $ws['validated_at'])
-                ->get();
+        $backfilled = 0;
+        $repaired   = 0;
 
-            foreach ($rows as $row) {
-                $validatedAt = $row->{$ws['validated_at']} ?? null;
-                $existingHistory = PicPointHistory::where('pic_id', $row->pic_id)
-                    ->where('submission_id', $row->id)
-                    ->where('step', $ws['step'])
-                    ->first();
-
-                if (!$existingHistory) {
-                    $points = PicPointHistory::getPointsForStep($ws['step']);
-                    if ($points > 0) {
-                        $ts = $validatedAt ?? now();
-                        PicPointHistory::create([
-                            'pic_id'        => $row->pic_id,
-                            'submission_id' => $row->id,
-                            'step'          => $ws['step'],
-                            'points_earned' => $points,
-                            'description'   => "Menyelesaikan tugas {$ws['step']} untuk: {$row->kode_submit}",
-                            'created_at'    => $ts,
-                            'updated_at'    => $ts,
-                        ]);
-                        $backfilled++;
-                    }
-                } elseif ($validatedAt && $existingHistory->created_at->toDateString() !== \Carbon\Carbon::parse($validatedAt)->toDateString()) {
-                    // Repair: history created_at mismatch with actual validated_at (e.g. created by old sync)
-                    $existingHistory->update(['created_at' => $validatedAt, 'updated_at' => $validatedAt]);
-                    $repaired++;
-                }
-            }
+        // Bulk INSERT missing submit histories (one query instead of one per submission)
+        $submitPoints = PicPointHistory::getPointsForStep('submit');
+        if ($submitPoints > 0) {
+            $backfilled += \DB::affectingStatement("
+                INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
+                SELECT s.petugas_submit_id, s.id, 'submit', ?,
+                       CONCAT('Submit artikel: ', COALESCE(s.kode_submit,''), ' - ', COALESCE(s.judul_artikel,'')),
+                       NOW(), NOW()
+                FROM submissions s
+                WHERE s.petugas_submit_id IS NOT NULL
+                  AND NOT EXISTS (
+                      SELECT 1 FROM pic_point_histories h
+                      WHERE h.pic_id = s.petugas_submit_id AND h.submission_id = s.id AND h.step = 'submit'
+                  )
+            ", [$submitPoints]);
         }
 
-        // Backfill NULL validated_at from history.created_at (for records toggled by admin without validated_at)
+        // Bulk INSERT missing workflow step histories (one query per step instead of one per row)
+        foreach ($workflowSteps as $ws) {
+            $points = PicPointHistory::getPointsForStep($ws['step']);
+            if ($points <= 0) continue;
+
+            $backfilled += \DB::affectingStatement("
+                INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
+                SELECT s.{$ws['field']}, s.id, '{$ws['step']}', ?,
+                       CONCAT('Menyelesaikan tugas {$ws['step']} untuk: ', COALESCE(s.kode_submit,'')),
+                       COALESCE(s.{$ws['validated_at']}, NOW()), COALESCE(s.{$ws['validated_at']}, NOW())
+                FROM submissions s
+                WHERE s.{$ws['field']} IS NOT NULL
+                  AND s.{$ws['valid']} = 1
+                  AND NOT EXISTS (
+                      SELECT 1 FROM pic_point_histories h
+                      WHERE h.pic_id = s.{$ws['field']} AND h.submission_id = s.id AND h.step = '{$ws['step']}'
+                  )
+            ", [$points]);
+
+            // Bulk UPDATE mismatched created_at dates (repair)
+            $repaired += \DB::affectingStatement("
+                UPDATE pic_point_histories h
+                INNER JOIN submissions s ON s.id = h.submission_id AND s.{$ws['field']} = h.pic_id
+                SET h.created_at = s.{$ws['validated_at']}, h.updated_at = s.{$ws['validated_at']}
+                WHERE h.step = '{$ws['step']}'
+                  AND s.{$ws['validated_at']} IS NOT NULL
+                  AND DATE(h.created_at) != DATE(s.{$ws['validated_at']})
+            ");
+        }
+
+        // Backfill NULL validated_at from history.created_at
         foreach ($workflowSteps as $ws) {
             \DB::statement("
                 UPDATE submissions s
                 INNER JOIN pic_point_histories h
                     ON h.submission_id = s.id
-                    AND h.pic_id = s.{$ws['field']}
-                    AND h.step = '{$ws['step']}'
+                   AND h.pic_id = s.{$ws['field']}
+                   AND h.step = '{$ws['step']}'
                 SET s.{$ws['validated_at']} = h.created_at
                 WHERE s.{$ws['validated_at']} IS NULL
                   AND s.{$ws['valid']} = 1
             ");
         }
 
-        // Recalculate total_points for all PICs from histories
-        $synced = 0;
-        $unchanged = 0;
-        foreach (Pic::all() as $pic) {
-            $actualPoints = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            if ($actualPoints != ($pic->total_points ?? 0)) {
-                $pic->update(['total_points' => $actualPoints]);
-                $synced++;
-            } else {
-                $unchanged++;
-            }
-        }
-
-        // Remove orphan point histories
-        $validPicIds = Pic::pluck('id');
-        $orphanCount = PicPointHistory::whereNotIn('pic_id', $validPicIds)->count();
-        if ($orphanCount > 0) {
-            PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
-        }
-
-        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$repaired} tanggal dikoreksi, {$synced} PIC diperbarui, {$unchanged} sudah sesuai";
-        if ($orphanCount > 0) {
-            $msg .= ", {$orphanCount} riwayat orphan dihapus";
-        }
-
-        return redirect()->route('admin.pic-points.index')->with('success', $msg . '.');
+        return [$backfilled, $repaired];
     }
 
     /**
@@ -405,83 +435,24 @@ class PicPointReportController extends Controller
      */
     public function syncAllAndLogout()
     {
-        // Run full sync inline (same logic as syncAllPoints)
-        $backfilled = 0;
+        [$backfilled] = $this->runBulkSync();
 
-        $submitRows = \DB::table('submissions')->whereNotNull('petugas_submit_id')
-            ->select('id', 'petugas_submit_id', 'kode_submit', 'judul_artikel')->get();
-        foreach ($submitRows as $row) {
-            $exists = PicPointHistory::where('pic_id', $row->petugas_submit_id)
-                ->where('submission_id', $row->id)->where('step', 'submit')->exists();
-            if (!$exists) {
-                $pts = PicPointHistory::getPointsForStep('submit');
-                if ($pts > 0) {
-                    PicPointHistory::create(['pic_id' => $row->petugas_submit_id, 'submission_id' => $row->id,
-                        'step' => 'submit', 'points_earned' => $pts,
-                        'description' => "Submit artikel: {$row->kode_submit} - {$row->judul_artikel}"]);
-                    $backfilled++;
-                }
-            }
-        }
+        // Recalculate total_points for all PICs
+        \DB::statement('
+            UPDATE pics p
+            LEFT JOIN (
+                SELECT pic_id, COALESCE(SUM(points_earned), 0) AS actual
+                FROM pic_point_histories
+                GROUP BY pic_id
+            ) h ON h.pic_id = p.id
+            SET p.total_points = COALESCE(h.actual, 0)
+        ');
 
-        $workflowSteps = [
-            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1',   'validated_at' => 'editor1_validated_at'],
-            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1',   'validated_at' => 'author1_validated_at'],
-            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2',   'validated_at' => 'editor2_validated_at'],
-            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1', 'validated_at' => 'reviewer1_validated_at'],
-            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2', 'validated_at' => 'reviewer2_validated_at'],
-            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3',   'validated_at' => 'editor3_validated_at'],
-            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2',   'validated_at' => 'author2_validated_at'],
-            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production','validated_at' => 'production_validated_at'],
-        ];
-        foreach ($workflowSteps as $ws) {
-            $rows = \DB::table('submissions')->whereNotNull($ws['field'])->where($ws['valid'], true)
-                ->select('id', $ws['field'].' as pic_id', 'kode_submit', 'judul_artikel', $ws['validated_at'])->get();
-            foreach ($rows as $row) {
-                $validatedAt = $row->{$ws['validated_at']} ?? null;
-                $existingHistory = PicPointHistory::where('pic_id', $row->pic_id)
-                    ->where('submission_id', $row->id)->where('step', $ws['step'])->first();
-                if (!$existingHistory) {
-                    $pts = PicPointHistory::getPointsForStep($ws['step']);
-                    if ($pts > 0) {
-                        $ts = $validatedAt ?? now();
-                        PicPointHistory::create(['pic_id' => $row->pic_id, 'submission_id' => $row->id,
-                            'step' => $ws['step'], 'points_earned' => $pts,
-                            'description' => "Tugas {$ws['step']}: {$row->kode_submit}",
-                            'created_at' => $ts, 'updated_at' => $ts]);
-                        $backfilled++;
-                    }
-                } elseif ($validatedAt && $existingHistory->created_at->toDateString() !== \Carbon\Carbon::parse($validatedAt)->toDateString()) {
-                    $existingHistory->update(['created_at' => $validatedAt, 'updated_at' => $validatedAt]);
-                }
-            }
-        }
-
-        // Backfill NULL validated_at from history (for records toggled by admin without validated_at)
-        foreach ($workflowSteps as $ws) {
-            \DB::statement("
-                UPDATE submissions s
-                INNER JOIN pic_point_histories h
-                    ON h.submission_id = s.id
-                    AND h.pic_id = s.{$ws['field']}
-                    AND h.step = '{$ws['step']}'
-                SET s.{$ws['validated_at']} = h.created_at
-                WHERE s.{$ws['validated_at']} IS NULL
-                  AND s.{$ws['valid']} = 1
-            ");
-        }
-
-        foreach (Pic::all() as $pic) {
-            $actual = PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            if ($actual != ($pic->total_points ?? 0)) $pic->update(['total_points' => $actual]);
-        }
-
-        // Logout
         auth()->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
         return redirect()->route('login')
-            ->with('success', "Sinkronisasi selesai ({$backfilled} data diperbarui). Anda telah logout.");
+            ->with('success', "Sinkronisasi selesai ({$backfilled} riwayat baru). Anda telah logout.");
     }
 }
