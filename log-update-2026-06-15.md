@@ -221,3 +221,17 @@ Username: {username_author} | Password: {password_author}
 - `app/Models/EmailTemplate.php`
 - `log-update-2026-06-15.md`
 
+
+## 14. 🔄 Update: report email
+
+- **Commit:** `c550250` — 11:15 oleh Gudangsoft
+- **File berubah:** 8 file
+- `app/Http/Controllers/Admin/EmailTemplateController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Models/EmailLog.php`
+- `database/migrations/2026_06_15_120000_create_email_logs_table.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/email-logs/index.blade.php`
+- `resources/views/admin/partials/sidebar.blade.php`
+- `routes/web.php`
+

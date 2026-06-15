@@ -1367,6 +1367,9 @@ class SubmissionController extends Controller
                         Log::warning('Email template send failed [assign_' . $assignmentType . ']: ' . $e->getMessage());
                         EmailLog::record('assign_' . $assignmentType, $submission->id, $petugas->email, $petugas->name, $rendered['subject'], 'failed', $e->getMessage());
                     }
+                } catch (\Exception $e) {
+                    Log::warning('Email template render failed [assign_' . $assignmentType . ']: ' . $e->getMessage());
+                }
             }
         } else {
             $submission->logHistory($assignmentType, 'unassigned', "Penugasan dihapus (Quick Assign)", []);
@@ -1576,6 +1579,9 @@ class SubmissionController extends Controller
                             Log::warning('Email template send failed [validate_' . $stageName . ']: ' . $e->getMessage());
                             EmailLog::record('validate_' . $stageName, $submission->id, $petugas->email, $petugas->name, $rendered['subject'], 'failed', $e->getMessage());
                         }
+                    } catch (\Exception $e) {
+                        Log::warning('Email template render failed [validate_' . $stageName . ']: ' . $e->getMessage());
+                    }
                 }
             }
         }
