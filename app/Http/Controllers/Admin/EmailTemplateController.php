@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmailTemplate;
 use App\Models\EmailTemplateAttachment;
+use App\Models\EmailLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -149,6 +150,43 @@ class EmailTemplateController extends Controller
         Storage::delete($attachment->stored_path);
         $attachment->delete();
         return response()->json(['success' => true]);
+    }
+
+    public function logs(Request $request)
+    {
+        $query = EmailLog::with('submission:id,kode_submit,judul_artikel')
+            ->orderByDesc('created_at');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('trigger_key')) {
+            $query->where('trigger_key', $request->trigger_key);
+        }
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('recipient_email', 'like', "%{$s}%")
+                  ->orWhere('recipient_name', 'like', "%{$s}%")
+                  ->orWhere('subject', 'like', "%{$s}%");
+            });
+        }
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $logs        = $query->paginate(50)->withQueryString();
+        $triggerLabels = EmailTemplate::$triggerLabels;
+
+        // Summary counts
+        $summary = EmailLog::selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return view('admin.email-logs.index', compact('logs', 'triggerLabels', 'summary'));
     }
 
     private function handleAttachmentUploads(Request $request, EmailTemplate $template): void

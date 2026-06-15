@@ -20,6 +20,7 @@ use App\Models\ActivityLog;
 use App\Models\Setting;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\EmailTemplate;
+use App\Models\EmailLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -1352,17 +1353,20 @@ class SubmissionController extends Controller
                         'app_name'          => config('app.name'),
                     ]);
                     $atts = $tpl->attachments;
-                    Mail::html($rendered['body'], function ($message) use ($rendered, $petugas, $atts) {
-                        $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
-                        foreach ($atts as $att) {
-                            if (file_exists($att->getFullPath())) {
-                                $message->attach($att->getFullPath(), ['as' => $att->original_name, 'mime' => $att->mime_type]);
+                    try {
+                        Mail::html($rendered['body'], function ($message) use ($rendered, $petugas, $atts) {
+                            $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
+                            foreach ($atts as $att) {
+                                if (file_exists($att->getFullPath())) {
+                                    $message->attach($att->getFullPath(), ['as' => $att->original_name, 'mime' => $att->mime_type]);
+                                }
                             }
-                        }
-                    });
-                } catch (\Exception $e) {
-                    Log::warning('Email template send failed [assign_' . $assignmentType . ']: ' . $e->getMessage());
-                }
+                        });
+                        EmailLog::record('assign_' . $assignmentType, $submission->id, $petugas->email, $petugas->name, $rendered['subject'], 'sent');
+                    } catch (\Exception $e) {
+                        Log::warning('Email template send failed [assign_' . $assignmentType . ']: ' . $e->getMessage());
+                        EmailLog::record('assign_' . $assignmentType, $submission->id, $petugas->email, $petugas->name, $rendered['subject'], 'failed', $e->getMessage());
+                    }
             }
         } else {
             $submission->logHistory($assignmentType, 'unassigned', "Penugasan dihapus (Quick Assign)", []);
@@ -1558,17 +1562,20 @@ class SubmissionController extends Controller
                             'app_name'          => config('app.name'),
                         ]);
                         $atts = $tpl->attachments;
-                        Mail::html($rendered['body'], function ($message) use ($rendered, $petugas, $atts) {
-                            $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
-                            foreach ($atts as $att) {
-                                if (file_exists($att->getFullPath())) {
-                                    $message->attach($att->getFullPath(), ['as' => $att->original_name, 'mime' => $att->mime_type]);
+                        try {
+                            Mail::html($rendered['body'], function ($message) use ($rendered, $petugas, $atts) {
+                                $message->to($petugas->email, $petugas->name)->subject($rendered['subject']);
+                                foreach ($atts as $att) {
+                                    if (file_exists($att->getFullPath())) {
+                                        $message->attach($att->getFullPath(), ['as' => $att->original_name, 'mime' => $att->mime_type]);
+                                    }
                                 }
-                            }
-                        });
-                    } catch (\Exception $e) {
-                        Log::warning('Email template send failed [validate_' . $stageName . ']: ' . $e->getMessage());
-                    }
+                            });
+                            EmailLog::record('validate_' . $stageName, $submission->id, $petugas->email, $petugas->name, $rendered['subject'], 'sent');
+                        } catch (\Exception $e) {
+                            Log::warning('Email template send failed [validate_' . $stageName . ']: ' . $e->getMessage());
+                            EmailLog::record('validate_' . $stageName, $submission->id, $petugas->email, $petugas->name, $rendered['subject'], 'failed', $e->getMessage());
+                        }
                 }
             }
         }
@@ -2072,30 +2079,30 @@ class SubmissionController extends Controller
 
     private function sendPenulisEmail(Submission $submission): void
     {
+        if (empty($submission->email_penulis)) {
+            return;
+        }
+        $tpl = EmailTemplate::findActive('notify_penulis');
+        if (!$tpl) {
+            return;
+        }
+        $submission->loadMissing('journalSlot.journalMaster');
+        $rendered = $tpl->render([
+            'nama_artikel'   => $submission->judul_artikel ?? '-',
+            'kode_submit'    => $submission->kode_submit ?? '-',
+            'id_artikel'     => $submission->id_artikel ?? '-',
+            'nama_jurnal'    => $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-',
+            'url_jurnal'     => $submission->journalSlot?->journalMaster?->link_jurnal ?? '-',
+            'nama_penulis'   => $submission->nama_penulis ?? '-',
+            'username_author'=> $submission->username_author ?? '-',
+            'password_author'=> $submission->password_author ?? '-',
+            'tanggal'        => now()->format('d/m/Y H:i'),
+            'app_name'       => config('app.name'),
+        ]);
+        $recipientEmail = $submission->email_penulis;
+        $recipientName  = $submission->nama_penulis ?? $recipientEmail;
+        $atts = $tpl->attachments;
         try {
-            if (empty($submission->email_penulis)) {
-                return;
-            }
-            $tpl = EmailTemplate::findActive('notify_penulis');
-            if (!$tpl) {
-                return;
-            }
-            $submission->loadMissing('journalSlot.journalMaster');
-            $rendered = $tpl->render([
-                'nama_artikel'   => $submission->judul_artikel ?? '-',
-                'kode_submit'    => $submission->kode_submit ?? '-',
-                'id_artikel'     => $submission->id_artikel ?? '-',
-                'nama_jurnal'    => $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-',
-                'url_jurnal'     => $submission->journalSlot?->journalMaster?->link_jurnal ?? '-',
-                'nama_penulis'   => $submission->nama_penulis ?? '-',
-                'username_author'=> $submission->username_author ?? '-',
-                'password_author'=> $submission->password_author ?? '-',
-                'tanggal'        => now()->format('d/m/Y H:i'),
-                'app_name'       => config('app.name'),
-            ]);
-            $recipientEmail = $submission->email_penulis;
-            $recipientName  = $submission->nama_penulis ?? $recipientEmail;
-            $atts = $tpl->attachments;
             Mail::html($rendered['body'], function ($message) use ($rendered, $recipientEmail, $recipientName, $atts) {
                 $message->to($recipientEmail, $recipientName)->subject($rendered['subject']);
                 foreach ($atts as $att) {
@@ -2104,11 +2111,10 @@ class SubmissionController extends Controller
                     }
                 }
             });
+            EmailLog::record('notify_penulis', $submission->id, $recipientEmail, $recipientName, $rendered['subject'], 'sent');
         } catch (\Throwable $e) {
-            Log::error('Email notify_penulis gagal', [
-                'submission_id' => $submission->id,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error('Email notify_penulis gagal', ['submission_id' => $submission->id, 'error' => $e->getMessage()]);
+            EmailLog::record('notify_penulis', $submission->id, $recipientEmail, $recipientName, $rendered['subject'], 'failed', $e->getMessage());
         }
     }
 

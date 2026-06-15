@@ -139,7 +139,30 @@ Username: {username_author} | Password: {password_author}
 
 **`notify_penulis`** — trigger baru, kirim email ke `email_penulis` saat submission dibuat. Email tidak terkirim jika `email_penulis` kosong atau tidak ada template aktif untuk trigger ini. Variables tersedia: `{nama_penulis}`, `{nama_artikel}`, `{kode_submit}`, `{id_artikel}`, `{nama_jurnal}`, `{url_jurnal}`, `{username_author}`, `{password_author}`, `{tanggal}`, `{app_name}`.
 
-## 8. 🔄 Update: fix sincron
+## 8. Laporan Log Pengiriman Email (`/admin/email-logs`)
+
+**Tujuan:** Catat setiap pengiriman email dari sistem template (berhasil/gagal/pending) dan tampilkan laporan di halaman admin.
+
+### File yang Diubah / Dibuat
+
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_15_120000_create_email_logs_table.php` | Buat tabel `email_logs` (trigger_key, submission_id, recipient, subject, status, error_message, sent_at) |
+| `app/Models/EmailLog.php` | Model baru + static method `record()` untuk catat log |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Update `sendPenulisEmail()`, assign email block, validate email block — semua catat ke `EmailLog` saat sent/failed |
+| `app/Http/Controllers/Admin/EmailTemplateController.php` | Tambah method `logs()` untuk halaman laporan dengan filter & summary |
+| `routes/web.php` | Tambah route `GET /email-logs` → `admin.email-logs.index` |
+| `resources/views/admin/email-logs/index.blade.php` | View baru: summary cards (terkirim/gagal/pending) + tabel log dengan filter + popover error message |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah link "Log Pengiriman Email" di sidebar, di bawah Template Email |
+
+### Fitur Halaman Log
+
+- **Summary cards:** total Terkirim / Gagal / Pending
+- **Filter:** cari email/nama/subjek, filter status, filter trigger, filter rentang tanggal
+- **Per baris:** waktu, status badge, nama trigger, penerima (nama + email), subjek, link ke submission
+- **Error detail:** klik ikon info untuk lihat pesan error lengkap (popover)
+
+## 9. 🔄 Update: fix sincron
 
 - **Commit:** `d5b709c` — 08:56 oleh Gudangsoft
 - **File berubah:** 7 file
@@ -188,4 +211,13 @@ Username: {username_author} | Password: {password_author}
 - `log-update-2026-06-15.md`
 - `resources/views/admin/email-templates/form.blade.php`
 - `resources/views/marketing/submissions-monitoring.blade.php`
+
+
+## 12. 🔄 Update: s
+
+- **Commit:** `b4f5658` — 11:08 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Models/EmailTemplate.php`
+- `log-update-2026-06-15.md`
 

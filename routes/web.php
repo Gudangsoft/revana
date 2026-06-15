@@ -420,6 +420,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/email-templates/{emailTemplate}/preview', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'preview'])->name('email-templates.preview');
         Route::post('/email-templates/{emailTemplate}/toggle-active', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'toggleActive'])->name('email-templates.toggle-active');
         Route::delete('/email-template-attachments/{attachment}', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'deleteAttachment'])->name('email-template-attachments.destroy');
+        Route::get('/email-logs', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'logs'])->name('email-logs.index');
 
         // SMS Gateway Settings (Fonnte)
         Route::get('/sms-gateway', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'index'])->name('sms-gateway.index');
