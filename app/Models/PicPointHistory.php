@@ -30,6 +30,7 @@ class PicPointHistory extends Model
         'editor3' => ['points' => 1, 'label' => 'Editor 3'],
         'author2' => ['points' => 1, 'label' => 'Author 2'],
         'production' => ['points' => 1, 'label' => 'Production'],
+        'validator'  => ['points' => 0, 'label' => 'Validator'],
         'submit' => ['points' => 1, 'label' => 'Submit Artikel'],
     ];
 

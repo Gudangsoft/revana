@@ -19,6 +19,7 @@ class TaskPointSettingController extends Controller
         'editor3'    => 'Editor 3',
         'author2'    => 'Author 2 Revisi',
         'production' => 'Production',
+        'validator'  => 'Validator',
     ];
 
     const MARKETING_STEPS = [

@@ -256,7 +256,8 @@ class PicPointReportController extends Controller
             ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2', 'validated_at' => 'reviewer2_validated_at'],
             ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3',   'validated_at' => 'editor3_validated_at'],
             ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2',   'validated_at' => 'author2_validated_at'],
-            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production','validated_at' => 'production_validated_at'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production', 'validated_at' => 'production_validated_at'],
+            ['field' => 'petugas_validator_id',  'valid' => 'validator_valid', 'step' => 'validator',  'validated_at' => 'validator_validated_at'],
         ];
 
         $backfilled = 0;
@@ -341,6 +342,7 @@ class PicPointReportController extends Controller
             ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'label' => 'Editor 3',        'step' => 'editor3'],
             ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'label' => 'Author 2 Revisi', 'step' => 'author2'],
             ['field' => 'petugas_production_id', 'valid' => 'production_valid','label' => 'Production',      'step' => 'production'],
+            ['field' => 'petugas_validator_id',  'valid' => 'validator_valid', 'label' => 'Validator',       'step' => 'validator'],
         ];
 
         $tasks = [];

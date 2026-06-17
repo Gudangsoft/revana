@@ -47,7 +47,25 @@ Jalankan `php artisan migrate` di server untuk menambah kolom `catatan_marketing
 | `app/Http/Controllers/Admin/PicPointReportController.php` | `pendingTasks()`: tambah field `step` di workflowSteps, LEFT JOIN subquery ke `submission_histories` (action=assigned) untuk ambil `assigned_at`, tambah `tgl_penugasan` ke JSON response |
 | `resources/views/admin/pic-points/index.blade.php` | Modal table: tambah kolom header "Tgl Penugasan" dan cell `task.tgl_penugasan` di setiap baris |
 
-## 4. 🔄 Update: up
+## 4. Fix: Poin Tahap Validator Tidak Terhitung (0 poin)
+
+**Tujuan:** AHMAD FEBRIYANTO dan Nabila Qistina menyelesaikan ratusan tugas Validator tapi mendapat 0 poin, karena step "validator" tidak terdaftar di sistem point.
+
+**Root cause:** Step "validator" ada di tabel `submissions` (`petugas_validator_id`, `validator_valid`) tapi tidak diikutsertakan di: (1) `PIC_STEP_ORDER` controller, (2) `runBulkSync()`, (3) `POINT_CONFIG`. Admin membuat custom task "validasi" (beda key dari "validator") mencoba mengatasinya tapi key tidak cocok dengan yang dibaca kode.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/TaskPointSettingController.php` | Tambah `'validator' => 'Validator'` ke `PIC_STEP_ORDER` agar tampil sebagai default step di pengaturan |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Tambah step validator ke `runBulkSync()` dan `pendingTasks()` |
+| `app/Models/PicPointHistory.php` | Tambah `'validator'` ke `POINT_CONFIG` (fallback 0 pt, aktual dari DB) |
+| `database/migrations/2026_06_17_150000_rename_validasi_to_validator_in_task_point_settings.php` | Rename task_key "validasi" → "validator" di task_point_settings (mempertahankan nilai poin 0,33 yang sudah di-set admin) |
+
+### Catatan Deploy
+Jalankan `php artisan migrate` di server untuk menjalankan migration rename.
+Setelah migrate, jalankan Sinkronisasi di `/admin/task-point-settings` untuk backfill poin validator.
+
+## 5. 🔄 Update: up
 
 - **Commit:** `1d4c6e2` — 10:27 oleh Gudangsoft
 - **File berubah:** 7 file
@@ -58,4 +76,13 @@ Jalankan `php artisan migrate` di server untuk menambah kolom `catatan_marketing
 - `resources/views/admin/submissions/show.blade.php`
 - `resources/views/marketing/show-submission.blade.php`
 - `resources/views/pic/submissions/show.blade.php`
+
+
+## 5. 🔄 Update: a
+
+- **Commit:** `88ed9bb` — 11:47 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `log-update-2026-06-17.md`
+- `resources/views/admin/pic-points/index.blade.php`
 
