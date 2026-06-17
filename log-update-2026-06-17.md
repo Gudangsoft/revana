@@ -65,7 +65,23 @@ Jalankan `php artisan migrate` di server untuk menambah kolom `catatan_marketing
 Jalankan `php artisan migrate` di server untuk menjalankan migration rename.
 Setelah migrate, jalankan Sinkronisasi di `/admin/task-point-settings` untuk backfill poin validator.
 
-## 5. 🔄 Update: up
+## 5. Sync Otomatis Nilai Poin Saat Ada Perubahan Setting
+
+**Tujuan:** Jika admin mengubah nilai poin suatu tahap di pengaturan, semua data historis ikut diperbarui saat sinkronisasi dijalankan (bukan hanya data baru saja).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `runBulkSync()`: tambah UPDATE `points_earned` untuk submit dan setiap step bila nilai poin berubah; pisahkan kondisi `$points > 0` dari logika update agar step dengan poin 0 tetap di-update |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | `runBulkSync()`: tambah UPDATE `points_earned` bila nilai berubah; ubah perhitungan `total_points` dari `COUNT(*)` ke `SUM(points_earned)` agar konsisten dengan perubahan nilai poin |
+
+### Cara Kerja
+Setiap kali admin klik **Simpan & Sync** di `/admin/task-point-settings`:
+1. Catatan yang belum ada → dibuat baru dengan nilai poin terkini
+2. Catatan yang sudah ada tapi nilai berbeda → diperbarui ke nilai terkini
+3. Total poin PIC & Marketing dihitung ulang dari jumlah aktual
+
+## 6. 🔄 Update: up
 
 - **Commit:** `1d4c6e2` — 10:27 oleh Gudangsoft
 - **File berubah:** 7 file
@@ -85,4 +101,15 @@ Setelah migrate, jalankan Sinkronisasi di `/admin/task-point-settings` untuk bac
 - `app/Http/Controllers/Admin/PicPointReportController.php`
 - `log-update-2026-06-17.md`
 - `resources/views/admin/pic-points/index.blade.php`
+
+
+## 7. 🔄 Update: point task
+
+- **Commit:** `aee4eba` — 14:54 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `app/Http/Controllers/Admin/TaskPointSettingController.php`
+- `app/Models/PicPointHistory.php`
+- `database/migrations/2026_06_17_150000_rename_validasi_to_validator_in_task_point_settings.php`
+- `log-update-2026-06-17.md`
 

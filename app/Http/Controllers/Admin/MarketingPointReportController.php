@@ -177,13 +177,20 @@ class MarketingPointReportController extends Controller
               )
         ", [$submitPoints]);
 
-        // Recalculate total_points = count of submissions for each marketing
+        // Update existing records if point value changed
+        \DB::affectingStatement("
+            UPDATE marketing_point_histories
+            SET points_earned = ?, updated_at = NOW()
+            WHERE ABS(points_earned - ?) > 0.0001
+        ", [$submitPoints, $submitPoints]);
+
+        // Recalculate total_points = SUM of points_earned per marketing
         $synced = \DB::affectingStatement('
-            UPDATE marketings
-            SET total_points = (
-                SELECT COUNT(*)
-                FROM submissions s
-                WHERE s.marketing_id = marketings.id
+            UPDATE marketings m
+            SET m.total_points = (
+                SELECT COALESCE(SUM(mph.points_earned), 0)
+                FROM marketing_point_histories mph
+                WHERE mph.marketing_id = m.id
             )
         ');
 

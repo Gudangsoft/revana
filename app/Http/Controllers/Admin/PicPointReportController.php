@@ -279,25 +279,39 @@ class PicPointReportController extends Controller
                   )
             ", [$submitPoints]);
         }
+        // Update submit records if point value changed
+        $repaired += \DB::affectingStatement("
+            UPDATE pic_point_histories
+            SET points_earned = ?, updated_at = NOW()
+            WHERE step = 'submit' AND ABS(points_earned - ?) > 0.0001
+        ", [$submitPoints, $submitPoints]);
 
         // Bulk INSERT missing workflow step histories (one query per step instead of one per row)
         foreach ($workflowSteps as $ws) {
             $points = PicPointHistory::getPointsForStep($ws['step']);
-            if ($points <= 0) continue;
 
-            $backfilled += \DB::affectingStatement("
-                INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
-                SELECT s.{$ws['field']}, s.id, '{$ws['step']}', ?,
-                       CONCAT('Menyelesaikan tugas {$ws['step']} untuk: ', COALESCE(s.kode_submit,'')),
-                       COALESCE(s.{$ws['validated_at']}, NOW()), COALESCE(s.{$ws['validated_at']}, NOW())
-                FROM submissions s
-                WHERE s.{$ws['field']} IS NOT NULL
-                  AND s.{$ws['valid']} = 1
-                  AND NOT EXISTS (
-                      SELECT 1 FROM pic_point_histories h
-                      WHERE h.pic_id = s.{$ws['field']} AND h.submission_id = s.id AND h.step = '{$ws['step']}'
-                  )
-            ", [$points]);
+            if ($points > 0) {
+                $backfilled += \DB::affectingStatement("
+                    INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
+                    SELECT s.{$ws['field']}, s.id, '{$ws['step']}', ?,
+                           CONCAT('Menyelesaikan tugas {$ws['step']} untuk: ', COALESCE(s.kode_submit,'')),
+                           COALESCE(s.{$ws['validated_at']}, NOW()), COALESCE(s.{$ws['validated_at']}, NOW())
+                    FROM submissions s
+                    WHERE s.{$ws['field']} IS NOT NULL
+                      AND s.{$ws['valid']} = 1
+                      AND NOT EXISTS (
+                          SELECT 1 FROM pic_point_histories h
+                          WHERE h.pic_id = s.{$ws['field']} AND h.submission_id = s.id AND h.step = '{$ws['step']}'
+                      )
+                ", [$points]);
+            }
+
+            // Update existing records if point value changed (handles increase, decrease, or set-to-zero)
+            $repaired += \DB::affectingStatement("
+                UPDATE pic_point_histories
+                SET points_earned = ?, updated_at = NOW()
+                WHERE step = '{$ws['step']}' AND ABS(points_earned - ?) > 0.0001
+            ", [$points, $points]);
 
             // Bulk UPDATE mismatched created_at dates (repair)
             $repaired += \DB::affectingStatement("
