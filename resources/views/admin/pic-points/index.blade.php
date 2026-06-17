@@ -469,11 +469,11 @@
         location.reload();
     }, 30000);
 
-    document.addEventListener('DOMContentLoaded', function () {
-
-        // ── Pending Tasks Modal ────────────────────────────────────────
+    // ── Pending Tasks Modal ────────────────────────────────────────
+    (function () {
         var pendingModalEl = document.getElementById('pendingTasksModal');
-        var pendingModal   = pendingModalEl ? new bootstrap.Modal(pendingModalEl) : null;
+        if (!pendingModalEl) return;
+        var pendingModal = new bootstrap.Modal(pendingModalEl);
 
         var pendingStepColors = {
             'Editor 1':        'bg-primary',
@@ -494,7 +494,6 @@
 
         document.querySelectorAll('.btn-pending-tasks').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                if (!pendingModal) return;
                 var picName = this.dataset.picName;
                 var url     = this.dataset.url;
                 var picId   = this.dataset.picId;
@@ -561,8 +560,7 @@
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
             new bootstrap.Tooltip(el);
         });
-
-    }); // end DOMContentLoaded
+    })();
 
     // Sync button: confirm → loading state → submit
     document.getElementById('syncPointForm').addEventListener('submit', function(e) {
