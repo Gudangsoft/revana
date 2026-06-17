@@ -289,6 +289,27 @@ Setiap kali Simpan/Tambah/Hapus task di `/admin/task-point-settings`:
 3. **Marketing backfill** — INSERT `marketing_point_histories` untuk semua submission yang sudah ada tapi belum ada record
 4. **Marketing recalculate** — UPDATE `marketings.total_points` = COUNT(submissions)
 
+## 12. Klik Angka "Belum Selesai" di Leaderboard PIC → Modal Detail Tugas
+
+**Tujuan:** Admin bisa melihat detail submission yang belum divalidasi per PIC langsung dari leaderboard, tanpa harus masuk ke halaman detail PIC.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah route `GET /pic-points/{pic}/pending-tasks` → `admin.pic-points.pending-tasks` |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Tambah method `pendingTasks(Pic $pic)` — query 8 workflow steps per PIC, return JSON list submission yang belum valid |
+| `resources/views/admin/pic-points/index.blade.php` | Badge merah "Belum Selesai" diubah jadi button klik; tambah modal `#pendingTasksModal` dengan tabel + loading state; tambah JS fetch + render |
+
+### Cara Kerja
+
+1. Admin melihat angka merah di kolom "Belum Selesai" pada leaderboard
+2. Klik angka → modal terbuka, muncul spinner loading
+3. JS fetch ke `/admin/pic-points/{id}/pending-tasks`
+4. Controller query 8 step (editor1 s/d production): cari submission yang `petugas_XYZ_id = pic.id` AND `XYZ_valid = null/false`
+5. Modal menampilkan tabel: badge tahap (warna per step), kode submit, judul artikel (truncated), nama jurnal, tanggal masuk, link langsung ke submission
+6. Footer modal menampilkan total submission tertunda + link "Lihat Detail PIC"
+
 ## 15. 🔄 Update: up
 
 - **Commit:** `3ec594a` — 11:27 oleh Gudangsoft
@@ -304,4 +325,15 @@ Setiap kali Simpan/Tambah/Hapus task di `/admin/task-point-settings`:
 - `app/Http/Controllers/Admin/TaskPointSettingController.php`
 - `log-update-2026-06-15.md`
 - `resources/views/admin/task-point-settings/index.blade.php`
+
+
+## 19. 🔄 Update: up
+
+- **Commit:** `96089d6` — 17:19 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/MarketingPointReportController.php`
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `app/Http/Controllers/Admin/TaskPointSettingController.php`
+- `log-update-2026-06-15.md`
+- `resources/views/admin/email-logs/index.blade.php`
 

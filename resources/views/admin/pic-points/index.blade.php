@@ -191,7 +191,16 @@
                                 <td class="text-center">
                                     @php $pendingCount = $pendingCounts[$pic->id] ?? 0; @endphp
                                     @if($pendingCount > 0)
-                                        <span class="badge bg-danger fs-6">{{ $pendingCount }}</span>
+                                        <button type="button"
+                                                class="badge bg-danger fs-6 border-0 btn-pending-tasks"
+                                                style="cursor:pointer;"
+                                                data-pic-id="{{ $pic->id }}"
+                                                data-pic-name="{{ $pic->name }}"
+                                                data-url="{{ route('admin.pic-points.pending-tasks', $pic->id) }}"
+                                                title="Klik untuk lihat detail tugas belum selesai"
+                                                data-bs-toggle="tooltip">
+                                            {{ $pendingCount }}
+                                        </button>
                                     @else
                                         <span class="badge bg-success">0</span>
                                     @endif
@@ -391,6 +400,58 @@
     </div>
 </div>
 
+{{-- Modal: Detail Tugas Belum Selesai --}}
+<div class="modal fade" id="pendingTasksModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header py-2" style="background:#fef2f2; border-bottom:2px solid #ef4444;">
+                <div>
+                    <h6 class="modal-title fw-bold mb-0">
+                        <i class="bi bi-clock-history text-danger me-1"></i>
+                        Tugas Belum Selesai — <span id="pendingModalPicName" class="text-danger"></span>
+                    </h6>
+                    <small class="text-muted" id="pendingModalSubtitle"></small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                {{-- Loading state --}}
+                <div id="pendingTasksLoading" class="text-center py-5">
+                    <div class="spinner-border text-danger" role="status" style="width:2rem;height:2rem;"></div>
+                    <div class="mt-2 text-muted small">Memuat data...</div>
+                </div>
+                {{-- Table --}}
+                <div id="pendingTasksTable" class="d-none">
+                    <table class="table table-hover table-sm align-middle mb-0">
+                        <thead style="background:#f8fafc; position:sticky; top:0; z-index:1;">
+                            <tr>
+                                <th class="ps-3" style="width:130px;">Tahap</th>
+                                <th style="width:110px;">Kode</th>
+                                <th>Judul Artikel</th>
+                                <th style="width:130px;">Jurnal</th>
+                                <th style="width:90px;">Tgl Masuk</th>
+                                <th style="width:48px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingTasksBody"></tbody>
+                    </table>
+                </div>
+                {{-- Empty state --}}
+                <div id="pendingTasksEmpty" class="d-none text-center py-5 text-muted">
+                    <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
+                    Tidak ada tugas yang tertunda.
+                </div>
+            </div>
+            <div class="modal-footer py-2 justify-content-between">
+                <small class="text-muted" id="pendingModalFooter"></small>
+                <a href="#" id="pendingModalDetailLink" class="btn btn-outline-primary btn-sm" target="_blank">
+                    <i class="bi bi-eye me-1"></i>Lihat Detail PIC
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
 <script>
     // Jika ada error konfirmasi, buka modal yang sesuai
@@ -408,6 +469,94 @@
     setTimeout(function() {
         location.reload();
     }, 30000);
+
+    // Pending tasks modal
+    const pendingModal     = new bootstrap.Modal(document.getElementById('pendingTasksModal'));
+    const pendingStepColors = {
+        'Editor 1':        'bg-primary',
+        'Author 1 Revisi': 'bg-warning text-dark',
+        'Editor 2':        'bg-info text-dark',
+        'Reviewer 1':      'bg-success',
+        'Reviewer 2':      'bg-success',
+        'Editor 3':        'bg-primary',
+        'Author 2 Revisi': 'bg-warning text-dark',
+        'Production':      'bg-danger',
+    };
+
+    document.querySelectorAll('.btn-pending-tasks').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const picName = this.dataset.picName;
+            const url     = this.dataset.url;
+            const picId   = this.dataset.picId;
+
+            // Reset state
+            document.getElementById('pendingModalPicName').textContent = picName;
+            document.getElementById('pendingModalSubtitle').textContent = '';
+            document.getElementById('pendingModalFooter').textContent = '';
+            document.getElementById('pendingTasksLoading').classList.remove('d-none');
+            document.getElementById('pendingTasksTable').classList.add('d-none');
+            document.getElementById('pendingTasksEmpty').classList.add('d-none');
+            document.getElementById('pendingTasksBody').innerHTML = '';
+            document.getElementById('pendingModalDetailLink').href =
+                '{{ route('admin.pic-points.index') }}'.replace('/pic-points', '/pic-points/' + picId);
+
+            pendingModal.show();
+
+            // Fetch data
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('pendingTasksLoading').classList.add('d-none');
+
+                    if (!data.tasks || data.tasks.length === 0) {
+                        document.getElementById('pendingTasksEmpty').classList.remove('d-none');
+                        return;
+                    }
+
+                    document.getElementById('pendingModalSubtitle').textContent =
+                        data.total + ' tugas sedang menunggu validasi';
+                    document.getElementById('pendingModalFooter').textContent =
+                        'Total ' + data.total + ' submission belum divalidasi';
+
+                    const tbody = document.getElementById('pendingTasksBody');
+                    data.tasks.forEach(task => {
+                        const badgeClass = pendingStepColors[task.step_label] || 'bg-secondary';
+                        const row = document.createElement('tr');
+                        row.innerHTML =
+                            '<td class="ps-3">' +
+                                '<span class="badge ' + badgeClass + '" style="font-size:.72rem;">' + task.step_label + '</span>' +
+                            '</td>' +
+                            '<td><code class="text-primary small">' + (task.kode_submit || '—') + '</code></td>' +
+                            '<td><span class="small" title="' + escHtml(task.judul || '') + '">' + escHtml(task.judul || '—') + '</span></td>' +
+                            '<td><span class="small text-muted">' + escHtml(task.nama_jurnal || '—') + '</span></td>' +
+                            '<td><span class="small text-muted">' + task.tanggal + '</span></td>' +
+                            '<td>' +
+                                '<a href="' + task.url + '" target="_blank" class="btn btn-link btn-sm p-0 text-primary" title="Buka submission">' +
+                                    '<i class="bi bi-box-arrow-up-right"></i>' +
+                                '</a>' +
+                            '</td>';
+                        tbody.appendChild(row);
+                    });
+
+                    document.getElementById('pendingTasksTable').classList.remove('d-none');
+                })
+                .catch(() => {
+                    document.getElementById('pendingTasksLoading').classList.add('d-none');
+                    document.getElementById('pendingTasksEmpty').classList.remove('d-none');
+                    document.getElementById('pendingTasksEmpty').innerHTML =
+                        '<i class="bi bi-exclamation-circle text-danger fs-3 d-block mb-2"></i>Gagal memuat data.';
+                });
+        });
+    });
+
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
+
+    // Tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
     // Sync button: confirm → loading state → submit
     document.getElementById('syncPointForm').addEventListener('submit', function(e) {

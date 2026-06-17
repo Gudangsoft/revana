@@ -327,6 +327,64 @@ class PicPointReportController extends Controller
     }
 
     /**
+     * Return pending (unvalidated) tasks for a specific PIC as JSON.
+     * Called via AJAX when clicking the "Belum Selesai" badge on the leaderboard.
+     */
+    public function pendingTasks(Pic $pic)
+    {
+        $workflowSteps = [
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'label' => 'Editor 1'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'label' => 'Author 1 Revisi'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'label' => 'Editor 2'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'label' => 'Reviewer 1'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'label' => 'Reviewer 2'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'label' => 'Editor 3'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'label' => 'Author 2 Revisi'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','label' => 'Production'],
+        ];
+
+        $tasks = [];
+        foreach ($workflowSteps as $ws) {
+            $rows = \DB::table('submissions as s')
+                ->where('s.' . $ws['field'], $pic->id)
+                ->where(function ($q) use ($ws) {
+                    $q->whereNull('s.' . $ws['valid'])->orWhere('s.' . $ws['valid'], false);
+                })
+                ->leftJoin('journal_slots as js', 'js.id', '=', 's.journal_slot_id')
+                ->leftJoin('journal_masters as jm', 'jm.id', '=', 'js.journal_master_id')
+                ->select(
+                    's.id',
+                    's.kode_submit',
+                    's.judul_artikel',
+                    's.status',
+                    's.created_at',
+                    'jm.nama_jurnal'
+                )
+                ->orderBy('s.created_at')
+                ->get();
+
+            foreach ($rows as $row) {
+                $tasks[] = [
+                    'step_label'   => $ws['label'],
+                    'id'           => $row->id,
+                    'kode_submit'  => $row->kode_submit,
+                    'judul'        => mb_strimwidth($row->judul_artikel ?? '', 0, 80, '…'),
+                    'nama_jurnal'  => $row->nama_jurnal,
+                    'status'       => $row->status,
+                    'tanggal'      => $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('d/m/Y') : '-',
+                    'url'          => route('admin.submissions.show', $row->id),
+                ];
+            }
+        }
+
+        return response()->json([
+            'pic_name' => $pic->name,
+            'total'    => count($tasks),
+            'tasks'    => $tasks,
+        ]);
+    }
+
+    /**
      * Export points report
      */
     public function export(Request $request)
