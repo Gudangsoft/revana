@@ -193,12 +193,11 @@
                                     @if($pendingCount > 0)
                                         <button type="button"
                                                 class="badge bg-danger fs-6 border-0 btn-pending-tasks"
-                                                style="cursor:pointer;"
+                                                style="cursor:pointer; text-decoration:underline dotted;"
                                                 data-pic-id="{{ $pic->id }}"
                                                 data-pic-name="{{ $pic->name }}"
                                                 data-url="{{ route('admin.pic-points.pending-tasks', $pic->id) }}"
-                                                title="Klik untuk lihat detail tugas belum selesai"
-                                                data-bs-toggle="tooltip">
+                                                title="Klik untuk lihat detail tugas belum selesai">
                                             {{ $pendingCount }}
                                         </button>
                                     @else
@@ -470,93 +469,100 @@
         location.reload();
     }, 30000);
 
-    // Pending tasks modal
-    const pendingModal     = new bootstrap.Modal(document.getElementById('pendingTasksModal'));
-    const pendingStepColors = {
-        'Editor 1':        'bg-primary',
-        'Author 1 Revisi': 'bg-warning text-dark',
-        'Editor 2':        'bg-info text-dark',
-        'Reviewer 1':      'bg-success',
-        'Reviewer 2':      'bg-success',
-        'Editor 3':        'bg-primary',
-        'Author 2 Revisi': 'bg-warning text-dark',
-        'Production':      'bg-danger',
-    };
+    document.addEventListener('DOMContentLoaded', function () {
 
-    document.querySelectorAll('.btn-pending-tasks').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const picName = this.dataset.picName;
-            const url     = this.dataset.url;
-            const picId   = this.dataset.picId;
+        // ── Pending Tasks Modal ────────────────────────────────────────
+        var pendingModalEl = document.getElementById('pendingTasksModal');
+        var pendingModal   = pendingModalEl ? new bootstrap.Modal(pendingModalEl) : null;
 
-            // Reset state
-            document.getElementById('pendingModalPicName').textContent = picName;
-            document.getElementById('pendingModalSubtitle').textContent = '';
-            document.getElementById('pendingModalFooter').textContent = '';
-            document.getElementById('pendingTasksLoading').classList.remove('d-none');
-            document.getElementById('pendingTasksTable').classList.add('d-none');
-            document.getElementById('pendingTasksEmpty').classList.add('d-none');
-            document.getElementById('pendingTasksBody').innerHTML = '';
-            document.getElementById('pendingModalDetailLink').href =
-                '{{ route('admin.pic-points.index') }}'.replace('/pic-points', '/pic-points/' + picId);
+        var pendingStepColors = {
+            'Editor 1':        'bg-primary',
+            'Author 1 Revisi': 'bg-warning text-dark',
+            'Editor 2':        'bg-info text-dark',
+            'Reviewer 1':      'bg-success',
+            'Reviewer 2':      'bg-success',
+            'Editor 3':        'bg-primary',
+            'Author 2 Revisi': 'bg-warning text-dark',
+            'Production':      'bg-danger',
+        };
 
-            pendingModal.show();
+        function escHtml(str) {
+            var d = document.createElement('div');
+            d.appendChild(document.createTextNode(str));
+            return d.innerHTML;
+        }
 
-            // Fetch data
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('pendingTasksLoading').classList.add('d-none');
+        document.querySelectorAll('.btn-pending-tasks').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!pendingModal) return;
+                var picName = this.dataset.picName;
+                var url     = this.dataset.url;
+                var picId   = this.dataset.picId;
 
-                    if (!data.tasks || data.tasks.length === 0) {
+                document.getElementById('pendingModalPicName').textContent = picName;
+                document.getElementById('pendingModalSubtitle').textContent = '';
+                document.getElementById('pendingModalFooter').textContent = '';
+                document.getElementById('pendingTasksLoading').classList.remove('d-none');
+                document.getElementById('pendingTasksTable').classList.add('d-none');
+                document.getElementById('pendingTasksEmpty').classList.add('d-none');
+                document.getElementById('pendingTasksBody').innerHTML = '';
+                document.getElementById('pendingModalDetailLink').href =
+                    '{{ route('admin.pic-points.index') }}/' + picId;
+
+                pendingModal.show();
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        document.getElementById('pendingTasksLoading').classList.add('d-none');
+
+                        if (!data.tasks || data.tasks.length === 0) {
+                            document.getElementById('pendingTasksEmpty').classList.remove('d-none');
+                            return;
+                        }
+
+                        document.getElementById('pendingModalSubtitle').textContent =
+                            data.total + ' tugas sedang menunggu validasi';
+                        document.getElementById('pendingModalFooter').textContent =
+                            'Total ' + data.total + ' submission belum divalidasi';
+
+                        var tbody = document.getElementById('pendingTasksBody');
+                        data.tasks.forEach(function (task) {
+                            var badgeClass = pendingStepColors[task.step_label] || 'bg-secondary';
+                            var row = document.createElement('tr');
+                            row.innerHTML =
+                                '<td class="ps-3">' +
+                                    '<span class="badge ' + badgeClass + '" style="font-size:.72rem;">' + escHtml(task.step_label) + '</span>' +
+                                '</td>' +
+                                '<td><code class="text-primary small">' + escHtml(task.kode_submit || '—') + '</code></td>' +
+                                '<td><span class="small" title="' + escHtml(task.judul || '') + '">' + escHtml(task.judul || '—') + '</span></td>' +
+                                '<td><span class="small text-muted">' + escHtml(task.nama_jurnal || '—') + '</span></td>' +
+                                '<td><span class="small text-muted">' + escHtml(task.tanggal) + '</span></td>' +
+                                '<td>' +
+                                    '<a href="' + task.url + '" target="_blank" class="btn btn-link btn-sm p-0 text-primary" title="Buka submission">' +
+                                        '<i class="bi bi-box-arrow-up-right"></i>' +
+                                    '</a>' +
+                                '</td>';
+                            tbody.appendChild(row);
+                        });
+
+                        document.getElementById('pendingTasksTable').classList.remove('d-none');
+                    })
+                    .catch(function () {
+                        document.getElementById('pendingTasksLoading').classList.add('d-none');
                         document.getElementById('pendingTasksEmpty').classList.remove('d-none');
-                        return;
-                    }
-
-                    document.getElementById('pendingModalSubtitle').textContent =
-                        data.total + ' tugas sedang menunggu validasi';
-                    document.getElementById('pendingModalFooter').textContent =
-                        'Total ' + data.total + ' submission belum divalidasi';
-
-                    const tbody = document.getElementById('pendingTasksBody');
-                    data.tasks.forEach(task => {
-                        const badgeClass = pendingStepColors[task.step_label] || 'bg-secondary';
-                        const row = document.createElement('tr');
-                        row.innerHTML =
-                            '<td class="ps-3">' +
-                                '<span class="badge ' + badgeClass + '" style="font-size:.72rem;">' + task.step_label + '</span>' +
-                            '</td>' +
-                            '<td><code class="text-primary small">' + (task.kode_submit || '—') + '</code></td>' +
-                            '<td><span class="small" title="' + escHtml(task.judul || '') + '">' + escHtml(task.judul || '—') + '</span></td>' +
-                            '<td><span class="small text-muted">' + escHtml(task.nama_jurnal || '—') + '</span></td>' +
-                            '<td><span class="small text-muted">' + task.tanggal + '</span></td>' +
-                            '<td>' +
-                                '<a href="' + task.url + '" target="_blank" class="btn btn-link btn-sm p-0 text-primary" title="Buka submission">' +
-                                    '<i class="bi bi-box-arrow-up-right"></i>' +
-                                '</a>' +
-                            '</td>';
-                        tbody.appendChild(row);
+                        document.getElementById('pendingTasksEmpty').innerHTML =
+                            '<i class="bi bi-exclamation-circle text-danger fs-3 d-block mb-2"></i>Gagal memuat data.';
                     });
-
-                    document.getElementById('pendingTasksTable').classList.remove('d-none');
-                })
-                .catch(() => {
-                    document.getElementById('pendingTasksLoading').classList.add('d-none');
-                    document.getElementById('pendingTasksEmpty').classList.remove('d-none');
-                    document.getElementById('pendingTasksEmpty').innerHTML =
-                        '<i class="bi bi-exclamation-circle text-danger fs-3 d-block mb-2"></i>Gagal memuat data.';
-                });
+            });
         });
-    });
 
-    function escHtml(str) {
-        const d = document.createElement('div');
-        d.appendChild(document.createTextNode(str));
-        return d.innerHTML;
-    }
+        // Tooltips
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            new bootstrap.Tooltip(el);
+        });
 
-    // Tooltips
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    }); // end DOMContentLoaded
 
     // Sync button: confirm → loading state → submit
     document.getElementById('syncPointForm').addEventListener('submit', function(e) {
