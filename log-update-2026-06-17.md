@@ -36,3 +36,26 @@ Jalankan `php artisan migrate` di server untuk menambah kolom `catatan_marketing
 | `app/Http/Controllers/Admin/PicPointReportController.php` | Tambah `pendingTasks()` — return JSON list submission yang belum divalidasi per PIC |
 | `resources/views/admin/pic-points/index.blade.php` | Badge merah jadi button klik; tambah modal + JS fetch; ganti `@section('scripts')` → `@push('scripts')` (fix: layout pakai `@stack`, bukan `@yield`) |
 
+
+## 3. Kolom Tanggal Penugasan di Modal Tugas Pending PIC
+
+**Tujuan:** Tampilkan tanggal PIC ditugaskan ke setiap submission di modal "Belum Selesai" pada leaderboard, agar admin bisa melihat sudah berapa lama tugas menunggu.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `pendingTasks()`: tambah field `step` di workflowSteps, LEFT JOIN subquery ke `submission_histories` (action=assigned) untuk ambil `assigned_at`, tambah `tgl_penugasan` ke JSON response |
+| `resources/views/admin/pic-points/index.blade.php` | Modal table: tambah kolom header "Tgl Penugasan" dan cell `task.tgl_penugasan` di setiap baris |
+
+## 4. 🔄 Update: up
+
+- **Commit:** `1d4c6e2` — 10:27 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_17_102400_add_catatan_marketing_at_to_submissions_table.php`
+- `log-update-2026-06-17.md`
+- `resources/views/admin/submissions/show.blade.php`
+- `resources/views/marketing/show-submission.blade.php`
+- `resources/views/pic/submissions/show.blade.php`
+

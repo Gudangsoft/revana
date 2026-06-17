@@ -333,14 +333,14 @@ class PicPointReportController extends Controller
     public function pendingTasks(Pic $pic)
     {
         $workflowSteps = [
-            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'label' => 'Editor 1'],
-            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'label' => 'Author 1 Revisi'],
-            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'label' => 'Editor 2'],
-            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'label' => 'Reviewer 1'],
-            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'label' => 'Reviewer 2'],
-            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'label' => 'Editor 3'],
-            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'label' => 'Author 2 Revisi'],
-            ['field' => 'petugas_production_id', 'valid' => 'production_valid','label' => 'Production'],
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'label' => 'Editor 1',        'step' => 'editor1'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'label' => 'Author 1 Revisi', 'step' => 'author1'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'label' => 'Editor 2',        'step' => 'editor2'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'label' => 'Reviewer 1',      'step' => 'reviewer1'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'label' => 'Reviewer 2',      'step' => 'reviewer2'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'label' => 'Editor 3',        'step' => 'editor3'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'label' => 'Author 2 Revisi', 'step' => 'author2'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','label' => 'Production',      'step' => 'production'],
         ];
 
         $tasks = [];
@@ -352,27 +352,33 @@ class PicPointReportController extends Controller
                 })
                 ->leftJoin('journal_slots as js', 'js.id', '=', 's.journal_slot_id')
                 ->leftJoin('journal_masters as jm', 'jm.id', '=', 'js.journal_master_id')
+                ->leftJoin(\DB::raw('(SELECT submission_id, step, MIN(created_at) as assigned_at FROM submission_histories WHERE action = \'assigned\' GROUP BY submission_id, step) as sh'), function ($join) use ($ws) {
+                    $join->on('sh.submission_id', '=', 's.id')
+                         ->where('sh.step', '=', $ws['step']);
+                })
                 ->select(
                     's.id',
                     's.kode_submit',
                     's.judul_artikel',
                     's.status',
                     's.created_at',
-                    'jm.nama_jurnal'
+                    'jm.nama_jurnal',
+                    'sh.assigned_at'
                 )
                 ->orderBy('s.created_at')
                 ->get();
 
             foreach ($rows as $row) {
                 $tasks[] = [
-                    'step_label'   => $ws['label'],
-                    'id'           => $row->id,
-                    'kode_submit'  => $row->kode_submit,
-                    'judul'        => mb_strimwidth($row->judul_artikel ?? '', 0, 80, '…'),
-                    'nama_jurnal'  => $row->nama_jurnal,
-                    'status'       => $row->status,
-                    'tanggal'      => $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('d/m/Y') : '-',
-                    'url'          => route('admin.submissions.show', $row->id),
+                    'step_label'    => $ws['label'],
+                    'id'            => $row->id,
+                    'kode_submit'   => $row->kode_submit,
+                    'judul'         => mb_strimwidth($row->judul_artikel ?? '', 0, 80, '…'),
+                    'nama_jurnal'   => $row->nama_jurnal,
+                    'status'        => $row->status,
+                    'tanggal'       => $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('d/m/Y') : '-',
+                    'tgl_penugasan' => $row->assigned_at ? \Carbon\Carbon::parse($row->assigned_at)->format('d/m/Y') : '-',
+                    'url'           => route('admin.submissions.show', $row->id),
                 ];
             }
         }

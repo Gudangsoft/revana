@@ -429,6 +429,7 @@
                                 <th>Judul Artikel</th>
                                 <th style="width:130px;">Jurnal</th>
                                 <th style="width:90px;">Tgl Masuk</th>
+                                <th style="width:90px;">Tgl Penugasan</th>
                                 <th style="width:48px;"></th>
                             </tr>
                         </thead>
@@ -537,6 +538,7 @@
                                 '<td><span class="small" title="' + escHtml(task.judul || '') + '">' + escHtml(task.judul || '—') + '</span></td>' +
                                 '<td><span class="small text-muted">' + escHtml(task.nama_jurnal || '—') + '</span></td>' +
                                 '<td><span class="small text-muted">' + escHtml(task.tanggal) + '</span></td>' +
+                                '<td><span class="small text-muted">' + escHtml(task.tgl_penugasan || '—') + '</span></td>' +
                                 '<td>' +
                                     '<a href="' + task.url + '" target="_blank" class="btn btn-link btn-sm p-0 text-primary" title="Buka submission">' +
                                         '<i class="bi bi-box-arrow-up-right"></i>' +
