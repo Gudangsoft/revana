@@ -606,9 +606,10 @@ class DashboardController extends Controller
         ]);
         
         $submission->update([
-            'catatan_marketing' => $request->catatan_marketing,
+            'catatan_marketing'    => $request->catatan_marketing,
+            'catatan_marketing_at' => $request->catatan_marketing ? now() : null,
         ]);
-        
+
         return redirect()->back()->with('catatan_success', 'Catatan berhasil disimpan.');
     }
 

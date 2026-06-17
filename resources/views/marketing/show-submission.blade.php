@@ -107,6 +107,16 @@
                     </div>
                 @endif
 
+                @if($submission->catatan_marketing_at)
+                <div class="alert alert-light border d-flex align-items-center gap-2 py-2 mb-3">
+                    <i class="bi bi-clock-history text-warning fs-5"></i>
+                    <div>
+                        <div class="small fw-semibold">Terakhir disimpan:</div>
+                        <div class="small text-muted">{{ $submission->catatan_marketing_at->format('d/m/Y H:i') }}</div>
+                    </div>
+                </div>
+                @endif
+
                 <form action="{{ route('marketing.submissions.update-catatan', $submission) }}" method="POST">
                     @csrf
                     <div class="mb-3">

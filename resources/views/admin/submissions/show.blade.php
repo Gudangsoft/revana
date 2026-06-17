@@ -277,6 +277,12 @@
                 <div class="mt-3">
                     <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-chat-left-text text-warning"></i> Catatan dari Marketing</h6>
                     <div class="alert alert-warning mb-0">
+                        @if($submission->catatan_marketing_at)
+                        <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom border-warning-subtle">
+                            <i class="bi bi-clock-history" style="font-size:.85rem;"></i>
+                            <small class="fw-semibold">Ditulis: {{ $submission->catatan_marketing_at->format('d/m/Y H:i') }}</small>
+                        </div>
+                        @endif
                         {{ $submission->catatan_marketing }}
                     </div>
                 </div>
