@@ -451,7 +451,7 @@
     </div>
 </div>
 
-@section('scripts')
+@push('scripts')
 <script>
     // Jika ada error konfirmasi, buka modal yang sesuai
     @if($errors->has('konfirmasi'))
@@ -580,4 +580,4 @@
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .spin-icon { display: inline-block; animation: spin 0.8s linear infinite; }
 </style>
-@endsection
+@endpush
