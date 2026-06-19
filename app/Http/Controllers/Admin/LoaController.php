@@ -25,6 +25,8 @@ class LoaController extends Controller
             'loaDate'    => $this->loaDate($journal, $date),
             'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            'verifyUrl'  => url('/loa/' . $submission->kode_loa),
+            'isAdminView'=> false,
         ]);
     }
 
@@ -44,6 +46,8 @@ class LoaController extends Controller
             'loaDate'    => $this->loaDate($journal, $date),
             'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            'verifyUrl'  => route('admin.submissions.loa', $submission),
+            'isAdminView'=> true,
         ]);
     }
 

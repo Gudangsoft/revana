@@ -212,6 +212,23 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `log-update-2026-06-19.md`
 - `resources/views/admin/loa/receipt.blade.php`
 
+## 16. QR Code Terpisah: Admin URL vs Public URL
+
+**Tujuan:** QR code di dokumen LOA mengarah ke URL yang sesuai konteks — admin view → QR mengarah ke URL admin; public view → QR mengarah ke URL publik.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | `show()` kirim `$verifyUrl = route('admin.submissions.loa', $submission)` dan `$isAdminView = true`; `publicView()` kirim `$verifyUrl = url('/loa/{kode_loa}')` dan `$isAdminView = false` |
+| `resources/views/admin/loa/receipt.blade.php` | Semua referensi URL QR & teks verifikasi pakai `$verifyUrl`; halaman 1 & 2 tampilkan badge "ADMIN" (hijau) jika `$isAdminView`; fallback ke `kode_submit` jika `kode_loa` kosong |
+
+### Perilaku QR Setelah Perubahan
+| Akses dari | QR mengarah ke |
+|-----------|----------------|
+| `/admin/submissions/558/loa` | `https://portal.apji.org/admin/submissions/558/loa` (butuh login) |
+| `/loa/{kode_loa}` | `https://portal.apji.org/loa/{kode_loa}` (publik) |
+
 ## 15. Unifikasi Penuh URL Portal Penulis
 
 **Tujuan:** `/cek-artikel`, `/request-loa`, dan `/tracking-loa` semuanya menampilkan halaman yang sama — tidak ada redirect, tidak ada halaman terpisah.
@@ -303,5 +320,15 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `app/Http/Controllers/TrackingController.php`
 - `log-update-2026-06-19.md`
 - `resources/views/public/author-portal.blade.php`
+- `routes/web.php`
+
+
+## 19. 🔄 Update: track loa update
+
+- **Commit:** `0b93141` — 15:39 oleh Gudangsoft
+- **File berubah:** 4 file
+- `log-update-2026-06-19.md`
+- `resources/views/public/author-portal.blade.php`
+- `resources/views/public/tracking.blade.php`
 - `routes/web.php`
 

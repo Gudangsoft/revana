@@ -344,13 +344,15 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
                 <span style="font-weight:bold;">Verified by</span>
                 <span class="verified-badge">iThenticate</span>
                 <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
+                @if(!empty($isAdminView) && $isAdminView)
+                <span class="verified-badge" style="background:#2e7d32;">ADMIN</span>
+                @endif
                 <span style="font-size:6pt;color:#888;margin-left:4px;">
-                    Doc ID: <strong>{{ $submission->kode_loa }}</strong>
+                    Doc ID: <strong>{{ $submission->kode_loa ?: $submission->kode_submit }}</strong>
                 </span>
             </div>
             <div style="font-size:6pt;color:#888;margin-top:2px;">
-                Scan QR code to verify authenticity of this document &bull;
-                {{ url('/loa/' . $submission->kode_loa) }}
+                Scan QR to verify &bull; {{ $verifyUrl ?? url('/loa/' . $submission->kode_loa) }}
             </div>
         </div>
     </div>
@@ -506,13 +508,15 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
                 <span style="font-weight:bold;">Verified by</span>
                 <span class="verified-badge">iThenticate</span>
                 <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
+                @if(!empty($isAdminView) && $isAdminView)
+                <span class="verified-badge" style="background:#2e7d32;">ADMIN</span>
+                @endif
                 <span style="font-size:6pt;color:#888;margin-left:4px;">
-                    Doc ID: <strong>{{ $submission->kode_loa }}</strong>
+                    Doc ID: <strong>{{ $submission->kode_loa ?: $submission->kode_submit }}</strong>
                 </span>
             </div>
             <div style="font-size:6pt;color:#888;margin-top:2px;">
-                Scan QR code to verify authenticity of this document &bull;
-                {{ url('/loa/' . $submission->kode_loa) }}
+                Scan QR to verify &bull; {{ $verifyUrl ?? url('/loa/' . $submission->kode_loa) }}
             </div>
         </div>
     </div>
@@ -521,7 +525,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
 <script>
 (function () {
-    var verifyUrl = '{{ url("/loa/" . $submission->kode_loa) }}';
+    var verifyUrl = '{{ $verifyUrl ?? url("/loa/" . $submission->kode_loa) }}';
 
     function renderQr(elId) {
         var el = document.getElementById(elId);
