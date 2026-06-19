@@ -212,6 +212,27 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `log-update-2026-06-19.md`
 - `resources/views/admin/loa/receipt.blade.php`
 
+## 14. Portal Penulis Terpadu — Redesign `/tracking-loa`
+
+**Tujuan:** Gabungkan `/tracking-loa` dan `/cek-artikel` menjadi satu halaman terpusat yang keren dan informatif. Halaman lama `/cek-artikel` otomatis redirect ke `/tracking-loa`.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/public/author-portal.blade.php` | Redesign total: hero section + badge APRKOM, search card dengan 3 feature pill (Status / LOA / Tanggal), result card dengan journal header dinamis, article info grid, stepper 5 tahap dengan status label detail, LOA section (available/locked) dengan date picker & verifikasi QR, footer links |
+| `app/Http/Controllers/TrackingController.php` | `index()` → return `author-portal` view; `search()` → terima field `kode_loa` atau `kode`, return `author-portal`; `authorPortal/Search()` → redirect ke `tracking.index`; `verifyDirect()` → return `author-portal` |
+| `routes/web.php` | `/cek-artikel` GET & POST → redirect 301 ke `/tracking-loa` |
+
+### Fitur Halaman Baru
+- **Hero**: badge "Portal Resmi SIPERA · APRKOM", headline, deskripsi
+- **Search card**: input kode monospace uppercase, tombol "Cek Sekarang"
+- **Feature pills** (saat belum ada hasil): Status Real-time / Unduh LOA / Pilih Tanggal
+- **Result card**: header jurnal (warna dinamis, logo/abbr), info artikel, stepper progress 5 tahap
+- **Status bar**: label status detail dengan ikon (mis. "Proses Editor 1", "Tahap Produksi")
+- **LOA section**: hijau + date picker + tombol "Buka & Cetak LOA" jika tersedia; abu-abu + progress chips jika belum
+- Background: radial gradient dekoratif, mobile responsive, CSP-friendly (tidak ada external fetch)
+
 ## 13. Tombol Cek LOA di Semua Halaman Monitoring
 
 **Tujuan:** Admin bisa langsung membuka preview LOA dari halaman monitoring tanpa harus masuk ke halaman detail submission terlebih dahulu.
@@ -239,4 +260,17 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - **File berubah:** 2 file
 - `log-update-2026-06-19.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
+
+
+## 15. 🔄 Update: update loa ditabel monitoring
+
+- **Commit:** `84017df` — 15:29 oleh Gudangsoft
+- **File berubah:** 7 file
+- `log-update-2026-06-19.md`
+- `resources/views/admin/fasttrack-management/monitoring/index.blade.php`
+- `resources/views/admin/fasttrack/monitoring.blade.php`
+- `resources/views/marketing/fasttrack/monitoring.blade.php`
+- `resources/views/marketing/submissions-monitoring.blade.php`
+- `resources/views/pic/fasttrack/monitoring.blade.php`
+- `resources/views/pic/submissions/monitoring.blade.php`
 
