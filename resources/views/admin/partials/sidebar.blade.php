@@ -380,6 +380,10 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.email-templates') ? 'active' : '' }}">
     <i class="bi bi-envelope-paper-fill" style="color:#fb923c;"></i> Template Email
 </a>
+<a href="{{ route('admin.loa-master.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.loa-master') ? 'active' : '' }}">
+    <i class="bi bi-file-earmark-check-fill" style="color:#34d399;"></i> Master LOA
+</a>
 <a href="{{ route('admin.email-logs.index') }}"
    class="nav-link {{ str_starts_with($currentRoute, 'admin.email-logs') ? 'active' : '' }}">
     <i class="bi bi-envelope-check-fill" style="color:#34d399;"></i> Log Pengiriman Email

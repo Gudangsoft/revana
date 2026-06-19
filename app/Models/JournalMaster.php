@@ -31,6 +31,8 @@ class JournalMaster extends Model
         'secondary_color',
         'loa_kota',
         'loa_tanggal',
+        'loa_auto_send',
+        'loa_auto_trigger',
     ];
 
     protected $casts = [

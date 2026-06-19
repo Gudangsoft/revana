@@ -105,6 +105,7 @@ class Submission extends Model
         'created_by',
         'edit_count',
         'program_type',
+        'loa_sent_at',
     ];
 
     protected $casts = [
@@ -128,6 +129,7 @@ class Submission extends Model
         'production_validated_at' => 'datetime',
         'validator_validated_at' => 'datetime',
         'tanggal_submit' => 'date',
+        'loa_sent_at' => 'datetime',
     ];
 
     protected static function boot()

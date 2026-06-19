@@ -34,3 +34,75 @@ Contoh: `PAF001/PAF/APRKOM/III/2026`
 
 ### Catatan Deploy
 Jalankan `php artisan migrate` di server untuk menambah kolom baru.
+
+## 2. Fitur Master LOA — Setting Template & Kirim Otomatis
+
+**Tujuan:** Halaman khusus admin untuk setting template LOA per jurnal (identitas, warna, logo, TTD) dan mengaktifkan pengiriman LOA otomatis ke email penulis.
+
+### File yang Dibuat / Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_19_100001_add_auto_loa_to_journal_masters_and_submissions.php` | Tambah `loa_auto_send` (boolean), `loa_auto_trigger` (string) ke `journal_masters`; tambah `loa_sent_at` (timestamp nullable) ke `submissions` |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | Controller baru: `index()` daftar jurnal, `edit/update()` form setting LOA, `resend()` kirim ulang manual, `maybeAutoSend()` hook step validasi, `maybeAutoSendOnPublish()` hook status PUBLISHED, `dispatchLoaEmail()` kirim email + catat waktu |
+| `app/Mail/LoaAcceptedMail.php` | Mailable baru untuk email LOA ke penulis |
+| `resources/views/emails/loa-accepted.blade.php` | Template HTML email LOA dengan warna jurnal, judul artikel, CTA button link ke LOA publik |
+| `resources/views/admin/loa-master/index.blade.php` | Tabel daftar jurnal dengan status kelengkapan (logo, TTD, editor, kode, E-ISSN) dan toggle LOA otomatis |
+| `resources/views/admin/loa-master/edit.blade.php` | Form setting LOA per jurnal: live preview header, color picker sync, upload logo/TTD, toggle auto-send + pilih trigger |
+| `app/Http/Controllers/Admin/LoaController.php` | Tambah `publicView()` — render LOA tanpa login (untuk link di email penulis) |
+| `app/Models/JournalMaster.php` | Tambah `loa_auto_send`, `loa_auto_trigger` ke `$fillable` |
+| `app/Models/Submission.php` | Tambah `loa_sent_at` ke `$fillable` dan `$casts` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `toggleValidField()`: tambah hook `LoaMasterController::maybeAutoSend()` setelah save |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah menu **Master LOA** di section Pengaturan |
+| `routes/web.php` | Tambah `GET /loa/{kode_loa}` (publik, tanpa auth); tambah 4 route Master LOA di admin |
+
+### Trigger LOA Otomatis
+Admin bisa pilih kapan LOA otomatis dikirim:
+- **Manual saja** — tidak ada pengiriman otomatis
+- **Setelah Production divalidasi** — saat `production_valid = true`
+- **Setelah Validator divalidasi** — saat `validator_valid = true`
+- **Saat status PUBLISHED** — saat status berubah ke PUBLISHED
+
+### Catatan Deploy
+Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
+
+## 3. Halaman Request LOA & Tanggal Per-Request
+
+**Tujuan:** Penulis bisa request LOA sendiri via halaman publik dengan memasukkan kode SIPERA. Tanggal LOA bisa disesuaikan per-request (tidak lagi terpaku di setting jurnal).
+
+### File yang Diubah / Dibuat
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/loa/request.blade.php` | Halaman publik baru: form input kode SIPERA + toggle tanggal opsional (default hari ini) |
+| `app/Http/Controllers/Admin/LoaController.php` | Tambah `requestForm()`, `requestSubmit()` (cari submission by kode_submit atau kode_loa, redirect ke LOA dengan query param tanggal); update `loaDate()` terima `$dateOverride`; `show()` dan `publicView()` baca `request('tanggal')` |
+| `routes/web.php` | Tambah `GET /request-loa` dan `POST /request-loa` |
+| `resources/views/admin/journal-masters/edit.blade.php` | Hapus field "Tanggal Resmi LOA" (tanggal kini per-request bukan per-jurnal) |
+| `resources/views/admin/loa-master/edit.blade.php` | Hapus field "Tanggal Resmi LOA" |
+
+### Alur Request LOA
+1. Penulis buka `/request-loa`
+2. Isi kode SIPERA (contoh: `SUB2026060001`)
+3. Opsional: aktifkan toggle "Tanggal dipilih" untuk mengubah tanggal (default = hari ini)
+4. Submit → redirect ke `/loa/{kode_loa}?tanggal=YYYY-MM-DD` → halaman LOA terbuka
+5. Klik Print / Save PDF
+
+### Prioritas Tanggal LOA
+1. Query param `?tanggal=` (dari request form atau admin) → dipakai jika ada
+2. Tanggal hari ini → fallback default
+
+## 4. 🔄 Update: loa
+
+- **Commit:** `784089c` — 14:16 oleh Gudangsoft
+- **File berubah:** 14 file
+- `app/Http/Controllers/Admin/JournalMasterController.php`
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Models/JournalMaster.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_19_000001_add_loa_fields_to_journal_masters.php`
+- `database/migrations/2026_06_19_000002_add_affiliation_to_submissions.php`
+- `log-update-2026-06-17.md`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/journal-masters/edit.blade.php`
+

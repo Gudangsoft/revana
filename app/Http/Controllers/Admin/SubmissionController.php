@@ -1588,6 +1588,15 @@ class SubmissionController extends Controller
             }
         }
 
+        // LOA auto-send hook
+        if ($newValue) {
+            $stepKey = str_replace('_valid', '', $field); // e.g. 'production_valid' → 'production'
+            \App\Http\Controllers\Admin\LoaMasterController::maybeAutoSend($submission, $stepKey . '_valid');
+            if ($submission->status === 'PUBLISHED') {
+                \App\Http\Controllers\Admin\LoaMasterController::maybeAutoSendOnPublish($submission);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Berhasil disimpan',

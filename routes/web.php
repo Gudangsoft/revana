@@ -102,6 +102,13 @@ Route::get('/pic-login-test', function () {
 Route::get('/daftar-reviewer', [ReviewerRegistrationController::class, 'showForm'])->name('reviewer-registration.form');
 Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store'])->name('reviewer-registration.store');
 
+// Public LOA — no login required, untuk link di email penulis
+Route::get('/loa/{kode_loa}', [\App\Http\Controllers\Admin\LoaController::class, 'publicView'])->name('loa.public');
+
+// Request LOA — halaman publik, penulis masukkan kode SIPERA
+Route::get('/request-loa', [\App\Http\Controllers\Admin\LoaController::class, 'requestForm'])->name('loa.request');
+Route::post('/request-loa', [\App\Http\Controllers\Admin\LoaController::class, 'requestSubmit'])->name('loa.request.submit');
+
 // Public Referensi Jurnal (no login required)
 Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');
 
@@ -393,6 +400,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
         
         // Task Point Settings
+        // ── Master LOA ──────────────────────────────────────────────────────────
+        Route::get('/loa-master', [\App\Http\Controllers\Admin\LoaMasterController::class, 'index'])->name('loa-master.index');
+        Route::get('/loa-master/{journalMaster}/edit', [\App\Http\Controllers\Admin\LoaMasterController::class, 'edit'])->name('loa-master.edit');
+        Route::put('/loa-master/{journalMaster}', [\App\Http\Controllers\Admin\LoaMasterController::class, 'update'])->name('loa-master.update');
+        Route::post('/loa-master/{submission}/resend', [\App\Http\Controllers\Admin\LoaMasterController::class, 'resend'])->name('loa-master.resend');
+
         Route::get('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'index'])->name('task-point-settings.index');
         Route::put('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'update'])->name('task-point-settings.update');
         Route::post('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'store'])->name('task-point-settings.store');

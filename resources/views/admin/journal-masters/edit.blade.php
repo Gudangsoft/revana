@@ -185,13 +185,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Tanggal Resmi LOA <small class="text-muted">(kosong = hari ini)</small></label>
-                                <input type="date" class="form-control" name="loa_tanggal"
-                                       value="{{ old('loa_tanggal', $journalMaster->loa_tanggal) }}">
-                            </div>
-                        </div>
                     </div>
 
                     <div class="row">
