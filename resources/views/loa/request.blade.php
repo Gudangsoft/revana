@@ -181,6 +181,14 @@
         Kode dirahasiakan — jangan dibagikan ke pihak lain.
     </div>
 
+    <div style="text-align:center;padding:0 28px 20px;border-top:1px solid #f3f4f6;margin-top:4px;">
+        <p class="text-muted mb-2" style="font-size:.78rem;">Ingin cek status artikel sekaligus?</p>
+        <a href="{{ route('author.portal') }}"
+           style="font-size:.82rem;color:#1a237e;text-decoration:none;font-weight:600;">
+            <i class="bi bi-file-earmark-person me-1"></i>Buka Portal Penulis →
+        </a>
+    </div>
+
 </div>
 
 <script>

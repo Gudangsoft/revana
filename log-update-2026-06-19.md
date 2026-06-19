@@ -109,7 +109,26 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - Row counter menampilkan "X dari Y jurnal" saat ada filter aktif
 - Tombol "Reset filter" muncul otomatis saat filter aktif
 
-## 5. 🔄 Update: loa
+## 5. Portal Penulis Terpadu (`/cek-artikel`)
+
+**Tujuan:** Penulis cukup buka satu halaman, masukkan kode SIPERA satu kali — langsung tampil status artikel + tombol LOA (jika tersedia).
+
+### File yang Dibuat / Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/public/author-portal.blade.php` | Halaman baru: form kode SIPERA, card info artikel, stepper progress 5 tahap, section LOA dengan date picker opsional |
+| `app/Http/Controllers/TrackingController.php` | Tambah `authorPortal()` dan `authorPortalSearch()` |
+| `routes/web.php` | Tambah `GET /cek-artikel` dan `POST /cek-artikel` |
+| `resources/views/public/tracking.blade.php` | Tambah link ke Portal Penulis di bawah form |
+| `resources/views/loa/request.blade.php` | Tambah link ke Portal Penulis di bawah card |
+
+### Fitur Portal Penulis
+- Kode SIPERA → info artikel + stepper 5 tahap (Submit → Review → Produksi → Validasi → Terbit)
+- LOA section muncul otomatis jika `production_valid = true`; date picker opsional (default hari ini)
+- LOA terkunci dengan pesan informatif jika artikel belum melewati tahap produksi
+
+## 6. 🔄 Update: loa
 
 - **Commit:** `784089c` — 14:16 oleh Gudangsoft
 - **File berubah:** 14 file
@@ -146,4 +165,13 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - **Commit:** `d187ddb` — 14:35 oleh Gudangsoft
 - **File berubah:** 1 file
 - `log-update-2026-06-19.md`
+
+
+## 8. 🔄 Update: filter loa
+
+- **Commit:** `b7f9cd9` — 14:53 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/loa-master/index.blade.php`
 

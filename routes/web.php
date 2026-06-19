@@ -109,6 +109,10 @@ Route::get('/loa/{kode_loa}', [\App\Http\Controllers\Admin\LoaController::class,
 Route::get('/request-loa', [\App\Http\Controllers\Admin\LoaController::class, 'requestForm'])->name('loa.request');
 Route::post('/request-loa', [\App\Http\Controllers\Admin\LoaController::class, 'requestSubmit'])->name('loa.request.submit');
 
+// Portal terpadu penulis — cek status + akses LOA dalam satu halaman
+Route::get('/cek-artikel', [TrackingController::class, 'authorPortal'])->name('author.portal');
+Route::post('/cek-artikel', [TrackingController::class, 'authorPortalSearch'])->name('author.portal.search');
+
 // Public Referensi Jurnal (no login required)
 Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');
 

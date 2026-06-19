@@ -15,6 +15,35 @@ class TrackingController extends Controller
         return view('public.tracking');
     }
 
+    // ── Portal terpadu penulis ───────────────────────────────────────────
+    public function authorPortal()
+    {
+        return view('public.author-portal');
+    }
+
+    public function authorPortalSearch(Request $request)
+    {
+        $request->validate([
+            'kode' => 'required|string|max:60',
+        ], [
+            'kode.required' => 'Kode SIPERA wajib diisi.',
+        ]);
+
+        $kode = strtoupper(trim($request->kode));
+
+        $submission = Submission::with(['journalSlot.journalMaster'])
+            ->where('kode_submit', $kode)
+            ->orWhere('kode_loa', $kode)
+            ->first();
+
+        if (!$submission) {
+            return back()->withInput()
+                ->withErrors(['kode' => 'Kode tidak ditemukan. Periksa kembali kode SIPERA Anda.']);
+        }
+
+        return view('public.author-portal', compact('submission'));
+    }
+
     /**
      * Direct verification via URL (for QR Code)
      */
