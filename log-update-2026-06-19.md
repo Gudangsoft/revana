@@ -204,3 +204,21 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `resources/views/public/tracking.blade.php`
 - `routes/web.php`
 
+
+## 12. 🔄 Update: qr
+
+- **Commit:** `95f40b2` — 15:15 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-19.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+## 13. Tombol Cek LOA di Halaman Monitoring
+
+**Tujuan:** Admin bisa langsung membuka preview LOA dari halaman monitoring tanpa harus masuk ke halaman detail submission terlebih dahulu.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/monitoring.blade.php` | Tambah badge/tombol **LOA** di bawah badge Screening pada kolom Kode Submit (sticky). Hijau + ikon solid jika `production_valid = true`; abu-abu jika belum. Link ke `admin.submissions.loa`, buka di tab baru. |
+
