@@ -133,21 +133,24 @@ class DashboardController extends Controller
     public function dashboard()
     {
         $marketing = Auth::guard('marketing')->user();
-        
-        // Sync total_points = submission count (1 submission = 1 point)
-        $marketing->syncPoints();
-        
-        $submissions = Submission::where('marketing_id', $marketing->id)
-            ->with('journalSlot.journalMaster')
-            ->latest('tanggal_submit')
-            ->get();
-        
-        $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
-            ->with('submission')
-            ->latest()
-            ->take(10)
-            ->get();
-        
+
+        try { $marketing->syncPoints(); } catch (\Throwable) {}
+
+        try {
+            $submissions = Submission::where('marketing_id', $marketing->id)
+                ->with('journalSlot.journalMaster')
+                ->latest('tanggal_submit')
+                ->get();
+        } catch (\Throwable) { $submissions = collect(); }
+
+        try {
+            $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
+                ->with('submission')
+                ->latest()
+                ->take(10)
+                ->get();
+        } catch (\Throwable) { $pointHistories = collect(); }
+
         $stats = [
             'total_submissions' => $submissions->count(),
             'submitted' => $submissions->where('status', 'SUBMITTED')->count(),
@@ -158,13 +161,18 @@ class DashboardController extends Controller
         ];
 
         $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
-        $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
-            \App\Models\Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
-        );
 
-        $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
-            \App\Models\Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
-        );
+        try {
+            $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
+                \App\Models\Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+            );
+        } catch (\Throwable) { $topMarketings = collect(); }
+
+        try {
+            $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
+                \App\Models\Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+            );
+        } catch (\Throwable) { $topPics = collect(); }
 
         // Birthday widget
         [$todayBirthdays, $myWishes] = $this->todayBirthdayData('marketing', $marketing->id, 'marketing', $marketing->id);
@@ -701,20 +709,28 @@ class DashboardController extends Controller
             return response()->json([]);
         }
         
+        $bulanNames = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
         $slots = JournalSlot::where('journal_master_id', $journalMasterId)
             ->where('is_active', true)
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
             ->get()
-            ->map(function ($slot) {
+            ->map(function ($slot) use ($bulanNames) {
                 $sisa = max(0, ($slot->jumlah_slot ?? 0) - ($slot->slot_terpakai ?? 0));
+                $bulanLabel = $slot->bulan ? ($bulanNames[(int) $slot->bulan] ?? $slot->bulan) : null;
+                $periodeLabel = $bulanLabel ? "{$bulanLabel} {$slot->tahun}" : $slot->tahun;
                 return [
                     'id' => $slot->id,
                     'text' => sprintf(
                         'Vol. %s No. %s (%s) - Sisa: %d/%d slot',
                         $slot->volume ?? '-',
                         $slot->nomor ?? '-',
-                        $slot->tahun,
+                        $periodeLabel,
                         $sisa,
                         $slot->jumlah_slot ?? 0
                     ),
@@ -724,7 +740,7 @@ class DashboardController extends Controller
                     'is_full' => $sisa <= 0
                 ];
             });
-        
+
         return response()->json($slots);
     }
 
@@ -1209,34 +1225,38 @@ class DashboardController extends Controller
 
     private function todayBirthdayData(string $senderType, int $senderId, ?string $excludeType = null, ?int $excludeId = null): array
     {
-        $month = now()->month;
-        $day   = now()->day;
+        try {
+            $month = now()->month;
+            $day   = now()->day;
 
-        $pics = \App\Models\Pic::whereNotNull('tanggal_lahir')
-            ->whereMonth('tanggal_lahir', $month)
-            ->whereDay('tanggal_lahir', $day)
-            ->where('is_active', true)
-            ->get()
-            ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
+            $pics = \App\Models\Pic::whereNotNull('tanggal_lahir')
+                ->whereMonth('tanggal_lahir', $month)
+                ->whereDay('tanggal_lahir', $day)
+                ->where('is_active', true)
+                ->get()
+                ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
 
-        $mktgs = \App\Models\Marketing::whereNotNull('tanggal_lahir')
-            ->whereMonth('tanggal_lahir', $month)
-            ->whereDay('tanggal_lahir', $day)
-            ->where('is_active', true)
-            ->get()
-            ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
+            $mktgs = \App\Models\Marketing::whereNotNull('tanggal_lahir')
+                ->whereMonth('tanggal_lahir', $month)
+                ->whereDay('tanggal_lahir', $day)
+                ->where('is_active', true)
+                ->get()
+                ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
 
-        $todayBirthdays = $pics->merge($mktgs)->filter(
-            fn($p) => !($excludeType && $p->type === $excludeType && $p->id === $excludeId)
-        )->values();
+            $todayBirthdays = $pics->merge($mktgs)->filter(
+                fn($p) => !($excludeType && $p->type === $excludeType && $p->id === $excludeId)
+            )->values();
 
-        $myWishes = BirthdayWish::where('sender_type', $senderType)
-            ->where('sender_id', $senderId)
-            ->where('wish_year', now()->year)
-            ->get()
-            ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
-            ->toArray();
+            $myWishes = BirthdayWish::where('sender_type', $senderType)
+                ->where('sender_id', $senderId)
+                ->where('wish_year', now()->year)
+                ->get()
+                ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
+                ->toArray();
 
-        return [$todayBirthdays, $myWishes];
+            return [$todayBirthdays, $myWishes];
+        } catch (\Throwable) {
+            return [collect(), []];
+        }
     }
 }

@@ -21,37 +21,46 @@ class AuthorController extends Controller
         $pic = Auth::guard('pic')->user();
 
         $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
-        $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
-            Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
-        );
 
-        $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
-            Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
-        );
+        try {
+            $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
+                Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+            );
+        } catch (\Throwable) { $topPics = collect(); }
+
+        try {
+            $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
+                Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+            );
+        } catch (\Throwable) { $topMarketings = collect(); }
 
         // Widget Catatan Kinerja Harian
         $today             = now()->toDateString();
-        $todayEntries      = LaporanHarian::where('pic_id', $pic->id)->where('tanggal', $today)->get();
-        $monthAvgCapaian   = LaporanHarian::where('pic_id', $pic->id)
-                                ->whereYear('tanggal', now()->year)
-                                ->whereMonth('tanggal', now()->month)
-                                ->avg('capaian_hasil');
-        $monthTotalEntries = LaporanHarian::where('pic_id', $pic->id)
-                                ->whereYear('tanggal', now()->year)
-                                ->whereMonth('tanggal', now()->month)
-                                ->count();
+        $todayEntries      = collect();
+        $monthAvgCapaian   = 0;
+        $monthTotalEntries = 0;
+        $entryDates        = [];
 
-        // Streak: satu query ambil semua tanggal 365 hari terakhir, hitung di PHP
-        $entryDates = LaporanHarian::where('pic_id', $pic->id)
-            ->where('tanggal', '>=', now()->subDays(365)->toDateString())
-            ->selectRaw('DATE(tanggal) as d')
-            ->groupBy('d')
-            ->pluck('d')
-            ->flip()
-            ->toArray();
+        try {
+            $todayEntries = LaporanHarian::where('pic_id', $pic->id)->where('tanggal', $today)->get();
+            $monthAvgCapaian = LaporanHarian::where('pic_id', $pic->id)
+                ->whereYear('tanggal', now()->year)
+                ->whereMonth('tanggal', now()->month)
+                ->avg('capaian_hasil');
+            $monthTotalEntries = LaporanHarian::where('pic_id', $pic->id)
+                ->whereYear('tanggal', now()->year)
+                ->whereMonth('tanggal', now()->month)
+                ->count();
+            $entryDates = LaporanHarian::where('pic_id', $pic->id)
+                ->where('tanggal', '>=', now()->subDays(365)->toDateString())
+                ->selectRaw('DATE(tanggal) as d')
+                ->groupBy('d')
+                ->pluck('d')
+                ->flip()
+                ->toArray();
+        } catch (\Throwable) {}
 
         $streak = 0;
-        // Jika hari ini belum diisi, mulai dari kemarin (jangan hukum user di pagi hari)
         $startDate = isset($entryDates[$today]) ? $today : now()->subDay()->toDateString();
         $d = \Carbon\Carbon::parse($startDate);
         while ($streak <= 365 && isset($entryDates[$d->toDateString()])) {
@@ -166,34 +175,38 @@ class AuthorController extends Controller
 
     private function todayBirthdayData(string $senderType, int $senderId, ?string $excludeType = null, ?int $excludeId = null): array
     {
-        $month = now()->month;
-        $day   = now()->day;
+        try {
+            $month = now()->month;
+            $day   = now()->day;
 
-        $pics = Pic::whereNotNull('tanggal_lahir')
-            ->whereMonth('tanggal_lahir', $month)
-            ->whereDay('tanggal_lahir', $day)
-            ->where('is_active', true)
-            ->get()
-            ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
+            $pics = Pic::whereNotNull('tanggal_lahir')
+                ->whereMonth('tanggal_lahir', $month)
+                ->whereDay('tanggal_lahir', $day)
+                ->where('is_active', true)
+                ->get()
+                ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
 
-        $mktgs = Marketing::whereNotNull('tanggal_lahir')
-            ->whereMonth('tanggal_lahir', $month)
-            ->whereDay('tanggal_lahir', $day)
-            ->where('is_active', true)
-            ->get()
-            ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
+            $mktgs = Marketing::whereNotNull('tanggal_lahir')
+                ->whereMonth('tanggal_lahir', $month)
+                ->whereDay('tanggal_lahir', $day)
+                ->where('is_active', true)
+                ->get()
+                ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
 
-        $todayBirthdays = $pics->merge($mktgs)->filter(
-            fn($p) => !($excludeType && $p->type === $excludeType && $p->id === $excludeId)
-        )->values();
+            $todayBirthdays = $pics->merge($mktgs)->filter(
+                fn($p) => !($excludeType && $p->type === $excludeType && $p->id === $excludeId)
+            )->values();
 
-        $myWishes = BirthdayWish::where('sender_type', $senderType)
-            ->where('sender_id', $senderId)
-            ->where('wish_year', now()->year)
-            ->get()
-            ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
-            ->toArray();
+            $myWishes = BirthdayWish::where('sender_type', $senderType)
+                ->where('sender_id', $senderId)
+                ->where('wish_year', now()->year)
+                ->get()
+                ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
+                ->toArray();
 
-        return [$todayBirthdays, $myWishes];
+            return [$todayBirthdays, $myWishes];
+        } catch (\Throwable) {
+            return [collect(), []];
+        }
     }
 }
