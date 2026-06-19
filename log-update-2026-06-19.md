@@ -422,3 +422,14 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 - `resources/views/admin/loa-master/edit.blade.php`
 - `resources/views/admin/loa/receipt.blade.php`
 
+
+## 27. 🔄 Update: ok
+
+- **Commit:** `e1a14f9` — 17:17 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/loa/receipt.blade.php`
+- `resources/views/loa/request.blade.php`
+- `resources/views/public/author-portal.blade.php`
+

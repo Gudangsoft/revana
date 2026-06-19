@@ -653,7 +653,6 @@
 
     {{-- ── Footer ── --}}
     <div class="portal-footer">
-        <a href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right"></i>Login Admin / PIC</a>
         <a href="mailto:admin@apji.org"><i class="bi bi-envelope"></i>Bantuan</a>
         <span style="color:rgba(255,255,255,.35);font-size:.75rem;">SIPERA &copy; {{ date('Y') }}</span>
     </div>
