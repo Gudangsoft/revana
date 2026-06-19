@@ -475,3 +475,25 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 - `log-update-2026-06-19.md`
 - `resources/views/public/author-portal.blade.php`
 
+
+## 32. Fix Duplicate Entry marketing_point_histories
+
+**Tujuan:** Mencegah error `Integrity constraint violation: 1062 Duplicate entry` yang muncul di log production ketika `toggleValidation` dipanggil lebih dari sekali untuk submission yang sama.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Ganti `MarketingPointHistory::create()` → `firstOrCreate()` agar idempoten |
+
+### Catatan
+- Error EMERGENCY `Log [] is not defined` di log production bukan bug kode — disebabkan `LOG_CHANNEL` di `.env` production kosong. Solusi: set `LOG_CHANNEL=stack` di `.env` production.
+- Error 500 di `/admin/dashboard` **tidak ada kaitannya** dengan perubahan LOA — DashboardController tidak menggunakan kolom `loa_language`.
+
+## 33. Sembunyikan Bagian LOA dari Halaman Tracking
+
+**Tujuan:** Menghilangkan card "Letter of Acceptance Tersedia" (beserta tombol Buka & Cetak LOA) dari halaman `/tracking-loa` publik.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/public/author-portal.blade.php` | Hapus blok `loa-section`, variabel `$loaAvailable`, referensi di status bar, dan JS date picker LOA |

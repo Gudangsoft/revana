@@ -594,9 +594,6 @@
         ];
         $stage = $stageMap[$realStatus] ?? 1;
 
-        $loaAvailable = $submission->production_valid || $submission->validator_valid
-                        || $realStatus === 'PUBLISHED';
-
         $statusLabels = [
             'SUBMITTED'          => ['label' => 'Menunggu Proses',  'color' => '#f59e0b', 'icon' => 'bi-hourglass-split'],
             'EDITOR1_PROCESS'    => ['label' => 'Proses Editor 1',  'color' => '#0288d1', 'icon' => 'bi-pencil-square'],
@@ -716,7 +713,6 @@
                     <span>
                         Status saat ini: <strong>{{ $currentStatus['label'] }}</strong>
                         @if($realStatus === 'PUBLISHED') — Selamat, artikel Anda telah terbit! 🎉
-                        @elseif($loaAvailable) — Artikel diterima, LOA tersedia
                         @endif
                     </span>
                 </div>
@@ -728,63 +724,6 @@
                 <div style="font-size:.85rem;color:#b91c1c;margin-top:4px;">Mohon maaf, artikel ini tidak dapat dilanjutkan ke tahap berikutnya.</div>
             </div>
             @endif
-
-            {{-- LOA section --}}
-            <div class="loa-section {{ $loaAvailable ? 'available' : 'locked' }}">
-                <div class="loa-head">
-                    <div class="loa-icon">
-                        <i class="bi bi-file-earmark-check{{ $loaAvailable ? '-fill' : '' }}"></i>
-                    </div>
-                    <div class="loa-head-text">
-                        <h3>{{ $loaAvailable ? 'Letter of Acceptance Tersedia' : 'Letter of Acceptance' }}</h3>
-                        <p>{{ $loaAvailable ? 'Dokumen LOA siap diunduh & dicetak' : 'Akan tersedia setelah tahap Produksi selesai' }}</p>
-                    </div>
-                    @if($loaAvailable)
-                    <div class="ms-auto">
-                        <span class="badge" style="background:#dcfce7;color:#15803d;font-size:.72rem;padding:5px 10px;border-radius:20px;">
-                            <i class="bi bi-check-circle-fill me-1"></i>Diterima
-                        </span>
-                    </div>
-                    @endif
-                </div>
-
-                @if($loaAvailable)
-                <div class="loa-controls">
-                    <div class="loa-date-wrap">
-                        <label>Tanggal LOA <span style="font-weight:400;color:#94a3b8;">(default: hari ini)</span></label>
-                        <input type="date" id="loaDate" class="loa-date-input"
-                               value="{{ now()->format('Y-m-d') }}">
-                    </div>
-                    <a id="btnLoa"
-                       href="{{ route('loa.public', ['kode_loa' => $submission->kode_loa]) }}?tanggal={{ now()->format('Y-m-d') }}"
-                       class="btn-loa" target="_blank">
-                        <i class="bi bi-file-earmark-arrow-down"></i>
-                        Buka & Cetak LOA
-                    </a>
-                </div>
-                <div style="margin-top:12px;font-size:.73rem;color:#6b7280;display:flex;align-items:center;gap:6px;">
-                    <i class="bi bi-shield-check" style="color:#16a34a;"></i>
-                    Dokumen dilengkapi QR Code verifikasi & watermark resmi SIPERA
-                </div>
-                @else
-                <div class="loa-locked-msg">
-                    Saat ini artikel Anda sedang dalam tahap <strong>{{ $currentStatus['label'] }}</strong>.
-                    LOA akan otomatis tersedia begitu tahap Produksi selesai divalidasi.
-                </div>
-                <div class="loa-progress-steps">
-                    <span class="loa-step-chip {{ $stage > 1 ? 'done' : 'active' }}">
-                        <i class="bi {{ $stage > 1 ? 'bi-check-lg' : 'bi-circle-fill' }}"></i> Submit
-                    </span>
-                    <span class="loa-step-chip {{ $stage > 2 ? 'done' : ($stage == 2 ? 'active' : 'pending') }}">
-                        <i class="bi {{ $stage > 2 ? 'bi-check-lg' : ($stage == 2 ? 'bi-circle-fill' : 'bi-circle') }}"></i> Review
-                    </span>
-                    <span class="loa-step-chip {{ $stage > 3 ? 'done' : ($stage == 3 ? 'active' : 'pending') }}">
-                        <i class="bi {{ $stage > 3 ? 'bi-check-lg' : ($stage == 3 ? 'bi-circle-fill' : 'bi-circle') }}"></i> Produksi
-                        @if($stage < 3) <span style="font-size:.65rem;">(LOA tersedia di sini)</span> @endif
-                    </span>
-                </div>
-                @endif
-            </div>
 
         </div>
     </div>
@@ -820,16 +759,6 @@
             var p = this.selectionStart;
             this.value = this.value.toUpperCase();
             this.setSelectionRange(p, p);
-        });
-    }
-
-    // LOA date picker → update button href
-    var datePick = document.getElementById('loaDate');
-    var btnLoa   = document.getElementById('btnLoa');
-    if (datePick && btnLoa) {
-        var base = btnLoa.href.split('?')[0];
-        datePick.addEventListener('change', function () {
-            btnLoa.href = base + (this.value ? '?tanggal=' + this.value : '');
         });
     }
 

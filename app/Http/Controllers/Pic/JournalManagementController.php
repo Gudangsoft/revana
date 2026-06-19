@@ -1501,13 +1501,17 @@ class JournalManagementController extends Controller
                         if ($marketing) {
                             $marketingPoints = MarketingPointHistory::getPointsForSubmission();
                             
-                            // Log marketing point history
-                            MarketingPointHistory::create([
-                                'marketing_id' => $marketing->id,
-                                'submission_id' => $submission->id,
-                                'points_earned' => $marketingPoints,
-                                'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
-                            ]);
+                            // Log marketing point history (idempoten: skip if already recorded)
+                            MarketingPointHistory::firstOrCreate(
+                                [
+                                    'marketing_id' => $marketing->id,
+                                    'submission_id' => $submission->id,
+                                ],
+                                [
+                                    'points_earned' => $marketingPoints,
+                                    'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
+                                ]
+                            );
                             
                             // Sync total_points from actual submission count (1 submission = 1 point)
                             $submissionCount = \App\Models\Submission::where('marketing_id', $marketing->id)->count();
