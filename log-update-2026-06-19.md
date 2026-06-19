@@ -106,3 +106,19 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `log-update-2026-06-19.md`
 - `resources/views/admin/journal-masters/edit.blade.php`
 
+
+## 5. 🔄 Update: loa
+
+- **Commit:** `514a601` — 14:33 oleh Gudangsoft
+- **File berubah:** 15 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Mail/LoaAcceptedMail.php`
+- `app/Models/JournalMaster.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_19_100001_add_auto_loa_to_journal_masters_and_submissions.php`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/journal-masters/edit.blade.php`
+- `resources/views/admin/loa-master/edit.blade.php`
+
