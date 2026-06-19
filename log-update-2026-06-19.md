@@ -458,3 +458,12 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 2. Klik tombol **Scan QR** (ikon kamera) di samping input
 3. Arahkan kamera ke QR Code pada dokumen LOA
 4. Kode otomatis terbaca → portal langsung tampilkan info artikel
+
+## 30. 🔄 Update: qr reader
+
+- **Commit:** `374fd8d` — 17:26 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-19.md`
+- `public/js/html5-qrcode.min.js`
+- `resources/views/public/author-portal.blade.php`
+

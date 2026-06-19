@@ -383,6 +383,85 @@
             border: 2px solid #fecaca; border-radius: 14px;
             padding: 20px 22px; text-align: center;
         }
+
+        /* ════════════════════════════════════════
+           MOBILE RESPONSIVE — max 576px
+        ════════════════════════════════════════ */
+        @media (max-width: 576px) {
+            /* Page padding */
+            .page-wrap { padding: 0 12px; }
+
+            /* Nav */
+            .top-nav { margin-bottom: 20px; padding-top: 16px; }
+
+            /* Hero */
+            .hero { padding: 10px 0 24px; }
+            .hero p { font-size: .88rem; }
+
+            /* Search card */
+            .search-card-body { padding: 20px 16px 16px; }
+
+            /* Input row — stack scan+cek on small */
+            .search-input-wrap { flex-wrap: wrap; gap: 8px; }
+            .kode-input {
+                width: 100%; flex: none;
+                font-size: .95rem; letter-spacing: 1px;
+                padding: 12px 14px;
+            }
+            .btn-scan {
+                flex: 1; justify-content: center;
+                padding: 12px 14px; font-size: 1rem;
+            }
+            .btn-cari {
+                flex: 2; justify-content: center;
+                padding: 12px 14px; font-size: .9rem;
+            }
+
+            /* Result header */
+            .result-header { padding: 16px 16px; gap: 12px; }
+            .journal-logo, .journal-abbr { width: 44px; height: 44px; border-radius: 10px; }
+            .jrn-title { font-size: .88rem; }
+            .jrn-meta  { font-size: .7rem; }
+
+            /* Result body */
+            .result-body { padding: 14px 14px; }
+
+            /* Article info */
+            .article-info { padding: 14px 14px; }
+            .info-row { flex-direction: column; gap: 3px; padding: 9px 0; }
+            .info-label { width: auto; font-size: .72rem; }
+            .info-value { font-size: .85rem; }
+
+            /* Stepper */
+            .stepper-wrap { padding: 14px 14px; }
+            .step-dot { width: 24px; height: 24px; font-size: .6rem; }
+            .step::before { top: 12px; left: calc(-50% + 12px); right: calc(50% + 12px); }
+            .step-label { font-size: .55rem; }
+
+            /* Status bar */
+            .current-status-bar { font-size: .78rem; padding: 9px 12px; }
+
+            /* LOA section */
+            .loa-section { padding: 16px 16px; }
+            .loa-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+            .loa-date-wrap { width: 100%; }
+            .loa-date-input { width: 100%; }
+            .btn-loa { width: 100%; justify-content: center; padding: 13px 18px; }
+
+            /* Feature pills - 1 col already handled above */
+            .feature-row { padding: 0 16px 16px; }
+            .divider { margin: 0 16px; }
+        }
+
+        /* Extra small — 380px and below */
+        @media (max-width: 380px) {
+            .btn-scan span { display: none; }
+            .btn-scan { padding: 12px 16px; flex: 0 0 auto; }
+            .btn-cari span { display: none; }
+            .btn-cari { padding: 12px 18px; flex: 1; }
+            .step-label { display: none; }
+            .stepper-wrap .stepper-title { display: block; }
+        }
     </style>
 </head>
 <body>
