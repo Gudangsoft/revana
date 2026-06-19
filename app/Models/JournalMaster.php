@@ -33,6 +33,7 @@ class JournalMaster extends Model
         'loa_tanggal',
         'loa_auto_send',
         'loa_auto_trigger',
+        'loa_language',
     ];
 
     protected $casts = [

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ $lang ?? 'en' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
     $kodeSingkat    = $journal?->kode_singkat     ?? '';
     $eIssn          = $journal?->e_issn           ?? '';
     $editorName     = $journal?->editor_name      ?? '';
-    $editorTitle    = $journal?->editor_title     ?? 'Editor in Chief';
+    $editorTitle    = $journal?->editor_title     ?? ($lang === 'id' ? 'Ketua Dewan Redaksi' : 'Editor in Chief');
     $kota           = $journal?->loa_kota         ?? 'Semarang';
     $volume         = $slot?->volume   ?? '—';
     $nomor          = $slot?->nomor    ?? '—';
@@ -23,6 +23,113 @@
     $judul          = $submission->judul_artikel ?? '—';
     $idArtikel      = $submission->id_artikel    ?? $submission->kode_submit;
     $articleCode    = $kodeSingkat ? $kodeSingkat . '_' . $idArtikel : $idArtikel;
+
+    // ── Kamus teks bilingual ────────────────────────────────────
+    $isId = ($lang ?? 'en') === 'id';
+
+    $L = $isId ? [
+        // Halaman 1 — Surat Penerimaan
+        'p1_title'      => 'SURAT PENERIMAAN ARTIKEL',
+        'p1_subtitle'   => 'Letter of Acceptance (LOA)',
+        'salutation1'   => 'Yth.,',
+        'salutation2'   => 'Bapak/Ibu',
+        'salutation3'   => 'di',
+        'greeting'      => 'Dengan hormat,',
+        'body1_pre'     => 'Kami, Dewan Redaksi',
+        'body1_issn'    => 'dengan E-ISSN:',
+        'body1_post'    => 'dengan ini menyampaikan bahwa manuskrip Saudara/i yang berjudul:',
+        'body2_pre'     => 'telah diterima, dinilai oleh mitra bestari, dan secara resmi',
+        'body2_accepted'=> 'DITERIMA',
+        'body2_post'    => 'untuk dipublikasikan pada',
+        'body3'         => 'Kami menyampaikan apresiasi yang sebesar-besarnya atas kontribusi dan kepercayaan Saudara/i kepada jurnal kami. Kami akan senantiasa menginformasikan perkembangan proses penerbitan hingga artikel Saudara/i terbit. Kami mengharapkan kiriman manuskrip terbaik Saudara/i berikutnya.',
+        'body4'         => 'Surat keterangan ini diterbitkan secara resmi sebagai bukti penerimaan artikel.',
+        'idx_title'     => 'Telah Diindeks oleh:',
+        'verified_by'   => 'Diverifikasi oleh',
+        'scan_qr'       => 'Scan QR untuk verifikasi',
+        // Halaman 2 — Lembar Penilaian
+        'p2_title'      => 'LEMBAR PENILAIAN ARTIKEL',
+        'meta_author'   => 'Penulis',
+        'meta_code'     => 'Kode Artikel',
+        'meta_title'    => 'Judul',
+        'criteria_hdr'  => 'KRITERIA PENILAIAN',
+        'criteria_note' => '[DAPAT DIREVISI OLEH REVIEWER]',
+        'col_no'        => 'No',
+        'col_desc'      => 'Uraian',
+        'col_comment'   => 'Komentar',
+        'criteria'      => [
+            ['Kesesuaian isi artikel dengan <strong>Judul</strong>',                              'Isi artikel relevan dengan judul.'],
+            ['Kesesuaian isi artikel dengan <strong>Abstrak</strong>',                            'Baik. Masalah, metode, dan hasil penelitian tergambar dengan jelas.'],
+            ['Cakupan penelitian pada <strong>Kata Kunci</strong>',                               'Baik.'],
+            ['Kejelasan <strong>Metodologi</strong> Penelitian',                                  'Baik.'],
+            ['Penyajian dan Interpretasi <strong>Data</strong>',                                  'Baik.'],
+            ['Penggunaan <strong>Tabel</strong> dan <strong>Gambar</strong>',                     'Baik.'],
+            ['Relevansi <strong>Pembahasan/Analisis</strong> dengan <strong>Hasil</strong> Penelitian', 'Baik.'],
+            ['Relevansi <strong>Referensi</strong>',                                              'Baik.'],
+            ['Kontribusi terhadap Ilmu Pengetahuan',                                              'Baik.'],
+            ['<strong>Sistematika</strong> Penulisan',                                            'Baik.'],
+            ['Penggunaan <strong>Bahasa</strong>',                                                'Baik.'],
+        ],
+        'decision_hdr'  => 'KEPUTUSAN REVIEWER',
+        'decision_note' => '[DAPAT DIREVISI OLEH REVIEWER]',
+        'decisions'     => [
+            'Artikel dapat diterbitkan tanpa revisi',
+            'Artikel dapat diterbitkan dengan revisi kecil',
+            'Artikel dapat diterbitkan dengan revisi besar',
+            'Mohon kirimkan kembali artikel untuk dievaluasi ulang setelah revisi',
+            'Artikel tidak layak diterbitkan berdasarkan alasan yang tercantum di atas',
+        ],
+    ] : [
+        // Halaman 1 — Receipt for Paper
+        'p1_title'      => 'RECEIPT FOR PAPER',
+        'p1_subtitle'   => 'Letter of Acceptance (LOA)',
+        'salutation1'   => 'To the Honorable,',
+        'salutation2'   => 'Dear Sir/Madam',
+        'salutation3'   => 'at',
+        'greeting'      => 'Dear Sir or Madam,',
+        'body1_pre'     => 'We, the Editorial Board of',
+        'body1_issn'    => 'with E-ISSN:',
+        'body1_post'    => 'hereby inform you that your manuscript entitled:',
+        'body2_pre'     => 'has been received, peer-reviewed, and formally',
+        'body2_accepted'=> 'ACCEPTED',
+        'body2_post'    => 'for publication in',
+        'body3'         => 'We express our sincere appreciation for your valuable contribution and trust in our journal. We will keep you informed of each subsequent step in the publication process. We look forward to receiving your future scholarly submissions.',
+        'body4'         => 'This letter is officially issued as documentary proof of manuscript acceptance.',
+        'idx_title'     => 'Has been Indexed by:',
+        'verified_by'   => 'Verified by',
+        'scan_qr'       => 'Scan QR to verify',
+        // Halaman 2 — Evaluation Sheet
+        'p2_title'      => 'PAPER EVALUATION SHEET',
+        'meta_author'   => 'Author',
+        'meta_code'     => 'Article Code',
+        'meta_title'    => 'Title',
+        'criteria_hdr'  => 'EVALUATION CRITERIA',
+        'criteria_note' => '[SUBJECT TO REVISION BY THE REVIEWER]',
+        'col_no'        => 'No',
+        'col_desc'      => 'Description',
+        'col_comment'   => 'Comments',
+        'criteria'      => [
+            ['Representation of article content in the <strong>Title</strong>',                   'The content is relevant to the title.'],
+            ['Reflection of article content in the <strong>Abstract</strong>',                    'Good. Issues, methods, and results are clearly represented.'],
+            ['Scope of research in <strong>Keywords</strong>',                                    'Good.'],
+            ['Clarity of Research <strong>Methodology</strong>',                                  'Good.'],
+            ['Presentation and Interpretation of <strong>Data</strong>',                          'Good.'],
+            ['Use of <strong>Tables</strong> and <strong>Figures</strong>',                       'Good.'],
+            ['Relevance of <strong>Discussion/Analysis</strong> to Research <strong>Results</strong>', 'Good.'],
+            ['Relevance of <strong>References</strong>',                                          'Good.'],
+            ['Contribution to Science and Knowledge',                                             'Good.'],
+            ['<strong>Structure</strong> of the Paper',                                           'Good.'],
+            ['Use of <strong>Language</strong>',                                                  'Good.'],
+        ],
+        'decision_hdr'  => "REVIEWER'S DECISION",
+        'decision_note' => '[SUBJECT TO REVISION BY THE REVIEWER]',
+        'decisions'     => [
+            'The article can be published as is',
+            'The article can be published with minor revisions',
+            'The article can be published with major revisions',
+            'Please resubmit the article for re-evaluation after revisions',
+            'The article is not suitable for publication based on the reasons stated above',
+        ],
+    ];
 @endphp
 <style>
 /* ── Reset ───────────────────────────────────────────── */
@@ -97,7 +204,8 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 }
 
 /* Document heading */
-.doc-title { text-align: center; font-size: 14pt; font-weight: 900; letter-spacing: 2px; margin: 14px 0 2px; }
+.doc-title { text-align: center; font-size: 14pt; font-weight: 900; letter-spacing: 2px; margin: 14px 0 1px; }
+.doc-subtitle { text-align: center; font-size: 9pt; color: #555; margin-bottom: 4px; font-style: italic; }
 .doc-no    { text-align: center; font-size: 9pt; color: #555; margin-bottom: 14px; }
 
 /* Address block */
@@ -130,9 +238,9 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 }
 .verified-bar {
   background: #fff; color: #333;
-  padding: 3px 18px 4px;
+  padding: 6px 18px !important;
   font-size: 7.5pt;
-  display: flex; align-items: center; gap: 8px;
+  display: flex !important; align-items: center; gap: 10px;
 }
 .verified-badge {
   background: #d32f2f; color: #fff;
@@ -168,12 +276,6 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 }
 
 /* ── QR ──────────────────────────────────────────────── */
-.verified-bar {
-  display: flex !important;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 18px !important;
-}
 .qr-wrap img,
 .qr-wrap canvas {
   display: block;
@@ -236,7 +338,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 </div>
 
 {{-- ══════════════════════════════════════════════════════
-     PAGE 1 — RECEIPT FOR PAPER
+     PAGE 1 — RECEIPT FOR PAPER / SURAT PENERIMAAN ARTIKEL
      ══════════════════════════════════════════════════════ --}}
 <div class="a4-page">
 
@@ -277,22 +379,23 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
     <div class="page-inner">
         {{-- Title --}}
-        <div class="doc-title">RECEIPT FOR PAPER</div>
+        <div class="doc-title">{{ $L['p1_title'] }}</div>
+        <div class="doc-subtitle">{{ $L['p1_subtitle'] }}</div>
         <div class="doc-no">No. {{ $loaNumber }}</div>
 
         {{-- Address --}}
         <div class="to-block">
-            <p>To the Honorable,</p>
-            <p>Dear Sir/Madam &nbsp;: &nbsp;<span class="hl">{{ $penulis }}</span></p>
-            <p>at &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
+            <p>{{ $L['salutation1'] }}</p>
+            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $penulis }}</span></p>
+            <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
         </div>
 
         {{-- Body --}}
-        <p class="body-text">Dear Sir or Madam,</p>
+        <p class="body-text">{{ $L['greeting'] }}</p>
         <p class="body-text">
-            We, the Editorial Board of <strong>{{ $jurnalNama }}</strong>
-            @if($eIssn) with E-ISSN: <strong>{{ $eIssn }}</strong>@endif
-            would like to inform you that your article titled:
+            {{ $L['body1_pre'] }} <strong>{{ $jurnalNama }}</strong>
+            @if($eIssn) ({{ $L['body1_issn'] }} <strong>{{ $eIssn }}</strong>)@endif,
+            {{ $L['body1_post'] }}
         </p>
 
         <p class="body-text" style="text-align:center; font-style:italic; font-size:11pt;">
@@ -300,17 +403,14 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </p>
 
         <p class="body-text">
-            has been received, reviewed, <strong>ACCEPTED</strong> and will be published in
-            <span class="hl">Volume {{ $volume }}, No. {{ $nomor }}, {{ $bulan }} {{ $tahun }}</span>.
+            {{ $L['body2_pre'] }} <strong>{{ $L['body2_accepted'] }}</strong>
+            {{ $L['body2_post'] }} <span class="hl"><em>{{ $jurnalNama }}</em>,
+            Volume {{ $volume }}, No. {{ $nomor }}, {{ $bulan }} {{ $tahun }}</span>.
         </p>
 
-        <p class="body-text">
-            We would like to express our sincere gratitude for your trust in submitting your best articles.
-            We will keep you informed of the next steps in the process until publication. We look forward
-            to receiving your next best article.
-        </p>
+        <p class="body-text">{{ $L['body3'] }}</p>
 
-        <p class="body-text">This certificate is hereby issued for use as appropriate.</p>
+        <p class="body-text">{{ $L['body4'] }}</p>
 
         {{-- Signature --}}
         <div class="sig-block">
@@ -330,7 +430,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
     {{-- Indexed by footer --}}
     <div class="idx-bar">
-        <div class="idx-bar-title">Has been Index by:</div>
+        <div class="idx-bar-title">{{ $L['idx_title'] }}</div>
         <div class="idx-logos">
             <span class="idx-badge">Crossref</span>
             <span class="idx-badge">Google Scholar</span>
@@ -339,10 +439,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
     <div class="verified-bar">
-        <div class="qr-wrap" id="qr1" title="Scan to verify LOA authenticity"></div>
+        <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}"></div>
         <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-weight:bold;">Verified by</span>
+                <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
                 <span class="verified-badge">iThenticate</span>
                 <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
                 @if(!empty($isAdminView) && $isAdminView)
@@ -353,7 +453,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
                 </span>
             </div>
             <div style="font-size:6pt;color:#888;margin-top:2px;">
-                Scan QR to verify &bull; {{ $verifyUrl ?? url('/loa/' . $submission->kode_loa) }}
+                {{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}
             </div>
         </div>
     </div>
@@ -361,7 +461,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 </div>
 
 {{-- ══════════════════════════════════════════════════════
-     PAGE 2 — PAPER EVALUATION SHEET
+     PAGE 2 — PAPER EVALUATION SHEET / LEMBAR PENILAIAN
      ══════════════════════════════════════════════════════ --}}
 <div class="a4-page">
 
@@ -397,58 +497,41 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
     </div>
 
     <div class="page-inner">
-        <div class="eval-title">PAPER EVALUATION SHEET</div>
+        <div class="eval-title">{{ $L['p2_title'] }}</div>
 
         {{-- Meta --}}
         <div class="eval-meta">
             <table>
                 <tr>
-                    <td>Author</td><td>:</td>
+                    <td>{{ $L['meta_author'] }}</td><td>:</td>
                     <td>{{ $penulis }}</td>
                 </tr>
                 <tr>
-                    <td>Article Code</td><td>:</td>
+                    <td>{{ $L['meta_code'] }}</td><td>:</td>
                     <td><span class="hl" style="font-weight:bold;">{{ $articleCode }}</span></td>
                 </tr>
                 <tr>
-                    <td>Title</td><td>:</td>
-                    <td>
-                        <span class="hl">&#10003; {{ $judul }}</span>
-                    </td>
+                    <td>{{ $L['meta_title'] }}</td><td>:</td>
+                    <td><span class="hl">&#10003; {{ $judul }}</span></td>
                 </tr>
             </table>
         </div>
 
         {{-- Criteria table --}}
         <div class="criteria-title">
-            EVALUATION CRITERIA
-            <span style="color:{{ $secondaryColor }};">[SUBJECT TO REVISION BY THE REVIEWER]</span>
+            {{ $L['criteria_hdr'] }}
+            <span style="color:{{ $secondaryColor }};">{{ $L['criteria_note'] }}</span>
         </div>
         <table class="criteria-table">
             <thead>
                 <tr>
-                    <th style="width:28px;">No</th>
-                    <th>Description</th>
-                    <th style="width:180px;">Comments</th>
+                    <th style="width:28px;">{{ $L['col_no'] }}</th>
+                    <th>{{ $L['col_desc'] }}</th>
+                    <th style="width:180px;">{{ $L['col_comment'] }}</th>
                 </tr>
             </thead>
             <tbody>
-                @php
-                $criteria = [
-                    ['Representation of article content in the <strong>Title</strong>',        'The content is relevant to the title.'],
-                    ['Reflection of article content in the <strong>Abstract</strong>',         'Good. Issues, methods, and results are represented.'],
-                    ['Scope of Research in <strong>Keywords</strong>',                          'Good.'],
-                    ['Clarity of Research <strong>Methodology</strong>',                        'Good.'],
-                    ['Presentation and Interpretation of <strong>Data</strong>',                'Good.'],
-                    ['Use of <strong>Tables</strong> and <strong>Figures</strong>',             'Good.'],
-                    ['Relevance of <strong>Discussion/Analysis</strong> to Research <strong>Results</strong>', 'Good.'],
-                    ['Relevance of <strong>References</strong>',                                'Good.'],
-                    ['Contribution to Science and Knowledge',                                   'Good.'],
-                    ['<strong>Structure</strong> of the Paper',                                 'Good.'],
-                    ['Use of <strong>Language</strong>',                                        'Good.'],
-                ];
-                @endphp
-                @foreach($criteria as $i => $row)
+                @foreach($L['criteria'] as $i => $row)
                 <tr>
                     <td>{{ $i + 1 }}</td>
                     <td>{!! $row[0] !!}</td>
@@ -460,41 +543,23 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
         {{-- Reviewer's decision --}}
         <div class="decision-title">
-            REVIEWER'S DECISION
-            <span style="color:{{ $secondaryColor }};">[SUBJECT TO REVISION BY THE REVIEWER]</span>
+            {{ $L['decision_hdr'] }}
+            <span style="color:{{ $secondaryColor }};">{{ $L['decision_note'] }}</span>
         </div>
         <table class="decision-table">
+            @foreach($L['decisions'] as $i => $dec)
             <tr>
-                <td class="chk"><span class="chk-checked">&#10003;</span></td>
-                <td>1. The article can be published as is</td>
-                <td class="chk"></td>
+                <td class="chk">@if($i === 0)<span class="chk-checked">&#10003;</span>@endif</td>
+                <td>{{ $i + 1 }}. {{ $dec }}</td>
+                <td class="chk">@if($i === 4)[&nbsp;&nbsp;&nbsp;]@endif</td>
             </tr>
-            <tr>
-                <td class="chk"></td>
-                <td>2. The article can be published with minor revisions</td>
-                <td class="chk"></td>
-            </tr>
-            <tr>
-                <td class="chk"></td>
-                <td>3. The article can be published with major revisions</td>
-                <td class="chk"></td>
-            </tr>
-            <tr>
-                <td class="chk"></td>
-                <td>4. Please resubmit the article to us for re-evaluation after revisions</td>
-                <td class="chk"></td>
-            </tr>
-            <tr>
-                <td class="chk"></td>
-                <td>5. The article is not suitable for publication based on the reasons above</td>
-                <td class="chk">[&nbsp;&nbsp;&nbsp;]</td>
-            </tr>
+            @endforeach
         </table>
     </div>
 
     {{-- Footer --}}
     <div class="idx-bar" style="margin-top:auto;">
-        <div class="idx-bar-title">Has been Index by:</div>
+        <div class="idx-bar-title">{{ $L['idx_title'] }}</div>
         <div class="idx-logos">
             <span class="idx-badge">Crossref</span>
             <span class="idx-badge">Google Scholar</span>
@@ -503,10 +568,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
     <div class="verified-bar">
-        <div class="qr-wrap" id="qr2" title="Scan to verify LOA authenticity"></div>
+        <div class="qr-wrap" id="qr2" title="{{ $L['scan_qr'] }}"></div>
         <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-weight:bold;">Verified by</span>
+                <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
                 <span class="verified-badge">iThenticate</span>
                 <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
                 @if(!empty($isAdminView) && $isAdminView)
@@ -517,7 +582,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
                 </span>
             </div>
             <div style="font-size:6pt;color:#888;margin-top:2px;">
-                Scan QR to verify &bull; {{ $verifyUrl ?? url('/loa/' . $submission->kode_loa) }}
+                {{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}
             </div>
         </div>
     </div>

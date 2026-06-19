@@ -59,6 +59,7 @@ class LoaMasterController extends Controller
             'loa_kota'          => 'nullable|string|max:100',
             'loa_tanggal'       => 'nullable|date',
             'loa_auto_trigger'  => 'nullable|string|max:30',
+            'loa_language'      => 'nullable|in:en,id',
             'logo'              => 'nullable|image|max:2048',
             'editor_signature'  => 'nullable|image|max:2048',
         ]);
@@ -66,7 +67,7 @@ class LoaMasterController extends Controller
         $data = $request->only([
             'kode_singkat', 'e_issn', 'editor_name', 'editor_title',
             'primary_color', 'secondary_color', 'loa_kota', 'loa_tanggal',
-            'loa_auto_trigger',
+            'loa_auto_trigger', 'loa_language',
         ]);
 
         $data['loa_auto_send'] = $request->boolean('loa_auto_send');

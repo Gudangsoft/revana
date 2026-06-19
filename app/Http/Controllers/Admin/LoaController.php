@@ -16,18 +16,20 @@ class LoaController extends Controller
         $journal = $submission->journalSlot?->journalMaster;
         $slot    = $submission->journalSlot;
         $date    = request('tanggal');
+        $kode    = $submission->kode_loa ?: $submission->kode_submit;
+        $lang    = $journal?->loa_language ?? 'en';
 
-        $kode = $submission->kode_loa ?: $submission->kode_submit;
         return view('admin.loa.receipt', [
             'submission' => $submission,
             'journal'    => $journal,
             'slot'       => $slot,
             'loaNumber'  => $this->loaNumber($submission, $journal, $slot),
-            'loaDate'    => $this->loaDate($journal, $date),
+            'loaDate'    => $this->loaDate($journal, $date, $lang),
             'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'verifyUrl'  => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'=> false,
+            'lang'       => $lang,
         ]);
     }
 
@@ -38,18 +40,20 @@ class LoaController extends Controller
         $journal = $submission->journalSlot?->journalMaster;
         $slot    = $submission->journalSlot;
         $date    = request('tanggal');
+        $kode    = $submission->kode_loa ?: $submission->kode_submit;
+        $lang    = $journal?->loa_language ?? 'en';
 
-        $kode = $submission->kode_loa ?: $submission->kode_submit;
         return view('admin.loa.receipt', [
             'submission' => $submission,
             'journal'    => $journal,
             'slot'       => $slot,
             'loaNumber'  => $this->loaNumber($submission, $journal, $slot),
-            'loaDate'    => $this->loaDate($journal, $date),
+            'loaDate'    => $this->loaDate($journal, $date, $lang),
             'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'verifyUrl'  => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'=> true,
+            'lang'       => $lang,
         ]);
     }
 
@@ -94,22 +98,28 @@ class LoaController extends Controller
 
     private function loaNumber(Submission $s, $j, $slot): string
     {
-        $kode   = $j?->kode_singkat ?: 'SIPERA';
-        $roman  = $this->romanMonth($slot?->bulan);
-        $year   = $slot?->tahun ?? now()->year;
-        $id     = $s->id_artikel ?: $s->kode_submit;
+        $kode  = $j?->kode_singkat ?: 'SIPERA';
+        $roman = $this->romanMonth($slot?->bulan);
+        $year  = $slot?->tahun ?? now()->year;
+        $id    = $s->id_artikel ?: $s->kode_submit;
 
         return $id . '/' . $kode . '/APRKOM/' . $roman . '/' . $year;
     }
 
-    private function loaDate($journal, ?string $dateOverride = null): string
+    private function loaDate($journal, ?string $dateOverride = null, string $lang = 'en'): string
     {
-        if ($dateOverride) {
-            $dt = \Carbon\Carbon::parse($dateOverride);
+        $dt   = $dateOverride ? \Carbon\Carbon::parse($dateOverride) : now();
+        $kota = $journal?->loa_kota ?? 'Semarang';
+
+        if ($lang === 'id') {
+            $months = ['Januari','Februari','Maret','April','Mei','Juni',
+                       'Juli','Agustus','September','Oktober','November','Desember'];
+            $dateStr = $dt->day . ' ' . $months[$dt->month - 1] . ' ' . $dt->year;
         } else {
-            $dt = now();
+            $dateStr = $dt->format('F j, Y');
         }
-        return ($journal?->loa_kota ?? 'Semarang') . ', ' . $dt->format('F j, Y');
+
+        return $kota . ', ' . $dateStr;
     }
 
     private function romanMonth(?string $bulan): string

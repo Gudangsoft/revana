@@ -370,3 +370,42 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `public/js/qrcode.min.js`
 - `resources/views/admin/loa/receipt.blade.php`
 
+
+## 24. 🔄 Update: ok
+
+- **Commit:** `e02cabc` — 16:03 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+
+## 18. Setting Bahasa LOA (Bilingual: Indonesia / Inggris)
+
+**Tujuan:** Admin bisa memilih bahasa dokumen LOA per jurnal — Bahasa Indonesia atau English — sehingga seluruh isi dokumen (surat penerimaan, lembar penilaian, footer verifikasi) konsisten dan sesuai kaidah penulisan LOA akademik.
+
+### File yang Dibuat / Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_19_200001_add_loa_language_to_journal_masters.php` | Tambah kolom `loa_language` varchar(5) default `en` ke tabel `journal_masters` |
+| `app/Models/JournalMaster.php` | Tambah `loa_language` ke `$fillable` |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | Tambah `loa_language` ke validasi dan `$data` di `update()` |
+| `app/Http/Controllers/Admin/LoaController.php` | `show()` & `publicView()` baca `$journal->loa_language`, pass ke view sebagai `$lang`; `loaDate()` terima param `$lang` — Indonesian: "19 Juni 2026", English: "June 19, 2026" |
+| `resources/views/admin/loa-master/edit.blade.php` | Tambah card "Bahasa Dokumen LOA" dengan radio button (EN/ID) + preview teks sesuai pilihan (live update via JS) |
+| `resources/views/admin/loa/receipt.blade.php` | Tulis ulang penuh: kamus bilingual `$L[]` di PHP block — semua teks (judul, salam, body, footer, label evaluasi, keputusan reviewer) dipilih berdasarkan `$lang` |
+
+### Perbedaan Konten Berdasarkan Bahasa
+
+| Elemen | English | Bahasa Indonesia |
+|--------|---------|-----------------|
+| Judul Halaman 1 | RECEIPT FOR PAPER | SURAT PENERIMAAN ARTIKEL |
+| Salam pembuka | Dear Sir or Madam, | Dengan hormat, |
+| Kata kunci penerimaan | **ACCEPTED** | **DITERIMA** |
+| Tanggal | June 19, 2026 | 19 Juni 2026 |
+| Judul Halaman 2 | PAPER EVALUATION SHEET | LEMBAR PENILAIAN ARTIKEL |
+| Label tabel | Author / Article Code / Title | Penulis / Kode Artikel / Judul |
+| Footer verifikasi | Verified by / Scan QR to verify | Diverifikasi oleh / Scan QR untuk verifikasi |
+
+### Catatan Deploy
+Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.

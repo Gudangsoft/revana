@@ -55,6 +55,48 @@
                 </div>
             </div>
 
+            {{-- ── Bahasa LOA ───────────────────────────────────────────── --}}
+            <div class="card mb-3 border-primary">
+                <div class="card-header bg-primary bg-opacity-10 fw-semibold">
+                    <i class="bi bi-translate me-1"></i> Bahasa Dokumen LOA
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold mb-2">Pilih Bahasa</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="loa_language" id="langEn" value="en"
+                                           {{ old('loa_language', $journal->loa_language ?? 'en') === 'en' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="langEn">
+                                        <strong>English</strong>
+                                        <span class="text-muted small d-block">Bahasa Inggris</span>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="loa_language" id="langId" value="id"
+                                           {{ old('loa_language', $journal->loa_language ?? 'en') === 'id' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="langId">
+                                        <strong>Bahasa Indonesia</strong>
+                                        <span class="text-muted small d-block">Indonesia</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="langPreviewEn" class="alert alert-light border mb-0 small" style="display:none;">
+                                <strong>Preview (EN):</strong><br>
+                                "We, the Editorial Board of <em>[Journal Name]</em>, hereby inform you that your manuscript has been peer-reviewed and formally <strong>ACCEPTED</strong> for publication..."
+                            </div>
+                            <div id="langPreviewId" class="alert alert-light border mb-0 small" style="display:none;">
+                                <strong>Preview (ID):</strong><br>
+                                "Kami, Dewan Redaksi <em>[Nama Jurnal]</em>, dengan ini menyampaikan bahwa manuskrip Saudara/i telah melalui penelaahan mitra bestari dan secara resmi <strong>DITERIMA</strong> untuk dipublikasikan..."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- ── Identitas LOA ─────────────────────────────────────────── --}}
             <div class="card mb-3">
                 <div class="card-header"><i class="bi bi-journal-text me-1"></i> Identitas Jurnal (untuk LOA)</div>
@@ -292,6 +334,18 @@
             swLbl.textContent = this.checked ? 'Aktif' : 'Non-aktif';
         });
     }
+
+    // ── Language preview ─────────────────────────────────────────
+    var langInputs = document.querySelectorAll('input[name="loa_language"]');
+    var prevEn = document.getElementById('langPreviewEn');
+    var prevId = document.getElementById('langPreviewId');
+    function updateLangPreview() {
+        var val = document.querySelector('input[name="loa_language"]:checked')?.value;
+        if (prevEn) prevEn.style.display = val === 'en' ? '' : 'none';
+        if (prevId) prevId.style.display = val === 'id' ? '' : 'none';
+    }
+    langInputs.forEach(function(r) { r.addEventListener('change', updateLangPreview); });
+    updateLangPreview();
 })();
 </script>
 @endpush
