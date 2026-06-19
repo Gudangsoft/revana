@@ -109,7 +109,24 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - Row counter menampilkan "X dari Y jurnal" saat ada filter aktif
 - Tombol "Reset filter" muncul otomatis saat filter aktif
 
-## 5. Portal Penulis Terpadu (`/cek-artikel`)
+## 5. QR Code & Watermark pada Dokumen LOA
+
+**Tujuan:** Mempersulit pemalsuan dokumen LOA — setiap dokumen memiliki QR code unik yang mengarah ke LOA asli di server, dan watermark diagonal di seluruh halaman.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Tambah: watermark diagonal semi-transparan berlapis 9 baris (teks jurnal + APRKOM + VERIFIED), QR code SVG di footer setiap halaman mengarah ke URL LOA publik (`/loa/{kode_loa}`), Document ID + URL verifikasi di bawah QR |
+
+### Detail Implementasi
+- **Watermark**: rotasi -38°, opacity ~5.5%, teks: `{KODE_SINGKAT} • APRKOM • VERIFIED`, grid 9 baris × 3 kolom → menutupi seluruh halaman A4
+- **QR Code**: generate via `qrcode.js` (CDN), output SVG 54×54px, tercetak di verified bar bawah halaman 1 & 2
+- **URL QR**: `https://portal.apji.org/loa/{kode_loa}` — siapapun yang scan langsung melihat dokumen LOA asli untuk dibandingkan
+- **Document ID**: `kode_loa` tampil sebagai teks di samping QR, verifikasi cepat tanpa scan
+- **Fallback**: jika CDN pertama gagal, otomatis coba CDN kedua (cdnjs)
+
+## 6. Portal Penulis Terpadu (`/cek-artikel`)
 
 **Tujuan:** Penulis cukup buka satu halaman, masukkan kode SIPERA satu kali — langsung tampil status artikel + tombol LOA (jika tersedia).
 
@@ -174,4 +191,16 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `app/Http/Controllers/Admin/LoaMasterController.php`
 - `log-update-2026-06-19.md`
 - `resources/views/admin/loa-master/index.blade.php`
+
+
+## 10. 🔄 Update: cek
+
+- **Commit:** `7449b1f` — 15:04 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/TrackingController.php`
+- `log-update-2026-06-19.md`
+- `resources/views/loa/request.blade.php`
+- `resources/views/public/author-portal.blade.php`
+- `resources/views/public/tracking.blade.php`
+- `routes/web.php`
 

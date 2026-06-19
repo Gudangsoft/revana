@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOA – {{ $submission->kode_submit }}</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 @php
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
@@ -139,6 +140,46 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
   font-size: 7.5pt; font-weight: bold; font-family: sans-serif;
 }
 
+/* ── Watermark ───────────────────────────────────────── */
+.a4-page { position: relative; overflow: hidden; }
+.jrn-header, .jrn-subbar, .page-inner, .idx-bar, .verified-bar { position: relative; z-index: 1; }
+.watermark {
+  position: absolute;
+  top: -80%; left: -40%;
+  width: 210%; height: 280%;
+  z-index: 0;
+  pointer-events: none;
+  transform: rotate(-38deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  overflow: hidden;
+}
+.wm-row { white-space: nowrap; }
+.wm-text {
+  font-size: 16pt;
+  font-weight: 900;
+  color: rgba(26,35,126,.055);
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  padding-right: 60px;
+  display: inline-block;
+}
+
+/* ── QR ──────────────────────────────────────────────── */
+.verified-bar {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 18px !important;
+}
+.qr-wrap svg {
+  display: block;
+  width: 54px !important;
+  height: 54px !important;
+}
+
 /* ── Evaluation sheet ────────────────────────────────── */
 .eval-section { margin-top: 14px; }
 .eval-title { font-size: 13pt; font-weight: 900; text-align: center; letter-spacing: 1px; margin-bottom: 12px; }
@@ -197,6 +238,18 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
      PAGE 1 — RECEIPT FOR PAPER
      ══════════════════════════════════════════════════════ --}}
 <div class="a4-page">
+
+    {{-- Watermark --}}
+    <div class="watermark" aria-hidden="true">
+        @php $wmLabel = strtoupper(($kodeSingkat ?: 'SIPERA') . ' • APRKOM • VERIFIED'); @endphp
+        @for($wi = 0; $wi < 9; $wi++)
+        <div class="wm-row">
+            <span class="wm-text">{{ $wmLabel }}</span>
+            <span class="wm-text">{{ $wmLabel }}</span>
+            <span class="wm-text">{{ $wmLabel }}</span>
+        </div>
+        @endfor
+    </div>
 
     {{-- Header --}}
     <div class="jrn-header">
@@ -285,9 +338,21 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
     <div class="verified-bar">
-        <span style="font-weight:bold;">Verified by</span>
-        <span class="verified-badge">iThenticate</span>
-        <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
+        <div class="qr-wrap" id="qr1" title="Scan to verify LOA authenticity"></div>
+        <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-weight:bold;">Verified by</span>
+                <span class="verified-badge">iThenticate</span>
+                <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
+                <span style="font-size:6pt;color:#888;margin-left:4px;">
+                    Doc ID: <strong>{{ $submission->kode_loa }}</strong>
+                </span>
+            </div>
+            <div style="font-size:6pt;color:#888;margin-top:2px;">
+                Scan QR code to verify authenticity of this document &bull;
+                {{ url('/loa/' . $submission->kode_loa) }}
+            </div>
+        </div>
     </div>
 
 </div>
@@ -296,6 +361,17 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
      PAGE 2 — PAPER EVALUATION SHEET
      ══════════════════════════════════════════════════════ --}}
 <div class="a4-page">
+
+    {{-- Watermark --}}
+    <div class="watermark" aria-hidden="true">
+        @for($wi = 0; $wi < 9; $wi++)
+        <div class="wm-row">
+            <span class="wm-text">{{ $wmLabel }}</span>
+            <span class="wm-text">{{ $wmLabel }}</span>
+            <span class="wm-text">{{ $wmLabel }}</span>
+        </div>
+        @endfor
+    </div>
 
     {{-- Header --}}
     <div class="jrn-header">
@@ -424,12 +500,53 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
     <div class="verified-bar">
-        <span style="font-weight:bold;">Verified by</span>
-        <span class="verified-badge">iThenticate</span>
-        <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
+        <div class="qr-wrap" id="qr2" title="Scan to verify LOA authenticity"></div>
+        <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-weight:bold;">Verified by</span>
+                <span class="verified-badge">iThenticate</span>
+                <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
+                <span style="font-size:6pt;color:#888;margin-left:4px;">
+                    Doc ID: <strong>{{ $submission->kode_loa }}</strong>
+                </span>
+            </div>
+            <div style="font-size:6pt;color:#888;margin-top:2px;">
+                Scan QR code to verify authenticity of this document &bull;
+                {{ url('/loa/' . $submission->kode_loa) }}
+            </div>
+        </div>
     </div>
 
 </div>
 
+<script>
+(function () {
+    var verifyUrl = '{{ url("/loa/" . $submission->kode_loa) }}';
+
+    function renderQr(elId) {
+        var el = document.getElementById(elId);
+        if (!el) return;
+        QRCode.toString(verifyUrl, {
+            type    : 'svg',
+            width   : 54,
+            margin  : 1,
+            color   : { dark: '#111111', light: '#ffffff' }
+        }, function (err, svg) {
+            if (!err) el.innerHTML = svg;
+        });
+    }
+
+    if (typeof QRCode !== 'undefined') {
+        renderQr('qr1');
+        renderQr('qr2');
+    } else {
+        // Fallback: load dari CDN alternatif lalu render
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+        s.onload = function () { renderQr('qr1'); renderQr('qr2'); };
+        document.head.appendChild(s);
+    }
+})();
+</script>
 </body>
 </html>
