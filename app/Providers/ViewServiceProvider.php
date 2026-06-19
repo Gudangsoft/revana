@@ -15,9 +15,14 @@ class ViewServiceProvider extends ServiceProvider
     {
         // Cached 5 menit — runs on every admin view render otherwise
         View::composer('admin.*', function ($view) {
-            $pendingReviewRequests = Cache::remember('admin.pending_review_requests', 300, fn() =>
-                ReviewRequest::where('status', 'pending')->count()
-            );
+            try {
+                $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+                $pendingReviewRequests = Cache::remember('admin.pending_review_requests.' . $tenantKey, 300, fn() =>
+                    ReviewRequest::where('status', 'pending')->count()
+                );
+            } catch (\Throwable) {
+                $pendingReviewRequests = 0;
+            }
             $view->with('pendingReviewRequests', $pendingReviewRequests);
         });
     }

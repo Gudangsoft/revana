@@ -497,3 +497,18 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 | File | Perubahan |
 |------|-----------|
 | `resources/views/public/author-portal.blade.php` | Hapus blok `loa-section`, variabel `$loaAvailable`, referensi di status bar, dan JS date picker LOA |
+
+## 34. Fix 500 Admin Dashboard — Resilient Error Handling
+
+**Tujuan:** Mencegah 500 di `/admin/dashboard` yang disebabkan query ke tabel yang mungkin belum ada di tenant DB (birthday_wishes, review_requests). Error tidak muncul di log karena LOG_CHANNEL kosong di production .env.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Providers/ViewServiceProvider.php` | Tambah try/catch pada `ReviewRequest::count()` + cache key per-tenant |
+| `app/Http/Controllers/Admin/DashboardController.php` | Wrap `todayBirthdayData()` dengan try/catch, fallback ke empty collection |
+
+### Catatan
+- **Root cause:** Tabel `birthday_wishes` / `review_requests` belum ada di tenant DB karena migration belum dijalankan
+- **Solusi permanen:** Jalankan `php artisan migrate` di server production
+- **Solusi sementara:** try/catch di kedua tempat agar dashboard tidak 500 meski tabel belum ada

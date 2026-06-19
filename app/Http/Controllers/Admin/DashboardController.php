@@ -553,33 +553,37 @@ class DashboardController extends Controller
 
     private function todayBirthdayData(string $senderType, int $senderId): array
     {
-        $month = now()->month;
-        $day   = now()->day;
+        try {
+            $month = now()->month;
+            $day   = now()->day;
 
-        $pics = Pic::whereNotNull('tanggal_lahir')
-            ->whereMonth('tanggal_lahir', $month)
-            ->whereDay('tanggal_lahir', $day)
-            ->where('is_active', true)
-            ->get()
-            ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
+            $pics = Pic::whereNotNull('tanggal_lahir')
+                ->whereMonth('tanggal_lahir', $month)
+                ->whereDay('tanggal_lahir', $day)
+                ->where('is_active', true)
+                ->get()
+                ->map(fn($p) => (object)['id' => $p->id, 'name' => $p->name, 'type' => 'pic', 'umur' => $p->umur]);
 
-        $mktgs = Marketing::whereNotNull('tanggal_lahir')
-            ->whereMonth('tanggal_lahir', $month)
-            ->whereDay('tanggal_lahir', $day)
-            ->where('is_active', true)
-            ->get()
-            ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
+            $mktgs = Marketing::whereNotNull('tanggal_lahir')
+                ->whereMonth('tanggal_lahir', $month)
+                ->whereDay('tanggal_lahir', $day)
+                ->where('is_active', true)
+                ->get()
+                ->map(fn($m) => (object)['id' => $m->id, 'name' => $m->name, 'type' => 'marketing', 'umur' => $m->umur]);
 
-        $todayBirthdays = $pics->merge($mktgs);
+            $todayBirthdays = $pics->merge($mktgs);
 
-        $myWishes = BirthdayWish::where('sender_type', $senderType)
-            ->where('sender_id', $senderId)
-            ->where('wish_year', now()->year)
-            ->get()
-            ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
-            ->toArray();
+            $myWishes = BirthdayWish::where('sender_type', $senderType)
+                ->where('sender_id', $senderId)
+                ->where('wish_year', now()->year)
+                ->get()
+                ->map(fn($w) => $w->recipient_type . '-' . $w->recipient_id)
+                ->toArray();
 
-        return [$todayBirthdays, $myWishes];
+            return [$todayBirthdays, $myWishes];
+        } catch (\Throwable) {
+            return [collect(), []];
+        }
     }
 
     /**
