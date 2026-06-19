@@ -433,3 +433,28 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 - `resources/views/loa/request.blade.php`
 - `resources/views/public/author-portal.blade.php`
 
+
+## 28. 🔄 Update: sa
+
+- **Commit:** `df168d9` — 17:19 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-19.md`
+- `resources/views/public/author-portal.blade.php`
+
+
+## 19. QR Scanner di Portal Penulis
+
+**Tujuan:** Penulis bisa scan QR Code dari dokumen LOA langsung di halaman `/tracking-loa` menggunakan kamera HP — tanpa perlu mengetik kode secara manual.
+
+### File yang Ditambahkan / Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `public/js/html5-qrcode.min.js` | Library QR scanner browser (html5-qrcode v2.3.8) disimpan lokal |
+| `resources/views/public/author-portal.blade.php` | Tambah tombol "Scan QR" di samping input kode; overlay kamera full-screen dengan animasi frame hijau; logic ekstrak kode dari URL QR (`/v/KODE`, `kode_loa=KODE`) atau kode plain; auto-submit setelah scan berhasil; tutup dengan tombol atau Escape |
+
+### Alur Penggunaan
+1. Buka `/tracking-loa` di HP
+2. Klik tombol **Scan QR** (ikon kamera) di samping input
+3. Arahkan kamera ke QR Code pada dokumen LOA
+4. Kode otomatis terbaca → portal langsung tampilkan info artikel

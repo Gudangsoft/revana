@@ -133,6 +133,62 @@
             display: flex; align-items: center; gap: 6px;
         }
 
+        /* ── QR Scanner button ── */
+        .btn-scan {
+            background: #f1f5f9; border: 2px solid #e2e8f0;
+            border-radius: 14px; padding: 14px 18px;
+            color: #475569; cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; gap: 6px;
+            white-space: nowrap; transition: all .2s; flex-shrink: 0;
+        }
+        .btn-scan:hover { background: #e2e8f0; border-color: #cbd5e1; color: #1e293b; }
+        .btn-scan span { font-size: .8rem; font-weight: 600; }
+
+        /* ── QR Scanner overlay ── */
+        .qr-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,.92);
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .qr-overlay.active { display: flex; }
+        .qr-overlay-title {
+            color: #fff; font-size: 1.1rem; font-weight: 700;
+            margin-bottom: 18px; text-align: center;
+        }
+        .qr-overlay-sub {
+            color: rgba(255,255,255,.55); font-size: .8rem;
+            margin-bottom: 22px; text-align: center;
+        }
+        #qrReader {
+            width: 300px; max-width: 90vw;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 0 0 4px rgba(255,255,255,.15);
+        }
+        #qrReader video { border-radius: 20px; }
+        .qr-frame {
+            position: absolute; width: 220px; height: 220px;
+            border: 3px solid #4ade80; border-radius: 12px;
+            pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,.45);
+            animation: pulse-frame 2s ease-in-out infinite;
+        }
+        @keyframes pulse-frame {
+            0%,100% { border-color: #4ade80; box-shadow: 0 0 0 9999px rgba(0,0,0,.45), 0 0 20px rgba(74,222,128,.4); }
+            50%      { border-color: #86efac; box-shadow: 0 0 0 9999px rgba(0,0,0,.45), 0 0 30px rgba(74,222,128,.7); }
+        }
+        .btn-scan-close {
+            margin-top: 28px; background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.2); border-radius: 12px;
+            color: #fff; padding: 12px 32px; cursor: pointer;
+            font-size: .9rem; font-weight: 600; transition: background .2s;
+        }
+        .btn-scan-close:hover { background: rgba(255,255,255,.22); }
+        .qr-status {
+            margin-top: 16px; font-size: .82rem; font-weight: 600;
+            min-height: 22px; text-align: center;
+        }
+        .qr-status.ok   { color: #4ade80; }
+        .qr-status.info { color: rgba(255,255,255,.6); }
+
         /* ── Feature pills (when no result) ── */
         .feature-row {
             display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
@@ -390,9 +446,13 @@
                            value="{{ old('kode_loa', isset($submission) ? $submission->kode_submit : '') }}"
                            autocomplete="off"
                            autofocus>
+                    <button type="button" class="btn-scan" id="btnScan" title="Scan QR Code">
+                        <i class="bi bi-qr-code-scan"></i>
+                        <span>Scan QR</span>
+                    </button>
                     <button type="submit" class="btn-cari" id="btnCari">
                         <i class="bi bi-search"></i>
-                        <span>Cek Sekarang</span>
+                        <span>Cek</span>
                     </button>
                 </div>
                 <div class="search-hint">
@@ -651,6 +711,17 @@
     </div>
     @endisset
 
+    {{-- ── QR Scanner Overlay ── --}}
+    <div class="qr-overlay" id="qrOverlay">
+        <div class="qr-overlay-title"><i class="bi bi-qr-code-scan me-2"></i>Scan QR Code LOA</div>
+        <div class="qr-overlay-sub">Arahkan kamera ke QR Code pada dokumen LOA Anda</div>
+        <div id="qrReader"></div>
+        <div class="qr-status info" id="qrStatus">Menginisialisasi kamera...</div>
+        <button class="btn-scan-close" id="btnScanClose">
+            <i class="bi bi-x-lg me-1"></i> Tutup
+        </button>
+    </div>
+
     {{-- ── Footer ── --}}
     <div class="portal-footer">
         <a href="mailto:admin@apji.org"><i class="bi bi-envelope"></i>Bantuan</a>
@@ -660,6 +731,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 <script>
 (function () {
     // Auto-uppercase kode input
@@ -691,6 +763,92 @@
             btn.disabled = true;
         });
     }
+
+    // ── QR Scanner ──────────────────────────────────────────────
+    var overlay    = document.getElementById('qrOverlay');
+    var btnScan    = document.getElementById('btnScan');
+    var btnClose   = document.getElementById('btnScanClose');
+    var qrStatus   = document.getElementById('qrStatus');
+    var scanner    = null;
+    var scanning   = false;
+
+    function extractKode(text) {
+        // URL: /v/KODE atau /tracking-loa?kode_loa=KODE atau /loa/KODE
+        var m = text.match(/\/v\/([A-Z0-9]+)/i)
+               || text.match(/kode_loa=([A-Z0-9]+)/i)
+               || text.match(/\/loa\/([A-Z0-9]+)/i);
+        if (m) return m[1].toUpperCase();
+        // Plain code
+        if (/^[A-Z0-9]{6,}$/i.test(text.trim())) return text.trim().toUpperCase();
+        return null;
+    }
+
+    function stopScanner() {
+        if (scanner && scanning) {
+            scanner.stop().catch(function () {});
+            scanning = false;
+        }
+        overlay.classList.remove('active');
+        qrStatus.textContent = 'Menginisialisasi kamera...';
+        qrStatus.className = 'qr-status info';
+    }
+
+    function startScanner() {
+        if (!window.Html5Qrcode) {
+            alert('Library QR tidak tersedia. Coba muat ulang halaman.');
+            return;
+        }
+        overlay.classList.add('active');
+
+        if (!scanner) {
+            scanner = new Html5Qrcode('qrReader');
+        }
+
+        var config = {
+            fps: 12,
+            qrbox: { width: 240, height: 240 },
+            aspectRatio: 1.0,
+            rememberLastUsedCamera: true,
+        };
+
+        scanner.start(
+            { facingMode: 'environment' },
+            config,
+            function (decodedText) {
+                var kode = extractKode(decodedText);
+                if (kode) {
+                    qrStatus.textContent = 'QR terbaca: ' + kode;
+                    qrStatus.className = 'qr-status ok';
+                    setTimeout(function () {
+                        stopScanner();
+                        if (inp) {
+                            inp.value = kode;
+                            inp.dispatchEvent(new Event('input'));
+                        }
+                        if (form) form.submit();
+                    }, 600);
+                } else {
+                    qrStatus.textContent = 'QR tidak dikenali, coba lagi...';
+                    qrStatus.className = 'qr-status info';
+                }
+            },
+            function () { /* per-frame error, abaikan */ }
+        ).then(function () {
+            scanning = true;
+            qrStatus.textContent = 'Arahkan ke QR Code LOA...';
+        }).catch(function (err) {
+            qrStatus.textContent = 'Kamera tidak dapat diakses. Pastikan izin kamera diberikan.';
+            qrStatus.className = 'qr-status info';
+        });
+    }
+
+    if (btnScan)  btnScan.addEventListener('click', startScanner);
+    if (btnClose) btnClose.addEventListener('click', stopScanner);
+
+    // Tutup dengan Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) stopScanner();
+    });
 })();
 </script>
 </body>
