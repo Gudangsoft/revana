@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 
 class TrackingController extends Controller
 {
-    // Halaman utama portal penulis (juga menggantikan /tracking-loa lama)
-    public function index()
+    // Halaman utama portal penulis — GET ?kode_loa=xxx otomatis search
+    public function index(Request $request)
     {
+        if ($request->filled('kode_loa')) {
+            return $this->search($request);
+        }
         return view('public.author-portal');
     }
 

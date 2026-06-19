@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOA – {{ $submission->kode_submit }}</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="{{ asset('js/qrcode.min.js') }}"></script>
 @php
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
@@ -174,7 +174,8 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
   gap: 10px;
   padding: 6px 18px !important;
 }
-.qr-wrap svg {
+.qr-wrap img,
+.qr-wrap canvas {
   display: block;
   width: 54px !important;
   height: 54px !important;
@@ -525,31 +526,26 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
 <script>
 (function () {
-    var verifyUrl = '{{ $verifyUrl ?? url("/loa/" . $submission->kode_loa) }}';
+    var verifyUrl = '{{ $verifyUrl ?? url("/tracking-loa?kode_loa=" . ($submission->kode_loa ?: $submission->kode_submit)) }}';
 
     function renderQr(elId) {
         var el = document.getElementById(elId);
-        if (!el) return;
-        QRCode.toString(verifyUrl, {
-            type    : 'svg',
-            width   : 54,
-            margin  : 1,
-            color   : { dark: '#111111', light: '#ffffff' }
-        }, function (err, svg) {
-            if (!err) el.innerHTML = svg;
+        if (!el || typeof QRCode === 'undefined') return;
+        el.innerHTML = '';
+        new QRCode(el, {
+            text         : verifyUrl,
+            width        : 54,
+            height       : 54,
+            colorDark    : '#111111',
+            colorLight   : '#ffffff',
+            correctLevel : QRCode.CorrectLevel.H
         });
     }
 
-    if (typeof QRCode !== 'undefined') {
+    window.addEventListener('load', function () {
         renderQr('qr1');
         renderQr('qr2');
-    } else {
-        // Fallback: load dari CDN alternatif lalu render
-        var s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-        s.onload = function () { renderQr('qr1'); renderQr('qr2'); };
-        document.head.appendChild(s);
-    }
+    });
 })();
 </script>
 </body>

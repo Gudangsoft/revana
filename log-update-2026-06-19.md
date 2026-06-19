@@ -332,3 +332,30 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `resources/views/public/tracking.blade.php`
 - `routes/web.php`
 
+
+## 21. 🔄 Update: qr
+
+- **Commit:** `3602d30` — 15:46 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+
+## 17. QR Code LOA — Fix Rendering & URL ke Portal Penulis
+
+**Tujuan:** QR code yang sebelumnya tidak muncul (CDN error 404) diperbaiki, dan URL yang di-encode ke QR kini mengarah ke portal penulis (`/tracking-loa`) sehingga siapapun bisa scan dan langsung melihat status artikel.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `public/js/qrcode.min.js` | File baru — library `qrcodejs` disimpan lokal (tidak lagi bergantung CDN luar) |
+| `resources/views/admin/loa/receipt.blade.php` | Ganti CDN qrcode@1.5.4 (URL 404) → file lokal `asset('js/qrcode.min.js')`; ganti rendering dari `QRCode.toString()` ke `new QRCode()` (qrcodejs API); update CSS `.qr-wrap` untuk handle `<img>` output |
+| `app/Http/Controllers/Admin/LoaController.php` | Kedua method `show()` & `publicView()` kini kirim `$verifyUrl = route('tracking.index', ['kode_loa' => $kode])` |
+| `app/Http/Controllers/TrackingController.php` | `index()` kini terima GET parameter `?kode_loa=xxx` — jika ada, langsung jalankan pencarian dan tampilkan hasil |
+
+### Alur Setelah Perbaikan
+1. Buka LOA (admin atau publik) → QR code muncul di footer halaman 1 & 2
+2. Scan QR → browser buka `https://portal.apji.org/tracking-loa?kode_loa=SUB2026xxxxxx`
+3. Portal penulis langsung tampilkan info artikel + status lengkap
