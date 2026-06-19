@@ -171,8 +171,8 @@
 
                     <hr class="my-4">
                     <div class="text-center">
-                        <p class="text-muted small mb-2">Ingin cek status <strong>dan</strong> unduh LOA sekaligus?</p>
-                        <a href="{{ route('author.portal') }}"
+                        <p class="text-muted small mb-2">Gunakan <strong>Portal Terpadu</strong> — lacak status & unduh LOA dalam satu halaman.</p>
+                        <a href="{{ route('tracking.index') }}"
                            class="btn btn-outline-secondary btn-sm rounded-pill px-4">
                             <i class="bi bi-file-earmark-person me-1"></i>
                             Buka Portal Penulis

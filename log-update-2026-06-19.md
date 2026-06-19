@@ -212,6 +212,27 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `log-update-2026-06-19.md`
 - `resources/views/admin/loa/receipt.blade.php`
 
+## 15. Unifikasi Penuh URL Portal Penulis
+
+**Tujuan:** `/cek-artikel`, `/request-loa`, dan `/tracking-loa` semuanya menampilkan halaman yang sama — tidak ada redirect, tidak ada halaman terpisah.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Hapus route duplikat; hapus route `/request-loa` lama (LoaController); jadikan `/cek-artikel` dan `/request-loa` alias langsung ke `TrackingController::index/search` — semua URL menuju view yang sama |
+| `resources/views/public/author-portal.blade.php` | Hapus link "Request LOA" dari nav (tidak perlu lagi); perbarui hero text; perbaiki footer |
+| `resources/views/public/tracking.blade.php` | Update link portal penulis mengarah ke `tracking.index` |
+
+### Peta URL Setelah Perubahan
+| URL | Hasil |
+|-----|-------|
+| `/tracking-loa` | Portal terpadu (GET) |
+| `/tracking-loa/search` | Proses pencarian (POST) |
+| `/cek-artikel` | Sama persis dengan `/tracking-loa` |
+| `/request-loa` | Sama persis dengan `/tracking-loa` |
+| `/loa/{kode_loa}` | Halaman cetak LOA (tetap terpisah) |
+
 ## 14. Portal Penulis Terpadu — Redesign `/tracking-loa`
 
 **Tujuan:** Gabungkan `/tracking-loa` dan `/cek-artikel` menjadi satu halaman terpusat yang keren dan informatif. Halaman lama `/cek-artikel` otomatis redirect ke `/tracking-loa`.
@@ -273,4 +294,14 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `resources/views/marketing/submissions-monitoring.blade.php`
 - `resources/views/pic/fasttrack/monitoring.blade.php`
 - `resources/views/pic/submissions/monitoring.blade.php`
+
+
+## 17. 🔄 Update: tracking loa update
+
+- **Commit:** `70b6a51` — 15:35 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/TrackingController.php`
+- `log-update-2026-06-19.md`
+- `resources/views/public/author-portal.blade.php`
+- `routes/web.php`
 

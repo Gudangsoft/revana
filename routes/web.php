@@ -76,22 +76,18 @@ Route::get('/', function () {
 Route::get('/impersonate/{token}', [TenantImpersonateController::class, 'enter'])->name('impersonate.enter');
 Route::post('/impersonate/stop', [TenantImpersonateController::class, 'stop'])->name('impersonate.stop');
 
-// Pastikan rute tracking tersedia secara global
-Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
+// ── Portal Penulis Terpadu — tracking + request LOA ──────────────────
+Route::get('/tracking-loa',         [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('tracking.search');
+Route::get('/tracking-loa/search',  fn() => redirect()->route('tracking.index'));
+
+// Alias: /cek-artikel & /request-loa → sama persis dengan /tracking-loa
+Route::get('/cek-artikel',  [TrackingController::class, 'index'])->name('author.portal');
+Route::post('/cek-artikel', [TrackingController::class, 'search'])->name('author.portal.search');
+Route::get('/request-loa',  [TrackingController::class, 'index'])->name('loa.request');
+Route::post('/request-loa', [TrackingController::class, 'search'])->name('loa.request.submit');
+
 Route::get('/v/{kode_loa}', [TrackingController::class, 'verifyDirect'])->name('verify.direct');
-
-// Test route
-Route::get('/test-tracking', function () {
-    return 'Tracking route works!';
-});
-
-// Public LOA Tracking (no login required)
-Route::get('/tracking-loa', [TrackingController::class, 'index'])->name('tracking.index');
-Route::post('/tracking-loa/search', [TrackingController::class, 'search'])->name('tracking.search');
-Route::get('/tracking-loa/search', function () {
-    return redirect()->route('tracking.index');
-});
 
 // Test route PIC login
 Route::get('/pic-login-test', function () {
@@ -104,14 +100,6 @@ Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store']
 
 // Public LOA — no login required, untuk link di email penulis
 Route::get('/loa/{kode_loa}', [\App\Http\Controllers\Admin\LoaController::class, 'publicView'])->name('loa.public');
-
-// Request LOA — halaman publik, penulis masukkan kode SIPERA
-Route::get('/request-loa', [\App\Http\Controllers\Admin\LoaController::class, 'requestForm'])->name('loa.request');
-Route::post('/request-loa', [\App\Http\Controllers\Admin\LoaController::class, 'requestSubmit'])->name('loa.request.submit');
-
-// /cek-artikel → redirect ke /tracking-loa (portal terpadu)
-Route::get('/cek-artikel',  fn() => redirect('/tracking-loa', 301))->name('author.portal');
-Route::post('/cek-artikel', fn() => redirect('/tracking-loa', 301))->name('author.portal.search');
 
 // Public Referensi Jurnal (no login required)
 Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');

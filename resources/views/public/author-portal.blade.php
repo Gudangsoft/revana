@@ -334,7 +334,7 @@
 
     {{-- ── Top nav ── --}}
     <nav class="top-nav">
-        <a href="#" class="brand">
+        <a href="{{ route('tracking.index') }}" class="brand">
             <div class="brand-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
             <div>
                 <span class="brand-name">SIPERA</span>
@@ -342,9 +342,6 @@
             </div>
         </a>
         <div class="nav-links">
-            <a href="{{ route('loa.request') }}" class="nav-link-btn">
-                <i class="bi bi-file-earmark-check me-1"></i>Request LOA
-            </a>
             <a href="{{ route('login') }}" class="nav-link-btn">
                 <i class="bi bi-box-arrow-in-right me-1"></i>Login
             </a>
@@ -358,8 +355,8 @@
             <i class="bi bi-shield-check-fill"></i>
             Portal Resmi SIPERA · APRKOM
         </div>
-        <h1>Cek Status & Unduh <span>LOA</span> Artikel</h1>
-        <p>Pantau progress artikel Anda secara real-time dan unduh Letter of Acceptance kapan saja menggunakan Kode SIPERA.</p>
+        <h1>Lacak Status & Unduh <span>LOA</span></h1>
+        <p>Pantau progress artikel dan akses Letter of Acceptance — cukup masukkan Kode SIPERA Anda di satu tempat.</p>
     </div>
     @endunless
 
@@ -657,8 +654,8 @@
     {{-- ── Footer ── --}}
     <div class="portal-footer">
         <a href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right"></i>Login Admin / PIC</a>
-        <a href="{{ route('loa.request') }}"><i class="bi bi-file-earmark-check"></i>Request LOA via Kode</a>
         <a href="mailto:admin@apji.org"><i class="bi bi-envelope"></i>Bantuan</a>
+        <span style="color:rgba(255,255,255,.35);font-size:.75rem;">SIPERA · APRKOM &copy; {{ date('Y') }}</span>
     </div>
 
 </div>
