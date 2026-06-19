@@ -404,6 +404,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            <div class="mb-3">
+                                <label for="affiliation_penulis" class="form-label">
+                                    Afiliasi Penulis
+                                    <small class="text-muted">(untuk LOA)</small>
+                                </label>
+                                <input type="text" class="form-control @error('affiliation_penulis') is-invalid @enderror"
+                                       id="affiliation_penulis" name="affiliation_penulis"
+                                       value="{{ old('affiliation_penulis', $submission->affiliation_penulis) }}"
+                                       placeholder="Universitas / Instansi penulis">
+                                @error('affiliation_penulis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">

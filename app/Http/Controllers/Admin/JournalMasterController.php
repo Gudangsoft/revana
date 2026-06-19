@@ -9,6 +9,7 @@ use App\Exports\JournalMastersExport;
 use App\Imports\JournalMastersImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class JournalMasterController extends Controller
 {
@@ -100,18 +101,50 @@ class JournalMasterController extends Controller
     public function update(Request $request, JournalMaster $journalMaster)
     {
         $validated = $request->validate([
-            'kode_jurnal' => 'required|string|max:50|unique:journal_masters,kode_jurnal,' . $journalMaster->id,
-            'nama_jurnal' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
-            'link_jurnal' => 'required|url',
-            'accreditation' => 'nullable|string|max:50',
-            'kategori' => 'nullable|in:Penelitian,PKM',
+            'kode_jurnal'  => 'required|string|max:50|unique:journal_masters,kode_jurnal,' . $journalMaster->id,
+            'nama_jurnal'  => 'required|string|max:255',
+            'publisher'    => 'required|string|max:255',
+            'link_jurnal'  => 'required|url',
+            'accreditation'=> 'nullable|string|max:50',
+            'kategori'     => 'nullable|in:Penelitian,PKM',
             'jenis_jurnal' => 'nullable|in:Jurnal Nasional,Jurnal Internasional',
-            'is_active' => 'boolean',
+            'is_active'    => 'boolean',
+            // LOA fields
+            'kode_singkat'    => 'nullable|string|max:20',
+            'e_issn'          => 'nullable|string|max:20',
+            'editor_name'     => 'nullable|string|max:255',
+            'editor_title'    => 'nullable|string|max:255',
+            'primary_color'   => 'nullable|string|max:7',
+            'secondary_color' => 'nullable|string|max:7',
+            'loa_kota'        => 'nullable|string|max:100',
+            'loa_tanggal'     => 'nullable|date',
+            'logo'            => 'nullable|image|max:2048',
+            'editor_signature'=> 'nullable|image|max:2048',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
 
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            if ($journalMaster->logo_path) Storage::delete($journalMaster->logo_path);
+            $validated['logo_path'] = $request->file('logo')->store('journals/logos', 'public');
+        }
+        if ($request->boolean('remove_logo') && $journalMaster->logo_path) {
+            Storage::disk('public')->delete($journalMaster->logo_path);
+            $validated['logo_path'] = null;
+        }
+
+        // Handle signature upload
+        if ($request->hasFile('editor_signature')) {
+            if ($journalMaster->editor_signature_path) Storage::disk('public')->delete($journalMaster->editor_signature_path);
+            $validated['editor_signature_path'] = $request->file('editor_signature')->store('journals/signatures', 'public');
+        }
+        if ($request->boolean('remove_signature') && $journalMaster->editor_signature_path) {
+            Storage::disk('public')->delete($journalMaster->editor_signature_path);
+            $validated['editor_signature_path'] = null;
+        }
+
+        unset($validated['logo'], $validated['editor_signature']);
         $journalMaster->update($validated);
 
         return redirect()->route('admin.journal-masters.index')

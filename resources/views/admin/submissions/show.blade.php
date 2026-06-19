@@ -14,6 +14,9 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-file-earmark-text"></i> Detail Submit</span>
                 <div>
+                    <a href="{{ route('admin.submissions.loa', $submission) }}" class="btn btn-primary" target="_blank">
+                        <i class="bi bi-file-earmark-check"></i> LOA
+                    </a>
                     <a href="{{ route('admin.submissions.process', $submission) }}" class="btn btn-info">
                         <i class="bi bi-gear"></i> Lihat Proses
                     </a>

@@ -196,6 +196,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/quick-assign-marketing', [SubmissionController::class, 'quickAssignMarketing'])->name('submissions.quick-assign-marketing');
         Route::post('/submissions/quick-update-credential', [SubmissionController::class, 'quickUpdateCredential'])->name('submissions.quick-update-credential');
         Route::post('/submissions/toggle-valid-field', [SubmissionController::class, 'toggleValidField'])->name('submissions.toggle-valid-field');
+        Route::get('/submissions/{submission}/loa', [\App\Http\Controllers\Admin\LoaController::class, 'show'])->name('submissions.loa');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');

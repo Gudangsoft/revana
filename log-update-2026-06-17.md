@@ -113,3 +113,12 @@ Setiap kali admin klik **Simpan & Sync** di `/admin/task-point-settings`:
 - `database/migrations/2026_06_17_150000_rename_validasi_to_validator_in_task_point_settings.php`
 - `log-update-2026-06-17.md`
 
+
+## 9. 🔄 Update: a
+
+- **Commit:** `faf043d` — 15:17 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/MarketingPointReportController.php`
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `log-update-2026-06-17.md`
+

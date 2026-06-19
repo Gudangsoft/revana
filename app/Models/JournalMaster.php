@@ -20,6 +20,17 @@ class JournalMaster extends Model
         'points',
         'is_active',
         'created_by',
+        // LOA fields
+        'kode_singkat',
+        'e_issn',
+        'logo_path',
+        'editor_name',
+        'editor_title',
+        'editor_signature_path',
+        'primary_color',
+        'secondary_color',
+        'loa_kota',
+        'loa_tanggal',
     ];
 
     protected $casts = [

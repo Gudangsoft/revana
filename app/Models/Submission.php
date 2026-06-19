@@ -32,6 +32,7 @@ class Submission extends Model
         'file_artikel',
         'file_artikel_original_name',
         'nama_penulis',
+        'affiliation_penulis',
         'no_hp_penulis',
         'email_penulis',
         'username_author',
