@@ -350,9 +350,14 @@ class FeatureSettingService
      */
     public static function all(): array
     {
-        $settings = Cache::remember('feature_settings', 300, function () {
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        $settings = Cache::remember('feature_settings.' . $tenantKey, 300, function () {
             $defaults = self::defaults();
-            $stored = Setting::where('key', 'like', 'feat_%')->pluck('value', 'key')->toArray();
+            try {
+                $stored = Setting::where('key', 'like', 'feat_%')->pluck('value', 'key')->toArray();
+            } catch (\Throwable) {
+                $stored = [];
+            }
 
             $result = [];
             foreach ($defaults as $key => $default) {

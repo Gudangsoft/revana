@@ -115,33 +115,49 @@ class DashboardController extends Controller
         $chartRejected  = array_values($chartData['rejected']);
 
         // PIC Point Rankings - Top 10 PIC dengan point tertinggi (cache 5 menit)
-        $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
-            Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
-        );
+        try {
+            $topPics = Cache::remember("rankings.topPics.{$tenantKey}", 300, fn () =>
+                Pic::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+            );
+        } catch (\Throwable) {
+            $topPics = collect();
+        }
 
         // Marketing Point Rankings - Top 10 Marketing dengan point tertinggi (cache 5 menit)
-        $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
-            Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
-        );
+        try {
+            $topMarketings = Cache::remember("rankings.topMarketings.{$tenantKey}", 300, fn () =>
+                Marketing::where('is_active', true)->orderBy('total_points', 'desc')->take(10)->get()
+            );
+        } catch (\Throwable) {
+            $topMarketings = collect();
+        }
 
         // Analytics: top 5 reviewer by total_points (cache 5 menit)
-        $topReviewers = Cache::remember("analytics.topReviewers.{$tenantKey}", 300, fn () =>
-            User::where('role', 'reviewer')
-                ->where('total_points', '>', 0)
-                ->orderBy('total_points', 'desc')
-                ->take(5)
-                ->get(['id', 'name', 'total_points'])
-        );
+        try {
+            $topReviewers = Cache::remember("analytics.topReviewers.{$tenantKey}", 300, fn () =>
+                User::where('role', 'reviewer')
+                    ->where('total_points', '>', 0)
+                    ->orderBy('total_points', 'desc')
+                    ->take(5)
+                    ->get(['id', 'name', 'total_points'])
+            );
+        } catch (\Throwable) {
+            $topReviewers = collect();
+        }
 
         // Analytics: rata-rata hari penyelesaian submission (PUBLISHED)
-        $avgCompletionDays = Cache::remember("analytics.avgCompletion.{$tenantKey}", 300, fn () =>
-            (int) round(
-                Submission::where('status', 'PUBLISHED')
-                    ->whereNotNull('tanggal_submit')
-                    ->selectRaw('AVG(DATEDIFF(updated_at, tanggal_submit)) as avg_days')
-                    ->value('avg_days') ?? 0
-            )
-        );
+        try {
+            $avgCompletionDays = Cache::remember("analytics.avgCompletion.{$tenantKey}", 300, fn () =>
+                (int) round(
+                    Submission::where('status', 'PUBLISHED')
+                        ->whereNotNull('tanggal_submit')
+                        ->selectRaw('AVG(DATEDIFF(updated_at, tanggal_submit)) as avg_days')
+                        ->value('avg_days') ?? 0
+                )
+            );
+        } catch (\Throwable) {
+            $avgCompletionDays = 0;
+        }
 
         // Birthday widget
         [$todayBirthdays, $myWishes] = $this->todayBirthdayData('admin', auth()->id());

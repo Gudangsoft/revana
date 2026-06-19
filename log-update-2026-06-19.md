@@ -512,3 +512,25 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 - **Root cause:** Tabel `birthday_wishes` / `review_requests` belum ada di tenant DB karena migration belum dijalankan
 - **Solusi permanen:** Jalankan `php artisan migrate` di server production
 - **Solusi sementara:** try/catch di kedua tempat agar dashboard tidak 500 meski tabel belum ada
+
+## 35. Dashboard Fully Resilient — Semua Cache Query Di-guard
+
+**Tujuan:** Dashboard tidak boleh 500 meski ada kolom/tabel yang belum ada di DB production (akibat migration belum dijalankan).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DashboardController.php` | Tambah try/catch pada 4 cache query: topPics, topMarketings, topReviewers, avgCompletionDays |
+
+## 36. FeatureSettingService — Resilient + Per-Tenant Cache Key
+
+**Tujuan:** `FeatureSettingService::all()` dipanggil 4x di setiap halaman admin lewat `@feature()` directive. Jika `settings` table belum ada di tenant DB → 500 di semua halaman admin termasuk dashboard.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Services/FeatureSettingService.php` | Tambah try/catch pada `Setting::where(...)` di dalam `Cache::remember`; ubah cache key menjadi per-tenant (`feature_settings.{subdomain}`) agar cache tenant tidak campur dengan master |
+
+### Catatan
+- **Root cause dashboard 500:** `@feature()` Blade directive di sidebar memanggil `FeatureSettingService::isEnabled()` → `all()` → `Cache::remember('feature_settings', ...)` → query `Setting` model. Cache key tidak per-tenant, dan tidak ada try/catch jika tabel `settings` tidak ada di tenant DB.
+- **Fix:** try/catch + cache key per-tenant, fallback ke default values jika query gagal.
