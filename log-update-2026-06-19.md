@@ -467,3 +467,11 @@ Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
 - `public/js/html5-qrcode.min.js`
 - `resources/views/public/author-portal.blade.php`
 
+
+## 31. 🔄 Update: responsive
+
+- **Commit:** `aec0837` — 17:30 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-19.md`
+- `resources/views/public/author-portal.blade.php`
+
