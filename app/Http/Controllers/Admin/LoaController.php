@@ -26,7 +26,7 @@ class LoaController extends Controller
             'loaDate'    => $this->loaDate($journal, $date),
             'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'verifyUrl'  => route('tracking.index', ['kode_loa' => $kode]),
+            'verifyUrl'  => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'=> false,
         ]);
     }
@@ -48,7 +48,7 @@ class LoaController extends Controller
             'loaDate'    => $this->loaDate($journal, $date),
             'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'verifyUrl'  => route('tracking.index', ['kode_loa' => $kode]),
+            'verifyUrl'  => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'=> true,
         ]);
     }
@@ -109,7 +109,7 @@ class LoaController extends Controller
         } else {
             $dt = now();
         }
-        return ($journal?->loa_kota ?? 'Semarang') . ', ' . $dt->isoFormat('MMMM D, YYYY');
+        return ($journal?->loa_kota ?? 'Semarang') . ', ' . $dt->format('F j, Y');
     }
 
     private function romanMonth(?string $bulan): string

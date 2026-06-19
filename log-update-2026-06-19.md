@@ -359,3 +359,14 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 1. Buka LOA (admin atau publik) → QR code muncul di footer halaman 1 & 2
 2. Scan QR → browser buka `https://portal.apji.org/tracking-loa?kode_loa=SUB2026xxxxxx`
 3. Portal penulis langsung tampilkan info artikel + status lengkap
+
+## 23. 🔄 Update: qr
+
+- **Commit:** `8c489f0` — 15:58 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/TrackingController.php`
+- `log-update-2026-06-19.md`
+- `public/js/qrcode.min.js`
+- `resources/views/admin/loa/receipt.blade.php`
+

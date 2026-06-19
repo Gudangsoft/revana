@@ -177,8 +177,8 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 .qr-wrap img,
 .qr-wrap canvas {
   display: block;
-  width: 54px !important;
-  height: 54px !important;
+  width: 80px !important;
+  height: 80px !important;
 }
 
 /* ── Evaluation sheet ────────────────────────────────── */
@@ -526,7 +526,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
 <script>
 (function () {
-    var verifyUrl = '{{ $verifyUrl ?? url("/tracking-loa?kode_loa=" . ($submission->kode_loa ?: $submission->kode_submit)) }}';
+    var verifyUrl = '{{ $verifyUrl ?? url("/v/" . ($submission->kode_loa ?: $submission->kode_submit)) }}';
 
     function renderQr(elId) {
         var el = document.getElementById(elId);
@@ -534,11 +534,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         el.innerHTML = '';
         new QRCode(el, {
             text         : verifyUrl,
-            width        : 54,
-            height       : 54,
-            colorDark    : '#111111',
+            width        : 80,
+            height       : 80,
+            colorDark    : '#000000',
             colorLight   : '#ffffff',
-            correctLevel : QRCode.CorrectLevel.H
+            correctLevel : QRCode.CorrectLevel.L
         });
     }
 
