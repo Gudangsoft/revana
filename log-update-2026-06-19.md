@@ -91,7 +91,25 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 1. Query param `?tanggal=` (dari request form atau admin) → dipakai jika ada
 2. Tanggal hari ini → fallback default
 
-## 4. 🔄 Update: loa
+## 4. Filter & Search — Halaman Master LOA
+
+**Tujuan:** Mempermudah admin menemukan jurnal di halaman Master LOA dengan search, filter chip, dan stat cards.
+
+### File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa-master/index.blade.php` | Tambah: 4 stat cards (Total / Lengkap / Belum Lengkap / Otomatis Aktif), search bar live, filter chip Kelengkapan (Semua / Lengkap / Belum Lengkap), filter chip LOA Otomatis (Semua / Aktif / Manual), row counter, empty-state saat tidak ada hasil, tombol reset filter |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `index()`: hitung `$stats` (total, complete, auto) dan kirim ke view |
+
+### Fitur Filter
+- Klik stat card → langsung aktifkan filter terkait
+- Search live: cari nama jurnal, kode singkat, editor, E-ISSN
+- Filter chip Kelengkapan + LOA Otomatis bisa dikombinasikan
+- Row counter menampilkan "X dari Y jurnal" saat ada filter aktif
+- Tombol "Reset filter" muncul otomatis saat filter aktif
+
+## 5. 🔄 Update: loa
 
 - **Commit:** `784089c` — 14:16 oleh Gudangsoft
 - **File berubah:** 14 file
@@ -121,4 +139,11 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `log-update-2026-06-19.md`
 - `resources/views/admin/journal-masters/edit.blade.php`
 - `resources/views/admin/loa-master/edit.blade.php`
+
+
+## 6. 🔄 Update: loa
+
+- **Commit:** `d187ddb` — 14:35 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-06-19.md`
 

@@ -22,10 +22,19 @@ class LoaMasterController extends Controller
     // ── Index: daftar semua jurnal + status kelengkapan LOA ──────────────
     public function index()
     {
-        $journals = JournalMaster::with('slots')->where('is_active', true)
+        $journals = JournalMaster::where('is_active', true)
             ->orderBy('nama_jurnal')->get();
 
-        return view('admin.loa-master.index', compact('journals'));
+        $stats = [
+            'total'     => $journals->count(),
+            'complete'  => $journals->filter(fn($j) =>
+                $j->kode_singkat && $j->e_issn && $j->editor_name &&
+                $j->logo_path && $j->editor_signature_path
+            )->count(),
+            'auto'      => $journals->where('loa_auto_send', true)->count(),
+        ];
+
+        return view('admin.loa-master.index', compact('journals', 'stats'));
     }
 
     // ── Edit: form khusus LOA per jurnal ────────────────────────────────
