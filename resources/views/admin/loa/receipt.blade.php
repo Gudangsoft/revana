@@ -344,7 +344,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
     {{-- Watermark --}}
     <div class="watermark" aria-hidden="true">
-        @php $wmLabel = strtoupper(($kodeSingkat ?: 'SIPERA') . ' • APRKOM • VERIFIED'); @endphp
+        @php $wmLabel = strtoupper(($kodeSingkat ?: 'SIPERA') . ' • VERIFIED'); @endphp
         @for($wi = 0; $wi < 9; $wi++)
         <div class="wm-row">
             <span class="wm-text">{{ $wmLabel }}</span>

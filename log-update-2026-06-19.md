@@ -409,3 +409,16 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 
 ### Catatan Deploy
 Jalankan `php artisan migrate` untuk menambah kolom `loa_language`.
+
+## 26. 🔄 Update: multi language loa
+
+- **Commit:** `e81f88e` — 16:12 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `app/Models/JournalMaster.php`
+- `database/migrations/2026_06_19_200001_add_loa_language_to_journal_masters.php`
+- `log-update-2026-06-19.md`
+- `resources/views/admin/loa-master/edit.blade.php`
+- `resources/views/admin/loa/receipt.blade.php`
+

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portal Penulis — Cek Status & LOA | SIPERA APRKOM</title>
+    <title>Portal Penulis — Cek Status & LOA | SIPERA</title>
     <meta name="description" content="Cek status artikel dan unduh Letter of Acceptance (LOA) Anda. Masukkan Kode SIPERA untuk melihat progress artikel secara real-time.">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -338,7 +338,7 @@
             <div class="brand-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
             <div>
                 <span class="brand-name">SIPERA</span>
-                <span class="brand-sub">APRKOM Portal Penulis</span>
+                <span class="brand-sub">Portal Penulis</span>
             </div>
         </a>
         <div class="nav-links">
@@ -353,7 +353,7 @@
     <div class="hero">
         <div class="hero-badge">
             <i class="bi bi-shield-check-fill"></i>
-            Portal Resmi SIPERA · APRKOM
+            Portal Resmi SIPERA
         </div>
         <h1>Lacak Status & Unduh <span>LOA</span></h1>
         <p>Pantau progress artikel dan akses Letter of Acceptance — cukup masukkan Kode SIPERA Anda di satu tempat.</p>
@@ -625,7 +625,7 @@
                 </div>
                 <div style="margin-top:12px;font-size:.73rem;color:#6b7280;display:flex;align-items:center;gap:6px;">
                     <i class="bi bi-shield-check" style="color:#16a34a;"></i>
-                    Dokumen dilengkapi QR Code verifikasi & watermark resmi APRKOM
+                    Dokumen dilengkapi QR Code verifikasi & watermark resmi SIPERA
                 </div>
                 @else
                 <div class="loa-locked-msg">
@@ -655,7 +655,7 @@
     <div class="portal-footer">
         <a href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right"></i>Login Admin / PIC</a>
         <a href="mailto:admin@apji.org"><i class="bi bi-envelope"></i>Bantuan</a>
-        <span style="color:rgba(255,255,255,.35);font-size:.75rem;">SIPERA · APRKOM &copy; {{ date('Y') }}</span>
+        <span style="color:rgba(255,255,255,.35);font-size:.75rem;">SIPERA &copy; {{ date('Y') }}</span>
     </div>
 
 </div>

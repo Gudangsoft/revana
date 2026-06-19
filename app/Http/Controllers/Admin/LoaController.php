@@ -103,7 +103,7 @@ class LoaController extends Controller
         $year  = $slot?->tahun ?? now()->year;
         $id    = $s->id_artikel ?: $s->kode_submit;
 
-        return $id . '/' . $kode . '/APRKOM/' . $roman . '/' . $year;
+        return $id . '/' . $kode . '/' . $roman . '/' . $year;
     }
 
     private function loaDate($journal, ?string $dateOverride = null, string $lang = 'en'): string

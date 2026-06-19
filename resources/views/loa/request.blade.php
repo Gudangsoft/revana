@@ -103,7 +103,6 @@
                 <div class="title"><i class="bi bi-file-earmark-check-fill me-2"></i>Request LOA</div>
                 <div class="subtitle">Letter of Acceptance — SIPERA</div>
             </div>
-            <span class="badge-sipera">APRKOM</span>
         </div>
     </div>
 
