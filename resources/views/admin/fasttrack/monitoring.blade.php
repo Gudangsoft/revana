@@ -193,6 +193,10 @@
                             <a href="{{ route('admin.fasttrack.show', $submission->id) }}" class="btn btn-sm btn-info" title="Detail">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            <a href="{{ route('admin.submissions.loa', $submission) }}" target="_blank"
+                               class="btn btn-sm {{ $submission->production_valid ? 'btn-success' : 'btn-outline-secondary' }} ms-1" title="Cek LOA">
+                                <i class="bi bi-file-earmark-check{{ $submission->production_valid ? '-fill' : '' }}"></i>
+                            </a>
                         </td>
                     </tr>
                     @empty

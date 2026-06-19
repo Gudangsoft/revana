@@ -212,7 +212,7 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 - `log-update-2026-06-19.md`
 - `resources/views/admin/loa/receipt.blade.php`
 
-## 13. Tombol Cek LOA di Halaman Monitoring
+## 13. Tombol Cek LOA di Semua Halaman Monitoring
 
 **Tujuan:** Admin bisa langsung membuka preview LOA dari halaman monitoring tanpa harus masuk ke halaman detail submission terlebih dahulu.
 
@@ -220,5 +220,23 @@ Jalankan `php artisan migrate` di server untuk 2 migration baru sesi ini.
 
 | File | Perubahan |
 |------|-----------|
-| `resources/views/admin/submissions/monitoring.blade.php` | Tambah badge/tombol **LOA** di bawah badge Screening pada kolom Kode Submit (sticky). Hijau + ikon solid jika `production_valid = true`; abu-abu jika belum. Link ke `admin.submissions.loa`, buka di tab baru. |
+| `resources/views/admin/submissions/monitoring.blade.php` | Tambah badge **LOA** di bawah badge Screening di kolom Kode Submit (sticky). Link ke `admin.submissions.loa`. |
+| `resources/views/admin/fasttrack-management/monitoring/index.blade.php` | Tambah badge **LOA** di kolom Kode Submit (sticky). Link ke `admin.submissions.loa`. |
+| `resources/views/admin/fasttrack/monitoring.blade.php` | Tambah tombol **LOA** di kolom Aksi. Link ke `admin.submissions.loa`. |
+| `resources/views/pic/submissions/monitoring.blade.php` | Tambah badge **LOA** di kolom Kode Submit (sticky). Muncul hanya jika `kode_loa` sudah diset. Link ke LOA publik. |
+| `resources/views/pic/fasttrack/monitoring.blade.php` | Sama seperti PIC submissions. |
+| `resources/views/marketing/submissions-monitoring.blade.php` | Tambah tombol **LOA** di kolom Aksi. Muncul hanya jika `kode_loa` sudah diset. Link ke LOA publik. |
+| `resources/views/marketing/fasttrack/monitoring.blade.php` | Sama seperti marketing submissions. |
+
+### Logika Tampil
+- **Admin**: tombol selalu muncul (admin bisa preview LOA kapan saja). Hijau jika `production_valid`, abu-abu jika belum.
+- **PIC & Marketing**: tombol muncul hanya jika `kode_loa` sudah diisi (LOA pernah digenerate/dikirim). Link ke halaman LOA publik.
+
+
+## 14. 🔄 Update: monitorung update
+
+- **Commit:** `8dfdef2` — 15:23 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-19.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
 

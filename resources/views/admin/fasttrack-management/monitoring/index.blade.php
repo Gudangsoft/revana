@@ -659,6 +659,11 @@
                                     @if($isCompleted)
                                         <br><span class="badge bg-success mt-1"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
                                     @endif
+                                    <a href="{{ route('admin.submissions.loa', $s) }}" target="_blank"
+                                       class="badge mt-1 text-decoration-none {{ $s->production_valid ? 'bg-success' : 'bg-light text-secondary border' }}"
+                                       style="font-size:0.55rem;" title="Cek LOA{{ $s->production_valid ? '' : ' (belum tahap produksi)' }}">
+                                        <i class="bi bi-file-earmark-check{{ $s->production_valid ? '-fill' : '' }}"></i> LOA
+                                    </a>
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td class="text-center">

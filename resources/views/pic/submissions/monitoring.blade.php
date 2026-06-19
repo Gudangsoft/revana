@@ -717,6 +717,13 @@
                                     @if($s->journalSlot)
                                         <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $s->journalSlot->journalMaster?->nama_jurnal ?? '-' }} - Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}">{{ Str::limit($s->journalSlot->journalMaster?->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}</small>
                                     @endif
+                                    @if($s->kode_loa)
+                                    <a href="{{ route('loa.public', $s->kode_loa) }}" target="_blank"
+                                       class="badge mt-1 text-decoration-none {{ $s->production_valid ? 'bg-success' : 'bg-light text-secondary border' }}"
+                                       style="font-size:0.55rem;" title="Cek LOA">
+                                        <i class="bi bi-file-earmark-check{{ $s->production_valid ? '-fill' : '' }}"></i> LOA
+                                    </a>
+                                    @endif
                                 </td>
                                 <td class="sticky-second">{{ $s->id_artikel }}</td>
                                 <td class="text-center">

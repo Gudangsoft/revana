@@ -217,10 +217,16 @@
                             <x-submission-progress :submission="$submission" :height="8" :min-width="80" />
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('marketing.submissions.show', $submission) }}" 
+                            <a href="{{ route('marketing.submissions.show', $submission) }}"
                                class="btn btn-sm btn-outline-primary" title="Lihat Detail">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            @if($submission->kode_loa)
+                            <a href="{{ route('loa.public', $submission->kode_loa) }}" target="_blank"
+                               class="btn btn-sm {{ $submission->production_valid ? 'btn-success' : 'btn-outline-secondary' }} ms-1" title="Cek LOA">
+                                <i class="bi bi-file-earmark-check{{ $submission->production_valid ? '-fill' : '' }}"></i>
+                            </a>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
