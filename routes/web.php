@@ -309,6 +309,7 @@ Route::middleware('auth')->group(function () {
         // Marketing Management
         Route::resource('marketings', MarketingController::class)->except(['show']);
         Route::post('/marketings/{marketing}/login-as', [MarketingController::class, 'loginAs'])->name('marketings.login-as');
+        Route::post('/marketings/return-to-admin', [MarketingController::class, 'returnToAdmin'])->name('marketings.return-to-admin');
         Route::get('/marketings-export', [MarketingController::class, 'export'])->name('marketings.export');
         Route::post('/marketings-import', [MarketingController::class, 'import'])->name('marketings.import');
         Route::get('/marketings-template', [MarketingController::class, 'downloadTemplate'])->name('marketings.template');

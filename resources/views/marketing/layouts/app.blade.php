@@ -182,11 +182,30 @@
     </style>
 </head>
 <body>
+    @if(session('admin_impersonating'))
+    <div class="bg-warning text-dark py-1 px-3 d-flex align-items-center gap-2" style="font-size:.85rem; border-bottom: 2px solid #ffc107;">
+        <i class="bi bi-eye-fill"></i>
+        <strong>Mode Admin:</strong> Anda sedang melihat sebagai <strong>{{ auth()->guard('marketing')->user()->name }}</strong>
+        <form method="POST" action="{{ route('admin.marketings.return-to-admin') }}" class="ms-auto mb-0">
+            @csrf
+            <button type="submit" class="btn btn-dark btn-sm fw-bold">
+                <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin
+            </button>
+        </form>
+    </div>
+    @endif
+
     <nav class="navbar navbar-expand-lg navbar-dark navbar-marketing">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('marketing.dashboard') }}">
                 <i class="bi bi-megaphone-fill"></i> Marketing Portal
             </a>
+            @if(session('admin_impersonating'))
+            <span class="badge bg-warning text-dark ms-2 d-flex align-items-center gap-1 flex-shrink-0" style="font-size:.72rem;">
+                <i class="bi bi-eye-fill"></i>
+                <span class="d-none d-sm-inline">Mode Admin</span>
+            </span>
+            @endif
             <div class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-1">
                     <button id="mktSidebarBtn" onclick="toggleSidebar()" title="Sembunyikan/Tampilkan Menu">
@@ -223,6 +242,17 @@
                                 <i class="bi bi-arrow-repeat text-warning"></i> Refresh Point
                             </a>
                         </li>
+                        @if(session('admin_impersonating'))
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="{{ route('admin.marketings.return-to-admin') }}" class="px-1 py-1">
+                                @csrf
+                                <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">
+                                    <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin
+                                </button>
+                            </form>
+                        </li>
+                        @endif
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#mktLogoutModal">

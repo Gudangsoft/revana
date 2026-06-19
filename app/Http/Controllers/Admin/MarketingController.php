@@ -123,12 +123,24 @@ class MarketingController extends Controller
 
         // Store original admin user ID in session for potential return
         session(['admin_impersonating' => Auth::id()]);
-        
+
         // Login as Marketing (marketing guard)
         Auth::guard('marketing')->login($marketing);
-        
+
         return redirect()->route('marketing.dashboard')
             ->with('success', 'Anda sekarang login sebagai ' . $marketing->name);
+    }
+
+    /**
+     * Return from Marketing impersonation back to admin
+     */
+    public function returnToAdmin()
+    {
+        Auth::guard('marketing')->logout();
+        session()->forget('admin_impersonating');
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Kembali ke akun admin.');
     }
 
     /**

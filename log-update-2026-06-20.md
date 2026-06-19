@@ -28,3 +28,23 @@ Tenant DB di production belum menjalankan semua migration → kolom `tanggal_lah
 
 ### Solusi Permanen
 Jalankan `php artisan migrate` di server production setelah deploy.
+
+## 3. Banner & Tombol "Kembali ke Admin" saat Login As Marketing
+
+**Tujuan:** Ketika admin menggunakan fitur "Login As" ke marketing, tampilkan banner kuning di atas halaman dan tombol "Kembali ke Admin" di dropdown, sama seperti yang sudah ada di PIC portal.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/MarketingController.php` | Tambah method `returnToAdmin()` — logout marketing guard, hapus session `admin_impersonating`, redirect ke admin dashboard |
+| `routes/web.php` | Tambah route `POST /admin/marketings/return-to-admin` → `marketings.return-to-admin` |
+| `resources/views/marketing/layouts/app.blade.php` | Tambah banner kuning full-width di atas navbar + badge "Mode Admin" di navbar + tombol "Kembali ke Admin" di dropdown — semua hanya tampil jika `session('admin_impersonating')` ada |
+
+## 3. 🔄 Update: a
+
+- **Commit:** `cd26f39` — 06:31 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/AuthorController.php`
+- `log-update-2026-06-20.md`
+
