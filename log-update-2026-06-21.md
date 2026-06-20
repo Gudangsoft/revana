@@ -110,3 +110,22 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - **File berubah:** 1 file
 - `log-update-2026-06-21.md`
 
+
+## 10. Perbaikan Tampilan Logo Akreditasi di LOA
+
+**Tujuan:** Logo akreditasi tampil di dalam bar berwarna (warna sekunder jurnal) di atas QR verified-bar — terlihat seperti sertifikasi resmi, bukan kotak putih mengambang.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Logo akreditasi masuk ke dalam `.sinta-bar` (bar warna sekunder); kotak putih mengambang dihapus. Logo diberi filter `brightness(0) invert(1)` agar putih di atas background berwarna. |
+
+---
+
+## 9. 🔄 Update: u
+
+- **Commit:** `71604fe` — 00:39 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
