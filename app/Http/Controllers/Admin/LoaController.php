@@ -20,16 +20,17 @@ class LoaController extends Controller
         $lang    = $journal?->loa_language ?? 'en';
 
         return view('admin.loa.receipt', [
-            'submission' => $submission,
-            'journal'    => $journal,
-            'slot'       => $slot,
-            'loaNumber'  => $this->loaNumber($submission, $journal, $slot),
-            'loaDate'    => $this->loaDate($journal, $date, $lang),
-            'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'verifyUrl'  => route('verify.direct', ['kode_loa' => $kode]),
-            'isAdminView'=> false,
-            'lang'       => $lang,
+            'submission'      => $submission,
+            'journal'         => $journal,
+            'slot'            => $slot,
+            'loaNumber'       => $this->loaNumber($submission, $journal, $slot),
+            'loaDate'         => $this->loaDate($journal, $date, $lang),
+            'logoUrl'         => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
+            'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
+            'verifyUrl'       => route('verify.direct', ['kode_loa' => $kode]),
+            'isAdminView'     => false,
+            'lang'            => $lang,
         ]);
     }
 
@@ -44,16 +45,17 @@ class LoaController extends Controller
         $lang    = $journal?->loa_language ?? 'en';
 
         return view('admin.loa.receipt', [
-            'submission' => $submission,
-            'journal'    => $journal,
-            'slot'       => $slot,
-            'loaNumber'  => $this->loaNumber($submission, $journal, $slot),
-            'loaDate'    => $this->loaDate($journal, $date, $lang),
-            'logoUrl'    => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'    => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'verifyUrl'  => route('verify.direct', ['kode_loa' => $kode]),
-            'isAdminView'=> true,
-            'lang'       => $lang,
+            'submission'      => $submission,
+            'journal'         => $journal,
+            'slot'            => $slot,
+            'loaNumber'       => $this->loaNumber($submission, $journal, $slot),
+            'loaDate'         => $this->loaDate($journal, $date, $lang),
+            'logoUrl'         => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
+            'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
+            'verifyUrl'       => route('verify.direct', ['kode_loa' => $kode]),
+            'isAdminView'     => true,
+            'lang'            => $lang,
         ]);
     }
 

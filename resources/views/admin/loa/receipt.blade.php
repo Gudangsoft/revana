@@ -6,6 +6,7 @@
 <title>LOA – {{ $submission->kode_submit }}</title>
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
 @php
+    $headerImageUrl = $headerImageUrl ?? null;
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
     $jurnalNama     = $journal?->nama_jurnal      ?? 'Jurnal';
@@ -23,7 +24,15 @@
     $coAuthors      = $submission->co_authors ?? [];
     $judul          = $submission->judul_artikel ?? '—';
     $idArtikel      = $submission->id_artikel    ?? $submission->kode_submit;
-    $articleCode    = $kodeSingkat ? $kodeSingkat . '_' . $idArtikel : $idArtikel;
+    $kodeSubmit     = $submission->kode_submit   ?? '';
+    // Format: inisialJurnal_kodeArtikel_kodeSubSIPERA
+    $articleCode    = implode('_', array_filter([$kodeSingkat, $idArtikel, $kodeSubmit]));
+
+    // SINTA accreditation level (null if non-SINTA)
+    $sintaLevel = null;
+    if ($journal && preg_match('/SINTA\s*(\d)/i', $journal->accreditation ?? '', $_sm)) {
+        $sintaLevel = (int)$_sm[1];
+    }
 
     // ── Kamus teks bilingual ────────────────────────────────────
     $isId = ($lang ?? 'en') === 'id';
@@ -214,7 +223,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 /* Address block */
 .to-block { margin-bottom: 12px; }
 .to-block p { line-height: 1.8; font-size: 10pt; }
-.hl { background: #FFFF00; padding: 0 4px; }
+.hl { background: transparent; padding: 0; }
 
 /* Body text */
 .body-text { font-size: 10pt; line-height: 1.7; margin-bottom: 10px; }
@@ -225,35 +234,47 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 .sig-name { font-weight: bold; font-size: 10pt; }
 .sig-role { font-size: 9pt; color: #444; }
 
-/* Indexed footer */
-.idx-bar {
+/* SINTA accreditation bar */
+.sinta-bar {
   background-color: {{ $secondaryColor }};
   color: #fff; font-size: 8pt;
-  padding: 6px 18px 4px;
+  padding: 6px 18px;
   margin-top: 14px;
+  display: flex; align-items: center; gap: 12px;
 }
-.idx-bar-title { font-weight: bold; margin-bottom: 4px; font-size: 8pt; }
-.idx-logos { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.idx-badge {
-  background: #fff; color: #333;
-  padding: 2px 8px; border-radius: 3px;
-  font-size: 8pt; font-weight: bold; font-family: sans-serif;
+.sinta-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #fff; border-radius: 4px;
+  padding: 2px 8px; gap: 1px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 900; font-size: 13pt; line-height: 1;
+  flex-shrink: 0;
 }
+.sinta-badge .sinta-s { color: #008000; }
+.sinta-badge .sinta-n { color: #1565C0; }
+.sinta-bar-text { font-size: 8pt; font-weight: bold; }
+
+/* Verified bar */
 .verified-bar {
-  background: #fff; color: #333;
-  padding: 6px 18px !important;
-  font-size: 7.5pt;
-  display: flex !important; align-items: center; gap: 10px;
+  background: #f5f5f5; color: #333;
+  padding: 5px 18px !important;
+  font-size: 7pt;
+  display: flex !important; align-items: flex-start; gap: 10px;
+  border-top: 1px solid #ddd;
 }
 .verified-badge {
   background: #d32f2f; color: #fff;
   padding: 1px 6px; border-radius: 2px;
-  font-size: 7.5pt; font-weight: bold; font-family: sans-serif;
+  font-size: 7pt; font-weight: bold; font-family: sans-serif;
 }
+.verified-text-block { flex: 1; }
+.verified-text-block .vb-row1 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+.verified-text-block .vb-row2 { font-size: 6.5pt; color: #666; }
+.verified-text-block .vb-row3 { font-size: 6.5pt; color: #555; margin-top: 1px; font-weight: bold; }
 
 /* ── Watermark ───────────────────────────────────────── */
 .a4-page { position: relative; overflow: hidden; }
-.jrn-header, .jrn-subbar, .page-inner, .idx-bar, .verified-bar { position: relative; z-index: 1; }
+.jrn-header, .jrn-subbar, .page-inner, .sinta-bar, .verified-bar { position: relative; z-index: 1; }
 .watermark {
   position: absolute;
   top: -80%; left: -40%;
@@ -358,6 +379,9 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
     </div>
 
     {{-- Header --}}
+    @if(!empty($headerImageUrl))
+    <img src="{{ $headerImageUrl }}" style="width:100%;display:block;" alt="Header {{ $jurnalNama }}">
+    @else
     <div class="jrn-header">
         @if($logoUrl)
             <img src="{{ $logoUrl }}" class="jrn-logo" alt="Logo">
@@ -379,6 +403,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         <span>LPKD-APJI &bull; Jurnal Ilmiah</span>
         <span>{{ $jurnalNama }}</span>
     </div>
+    @endif
 
     <div class="page-inner">
         {{-- Title --}}
@@ -437,33 +462,27 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
 
-    {{-- Indexed by footer --}}
-    <div class="idx-bar">
-        <div class="idx-bar-title">{{ $L['idx_title'] }}</div>
-        <div class="idx-logos">
-            <span class="idx-badge">Crossref</span>
-            <span class="idx-badge">Google Scholar</span>
-            <span class="idx-badge">Dimensions</span>
-            <span class="idx-badge">SciRepID</span>
-        </div>
+    {{-- SINTA accreditation bar --}}
+    @if($sintaLevel)
+    <div class="sinta-bar">
+        <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
+        <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
+    @endif
+
     <div class="verified-bar">
         <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}"></div>
-        <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <div class="verified-text-block">
+            <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
                 <span class="verified-badge">iThenticate</span>
                 <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
                 @if(!empty($isAdminView) && $isAdminView)
                 <span class="verified-badge" style="background:#2e7d32;">ADMIN</span>
                 @endif
-                <span style="font-size:6pt;color:#888;margin-left:4px;">
-                    Doc ID: <strong>{{ $submission->kode_loa ?: $submission->kode_submit }}</strong>
-                </span>
             </div>
-            <div style="font-size:6pt;color:#888;margin-top:2px;">
-                {{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}
-            </div>
+            <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
+            <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
     </div>
 
@@ -486,6 +505,9 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
     </div>
 
     {{-- Header --}}
+    @if(!empty($headerImageUrl))
+    <img src="{{ $headerImageUrl }}" style="width:100%;display:block;" alt="Header {{ $jurnalNama }}">
+    @else
     <div class="jrn-header">
         @if($logoUrl)
             <img src="{{ $logoUrl }}" class="jrn-logo" alt="Logo">
@@ -504,6 +526,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         <span>LPKD-APJI &bull; Jurnal Ilmiah</span>
         <span>{{ $jurnalNama }}</span>
     </div>
+    @endif
 
     <div class="page-inner">
         <div class="eval-title">{{ $L['p2_title'] }}</div>
@@ -517,11 +540,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
                 </tr>
                 <tr>
                     <td>{{ $L['meta_code'] }}</td><td>:</td>
-                    <td><span class="hl" style="font-weight:bold;">{{ $articleCode }}</span></td>
+                    <td style="font-weight:bold;">{{ $articleCode }}</td>
                 </tr>
                 <tr>
                     <td>{{ $L['meta_title'] }}</td><td>:</td>
-                    <td><span class="hl">&#10003; {{ $judul }}</span></td>
+                    <td>{{ $judul }}</td>
                 </tr>
             </table>
         </div>
@@ -558,41 +581,36 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         <table class="decision-table">
             @foreach($L['decisions'] as $i => $dec)
             <tr>
-                <td class="chk">@if($i === 0)<span class="chk-checked">&#10003;</span>@endif</td>
                 <td>{{ $i + 1 }}. {{ $dec }}</td>
-                <td class="chk">@if($i === 4)[&nbsp;&nbsp;&nbsp;]@endif</td>
+                <td class="chk">
+                    @if($i === 1)<span class="chk-checked">&#10003;</span>@else[&nbsp;&nbsp;&nbsp;]@endif
+                </td>
             </tr>
             @endforeach
         </table>
     </div>
 
-    {{-- Footer --}}
-    <div class="idx-bar" style="margin-top:auto;">
-        <div class="idx-bar-title">{{ $L['idx_title'] }}</div>
-        <div class="idx-logos">
-            <span class="idx-badge">Crossref</span>
-            <span class="idx-badge">Google Scholar</span>
-            <span class="idx-badge">Dimensions</span>
-            <span class="idx-badge">SciRepID</span>
-        </div>
+    {{-- SINTA accreditation bar --}}
+    @if($sintaLevel)
+    <div class="sinta-bar" style="margin-top:auto;">
+        <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
+        <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
+    @endif
+
     <div class="verified-bar">
         <div class="qr-wrap" id="qr2" title="{{ $L['scan_qr'] }}"></div>
-        <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <div class="verified-text-block">
+            <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
                 <span class="verified-badge">iThenticate</span>
                 <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
                 @if(!empty($isAdminView) && $isAdminView)
                 <span class="verified-badge" style="background:#2e7d32;">ADMIN</span>
                 @endif
-                <span style="font-size:6pt;color:#888;margin-left:4px;">
-                    Doc ID: <strong>{{ $submission->kode_loa ?: $submission->kode_submit }}</strong>
-                </span>
             </div>
-            <div style="font-size:6pt;color:#888;margin-top:2px;">
-                {{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}
-            </div>
+            <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
+            <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
     </div>
 

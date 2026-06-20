@@ -265,10 +265,17 @@
                                 </td>
 
                                 <td class="text-center">
-                                    <a href="{{ route('admin.loa-master.edit', $j) }}"
-                                       class="btn btn-sm btn-outline-primary" title="Setting LOA">
-                                        <i class="bi bi-gear"></i> Setting
-                                    </a>
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a href="{{ route('admin.loa-master.edit', $j) }}"
+                                           class="btn btn-sm btn-outline-primary" title="Setting LOA">
+                                            <i class="bi bi-gear"></i> Setting
+                                        </a>
+                                        <a href="{{ route('admin.loa-master.preview-loa', $j) }}"
+                                           class="btn btn-sm btn-outline-secondary" title="Preview LOA"
+                                           target="_blank">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             @empty

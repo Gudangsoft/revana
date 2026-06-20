@@ -62,6 +62,7 @@ class LoaMasterController extends Controller
             'loa_language'      => 'nullable|in:en,id',
             'logo'              => 'nullable|image|max:2048',
             'editor_signature'  => 'nullable|image|max:2048',
+            'header_image'      => 'nullable|image|max:4096',
         ]);
 
         $data = $request->only([
@@ -83,6 +84,16 @@ class LoaMasterController extends Controller
             $data['logo_path'] = null;
         }
 
+        // Header image
+        if ($request->hasFile('header_image')) {
+            if ($journalMaster->header_image_path) Storage::disk('public')->delete($journalMaster->header_image_path);
+            $data['header_image_path'] = $request->file('header_image')->store('journals/headers', 'public');
+        }
+        if ($request->boolean('remove_header_image') && $journalMaster->header_image_path) {
+            Storage::disk('public')->delete($journalMaster->header_image_path);
+            $data['header_image_path'] = null;
+        }
+
         // Signature
         if ($request->hasFile('editor_signature')) {
             if ($journalMaster->editor_signature_path) Storage::disk('public')->delete($journalMaster->editor_signature_path);
@@ -97,6 +108,31 @@ class LoaMasterController extends Controller
 
         return redirect()->route('admin.loa-master.index')
             ->with('success', 'Setting LOA untuk "' . $journalMaster->nama_jurnal . '" berhasil disimpan.');
+    }
+
+    // ── Preview LOA: redirect ke LOA submission terbaru dari jurnal ini ──
+    public function previewLoa(JournalMaster $journalMaster)
+    {
+        $submission = Submission::whereHas('journalSlot', function ($q) use ($journalMaster) {
+            $q->where('journal_master_id', $journalMaster->id);
+        })
+        ->whereNotNull('kode_loa')
+        ->latest()
+        ->first();
+
+        if (!$submission) {
+            $submission = Submission::whereHas('journalSlot', function ($q) use ($journalMaster) {
+                $q->where('journal_master_id', $journalMaster->id);
+            })
+            ->latest()
+            ->first();
+        }
+
+        if (!$submission) {
+            return back()->with('error', 'Belum ada submission untuk jurnal "' . $journalMaster->nama_jurnal . '". Tambahkan submission terlebih dahulu.');
+        }
+
+        return redirect()->route('admin.submissions.loa', $submission);
     }
 
     // ── Kirim ulang LOA manual dari admin ───────────────────────────────

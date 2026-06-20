@@ -228,6 +228,43 @@
                 </div>
             </div>
 
+            {{-- ── Gambar Header LOA ────────────────────────────────────── --}}
+            <div class="card mb-3 border-info">
+                <div class="card-header bg-info bg-opacity-10">
+                    <i class="bi bi-card-image me-1"></i> Gambar Header LOA
+                    <span class="text-muted small fw-normal ms-2">— opsional, menggantikan header otomatis</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-text mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Jika diisi, gambar ini akan tampil sebagai header penuh di dokumen LOA, menggantikan header warna + logo yang dibuat otomatis.
+                        Format JPG/PNG, lebar 210mm (A4), maks 4MB.
+                    </div>
+                    @if($journal->header_image_path)
+                    <div class="mb-3">
+                        <div class="fw-semibold small mb-1 text-muted">Header saat ini:</div>
+                        <img src="{{ Storage::url($journal->header_image_path) }}"
+                             style="width:100%;max-width:600px;border:1px solid #ddd;border-radius:4px;display:block;" alt="Header LOA">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="remove_header_image" value="1" id="rmHeader">
+                            <label class="form-check-label text-danger small" for="rmHeader">Hapus gambar header (gunakan header otomatis)</label>
+                        </div>
+                    </div>
+                    @endif
+                    <div>
+                        <label class="form-label fw-semibold">{{ $journal->header_image_path ? 'Ganti Gambar Header' : 'Upload Gambar Header' }}</label>
+                        <input type="file" class="form-control @error('header_image') is-invalid @enderror"
+                               name="header_image" accept="image/*" id="inpHeaderImg">
+                        @error('header_image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div id="headerImgPreview" class="mt-2" style="display:none;">
+                        <div class="fw-semibold small mb-1 text-muted">Preview upload:</div>
+                        <img id="headerImgPreviewImg"
+                             style="width:100%;max-width:600px;border:1px solid #0dcaf0;border-radius:4px;display:block;" alt="Preview">
+                    </div>
+                </div>
+            </div>
+
             {{-- ── LOA Otomatis ────────────────────────────────────────── --}}
             <div class="card mb-4 border-{{ $journal->loa_auto_send ? 'success' : 'secondary' }}">
                 <div class="card-header d-flex justify-content-between align-items-center
@@ -332,6 +369,26 @@
     if (sw && swLbl) {
         sw.addEventListener('change', function () {
             swLbl.textContent = this.checked ? 'Aktif' : 'Non-aktif';
+        });
+    }
+
+    // ── Header image preview ─────────────────────────────────────
+    var inpHdr = document.getElementById('inpHeaderImg');
+    var hdrPrev = document.getElementById('headerImgPreview');
+    var hdrPrevImg = document.getElementById('headerImgPreviewImg');
+    if (inpHdr) {
+        inpHdr.addEventListener('change', function () {
+            var file = this.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    hdrPrevImg.src = e.target.result;
+                    hdrPrev.style.display = '';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                hdrPrev.style.display = 'none';
+            }
         });
     }
 

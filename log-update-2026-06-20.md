@@ -140,6 +140,39 @@ Jalankan `php artisan migrate` di server production setelah deploy.
 - `resources/views/partials/co-authors-fields.blade.php`
 
 
+## 14. Pembaruan Tampilan Dokumen LOA & Tombol View LOA
+
+**Tujuan:** Perbaikan visual dan konten dokumen LOA sesuai feedback tampilan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | (1) Hilangkan background kuning `.hl`; (2) Format kode artikel: `inisialJurnal_kodeArtikel_kodeSubSIPERA`; (3) Hapus tanda ✓ dari judul; (4) Reviewer Decision selalu nomor 2, ceklis di KANAN; (5) Ganti "Has been Indexed by" dengan logo SINTA (jika akreditasi SINTA) atau kosong; (6) Doc ID dipindah ke baris bawah URL di verified-bar |
+| `resources/views/admin/loa-master/index.blade.php` | Tambah tombol "👁 Preview LOA" (ikon mata) di kolom Aksi, buka tab baru |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | Tambah method `previewLoa()` — cari submission terbaru dari jurnal, redirect ke LOA-nya |
+| `routes/web.php` | Tambah `GET /admin/loa-master/{journalMaster}/preview-loa` |
+
+---
+
+## 13. Upload Gambar Header di LOA Master
+
+**Tujuan:** Admin bisa upload gambar header (JPG/PNG lebar penuh A4) di halaman Setting LOA per jurnal. Jika gambar header diisi, gambar tersebut menggantikan header warna+logo yang dibuat otomatis di dokumen LOA (halaman 1 & 2).
+
+### File yang Diubah / Dibuat
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_20_000002_add_header_image_to_journal_masters.php` | Tambah kolom `header_image_path` string nullable di tabel `journal_masters` |
+| `app/Models/JournalMaster.php` | Tambah `header_image_path` ke `$fillable` |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | Validasi + upload/remove `header_image` ke `journals/headers` |
+| `app/Http/Controllers/Admin/LoaController.php` | Pass `headerImageUrl` ke view receipt (method `publicView` & `show`) |
+| `resources/views/admin/loa-master/edit.blade.php` | Tambah card "Gambar Header LOA" dengan upload, preview real-time, dan remove checkbox |
+| `resources/views/admin/loa/receipt.blade.php` | Page 1 & Page 2: jika `headerImageUrl` ada, tampil sebagai `<img>` full-width menggantikan `.jrn-header` + `.jrn-subbar` |
+
+### Catatan
+Jalankan `php artisan migrate` di production untuk membuat kolom `header_image_path`.
+
+---
+
 ## 12. Pindah Field Username/Password Akses Author
 
 **Tujuan:** Username dan Password Akses Author dipindahkan ke tepat di bawah Data Penulis utama (sebelum co-authors), agar pengelompokan data penulis lebih logis.
@@ -160,6 +193,17 @@ Jalankan `php artisan migrate` di server production setelah deploy.
 - `app/Http/Controllers/Marketing/DashboardController.php`
 - `app/Http/Controllers/Pic/JournalManagementController.php`
 - `log-update-2026-06-20.md`
+- `resources/views/admin/submissions/create.blade.php`
+- `resources/views/marketing/create-submission.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
+
+
+## 13. 🔄 Update: up
+
+- **Commit:** `52fd7b2` — 09:01 oleh Gudangsoft
+- **File berubah:** 5 file
+- `log-update-2026-06-20.md`
+- `resources/views/admin/loa/receipt.blade.php`
 - `resources/views/admin/submissions/create.blade.php`
 - `resources/views/marketing/create-submission.blade.php`
 - `resources/views/pic/submissions/create.blade.php`

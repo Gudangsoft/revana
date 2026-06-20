@@ -24,6 +24,7 @@ class JournalMaster extends Model
         'kode_singkat',
         'e_issn',
         'logo_path',
+        'header_image_path',
         'editor_name',
         'editor_title',
         'editor_signature_path',
