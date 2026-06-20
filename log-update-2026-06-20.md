@@ -46,6 +46,21 @@
 ### Catatan
 Jalankan `php artisan migrate` di production untuk membuat kolom `co_authors`.
 
+## 6. Field Afiliasi Penulis Utama di Form Create Submission
+
+**Tujuan:** Tambah input "Afiliasi Penulis" (institusi/universitas) untuk penulis utama di semua form create submission — melengkapi data yang sudah ada di LOA.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/create-submission.blade.php` | Tambah field `affiliation_penulis` (full width) setelah Email Penulis, sebelum penulis tambahan |
+| `resources/views/pic/submissions/create.blade.php` | Tambah field `affiliation_penulis` (full width) setelah Email Penulis |
+| `resources/views/admin/submissions/create.blade.php` | Tambah field `affiliation_penulis` (full width) setelah Email Penulis |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah validasi `affiliation_penulis` + simpan ke `Submission::create()` |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Tambah validasi `affiliation_penulis` (PIC menggunakan `$validated` langsung, sudah tersimpan otomatis) |
+
+---
+
 ## 5. Afiliasi Co-Authors + Tampil di LOA
 
 **Tujuan:** Setiap penulis tambahan memiliki field afiliasi (institusi), dan semua penulis beserta afiliasi ditampilkan di LOA.
@@ -111,4 +126,16 @@ Jalankan `php artisan migrate` di server production setelah deploy.
 - `resources/views/marketing/create-submission.blade.php`
 - `resources/views/partials/co-authors-fields.blade.php`
 - `resources/views/pic/submissions/create.blade.php`
+
+
+## 9. 🔄 Update: up
+
+- **Commit:** `1f4fe27` — 08:45 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-20.md`
+- `resources/views/admin/loa/receipt.blade.php`
+- `resources/views/partials/co-authors-fields.blade.php`
 

@@ -417,6 +417,7 @@ class JournalManagementController extends Controller
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'email_penulis' => 'nullable|email|max:255',
+            'affiliation_penulis' => 'nullable|string|max:255',
             'co_authors' => 'nullable|array',
             'co_authors.*.nama' => 'nullable|string|max:255',
             'co_authors.*.no_hp' => 'nullable|string|max:20',

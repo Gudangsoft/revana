@@ -154,6 +154,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="affiliation_penulis" class="form-label">Afiliasi Penulis <span class="text-muted small fw-normal">(institusi/universitas)</span></label>
+                                <input type="text" class="form-control @error('affiliation_penulis') is-invalid @enderror" id="affiliation_penulis" name="affiliation_penulis" value="{{ old('affiliation_penulis') }}" placeholder="Nama institusi / universitas penulis">
+                                @error('affiliation_penulis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
 
                     @include('partials.co-authors-fields')
 
