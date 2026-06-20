@@ -20,6 +20,7 @@
     $tahun          = $slot?->tahun    ?? '—';
     $penulis        = $submission->nama_penulis ?? '—';
     $afiliasi       = $submission->affiliation_penulis ?? '—';
+    $coAuthors      = $submission->co_authors ?? [];
     $judul          = $submission->judul_artikel ?? '—';
     $idArtikel      = $submission->id_artikel    ?? $submission->kode_submit;
     $articleCode    = $kodeSingkat ? $kodeSingkat . '_' . $idArtikel : $idArtikel;
@@ -46,6 +47,7 @@
         'idx_title'     => 'Telah Diindeks oleh:',
         'verified_by'   => 'Diverifikasi oleh',
         'scan_qr'       => 'Scan QR untuk verifikasi',
+        'co_authors_lbl'=> 'Co-Penulis',
         // Halaman 2 — Lembar Penilaian
         'p2_title'      => 'LEMBAR PENILAIAN ARTIKEL',
         'meta_author'   => 'Penulis',
@@ -97,6 +99,7 @@
         'idx_title'     => 'Has been Indexed by:',
         'verified_by'   => 'Verified by',
         'scan_qr'       => 'Scan QR to verify',
+        'co_authors_lbl'=> 'Co-Authors',
         // Halaman 2 — Evaluation Sheet
         'p2_title'      => 'PAPER EVALUATION SHEET',
         'meta_author'   => 'Author',
@@ -388,6 +391,15 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <p>{{ $L['salutation1'] }}</p>
             <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $penulis }}</span></p>
             <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
+            @if(!empty($coAuthors))
+            <p style="margin-top:4px; font-size:9pt; color:#444;">
+                {{ $L['co_authors_lbl'] }}:
+                @foreach($coAuthors as $ca)
+                <br>
+                &nbsp;&nbsp;&nbsp;• <strong>{{ $ca['nama'] }}</strong>@if(!empty($ca['afiliasi'])) — <em>{{ $ca['afiliasi'] }}</em>@endif
+                @endforeach
+            </p>
+            @endif
         </div>
 
         {{-- Body --}}
@@ -504,7 +516,14 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <table>
                 <tr>
                     <td>{{ $L['meta_author'] }}</td><td>:</td>
-                    <td>{{ $penulis }}</td>
+                    <td>
+                        {{ $penulis }}@if(!empty($afiliasi) && $afiliasi !== '—') <em style="color:#555;font-size:8.5pt;"> ({{ $afiliasi }})</em>@endif
+                        @if(!empty($coAuthors))
+                            @foreach($coAuthors as $ca)
+                            <br><span style="font-size:8.5pt;">• {{ $ca['nama'] }}@if(!empty($ca['afiliasi'])) <em style="color:#555;"> ({{ $ca['afiliasi'] }})</em>@endif</span>
+                            @endforeach
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <td>{{ $L['meta_code'] }}</td><td>:</td>

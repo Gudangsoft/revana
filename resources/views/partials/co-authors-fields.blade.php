@@ -23,7 +23,7 @@
                 </button>
             </div>
             <div class="row g-2">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <label class="form-label form-label-sm mb-1">Nama <span class="text-danger">*</span></label>
                     <input type="text" name="co_authors[{{ $i }}][nama]" class="form-control form-control-sm"
                            value="{{ $co['nama'] ?? '' }}" required>
@@ -33,10 +33,15 @@
                     <input type="text" name="co_authors[{{ $i }}][no_hp]" class="form-control form-control-sm"
                            value="{{ $co['no_hp'] ?? '' }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label form-label-sm mb-1">Email</label>
                     <input type="email" name="co_authors[{{ $i }}][email]" class="form-control form-control-sm"
                            value="{{ $co['email'] ?? '' }}" placeholder="email@domain.com">
+                </div>
+                <div class="col-12">
+                    <label class="form-label form-label-sm mb-1">Afiliasi <span class="text-muted fw-normal">(institusi/universitas)</span></label>
+                    <input type="text" name="co_authors[{{ $i }}][afiliasi]" class="form-control form-control-sm"
+                           value="{{ $co['afiliasi'] ?? '' }}" placeholder="Nama institusi / universitas">
                 </div>
             </div>
         </div>
@@ -56,7 +61,7 @@
             </button>
         </div>
         <div class="row g-2">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <label class="form-label form-label-sm mb-1">Nama <span class="text-danger">*</span></label>
                 <input type="text" name="co_authors[__IDX__][nama]" class="form-control form-control-sm" required>
             </div>
@@ -64,9 +69,13 @@
                 <label class="form-label form-label-sm mb-1">No HP</label>
                 <input type="text" name="co_authors[__IDX__][no_hp]" class="form-control form-control-sm">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="form-label form-label-sm mb-1">Email</label>
                 <input type="email" name="co_authors[__IDX__][email]" class="form-control form-control-sm" placeholder="email@domain.com">
+            </div>
+            <div class="col-12">
+                <label class="form-label form-label-sm mb-1">Afiliasi <span class="text-muted fw-normal">(institusi/universitas)</span></label>
+                <input type="text" name="co_authors[__IDX__][afiliasi]" class="form-control form-control-sm" placeholder="Nama institusi / universitas">
             </div>
         </div>
     </div>

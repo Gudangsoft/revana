@@ -116,10 +116,11 @@ class SubmissionController extends Controller
             'affiliation_penulis' => 'nullable|string|max:255',
             'no_hp_penulis'       => 'nullable|string|max:20',
             'email_penulis'       => 'nullable|email|max:255',
-            'co_authors'          => 'nullable|array',
-            'co_authors.*.nama'   => 'nullable|string|max:255',
-            'co_authors.*.no_hp'  => 'nullable|string|max:20',
-            'co_authors.*.email'  => 'nullable|email|max:255',
+            'co_authors'             => 'nullable|array',
+            'co_authors.*.nama'      => 'nullable|string|max:255',
+            'co_authors.*.no_hp'     => 'nullable|string|max:20',
+            'co_authors.*.email'     => 'nullable|email|max:255',
+            'co_authors.*.afiliasi'  => 'nullable|string|max:255',
             'username_author'     => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
             'marketing_id' => 'nullable|exists:marketings,id',
@@ -132,9 +133,10 @@ class SubmissionController extends Controller
         $validated['co_authors'] = collect($request->input('co_authors', []))
             ->filter(fn($a) => !empty(trim($a['nama'] ?? '')))
             ->map(fn($a) => [
-                'nama'  => trim($a['nama']),
-                'no_hp' => trim($a['no_hp'] ?? ''),
-                'email' => trim($a['email'] ?? ''),
+                'nama'     => trim($a['nama']),
+                'no_hp'    => trim($a['no_hp'] ?? ''),
+                'email'    => trim($a['email'] ?? ''),
+                'afiliasi' => trim($a['afiliasi'] ?? ''),
             ])
             ->values()
             ->toArray() ?: null;

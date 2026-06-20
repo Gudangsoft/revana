@@ -41,10 +41,23 @@
 | `app/Http/Controllers/Admin/SubmissionController.php` | Validasi + proses `co_authors` di `store()` |
 
 ### Format Simpan
-`co_authors` disimpan sebagai JSON array: `[{"nama":"...","no_hp":"...","email":"..."}, ...]`
+`co_authors` disimpan sebagai JSON array: `[{"nama":"...","no_hp":"...","email":"...","afiliasi":"..."}, ...]`
 
 ### Catatan
 Jalankan `php artisan migrate` di production untuk membuat kolom `co_authors`.
+
+## 5. Afiliasi Co-Authors + Tampil di LOA
+
+**Tujuan:** Setiap penulis tambahan memiliki field afiliasi (institusi), dan semua penulis beserta afiliasi ditampilkan di LOA.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/co-authors-fields.blade.php` | Tambah field "Afiliasi" (full width, row ke-2) di setiap baris penulis tambahan |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Validasi + simpan field `afiliasi` di `co_authors` |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Validasi + simpan field `afiliasi` di `co_authors` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Validasi + simpan field `afiliasi` di `co_authors` |
+| `resources/views/admin/loa/receipt.blade.php` | Page 1: tampilkan co-authors + afiliasi di blok alamat. Page 2: tampilkan semua penulis + afiliasi di tabel meta. Bilingual (ID/EN). |
 
 ---
 
@@ -82,4 +95,20 @@ Jalankan `php artisan migrate` di server production setelah deploy.
 - `log-update-2026-06-20.md`
 - `resources/views/marketing/layouts/app.blade.php`
 - `routes/web.php`
+
+
+## 7. 🔄 Update: co author
+
+- **Commit:** `fb698ad` — 07:14 oleh Gudangsoft
+- **File berubah:** 10 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_20_000001_add_co_authors_to_submissions.php`
+- `log-update-2026-06-20.md`
+- `resources/views/admin/submissions/create.blade.php`
+- `resources/views/marketing/create-submission.blade.php`
+- `resources/views/partials/co-authors-fields.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
 
