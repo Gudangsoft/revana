@@ -6,8 +6,9 @@
 <title>LOA – {{ $submission->kode_submit }}</title>
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
 @php
-    $headerImageUrl = $headerImageUrl ?? null;
-    $footerImageUrl = $footerImageUrl ?? null;
+    $headerImageUrl       = $headerImageUrl ?? null;
+    $footerImageUrl       = $footerImageUrl ?? null;
+    $accreditationLogoUrl = $accreditationLogoUrl ?? null;
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
     $jurnalNama     = $journal?->nama_jurnal      ?? 'Jurnal';
@@ -467,10 +468,14 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
     {{-- Footer --}}
     @if(!$sintaLevel && empty($footerImageUrl)){{-- spacer --}}@endif
-    @if($sintaLevel && empty($footerImageUrl))
+    @if(($sintaLevel || $accreditationLogoUrl) && empty($footerImageUrl))
     <div class="sinta-bar">
-        <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
-        <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
+        @if($accreditationLogoUrl)
+            <img src="{{ $accreditationLogoUrl }}" style="height:32px;width:auto;object-fit:contain;flex-shrink:0;" alt="Logo Akreditasi">
+        @else
+            <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
+            <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
+        @endif
     </div>
     @endif
     <div class="verified-bar">
@@ -599,10 +604,14 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
     </div>
 
     {{-- Footer --}}
-    @if($sintaLevel && empty($footerImageUrl))
+    @if(($sintaLevel || $accreditationLogoUrl) && empty($footerImageUrl))
     <div class="sinta-bar">
-        <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
-        <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
+        @if($accreditationLogoUrl)
+            <img src="{{ $accreditationLogoUrl }}" style="height:32px;width:auto;object-fit:contain;flex-shrink:0;" alt="Logo Akreditasi">
+        @else
+            <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
+            <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
+        @endif
     </div>
     @endif
     <div class="verified-bar">

@@ -26,6 +26,7 @@ class JournalMaster extends Model
         'logo_path',
         'header_image_path',
         'footer_image_path',
+        'accreditation_logo_path',
         'editor_name',
         'editor_title',
         'editor_signature_path',

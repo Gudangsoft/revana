@@ -46,3 +46,36 @@ Jalankan `php artisan migrate` di production untuk membuat kolom `footer_image_p
 - `resources/views/admin/loa-master/edit.blade.php`
 - `resources/views/admin/loa/receipt.blade.php`
 
+
+## 5. Upload Logo Akreditasi di LOA Master
+
+**Tujuan:** Admin bisa upload gambar logo akreditasi (SINTA, Scopus, WoS, dll) per jurnal. Logo tampil di bar bawah dokumen LOA menggantikan badge teks SINTA otomatis.
+
+### File yang Diubah / Dibuat
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_21_000002_add_accreditation_logo_to_journal_masters.php` | Kolom `accreditation_logo_path` nullable di `journal_masters` |
+| `app/Models/JournalMaster.php` | Tambah `accreditation_logo_path` ke `$fillable` |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | Validasi + upload/remove `accreditation_logo` ke `journals/accreditation` |
+| `app/Http/Controllers/Admin/LoaController.php` | Pass `accreditationLogoUrl` ke view receipt |
+| `resources/views/admin/loa-master/edit.blade.php` | Card baru "Logo Akreditasi" — upload, preview dengan background warna header jurnal, remove checkbox |
+| `resources/views/admin/loa/receipt.blade.php` | SINTA bar: jika `accreditationLogoUrl` ada → tampil gambar logo; jika tidak → fallback badge teks SINTA CSS |
+
+### Prioritas tampilan bar bawah LOA
+1. Footer image (custom) → menggantikan seluruh bar
+2. Tanpa footer image: Logo akreditasi (gambar) jika ada → tampil di SINTA bar
+3. Tanpa logo akreditasi: Badge teks SINTA (CSS) jika jurnal ber-akreditasi SINTA
+4. Tanpa keduanya: bar tidak muncul
+
+### Catatan
+Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_path`.
+
+---
+
+## 4. 🔄 Update: s
+
+- **Commit:** `3657e9a` — 00:20 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+

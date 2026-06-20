@@ -228,6 +228,42 @@
                 </div>
             </div>
 
+            {{-- ── Logo Akreditasi ─────────────────────────────────────── --}}
+            <div class="card mb-3">
+                <div class="card-header"><i class="bi bi-award me-1"></i> Logo Akreditasi</div>
+                <div class="card-body">
+                    <div class="form-text mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Logo lembaga akreditasi (misal: SINTA, Scopus, WoS, dll). Ditampilkan di bar bawah dokumen LOA.
+                        PNG transparan lebih bagus, tinggi ideal ±32px, maks 2MB.
+                    </div>
+                    @if($journal->accreditation_logo_path)
+                    <div class="mb-3 d-flex align-items-center gap-3">
+                        <img src="{{ Storage::url($journal->accreditation_logo_path) }}" height="40"
+                             style="border:1px solid #eee;padding:4px;background:#1A237E;border-radius:4px;" alt="Logo Akreditasi">
+                        <div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remove_accreditation_logo" value="1" id="rmAccLogo">
+                                <label class="form-check-label text-danger small" for="rmAccLogo">Hapus logo akreditasi</label>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    <div>
+                        <label class="form-label fw-semibold">{{ $journal->accreditation_logo_path ? 'Ganti Logo Akreditasi' : 'Upload Logo Akreditasi' }}</label>
+                        <input type="file" class="form-control @error('accreditation_logo') is-invalid @enderror"
+                               name="accreditation_logo" accept="image/*" id="inpAccLogo">
+                        @error('accreditation_logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div id="accLogoPreview" class="mt-2" style="display:none;">
+                        <div class="fw-semibold small mb-1 text-muted">Preview:</div>
+                        <div style="background:{{ $journal->primary_color ?? '#1A237E' }};display:inline-block;padding:6px 12px;border-radius:4px;">
+                            <img id="accLogoPreviewImg" height="32" style="display:block;" alt="Preview">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- ── Gambar Header LOA ────────────────────────────────────── --}}
             <div class="card mb-3 border-info">
                 <div class="card-header bg-info bg-opacity-10">
@@ -406,6 +442,26 @@
     if (sw && swLbl) {
         sw.addEventListener('change', function () {
             swLbl.textContent = this.checked ? 'Aktif' : 'Non-aktif';
+        });
+    }
+
+    // ── Accreditation logo preview ───────────────────────────────
+    var inpAcc = document.getElementById('inpAccLogo');
+    var accPrev = document.getElementById('accLogoPreview');
+    var accPrevImg = document.getElementById('accLogoPreviewImg');
+    if (inpAcc) {
+        inpAcc.addEventListener('change', function () {
+            var file = this.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    accPrevImg.src = e.target.result;
+                    accPrev.style.display = '';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                accPrev.style.display = 'none';
+            }
         });
     }
 

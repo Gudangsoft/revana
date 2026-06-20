@@ -63,7 +63,8 @@ class LoaMasterController extends Controller
             'logo'              => 'nullable|image|max:2048',
             'editor_signature'  => 'nullable|image|max:2048',
             'header_image'      => 'nullable|image|max:4096',
-            'footer_image'      => 'nullable|image|max:4096',
+            'footer_image'          => 'nullable|image|max:4096',
+            'accreditation_logo'    => 'nullable|image|max:2048',
         ]);
 
         $data = $request->only([
@@ -103,6 +104,16 @@ class LoaMasterController extends Controller
         if ($request->boolean('remove_footer_image') && $journalMaster->footer_image_path) {
             Storage::disk('public')->delete($journalMaster->footer_image_path);
             $data['footer_image_path'] = null;
+        }
+
+        // Accreditation logo
+        if ($request->hasFile('accreditation_logo')) {
+            if ($journalMaster->accreditation_logo_path) Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            $data['accreditation_logo_path'] = $request->file('accreditation_logo')->store('journals/accreditation', 'public');
+        }
+        if ($request->boolean('remove_accreditation_logo') && $journalMaster->accreditation_logo_path) {
+            Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            $data['accreditation_logo_path'] = null;
         }
 
         // Signature
