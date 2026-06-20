@@ -274,8 +274,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 .verified-text-block .vb-row3 { font-size: 6.5pt; color: #555; margin-top: 1px; font-weight: bold; }
 
 /* ── Watermark ───────────────────────────────────────── */
-.a4-page { position: relative; overflow: hidden; }
+.a4-page { position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.page-inner { flex: 1; }
 .jrn-header, .jrn-subbar, .page-inner, .sinta-bar, .verified-bar { position: relative; z-index: 1; }
+.footer-img-wrap { flex-shrink: 0; position: relative; z-index: 1; }
 .watermark {
   position: absolute;
   top: -80%; left: -40%;
@@ -463,11 +465,9 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
 
-    {{-- Footer: gambar custom ATAU bar SINTA + verified --}}
-    @if(!empty($footerImageUrl))
-    <img src="{{ $footerImageUrl }}" style="width:100%;display:block;margin-top:14px;" alt="Footer {{ $jurnalNama }}">
-    @else
-    @if($sintaLevel)
+    {{-- Footer --}}
+    @if(!$sintaLevel && empty($footerImageUrl)){{-- spacer --}}@endif
+    @if($sintaLevel && empty($footerImageUrl))
     <div class="sinta-bar">
         <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
         <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
@@ -487,6 +487,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
+    </div>
+    @if(!empty($footerImageUrl))
+    <div class="footer-img-wrap">
+        <img src="{{ $footerImageUrl }}" style="width:100%;display:block;" alt="Footer {{ $jurnalNama }}">
     </div>
     @endif
 
@@ -594,12 +598,9 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </table>
     </div>
 
-    {{-- Footer: gambar custom ATAU bar SINTA + verified --}}
-    @if(!empty($footerImageUrl))
-    <img src="{{ $footerImageUrl }}" style="width:100%;display:block;margin-top:auto;" alt="Footer {{ $jurnalNama }}">
-    @else
-    @if($sintaLevel)
-    <div class="sinta-bar" style="margin-top:auto;">
+    {{-- Footer --}}
+    @if($sintaLevel && empty($footerImageUrl))
+    <div class="sinta-bar">
         <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
         <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
@@ -618,6 +619,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
+    </div>
+    @if(!empty($footerImageUrl))
+    <div class="footer-img-wrap">
+        <img src="{{ $footerImageUrl }}" style="width:100%;display:block;" alt="Footer {{ $jurnalNama }}">
     </div>
     @endif
 
