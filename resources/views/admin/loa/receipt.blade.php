@@ -387,19 +387,16 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         <div class="doc-no">No. {{ $loaNumber }}</div>
 
         {{-- Address --}}
+        @php
+            $allAuthorNames = collect([$penulis])
+                ->merge(collect($coAuthors)->pluck('nama'))
+                ->filter()
+                ->implode(', ');
+        @endphp
         <div class="to-block">
             <p>{{ $L['salutation1'] }}</p>
-            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $penulis }}</span></p>
+            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $allAuthorNames }}</span></p>
             <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
-            @if(!empty($coAuthors))
-            <p style="margin-top:4px; font-size:9pt; color:#444;">
-                {{ $L['co_authors_lbl'] }}:
-                @foreach($coAuthors as $ca)
-                <br>
-                &nbsp;&nbsp;&nbsp;• <strong>{{ $ca['nama'] }}</strong>@if(!empty($ca['afiliasi'])) — <em>{{ $ca['afiliasi'] }}</em>@endif
-                @endforeach
-            </p>
-            @endif
         </div>
 
         {{-- Body --}}
@@ -516,14 +513,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <table>
                 <tr>
                     <td>{{ $L['meta_author'] }}</td><td>:</td>
-                    <td>
-                        {{ $penulis }}@if(!empty($afiliasi) && $afiliasi !== '—') <em style="color:#555;font-size:8.5pt;"> ({{ $afiliasi }})</em>@endif
-                        @if(!empty($coAuthors))
-                            @foreach($coAuthors as $ca)
-                            <br><span style="font-size:8.5pt;">• {{ $ca['nama'] }}@if(!empty($ca['afiliasi'])) <em style="color:#555;"> ({{ $ca['afiliasi'] }})</em>@endif</span>
-                            @endforeach
-                        @endif
-                    </td>
+                    <td>{{ $allAuthorNames }}</td>
                 </tr>
                 <tr>
                     <td>{{ $L['meta_code'] }}</td><td>:</td>

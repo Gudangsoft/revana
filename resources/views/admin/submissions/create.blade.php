@@ -166,8 +166,6 @@
                         </div>
                     </div>
 
-                    @include('partials.co-authors-fields')
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -188,6 +186,8 @@
                             </div>
                         </div>
                     </div>
+
+                    @include('partials.co-authors-fields')
 
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-people"></i> PIC & Petugas</h6>

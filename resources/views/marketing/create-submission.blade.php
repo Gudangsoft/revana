@@ -134,8 +134,6 @@
                 </div>
             </div>
 
-            @include('partials.co-authors-fields')
-
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Username Author</label>
@@ -152,6 +150,8 @@
                     @enderror
                 </div>
             </div>
+
+            @include('partials.co-authors-fields')
             
             <div class="mb-3">
                 <label class="form-label">Catatan</label>

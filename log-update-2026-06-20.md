@@ -139,3 +139,28 @@ Jalankan `php artisan migrate` di server production setelah deploy.
 - `resources/views/admin/loa/receipt.blade.php`
 - `resources/views/partials/co-authors-fields.blade.php`
 
+
+## 12. Pindah Field Username/Password Akses Author
+
+**Tujuan:** Username dan Password Akses Author dipindahkan ke tepat di bawah Data Penulis utama (sebelum co-authors), agar pengelompokan data penulis lebih logis.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/create-submission.blade.php` | Pindah blok username/password ke sebelum `@include('partials.co-authors-fields')` |
+| `resources/views/pic/submissions/create.blade.php` | Idem |
+| `resources/views/admin/submissions/create.blade.php` | Idem |
+
+---
+
+## 11. 🔄 Update: apiliasi
+
+- **Commit:** `361d136` — 08:52 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `log-update-2026-06-20.md`
+- `resources/views/admin/submissions/create.blade.php`
+- `resources/views/marketing/create-submission.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
+

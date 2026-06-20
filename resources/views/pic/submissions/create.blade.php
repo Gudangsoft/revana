@@ -213,8 +213,6 @@
                         </div>
                     </div>
 
-                    @include('partials.co-authors-fields')
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -235,6 +233,8 @@
                             </div>
                         </div>
                     </div>
+
+                    @include('partials.co-authors-fields')
 
                     <div class="mb-3">
                         <label for="notes" class="form-label">Catatan</label>
