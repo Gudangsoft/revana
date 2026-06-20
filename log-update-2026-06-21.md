@@ -120,11 +120,28 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 |------|-----------|
 | `resources/views/admin/loa/receipt.blade.php` | Logo akreditasi masuk ke dalam `.sinta-bar` (bar warna sekunder); kotak putih mengambang dihapus. Logo diberi filter `brightness(0) invert(1)` agar putih di atas background berwarna. |
 
+## 12. Pindah Logo Akreditasi ke Bawah QR (Kotak Putih)
+
+**Tujuan:** Logo akreditasi tampil di area putih di bawah QR verified-bar, bukan di dalam bar berwarna SINTA. Lebih rapi dan terlihat jelas.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Tambah CSS `.acred-logo-bar`; hapus logo dari `.sinta-bar`; logo akreditasi ditampilkan di div putih setelah verified-bar, sebelum footer image. |
+
 ---
 
 ## 9. 🔄 Update: u
 
 - **Commit:** `71604fe` — 00:39 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+
+## 11. 🔄 Update: s
+
+- **Commit:** `1443561` — 00:41 oleh Gudangsoft
 - **File berubah:** 2 file
 - `log-update-2026-06-21.md`
 - `resources/views/admin/loa/receipt.blade.php`

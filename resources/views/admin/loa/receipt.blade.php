@@ -256,6 +256,14 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 .sinta-badge .sinta-n { color: #1565C0; }
 .sinta-bar-text { font-size: 8pt; font-weight: bold; }
 
+/* Accreditation logo bar (white, below QR) */
+.acred-logo-bar {
+  background: #fff;
+  padding: 6px 18px;
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid #e8e8e8;
+}
+
 /* Verified bar */
 .verified-bar {
   background: #f5f5f5; color: #333;
@@ -467,17 +475,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
     </div>
 
     {{-- Footer --}}
-    @if(!$sintaLevel && empty($footerImageUrl)){{-- spacer --}}@endif
-    @if($sintaLevel || $accreditationLogoUrl)
+    @if($sintaLevel)
     <div class="sinta-bar">
-        @if($accreditationLogoUrl)
-            <img src="{{ $accreditationLogoUrl }}" style="height:30px;width:auto;object-fit:contain;flex-shrink:0;filter:brightness(0) invert(1);" alt="Logo Akreditasi">
-        @else
-            <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
-        @endif
-        @if($sintaLevel)
-            <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
-        @endif
+        <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
+        <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
     @endif
     <div class="verified-bar">
@@ -495,6 +496,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
     </div>
+    @if($accreditationLogoUrl)
+    <div class="acred-logo-bar">
+        <img src="{{ $accreditationLogoUrl }}" style="height:40px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+    </div>
+    @endif
     @if(!empty($footerImageUrl))
     <div class="footer-img-wrap">
         <img src="{{ $footerImageUrl }}" style="width:100%;display:block;" alt="Footer {{ $jurnalNama }}">
@@ -606,16 +612,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
     </div>
 
     {{-- Footer --}}
-    @if($sintaLevel || $accreditationLogoUrl)
+    @if($sintaLevel)
     <div class="sinta-bar">
-        @if($accreditationLogoUrl)
-            <img src="{{ $accreditationLogoUrl }}" style="height:30px;width:auto;object-fit:contain;flex-shrink:0;filter:brightness(0) invert(1);" alt="Logo Akreditasi">
-        @else
-            <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
-        @endif
-        @if($sintaLevel)
-            <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
-        @endif
+        <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
+        <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
     @endif
     <div class="verified-bar">
@@ -633,6 +633,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
     </div>
+    @if($accreditationLogoUrl)
+    <div class="acred-logo-bar">
+        <img src="{{ $accreditationLogoUrl }}" style="height:40px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+    </div>
+    @endif
     @if(!empty($footerImageUrl))
     <div class="footer-img-wrap">
         <img src="{{ $footerImageUrl }}" style="width:100%;display:block;" alt="Footer {{ $jurnalNama }}">
