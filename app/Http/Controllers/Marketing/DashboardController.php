@@ -334,6 +334,10 @@ class DashboardController extends Controller
             'nama_penulis' => 'required|string|max:255',
             'no_hp_penulis' => 'nullable|string|max:20',
             'email_penulis' => 'nullable|email|max:255',
+            'co_authors' => 'nullable|array',
+            'co_authors.*.nama' => 'nullable|string|max:255',
+            'co_authors.*.no_hp' => 'nullable|string|max:20',
+            'co_authors.*.email' => 'nullable|email|max:255',
             'username_author' => 'nullable|string|max:100',
             'password_author' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
@@ -382,6 +386,16 @@ class DashboardController extends Controller
             // Create submission dalam database transaction
             $submission = \DB::transaction(function() use ($kodeSubmit, $request, $marketing, $adminUser) {
                 // Create submission
+                $coAuthors = collect($request->input('co_authors', []))
+                    ->filter(fn($a) => !empty(trim($a['nama'] ?? '')))
+                    ->map(fn($a) => [
+                        'nama'   => trim($a['nama']),
+                        'no_hp'  => trim($a['no_hp'] ?? ''),
+                        'email'  => trim($a['email'] ?? ''),
+                    ])
+                    ->values()
+                    ->toArray();
+
                 $submission = Submission::create([
                     'kode_submit' => $kodeSubmit,
                     'journal_slot_id' => $request->journal_slot_id,
@@ -392,6 +406,7 @@ class DashboardController extends Controller
                     'nama_penulis' => $request->nama_penulis,
                     'no_hp_penulis' => $request->no_hp_penulis,
                     'email_penulis' => $request->email_penulis,
+                    'co_authors' => $coAuthors ?: null,
                     'username_author' => $request->username_author,
                     'password_author' => $request->password_author,
                     'notes' => $request->notes,

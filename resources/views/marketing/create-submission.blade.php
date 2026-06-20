@@ -100,7 +100,7 @@
 
             <hr>
             <h6 class="text-muted mb-3"><i class="bi bi-person"></i> Data Penulis</h6>
-            
+
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Nama Penulis <span class="text-danger">*</span></label>
@@ -124,6 +124,8 @@
                     @enderror
                 </div>
             </div>
+
+            @include('partials.co-authors-fields')
 
             <div class="row mb-3">
                 <div class="col-md-6">

@@ -23,6 +23,31 @@
 | `app/Http/Controllers/Pic/AuthorController.php` | Tambah try/catch pada `topPics`, `topMarketings`, semua query `LaporanHarian`, dan seluruh method `todayBirthdayData()` |
 | `app/Http/Controllers/Marketing/DashboardController.php` | Tambah try/catch pada `syncPoints()`, query `Submission`, `MarketingPointHistory`, `topMarketings`, `topPics`, dan seluruh method `todayBirthdayData()` |
 
+## 4. Field Penulis Tambahan (Co-Authors) di Form Submit
+
+**Tujuan:** Memungkinkan input lebih dari satu penulis per artikel — penulis 2, 3, dst. bisa ditambah/dihapus dinamis lewat tombol + di form create submission.
+
+### File yang Diubah / Dibuat
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_06_20_000001_add_co_authors_to_submissions.php` | Tambah kolom `co_authors` JSON nullable di tabel `submissions` |
+| `app/Models/Submission.php` | Tambah `co_authors` ke `$fillable` dan cast sebagai `array` |
+| `resources/views/partials/co-authors-fields.blade.php` | Partial baru — UI dinamis tambah/hapus penulis, repopulate `old()` saat validasi gagal |
+| `resources/views/marketing/create-submission.blade.php` | `@include('partials.co-authors-fields')` setelah Data Penulis utama |
+| `resources/views/pic/submissions/create.blade.php` | `@include('partials.co-authors-fields')` setelah Data Penulis utama |
+| `resources/views/admin/submissions/create.blade.php` | `@include('partials.co-authors-fields')` setelah Data Penulis utama |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Validasi + proses `co_authors` di `storeSubmission()` |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | Validasi + proses `co_authors` di `submissionsStore()` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Validasi + proses `co_authors` di `store()` |
+
+### Format Simpan
+`co_authors` disimpan sebagai JSON array: `[{"nama":"...","no_hp":"...","email":"..."}, ...]`
+
+### Catatan
+Jalankan `php artisan migrate` di production untuk membuat kolom `co_authors`.
+
+---
+
 ### Root Cause
 Tenant DB di production belum menjalankan semua migration → kolom `tanggal_lahir` tidak ada di tabel `pics`/`marketings`, tabel `birthday_wishes` belum ada. Semua query yang menyentuh kolom/tabel ini throw exception → 500.
 
@@ -47,4 +72,14 @@ Jalankan `php artisan migrate` di server production setelah deploy.
 - `app/Http/Controllers/Marketing/DashboardController.php`
 - `app/Http/Controllers/Pic/AuthorController.php`
 - `log-update-2026-06-20.md`
+
+
+## 5. 🔄 Update: up
+
+- **Commit:** `bd13a55` — 06:35 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/MarketingController.php`
+- `log-update-2026-06-20.md`
+- `resources/views/marketing/layouts/app.blade.php`
+- `routes/web.php`
 

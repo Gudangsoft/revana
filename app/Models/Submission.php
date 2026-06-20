@@ -35,6 +35,7 @@ class Submission extends Model
         'affiliation_penulis',
         'no_hp_penulis',
         'email_penulis',
+        'co_authors',
         'username_author',
         'password_author',
         'pic_marketing',
@@ -109,6 +110,7 @@ class Submission extends Model
     ];
 
     protected $casts = [
+        'co_authors' => 'array',
         'editor1_valid' => 'boolean',
         'author1_valid' => 'boolean',
         'editor2_valid' => 'boolean',
