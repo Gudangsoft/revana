@@ -208,3 +208,18 @@ Jalankan `php artisan migrate` di production untuk membuat kolom `header_image_p
 - `resources/views/marketing/create-submission.blade.php`
 - `resources/views/pic/submissions/create.blade.php`
 
+
+## 16. 🔄 Update: loa update
+
+- **Commit:** `8cc9e3a` — 23:40 oleh Gudangsoft
+- **File berubah:** 9 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `app/Models/JournalMaster.php`
+- `database/migrations/2026_06_20_000002_add_header_image_to_journal_masters.php`
+- `log-update-2026-06-20.md`
+- `resources/views/admin/loa-master/edit.blade.php`
+- `resources/views/admin/loa-master/index.blade.php`
+- `resources/views/admin/loa/receipt.blade.php`
+- `routes/web.php`
+

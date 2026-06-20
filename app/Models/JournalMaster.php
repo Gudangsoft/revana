@@ -25,6 +25,7 @@ class JournalMaster extends Model
         'e_issn',
         'logo_path',
         'header_image_path',
+        'footer_image_path',
         'editor_name',
         'editor_title',
         'editor_signature_path',

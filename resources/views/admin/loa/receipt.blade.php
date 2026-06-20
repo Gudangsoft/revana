@@ -7,6 +7,7 @@
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
 @php
     $headerImageUrl = $headerImageUrl ?? null;
+    $footerImageUrl = $footerImageUrl ?? null;
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
     $jurnalNama     = $journal?->nama_jurnal      ?? 'Jurnal';
@@ -462,14 +463,16 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </div>
     </div>
 
-    {{-- SINTA accreditation bar --}}
+    {{-- Footer: gambar custom ATAU bar SINTA + verified --}}
+    @if(!empty($footerImageUrl))
+    <img src="{{ $footerImageUrl }}" style="width:100%;display:block;margin-top:14px;" alt="Footer {{ $jurnalNama }}">
+    @else
     @if($sintaLevel)
     <div class="sinta-bar">
         <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
         <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
     @endif
-
     <div class="verified-bar">
         <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}"></div>
         <div class="verified-text-block">
@@ -485,6 +488,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
     </div>
+    @endif
 
 </div>
 
@@ -590,14 +594,16 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         </table>
     </div>
 
-    {{-- SINTA accreditation bar --}}
+    {{-- Footer: gambar custom ATAU bar SINTA + verified --}}
+    @if(!empty($footerImageUrl))
+    <img src="{{ $footerImageUrl }}" style="width:100%;display:block;margin-top:auto;" alt="Footer {{ $jurnalNama }}">
+    @else
     @if($sintaLevel)
     <div class="sinta-bar" style="margin-top:auto;">
         <div class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></div>
         <span class="sinta-bar-text">Accredited SINTA {{ $sintaLevel }}</span>
     </div>
     @endif
-
     <div class="verified-bar">
         <div class="qr-wrap" id="qr2" title="{{ $L['scan_qr'] }}"></div>
         <div class="verified-text-block">
@@ -613,6 +619,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
     </div>
+    @endif
 
 </div>
 

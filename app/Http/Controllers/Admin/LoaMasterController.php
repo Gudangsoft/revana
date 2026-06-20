@@ -63,6 +63,7 @@ class LoaMasterController extends Controller
             'logo'              => 'nullable|image|max:2048',
             'editor_signature'  => 'nullable|image|max:2048',
             'header_image'      => 'nullable|image|max:4096',
+            'footer_image'      => 'nullable|image|max:4096',
         ]);
 
         $data = $request->only([
@@ -92,6 +93,16 @@ class LoaMasterController extends Controller
         if ($request->boolean('remove_header_image') && $journalMaster->header_image_path) {
             Storage::disk('public')->delete($journalMaster->header_image_path);
             $data['header_image_path'] = null;
+        }
+
+        // Footer image
+        if ($request->hasFile('footer_image')) {
+            if ($journalMaster->footer_image_path) Storage::disk('public')->delete($journalMaster->footer_image_path);
+            $data['footer_image_path'] = $request->file('footer_image')->store('journals/footers', 'public');
+        }
+        if ($request->boolean('remove_footer_image') && $journalMaster->footer_image_path) {
+            Storage::disk('public')->delete($journalMaster->footer_image_path);
+            $data['footer_image_path'] = null;
         }
 
         // Signature
