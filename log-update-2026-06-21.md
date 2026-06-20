@@ -79,3 +79,16 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `log-update-2026-06-21.md`
 - `resources/views/admin/loa/receipt.blade.php`
 
+
+## 6. 🔄 Update: logo sinta
+
+- **Commit:** `a98dd52` — 00:28 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `app/Models/JournalMaster.php`
+- `database/migrations/2026_06_21_000002_add_accreditation_logo_to_journal_masters.php`
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa-master/edit.blade.php`
+- `resources/views/admin/loa/receipt.blade.php`
+
