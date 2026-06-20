@@ -92,3 +92,21 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `resources/views/admin/loa-master/edit.blade.php`
 - `resources/views/admin/loa/receipt.blade.php`
 
+
+## 7. Fix Posisi Logo Akreditasi di Dokumen LOA
+
+**Tujuan:** Logo akreditasi tampil di area putih antara QR/verified-bar dan footer image, bukan di bar terpisah yang tersembunyi saat ada footer image.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Logo akreditasi dipindah ke bawah verified-bar (di atas footer image), tampil selalu ketika ada logo. SINTA CSS badge hanya muncul jika tidak ada logo akreditasi dan tidak ada footer image. |
+
+---
+
+## 8. 🔄 Update: a
+
+- **Commit:** `5686dc5` — 00:31 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-06-21.md`
+
