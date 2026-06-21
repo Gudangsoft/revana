@@ -275,6 +275,7 @@
                     $mktBkdActive     = request('program') === 'bkd';
                     $mktJafaActive    = request('program') === 'jafa';
                     $mktJournalActive = str_contains($currentRoute, 'marketing.journals') || str_contains($currentRoute, 'marketing.journal-slots');
+                    $mktLoaMasterActive = str_contains($currentRoute, 'marketing.loa-master');
                 @endphp
 
                 {{-- Dashboard --}}
@@ -419,6 +420,10 @@
 
                 <a href="{{ route('marketing.reports.journal-articles') }}" class="nav-link {{ str_contains($currentRoute, 'marketing.reports') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-bar-graph"></i> Laporan Jurnal
+                </a>
+
+                <a href="{{ route('marketing.loa-master.index') }}" class="nav-link {{ $mktLoaMasterActive ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-check-fill text-success"></i> Master LOA
                 </a>
 
                 <hr style="margin: 12px 0; opacity: 0.2;">

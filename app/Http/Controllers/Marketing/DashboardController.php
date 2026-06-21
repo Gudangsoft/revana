@@ -1242,6 +1242,54 @@ class DashboardController extends Controller
         return back()->with('wish_sent', 'Ucapan untuk ' . $recipient->name . ' berhasil dikirim! 🎉');
     }
 
+    // ==================== MASTER LOA ====================
+
+    /**
+     * LOA Master Index — hanya jurnal yang dikelola marketing ini
+     */
+    public function loaMasterIndex()
+    {
+        $marketing = Auth::guard('marketing')->user();
+
+        $journalIds = Submission::where('marketing_id', $marketing->id)
+            ->join('journal_slots', 'submissions.journal_slot_id', '=', 'journal_slots.id')
+            ->pluck('journal_slots.journal_master_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $journals = JournalMaster::whereIn('id', $journalIds)
+            ->orderBy('nama_jurnal')
+            ->get();
+
+        return view('marketing.loa-master.index', compact('marketing', 'journals'));
+    }
+
+    /**
+     * Update loa_tanggal for a journal — only journals the marketing manages
+     */
+    public function loaMasterUpdate(Request $request, JournalMaster $journalMaster)
+    {
+        $marketing = Auth::guard('marketing')->user();
+
+        $hasAccess = Submission::where('marketing_id', $marketing->id)
+            ->join('journal_slots', 'submissions.journal_slot_id', '=', 'journal_slots.id')
+            ->where('journal_slots.journal_master_id', $journalMaster->id)
+            ->exists();
+
+        if (!$hasAccess) {
+            return redirect()->route('marketing.loa-master.index')
+                ->with('error', 'Anda tidak memiliki akses ke jurnal ini.');
+        }
+
+        $request->validate(['loa_tanggal' => 'nullable|date']);
+
+        $journalMaster->update(['loa_tanggal' => $request->loa_tanggal ?: null]);
+
+        return redirect()->route('marketing.loa-master.index')
+            ->with('success', 'Tanggal LOA untuk ' . $journalMaster->nama_jurnal . ' berhasil disimpan.');
+    }
+
     private function todayBirthdayData(string $senderType, int $senderId, ?string $excludeType = null, ?int $excludeId = null): array
     {
         try {

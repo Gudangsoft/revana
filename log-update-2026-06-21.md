@@ -1,5 +1,26 @@
 # Log Update — 21 Juni 2026
 
+## 29. Menu Master LOA di Portal Marketing
+
+**Tujuan:** Marketing bisa melihat dan mengatur tanggal LOA default per jurnal, namun hanya untuk jurnal yang memiliki submission dari marketing tersebut.
+
+### File yang Diubah / Dibuat
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah `loaMasterIndex()` (filter jurnal via submissions marketing) dan `loaMasterUpdate()` (update `loa_tanggal`, cek otorisasi) |
+| `routes/web.php` | Tambah route `GET /loa-master` dan `POST /loa-master/{journalMaster}` di grup middleware marketing |
+| `resources/views/marketing/loa-master/index.blade.php` | View baru — tabel jurnal + form date picker inline per baris |
+| `resources/views/marketing/layouts/app.blade.php` | Tambah menu "Master LOA" di sidebar (setelah Laporan Jurnal) |
+
+### Cara Kerja
+- Menu hanya tampil jurnal di mana marketing punya minimal 1 submission
+- Relasi: `submissions.marketing_id` → `journal_slots.journal_master_id`
+- Update `loa_tanggal` di `journal_masters` — berlaku untuk semua artikel di jurnal itu
+- Kosongkan tanggal → LOA pakai hari ini saat dibuka
+- Per-artikel masih bisa di-override via URL `?tanggal=` di halaman detail submission
+
+---
+
 ## 18. Marketing Bisa Ubah Tanggal LOA per Artikel
 
 **Tujuan:** Marketing punya halaman LOA khusus dengan date picker, tanpa akses admin.
@@ -310,4 +331,12 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `resources/views/marketing/show-submission.blade.php`
 - `resources/views/marketing/submissions.blade.php`
 - `routes/web.php`
+
+
+## 28. 🔄 Update: mar
+
+- **Commit:** `ee7580e` — 23:53 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-21.md`
+- `resources/views/marketing/show-submission.blade.php`
 
