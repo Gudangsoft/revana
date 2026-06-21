@@ -120,6 +120,17 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 |------|-----------|
 | `resources/views/admin/loa/receipt.blade.php` | Logo akreditasi masuk ke dalam `.sinta-bar` (bar warna sekunder); kotak putih mengambang dihapus. Logo diberi filter `brightness(0) invert(1)` agar putih di atas background berwarna. |
 
+## 16. Tata Ulang Layout LOA Master Edit
+
+**Tujuan:** Sederhanakan form LOA Master — hapus Nama Editor & Tanda Tangan Editor, gabungkan Jabatan Editor ke card Identitas Jurnal, Logo Jurnal jadi layout horizontal.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa-master/edit.blade.php` | Hapus card Editor-in-Chief terpisah; pindah Jabatan Editor ke card Identitas (5 kolom); hapus Tanda Tangan Editor; card Logo Jurnal jadi layout horizontal |
+
+---
+
 ## 14. Tanggal LOA Diatur di Setting Jurnal (LOA Master)
 
 **Tujuan:** Admin set tanggal LOA default per jurnal di LOA Master edit. Jika kosong → pakai hari ini. Date picker inline di dokumen dihapus.
@@ -220,5 +231,15 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - **Commit:** `e0011f1` — 22:51 oleh Gudangsoft
 - **File berubah:** 2 file
 - `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+
+## 21. 🔄 Update: up
+
+- **Commit:** `c1505a2` — 23:16 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa-master/edit.blade.php`
 - `resources/views/admin/loa/receipt.blade.php`
 

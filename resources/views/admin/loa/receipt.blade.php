@@ -475,7 +475,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <p>{{ $loaDate }}</p>
             <p style="margin-top:4px;">{{ $editorTitle }}</p>
             <p>{{ $jurnalNama }}</p>
-            <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}" style="margin-top:8px;"></div>
+            <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}" style="margin-top:8px; margin-left:auto; display:inline-block;"></div>
             @if($editorName)
             <p class="sig-name" style="margin-top:6px;">{{ $editorName }}</p>
             @endif

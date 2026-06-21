@@ -112,7 +112,9 @@ class LoaController extends Controller
         $id         = $s->id_artikel ?: $s->kode_submit;
         $kodeSubmit = $s->kode_submit ?? '';
 
-        return $id . '/' . $kodeSubmit . '/' . $kode . '/' . $roman . '/' . $year;
+        $kodeSubmitLabel = str_ends_with(strtoupper($kodeSubmit), 'SIPERA') ? $kodeSubmit : $kodeSubmit . 'SIPERA';
+
+        return $id . '/' . $kodeSubmitLabel . '/' . $kode . '/' . $roman . '/' . $year;
     }
 
     private function loaDate($journal, ?string $dateOverride = null, string $lang = 'en'): string

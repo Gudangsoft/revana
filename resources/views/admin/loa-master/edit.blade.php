@@ -117,34 +117,19 @@
                                    value="{{ old('e_issn', $journal->e_issn) }}"
                                    maxlength="20" placeholder="XXXX-XXXX">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold">Kota TTD</label>
                             <input type="text" class="form-control" name="loa_kota"
                                    value="{{ old('loa_kota', $journal->loa_kota ?? 'Semarang') }}">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold">Tanggal LOA</label>
                             <input type="date" class="form-control" name="loa_tanggal"
                                    value="{{ old('loa_tanggal', $journal->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : '') }}">
-                            <div class="form-text text-muted">Kosongkan = gunakan tanggal hari ini</div>
+                            <div class="form-text text-muted">Kosong = hari ini</div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ── Editor ──────────────────────────────────────────────── --}}
-            <div class="card mb-3">
-                <div class="card-header"><i class="bi bi-person-badge me-1"></i> Editor-in-Chief</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Nama Editor</label>
-                            <input type="text" class="form-control" name="editor_name"
-                                   value="{{ old('editor_name', $journal->editor_name) }}"
-                                   placeholder="Dr. John Doe, M.T.">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Jabatan</label>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Jabatan Editor</label>
                             <input type="text" class="form-control" name="editor_title"
                                    value="{{ old('editor_title', $journal->editor_title ?? 'Editor in Chief') }}">
                         </div>
@@ -187,48 +172,26 @@
                 </div>
             </div>
 
-            {{-- ── Gambar ──────────────────────────────────────────────── --}}
+            {{-- ── Logo Jurnal ──────────────────────────────────────────── --}}
             <div class="card mb-3">
-                <div class="card-header"><i class="bi bi-image me-1"></i> Logo & Tanda Tangan</div>
+                <div class="card-header"><i class="bi bi-image me-1"></i> Logo Jurnal</div>
                 <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Logo Jurnal</label>
+                    <div class="d-flex align-items-center gap-4">
+                        @if($journal->logo_path)
+                        <img src="{{ Storage::url($journal->logo_path) }}" height="72" width="72"
+                             style="border-radius:50%;border:3px solid #ddd;object-fit:cover;flex-shrink:0;" alt="Logo">
+                        @endif
+                        <div class="flex-grow-1">
                             <div class="form-text mb-2">PNG/JPG, ukuran bulat, maks 2MB</div>
-                            @if($journal->logo_path)
-                            <div class="mb-2 d-flex align-items-center gap-3">
-                                <img src="{{ Storage::url($journal->logo_path) }}" height="64" width="64"
-                                     style="border-radius:50%;border:3px solid #ddd;object-fit:cover;" alt="Logo">
-                                <div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="remove_logo" value="1" id="rmLogo">
-                                        <label class="form-check-label text-danger small" for="rmLogo">Hapus logo</label>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
                             <input type="file" class="form-control @error('logo') is-invalid @enderror"
                                    name="logo" accept="image/*">
                             @error('logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Tanda Tangan Editor</label>
-                            <div class="form-text mb-2">PNG transparan lebih bagus, maks 2MB</div>
-                            @if($journal->editor_signature_path)
-                            <div class="mb-2 d-flex align-items-center gap-3">
-                                <img src="{{ Storage::url($journal->editor_signature_path) }}" height="48"
-                                     style="border:1px solid #eee;padding:4px;background:#fff;" alt="TTD">
-                                <div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="remove_signature" value="1" id="rmSign">
-                                        <label class="form-check-label text-danger small" for="rmSign">Hapus TTD</label>
-                                    </div>
-                                </div>
+                            @if($journal->logo_path)
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="remove_logo" value="1" id="rmLogo">
+                                <label class="form-check-label text-danger small" for="rmLogo">Hapus logo</label>
                             </div>
                             @endif
-                            <input type="file" class="form-control @error('editor_signature') is-invalid @enderror"
-                                   name="editor_signature" accept="image/*">
-                            @error('editor_signature')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
