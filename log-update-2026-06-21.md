@@ -1,5 +1,22 @@
 # Log Update — 21 Juni 2026
 
+## 17. Akses LOA dari Halaman Marketing
+
+**Tujuan:** Marketing bisa langsung lihat LOA per artikel tanpa perlu masuk ke halaman admin.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/show-submission.blade.php` | Tambah card hijau "LOA Tersedia" + tombol "Lihat LOA" (hanya muncul jika `kode_loa` terisi) |
+| `resources/views/marketing/submissions.blade.php` | Tambah ikon tombol LOA di kolom aksi tabel daftar submission |
+
+### Cara Kerja
+- Jika submission belum ada LOA (`kode_loa` null) → tombol tidak tampil
+- Jika sudah ada LOA → tombol "Lihat LOA" muncul, buka di tab baru ke halaman publik LOA
+- Tidak perlu route/controller baru — reuse `loa.public` yang sudah ada
+
+---
+
 ## 1. Upload Gambar Footer di LOA Master
 
 **Tujuan:** Admin bisa upload gambar footer (JPG/PNG lebar penuh A4) di halaman Setting LOA per jurnal. Jika diisi, gambar tersebut menggantikan bar akreditasi SINTA dan baris verifikasi QR di bagian bawah dokumen LOA (halaman 1 & 2).
@@ -237,6 +254,16 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 ## 21. 🔄 Update: up
 
 - **Commit:** `c1505a2` — 23:16 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa-master/edit.blade.php`
+- `resources/views/admin/loa/receipt.blade.php`
+
+
+## 23. 🔄 Update: ok
+
+- **Commit:** `c4da605` — 23:28 oleh Gudangsoft
 - **File berubah:** 4 file
 - `app/Http/Controllers/Admin/LoaController.php`
 - `log-update-2026-06-21.md`

@@ -91,6 +91,27 @@
             </div>
         </div>
 
+        {{-- LOA Card --}}
+        @if($submission->kode_loa)
+        <div class="card mb-4 border-success">
+            <div class="card-body d-flex align-items-center justify-content-between gap-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-file-earmark-check-fill text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold text-success">Letter of Acceptance (LOA) Tersedia</div>
+                        <div class="small text-muted">Kode: <code>{{ $submission->kode_loa }}</code></div>
+                    </div>
+                </div>
+                <a href="{{ route('loa.public', ['kode_loa' => $submission->kode_loa]) }}"
+                   target="_blank" class="btn btn-success btn-sm px-3 flex-shrink-0">
+                    <i class="bi bi-eye me-1"></i> Lihat LOA
+                </a>
+            </div>
+        </div>
+        @endif
+
         <!-- Progress Card - Using Shared Component -->
         <x-tracking-table :submission="$submission" />
 

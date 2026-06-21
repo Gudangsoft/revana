@@ -152,10 +152,18 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('marketing.submissions.show', $submission) }}" 
-                               class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> Detail
-                            </a>
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a href="{{ route('marketing.submissions.show', $submission) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Detail
+                                </a>
+                                @if($submission->kode_loa)
+                                <a href="{{ route('loa.public', ['kode_loa' => $submission->kode_loa]) }}"
+                                   target="_blank" class="btn btn-sm btn-success" title="Lihat LOA">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                </a>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
