@@ -1,5 +1,19 @@
 # Log Update — 21 Juni 2026
 
+## 31. Fix Bug Route Nama Birthday Wish Admin
+
+**Tujuan:** Perbaiki bug yang menyebabkan admin dashboard error (RouteNotFoundException) setiap kali dirender karena nama route tidak cocok.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Ubah nama route admin birthday wish dari `birthday.wish` menjadi `admin.birthday.wish` (view sudah benar memanggil `admin.birthday.wish`) |
+
+### Akar Masalah
+View `resources/views/admin/dashboard.blade.php` memanggil `route('admin.birthday.wish')` tapi route terdaftar sebagai `birthday.wish` tanpa prefix `admin.`. Laravel melempar `InvalidArgumentException` saat Blade mengevaluasi nilai parameter `@include` — bukan hanya saat tombol ditekan, tapi setiap kali dashboard dirender.
+
+---
+
 ## 30. Master LOA Marketing — Samakan dengan Halaman Admin
 
 **Tujuan:** Marketing bisa setting LOA lengkap (semua field sama dengan admin) untuk jurnal yang mereka kelola, bukan hanya tanggal.
