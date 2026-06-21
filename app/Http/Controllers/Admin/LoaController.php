@@ -25,6 +25,7 @@ class LoaController extends Controller
             'slot'            => $slot,
             'loaNumber'       => $this->loaNumber($submission, $journal, $slot),
             'loaDate'         => $this->loaDate($journal, $date, $lang),
+            'loaDateRaw'      => $date ?: now()->toDateString(),
             'logoUrl'         => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
@@ -52,6 +53,7 @@ class LoaController extends Controller
             'slot'            => $slot,
             'loaNumber'       => $this->loaNumber($submission, $journal, $slot),
             'loaDate'         => $this->loaDate($journal, $date, $lang),
+            'loaDateRaw'      => $date ?: now()->toDateString(),
             'logoUrl'         => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
@@ -104,12 +106,13 @@ class LoaController extends Controller
 
     private function loaNumber(Submission $s, $j, $slot): string
     {
-        $kode  = $j?->kode_singkat ?: 'SIPERA';
-        $roman = $this->romanMonth($slot?->bulan);
-        $year  = $slot?->tahun ?? now()->year;
-        $id    = $s->id_artikel ?: $s->kode_submit;
+        $kode       = $j?->kode_singkat ?: 'SIPERA';
+        $roman      = $this->romanMonth($slot?->bulan);
+        $year       = $slot?->tahun ?? now()->year;
+        $id         = $s->id_artikel ?: $s->kode_submit;
+        $kodeSubmit = $s->kode_submit ?? '';
 
-        return $id . '/' . $kode . '/' . $roman . '/' . $year;
+        return $id . '/' . $kodeSubmit . '/' . $kode . '/' . $roman . '/' . $year;
     }
 
     private function loaDate($journal, ?string $dateOverride = null, string $lang = 'en'): string

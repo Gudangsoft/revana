@@ -120,6 +120,39 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 |------|-----------|
 | `resources/views/admin/loa/receipt.blade.php` | Logo akreditasi masuk ke dalam `.sinta-bar` (bar warna sekunder); kotak putih mengambang dihapus. Logo diberi filter `brightness(0) invert(1)` agar putih di atas background berwarna. |
 
+## 14. Edit Tanggal LOA Manual dari Top Bar
+
+**Tujuan:** Admin bisa ubah tanggal LOA langsung dari halaman preview tanpa edit URL secara manual.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | Pass `loaDateRaw` (format YYYY-MM-DD) ke view di kedua method `publicView` & `show` |
+| `resources/views/admin/loa/receipt.blade.php` | Tambah date input `📅 Tanggal LOA` di top bar (hanya tampil jika admin view); onChange reload URL dengan `?tanggal=` |
+
+### Cara Kerja
+- Buka LOA dari admin → date picker tampil di top bar
+- Ubah tanggal → halaman reload otomatis → tanggal di dokumen berubah
+- Tidak tampil saat LOA dibuka oleh penulis (public view)
+- Tidak ikut terprint
+
+---
+
+## 13. Hapus Judul Halaman 1 + Format Nomor LOA Baru
+
+**Tujuan:** Hapus baris judul "RECEIPT FOR PAPER" / "SURAT PENERIMAAN ARTIKEL" (hanya tampil subtitle). Format nomor LOA diubah menjadi: `KodeArtikel/KodeSipera/InisialJurnal/RomawiBulan/Tahun`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Hapus `<div class="doc-title">` (judul yang dicoret) |
+| `app/Http/Controllers/Admin/LoaController.php` | `loaNumber()`: format baru = `id_artikel/kode_submit/kode_singkat/romawi/tahun` |
+
+### Contoh Nomor LOA Baru
+`1839/FT202602120028SIPERA/SIPERA/VII/2026`
+
+---
+
 ## 12. Pindah Logo Akreditasi ke Bawah QR (Kotak Putih)
 
 **Tujuan:** Logo akreditasi tampil di area putih di bawah QR verified-bar, bukan di dalam bar berwarna SINTA. Lebih rapi dan terlihat jelas.
@@ -150,6 +183,14 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 ## 13. 🔄 Update: z
 
 - **Commit:** `87f3c2f` — 00:47 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+
+## 14. 🔄 Update: sa
+
+- **Commit:** `7a41776` — 00:51 oleh Gudangsoft
 - **File berubah:** 2 file
 - `log-update-2026-06-21.md`
 - `resources/views/admin/loa/receipt.blade.php`

@@ -362,14 +362,29 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
         <a href="{{ url()->previous() }}" class="btn-back">← Kembali</a>
         <span style="margin-left:16px; color:#ccc;">LOA: {{ $submission->kode_submit }}</span>
     </div>
-    <div>
+    <div style="display:flex; align-items:center; gap:12px;">
+        @if(!empty($isAdminView) && $isAdminView)
+        <label style="color:#ccc; font-size:12px; display:flex; align-items:center; gap:6px;">
+            📅 Tanggal LOA:
+            <input type="date" id="loa-date-picker"
+                   value="{{ $loaDateRaw ?? now()->toDateString() }}"
+                   style="background:#2a2a2a; color:#fff; border:1px solid #555; border-radius:4px; padding:3px 8px; font-size:12px; cursor:pointer;">
+        </label>
+        @endif
         <a href="{{ route('admin.submissions.edit', $submission) }}"
-           style="color:#90CAF9; text-decoration:none; margin-right:16px; font-size:12px;">
+           style="color:#90CAF9; text-decoration:none; font-size:12px;">
             ✏ Edit Afiliasi & Data
         </a>
         <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
 </div>
+<script>
+document.getElementById('loa-date-picker')?.addEventListener('change', function() {
+    var url = new URL(window.location.href);
+    url.searchParams.set('tanggal', this.value);
+    window.location.href = url.toString();
+});
+</script>
 
 {{-- ══════════════════════════════════════════════════════
      PAGE 1 — RECEIPT FOR PAPER / SURAT PENERIMAAN ARTIKEL
@@ -417,7 +432,6 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
     <div class="page-inner">
         {{-- Title --}}
-        <div class="doc-title">{{ $L['p1_title'] }}</div>
         <div class="doc-subtitle">{{ $L['p1_subtitle'] }}</div>
         <div class="doc-no">No. {{ $loaNumber }}</div>
 
