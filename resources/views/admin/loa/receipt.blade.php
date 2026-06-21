@@ -472,27 +472,13 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
 
         {{-- Signature --}}
         <div class="sig-block">
-            <p>
-                {{ $loaDate }}
-                @if(!empty($isAdminView) && $isAdminView)
-                <input type="date" class="no-print loa-date-inline"
-                       value="{{ $loaDateRaw ?? now()->toDateString() }}"
-                       title="Ubah tanggal LOA"
-                       onchange="var u=new URL(window.location.href);u.searchParams.set('tanggal',this.value);window.location.href=u.toString();"
-                       style="margin-left:8px;background:#fffde7;border:1px dashed #f9a825;border-radius:4px;padding:2px 6px;font-size:8pt;color:#555;cursor:pointer;">
-                @endif
-            </p>
+            <p>{{ $loaDate }}</p>
             <p style="margin-top:4px;">{{ $editorTitle }}</p>
             <p>{{ $jurnalNama }}</p>
-            @if($signUrl)
-                <img src="{{ $signUrl }}" class="sig-img" alt="TTD">
-            @else
-                <div style="height:60px;"></div>
-            @endif
-            @if($editorName)
-            <p class="sig-name">{{ $editorName }}</p>
-            @endif
             <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}" style="margin-top:8px;"></div>
+            @if($editorName)
+            <p class="sig-name" style="margin-top:6px;">{{ $editorName }}</p>
+            @endif
         </div>
     </div>
 

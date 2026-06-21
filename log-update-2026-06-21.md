@@ -120,21 +120,16 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 |------|-----------|
 | `resources/views/admin/loa/receipt.blade.php` | Logo akreditasi masuk ke dalam `.sinta-bar` (bar warna sekunder); kotak putih mengambang dihapus. Logo diberi filter `brightness(0) invert(1)` agar putih di atas background berwarna. |
 
-## 14. Edit Tanggal LOA Manual dari Top Bar
+## 14. Tanggal LOA Diatur di Setting Jurnal (LOA Master)
 
-**Tujuan:** Admin bisa ubah tanggal LOA langsung dari halaman preview tanpa edit URL secara manual.
+**Tujuan:** Admin set tanggal LOA default per jurnal di LOA Master edit. Jika kosong → pakai hari ini. Date picker inline di dokumen dihapus.
 
 ### File yang Diubah
 | File | Perubahan |
 |------|-----------|
-| `app/Http/Controllers/Admin/LoaController.php` | Pass `loaDateRaw` (format YYYY-MM-DD) ke view di kedua method `publicView` & `show` |
-| `resources/views/admin/loa/receipt.blade.php` | Tambah date input `📅 Tanggal LOA` di top bar (hanya tampil jika admin view); onChange reload URL dengan `?tanggal=` |
-
-### Cara Kerja
-- Buka LOA dari admin → date picker tampil di top bar
-- Ubah tanggal → halaman reload otomatis → tanggal di dokumen berubah
-- Tidak tampil saat LOA dibuka oleh penulis (public view)
-- Tidak ikut terprint
+| `resources/views/admin/loa-master/edit.blade.php` | Tambah field `Tanggal LOA` (date input) di sebelah Kota TTD |
+| `app/Http/Controllers/Admin/LoaController.php` | `loaDate()`: prioritas — URL param → `loa_tanggal` jurnal → hari ini |
+| `resources/views/admin/loa/receipt.blade.php` | Hapus date picker inline dari sig-block |
 
 ---
 
@@ -218,4 +213,12 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - **Commit:** `9a8adf4` — 22:45 oleh Gudangsoft
 - **File berubah:** 1 file
 - `log-update-2026-06-21.md`
+
+
+## 20. 🔄 Update: qr
+
+- **Commit:** `e0011f1` — 22:51 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
 

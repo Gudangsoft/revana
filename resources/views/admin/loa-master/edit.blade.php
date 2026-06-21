@@ -122,6 +122,12 @@
                             <input type="text" class="form-control" name="loa_kota"
                                    value="{{ old('loa_kota', $journal->loa_kota ?? 'Semarang') }}">
                         </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Tanggal LOA</label>
+                            <input type="date" class="form-control" name="loa_tanggal"
+                                   value="{{ old('loa_tanggal', $journal->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : '') }}">
+                            <div class="form-text text-muted">Kosongkan = gunakan tanggal hari ini</div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -25,7 +25,7 @@ class LoaController extends Controller
             'slot'            => $slot,
             'loaNumber'       => $this->loaNumber($submission, $journal, $slot),
             'loaDate'         => $this->loaDate($journal, $date, $lang),
-            'loaDateRaw'      => $date ?: now()->toDateString(),
+            'loaDateRaw'      => $date ?: ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : now()->toDateString()),
             'logoUrl'         => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
@@ -53,7 +53,7 @@ class LoaController extends Controller
             'slot'            => $slot,
             'loaNumber'       => $this->loaNumber($submission, $journal, $slot),
             'loaDate'         => $this->loaDate($journal, $date, $lang),
-            'loaDateRaw'      => $date ?: now()->toDateString(),
+            'loaDateRaw'      => $date ?: ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : now()->toDateString()),
             'logoUrl'         => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
@@ -117,7 +117,13 @@ class LoaController extends Controller
 
     private function loaDate($journal, ?string $dateOverride = null, string $lang = 'en'): string
     {
-        $dt   = $dateOverride ? \Carbon\Carbon::parse($dateOverride) : now();
+        if ($dateOverride) {
+            $dt = \Carbon\Carbon::parse($dateOverride);
+        } elseif ($journal?->loa_tanggal) {
+            $dt = \Carbon\Carbon::parse($journal->loa_tanggal);
+        } else {
+            $dt = now();
+        }
         $kota = $journal?->loa_kota ?? 'Semarang';
 
         if ($lang === 'id') {
