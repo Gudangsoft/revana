@@ -1,5 +1,25 @@
 # Log Update — 21 Juni 2026
 
+## 18. Marketing Bisa Ubah Tanggal LOA per Artikel
+
+**Tujuan:** Marketing punya halaman LOA khusus dengan date picker, tanpa akses admin.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | Tambah method `showMarketing()` — auth guard marketing, pass `canEditDate=true`, `backUrl` ke detail submission marketing |
+| `routes/web.php` | Tambah route `GET /marketing/submissions/{submission}/loa` → `LoaController::showMarketing` (middleware auth:marketing) |
+| `resources/views/admin/loa/receipt.blade.php` | Date picker muncul jika `$isAdminView` ATAU `$canEditDate`; tombol "Edit Afiliasi" hanya untuk admin; `backUrl` override tombol Kembali |
+| `resources/views/marketing/show-submission.blade.php` | Tombol "Lihat LOA" pakai route `marketing.submissions.loa` (bukan loa.public) |
+
+### Cara Kerja
+- Marketing buka detail submission → klik "Lihat LOA" → halaman LOA dengan date picker
+- Ubah tanggal → reload dengan `?tanggal=` → tanggal dokumen berubah
+- Kembali → kembali ke halaman detail submission marketing
+- "Edit Afiliasi & Data" tidak tampil (admin only)
+
+---
+
 ## 17. Akses LOA dari Halaman Marketing
 
 **Tujuan:** Marketing bisa langsung lihat LOA per artikel tanpa perlu masuk ke halaman admin.
@@ -269,4 +289,13 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `log-update-2026-06-21.md`
 - `resources/views/admin/loa-master/edit.blade.php`
 - `resources/views/admin/loa/receipt.blade.php`
+
+
+## 25. 🔄 Update: loa mar
+
+- **Commit:** `94a105e` — 23:44 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-06-21.md`
+- `resources/views/marketing/show-submission.blade.php`
+- `resources/views/marketing/submissions.blade.php`
 

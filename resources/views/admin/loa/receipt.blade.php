@@ -356,14 +356,15 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 </head>
 <body>
 
+@php $canEditDate = $canEditDate ?? false; $backUrl = $backUrl ?? null; @endphp
 {{-- ── TOP BAR (screen only) ────────────────────────── --}}
 <div class="print-bar no-print" style="font-family:sans-serif;">
     <div>
-        <a href="{{ url()->previous() }}" class="btn-back">← Kembali</a>
+        <a href="{{ $backUrl ?? url()->previous() }}" class="btn-back">← Kembali</a>
         <span style="margin-left:16px; color:#ccc;">LOA: {{ $submission->kode_submit }}</span>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
-        @if(!empty($isAdminView) && $isAdminView)
+        @if((!empty($isAdminView) && $isAdminView) || $canEditDate)
         <label style="color:#ccc; font-size:12px; display:flex; align-items:center; gap:6px;">
             📅 Tanggal LOA:
             <input type="date" id="loa-date-picker"
@@ -371,10 +372,12 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
                    style="background:#2a2a2a; color:#fff; border:1px solid #555; border-radius:4px; padding:3px 8px; font-size:12px; cursor:pointer;">
         </label>
         @endif
+        @if(!empty($isAdminView) && $isAdminView)
         <a href="{{ route('admin.submissions.edit', $submission) }}"
            style="color:#90CAF9; text-decoration:none; font-size:12px;">
             ✏ Edit Afiliasi & Data
         </a>
+        @endif
         <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
 </div>

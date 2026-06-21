@@ -65,6 +65,42 @@ class LoaController extends Controller
         ]);
     }
 
+    // ── Marketing: view LOA dengan date picker, tanpa akses admin ───────────
+    public function showMarketing(Submission $submission)
+    {
+        $marketing = \Auth::guard('marketing')->user();
+        if ($submission->marketing_id && $submission->marketing_id !== $marketing->id) {
+            return redirect()->route('marketing.submissions')
+                ->with('error', 'Anda tidak memiliki akses ke LOA ini.');
+        }
+
+        $submission->load(['journalSlot.journalMaster']);
+        $journal = $submission->journalSlot?->journalMaster;
+        $slot    = $submission->journalSlot;
+        $date    = request('tanggal');
+        $kode    = $submission->kode_loa ?: $submission->kode_submit;
+        $lang    = $journal?->loa_language ?? 'en';
+
+        return view('admin.loa.receipt', [
+            'submission'           => $submission,
+            'journal'              => $journal,
+            'slot'                 => $slot,
+            'loaNumber'            => $this->loaNumber($submission, $journal, $slot),
+            'loaDate'              => $this->loaDate($journal, $date, $lang),
+            'loaDateRaw'           => $date ?: ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : now()->toDateString()),
+            'logoUrl'              => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
+            'signUrl'              => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            'headerImageUrl'       => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
+            'footerImageUrl'       => $journal?->footer_image_path ? Storage::url($journal->footer_image_path) : null,
+            'accreditationLogoUrl' => $journal?->accreditation_logo_path ? Storage::url($journal->accreditation_logo_path) : null,
+            'verifyUrl'            => route('verify.direct', ['kode_loa' => $kode]),
+            'isAdminView'          => false,
+            'canEditDate'          => true,
+            'backUrl'              => route('marketing.submissions.show', $submission),
+            'lang'                 => $lang,
+        ]);
+    }
+
     // ── Request LOA publik ─────────────────────────────────────────────────
     public function requestForm()
     {

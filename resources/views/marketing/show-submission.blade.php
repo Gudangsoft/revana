@@ -104,7 +104,7 @@
                         <div class="small text-muted">Kode: <code>{{ $submission->kode_loa }}</code></div>
                     </div>
                 </div>
-                <a href="{{ route('loa.public', ['kode_loa' => $submission->kode_loa]) }}"
+                <a href="{{ route('marketing.submissions.loa', $submission) }}"
                    target="_blank" class="btn btn-success btn-sm px-3 flex-shrink-0">
                     <i class="bi bi-eye me-1"></i> Lihat LOA
                 </a>

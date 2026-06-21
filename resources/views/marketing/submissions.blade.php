@@ -158,9 +158,9 @@
                                     <i class="bi bi-eye"></i> Detail
                                 </a>
                                 @if($submission->kode_loa)
-                                <a href="{{ route('loa.public', ['kode_loa' => $submission->kode_loa]) }}"
-                                   target="_blank" class="btn btn-sm btn-success" title="Lihat LOA">
-                                    <i class="bi bi-file-earmark-check"></i>
+                                <a href="{{ route('marketing.submissions.loa', $submission) }}"
+                                   target="_blank" class="btn btn-sm btn-success">
+                                    <i class="bi bi-file-earmark-check me-1"></i>LOA
                                 </a>
                                 @endif
                             </div>
