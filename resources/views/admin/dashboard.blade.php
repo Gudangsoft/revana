@@ -18,7 +18,7 @@
 </div>
 @endif
 @include('partials.birthday-notification', [
-    'wishRoute' => route('admin.birthday.wish'),
+    'wishRoute' => Route::has('admin.birthday.wish') ? route('admin.birthday.wish') : (Route::has('birthday.wish') ? route('birthday.wish') : '#'),
 ])
 
 <!-- Notification Alert for Submitted Reviews -->

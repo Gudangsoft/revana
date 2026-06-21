@@ -374,3 +374,23 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `log-update-2026-06-21.md`
 - `resources/views/marketing/show-submission.blade.php`
 
+
+## 32. Fix Admin Dashboard — Resilient Route::has() untuk Birthday Notification
+
+**Tujuan:** Admin dashboard masih 500 karena PHP OPcache menyimpan bytecode lama `routes/web.php` (route masih bernama `birthday.wish` di OPcache meski file sudah diubah). Solusi: ubah view agar tidak crash meski nama route berubah.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/dashboard.blade.php` | Ganti `route('admin.birthday.wish')` dengan fallback `Route::has()` — cek nama baru dulu, fallback ke nama lama, fallback ke `#` |
+
+### Penjelasan
+Sebelumnya:
+```blade
+'wishRoute' => route('admin.birthday.wish'),
+```
+Sekarang:
+```blade
+'wishRoute' => Route::has('admin.birthday.wish') ? route('admin.birthday.wish') : (Route::has('birthday.wish') ? route('birthday.wish') : '#'),
+```
+Dashboard tidak akan crash apapun kondisi OPcache atau nama route yang aktif.
