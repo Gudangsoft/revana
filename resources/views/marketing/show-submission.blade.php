@@ -94,22 +94,42 @@
         {{-- LOA Card --}}
         @if($submission->kode_loa)
         <div class="card mb-4 border-success">
-            <div class="card-body d-flex align-items-center justify-content-between gap-3 py-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div style="width:44px;height:44px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="bi bi-file-earmark-check-fill text-success fs-5"></i>
-                    </div>
+            <div class="card-header bg-success bg-opacity-10 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-check-fill text-success"></i>
+                <span class="fw-semibold text-success">Letter of Acceptance (LOA) Tersedia</span>
+                <code class="ms-1 small text-muted">{{ $submission->kode_loa }}</code>
+            </div>
+            <div class="card-body py-3">
+                <div class="d-flex align-items-end gap-3 flex-wrap">
                     <div>
-                        <div class="fw-semibold text-success">Letter of Acceptance (LOA) Tersedia</div>
-                        <div class="small text-muted">Kode: <code>{{ $submission->kode_loa }}</code></div>
+                        <label class="form-label fw-semibold mb-1 small">Tanggal Surat LOA</label>
+                        <input type="date" id="loaTanggalInput" class="form-control form-control-sm"
+                               value="{{ now()->toDateString() }}"
+                               style="width:180px;">
+                        <div class="form-text">Kosong = tanggal default jurnal / hari ini</div>
+                    </div>
+                    <div class="pb-4">
+                        <a id="loaBtn"
+                           href="{{ route('marketing.submissions.loa', $submission) }}"
+                           target="_blank" class="btn btn-success btn-sm px-4">
+                            <i class="bi bi-eye me-1"></i> Lihat LOA
+                        </a>
                     </div>
                 </div>
-                <a href="{{ route('marketing.submissions.loa', $submission) }}"
-                   target="_blank" class="btn btn-success btn-sm px-3 flex-shrink-0">
-                    <i class="bi bi-eye me-1"></i> Lihat LOA
-                </a>
             </div>
         </div>
+        <script>
+        (function () {
+            var inp = document.getElementById('loaTanggalInput');
+            var btn = document.getElementById('loaBtn');
+            var base = btn.href.split('?')[0];
+            function updateUrl() {
+                btn.href = inp.value ? base + '?tanggal=' + inp.value : base;
+            }
+            inp.addEventListener('change', updateUrl);
+            updateUrl();
+        })();
+        </script>
         @endif
 
         <!-- Progress Card - Using Shared Component -->

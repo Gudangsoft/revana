@@ -299,3 +299,15 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `resources/views/marketing/show-submission.blade.php`
 - `resources/views/marketing/submissions.blade.php`
 
+
+## 27. 🔄 Update: up loa mar
+
+- **Commit:** `250fc8d` — 23:49 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+- `resources/views/marketing/show-submission.blade.php`
+- `resources/views/marketing/submissions.blade.php`
+- `routes/web.php`
+
