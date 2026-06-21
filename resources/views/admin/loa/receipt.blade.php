@@ -178,7 +178,7 @@
 
 /* ── Print ───────────────────────────────────────────── */
 @media print {
-  .print-bar { display: none !important; }
+  .print-bar, .no-print { display: none !important; }
   body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 10pt; }
   @page { size: A4; margin: 0; }
   .a4-page { width: 210mm; min-height: 297mm; page-break-after: always; margin: 0; }
@@ -472,7 +472,16 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
 
         {{-- Signature --}}
         <div class="sig-block">
-            <p>{{ $loaDate }}</p>
+            <p>
+                {{ $loaDate }}
+                @if(!empty($isAdminView) && $isAdminView)
+                <input type="date" class="no-print loa-date-inline"
+                       value="{{ $loaDateRaw ?? now()->toDateString() }}"
+                       title="Ubah tanggal LOA"
+                       onchange="var u=new URL(window.location.href);u.searchParams.set('tanggal',this.value);window.location.href=u.toString();"
+                       style="margin-left:8px;background:#fffde7;border:1px dashed #f9a825;border-radius:4px;padding:2px 6px;font-size:8pt;color:#555;cursor:pointer;">
+                @endif
+            </p>
             <p style="margin-top:4px;">{{ $editorTitle }}</p>
             <p>{{ $jurnalNama }}</p>
             @if($signUrl)

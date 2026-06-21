@@ -195,3 +195,12 @@ Jalankan `php artisan migrate` di production untuk kolom `accreditation_logo_pat
 - `log-update-2026-06-21.md`
 - `resources/views/admin/loa/receipt.blade.php`
 
+
+## 17. 🔄 Update: up
+
+- **Commit:** `59f93ea` — 22:34 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-21.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
