@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -1254,21 +1255,134 @@ class DashboardController extends Controller
         $journalIds = Submission::where('marketing_id', $marketing->id)
             ->join('journal_slots', 'submissions.journal_slot_id', '=', 'journal_slots.id')
             ->pluck('journal_slots.journal_master_id')
-            ->filter()
-            ->unique()
-            ->values();
+            ->filter()->unique()->values();
 
         $journals = JournalMaster::whereIn('id', $journalIds)
             ->orderBy('nama_jurnal')
             ->get();
 
-        return view('marketing.loa-master.index', compact('marketing', 'journals'));
+        $stats = [
+            'total'    => $journals->count(),
+            'complete' => $journals->filter(fn($j) => $j->kode_singkat && $j->e_issn && $j->logo_path)->count(),
+            'auto'     => $journals->where('loa_auto_send', true)->count(),
+        ];
+
+        return view('marketing.loa-master.index', compact('marketing', 'journals', 'stats'));
     }
 
     /**
-     * Update loa_tanggal for a journal — only journals the marketing manages
+     * LOA Master Edit — form setting per jurnal
+     */
+    public function loaMasterEdit(JournalMaster $journalMaster)
+    {
+        $this->authorizeLoaJournal($journalMaster);
+
+        return view('marketing.loa-master.edit', [
+            'journal'        => $journalMaster,
+            'triggerOptions' => \App\Http\Controllers\Admin\LoaMasterController::TRIGGER_OPTIONS,
+        ]);
+    }
+
+    /**
+     * LOA Master Update — simpan semua setting (file uploads + fields)
      */
     public function loaMasterUpdate(Request $request, JournalMaster $journalMaster)
+    {
+        $this->authorizeLoaJournal($journalMaster);
+
+        $request->validate([
+            'kode_singkat'       => 'nullable|string|max:20',
+            'e_issn'             => 'nullable|string|max:20',
+            'editor_title'       => 'nullable|string|max:255',
+            'primary_color'      => 'nullable|string|max:7',
+            'secondary_color'    => 'nullable|string|max:7',
+            'loa_kota'           => 'nullable|string|max:100',
+            'loa_tanggal'        => 'nullable|date',
+            'loa_auto_trigger'   => 'nullable|string|max:30',
+            'loa_language'       => 'nullable|in:en,id',
+            'logo'               => 'nullable|image|max:2048',
+            'header_image'       => 'nullable|image|max:4096',
+            'footer_image'       => 'nullable|image|max:4096',
+            'accreditation_logo' => 'nullable|image|max:2048',
+        ]);
+
+        $data = $request->only([
+            'kode_singkat', 'e_issn', 'editor_title',
+            'primary_color', 'secondary_color', 'loa_kota', 'loa_tanggal',
+            'loa_auto_trigger', 'loa_language',
+        ]);
+
+        $data['loa_auto_send'] = $request->boolean('loa_auto_send');
+        if (empty($data['loa_auto_trigger'])) $data['loa_auto_trigger'] = 'manual';
+
+        if ($request->hasFile('logo')) {
+            if ($journalMaster->logo_path) Storage::disk('public')->delete($journalMaster->logo_path);
+            $data['logo_path'] = $request->file('logo')->store('journals/logos', 'public');
+        }
+        if ($request->boolean('remove_logo') && $journalMaster->logo_path) {
+            Storage::disk('public')->delete($journalMaster->logo_path);
+            $data['logo_path'] = null;
+        }
+
+        if ($request->hasFile('header_image')) {
+            if ($journalMaster->header_image_path) Storage::disk('public')->delete($journalMaster->header_image_path);
+            $data['header_image_path'] = $request->file('header_image')->store('journals/headers', 'public');
+        }
+        if ($request->boolean('remove_header_image') && $journalMaster->header_image_path) {
+            Storage::disk('public')->delete($journalMaster->header_image_path);
+            $data['header_image_path'] = null;
+        }
+
+        if ($request->hasFile('footer_image')) {
+            if ($journalMaster->footer_image_path) Storage::disk('public')->delete($journalMaster->footer_image_path);
+            $data['footer_image_path'] = $request->file('footer_image')->store('journals/footers', 'public');
+        }
+        if ($request->boolean('remove_footer_image') && $journalMaster->footer_image_path) {
+            Storage::disk('public')->delete($journalMaster->footer_image_path);
+            $data['footer_image_path'] = null;
+        }
+
+        if ($request->hasFile('accreditation_logo')) {
+            if ($journalMaster->accreditation_logo_path) Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            $data['accreditation_logo_path'] = $request->file('accreditation_logo')->store('journals/accreditation', 'public');
+        }
+        if ($request->boolean('remove_accreditation_logo') && $journalMaster->accreditation_logo_path) {
+            Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            $data['accreditation_logo_path'] = null;
+        }
+
+        $journalMaster->update($data);
+
+        return redirect()->route('marketing.loa-master.index')
+            ->with('success', 'Setting LOA untuk "' . $journalMaster->nama_jurnal . '" berhasil disimpan.');
+    }
+
+    /**
+     * LOA Master Preview — buka LOA submission terbaru milik marketing di jurnal ini
+     */
+    public function loaMasterPreview(JournalMaster $journalMaster)
+    {
+        $marketing = Auth::guard('marketing')->user();
+
+        $submission = Submission::where('marketing_id', $marketing->id)
+            ->whereHas('journalSlot', fn($q) => $q->where('journal_master_id', $journalMaster->id))
+            ->whereNotNull('kode_loa')
+            ->latest()->first()
+            ?? Submission::where('marketing_id', $marketing->id)
+               ->whereHas('journalSlot', fn($q) => $q->where('journal_master_id', $journalMaster->id))
+               ->latest()->first();
+
+        if (!$submission) {
+            return back()->with('error', 'Belum ada submission untuk jurnal "' . $journalMaster->nama_jurnal . '".');
+        }
+
+        return redirect()->route('marketing.submissions.loa', $submission);
+    }
+
+    /**
+     * Verify the marketing user has submissions in the given journal.
+     */
+    private function authorizeLoaJournal(JournalMaster $journalMaster): void
     {
         $marketing = Auth::guard('marketing')->user();
 
@@ -1278,16 +1392,8 @@ class DashboardController extends Controller
             ->exists();
 
         if (!$hasAccess) {
-            return redirect()->route('marketing.loa-master.index')
-                ->with('error', 'Anda tidak memiliki akses ke jurnal ini.');
+            abort(403, 'Anda tidak memiliki akses ke jurnal ini.');
         }
-
-        $request->validate(['loa_tanggal' => 'nullable|date']);
-
-        $journalMaster->update(['loa_tanggal' => $request->loa_tanggal ?: null]);
-
-        return redirect()->route('marketing.loa-master.index')
-            ->with('success', 'Tanggal LOA untuk ' . $journalMaster->nama_jurnal . ' berhasil disimpan.');
     }
 
     private function todayBirthdayData(string $senderType, int $senderId, ?string $excludeType = null, ?int $excludeId = null): array

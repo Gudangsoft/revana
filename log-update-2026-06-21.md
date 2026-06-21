@@ -1,5 +1,25 @@
 # Log Update — 21 Juni 2026
 
+## 30. Master LOA Marketing — Samakan dengan Halaman Admin
+
+**Tujuan:** Marketing bisa setting LOA lengkap (semua field sama dengan admin) untuk jurnal yang mereka kelola, bukan hanya tanggal.
+
+### File yang Diubah / Dibuat
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah `import Storage`; ganti `loaMasterUpdate()` menjadi full (semua field + file upload); tambah `loaMasterEdit()`, `loaMasterPreview()`, `authorizeLoaJournal()` helper |
+| `routes/web.php` | Tambah route `GET /loa-master/{journalMaster}/edit` dan `GET /loa-master/{journalMaster}/preview`; ubah update ke `PUT` |
+| `resources/views/marketing/loa-master/index.blade.php` | Rewrite: stat cards + tabel bergaya admin (logo, warna, LOA otomatis, kelengkapan) + search + filter chips |
+| `resources/views/marketing/loa-master/edit.blade.php` | View baru mirip admin edit: bahasa, identitas, warna, logo, logo akreditasi, header/footer image, LOA otomatis — extend marketing layout |
+
+### Cara Kerja
+- Index: stat cards (Total/Lengkap/Otomatis) + tabel dengan filter kelengkapan & LOA otomatis + search
+- Setting per jurnal: semua field sama dengan admin (kode, e-ISSN, kota, tanggal, jabatan, warna, logo, akreditasi, header, footer, auto-send)
+- Preview: buka LOA submission marketing terbaru di jurnal tersebut
+- Otorisasi: marketing hanya bisa akses jurnal di mana mereka punya submission
+
+---
+
 ## 29. Menu Master LOA di Portal Marketing
 
 **Tujuan:** Marketing bisa melihat dan mengatur tanggal LOA default per jurnal, namun hanya untuk jurnal yang memiliki submission dari marketing tersebut.
