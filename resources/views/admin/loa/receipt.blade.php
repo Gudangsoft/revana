@@ -492,6 +492,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             @if($editorName)
             <p class="sig-name">{{ $editorName }}</p>
             @endif
+            <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}" style="margin-top:8px;"></div>
         </div>
     </div>
 
@@ -503,15 +504,9 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
     </div>
     @endif
     <div class="verified-bar">
-        <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}"></div>
         <div class="verified-text-block">
             <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
-                <span class="verified-badge">iThenticate</span>
-                <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
-                @if(!empty($isAdminView) && $isAdminView)
-                <span class="verified-badge" style="background:#2e7d32;">ADMIN</span>
-                @endif
             </div>
             <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
@@ -644,11 +639,6 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         <div class="verified-text-block">
             <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
-                <span class="verified-badge">iThenticate</span>
-                <span class="verified-badge" style="background:#1565C0;">Turnitin</span>
-                @if(!empty($isAdminView) && $isAdminView)
-                <span class="verified-badge" style="background:#2e7d32;">ADMIN</span>
-                @endif
             </div>
             <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
