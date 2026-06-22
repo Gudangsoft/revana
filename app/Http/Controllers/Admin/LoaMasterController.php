@@ -35,9 +35,7 @@ class LoaMasterController extends Controller
             'auto'      => $journals->where('loa_auto_send', true)->count(),
         ];
 
-        $accreditations = Accreditation::where('is_active', true)->orderBy('name')->get();
-
-        return view('admin.loa-master.index', compact('journals', 'stats', 'accreditations'));
+        return view('admin.loa-master.index', compact('journals', 'stats'));
     }
 
     // ── Edit: form khusus LOA per jurnal ────────────────────────────────
