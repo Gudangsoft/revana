@@ -36,11 +36,18 @@ class AccreditationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:accreditations,name',
-            'is_active' => 'boolean',
+            'name'       => 'required|string|max:255|unique:accreditations,name',
+            'is_active'  => 'boolean',
+            'logo_sinta' => 'nullable|image|mimes:jpg,jpeg,png,webp,svg|max:2048',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+
+        if ($request->hasFile('logo_sinta')) {
+            $validated['logo_sinta'] = $request->file('logo_sinta')->store('accreditations/logos', 'public');
+        } else {
+            unset($validated['logo_sinta']);
+        }
 
         Accreditation::create($validated);
 
@@ -56,11 +63,21 @@ class AccreditationController extends Controller
     public function update(Request $request, Accreditation $accreditation)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:accreditations,name,' . $accreditation->id,
-            'is_active' => 'boolean',
+            'name'       => 'required|string|max:255|unique:accreditations,name,' . $accreditation->id,
+            'is_active'  => 'boolean',
+            'logo_sinta' => 'nullable|image|mimes:jpg,jpeg,png,webp,svg|max:2048',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+
+        if ($request->hasFile('logo_sinta')) {
+            if ($accreditation->logo_sinta) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($accreditation->logo_sinta);
+            }
+            $validated['logo_sinta'] = $request->file('logo_sinta')->store('accreditations/logos', 'public');
+        } else {
+            unset($validated['logo_sinta']);
+        }
 
         $accreditation->update($validated);
 

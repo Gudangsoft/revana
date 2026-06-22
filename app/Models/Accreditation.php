@@ -12,6 +12,7 @@ class Accreditation extends Model
     protected $fillable = [
         'name',
         'is_active',
+        'logo_sinta',
     ];
 
     protected $casts = [

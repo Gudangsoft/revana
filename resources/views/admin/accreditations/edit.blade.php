@@ -15,7 +15,7 @@
                 <i class="bi bi-pencil-square"></i> Form Edit Akreditasi
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.accreditations.update', $accreditation) }}" method="POST">
+                <form action="{{ route('admin.accreditations.update', $accreditation) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -30,8 +30,29 @@
                         <small class="text-muted">Nama akreditasi harus unik</small>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Logo SINTA</label>
+                        @if($accreditation->logo_sinta)
+                        <div class="mb-2 d-flex align-items-center gap-3">
+                            <img src="{{ asset('storage/' . $accreditation->logo_sinta) }}" alt="Logo SINTA"
+                                 style="max-height:70px;border:1px solid #dee2e6;border-radius:6px;padding:4px">
+                            <small class="text-muted">Logo saat ini</small>
+                        </div>
+                        @endif
+                        <input type="file" class="form-control @error('logo_sinta') is-invalid @enderror"
+                               name="logo_sinta" id="logo_sinta" accept="image/*"
+                               onchange="previewLogo(this)">
+                        @error('logo_sinta')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Kosongkan jika tidak ingin mengganti logo. JPG, PNG, WebP, SVG — maks 2MB</small>
+                        <div id="logo_preview" class="mt-2" style="display:none">
+                            <img id="logo_img" src="" alt="Preview" style="max-height:80px;border:1px solid #dee2e6;border-radius:6px;padding:4px">
+                        </div>
+                    </div>
+
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" name="is_active" 
+                        <input type="checkbox" class="form-check-input" name="is_active"
                                id="is_active" value="1" {{ old('is_active', $accreditation->is_active) ? 'checked' : '' }}>
                         <label class="form-check-label" for="is_active">
                             Aktif
@@ -70,4 +91,18 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+function previewLogo(input) {
+    var preview = document.getElementById('logo_preview');
+    var img = document.getElementById('logo_img');
+    if (input.files && input.files[0]) {
+        img.src = URL.createObjectURL(input.files[0]);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+}
+</script>
+@endpush
 @endsection

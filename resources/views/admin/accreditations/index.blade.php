@@ -64,6 +64,7 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
+                        <th>Logo</th>
                         <th>Nama Akreditasi</th>
                         <th>Jumlah Jurnal</th>
                         <th>Status</th>
@@ -73,6 +74,15 @@
                 <tbody>
                     @forelse($accreditations as $accreditation)
                     <tr>
+                        <td style="width:60px">
+                            @if($accreditation->logo_sinta)
+                                <img src="{{ asset('storage/' . $accreditation->logo_sinta) }}"
+                                     alt="{{ $accreditation->name }}"
+                                     style="max-height:40px;max-width:50px;object-fit:contain">
+                            @else
+                                <span class="text-muted small">-</span>
+                            @endif
+                        </td>
                         <td>
                             <strong>{{ $accreditation->name }}</strong>
                         </td>
