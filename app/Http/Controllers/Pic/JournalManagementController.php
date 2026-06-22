@@ -1914,16 +1914,17 @@ class JournalManagementController extends Controller
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
                 }
             }],
-            'link_publish' => 'nullable|url|max:500',
-            'nama_penulis' => 'required|string',
-            'no_hp_penulis' => 'nullable|string|max:20',
-            'email_penulis' => 'nullable|email|max:255',
-            'username_author' => 'nullable|string|max:255',
-            'password_author' => 'nullable|string|max:255',
-            'marketing_id' => 'nullable|exists:marketings,id',
-            'petugas_submit_id' => 'nullable|exists:pics,id',
-            'notes' => 'nullable|string',
-            'program_type' => ['nullable', \Illuminate\Validation\Rule::in(['bkd', 'jafa'])],
+            'link_publish'        => 'nullable|url|max:500',
+            'nama_penulis'        => 'required|string',
+            'affiliation_penulis' => 'nullable|string',
+            'no_hp_penulis'       => 'nullable|string|max:20',
+            'email_penulis'       => 'nullable|email|max:255',
+            'username_author'     => 'nullable|string|max:255',
+            'password_author'     => 'nullable|string|max:255',
+            'marketing_id'        => 'nullable|exists:marketings,id',
+            'petugas_submit_id'   => 'nullable|exists:pics,id',
+            'notes'               => 'nullable|string',
+            'program_type'        => ['nullable', \Illuminate\Validation\Rule::in(['bkd', 'jafa'])],
         ]);
 
         // Handle file upload
@@ -2189,13 +2190,14 @@ class JournalManagementController extends Controller
         
         $request->validate([
             'journal_slot_id' => 'required|exists:journal_slots,id',
-            'judul_artikel' => 'required|string|max:500',
-            'nama_penulis' => 'required|string|max:500',
-            'no_hp_penulis' => 'nullable|string|max:20',
-            'email_penulis' => 'nullable|email|max:255',
-            'notes' => 'nullable|string',
-            'marketing_id' => 'nullable|exists:marketings,id',
-            'link_publish' => 'nullable|url|max:500',
+            'judul_artikel'       => 'required|string|max:500',
+            'nama_penulis'        => 'required|string',
+            'affiliation_penulis' => 'nullable|string',
+            'no_hp_penulis'       => 'nullable|string|max:20',
+            'email_penulis'       => 'nullable|email|max:255',
+            'notes'               => 'nullable|string',
+            'marketing_id'        => 'nullable|exists:marketings,id',
+            'link_publish'        => 'nullable|url|max:500',
             'file_artikel' => ['nullable', 'file', 'max:51200', function ($attribute, $value, $fail) {
                 $ext = strtolower($value->getClientOriginalExtension());
                 if (!in_array($ext, ['doc', 'docx', 'pdf'])) {
@@ -2231,13 +2233,14 @@ class JournalManagementController extends Controller
         // Update submission data and increment edit count
         $submission->update([
             'journal_slot_id' => $request->journal_slot_id,
-            'judul_artikel' => $request->judul_artikel,
-            'nama_penulis' => $request->nama_penulis,
-            'no_hp_penulis' => $request->no_hp_penulis,
-            'email_penulis' => $request->email_penulis,
-            'notes' => $request->notes,
-            'marketing_id' => $request->marketing_id,
-            'link_publish' => $request->link_publish,
+            'judul_artikel'       => $request->judul_artikel,
+            'nama_penulis'        => $request->nama_penulis,
+            'affiliation_penulis' => $request->affiliation_penulis,
+            'no_hp_penulis'       => $request->no_hp_penulis,
+            'email_penulis'       => $request->email_penulis,
+            'notes'               => $request->notes,
+            'marketing_id'        => $request->marketing_id,
+            'link_publish'        => $request->link_publish,
         ]);
         
         // Get admin user for logHistory

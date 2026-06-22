@@ -847,13 +847,14 @@ class DashboardController extends Controller
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
                 }
             }],
-            'link_publish' => 'nullable|url|max:500',
-            'nama_penulis' => 'required|string',
-            'no_hp_penulis' => 'nullable|string|max:20',
-            'email_penulis' => 'nullable|email|max:255',
-            'username_author' => 'nullable|string|max:255',
-            'password_author' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
+            'link_publish'        => 'nullable|url|max:500',
+            'nama_penulis'        => 'required|string',
+            'affiliation_penulis' => 'nullable|string',
+            'no_hp_penulis'       => 'nullable|string|max:20',
+            'email_penulis'       => 'nullable|email|max:255',
+            'username_author'     => 'nullable|string|max:255',
+            'password_author'     => 'nullable|string|max:255',
+            'notes'               => 'nullable|string',
         ]);
 
         // Check slot availability
@@ -907,9 +908,10 @@ class DashboardController extends Controller
             'link_artikel' => $validated['link_artikel'] ?? null,
             'file_artikel' => $fileArtikel,
             'link_publish' => $validated['link_publish'] ?? null,
-            'nama_penulis' => $validated['nama_penulis'],
-            'no_hp_penulis' => $validated['no_hp_penulis'] ?? null,
-            'email_penulis' => $validated['email_penulis'] ?? null,
+            'nama_penulis'        => $validated['nama_penulis'],
+            'affiliation_penulis' => $validated['affiliation_penulis'] ?? null,
+            'no_hp_penulis'       => $validated['no_hp_penulis'] ?? null,
+            'email_penulis'       => $validated['email_penulis'] ?? null,
             'username_author' => $validated['username_author'] ?? null,
             'password_author' => $validated['password_author'] ?? null,
             'notes' => $validated['notes'] ?? null,

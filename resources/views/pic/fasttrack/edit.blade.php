@@ -127,6 +127,19 @@
                             </div>
 
                             <div class="form-group">
+                                <label for="affiliation_penulis">
+                                    <i class="fas fa-university mr-1"></i>
+                                    Afiliasi Penulis <small class="text-muted font-weight-normal">(institusi/universitas)</small>
+                                </label>
+                                <input type="text" name="affiliation_penulis" id="affiliation_penulis" class="form-control"
+                                       value="{{ old('affiliation_penulis', $submission->affiliation_penulis) }}"
+                                       placeholder="Nama institusi / universitas penulis">
+                                @error('affiliation_penulis')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
                                 <label for="no_hp_penulis">
                                     <i class="fas fa-phone mr-1"></i>
                                     No HP Penulis

@@ -161,6 +161,16 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="col-12">
+                    <label for="affiliation_penulis" class="form-label form-label-sm mb-1">Afiliasi Penulis <span class="text-muted fw-normal">(institusi/universitas)</span></label>
+                    <input type="text" name="affiliation_penulis" id="affiliation_penulis"
+                           class="form-control @error('affiliation_penulis') is-invalid @enderror"
+                           value="{{ old('affiliation_penulis') }}"
+                           placeholder="Nama institusi / universitas penulis">
+                    @error('affiliation_penulis')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
                 <div class="col-md-6">
                     <label class="form-label form-label-sm mb-1">No HP Penulis</label>
                     <input type="text" name="no_hp_penulis" class="form-control @error('no_hp_penulis') is-invalid @enderror" value="{{ old('no_hp_penulis') }}" placeholder="08xx-xxxx-xxxx">
