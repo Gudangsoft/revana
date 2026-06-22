@@ -89,6 +89,44 @@
         </div>
     </div>
 
+    {{-- ── Logo Akreditasi ──────────────────────────────────────────────── --}}
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header py-2 d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="font-size:.9rem;">
+                    <i class="bi bi-award me-1 text-warning"></i> Logo Akreditasi
+                </span>
+                <a href="{{ route('admin.accreditations.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-gear"></i> Kelola
+                </a>
+            </div>
+            <div class="card-body py-3">
+                @if($accreditations->isEmpty())
+                    <span class="text-muted small">Belum ada data akreditasi aktif.</span>
+                @else
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    @foreach($accreditations as $acc)
+                    <div class="text-center" style="min-width:60px;">
+                        @if($acc->logo_sinta)
+                            <img src="{{ asset('storage/' . $acc->logo_sinta) }}"
+                                 alt="{{ $acc->name }}"
+                                 title="{{ $acc->name }}"
+                                 style="max-height:36px;max-width:72px;object-fit:contain;display:block;margin:0 auto 4px;">
+                        @else
+                            <div style="height:36px;width:60px;background:#f1f5f9;border:1px dashed #cbd5e1;
+                                        border-radius:4px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;">
+                                <i class="bi bi-image text-muted" style="font-size:.8rem;"></i>
+                            </div>
+                        @endif
+                        <span style="font-size:.65rem;color:#64748b;">{{ $acc->name }}</span>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
     {{-- ── Tabel utama ────────────────────────────────────────────────── --}}
     <div class="col-12">
         <div class="card shadow-sm">
