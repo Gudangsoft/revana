@@ -112,7 +112,7 @@ class SubmissionController extends Controller
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
                 }
             }],
-            'nama_penulis'           => 'required|string|max:255',
+            'nama_penulis'           => 'required|string',
             'affiliation_penulis'    => 'nullable|string|max:500',
             'no_hp_penulis'          => 'nullable|string|max:20',
             'email_penulis'          => 'nullable|email|max:255',
@@ -274,7 +274,7 @@ class SubmissionController extends Controller
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
                 }
             }],
-            'nama_penulis'           => 'required|string|max:255',
+            'nama_penulis'           => 'required|string',
             'affiliation_penulis'    => 'nullable|string|max:500',
             'no_hp_penulis'          => 'nullable|string|max:20',
             'email_penulis'          => 'nullable|email|max:255',
@@ -1727,7 +1727,7 @@ class SubmissionController extends Controller
                 }
             }],
             'link_publish' => 'nullable|url|max:500',
-            'nama_penulis'        => 'required|string|max:255',
+            'nama_penulis'        => 'required|string',
             'affiliation_penulis' => 'nullable|string|max:255',
             'no_hp_penulis'       => 'nullable|string|max:20',
             'email_penulis'       => 'nullable|email|max:255',
@@ -1878,7 +1878,7 @@ class SubmissionController extends Controller
             'journal_slot_id' => 'required|exists:journal_slots,id',
             'judul_artikel' => 'required|string|max:500',
             'link_publish' => 'nullable|url|max:500',
-            'nama_penulis' => 'required|string|max:255',
+            'nama_penulis' => 'required|string',
             'no_hp_penulis' => 'nullable|string|max:20',
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',

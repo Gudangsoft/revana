@@ -414,7 +414,7 @@ class JournalManagementController extends Controller
             'id_artikel' => 'required|string|max:100',
             'judul_artikel' => 'required|string|max:500',
             'link_artikel' => ['nullable', 'url', 'max:500', Rule::unique('submissions', 'link_artikel')],
-            'nama_penulis' => 'required|string|max:255',
+            'nama_penulis' => 'required|string',
             'no_hp_penulis' => 'nullable|string|max:20',
             'email_penulis' => 'nullable|email|max:255',
             'affiliation_penulis'    => 'nullable|string|max:500',
@@ -1915,7 +1915,7 @@ class JournalManagementController extends Controller
                 }
             }],
             'link_publish' => 'nullable|url|max:500',
-            'nama_penulis' => 'required|string|max:255',
+            'nama_penulis' => 'required|string',
             'no_hp_penulis' => 'nullable|string|max:20',
             'email_penulis' => 'nullable|email|max:255',
             'username_author' => 'nullable|string|max:255',
