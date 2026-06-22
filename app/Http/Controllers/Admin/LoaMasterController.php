@@ -70,12 +70,13 @@ class LoaMasterController extends Controller
             'editor_signature'  => 'nullable|image|max:2048',
             'header_image'      => 'nullable|image|max:4096',
             'footer_image'          => 'nullable|image|max:4096',
+            'link_sk_akreditasi'    => 'nullable|url|max:500',
         ]);
 
         $data = $request->only([
             'kode_singkat', 'e_issn', 'editor_name', 'editor_title',
             'primary_color', 'secondary_color', 'loa_kota', 'loa_tanggal',
-            'loa_auto_trigger', 'loa_language',
+            'loa_auto_trigger', 'loa_language', 'link_sk_akreditasi',
         ]);
 
         $data['loa_auto_send'] = $request->boolean('loa_auto_send');

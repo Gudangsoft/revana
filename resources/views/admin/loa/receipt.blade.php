@@ -9,6 +9,7 @@
     $headerImageUrl       = $headerImageUrl ?? null;
     $footerImageUrl       = $footerImageUrl ?? null;
     $accreditationLogoUrl = $accreditationLogoUrl ?? null;
+    $linkSkAkreditasi     = $linkSkAkreditasi ?? null;
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
     $jurnalNama     = $journal?->nama_jurnal      ?? 'Jurnal';
@@ -502,7 +503,13 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         </div>
         @if($accreditationLogoUrl)
         <div class="acred-logo-col">
-            <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+            @if(!empty($linkSkAkreditasi))
+                <a href="{{ $linkSkAkreditasi }}" target="_blank" style="display:inline-block;">
+                    <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+                </a>
+            @else
+                <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+            @endif
         </div>
         @endif
     </div>
@@ -634,7 +641,13 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         </div>
         @if($accreditationLogoUrl)
         <div class="acred-logo-col">
-            <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+            @if(!empty($linkSkAkreditasi))
+                <a href="{{ $linkSkAkreditasi }}" target="_blank" style="display:inline-block;">
+                    <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+                </a>
+            @else
+                <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+            @endif
         </div>
         @endif
     </div>

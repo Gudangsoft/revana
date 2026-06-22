@@ -203,7 +203,7 @@
                 <div class="card-header"><i class="bi bi-award me-1"></i> Logo Akreditasi</div>
                 <div class="card-body">
                     @if($masterLogo)
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3 mb-3">
                         <div style="background:#1A237E;padding:8px 14px;border-radius:6px;display:inline-flex;align-items:center;">
                             <img src="{{ asset('storage/' . $masterLogo) }}" height="36"
                                  style="display:block;" alt="{{ $journal->accreditation }}">
@@ -219,14 +219,29 @@
                         </div>
                     </div>
                     @elseif($journal->accreditation)
-                    <div class="alert alert-warning py-2 mb-0 small">
+                    <div class="alert alert-warning py-2 small mb-3">
                         <i class="bi bi-exclamation-triangle me-1"></i>
                         Jurnal ini terakreditasi <strong>{{ $journal->accreditation }}</strong> tapi belum ada logo di
                         <a href="{{ route('admin.accreditations.index') }}">Master Akreditasi</a>.
                     </div>
                     @else
-                    <span class="text-muted small">Jurnal belum memiliki akreditasi.</span>
+                    <p class="text-muted small mb-3">Jurnal belum memiliki akreditasi.</p>
                     @endif
+
+                    <div>
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-link-45deg me-1"></i> Link SK Akreditasi
+                            <span class="fw-normal text-muted small ms-1">— logo di LOA akan dapat diklik menuju link ini</span>
+                        </label>
+                        <input type="url" name="link_sk_akreditasi" id="link_sk_akreditasi"
+                               class="form-control @error('link_sk_akreditasi') is-invalid @enderror"
+                               value="{{ old('link_sk_akreditasi', $journal->link_sk_akreditasi) }}"
+                               placeholder="https://sinta.kemdikbud.go.id/journals/...">
+                        @error('link_sk_akreditasi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">Kosongkan jika tidak ada. Contoh: link profil jurnal di SINTA atau link SK PDF.</div>
+                    </div>
                 </div>
             </div>
 
