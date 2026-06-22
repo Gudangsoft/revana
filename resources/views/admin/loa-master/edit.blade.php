@@ -198,62 +198,35 @@
             </div>
 
             {{-- ── Logo Akreditasi ─────────────────────────────────────── --}}
+            @php $masterLogo = $accreditation->logo_sinta ?? null; @endphp
             <div class="card mb-3">
                 <div class="card-header"><i class="bi bi-award me-1"></i> Logo Akreditasi</div>
                 <div class="card-body">
-                    <div class="form-text mb-3">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Logo lembaga akreditasi (misal: SINTA, Scopus, WoS, dll). Ditampilkan di bar bawah dokumen LOA.
-                        PNG transparan lebih bagus, tinggi ideal ±32px, maks 2MB.
-                    </div>
-
-                    @php
-                        $masterLogo = $accreditation->logo_sinta ?? null;
-                        $isMasterLogo = $journal->accreditation_logo_path &&
-                                        str_starts_with($journal->accreditation_logo_path, 'accreditations/');
-                    @endphp
-
-                    @if($journal->accreditation_logo_path)
-                    <div class="mb-3 d-flex align-items-center gap-3">
-                        <img src="{{ Storage::url($journal->accreditation_logo_path) }}" height="40"
-                             style="border:1px solid #eee;padding:4px;background:#1A237E;border-radius:4px;" alt="Logo Akreditasi">
+                    @if($masterLogo)
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="background:#1A237E;padding:8px 14px;border-radius:6px;display:inline-flex;align-items:center;">
+                            <img src="{{ asset('storage/' . $masterLogo) }}" height="36"
+                                 style="display:block;" alt="{{ $journal->accreditation }}">
+                        </div>
                         <div>
-                            @if($isMasterLogo)
-                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
-                                    <i class="bi bi-link-45deg"></i> Otomatis dari master akreditasi
-                                </span><br>
-                            @endif
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="remove_accreditation_logo" value="1" id="rmAccLogo">
-                                <label class="form-check-label text-danger small" for="rmAccLogo">Hapus logo akreditasi</label>
+                            <div class="fw-semibold small">{{ $journal->accreditation }}</div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">
+                                <i class="bi bi-link-45deg"></i> Otomatis dari master akreditasi
+                            </span>
+                            <div class="text-muted mt-1" style="font-size:.75rem;">
+                                Ganti logo di <a href="{{ route('admin.accreditations.index') }}">Master Akreditasi</a>
                             </div>
                         </div>
                     </div>
-                    @elseif($masterLogo)
-                    <div class="alert alert-info py-2 d-flex align-items-center gap-3 mb-3">
-                        <img src="{{ asset('storage/' . $masterLogo) }}" height="36"
-                             style="border:1px solid rgba(0,0,0,.1);padding:3px;background:#fff;border-radius:4px;" alt="Logo Master">
-                        <div class="small">
-                            <strong>Logo dari master akreditasi ({{ $journal->accreditation }})</strong><br>
-                            <span class="text-muted">Akan digunakan otomatis saat simpan. Upload file di bawah jika ingin custom.</span>
-                        </div>
+                    @elseif($journal->accreditation)
+                    <div class="alert alert-warning py-2 mb-0 small">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Jurnal ini terakreditasi <strong>{{ $journal->accreditation }}</strong> tapi belum ada logo di
+                        <a href="{{ route('admin.accreditations.index') }}">Master Akreditasi</a>.
                     </div>
+                    @else
+                    <span class="text-muted small">Jurnal belum memiliki akreditasi.</span>
                     @endif
-
-                    <div>
-                        <label class="form-label fw-semibold">
-                            {{ $journal->accreditation_logo_path ? 'Ganti Logo Akreditasi' : 'Upload Logo Akreditasi (Custom)' }}
-                        </label>
-                        <input type="file" class="form-control @error('accreditation_logo') is-invalid @enderror"
-                               name="accreditation_logo" accept="image/*" id="inpAccLogo">
-                        @error('accreditation_logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div id="accLogoPreview" class="mt-2" style="display:none;">
-                        <div class="fw-semibold small mb-1 text-muted">Preview:</div>
-                        <div style="background:{{ $journal->primary_color ?? '#1A237E' }};display:inline-block;padding:6px 12px;border-radius:4px;">
-                            <img id="accLogoPreviewImg" height="32" style="display:block;" alt="Preview">
-                        </div>
-                    </div>
                 </div>
             </div>
 

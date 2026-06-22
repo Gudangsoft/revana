@@ -72,7 +72,6 @@ class LoaMasterController extends Controller
             'editor_signature'  => 'nullable|image|max:2048',
             'header_image'      => 'nullable|image|max:4096',
             'footer_image'          => 'nullable|image|max:4096',
-            'accreditation_logo'    => 'nullable|image|max:2048',
         ]);
 
         $data = $request->only([
@@ -114,27 +113,9 @@ class LoaMasterController extends Controller
             $data['footer_image_path'] = null;
         }
 
-        // Accreditation logo
-        if ($request->hasFile('accreditation_logo')) {
-            // Hapus file lama hanya jika bukan referensi ke master akreditasi
-            if ($journalMaster->accreditation_logo_path &&
-                !str_starts_with($journalMaster->accreditation_logo_path, 'accreditations/')) {
-                Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
-            }
-            $data['accreditation_logo_path'] = $request->file('accreditation_logo')->store('journals/accreditation', 'public');
-        } elseif ($request->boolean('remove_accreditation_logo')) {
-            if ($journalMaster->accreditation_logo_path &&
-                !str_starts_with($journalMaster->accreditation_logo_path, 'accreditations/')) {
-                Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
-            }
-            $data['accreditation_logo_path'] = null;
-        } elseif (!$journalMaster->accreditation_logo_path) {
-            // Auto-isi dari master akreditasi jika belum ada logo
-            $acc = Accreditation::where('name', $journalMaster->accreditation)->first();
-            if ($acc && $acc->logo_sinta) {
-                $data['accreditation_logo_path'] = $acc->logo_sinta;
-            }
-        }
+        // Accreditation logo — selalu sync dari master akreditasi
+        $acc = Accreditation::where('name', $journalMaster->accreditation)->first();
+        $data['accreditation_logo_path'] = ($acc && $acc->logo_sinta) ? $acc->logo_sinta : null;
 
         // Signature
         if ($request->hasFile('editor_signature')) {
