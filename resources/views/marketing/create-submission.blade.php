@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Nama penulis character counter
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var inp     = document.getElementById('nama_penulis');
     var counter = document.getElementById('nama_penulis_counter');
     if (!inp || !counter) return;
@@ -500,6 +500,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     inp.addEventListener('input', update);
     update();
-})();
+});
 </script>
 @endsection
