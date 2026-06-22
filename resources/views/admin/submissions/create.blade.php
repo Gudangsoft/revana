@@ -123,43 +123,42 @@
                     </div>
 
                     <hr>
-                    <h6 class="text-muted mb-3"><i class="bi bi-person"></i> Data Penulis</h6>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="text-muted mb-0"><i class="bi bi-person"></i> Data Penulis</h6>
+                        <small class="text-muted">Maks. 7 penulis (1 utama + 6 tambahan)</small>
+                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nama_penulis" class="form-label">Nama Penulis <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('nama_penulis') is-invalid @enderror" id="nama_penulis" name="nama_penulis" value="{{ old('nama_penulis') }}" required>
+                    {{-- Penulis 1 (Utama) --}}
+                    <div class="border rounded p-3 mb-2 bg-white">
+                        <small class="fw-semibold text-primary d-block mb-2">
+                            <i class="bi bi-person-fill"></i> Penulis 1 <span class="text-muted fw-normal">(Penulis Utama / Corresponding Author)</span>
+                        </small>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label for="nama_penulis" class="form-label form-label-sm mb-1">Nama Penulis <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('nama_penulis') is-invalid @enderror" id="nama_penulis" name="nama_penulis" value="{{ old('nama_penulis') }}" placeholder="Nama lengkap penulis utama" required>
                                 @error('nama_penulis')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label for="no_hp_penulis" class="form-label">No HP Penulis</label>
-                                <input type="text" class="form-control @error('no_hp_penulis') is-invalid @enderror" id="no_hp_penulis" name="no_hp_penulis" value="{{ old('no_hp_penulis') }}">
+                            <div class="col-12">
+                                <label for="affiliation_penulis" class="form-label form-label-sm mb-1">Afiliasi Penulis <span class="text-muted fw-normal">(institusi/universitas)</span></label>
+                                <input type="text" class="form-control @error('affiliation_penulis') is-invalid @enderror" id="affiliation_penulis" name="affiliation_penulis" value="{{ old('affiliation_penulis') }}" placeholder="Nama institusi / universitas penulis utama">
+                                @error('affiliation_penulis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="no_hp_penulis" class="form-label form-label-sm mb-1">No HP Penulis</label>
+                                <input type="text" class="form-control @error('no_hp_penulis') is-invalid @enderror" id="no_hp_penulis" name="no_hp_penulis" value="{{ old('no_hp_penulis') }}" placeholder="08xx-xxxx-xxxx">
                                 @error('no_hp_penulis')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label for="email_penulis" class="form-label">Email Penulis</label>
+                            <div class="col-md-6">
+                                <label for="email_penulis" class="form-label form-label-sm mb-1">Email Penulis</label>
                                 <input type="email" class="form-control @error('email_penulis') is-invalid @enderror" id="email_penulis" name="email_penulis" value="{{ old('email_penulis') }}" placeholder="email@domain.com">
                                 @error('email_penulis')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label for="affiliation_penulis" class="form-label">Afiliasi Penulis <span class="text-muted small fw-normal">(institusi/universitas)</span></label>
-                                <input type="text" class="form-control @error('affiliation_penulis') is-invalid @enderror" id="affiliation_penulis" name="affiliation_penulis" value="{{ old('affiliation_penulis') }}" placeholder="Nama institusi / universitas penulis">
-                                @error('affiliation_penulis')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

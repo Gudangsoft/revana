@@ -112,15 +112,15 @@ class SubmissionController extends Controller
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
                 }
             }],
-            'nama_penulis'        => 'required|string|max:255',
-            'affiliation_penulis' => 'nullable|string|max:255',
-            'no_hp_penulis'       => 'nullable|string|max:20',
-            'email_penulis'       => 'nullable|email|max:255',
-            'co_authors'             => 'nullable|array',
+            'nama_penulis'           => 'required|string|max:255',
+            'affiliation_penulis'    => 'nullable|string|max:500',
+            'no_hp_penulis'          => 'nullable|string|max:20',
+            'email_penulis'          => 'nullable|email|max:255',
+            'co_authors'             => 'nullable|array|max:6',
             'co_authors.*.nama'      => 'nullable|string|max:255',
             'co_authors.*.no_hp'     => 'nullable|string|max:20',
             'co_authors.*.email'     => 'nullable|email|max:255',
-            'co_authors.*.afiliasi'  => 'nullable|string|max:255',
+            'co_authors.*.afiliasi'  => 'nullable|string|max:500',
             'username_author'     => 'nullable|string|max:255',
             'password_author' => 'nullable|string|max:255',
             'marketing_id' => 'nullable|exists:marketings,id',
@@ -274,12 +274,17 @@ class SubmissionController extends Controller
                     $fail('File artikel harus berformat: DOC, DOCX, atau PDF.');
                 }
             }],
-            'nama_penulis'        => 'required|string|max:255',
-            'affiliation_penulis' => 'nullable|string|max:255',
-            'no_hp_penulis'       => 'nullable|string|max:20',
-            'email_penulis'       => 'nullable|email|max:255',
-            'username_author'     => 'nullable|string|max:255',
-            'password_author' => 'nullable|string|max:255',
+            'nama_penulis'           => 'required|string|max:255',
+            'affiliation_penulis'    => 'nullable|string|max:500',
+            'no_hp_penulis'          => 'nullable|string|max:20',
+            'email_penulis'          => 'nullable|email|max:255',
+            'co_authors'             => 'nullable|array|max:6',
+            'co_authors.*.nama'      => 'nullable|string|max:255',
+            'co_authors.*.no_hp'     => 'nullable|string|max:20',
+            'co_authors.*.email'     => 'nullable|email|max:255',
+            'co_authors.*.afiliasi'  => 'nullable|string|max:500',
+            'username_author'        => 'nullable|string|max:255',
+            'password_author'        => 'nullable|string|max:255',
             'marketing_id' => 'nullable|exists:marketings,id',
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
@@ -322,6 +327,18 @@ class SubmissionController extends Controller
                 $validated['pic_marketing'] = $marketing->name;
             }
         }
+
+        // Process co_authors: filter empty, normalize
+        $validated['co_authors'] = collect($request->input('co_authors', []))
+            ->filter(fn($a) => !empty(trim($a['nama'] ?? '')))
+            ->map(fn($a) => [
+                'nama'     => trim($a['nama'] ?? ''),
+                'no_hp'    => trim($a['no_hp'] ?? ''),
+                'email'    => trim($a['email'] ?? ''),
+                'afiliasi' => trim($a['afiliasi'] ?? ''),
+            ])
+            ->values()
+            ->toArray() ?: null;
 
         // Handle file upload
         if ($request->hasFile('file_artikel')) {
