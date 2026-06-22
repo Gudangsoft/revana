@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Accreditation;
 use App\Models\Submission;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,7 +31,7 @@ class LoaController extends Controller
             'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
             'footerImageUrl'         => $journal?->footer_image_path ? Storage::url($journal->footer_image_path) : null,
-            'accreditationLogoUrl'   => $journal?->accreditation_logo_path ? Storage::url($journal->accreditation_logo_path) : null,
+            'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
             'verifyUrl'       => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'     => false,
             'lang'            => $lang,
@@ -58,7 +59,7 @@ class LoaController extends Controller
             'signUrl'         => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'  => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
             'footerImageUrl'         => $journal?->footer_image_path ? Storage::url($journal->footer_image_path) : null,
-            'accreditationLogoUrl'   => $journal?->accreditation_logo_path ? Storage::url($journal->accreditation_logo_path) : null,
+            'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
             'verifyUrl'       => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'     => true,
             'lang'            => $lang,
@@ -92,7 +93,7 @@ class LoaController extends Controller
             'signUrl'              => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'       => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
             'footerImageUrl'       => $journal?->footer_image_path ? Storage::url($journal->footer_image_path) : null,
-            'accreditationLogoUrl' => $journal?->accreditation_logo_path ? Storage::url($journal->accreditation_logo_path) : null,
+            'accreditationLogoUrl' => $this->resolveAccreditationLogoUrl($journal),
             'verifyUrl'            => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'          => false,
             'canEditDate'          => true,
@@ -136,6 +137,19 @@ class LoaController extends Controller
         if ($params) $url .= '?' . http_build_query($params);
 
         return redirect($url);
+    }
+
+    private function resolveAccreditationLogoUrl($journal): ?string
+    {
+        if (!$journal) return null;
+        $acc = Accreditation::where('name', $journal->accreditation)->first();
+        if ($acc && $acc->logo_sinta) {
+            return asset('storage/' . $acc->logo_sinta);
+        }
+        if ($journal->accreditation_logo_path) {
+            return Storage::url($journal->accreditation_logo_path);
+        }
+        return null;
     }
 
     // ── helpers ────────────────────────────────────────────────────────────
