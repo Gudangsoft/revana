@@ -206,20 +206,44 @@
                         Logo lembaga akreditasi (misal: SINTA, Scopus, WoS, dll). Ditampilkan di bar bawah dokumen LOA.
                         PNG transparan lebih bagus, tinggi ideal ±32px, maks 2MB.
                     </div>
+
+                    @php
+                        $masterLogo = $accreditation->logo_sinta ?? null;
+                        $isMasterLogo = $journal->accreditation_logo_path &&
+                                        str_starts_with($journal->accreditation_logo_path, 'accreditations/');
+                    @endphp
+
                     @if($journal->accreditation_logo_path)
                     <div class="mb-3 d-flex align-items-center gap-3">
                         <img src="{{ Storage::url($journal->accreditation_logo_path) }}" height="40"
                              style="border:1px solid #eee;padding:4px;background:#1A237E;border-radius:4px;" alt="Logo Akreditasi">
                         <div>
+                            @if($isMasterLogo)
+                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
+                                    <i class="bi bi-link-45deg"></i> Otomatis dari master akreditasi
+                                </span><br>
+                            @endif
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="remove_accreditation_logo" value="1" id="rmAccLogo">
                                 <label class="form-check-label text-danger small" for="rmAccLogo">Hapus logo akreditasi</label>
                             </div>
                         </div>
                     </div>
+                    @elseif($masterLogo)
+                    <div class="alert alert-info py-2 d-flex align-items-center gap-3 mb-3">
+                        <img src="{{ asset('storage/' . $masterLogo) }}" height="36"
+                             style="border:1px solid rgba(0,0,0,.1);padding:3px;background:#fff;border-radius:4px;" alt="Logo Master">
+                        <div class="small">
+                            <strong>Logo dari master akreditasi ({{ $journal->accreditation }})</strong><br>
+                            <span class="text-muted">Akan digunakan otomatis saat simpan. Upload file di bawah jika ingin custom.</span>
+                        </div>
+                    </div>
                     @endif
+
                     <div>
-                        <label class="form-label fw-semibold">{{ $journal->accreditation_logo_path ? 'Ganti Logo Akreditasi' : 'Upload Logo Akreditasi' }}</label>
+                        <label class="form-label fw-semibold">
+                            {{ $journal->accreditation_logo_path ? 'Ganti Logo Akreditasi' : 'Upload Logo Akreditasi (Custom)' }}
+                        </label>
                         <input type="file" class="form-control @error('accreditation_logo') is-invalid @enderror"
                                name="accreditation_logo" accept="image/*" id="inpAccLogo">
                         @error('accreditation_logo')<div class="invalid-feedback">{{ $message }}</div>@enderror

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\LoaAcceptedMail;
+use App\Models\Accreditation;
 use App\Models\JournalMaster;
 use App\Models\Submission;
 use Illuminate\Http\Request;
@@ -40,9 +41,14 @@ class LoaMasterController extends Controller
     // ── Edit: form khusus LOA per jurnal ────────────────────────────────
     public function edit(JournalMaster $journalMaster)
     {
+        $accreditation = $journalMaster->accreditation
+            ? Accreditation::where('name', $journalMaster->accreditation)->first()
+            : null;
+
         return view('admin.loa-master.edit', [
             'journal'        => $journalMaster,
             'triggerOptions' => self::TRIGGER_OPTIONS,
+            'accreditation'  => $accreditation,
         ]);
     }
 
@@ -108,12 +114,24 @@ class LoaMasterController extends Controller
 
         // Accreditation logo
         if ($request->hasFile('accreditation_logo')) {
-            if ($journalMaster->accreditation_logo_path) Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            // Hapus file lama hanya jika bukan referensi ke master akreditasi
+            if ($journalMaster->accreditation_logo_path &&
+                !str_starts_with($journalMaster->accreditation_logo_path, 'accreditations/')) {
+                Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            }
             $data['accreditation_logo_path'] = $request->file('accreditation_logo')->store('journals/accreditation', 'public');
-        }
-        if ($request->boolean('remove_accreditation_logo') && $journalMaster->accreditation_logo_path) {
-            Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+        } elseif ($request->boolean('remove_accreditation_logo')) {
+            if ($journalMaster->accreditation_logo_path &&
+                !str_starts_with($journalMaster->accreditation_logo_path, 'accreditations/')) {
+                Storage::disk('public')->delete($journalMaster->accreditation_logo_path);
+            }
             $data['accreditation_logo_path'] = null;
+        } elseif (!$journalMaster->accreditation_logo_path) {
+            // Auto-isi dari master akreditasi jika belum ada logo
+            $acc = Accreditation::where('name', $journalMaster->accreditation)->first();
+            if ($acc && $acc->logo_sinta) {
+                $data['accreditation_logo_path'] = $acc->logo_sinta;
+            }
         }
 
         // Signature
