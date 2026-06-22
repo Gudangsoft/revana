@@ -112,8 +112,15 @@
                                 <label for="nama_penulis">
                                     <i class="fas fa-users mr-1"></i>
                                     Penulis <span class="text-danger">*</span>
+                                    <small class="text-muted font-weight-normal">(pisahkan dengan koma jika lebih dari 1)</small>
                                 </label>
-                                <input type="text" name="nama_penulis" id="nama_penulis" class="form-control" value="{{ old('nama_penulis', $submission->nama_penulis) }}" required>
+                                <input type="text" name="nama_penulis" id="nama_penulis" class="form-control"
+                                       value="{{ old('nama_penulis', $submission->nama_penulis) }}"
+                                       placeholder="Contoh: Ekosiswanto, Maulidiah Zulfa, Zaenal"
+                                       maxlength="500" required>
+                                <div class="text-right mt-1">
+                                    <small id="nama_penulis_counter" class="text-muted">0 / 500 karakter</small>
+                                </div>
                                 @error('nama_penulis')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
@@ -536,5 +543,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('=== SCRIPT INITIALIZATION COMPLETE ===');
 });
+
+// Nama penulis character counter
+(function() {
+    var inp = document.getElementById('nama_penulis');
+    var counter = document.getElementById('nama_penulis_counter');
+    if (!inp || !counter) return;
+    var MAX = parseInt(inp.getAttribute('maxlength')) || 500;
+    function update() {
+        var n = inp.value.length;
+        counter.textContent = n + ' / ' + MAX + ' karakter';
+        counter.className = n >= MAX * 0.95 ? 'text-danger fw-semibold' : n >= MAX * 0.80 ? 'text-warning fw-semibold' : 'text-muted';
+    }
+    inp.addEventListener('input', update);
+    update();
+})();
 </script>
 @endsection

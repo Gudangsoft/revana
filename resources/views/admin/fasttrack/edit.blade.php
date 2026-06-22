@@ -208,6 +208,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('=== ADMIN EDIT SCRIPT COMPLETE ===');
 });
+
+// Nama penulis character counter
+(function() {
+    var inp = document.getElementById('nama_penulis');
+    var counter = document.getElementById('nama_penulis_counter');
+    if (!inp || !counter) return;
+    var MAX = parseInt(inp.getAttribute('maxlength')) || 500;
+    function update() {
+        var n = inp.value.length;
+        counter.textContent = n + ' / ' + MAX + ' karakter';
+        counter.className = n >= MAX * 0.95 ? 'text-danger fw-semibold' : n >= MAX * 0.80 ? 'text-warning fw-semibold' : 'text-muted';
+    }
+    inp.addEventListener('input', update);
+    update();
+})();
 </script>
 @endsection
 @section('content')
@@ -314,49 +329,45 @@ document.addEventListener('DOMContentLoaded', function() {
                     <hr>
                     <h6 class="text-muted mb-3"><i class="bi bi-person"></i> Data Penulis</h6>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nama_penulis" class="form-label">Nama Penulis <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="form-control @error('nama_penulis') is-invalid @enderror" 
-                                       id="nama_penulis" 
-                                       name="nama_penulis" 
-                                       value="{{ old('nama_penulis', $submission->nama_penulis) }}"
-                                       required>
-                                @error('nama_penulis')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                    <div class="row g-2 mb-3">
+                        <div class="col-12">
+                            <label for="nama_penulis" class="form-label form-label-sm mb-1">
+                                Nama Penulis <span class="text-danger">*</span>
+                                <span class="text-muted fw-normal">(pisahkan dengan koma jika lebih dari 1)</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control @error('nama_penulis') is-invalid @enderror"
+                                   id="nama_penulis"
+                                   name="nama_penulis"
+                                   value="{{ old('nama_penulis', $submission->nama_penulis) }}"
+                                   placeholder="Contoh: Ekosiswanto, Maulidiah Zulfa, Zaenal"
+                                   maxlength="500" required>
+                            <div class="d-flex justify-content-end mt-1">
+                                <small id="nama_penulis_counter" class="text-muted">0 / 500 karakter</small>
                             </div>
+                            @error('nama_penulis')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="no_hp_penulis" class="form-label">No HP Penulis</label>
-                                <input type="text" 
-                                       class="form-control @error('no_hp_penulis') is-invalid @enderror" 
-                                       id="no_hp_penulis" 
-                                       name="no_hp_penulis" 
-                                       value="{{ old('no_hp_penulis', $submission->no_hp_penulis) }}">
-                                @error('no_hp_penulis')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            <label for="no_hp_penulis" class="form-label form-label-sm mb-1">No HP Penulis</label>
+                            <input type="text"
+                                   class="form-control @error('no_hp_penulis') is-invalid @enderror"
+                                   id="no_hp_penulis" name="no_hp_penulis"
+                                   value="{{ old('no_hp_penulis', $submission->no_hp_penulis) }}" placeholder="08xx-xxxx-xxxx">
+                            @error('no_hp_penulis')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="email_penulis" class="form-label">Email Penulis</label>
-                                <input type="email"
-                                       class="form-control @error('email_penulis') is-invalid @enderror"
-                                       id="email_penulis"
-                                       name="email_penulis"
-                                       value="{{ old('email_penulis', $submission->email_penulis) }}">
-                                @error('email_penulis')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            <label for="email_penulis" class="form-label form-label-sm mb-1">Email Penulis</label>
+                            <input type="email"
+                                   class="form-control @error('email_penulis') is-invalid @enderror"
+                                   id="email_penulis" name="email_penulis"
+                                   value="{{ old('email_penulis', $submission->email_penulis) }}" placeholder="email@domain.com">
+                            @error('email_penulis')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 

@@ -143,27 +143,34 @@
             <hr>
             <h6 class="text-muted mb-3"><i class="bi bi-person"></i> Data Penulis</h6>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Nama Penulis <span class="text-danger">*</span></label>
-                    <input type="text" name="nama_penulis" class="form-control @error('nama_penulis') is-invalid @enderror" value="{{ old('nama_penulis') }}" required>
+            <div class="row g-2 mb-3">
+                <div class="col-12">
+                    <label class="form-label form-label-sm mb-1">
+                        Nama Penulis <span class="text-danger">*</span>
+                        <span class="text-muted fw-normal">(pisahkan dengan koma jika lebih dari 1)</span>
+                    </label>
+                    <input type="text" id="nama_penulis" name="nama_penulis"
+                           class="form-control @error('nama_penulis') is-invalid @enderror"
+                           value="{{ old('nama_penulis') }}"
+                           placeholder="Contoh: Ekosiswanto, Maulidiah Zulfa, Zaenal"
+                           maxlength="500" required>
+                    <div class="d-flex justify-content-end mt-1">
+                        <small id="nama_penulis_counter" class="text-muted">0 / 500 karakter</small>
+                    </div>
                     @error('nama_penulis')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">No HP Penulis</label>
-                    <input type="text" name="no_hp_penulis" class="form-control @error('no_hp_penulis') is-invalid @enderror" value="{{ old('no_hp_penulis') }}">
+                    <label class="form-label form-label-sm mb-1">No HP Penulis</label>
+                    <input type="text" name="no_hp_penulis" class="form-control @error('no_hp_penulis') is-invalid @enderror" value="{{ old('no_hp_penulis') }}" placeholder="08xx-xxxx-xxxx">
                     @error('no_hp_penulis')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-            </div>
-
-            <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">Email Penulis</label>
-                    <input type="email" name="email_penulis" class="form-control @error('email_penulis') is-invalid @enderror" value="{{ old('email_penulis') }}">
+                    <label class="form-label form-label-sm mb-1">Email Penulis</label>
+                    <input type="email" name="email_penulis" class="form-control @error('email_penulis') is-invalid @enderror" value="{{ old('email_penulis') }}" placeholder="email@domain.com">
                     @error('email_penulis')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -406,5 +413,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('fastttrackForm').submit();
     });
 });
+
+// Nama penulis character counter
+(function() {
+    var inp = document.getElementById('nama_penulis');
+    var counter = document.getElementById('nama_penulis_counter');
+    if (!inp || !counter) return;
+    var MAX = parseInt(inp.getAttribute('maxlength')) || 500;
+    function update() {
+        var n = inp.value.length;
+        counter.textContent = n + ' / ' + MAX + ' karakter';
+        counter.className = n >= MAX * 0.95 ? 'text-danger fw-semibold' : n >= MAX * 0.80 ? 'text-warning fw-semibold' : 'text-muted';
+    }
+    inp.addEventListener('input', update);
+    update();
+})();
 </script>
 @endsection
