@@ -7,7 +7,7 @@
     @include('admin.partials.sidebar')
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== ADMIN EDIT SCRIPT LOADED ===');
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
     update();
 });
 </script>
-@endsection
+@endpush
 @section('content')
 <div class="row">
     <div class="col-md-10 mx-auto">

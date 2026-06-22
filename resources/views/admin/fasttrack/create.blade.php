@@ -321,7 +321,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search_journal');
@@ -438,4 +438,4 @@ document.addEventListener('DOMContentLoaded', function() {
     update();
 });
 </script>
-@endsection
+@endpush
