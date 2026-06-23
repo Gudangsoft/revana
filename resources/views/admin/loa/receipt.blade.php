@@ -154,7 +154,7 @@
 
 /* ── Screen wrapper ──────────────────────────────────── */
 @media screen {
-  body { background: #e0e0e0; font-family: 'Times New Roman', Times, serif; font-size: 10pt; }
+  body { background: #e0e0e0; font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
   .print-bar {
     background: #222; color: #fff; padding: 10px 20px;
     display: flex; align-items: center; justify-content: space-between;
@@ -182,14 +182,14 @@
 /* ── Print ───────────────────────────────────────────── */
 @media print {
   .print-bar, .no-print { display: none !important; }
-  body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 10pt; }
+  body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
   @page { size: A4; margin: 0; }
   .a4-page { width: 210mm; min-height: 297mm; page-break-after: always; margin: 0; }
   .page-inner { padding: 14mm 18mm 10mm 18mm; }
 }
 
 /* ── Common ─────────────────────────────────────────── */
-body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #222; }
+body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #222; }
 
 /* Header */
 .jrn-header {
@@ -211,7 +211,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 }
 .jrn-title-wrap { padding: 0 14px; flex: 1; }
 .jrn-name-big { font-size: 17pt; font-weight: 900; letter-spacing: 1px; line-height: 1.2; }
-.jrn-name-sub { font-size: 10pt; opacity: .85; }
+.jrn-name-sub { font-size: 12pt; opacity: .85; }
 .jrn-issn-block { text-align: right; font-size: 8pt; line-height: 1.6; opacity: .9; }
 
 .jrn-subbar {
@@ -222,20 +222,20 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
 /* Document heading */
 .doc-title { text-align: center; font-size: 14pt; font-weight: 900; letter-spacing: 2px; margin: 14px 0 1px; }
-.doc-subtitle { text-align: center; font-size: 9pt; color: #555; margin-bottom: 4px; font-style: italic; }
-.doc-no    { text-align: center; font-size: 9pt; color: #555; margin-bottom: 14px; }
+.doc-subtitle { text-align: center; font-size: 12pt; color: #555; margin-bottom: 4px; font-style: italic; }
+.doc-no    { text-align: center; font-size: 12pt; color: #555; margin-bottom: 14px; }
 
 /* Address block */
 .to-block { margin-bottom: 12px; }
-.to-block p { line-height: 1.8; font-size: 10pt; }
+.to-block p { line-height: 1.8; font-size: 12pt; }
 .hl { background: transparent; padding: 0; }
 
 /* Body text */
-.body-text { font-size: 10pt; line-height: 1.7; margin-bottom: 10px; }
+.body-text { font-size: 12pt; line-height: 1.7; margin-bottom: 10px; }
 
 /* Journal info block */
-.jrn-info-block { margin: 12px 0 14px; font-size: 9.5pt; }
-.jrn-info-block .jrn-info-name { font-weight: bold; font-size: 10pt; margin-bottom: 4px; }
+.jrn-info-block { margin: 12px 0 14px; font-size: 12pt; }
+.jrn-info-block .jrn-info-name { font-weight: bold; font-size: 12pt; margin-bottom: 4px; }
 .jrn-info-block table { border-collapse: collapse; width: 100%; }
 .jrn-info-block td { padding: 1px 4px 1px 0; vertical-align: top; line-height: 1.5; }
 .jrn-info-block td:first-child { white-space: nowrap; min-width: 80px; }
@@ -245,8 +245,8 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 /* Signature block */
 .sig-block { margin-top: 20px; text-align: right; }
 .sig-img { max-height: 70px; margin: 6px 0; }
-.sig-name { font-weight: bold; font-size: 10pt; }
-.sig-role { font-size: 9pt; color: #444; }
+.sig-name { font-weight: bold; font-size: 12pt; }
+.sig-role { font-size: 12pt; color: #444; }
 
 /* SINTA accreditation bar */
 .sinta-bar {
@@ -332,7 +332,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 /* ── Evaluation sheet ────────────────────────────────── */
 .eval-section { margin-top: 14px; }
 .eval-title { font-size: 13pt; font-weight: 900; text-align: center; letter-spacing: 1px; margin-bottom: 12px; }
-.eval-meta table { width: 100%; font-size: 9.5pt; margin-bottom: 12px; }
+.eval-meta table { width: 100%; font-size: 12pt; margin-bottom: 12px; }
 .eval-meta td { padding: 2px 4px; vertical-align: top; }
 .eval-meta td:first-child { width: 100px; }
 .eval-meta td:nth-child(2) { width: 10px; }
@@ -362,11 +362,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 }
 .decision-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
 .decision-table td { border: 1px solid #ccc; padding: 3px 6px; vertical-align: middle; }
-.chk { text-align: center; width: 28px; font-size: 11pt; }
+.chk { text-align: center; width: 28px; font-size: 12pt; }
 .chk-checked { font-size: 12pt; color: #000; }
 
 /* Article detail table (ID format) */
-.detail-table { border-collapse: collapse; font-size: 10pt; margin: 10px 0; }
+.detail-table { border-collapse: collapse; font-size: 12pt; margin: 10px 0; }
 .detail-table td { padding: 2px 6px 2px 0; vertical-align: top; line-height: 1.7; }
 </style>
 </head>
@@ -459,7 +459,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
 
         @if($isId)
         {{-- ── FORMAT INDONESIA ── --}}
-        <table style="border-collapse:collapse; font-size:9.5pt; margin-bottom:16px;">
+        <table style="border-collapse:collapse; font-size:12pt; margin-bottom:16px;">
             <tr>
                 <td style="padding:1px 4px 1px 0; white-space:nowrap;">No</td>
                 <td style="padding:1px 10px 1px 0;">:</td>
