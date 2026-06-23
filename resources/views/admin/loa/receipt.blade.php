@@ -367,8 +367,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
 /* Article detail table (ID format) */
 .detail-table { border-collapse: collapse; font-size: 10pt; margin: 10px 0; }
-.detail-table td { padding: 2px 10px 2px 0; vertical-align: top; line-height: 1.7; }
-.detail-table .dt-lbl { white-space: nowrap; }
+.detail-table td { padding: 2px 6px 2px 0; vertical-align: top; line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -488,12 +487,13 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         </p>
 
         <table class="detail-table">
+            <colgroup><col style="width:95px;"><col style="width:12px;"><col></colgroup>
             <tr>
-                <td class="dt-lbl">Judul naskah &nbsp;:</td>
+                <td>Judul naskah</td><td>:</td>
                 <td><strong>{{ $judul }}</strong></td>
             </tr>
             <tr>
-                <td class="dt-lbl">Kode naskah &nbsp;:</td>
+                <td>Kode naskah</td><td>:</td>
                 <td>{{ $kodeArtikel }}</td>
             </tr>
         </table>
@@ -505,10 +505,11 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         <p class="body-text" style="margin-bottom:4px;">untuk diterbitkan di:</p>
         <div class="jrn-info-block">
             <div class="jrn-info-name">{{ $jurnalNama }}</div>
-            <table>
+            <table style="border-collapse:collapse;width:100%;">
+                <colgroup><col style="width:76px;"><col style="width:12px;"><col></colgroup>
                 @if($eIssn || $pIssn)
                 <tr>
-                    <td style="white-space:nowrap;padding-right:8px;">ISSN &nbsp;:</td>
+                    <td>ISSN</td><td>:</td>
                     <td>
                         @if($eIssn){{ $eIssn }} (daring)@endif
                         @if($eIssn && $pIssn); @endif
@@ -517,29 +518,24 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                 </tr>
                 @endif
                 <tr>
-                    <td style="white-space:nowrap;padding-right:8px;">Edisi terbit &nbsp;:</td>
+                    <td>Edisi terbit</td><td>:</td>
                     <td>Volume {{ $volume }} Nomor {{ $nomor }} (Periode {{ $tahun }}) **)</td>
                 </tr>
                 @if($loaStatus)
                 <tr>
-                    <td style="white-space:nowrap;padding-right:8px;vertical-align:top;">Status &nbsp;:</td>
-                    <td>
-                        {{ $loaStatus }}
-                        @if($linkSkAkreditasi)
-                        — <a href="{{ $linkSkAkreditasi }}" target="_blank" style="color:inherit;">{{ $linkSkAkreditasi }}</a>
-                        @endif
-                    </td>
+                    <td style="vertical-align:top;">Status</td><td style="vertical-align:top;">:</td>
+                    <td>{{ $loaStatus }}@if($linkSkAkreditasi) — <a href="{{ $linkSkAkreditasi }}" target="_blank" style="color:inherit;">{{ $linkSkAkreditasi }}</a>@endif</td>
                 </tr>
                 @endif
                 @if($penerbit)
                 <tr>
-                    <td style="white-space:nowrap;padding-right:8px;">Penerbit &nbsp;:</td>
+                    <td>Penerbit</td><td>:</td>
                     <td>{{ $penerbit }}</td>
                 </tr>
                 @endif
                 @if($journal?->link_jurnal)
                 <tr>
-                    <td style="white-space:nowrap;padding-right:8px;">URL &nbsp;:</td>
+                    <td>URL</td><td>:</td>
                     <td><a href="{{ $journal->link_jurnal }}" target="_blank" style="color:inherit;">{{ $journal->link_jurnal }}</a></td>
                 </tr>
                 @endif
