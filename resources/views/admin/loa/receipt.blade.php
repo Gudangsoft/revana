@@ -499,19 +499,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                 <td class="dt-colon">:</td>
                 <td>{{ $kodeArtikel }}</td>
             </tr>
-            @foreach($authorList as $idx => $name)
-            <tr>
-                <td class="dt-lbl">Penulis {{ $idx + 1 }}{{ $idx === 0 ? '*' : '' }}</td>
-                <td class="dt-colon">:</td>
-                <td>{{ $name }}{{ $idx === 0 ? '*' : '' }}
-                    @if($afiliasi && $afiliasi !== '—')
-                    &nbsp;&nbsp;<span style="color:#555;">({{ $afiliasi }})</span>
-                    @endif
-                </td>
-            </tr>
-            @endforeach
         </table>
-        <p style="font-size:8.5pt; margin:2px 0 14px;"><em>*correspondence author</em></p>
 
         <div style="text-align:center; font-size:16pt; font-weight:900; letter-spacing:4px; margin:10px 0 8px;">
             DITERIMA
