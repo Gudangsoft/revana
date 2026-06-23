@@ -229,43 +229,6 @@
                 </div>
             </div>
 
-            {{-- ── Gambar Footer LOA ────────────────────────────────────── --}}
-            <div class="card mb-3 border-warning">
-                <div class="card-header bg-warning bg-opacity-10">
-                    <i class="bi bi-layout-text-window-reverse me-1"></i> Gambar Footer LOA
-                    <span class="text-muted small fw-normal ms-2">— opsional, menggantikan bar SINTA + QR otomatis</span>
-                </div>
-                <div class="card-body">
-                    <div class="form-text mb-3">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Jika diisi, gambar ini akan tampil sebagai footer penuh di bagian bawah dokumen LOA (halaman 1 & 2), menggantikan bar akreditasi SINTA dan baris verifikasi.
-                        Format JPG/PNG, lebar 210mm (A4), maks 4MB.
-                    </div>
-                    @if($journal->footer_image_path)
-                    <div class="mb-3">
-                        <div class="fw-semibold small mb-1 text-muted">Footer saat ini:</div>
-                        <img src="{{ Storage::url($journal->footer_image_path) }}"
-                             style="width:100%;max-width:600px;border:1px solid #ddd;border-radius:4px;display:block;" alt="Footer LOA">
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" name="remove_footer_image" value="1" id="rmFooter">
-                            <label class="form-check-label text-danger small" for="rmFooter">Hapus gambar footer (gunakan footer otomatis)</label>
-                        </div>
-                    </div>
-                    @endif
-                    <div>
-                        <label class="form-label fw-semibold">{{ $journal->footer_image_path ? 'Ganti Gambar Footer' : 'Upload Gambar Footer' }}</label>
-                        <input type="file" class="form-control @error('footer_image') is-invalid @enderror"
-                               name="footer_image" accept="image/*" id="inpFooterImg">
-                        @error('footer_image')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div id="footerImgPreview" class="mt-2" style="display:none;">
-                        <div class="fw-semibold small mb-1 text-muted">Preview upload:</div>
-                        <img id="footerImgPreviewImg"
-                             style="width:100%;max-width:600px;border:1px solid #ffc107;border-radius:4px;display:block;" alt="Preview">
-                    </div>
-                </div>
-            </div>
-
             {{-- ── LOA Otomatis ────────────────────────────────────────── --}}
             <div class="card mb-4 border-{{ $journal->loa_auto_send ? 'success' : 'secondary' }}">
                 <div class="card-header d-flex justify-content-between align-items-center
