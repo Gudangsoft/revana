@@ -366,10 +366,9 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 .chk-checked { font-size: 12pt; color: #000; }
 
 /* Article detail table (ID format) */
-.detail-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 10px 0; }
-.detail-table td { padding: 2px 4px 2px 0; vertical-align: top; line-height: 1.7; }
-.detail-table .dt-lbl { white-space: nowrap; min-width: 110px; }
-.detail-table .dt-colon { width: 16px; }
+.detail-table { border-collapse: collapse; font-size: 10pt; margin: 10px 0; }
+.detail-table td { padding: 2px 10px 2px 0; vertical-align: top; line-height: 1.7; }
+.detail-table .dt-lbl { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -490,13 +489,11 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
 
         <table class="detail-table">
             <tr>
-                <td class="dt-lbl">Judul naskah</td>
-                <td class="dt-colon">:</td>
+                <td class="dt-lbl">Judul naskah &nbsp;:</td>
                 <td><strong>{{ $judul }}</strong></td>
             </tr>
             <tr>
-                <td class="dt-lbl">Kode naskah</td>
-                <td class="dt-colon">:</td>
+                <td class="dt-lbl">Kode naskah &nbsp;:</td>
                 <td>{{ $kodeArtikel }}</td>
             </tr>
         </table>
@@ -511,7 +508,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <table>
                 @if($eIssn || $pIssn)
                 <tr>
-                    <td>ISSN</td><td>:</td>
+                    <td style="white-space:nowrap;padding-right:8px;">ISSN &nbsp;:</td>
                     <td>
                         @if($eIssn){{ $eIssn }} (daring)@endif
                         @if($eIssn && $pIssn); @endif
@@ -520,12 +517,12 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                 </tr>
                 @endif
                 <tr>
-                    <td>Edisi terbit</td><td>:</td>
+                    <td style="white-space:nowrap;padding-right:8px;">Edisi terbit &nbsp;:</td>
                     <td>Volume {{ $volume }} Nomor {{ $nomor }} (Periode {{ $tahun }}) **)</td>
                 </tr>
                 @if($loaStatus)
                 <tr>
-                    <td>Status</td><td>:</td>
+                    <td style="white-space:nowrap;padding-right:8px;vertical-align:top;">Status &nbsp;:</td>
                     <td>
                         {{ $loaStatus }}
                         @if($linkSkAkreditasi)
@@ -536,13 +533,13 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                 @endif
                 @if($penerbit)
                 <tr>
-                    <td>Penerbit</td><td>:</td>
+                    <td style="white-space:nowrap;padding-right:8px;">Penerbit &nbsp;:</td>
                     <td>{{ $penerbit }}</td>
                 </tr>
                 @endif
                 @if($journal?->link_jurnal)
                 <tr>
-                    <td>URL</td><td>:</td>
+                    <td style="white-space:nowrap;padding-right:8px;">URL &nbsp;:</td>
                     <td><a href="{{ $journal->link_jurnal }}" target="_blank" style="color:inherit;">{{ $journal->link_jurnal }}</a></td>
                 </tr>
                 @endif
