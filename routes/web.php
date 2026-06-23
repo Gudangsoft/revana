@@ -346,7 +346,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pics-reset-all-passwords', [PicController::class, 'resetAllPasswords'])->name('pics.reset-all-passwords');
         
         // Birthday wish
-        Route::post('/birthday-wish', [\App\Http\Controllers\Admin\DashboardController::class, 'storeWish'])->name('admin.birthday.wish');
+        Route::post('/birthday-wish', [\App\Http\Controllers\Admin\DashboardController::class, 'storeWish'])->name('birthday.wish');
 
         // PIC Point Report
         Route::get('/point-rankings', [\App\Http\Controllers\Admin\DashboardController::class, 'pointRankings'])->name('point-rankings');
