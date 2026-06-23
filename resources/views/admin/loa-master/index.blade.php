@@ -155,7 +155,6 @@
                                 <th>Jurnal</th>
                                 <th width="72" class="text-center">Logo</th>
                                 <th width="140">Editor</th>
-                                <th width="80" class="text-center">Warna</th>
                                 <th width="120">LOA Otomatis</th>
                                 <th width="130">Kelengkapan</th>
                                 <th width="90" class="text-center">Aksi</th>
@@ -217,21 +216,6 @@
                                     @else
                                     <span class="text-muted small">—</span>
                                     @endif
-                                </td>
-
-                                <td class="text-center">
-                                    <div class="d-flex gap-1 justify-content-center">
-                                        <div style="width:20px;height:20px;border-radius:4px;
-                                                    background:{{ $j->primary_color ?? '#1A237E' }};
-                                                    border:1px solid rgba(0,0,0,.1);"
-                                             title="Header: {{ $j->primary_color ?? '#1A237E' }}"
-                                             data-bs-toggle="tooltip"></div>
-                                        <div style="width:20px;height:20px;border-radius:4px;
-                                                    background:{{ $j->secondary_color ?? '#8B6914' }};
-                                                    border:1px solid rgba(0,0,0,.1);"
-                                             title="Aksen: {{ $j->secondary_color ?? '#8B6914' }}"
-                                             data-bs-toggle="tooltip"></div>
-                                    </div>
                                 </td>
 
                                 <td>
