@@ -112,86 +112,25 @@
                             @error('kode_singkat')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">E-ISSN</label>
-                            <input type="text" class="form-control" name="e_issn" id="inpIssn"
+                            <label class="form-label fw-semibold">E-ISSN <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('e_issn') is-invalid @enderror"
+                                   name="e_issn" id="inpIssn"
                                    value="{{ old('e_issn', $journal->e_issn) }}"
-                                   maxlength="20" placeholder="XXXX-XXXX">
+                                   maxlength="20" placeholder="XXXX-XXXX" required>
+                            @error('e_issn')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">P-ISSN <span class="text-muted fw-normal small">(opsional)</span></label>
+                            <input type="text" class="form-control @error('p_issn') is-invalid @enderror"
+                                   name="p_issn"
+                                   value="{{ old('p_issn', $journal->p_issn) }}"
+                                   maxlength="20" placeholder="XXXX-XXXX">
+                            @error('p_issn')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label fw-semibold">Kota TTD</label>
                             <input type="text" class="form-control" name="loa_kota"
                                    value="{{ old('loa_kota', $journal->loa_kota ?? 'Semarang') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Tanggal LOA</label>
-                            <input type="date" class="form-control" name="loa_tanggal"
-                                   value="{{ old('loa_tanggal', $journal->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : '') }}">
-                            <div class="form-text text-muted">Kosong = hari ini</div>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Jabatan Editor</label>
-                            <input type="text" class="form-control" name="editor_title"
-                                   value="{{ old('editor_title', $journal->editor_title ?? 'Editor in Chief') }}">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ── Warna ───────────────────────────────────────────────── --}}
-            <div class="card mb-3">
-                <div class="card-header"><i class="bi bi-palette me-1"></i> Warna Template</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Warna Header</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="color" class="form-control form-control-color"
-                                       name="primary_color" id="picPrimary"
-                                       value="{{ old('primary_color', $journal->primary_color ?? '#1A237E') }}"
-                                       style="width:48px;height:40px;">
-                                <input type="text" class="form-control font-monospace" id="txtPrimary"
-                                       value="{{ old('primary_color', $journal->primary_color ?? '#1A237E') }}"
-                                       maxlength="7" style="width:100px;">
-                                <span class="text-muted small">Contoh: #1A237E (biru), #4A148C (ungu), #1B5E20 (hijau)</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Warna Aksen / Footer</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="color" class="form-control form-control-color"
-                                       name="secondary_color" id="picSecondary"
-                                       value="{{ old('secondary_color', $journal->secondary_color ?? '#8B6914') }}"
-                                       style="width:48px;height:40px;">
-                                <input type="text" class="form-control font-monospace" id="txtSecondary"
-                                       value="{{ old('secondary_color', $journal->secondary_color ?? '#8B6914') }}"
-                                       maxlength="7" style="width:100px;">
-                                <span class="text-muted small">Contoh: #8B6914 (emas), #BF360C (oranye)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ── Logo Jurnal ──────────────────────────────────────────── --}}
-            <div class="card mb-3">
-                <div class="card-header"><i class="bi bi-image me-1"></i> Logo Jurnal</div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-4">
-                        @if($journal->logo_path)
-                        <img src="{{ Storage::url($journal->logo_path) }}" height="72" width="72"
-                             style="border-radius:50%;border:3px solid #ddd;object-fit:cover;flex-shrink:0;" alt="Logo">
-                        @endif
-                        <div class="flex-grow-1">
-                            <div class="form-text mb-2">PNG/JPG, ukuran bulat, maks 2MB</div>
-                            <input type="file" class="form-control @error('logo') is-invalid @enderror"
-                                   name="logo" accept="image/*">
-                            @error('logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            @if($journal->logo_path)
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="remove_logo" value="1" id="rmLogo">
-                                <label class="form-check-label text-danger small" for="rmLogo">Hapus logo</label>
-                            </div>
-                            @endif
                         </div>
                     </div>
                 </div>

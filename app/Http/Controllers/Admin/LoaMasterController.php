@@ -57,26 +57,21 @@ class LoaMasterController extends Controller
     {
         $request->validate([
             'kode_singkat'      => 'nullable|string|max:20',
-            'e_issn'            => 'nullable|string|max:20',
+            'e_issn'            => 'required|string|max:20',
+            'p_issn'            => 'nullable|string|max:20',
             'editor_name'       => 'nullable|string|max:255',
-            'editor_title'      => 'nullable|string|max:255',
-            'primary_color'     => 'nullable|string|max:7',
-            'secondary_color'   => 'nullable|string|max:7',
             'loa_kota'          => 'nullable|string|max:100',
-            'loa_tanggal'       => 'nullable|date',
             'loa_auto_trigger'  => 'nullable|string|max:30',
             'loa_language'      => 'nullable|in:en,id',
-            'logo'              => 'nullable|image|max:2048',
             'editor_signature'  => 'nullable|image|max:2048',
             'header_image'      => 'nullable|image|max:4096',
-            'footer_image'          => 'nullable|image|max:4096',
-            'link_sk_akreditasi'    => 'nullable|url|max:500',
+            'footer_image'      => 'nullable|image|max:4096',
+            'link_sk_akreditasi'=> 'nullable|url|max:500',
         ]);
 
         $data = $request->only([
-            'kode_singkat', 'e_issn', 'editor_name', 'editor_title',
-            'primary_color', 'secondary_color', 'loa_kota', 'loa_tanggal',
-            'loa_auto_trigger', 'loa_language', 'link_sk_akreditasi',
+            'kode_singkat', 'e_issn', 'p_issn', 'editor_name',
+            'loa_kota', 'loa_auto_trigger', 'loa_language', 'link_sk_akreditasi',
         ]);
 
         $data['loa_auto_send'] = $request->boolean('loa_auto_send');

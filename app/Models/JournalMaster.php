@@ -26,6 +26,7 @@ class JournalMaster extends Model
         'logo_path',
         'header_image_path',
         'footer_image_path',
+        'p_issn',
         'accreditation_logo_path',
         'link_sk_akreditasi',
         'editor_name',
