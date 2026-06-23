@@ -62,3 +62,136 @@ php artisan view:clear
 - Normal: abu-abu `"X / 500 karakter"`
 - ≥ 80% (400+ karakter): **kuning** (`text-warning fw-semibold`)
 - ≥ 95% (475+ karakter): **merah** (`text-danger fw-semibold`)
+
+## 4. 🔄 Update: Hapus co-authors section — nama penulis koma dalam 1 field + counter karakter
+
+- **Commit:** `f5a6e35` — 20:35 oleh Gudangsoft
+- **File berubah:** 5 file
+- `log-update-2026-06-22.md`
+- `resources/views/admin/submissions/create.blade.php`
+- `resources/views/admin/submissions/edit.blade.php`
+- `resources/views/marketing/create-submission.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
+
+
+## 5. 🔄 Update: Migration nama_penulis varchar(255) → text + hapus max:255 di semua controller
+
+- **Commit:** `0c6cf20` — 20:39 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `database/migrations/2026_06_22_000002_change_nama_penulis_to_text.php`
+
+
+## 6. 🔄 Update: Terapkan nama penulis koma + counter di semua form fasttrack (admin/PIC/marketing)
+
+- **Commit:** `bcde967` — 20:44 oleh Gudangsoft
+- **File berubah:** 5 file
+- `resources/views/admin/fasttrack/create.blade.php`
+- `resources/views/admin/fasttrack/edit.blade.php`
+- `resources/views/marketing/fasttrack/create.blade.php`
+- `resources/views/pic/fasttrack/create.blade.php`
+- `resources/views/pic/fasttrack/edit.blade.php`
+
+
+## 7. 🔄 Update: Sembunyikan Master LOA dari marketing + tambah afiliasi ke semua form fasttrack
+
+- **Commit:** `18d5311` — 20:50 oleh Gudangsoft
+- **File berubah:** 9 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Http/Controllers/Pic/JournalManagementController.php`
+- `resources/views/admin/fasttrack/create.blade.php`
+- `resources/views/admin/fasttrack/edit.blade.php`
+- `resources/views/marketing/fasttrack/create.blade.php`
+- `resources/views/marketing/layouts/app.blade.php`
+- `resources/views/pic/fasttrack/create.blade.php`
+- `resources/views/pic/fasttrack/edit.blade.php`
+
+
+## 8. 🔄 Update: Fix counter karakter tidak berfungsi — ganti IIFE menjadi DOMContentLoaded
+
+- **Commit:** `0dbabf3` — 20:58 oleh Gudangsoft
+- **File berubah:** 9 file
+- `resources/views/admin/fasttrack/create.blade.php`
+- `resources/views/admin/fasttrack/edit.blade.php`
+- `resources/views/admin/submissions/create.blade.php`
+- `resources/views/admin/submissions/edit.blade.php`
+- `resources/views/marketing/create-submission.blade.php`
+- `resources/views/marketing/fasttrack/create.blade.php`
+- `resources/views/pic/fasttrack/create.blade.php`
+- `resources/views/pic/fasttrack/edit.blade.php`
+- `resources/views/pic/submissions/create.blade.php`
+
+
+## 9. 🔄 Update: Fix counter tidak jalan di admin fasttrack — @section → @push
+
+- **Commit:** `af39ee0` — 21:04 oleh Gudangsoft
+- **File berubah:** 2 file
+- `resources/views/admin/fasttrack/create.blade.php`
+- `resources/views/admin/fasttrack/edit.blade.php`
+
+
+## 10. 🔄 Update: Tambah inputan logo SINTA pada master akreditasi
+
+- **Commit:** `5ebd550` — 21:22 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/AccreditationController.php`
+- `app/Models/Accreditation.php`
+- `database/migrations/2026_06_22_000003_add_logo_sinta_to_accreditations.php`
+- `resources/views/admin/accreditations/create.blade.php`
+- `resources/views/admin/accreditations/edit.blade.php`
+- `resources/views/admin/accreditations/index.blade.php`
+
+
+## 11. 🔄 Update: Logo akreditasi LOA master otomatis dari data master akreditasi
+
+- **Commit:** `99bf228` — 21:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `resources/views/admin/loa-master/edit.blade.php`
+
+
+## 12. 🔄 Update: Tambah panel logo akreditasi di halaman Master LOA index
+
+- **Commit:** `ef46116` — 21:41 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `resources/views/admin/loa-master/index.blade.php`
+
+
+## 13. 🔄 Update: Hapus input manual logo akreditasi LOA — otomatis dari master akreditasi
+
+- **Commit:** `56db1ef` — 21:43 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `resources/views/admin/loa-master/edit.blade.php`
+
+
+## 14. 🔄 Update: LOA receipt: logo akreditasi langsung dari master Accreditation
+
+- **Commit:** `8aa7636` — 21:51 oleh Gudangsoft
+- **File berubah:** 1 file
+- `app/Http/Controllers/Admin/LoaController.php`
+
+
+## 15. 🔄 Update: Hapus panel Logo Akreditasi dari halaman Master LOA index
+
+- **Commit:** `0e073e7` — 21:53 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `resources/views/admin/loa-master/index.blade.php`
+
+
+## 16. 🔄 Update: Tambah input link SK akreditasi di LOA Master, logo dapat diklik
+
+- **Commit:** `83725ca` — 21:56 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Http/Controllers/Admin/LoaMasterController.php`
+- `app/Models/JournalMaster.php`
+- `database/migrations/2026_06_22_000004_add_link_sk_akreditasi_to_journal_masters.php`
+- `resources/views/admin/loa-master/edit.blade.php`
+- `resources/views/admin/loa/receipt.blade.php`
+
