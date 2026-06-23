@@ -153,8 +153,6 @@
                             <tr>
                                 <th width="28" class="ps-3">No</th>
                                 <th>Jurnal</th>
-                                <th width="72" class="text-center">Logo</th>
-                                <th width="140">Editor</th>
                                 <th width="120">LOA Otomatis</th>
                                 <th width="130">Kelengkapan</th>
                                 <th width="90" class="text-center">Aksi</th>
@@ -193,29 +191,6 @@
                                         <span class="badge bg-light text-dark border" style="font-size:.68rem;">P-ISSN: {{ $j->p_issn }}</span>
                                         @endif
                                     </div>
-                                </td>
-
-                                <td class="text-center">
-                                    @if($j->logo_path)
-                                        <img src="{{ Storage::url($j->logo_path) }}" height="38" width="38"
-                                             style="border-radius:50%;border:2px solid #ddd;object-fit:cover;" alt="Logo">
-                                    @else
-                                        <div style="width:38px;height:38px;border-radius:50%;
-                                                    background:{{ $j->primary_color ?? '#1A237E' }};
-                                                    display:flex;align-items:center;justify-content:center;
-                                                    color:#fff;font-size:11px;font-weight:bold;margin:0 auto;">
-                                            {{ strtoupper(substr($j->kode_singkat ?: $j->nama_jurnal, 0, 2)) }}
-                                        </div>
-                                    @endif
-                                </td>
-
-                                <td>
-                                    @if($j->editor_name)
-                                    <div class="small fw-medium">{{ $j->editor_name }}</div>
-                                    <div class="text-muted" style="font-size:.72rem;">{{ $j->editor_title }}</div>
-                                    @else
-                                    <span class="text-muted small">—</span>
-                                    @endif
                                 </td>
 
                                 <td>
