@@ -59,6 +59,7 @@ class LoaMasterController extends Controller
             'kode_singkat'      => 'nullable|string|max:20',
             'e_issn'            => 'required|string|max:20',
             'p_issn'            => 'nullable|string|max:20',
+            'loa_status'        => 'nullable|string',
             'editor_name'       => 'nullable|string|max:255',
             'loa_kota'          => 'nullable|string|max:100',
             'loa_auto_trigger'  => 'nullable|string|max:30',
@@ -70,7 +71,7 @@ class LoaMasterController extends Controller
         ]);
 
         $data = $request->only([
-            'kode_singkat', 'e_issn', 'p_issn', 'editor_name',
+            'kode_singkat', 'e_issn', 'p_issn', 'loa_status', 'editor_name',
             'loa_kota', 'loa_auto_trigger', 'loa_language', 'link_sk_akreditasi',
         ]);
 

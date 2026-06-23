@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('journal_masters', function (Blueprint $table) {
+            $table->text('loa_status')->nullable()->after('p_issn');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('journal_masters', function (Blueprint $table) {
+            $table->dropColumn('loa_status');
+        });
+    }
+};

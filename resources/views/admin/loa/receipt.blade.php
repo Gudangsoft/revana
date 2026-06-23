@@ -10,6 +10,8 @@
     $footerImageUrl       = $footerImageUrl ?? null;
     $accreditationLogoUrl = $accreditationLogoUrl ?? null;
     $linkSkAkreditasi     = $linkSkAkreditasi ?? null;
+    $loaStatus            = $loaStatus ?? null;
+    $pIssn                = $pIssn ?? null;
     $primaryColor   = $journal?->primary_color   ?? '#1A237E';
     $secondaryColor = $journal?->secondary_color ?? '#8B6914';
     $jurnalNama     = $journal?->nama_jurnal      ?? 'Jurnal';
@@ -230,6 +232,15 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; color: #22
 
 /* Body text */
 .body-text { font-size: 10pt; line-height: 1.7; margin-bottom: 10px; }
+
+/* Journal info block */
+.jrn-info-block { margin: 12px 0 14px; font-size: 9.5pt; }
+.jrn-info-block .jrn-info-name { font-weight: bold; font-size: 10pt; margin-bottom: 4px; }
+.jrn-info-block table { border-collapse: collapse; width: 100%; }
+.jrn-info-block td { padding: 1px 4px 1px 0; vertical-align: top; line-height: 1.5; }
+.jrn-info-block td:first-child { white-space: nowrap; min-width: 80px; }
+.jrn-info-block td:nth-child(2) { width: 12px; }
+.jrn-info-block a { color: inherit; }
 
 /* Signature block */
 .sig-block { margin-top: 20px; text-align: right; }
@@ -469,6 +480,41 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             {{ $L['body2_post'] }} <span class="hl"><em>{{ $jurnalNama }}</em>,
             Volume {{ $volume }}, No. {{ $nomor }}, {{ $bulan }} {{ $tahun }}</span>.
         </p>
+
+        {{-- Info jurnal tujuan --}}
+        @if($eIssn || $pIssn || $loaStatus || $journal?->link_jurnal)
+        <div class="jrn-info-block">
+            <div class="jrn-info-name">{{ $jurnalNama }}</div>
+            <table>
+                @if($eIssn || $pIssn)
+                <tr>
+                    <td>ISSN</td><td>:</td>
+                    <td>
+                        @if($eIssn){{ $eIssn }} (daring)@endif
+                        @if($eIssn && $pIssn); @endif
+                        @if($pIssn){{ $pIssn }} (cetak)@endif
+                    </td>
+                </tr>
+                @endif
+                <tr>
+                    <td>Edisi terbit</td><td>:</td>
+                    <td>Volume {{ $volume }}, Nomor {{ $nomor }} ({{ $tahun }})</td>
+                </tr>
+                @if($loaStatus)
+                <tr>
+                    <td>Status</td><td>:</td>
+                    <td>{{ $loaStatus }}</td>
+                </tr>
+                @endif
+                @if($journal?->link_jurnal)
+                <tr>
+                    <td>URL</td><td>:</td>
+                    <td><a href="{{ $journal->link_jurnal }}" target="_blank">{{ $journal->link_jurnal }}</a></td>
+                </tr>
+                @endif
+            </table>
+        </div>
+        @endif
 
         <p class="body-text">{{ $L['body3'] }}</p>
 

@@ -132,6 +132,14 @@
                             <input type="text" class="form-control" name="loa_kota"
                                    value="{{ old('loa_kota', $journal->loa_kota ?? 'Semarang') }}">
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Status Akreditasi</label>
+                            <textarea name="loa_status" rows="3"
+                                      class="form-control @error('loa_status') is-invalid @enderror"
+                                      placeholder="Contoh: Terakreditasi SINTA 5 (SK Dirjen Pendidikan Tinggi, Riset, dan Teknologi Kemendikbudristek RI No. 156/C/C3/KPT/2026, Tanggal 7 April 2026, Volume 1 Nomor 3 Tahun 2023 sampai Volume 6 Nomor 2 Tahun 2028)">{{ old('loa_status', $journal->loa_status) }}</textarea>
+                            @error('loa_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">Ditampilkan di baris Status pada dokumen LOA. Kosongkan jika tidak ada.</div>
+                        </div>
                     </div>
                 </div>
             </div>
