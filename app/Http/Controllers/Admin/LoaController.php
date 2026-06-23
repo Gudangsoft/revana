@@ -24,7 +24,7 @@ class LoaController extends Controller
             'submission'             => $submission,
             'journal'                => $journal,
             'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot),
+            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
             'loaDate'                => $this->loaDate($journal, $date, $lang),
             'loaDateRaw'             => $date ?: ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : now()->toDateString()),
             'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
@@ -55,7 +55,7 @@ class LoaController extends Controller
             'submission'             => $submission,
             'journal'                => $journal,
             'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot),
+            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
             'loaDate'                => $this->loaDate($journal, $date, $lang),
             'loaDateRaw'             => $date ?: ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : now()->toDateString()),
             'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
@@ -92,7 +92,7 @@ class LoaController extends Controller
             'submission'             => $submission,
             'journal'                => $journal,
             'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot),
+            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
             'loaDate'                => $this->loaDate($journal, $date, $lang),
             'loaDateRaw'             => $date ?: ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString() : now()->toDateString()),
             'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
@@ -163,15 +163,25 @@ class LoaController extends Controller
 
     // ── helpers ────────────────────────────────────────────────────────────
 
-    private function loaNumber(Submission $s, $j, $slot): string
+    private function loaNumber(Submission $s, $j, $slot, ?string $dateOverride = null): string
     {
         $kode       = $j?->kode_singkat ?: 'SIPERA';
-        $roman      = $this->romanMonth($slot?->bulan);
-        $year       = $slot?->tahun ?? now()->year;
         $id         = $s->id_artikel ?: $s->kode_submit;
         $kodeSubmit = $s->kode_submit ?? '';
-
         $kodeSubmitLabel = str_ends_with(strtoupper($kodeSubmit), 'SIPERA') ? $kodeSubmit : $kodeSubmit . 'SIPERA';
+
+        if ($dateOverride) {
+            $dt    = \Carbon\Carbon::parse($dateOverride);
+            $roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][$dt->month - 1];
+            $year  = $dt->year;
+        } elseif ($j?->loa_tanggal) {
+            $dt    = \Carbon\Carbon::parse($j->loa_tanggal);
+            $roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][$dt->month - 1];
+            $year  = $dt->year;
+        } else {
+            $roman = $this->romanMonth($slot?->bulan);
+            $year  = $slot?->tahun ?? now()->year;
+        }
 
         return $id . '/' . $kodeSubmitLabel . '/' . $kode . '/' . $roman . '/' . $year;
     }
