@@ -20,7 +20,7 @@
             <div class="col-md-3">
                 <label class="form-label small mb-1">Cari</label>
                 <input type="text" name="search" class="form-control"
-                       placeholder="Kode/Judul/ID Artikel..." value="{{ request('search') }}">
+                       placeholder="Kode/Judul/ID Artikel/No WA..." value="{{ request('search') }}">
             </div>
             <div class="col-md-3">
                 <label class="form-label small mb-1">Slot Jurnal</label>

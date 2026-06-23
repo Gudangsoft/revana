@@ -667,7 +667,8 @@ class DashboardController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('kode_submit', 'like', "%{$search}%")
                   ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('id_artikel', 'like', "%{$search}%");
+                  ->orWhere('id_artikel', 'like', "%{$search}%")
+                  ->orWhere('no_hp_penulis', 'like', "%{$search}%");
             });
         }
         
