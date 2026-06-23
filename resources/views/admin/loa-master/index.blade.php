@@ -190,6 +190,9 @@
                                         @if($j->e_issn)
                                         <span class="badge bg-light text-dark border" style="font-size:.68rem;">E-ISSN: {{ $j->e_issn }}</span>
                                         @endif
+                                        @if($j->p_issn)
+                                        <span class="badge bg-light text-dark border" style="font-size:.68rem;">P-ISSN: {{ $j->p_issn }}</span>
+                                        @endif
                                     </div>
                                 </td>
 
