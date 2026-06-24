@@ -475,11 +475,11 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         <div class="to-block">
             <p>Kepada Yth.</p>
             <p>Sdr/i. <strong>{{ $firstAuthor }}</strong></p>
-            <p>{{ $afiliasi ?: '—' }}</p>
+            <p>di <strong>{{ $afiliasi ?: '—' }}</strong></p>
         </div>
 
         <p class="body-text">Dengan hormat,</p>
-        <p class="body-text">
+        <p class="body-text" style= "text-align:justify; line-height:1.2;">
             Sehubungan proses telaah yang telah dilakukan oleh <em>reviewer</em> kami sesuai
             bidang kajian topik penelitian pada naskah yang telah didaftarkan, Dewan Penyunting/Editor
             <strong>{{ $jurnalNama }}</strong>@if($kodeSingkat) ({{ $kodeSingkat }})@endif
@@ -625,6 +625,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             @if($editorName)
             <p class="sig-name" style="margin-top:6px;">{{ $editorName }}</p>
             @endif
+            <div style="font-size:6.5pt; margin-top:3px; text-align:right;"> {{ $L['scan_qr'] }} </div>
         </div>
     </div>
 
@@ -640,14 +641,14 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
             </div>
-            <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
+        {{--    <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div> --}}
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
         @if($accreditationLogoUrl)
         <div class="acred-logo-col">
             @if(!empty($linkSkAkreditasi))
                 <a href="{{ $linkSkAkreditasi }}" target="_blank" style="display:inline-block;">
-                    <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+                    <img src="{{ $accreditationLogoUrl }}" style="height:75px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
                 </a>
             @else
                 <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
@@ -773,14 +774,14 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
             </div>
-            <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>
+        {{--    <div class="vb-row2">{{ $L['scan_qr'] }} &bull; {{ $verifyUrl ?? url('/v/' . ($submission->kode_loa ?: $submission->kode_submit)) }}</div>  --}}
             <div class="vb-row3">Doc ID: {{ $submission->kode_loa ?: $submission->kode_submit }}</div>
         </div>
         @if($accreditationLogoUrl)
         <div class="acred-logo-col">
             @if(!empty($linkSkAkreditasi))
                 <a href="{{ $linkSkAkreditasi }}" target="_blank" style="display:inline-block;">
-                    <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+                    <img src="{{ $accreditationLogoUrl }}" style="height:75px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
                 </a>
             @else
                 <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
