@@ -148,7 +148,7 @@
 
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="loaTable">
+                    <table class="table table-hover table-sm align-middle mb-0" id="loaTable">
                         <thead class="table-light">
                             <tr>
                                 <th width="32" class="ps-3 text-muted">#</th>
@@ -227,7 +227,8 @@
                                             <i class="bi bi-gear-fill me-1"></i>Setting
                                         </a>
                                         <a href="{{ route('admin.loa-master.preview-loa', $j) }}"
-                                           class="btn btn-sm btn-outline-secondary" title="Preview LOA" target="_blank">
+                                           class="btn btn-sm btn-outline-secondary" title="Preview LOA" target="_blank"
+                                           style="width:32px;padding-left:0;padding-right:0;text-align:center;">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
@@ -329,6 +330,8 @@
 }
 .loa-row { transition: opacity .1s; }
 .loa-row.hidden { display: none; }
+#loaTable td, #loaTable th { padding-top: 7px; padding-bottom: 7px; }
+#loaTable .btn-sm { padding: 3px 10px; font-size: .78rem; line-height: 1.4; }
 </style>
 @endpush
 
