@@ -162,11 +162,9 @@
                             @forelse($journals as $i => $j)
                             @php
                                 $missing = [];
-                                if (!$j->kode_singkat)          $missing[] = 'Kode singkat';
-                                if (!$j->e_issn)                $missing[] = 'E-ISSN';
-                                if (!$j->editor_name)           $missing[] = 'Nama editor';
-                                if (!$j->logo_path)             $missing[] = 'Logo';
-                                if (!$j->editor_signature_path) $missing[] = 'Tanda tangan';
+                                if (!$j->kode_singkat) $missing[] = 'Kode singkat';
+                                if (!$j->e_issn)       $missing[] = 'E-ISSN';
+                                if (!$j->logo_path)    $missing[] = 'Logo';
                                 $complete = count($missing) === 0;
                                 $labels = \App\Http\Controllers\Admin\LoaMasterController::TRIGGER_OPTIONS;
                                 $triggerLabel = $labels[$j->loa_auto_trigger ?? 'manual'] ?? 'Manual';
@@ -174,7 +172,7 @@
                             <tr class="loa-row"
                                 data-complete="{{ $complete ? 'complete' : 'incomplete' }}"
                                 data-auto="{{ $j->loa_auto_send ? 'auto' : 'manual' }}"
-                                data-search="{{ strtolower($j->nama_jurnal . ' ' . $j->kode_singkat . ' ' . $j->editor_name . ' ' . $j->e_issn) }}">
+                                data-search="{{ strtolower($j->nama_jurnal . ' ' . $j->kode_singkat . ' ' . $j->e_issn . ' ' . $j->p_issn) }}">
 
                                 <td class="ps-3 text-muted" style="font-size:.8rem;">{{ $i + 1 }}</td>
 
