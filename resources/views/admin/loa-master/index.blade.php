@@ -149,13 +149,13 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-sm align-middle mb-0" id="loaTable">
-                        <thead class="table-light">
+                        <thead class="table-light border-bottom">
                             <tr>
-                                <th width="32" class="ps-3 text-muted">#</th>
-                                <th>Jurnal</th>
-                                <th width="110" class="text-center">LOA Otomatis</th>
-                                <th width="120" class="text-center">Kelengkapan</th>
-                                <th width="110" class="text-center">Aksi</th>
+                                <th class="ps-3 loa-col-no text-muted fw-normal">#</th>
+                                <th class="loa-col-jurnal">Jurnal</th>
+                                <th class="loa-col-auto text-center">LOA Otomatis</th>
+                                <th class="loa-col-kelengkapan text-center">Kelengkapan</th>
+                                <th class="loa-col-aksi text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -176,59 +176,60 @@
                                 data-auto="{{ $j->loa_auto_send ? 'auto' : 'manual' }}"
                                 data-search="{{ strtolower($j->nama_jurnal . ' ' . $j->kode_singkat . ' ' . $j->editor_name . ' ' . $j->e_issn) }}">
 
-                                <td class="ps-3 text-muted small">{{ $i + 1 }}</td>
+                                <td class="ps-3 text-muted" style="font-size:.8rem;">{{ $i + 1 }}</td>
 
                                 <td>
-                                    <div class="fw-semibold" style="font-size:.9rem; line-height:1.3;">{{ $j->nama_jurnal }}</div>
-                                    <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
                                         @if($j->kode_singkat)
-                                        <span class="badge rounded-pill" style="background:{{ $j->primary_color ?? '#1A237E' }};font-size:.68rem;">
+                                        <span class="badge rounded-2 flex-shrink-0"
+                                              style="background:{{ $j->primary_color ?? '#1A237E' }};font-size:.7rem;letter-spacing:.3px;">
                                             {{ $j->kode_singkat }}
                                         </span>
                                         @endif
-                                        @if($j->e_issn)
-                                        <span class="badge bg-light text-dark border rounded-pill" style="font-size:.67rem;">E-ISSN: {{ $j->e_issn }}</span>
-                                        @endif
-                                        @if($j->p_issn)
-                                        <span class="badge bg-light text-dark border rounded-pill" style="font-size:.67rem;">P-ISSN: {{ $j->p_issn }}</span>
+                                        <span class="fw-semibold" style="font-size:.88rem;">{{ $j->nama_jurnal }}</span>
+                                        @if($j->e_issn || $j->p_issn)
+                                        <span class="text-muted" style="font-size:.75rem; white-space:nowrap;">
+                                            @if($j->e_issn)E {{ $j->e_issn }}@endif
+                                            @if($j->e_issn && $j->p_issn) &middot; @endif
+                                            @if($j->p_issn)P {{ $j->p_issn }}@endif
+                                        </span>
                                         @endif
                                     </div>
                                 </td>
 
                                 <td class="text-center">
                                     @if($j->loa_auto_send)
-                                        <span class="badge bg-success rounded-pill px-2"
+                                        <span class="loa-status-badge loa-status-aktif"
                                               title="{{ $triggerLabel }}" data-bs-toggle="tooltip">
-                                            <i class="bi bi-lightning-charge-fill me-1"></i>Aktif
+                                            <i class="bi bi-lightning-charge-fill"></i> Aktif
                                         </span>
                                     @else
-                                        <span class="badge bg-light text-secondary border rounded-pill px-2" style="font-size:.72rem;">Manual</span>
+                                        <span class="loa-status-badge loa-status-manual">Manual</span>
                                     @endif
                                 </td>
 
                                 <td class="text-center">
                                     @if($complete)
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">
-                                            <i class="bi bi-check-circle-fill me-1"></i>Lengkap
+                                        <span class="loa-status-badge loa-status-lengkap">
+                                            <i class="bi bi-check-circle-fill"></i> Lengkap
                                         </span>
                                     @else
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2"
-                                              title="Belum diisi: {{ implode(', ', $missing) }}"
+                                        <span class="loa-status-badge loa-status-kurang"
+                                              title="Belum: {{ implode(', ', $missing) }}"
                                               data-bs-toggle="tooltip" data-bs-placement="left">
-                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ count($missing) }} kurang
+                                            <i class="bi bi-exclamation-triangle-fill"></i> {{ count($missing) }} kurang
                                         </span>
                                     @endif
                                 </td>
 
                                 <td class="text-center">
-                                    <div class="d-flex gap-1 justify-content-center">
+                                    <div class="btn-group btn-group-sm loa-actions" role="group">
                                         <a href="{{ route('admin.loa-master.edit', $j) }}"
-                                           class="btn btn-sm btn-primary" title="Setting LOA">
+                                           class="btn btn-primary" title="Setting LOA">
                                             <i class="bi bi-gear-fill me-1"></i>Setting
                                         </a>
                                         <a href="{{ route('admin.loa-master.preview-loa', $j) }}"
-                                           class="btn btn-sm btn-outline-secondary" title="Preview LOA" target="_blank"
-                                           style="width:32px;padding-left:0;padding-right:0;text-align:center;">
+                                           class="btn btn-outline-primary" title="Preview LOA" target="_blank">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
@@ -328,10 +329,33 @@
     border-color: #16a34a;
     color: #fff;
 }
-.loa-row { transition: opacity .1s; }
+.loa-row { transition: background .1s; }
 .loa-row.hidden { display: none; }
-#loaTable td, #loaTable th { padding-top: 7px; padding-bottom: 7px; }
-#loaTable .btn-sm { padding: 3px 10px; font-size: .78rem; line-height: 1.4; }
+
+/* kolom lebar tetap */
+.loa-col-no          { width: 36px; }
+.loa-col-auto        { width: 108px; }
+.loa-col-kelengkapan { width: 118px; }
+.loa-col-aksi        { width: 130px; }
+
+/* padding baris kompak — paksa override Bootstrap table-sm */
+#loaTable > thead > tr > th,
+#loaTable > tbody > tr > td { padding: 7px 10px !important; vertical-align: middle !important; }
+
+/* badge status seragam */
+.loa-status-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .73rem; font-weight: 500;
+    padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+    border: 1px solid transparent;
+}
+.loa-status-aktif   { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+.loa-status-manual  { background:#f1f5f9; color:#64748b; border-color:#cbd5e1; }
+.loa-status-lengkap { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+.loa-status-kurang  { background:#fef9c3; color:#92400e; border-color:#fcd34d; }
+
+/* tombol aksi */
+.loa-actions .btn { font-size: .78rem; padding: 4px 10px; white-space: nowrap; }
 </style>
 @endpush
 
