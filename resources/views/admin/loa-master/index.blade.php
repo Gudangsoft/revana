@@ -151,11 +151,11 @@
                     <table class="table table-hover align-middle mb-0" id="loaTable">
                         <thead class="table-light">
                             <tr>
-                                <th width="28" class="ps-3">No</th>
+                                <th width="32" class="ps-3 text-muted">#</th>
                                 <th>Jurnal</th>
-                                <th width="120">LOA Otomatis</th>
-                                <th width="130">Kelengkapan</th>
-                                <th width="90" class="text-center">Aksi</th>
+                                <th width="110" class="text-center">LOA Otomatis</th>
+                                <th width="120" class="text-center">Kelengkapan</th>
+                                <th width="110" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -168,6 +168,8 @@
                                 if (!$j->logo_path)             $missing[] = 'Logo';
                                 if (!$j->editor_signature_path) $missing[] = 'Tanda tangan';
                                 $complete = count($missing) === 0;
+                                $labels = \App\Http\Controllers\Admin\LoaMasterController::TRIGGER_OPTIONS;
+                                $triggerLabel = $labels[$j->loa_auto_trigger ?? 'manual'] ?? 'Manual';
                             @endphp
                             <tr class="loa-row"
                                 data-complete="{{ $complete ? 'complete' : 'incomplete' }}"
@@ -177,64 +179,55 @@
                                 <td class="ps-3 text-muted small">{{ $i + 1 }}</td>
 
                                 <td>
-                                    <div class="fw-semibold" style="font-size:.9rem;">{{ $j->nama_jurnal }}</div>
-                                    <div class="mt-1 d-flex flex-wrap align-items-center gap-1">
+                                    <div class="fw-semibold" style="font-size:.9rem; line-height:1.3;">{{ $j->nama_jurnal }}</div>
+                                    <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
                                         @if($j->kode_singkat)
-                                        <span class="badge" style="background:{{ $j->primary_color ?? '#1A237E' }};font-size:.68rem;">
+                                        <span class="badge rounded-pill" style="background:{{ $j->primary_color ?? '#1A237E' }};font-size:.68rem;">
                                             {{ $j->kode_singkat }}
                                         </span>
                                         @endif
                                         @if($j->e_issn)
-                                        <span class="badge bg-light text-dark border" style="font-size:.68rem;">E-ISSN: {{ $j->e_issn }}</span>
+                                        <span class="badge bg-light text-dark border rounded-pill" style="font-size:.67rem;">E-ISSN: {{ $j->e_issn }}</span>
                                         @endif
                                         @if($j->p_issn)
-                                        <span class="badge bg-light text-dark border" style="font-size:.68rem;">P-ISSN: {{ $j->p_issn }}</span>
+                                        <span class="badge bg-light text-dark border rounded-pill" style="font-size:.67rem;">P-ISSN: {{ $j->p_issn }}</span>
                                         @endif
                                     </div>
                                 </td>
 
-                                <td>
+                                <td class="text-center">
                                     @if($j->loa_auto_send)
-                                        <span class="badge bg-success" style="font-size:.7rem;">
-                                            <i class="bi bi-lightning-charge-fill"></i> Aktif
+                                        <span class="badge bg-success rounded-pill px-2"
+                                              title="{{ $triggerLabel }}" data-bs-toggle="tooltip">
+                                            <i class="bi bi-lightning-charge-fill me-1"></i>Aktif
                                         </span>
-                                        @php
-                                        $labels = \App\Http\Controllers\Admin\LoaMasterController::TRIGGER_OPTIONS;
-                                        @endphp
-                                        <div class="text-muted" style="font-size:.68rem;margin-top:2px;">
-                                            {{ Str::after($labels[$j->loa_auto_trigger ?? 'manual'] ?? 'Manual', 'Setelah ') }}
-                                        </div>
                                     @else
-                                        <span class="badge bg-secondary" style="font-size:.7rem;">Manual</span>
+                                        <span class="badge bg-light text-secondary border rounded-pill px-2" style="font-size:.72rem;">Manual</span>
                                     @endif
                                 </td>
 
-                                <td>
+                                <td class="text-center">
                                     @if($complete)
-                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Lengkap</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Lengkap
+                                        </span>
                                     @else
-                                        <div>
-                                            <span class="badge bg-warning text-dark"
-                                                  title="{{ implode(', ', $missing) }} belum diisi"
-                                                  data-bs-toggle="tooltip">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>{{ count($missing) }} kurang
-                                            </span>
-                                            <div class="text-muted" style="font-size:.66rem;margin-top:2px;">
-                                                {{ implode(', ', array_slice($missing, 0, 2)) }}{{ count($missing) > 2 ? '…' : '' }}
-                                            </div>
-                                        </div>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2"
+                                              title="Belum diisi: {{ implode(', ', $missing) }}"
+                                              data-bs-toggle="tooltip" data-bs-placement="left">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ count($missing) }} kurang
+                                        </span>
                                     @endif
                                 </td>
 
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
                                         <a href="{{ route('admin.loa-master.edit', $j) }}"
-                                           class="btn btn-sm btn-outline-primary" title="Setting LOA">
-                                            <i class="bi bi-gear"></i> Setting
+                                           class="btn btn-sm btn-primary" title="Setting LOA">
+                                            <i class="bi bi-gear-fill me-1"></i>Setting
                                         </a>
                                         <a href="{{ route('admin.loa-master.preview-loa', $j) }}"
-                                           class="btn btn-sm btn-outline-secondary" title="Preview LOA"
-                                           target="_blank">
+                                           class="btn btn-sm btn-outline-secondary" title="Preview LOA" target="_blank">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
