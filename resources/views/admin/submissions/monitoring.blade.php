@@ -549,7 +549,8 @@ code.copyable.copied {
                     @if(isset($program) && $program)
                         <input type="hidden" name="program" value="{{ $program }}">
                     @endif
-                    <div class="row g-2 align-items-end">
+                    {{-- Baris 1: Filter --}}
+                    <div class="row g-2 align-items-end mb-2">
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>
                             <input type="date" class="form-control form-control-sm" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">
@@ -598,23 +599,24 @@ code.copyable.copied {
                                 <option value="title_desc"{{ request('sort_by') == 'title_desc'? 'selected' : '' }}>↓ Judul Z→A</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label small mb-1 invisible">.</label>
-                            <div class="d-flex flex-wrap gap-1">
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-search"></i> Filter
-                                </button>
-                                <a href="{{ route('admin.submissions.monitoring', array_filter(['program' => $program ?? null])) }}" class="btn btn-outline-secondary btn-sm" title="Reset filter">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                                <a href="{{ route('admin.submissions.export', request()->query()) }}" class="btn btn-success btn-sm" title="Export Excel">
-                                    <i class="bi bi-file-earmark-excel"></i>
-                                </a>
-                                <button type="button" class="btn btn-outline-success btn-sm" title="Import" data-bs-toggle="modal" data-bs-target="#importModal">
-                                    <i class="bi bi-upload"></i>
-                                </button>
-                            </div>
-                        </div>
+                    </div>
+                    {{-- Baris 2: Tombol aksi --}}
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm px-3">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                        <a href="{{ route('admin.submissions.monitoring', array_filter(['program' => $program ?? null])) }}"
+                           class="btn btn-outline-secondary btn-sm" title="Reset filter">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </a>
+                        <a href="{{ route('admin.submissions.export', request()->query()) }}"
+                           class="btn btn-success btn-sm" title="Export Excel">
+                            <i class="bi bi-file-earmark-excel"></i> Export
+                        </a>
+                        <button type="button" class="btn btn-outline-primary btn-sm"
+                                title="Import" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="bi bi-upload"></i> Import
+                        </button>
                     </div>
                 </form>
 
