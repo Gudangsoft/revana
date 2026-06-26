@@ -124,10 +124,10 @@
 ### File yang Diubah
 | File | Perubahan |
 |------|-----------|
-| `app/Http/Controllers/Admin/PicReviewerJournalController.php` | Controller baru: method `submissions($type)` filter berdasarkan tipe (normal/fasttrack/bkd/jafa), mendukung search, filter status, filter jurnal |
-| `resources/views/admin/pic-reviewer/submissions.blade.php` | View baru: tabel submission dengan kolom kode, judul, jurnal, penulis, reviewer, status, tanggal — filter bar di atas, pagination di bawah |
-| `routes/web.php` | Route baru: `GET /admin/pic-reviewer/submissions/{type}` → `PicReviewerJournalController@submissions` |
-| `resources/views/admin/partials/sidebar-pic-reviewer.blade.php` | Link Jurnal Normal/BKD/JAFA → `admin.submissions.monitoring?program=`, Fasttrack → `admin.fasttrack-management.monitoring.index`; tidak perlu controller/view baru karena layout.blade.php sudah override sidebar untuk pic_reviewer |
+| `app/Http/Controllers/Admin/PicReviewerJournalController.php` | Controller baru: method `monitoring(Request, program)` — query submission sesuai program (normal/bkd/jafa), filter status/jurnal/search, pass `$pics` untuk lazy-load dropdown |
+| `resources/views/admin/pic-reviewer/monitoring.blade.php` | View monitoring khusus PIC Reviewer: hanya kolom Reviewer1 & Reviewer2 (Petugas, User/Pass, Catatan, Valid) — inline editing quickAssign/quickUpdateCredential/quickToggleValid reuse route admin, lazy-load pic list dari JS |
+| `routes/web.php` | Route baru: `GET /admin/pic-reviewer/monitoring` → `PicReviewerJournalController@monitoring` |
+| `resources/views/admin/partials/sidebar-pic-reviewer.blade.php` | Jurnal Normal/BKD/JAFA → `admin.pic-reviewer.monitoring?program=`; Fasttrack tetap ke `admin.fasttrack-management.monitoring.index` |
 
 ## 10. 🔄 Update: rev
 
@@ -169,6 +169,17 @@
 ## 15. 🔄 Update: up
 
 - **Commit:** `a7d6623` — 16:09 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/PicReviewerJournalController.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/partials/sidebar-pic-reviewer.blade.php`
+- `resources/views/admin/pic-reviewer/submissions.blade.php`
+- `routes/web.php`
+
+
+## 16. 🔄 Update: sub
+
+- **Commit:** `464f847` — 16:19 oleh Gudangsoft
 - **File berubah:** 5 file
 - `app/Http/Controllers/Admin/PicReviewerJournalController.php`
 - `log-update-2026-06-26.md`
