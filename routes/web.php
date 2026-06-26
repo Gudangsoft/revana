@@ -130,6 +130,7 @@ Route::middleware('auth')->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::get('/pic-reviewer/dashboard', [\App\Http\Controllers\Admin\PicReviewerDashboardController::class, 'index'])->name('pic-reviewer.dashboard');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
         Route::get('/export-completed-reviews', [AdminDashboard::class, 'exportCompletedReviews'])->name('export.completed.reviews');
         Route::get('/component-overview', [AdminDashboard::class, 'componentOverview'])->name('component-overview');
@@ -445,7 +446,9 @@ Route::middleware('auth')->group(function () {
         
         // Users
         Route::post('/users/broadcast-email', [\App\Http\Controllers\Admin\UserController::class, 'broadcastEmail'])->name('users.broadcast-email');
+        Route::post('/users/return-to-admin', [\App\Http\Controllers\Admin\UserController::class, 'returnToAdmin'])->name('users.return-to-admin');
         Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::post('/users/{user}/login-as', [\App\Http\Controllers\Admin\UserController::class, 'loginAs'])->name('users.login-as');
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         
         // Profile

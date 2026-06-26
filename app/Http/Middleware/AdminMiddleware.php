@@ -11,11 +11,10 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        if (!auth()->check() || !auth()->user()->hasAdminAccess()) {
             abort(403, 'Unauthorized access');
         }
 
-        // Perbarui cache sesi supaya tidak kedaluwarsa saat admin aktif browsing
         $user = auth()->user();
         $cacheKey = 'admin_session:' . $user->id;
         Cache::put($cacheKey, session()->getId(), now()->addMinutes(config('session.lifetime', 120)));

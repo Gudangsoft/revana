@@ -24,3 +24,47 @@
 | `routes/web.php` | Route baru: `POST /submissions/{submission}/loa-metadata` → `LoaController@updateMetadata` |
 | `resources/views/admin/loa/receipt.blade.php` | Ganti link "Edit Afiliasi & Data" dengan tombol modal, tambah modal dark-themed dengan 4 field yang dapat diedit (nama penulis, afiliasi, judul, tanggal LOA), notifikasi sukses via JS |
 
+
+## 3. Tambah Fitur Login As di Halaman Users
+
+**Tujuan:** Admin dapat masuk/impersonate sebagai akun user (reviewer/non-admin) untuk melihat sistem dari sudut pandang pengguna tersebut
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/UserController.php` | Tambah method `loginAs()` (cek non-admin, simpan sesi, `Auth::login`) dan `returnToAdmin()` (login balik ke admin asli), tambah import `Auth` |
+| `routes/web.php` | Route baru: `POST /users/return-to-admin` dan `POST /users/{user}/login-as` (keduanya sebelum resource route agar tidak bentrok wildcard) |
+| `resources/views/admin/users/index.blade.php` | Tambah tombol Login As (hijau, ikon person-check) di setiap baris, hanya tampil untuk user non-admin |
+| `resources/views/layouts/app.blade.php` | Tambah banner biru "Mode Login As Aktif" dengan tombol "Kembali ke Admin" — tampil saat session `admin_user_impersonating` aktif |
+
+## 4. Tambah Role PIC Reviewer + Dashboard Khusus
+
+**Tujuan:** Role baru `pic_reviewer` dengan akses terbatas ke halaman manajemen reviewer dan jurnal — sidebar & dashboard sendiri, tanpa akses ke menu sensitif admin
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/User.php` | Tambah method `isPicReviewer()` dan `hasAdminAccess()` (admin OR pic_reviewer) |
+| `app/Http/Middleware/AdminMiddleware.php` | Gunakan `hasAdminAccess()` agar pic_reviewer bisa masuk admin routes |
+| `app/Http/Controllers/Auth/LoginController.php` | Redirect `pic_reviewer` ke `/admin/pic-reviewer/dashboard` setelah login |
+| `app/Http/Controllers/Admin/UserController.php` | Tambah `pic_reviewer` ke validasi role, redirect loginAs ke pic-reviewer dashboard |
+| `app/Http/Controllers/Admin/PicReviewerDashboardController.php` | Controller baru: dashboard dengan stats reviewer, distribusi submission, menu akses cepat |
+| `resources/views/admin/pic-reviewer/dashboard.blade.php` | View dashboard PIC Reviewer: stat cards (reviewer, pending, selesai, permintaan), distribusi submission, grid menu cepat, tabel pending review |
+| `resources/views/admin/partials/sidebar-pic-reviewer.blade.php` | Sidebar khusus: Data Jurnal, Jurnal Normal/Fasttrack/BKD/JAFA, Penugasan Review, Daftar Reviewer, Permintaan Review, Papan Peringkat |
+| `resources/views/layouts/app.blade.php` | Override sidebar: jika user adalah `pic_reviewer`, selalu gunakan sidebar-pic-reviewer (di semua halaman admin) |
+| `resources/views/admin/users/index.blade.php` | Badge ungu untuk role `pic_reviewer`, Login As juga support redirect ke pic-reviewer dashboard |
+| `resources/views/admin/users/create.blade.php` | Tambah opsi PIC Reviewer di dropdown role |
+| `resources/views/admin/users/edit.blade.php` | Tambah opsi PIC Reviewer di dropdown role |
+| `routes/web.php` | Route baru: `GET /admin/pic-reviewer/dashboard` → `PicReviewerDashboardController@index` |
+
+## 5. 🔄 Update: meta loa
+
+- **Commit:** `53291f4` — 13:57 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `app/Models/Submission.php`
+- `database/migrations/2026_06_26_114409_add_tanggal_loa_to_submissions_table.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/loa/receipt.blade.php`
+- `routes/web.php`
+

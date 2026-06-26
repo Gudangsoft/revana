@@ -45,6 +45,7 @@
                                 <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
                                 <option value="reviewer" {{ old('role', $user->role) === 'reviewer' ? 'selected' : '' }}>Reviewer</option>
                                 <option value="pic" {{ old('role', $user->role) === 'pic' ? 'selected' : '' }}>PIC</option>
+                                <option value="pic_reviewer" {{ old('role', $user->role) === 'pic_reviewer' ? 'selected' : '' }}>PIC Reviewer</option>
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>

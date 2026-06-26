@@ -777,7 +777,11 @@
             @endif
         </div>
         <nav class="nav flex-column sidebar-nav">
-            @yield('sidebar')
+            @if(auth()->check() && auth()->user()->isPicReviewer())
+                @include('admin.partials.sidebar-pic-reviewer')
+            @else
+                @yield('sidebar')
+            @endif
         </nav>
     </div>
 
@@ -879,7 +883,7 @@
             </div>
         </nav>
 
-        {{-- Impersonate Banner --}}
+        {{-- Impersonate Banner (Tenant) --}}
         @if(session('impersonating'))
         <div class="alert alert-warning d-flex align-items-center justify-content-between mb-2 py-2" role="alert"
              style="border-left: 4px solid #f59e0b; border-radius: 6px;">
@@ -893,6 +897,26 @@
                 @csrf
                 <button type="submit" class="btn btn-warning btn-sm">
                     <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Super Admin
+                </button>
+            </form>
+        </div>
+        @endif
+
+        {{-- Login As User Banner (Admin impersonating reviewer/user) --}}
+        @if(session('admin_user_impersonating'))
+        <div class="alert alert-info d-flex align-items-center justify-content-between mb-2 py-2" role="alert"
+             style="border-left: 4px solid #3b82f6; border-radius: 6px; background:#eff6ff;">
+            <div>
+                <i class="bi bi-person-fill-check me-2 text-info"></i>
+                <strong>Mode Login As Aktif</strong>
+                — Anda sedang melihat sistem sebagai
+                <strong>{{ Auth::user()?->name }}</strong>
+                <span class="badge bg-secondary ms-1">{{ Auth::user()?->role }}</span>
+            </div>
+            <form action="{{ route('admin.users.return-to-admin') }}" method="POST" class="mb-0">
+                @csrf
+                <button type="submit" class="btn btn-info btn-sm text-white">
+                    <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin
                 </button>
             </form>
         </div>

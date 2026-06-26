@@ -60,6 +60,16 @@ class User extends Authenticatable
         return $this->role === 'reviewer';
     }
 
+    public function isPicReviewer()
+    {
+        return $this->role === 'pic_reviewer';
+    }
+
+    public function hasAdminAccess(): bool
+    {
+        return in_array($this->role, ['admin', 'pic_reviewer']);
+    }
+
     public function journals()
     {
         return $this->hasMany(Journal::class, 'created_by');

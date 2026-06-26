@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -37,7 +38,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,reviewer,pic',
+            'role' => 'required|in:admin,reviewer,pic,pic_reviewer',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -59,7 +60,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'role' => 'required|in:admin,reviewer,pic',
+            'role' => 'required|in:admin,reviewer,pic,pic_reviewer',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
@@ -81,6 +82,50 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Pengguna berhasil dihapus');
+    }
+
+    public function loginAs(User $user)
+    {
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Tidak dapat login sebagai akun admin lain.');
+        }
+
+        // Simpan ID admin asli di session
+        session(['admin_user_impersonating' => Auth::id()]);
+
+        Auth::login($user);
+
+        $redirect = match(true) {
+            $user->isReviewer()    => redirect()->route('reviewer.dashboard'),
+            $user->isPicReviewer() => redirect()->route('admin.pic-reviewer.dashboard'),
+            default                => redirect()->route('admin.dashboard'),
+        };
+
+        return $redirect->with('info', 'Anda sekarang login sebagai ' . $user->name . '. Klik "Kembali ke Admin" untuk keluar.');
+    }
+
+    public function returnToAdmin()
+    {
+        $adminId = session('admin_user_impersonating');
+
+        if (!$adminId) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $admin = User::find($adminId);
+
+        if (!$admin || !$admin->isAdmin()) {
+            Auth::logout();
+            session()->flush();
+            return redirect()->route('login')->with('error', 'Sesi admin tidak valid.');
+        }
+
+        Auth::login($admin);
+        session()->forget('admin_user_impersonating');
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Berhasil kembali ke akun admin.');
     }
 
     public function resetPassword(User $user)

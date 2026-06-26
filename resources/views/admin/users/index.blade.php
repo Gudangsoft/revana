@@ -67,6 +67,8 @@
                                     <span class="badge bg-danger">Admin</span>
                                 @elseif($user->role === 'reviewer')
                                     <span class="badge bg-primary">Reviewer</span>
+                                @elseif($user->role === 'pic_reviewer')
+                                    <span class="badge" style="background:#6366f1;">PIC Reviewer</span>
                                 @else
                                     <span class="badge bg-info">{{ ucfirst($user->role) }}</span>
                                 @endif
@@ -74,19 +76,28 @@
                             <td>{{ $user->created_at->format('d M Y') }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    @if(!$user->isAdmin())
+                                    <form action="{{ route('admin.users.login-as', $user) }}" method="POST" class="d-inline"
+                                          onsubmit="return confirm('Login sebagai {{ addslashes($user->name) }}?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success" title="Login As">
+                                            <i class="bi bi-person-check"></i>
+                                        </button>
+                                    </form>
+                                    @endif
                                     <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin mereset password pengguna ini?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-info">
+                                        <button type="submit" class="btn btn-sm btn-info" title="Reset Password">
                                             <i class="bi bi-key"></i>
                                         </button>
                                     </form>
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

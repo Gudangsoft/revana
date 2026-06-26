@@ -99,8 +99,11 @@ class LoginController extends Controller
             } elseif ($user->role === 'reviewer') {
                 $request->session()->flash('motivational_message', MotivationalMessage::random());
                 return redirect()->intended('/reviewer/dashboard');
+            } elseif ($user->role === 'pic_reviewer') {
+                $request->session()->flash('motivational_message', MotivationalMessage::random());
+                return redirect()->intended('/admin/pic-reviewer/dashboard');
             }
-            
+
             return redirect()->intended('/login');
         }
 
