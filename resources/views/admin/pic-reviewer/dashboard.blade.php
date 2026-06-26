@@ -218,12 +218,12 @@
     </div>
 </div>
 
-{{-- ── Submission Menunggu Review ── --}}
+{{-- ── Penugasan Review Menunggu ── --}}
 @if($recentPending->count())
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-transparent d-flex align-items-center justify-content-between">
         <h6 class="fw-semibold mb-0">
-            <i class="bi bi-hourglass-split text-warning me-2"></i>Submission Menunggu Review
+            <i class="bi bi-hourglass-split text-warning me-2"></i>Penugasan Menunggu Konfirmasi
         </h6>
         <a href="{{ route('admin.assignments.index') }}" class="btn btn-sm btn-outline-primary">
             Lihat Semua
@@ -234,34 +234,30 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Kode</th>
                         <th>Judul Artikel</th>
                         <th>Jurnal</th>
-                        <th>Program</th>
+                        <th>Reviewer</th>
+                        <th>Deadline</th>
                         <th>Status</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($recentPending as $sub)
+                    @foreach($recentPending as $assignment)
                     <tr>
-                        <td><code class="small">{{ $sub->kode_submit }}</code></td>
-                        <td class="small">{{ Str::limit($sub->judul_artikel, 50) }}</td>
-                        <td class="small text-muted">{{ Str::limit($sub->journalSlot?->journalMaster?->nama_jurnal ?? '—', 30) }}</td>
-                        <td>
-                            @if($sub->process_type === 'fasttrack')
-                                <span class="badge bg-warning text-dark">Fasttrack</span>
-                            @elseif($sub->program_type === 'bkd')
-                                <span class="badge bg-info">BKD</span>
-                            @elseif($sub->program_type === 'jafa')
-                                <span class="badge bg-success">JAFA</span>
+                        <td class="small">{{ Str::limit($assignment->article_title, 50) }}</td>
+                        <td class="small text-muted">{{ Str::limit($assignment->journal?->nama_jurnal ?? '—', 30) }}</td>
+                        <td class="small">{{ $assignment->reviewer?->name ?? '—' }}</td>
+                        <td class="small">
+                            @if($assignment->deadline)
+                                {{ $assignment->deadline->format('d M Y') }}
                             @else
-                                <span class="badge bg-secondary">Normal</span>
+                                <span class="text-muted">—</span>
                             @endif
                         </td>
-                        <td><span class="badge bg-warning text-dark">Menunggu</span></td>
+                        <td><span class="badge bg-warning text-dark">PENDING</span></td>
                         <td>
-                            <a href="{{ route('admin.submissions.show', $sub) }}" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ route('admin.assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </td>

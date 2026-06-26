@@ -96,6 +96,16 @@
 - `resources/views/admin/users/edit.blade.php`
 
 
+## 7. Fix Dashboard PIC Reviewer (500 Error is_active & ReviewAssignment)
+
+**Tujuan:** Perbaiki error 500 pada `/admin/pic-reviewer/dashboard` akibat query ke kolom tidak ada dan relasi salah
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicReviewerDashboardController.php` | Hapus query `is_active` (kolom tidak ada di tabel users); ganti query berbasis Submission+reviewAssignments (relasi tidak ada) dengan query langsung ke model `ReviewAssignment` menggunakan kolom `status` dan `approved_at`; `recentPending` sekarang berisi `ReviewAssignment` status PENDING |
+| `resources/views/admin/pic-reviewer/dashboard.blade.php` | Update tabel "Menunggu Review" agar menampilkan data dari `ReviewAssignment` (judul, jurnal, reviewer, deadline) bukan dari Submission |
+
 ## 8. 🔄 Update: rev
 
 - **Commit:** `505d53b` — 15:39 oleh Gudangsoft
@@ -104,4 +114,12 @@
 - `log-update-2026-06-26.md`
 - `resources/views/admin/partials/sidebar.blade.php`
 - `resources/views/admin/users/index.blade.php`
+
+
+## 9. 🔄 Update: a
+
+- **Commit:** `0c541b2` — 15:43 oleh Gudangsoft
+- **File berubah:** 2 file
+- `database/migrations/2026_06_26_160000_add_pic_reviewer_to_users_role_enum.php`
+- `log-update-2026-06-26.md`
 
