@@ -183,7 +183,6 @@
         </div>
     </div>
 </div>
-@endsection
 
 {{-- Adjust Point Modal --}}
 <div class="modal fade" id="adjustModal" tabindex="-1">
@@ -216,6 +215,7 @@
         </div>
     </div>
 </div>
+@endsection
 
 @section('scripts')
 <script>

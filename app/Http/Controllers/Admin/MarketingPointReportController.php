@@ -19,10 +19,8 @@ class MarketingPointReportController extends Controller
     {
         $query = Marketing::where('is_active', true)
             ->withCount('submissions')
-            ->with('submissions')
             ->orderByDesc('submissions_count');
-        
-        // Filter by search
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -30,28 +28,29 @@ class MarketingPointReportController extends Controller
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
-        
+
         $marketings = $query->paginate(request()->input('per_page', 20));
-        
-        // Get overall statistics
+
         $totalMarketings = Marketing::where('is_active', true)->count();
-        // Use submission count as the source of truth (1 submission = 1 point)
         $totalSubmissions = \App\Models\Submission::whereNotNull('marketing_id')->count();
         $totalPoints = $totalSubmissions;
-        
+
         // Top performer this month
+        $month = now()->month;
+        $year  = now()->year;
         $topPerformerThisMonth = Marketing::where('is_active', true)
-            ->whereHas('pointHistories', function($q) {
-                $q->whereMonth('created_at', now()->month)
-                  ->whereYear('created_at', now()->year);
+            ->whereHas('pointHistories', fn($q) => $q->whereMonth('created_at', $month)->whereYear('created_at', $year))
+            ->get()
+            ->map(function ($m) use ($month, $year) {
+                $m->points_this_month = $m->pointHistories()
+                    ->whereMonth('created_at', $month)
+                    ->whereYear('created_at', $year)
+                    ->sum('points_earned');
+                return $m;
             })
-            ->withSum(['pointHistories as points_this_month' => function($q) {
-                $q->whereMonth('created_at', now()->month)
-                  ->whereYear('created_at', now()->year);
-            }], 'points_earned')
-            ->orderByDesc('points_this_month')
+            ->sortByDesc('points_this_month')
             ->first();
-        
+
         return view('admin.marketing-points.index', compact(
             'marketings',
             'totalMarketings',
@@ -241,7 +240,7 @@ class MarketingPointReportController extends Controller
     public function adjustPoints(Request $request, Marketing $marketing)
     {
         $validated = $request->validate([
-            'points' => 'required|integer',
+            'points' => 'required|numeric',
             'reason' => 'required|string|max:255',
         ]);
 
@@ -252,7 +251,9 @@ class MarketingPointReportController extends Controller
             'description' => 'Penyesuaian manual: ' . $validated['reason'],
         ]);
 
-        $marketing->increment('total_points', $validated['points']);
+        // Recalculate total from actual sum to avoid drift
+        $actual = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');
+        $marketing->update(['total_points' => max(0, $actual)]);
 
         return redirect()->back()
             ->with('success', 'Poin berhasil disesuaikan');
