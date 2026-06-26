@@ -672,6 +672,7 @@ Route::prefix('marketing')->group(function () {
         Route::post('/submissions', [MarketingDashboardController::class, 'storeSubmission'])->name('marketing.submissions.store');
         Route::get('/submissions/{submission}', [MarketingDashboardController::class, 'showSubmission'])->name('marketing.submissions.show');
         Route::get('/submissions/{submission}/loa', [\App\Http\Controllers\Admin\LoaController::class, 'showMarketing'])->name('marketing.submissions.loa');
+        Route::post('/submissions/{submission}/loa-metadata', [\App\Http\Controllers\Admin\LoaController::class, 'updateMarketingMetadata'])->name('marketing.submissions.loa.update-metadata');
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');

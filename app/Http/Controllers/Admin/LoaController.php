@@ -124,10 +124,33 @@ class LoaController extends Controller
             'penerbit'               => $journal?->publisher,
             'verifyUrl'              => route('verify.direct', ['kode_loa' => $kode]),
             'isAdminView'            => false,
+            'isMarketingView'        => true,
             'canEditDate'            => true,
             'backUrl'                => route('marketing.submissions.show', $submission),
             'lang'                   => $lang,
         ]);
+    }
+
+    // ── Marketing: update metadata LOA ────────────────────────────────────
+    public function updateMarketingMetadata(Request $request, Submission $submission)
+    {
+        $marketing = \Auth::guard('marketing')->user();
+        if ($submission->marketing_id && $submission->marketing_id !== $marketing->id) {
+            return redirect()->route('marketing.submissions')
+                ->with('error', 'Anda tidak memiliki akses ke LOA ini.');
+        }
+
+        $validated = $request->validate([
+            'nama_penulis'        => 'required|string|max:255',
+            'affiliation_penulis' => 'nullable|string|max:500',
+            'judul_artikel'       => 'required|string|max:1000',
+            'tanggal_loa'         => 'nullable|date',
+        ]);
+
+        $submission->update($validated);
+
+        return redirect()->route('marketing.submissions.loa', $submission)
+            ->with('success', 'Metadata LOA berhasil diperbarui.');
     }
 
     // ── Request LOA publik ─────────────────────────────────────────────────
