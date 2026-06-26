@@ -857,6 +857,14 @@ class SubmissionController extends Controller
             });
         }
 
+        // Filter by reviewer (reviewer1 or reviewer2)
+        if ($request->filled('reviewer_id')) {
+            $query->where(function($q) use ($request) {
+                $q->where('petugas_reviewer1_id', $request->reviewer_id)
+                  ->orWhere('petugas_reviewer2_id', $request->reviewer_id);
+            });
+        }
+
         $this->applyProgramFilter($query, $request);
 
         // Sort — default Terlama (FIFO)
@@ -909,6 +917,12 @@ class SubmissionController extends Controller
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
+        if ($request->filled('reviewer_id')) {
+            $baseQuery->where(function($q) use ($request) {
+                $q->where('petugas_reviewer1_id', $request->reviewer_id)
+                  ->orWhere('petugas_reviewer2_id', $request->reviewer_id);
+            });
+        }
         $this->applyProgramFilter($baseQuery, $request);
 
         $statsResult = $baseQuery->first();
@@ -927,8 +941,9 @@ class SubmissionController extends Controller
         });
 
         $program = $request->input('program');
+        $reviewers = User::where('role', 'reviewer')->orderBy('name')->get(['id', 'name']);
 
-        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount', 'program'));
+        return view('admin.submissions.monitoring', compact('submissions', 'journals', 'statusOptions', 'stats', 'pics', 'users', 'marketings', 'pendingValidations', 'pendingCount', 'program', 'reviewers'));
     }
 
     /**

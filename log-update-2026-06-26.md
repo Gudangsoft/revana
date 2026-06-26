@@ -207,3 +207,22 @@
 | File | Perubahan |
 |------|-----------|
 | `app/Http/Controllers/Admin/ReviewAssignmentController.php` | Tambah `select()` pada query `$reviewers` untuk membatasi kolom yang di-`@json`; tambah `select()` + `limit(500)` + constrained eager loading pada query `$submissions` untuk mencegah memory exhaustion di production |
+
+## 19. 🔄 Update: id
+
+- **Commit:** `0e944d1` — 16:39 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/ReviewAssignmentController.php`
+- `log-update-2026-06-26.md`
+
+
+## 20. Tambah Filter Reviewer di Halaman Monitoring Submission
+
+**Tujuan:** Admin/PIC Reviewer dapat memfilter submission berdasarkan reviewer yang ditugaskan (Reviewer 1 atau Reviewer 2)
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah filter `reviewer_id` ke `$query` dan `$baseQuery` (OR antara `petugas_reviewer1_id` dan `petugas_reviewer2_id`); pass `$reviewers` (User role=reviewer) ke view |
+| `resources/views/admin/submissions/monitoring.blade.php` | Tambah combo box "Reviewer" di filter form, di antara Status dan Urutkan |
+

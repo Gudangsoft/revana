@@ -579,6 +579,17 @@ code.copyable.copied {
                             </select>
                         </div>
                         <div class="col-md-2">
+                            <label for="reviewer_id" class="form-label small mb-1">Reviewer</label>
+                            <select class="form-select form-select-sm" id="reviewer_id" name="reviewer_id">
+                                <option value="">-- Semua --</option>
+                                @foreach($reviewers as $reviewer)
+                                    <option value="{{ $reviewer->id }}" {{ request('reviewer_id') == $reviewer->id ? 'selected' : '' }}>
+                                        {{ Str::limit($reviewer->name, 20) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <label for="sort_by" class="form-label small mb-1">Urutkan</label>
                             <select class="form-select form-select-sm" id="sort_by" name="sort_by">
                                 <option value="date_asc"  {{ request('sort_by', 'date_asc') == 'date_asc'   ? 'selected' : '' }}>↑ Terlama</option>
