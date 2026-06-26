@@ -259,3 +259,21 @@
 - `log-update-2026-06-26.md`
 - `resources/views/admin/submissions/monitoring.blade.php`
 
+
+## 25. 🔄 Update: z
+
+- **Commit:** `79e90ef` — 17:09 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-26.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
+
+
+## 26. Rapikan Halaman Portal Penulis (verifyloa.apji.org)
+
+**Tujuan:** Bersihkan tampilan halaman tracking LOA publik — hapus elemen tidak perlu, ubah branding SIPERA → APJI
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/public/author-portal.blade.php` | Hapus brand "SIPERA" dari top nav; ubah badge "Portal Resmi SIPERA" → "Portal Resmi APJI"; hapus 3 feature pills (Status Real-time, Unduh LOA, Pilih Tanggal); hapus badge status di result header; ganti baris "Tgl Submit" → "Volume / Issue" (Vol/No/Bulan/Tahun); hapus seluruh section Progress Artikel (stepper + status bar current) |
+

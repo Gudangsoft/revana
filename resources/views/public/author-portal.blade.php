@@ -469,13 +469,7 @@
 
     {{-- ── Top nav ── --}}
     <nav class="top-nav">
-        <a href="{{ route('tracking.index') }}" class="brand">
-            <div class="brand-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
-            <div>
-                <span class="brand-name">SIPERA</span>
-                <span class="brand-sub">Portal Penulis</span>
-            </div>
-        </a>
+        <div></div>
         <div class="nav-links">
             <a href="{{ route('login') }}" class="nav-link-btn">
                 <i class="bi bi-box-arrow-in-right me-1"></i>Login
@@ -488,7 +482,7 @@
     <div class="hero">
         <div class="hero-badge">
             <i class="bi bi-shield-check-fill"></i>
-            Portal Resmi SIPERA
+            Portal Resmi APJI
         </div>
         <h1>Lacak Status & Unduh <span>LOA</span></h1>
         <p>Pantau progress artikel dan akses Letter of Acceptance — cukup masukkan Kode SIPERA Anda di satu tempat.</p>
@@ -541,32 +535,6 @@
             </form>
         </div>
 
-        @unless(isset($submission))
-        <hr class="divider">
-        <div class="feature-row">
-            <div class="feature-pill">
-                <div class="fp-icon" style="background:#eff6ff;color:#1d4ed8;">
-                    <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <div class="fp-title">Status Real-time</div>
-                <div class="fp-desc">Lihat di tahap mana artikel Anda sekarang berada</div>
-            </div>
-            <div class="feature-pill">
-                <div class="fp-icon" style="background:#f0fdf4;color:#15803d;">
-                    <i class="bi bi-file-earmark-check-fill"></i>
-                </div>
-                <div class="fp-title">Unduh LOA</div>
-                <div class="fp-desc">Akses & cetak Letter of Acceptance kapan saja</div>
-            </div>
-            <div class="feature-pill">
-                <div class="fp-icon" style="background:#fff7ed;color:#c2410c;">
-                    <i class="bi bi-calendar3"></i>
-                </div>
-                <div class="fp-title">Pilih Tanggal</div>
-                <div class="fp-desc">Atur tanggal LOA sesuai kebutuhan dokumen Anda</div>
-            </div>
-        </div>
-        @endunless
     </div>
 
     {{-- ── Result ── --}}
@@ -630,11 +598,6 @@
                     @if($journal?->e_issn) &nbsp;·&nbsp; E-ISSN {{ $journal->e_issn }} @endif
                 </div>
             </div>
-            <div class="ms-2 flex-shrink-0">
-                <span class="badge rounded-pill" style="background:{{ $currentStatus['color'] }};font-size:.72rem;padding:5px 12px;">
-                    <i class="bi {{ $currentStatus['icon'] }} me-1"></i>{{ $currentStatus['label'] }}
-                </span>
-            </div>
         </div>
 
         <div class="result-body">
@@ -663,12 +626,14 @@
                         </code>
                     </div>
                 </div>
+                @if($slot)
                 <div class="info-row">
-                    <div class="info-label"><i class="bi bi-calendar3 me-1"></i>Tgl Submit</div>
+                    <div class="info-label"><i class="bi bi-journal-bookmark me-1"></i>Volume / Issue</div>
                     <div class="info-value">
-                        {{ $submission->tanggal_submit ? \Carbon\Carbon::parse($submission->tanggal_submit)->isoFormat('D MMMM YYYY') : '—' }}
+                        Vol.{{ $slot->volume }}, No.{{ $slot->nomor }}, {{ $slot->bulan }} {{ $slot->tahun }}
                     </div>
                 </div>
+                @endif
                 @if($submission->link_publish)
                 <div class="info-row">
                     <div class="info-label"><i class="bi bi-globe me-1"></i>Link Terbit</div>
@@ -682,48 +647,6 @@
                 @endif
             </div>
 
-            {{-- Progress stepper --}}
-            @if($realStatus !== 'REJECTED')
-            <div class="stepper-wrap">
-                <div class="stepper-title"><i class="bi bi-diagram-3 me-1"></i>Progress Artikel</div>
-                <div class="stepper">
-                    @php
-                        $steps = [
-                            ['label' => 'Submit',    'icon' => 'bi-upload'],
-                            ['label' => 'Review',    'icon' => 'bi-eye'],
-                            ['label' => 'Produksi',  'icon' => 'bi-printer'],
-                            ['label' => 'Validasi',  'icon' => 'bi-shield-check'],
-                            ['label' => 'Terbit',    'icon' => 'bi-book'],
-                        ];
-                    @endphp
-                    @foreach($steps as $idx => $step)
-                    @php $n = $idx + 1; $cls = $n < $stage ? 'done' : ($n == $stage ? 'active' : 'pending'); @endphp
-                    <div class="step {{ $cls }}">
-                        <div class="step-dot">
-                            @if($cls === 'done') <i class="bi bi-check-lg"></i>
-                            @elseif($cls === 'active') <i class="bi {{ $step['icon'] }}"></i>
-                            @else {{ $n }} @endif
-                        </div>
-                        <div class="step-label">{{ $step['label'] }}</div>
-                    </div>
-                    @endforeach
-                </div>
-                <div class="current-status-bar {{ $realStatus === 'PUBLISHED' ? 'done' : 'active' }}">
-                    <i class="bi {{ $currentStatus['icon'] }}" style="font-size:1rem;flex-shrink:0;"></i>
-                    <span>
-                        Status saat ini: <strong>{{ $currentStatus['label'] }}</strong>
-                        @if($realStatus === 'PUBLISHED') — Selamat, artikel Anda telah terbit! 🎉
-                        @endif
-                    </span>
-                </div>
-            </div>
-            @else
-            <div class="rejected-banner mb-4">
-                <i class="bi bi-x-circle-fill" style="font-size:2rem;color:#dc2626;"></i>
-                <div style="font-weight:700;color:#991b1b;margin-top:8px;">Artikel Tidak Dilanjutkan</div>
-                <div style="font-size:.85rem;color:#b91c1c;margin-top:4px;">Mohon maaf, artikel ini tidak dapat dilanjutkan ke tahap berikutnya.</div>
-            </div>
-            @endif
 
         </div>
     </div>
