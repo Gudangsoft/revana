@@ -389,10 +389,10 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
         </label>
         @endif
         @if(!empty($isAdminView) && $isAdminView)
-        <a href="{{ route('admin.submissions.edit', $submission) }}"
-           style="color:#90CAF9; text-decoration:none; font-size:12px;">
-            ✏ Edit Afiliasi & Data
-        </a>
+        <button onclick="document.getElementById('modal-meta-loa').style.display='flex'"
+           style="background:#2a6496; color:#fff; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; font-size:12px;">
+            ✏ Edit Metadata LOA
+        </button>
         @endif
         <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
@@ -404,6 +404,91 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
     window.location.href = url.toString();
 });
 </script>
+
+@if(!empty($isAdminView) && $isAdminView)
+{{-- ── Modal Edit Metadata LOA (screen only, no-print) ──────────── --}}
+<div id="modal-meta-loa" class="no-print"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;
+            align-items:center; justify-content:center; font-family:sans-serif;">
+    <div style="background:#1e1e2e; color:#e0e0e0; border-radius:10px; width:100%; max-width:480px;
+                padding:28px 32px; box-shadow:0 8px 40px rgba(0,0,0,.6); position:relative;">
+        <h3 style="margin:0 0 20px; font-size:16px; color:#90CAF9;">
+            ✏ Edit Metadata LOA
+            <span style="font-size:12px; color:#aaa; font-weight:normal; margin-left:8px;">
+                {{ $submission->kode_submit }}
+            </span>
+        </h3>
+
+        <form method="POST" action="{{ route('admin.submissions.loa.update-metadata', $submission) }}">
+            @csrf
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Nama Penulis *</label>
+                <input type="text" name="nama_penulis" required
+                       value="{{ old('nama_penulis', $submission->nama_penulis) }}"
+                       style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                              border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Afiliasi</label>
+                <textarea name="affiliation_penulis" rows="2"
+                          style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                                 border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; resize:vertical;">{{ old('affiliation_penulis', $submission->affiliation_penulis) }}</textarea>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Judul Artikel *</label>
+                <textarea name="judul_artikel" rows="3" required
+                          style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                                 border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; resize:vertical;">{{ old('judul_artikel', $submission->judul_artikel) }}</textarea>
+            </div>
+
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">
+                    Tanggal LOA
+                    <span style="color:#888; font-size:11px;">(kosong = ikuti setting jurnal)</span>
+                </label>
+                <input type="date" name="tanggal_loa"
+                       value="{{ old('tanggal_loa', $submission->tanggal_loa?->toDateString()) }}"
+                       style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                              border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; cursor:pointer;">
+                @if($submission->tanggal_loa)
+                <div style="margin-top:4px; font-size:11px; color:#f0ad4e;">
+                    ⚠ Tanggal override aktif: {{ $submission->tanggal_loa->format('d M Y') }}
+                </div>
+                @endif
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button"
+                        onclick="document.getElementById('modal-meta-loa').style.display='none'"
+                        style="padding:8px 20px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
+                    Batal
+                </button>
+                <button type="submit"
+                        style="padding:8px 24px; background:#2a6496; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">
+                    Simpan
+                </button>
+            </div>
+        </form>
+
+        <button onclick="document.getElementById('modal-meta-loa').style.display='none'"
+                style="position:absolute; top:12px; right:16px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1;">×</button>
+    </div>
+</div>
+
+@if(session('success'))
+<script>
+    // Show success notification briefly
+    var _s = document.createElement('div');
+    _s.style.cssText = 'position:fixed;top:60px;right:20px;background:#2e7d32;color:#fff;padding:12px 20px;border-radius:8px;font-family:sans-serif;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);';
+    _s.textContent = '✓ {{ session("success") }}';
+    document.body.appendChild(_s);
+    setTimeout(function(){ _s.remove(); }, 4000);
+</script>
+@endif
+@endif
 
 {{-- ══════════════════════════════════════════════════════
      PAGE 1 — RECEIPT FOR PAPER / SURAT PENERIMAAN ARTIKEL

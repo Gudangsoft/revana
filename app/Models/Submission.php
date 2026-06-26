@@ -22,6 +22,7 @@ class Submission extends Model
         // Data Submit
         'kode_submit',
         'kode_loa',
+        'tanggal_loa',
         'journal_slot_id',
         'kategori_id',
         'jenis_jurnal_id',
@@ -110,7 +111,8 @@ class Submission extends Model
     ];
 
     protected $casts = [
-        'co_authors' => 'array',
+        'co_authors'   => 'array',
+        'tanggal_loa'  => 'date',
         'editor1_valid' => 'boolean',
         'author1_valid' => 'boolean',
         'editor2_valid' => 'boolean',

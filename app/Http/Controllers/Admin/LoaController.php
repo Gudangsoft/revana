@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Accreditation;
 use App\Models\Submission;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class LoaController extends Controller
@@ -16,7 +17,8 @@ class LoaController extends Controller
         $submission->load(['journalSlot.journalMaster']);
         $journal = $submission->journalSlot?->journalMaster;
         $slot    = $submission->journalSlot;
-        $date    = request('tanggal');
+        // Priority: ?tanggal param → submission.tanggal_loa → journal.loa_tanggal
+        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
         $kode    = $submission->kode_loa ?: $submission->kode_submit;
         $lang    = $journal?->loa_language ?? 'en';
 
@@ -47,7 +49,7 @@ class LoaController extends Controller
         $submission->load(['journalSlot.journalMaster']);
         $journal = $submission->journalSlot?->journalMaster;
         $slot    = $submission->journalSlot;
-        $date    = request('tanggal');
+        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
         $kode    = $submission->kode_loa ?: $submission->kode_submit;
         $lang    = $journal?->loa_language ?? 'en';
 
@@ -72,6 +74,23 @@ class LoaController extends Controller
         ]);
     }
 
+    // ── Admin: simpan metadata LOA (nama, afiliasi, judul, tanggal) ─────
+    public function updateMetadata(Request $request, Submission $submission)
+    {
+        $validated = $request->validate([
+            'nama_penulis'        => 'required|string|max:255',
+            'affiliation_penulis' => 'nullable|string|max:500',
+            'judul_artikel'       => 'required|string|max:1000',
+            'tanggal_loa'         => 'nullable|date',
+        ]);
+
+        $submission->update($validated);
+
+        return redirect()
+            ->route('admin.submissions.loa', $submission)
+            ->with('success', 'Metadata LOA berhasil diperbarui.');
+    }
+
     // ── Marketing: view LOA dengan date picker, tanpa akses admin ───────────
     public function showMarketing(Submission $submission)
     {
@@ -84,7 +103,7 @@ class LoaController extends Controller
         $submission->load(['journalSlot.journalMaster']);
         $journal = $submission->journalSlot?->journalMaster;
         $slot    = $submission->journalSlot;
-        $date    = request('tanggal');
+        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
         $kode    = $submission->kode_loa ?: $submission->kode_submit;
         $lang    = $journal?->loa_language ?? 'en';
 
