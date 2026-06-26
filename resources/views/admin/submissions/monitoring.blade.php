@@ -1686,15 +1686,80 @@ document.addEventListener('DOMContentLoaded', function() {
         cb.addEventListener('change', updateSelectedCount);
     });
 
-    // Reviewer user select → auto-fill username ke semua baris credential
-    document.getElementById('reviewerUserSelect')?.addEventListener('change', function() {
-        const selected = this.options[this.selectedIndex];
-        const email = selected.dataset.email || '';
-        if (!email) return;
-        document.querySelectorAll('#reviewerCredentialsList input[name*="[username]"]').forEach(input => {
-            input.value = email;
+    // ── Reviewer Picker (searchable custom dropdown) ──
+    (function() {
+        const searchInput  = document.getElementById('reviewerSearchInput');
+        const dropdown     = document.getElementById('reviewerDropdown');
+        const hiddenEmail  = document.getElementById('reviewerSelectedEmail');
+        const badge        = document.getElementById('reviewerSelectedBadge');
+        const badgeName    = document.getElementById('reviewerSelectedName');
+        const clearBtn     = document.getElementById('clearReviewerPicker');
+        if (!searchInput) return;
+
+        const allOptions = Array.from(dropdown.querySelectorAll('.reviewer-option'));
+
+        function fillUsername(email) {
+            document.querySelectorAll('#reviewerCredentialsList input[name*="[username]"]').forEach(i => i.value = email);
+        }
+
+        function selectReviewer(name, email) {
+            hiddenEmail.value = email;
+            searchInput.value = '';
+            searchInput.placeholder = 'Terpilih: ' + name.split(' ').slice(0,2).join(' ') + '…';
+            badgeName.textContent = name;
+            badge.style.display = '';
+            dropdown.style.display = 'none';
+            fillUsername(email);
+        }
+
+        function filterOptions(q) {
+            const lower = q.toLowerCase();
+            let any = false;
+            allOptions.forEach(opt => {
+                const match = opt.dataset.name.toLowerCase().includes(lower)
+                           || opt.dataset.email.toLowerCase().includes(lower);
+                opt.style.display = match ? '' : 'none';
+                if (match) any = true;
+            });
+            dropdown.style.display = any || q === '' ? '' : 'none';
+        }
+
+        searchInput.addEventListener('focus', () => { filterOptions(searchInput.value); dropdown.style.display = ''; });
+        searchInput.addEventListener('input', () => filterOptions(searchInput.value));
+
+        allOptions.forEach(opt => {
+            opt.addEventListener('mouseenter', () => opt.style.background = '#f0f4ff');
+            opt.addEventListener('mouseleave', () => opt.style.background = '');
+            opt.addEventListener('mousedown', e => {
+                e.preventDefault();
+                selectReviewer(opt.dataset.name, opt.dataset.email);
+            });
         });
-    });
+
+        document.addEventListener('click', e => {
+            if (!document.getElementById('reviewerPickerWrapper').contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        clearBtn?.addEventListener('click', () => {
+            hiddenEmail.value = '';
+            searchInput.value = '';
+            searchInput.placeholder = '🔍 Ketik nama reviewer...';
+            badge.style.display = 'none';
+            badgeName.textContent = '';
+        });
+
+        // Reset picker saat modal dibuka ulang
+        document.getElementById('bulkReviewerModal')?.addEventListener('show.bs.modal', () => {
+            hiddenEmail.value = '';
+            searchInput.value = '';
+            searchInput.placeholder = '🔍 Ketik nama reviewer...';
+            badge.style.display = 'none';
+            dropdown.style.display = 'none';
+            allOptions.forEach(o => o.style.display = '');
+        });
+    })();
 });
 </script>
 
@@ -1840,18 +1905,34 @@ document.addEventListener('DOMContentLoaded', function() {
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Pilih Reviewer <small class="text-muted">(isi otomatis username)</small></label>
-                            <select class="form-select" id="reviewerUserSelect">
-                                <option value="">-- Pilih Reviewer --</option>
-                                @foreach($reviewers as $reviewer)
-                                    <option value="{{ $reviewer->id }}"
-                                            data-email="{{ $reviewer->email }}"
-                                            data-name="{{ $reviewer->name }}">
-                                        {{ $reviewer->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">Memilih reviewer akan mengisi otomatis kolom username</small>
+                            <label class="form-label">Pilih Reviewer <small class="text-muted">(isi username otomatis)</small></label>
+                            <div class="position-relative" id="reviewerPickerWrapper">
+                                <input type="text" id="reviewerSearchInput" class="form-control"
+                                       placeholder="🔍 Ketik nama reviewer..."
+                                       autocomplete="off">
+                                <div id="reviewerDropdown"
+                                     style="display:none;position:absolute;top:100%;left:0;right:0;z-index:1060;
+                                            background:#fff;border:1px solid #dee2e6;border-radius:6px;
+                                            max-height:220px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12);">
+                                    @foreach($reviewers as $reviewer)
+                                    <div class="reviewer-option px-3 py-2"
+                                         style="cursor:pointer;font-size:.875rem;border-bottom:1px solid #f0f0f0;"
+                                         data-email="{{ $reviewer->email }}"
+                                         data-name="{{ $reviewer->name }}">
+                                        <span class="fw-semibold">{{ $reviewer->name }}</span>
+                                        <br><small class="text-muted">{{ $reviewer->email }}</small>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <input type="hidden" id="reviewerSelectedEmail">
+                            </div>
+                            <div id="reviewerSelectedBadge" class="mt-1" style="display:none;">
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1" style="font-size:.8rem;">
+                                    <i class="bi bi-person-check me-1"></i>
+                                    <span id="reviewerSelectedName"></span>
+                                    <button type="button" class="btn-close btn-close ms-1" style="font-size:.6rem;" id="clearReviewerPicker"></button>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
