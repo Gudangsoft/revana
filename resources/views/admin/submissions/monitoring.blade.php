@@ -1905,7 +1905,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Pilih Reviewer <small class="text-muted">(isi username otomatis)</small></label>
+                            <label class="form-label">Pilih Reviewer</label>
                             <div class="position-relative" id="reviewerPickerWrapper">
                                 <input type="text" id="reviewerSearchInput" class="form-control"
                                        placeholder="🔍 Ketik nama reviewer..."
