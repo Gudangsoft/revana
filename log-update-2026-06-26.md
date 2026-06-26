@@ -277,3 +277,11 @@
 |------|-----------|
 | `resources/views/public/author-portal.blade.php` | Hapus brand "SIPERA" dari top nav; ubah badge "Portal Resmi SIPERA" → "Portal Resmi APJI"; hapus 3 feature pills (Status Real-time, Unduh LOA, Pilih Tanggal); hapus badge status di result header; ganti baris "Tgl Submit" → "Volume / Issue" (Vol/No/Bulan/Tahun); hapus seluruh section Progress Artikel (stepper + status bar current) |
 
+
+## 27. 🔄 Update: a
+
+- **Commit:** `1de3494` — 21:21 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-06-26.md`
+- `resources/views/public/author-portal.blade.php`
+
