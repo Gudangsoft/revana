@@ -95,3 +95,13 @@
 - `resources/views/admin/users/create.blade.php`
 - `resources/views/admin/users/edit.blade.php`
 
+
+## 8. 🔄 Update: rev
+
+- **Commit:** `505d53b` — 15:39 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/UserController.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/partials/sidebar.blade.php`
+- `resources/views/admin/users/index.blade.php`
+
