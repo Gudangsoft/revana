@@ -187,3 +187,23 @@
 - `resources/views/admin/pic-reviewer/submissions.blade.php`
 - `routes/web.php`
 
+
+## 17. 🔄 Update: z
+
+- **Commit:** `7ce9c7a` — 16:26 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/PicReviewerJournalController.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/partials/sidebar-pic-reviewer.blade.php`
+- `resources/views/admin/pic-reviewer/monitoring.blade.php`
+- `routes/web.php`
+
+
+## 10. Fix HTTP 500 pada Halaman Assignments Create
+
+**Tujuan:** Perbaiki kemungkinan memory exhaustion di `/admin/assignments/create` akibat query tanpa limit
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ReviewAssignmentController.php` | Tambah `select()` pada query `$reviewers` untuk membatasi kolom yang di-`@json`; tambah `select()` + `limit(500)` + constrained eager loading pada query `$submissions` untuk mencegah memory exhaustion di production |

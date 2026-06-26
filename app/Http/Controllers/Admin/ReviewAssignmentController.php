@@ -48,13 +48,17 @@ class ReviewAssignmentController extends Controller
 
     public function create(Request $request)
     {
-        $reviewers = User::where('role', 'reviewer')->get();
+        $reviewers = User::where('role', 'reviewer')
+            ->select(['id', 'name', 'email', 'institution', 'field_of_study_id', 'article_languages', 'completed_reviews', 'total_points'])
+            ->get();
         $fieldOfStudies = \App\Models\FieldOfStudy::active()->ordered()->get();
         
-        // Get submissions data for dropdown (from journal management)
-        $submissions = \App\Models\Submission::with(['journalSlot.journalMaster'])
+        // Get submissions data for dropdown (limited to avoid memory exhaustion)
+        $submissions = \App\Models\Submission::with(['journalSlot:id,journal_master_id', 'journalSlot.journalMaster:id,nama_jurnal'])
+            ->select(['id', 'id_artikel', 'judul_artikel', 'link_artikel', 'journal_slot_id'])
             ->whereNotNull('id_artikel')
             ->orderBy('created_at', 'desc')
+            ->limit(500)
             ->get();
         
         // Get pre-selected reviewer if coming from review request approval
