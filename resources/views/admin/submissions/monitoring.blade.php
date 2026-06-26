@@ -1685,6 +1685,16 @@ document.addEventListener('DOMContentLoaded', function() {
     checkboxes.forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
     });
+
+    // Reviewer user select → auto-fill username ke semua baris credential
+    document.getElementById('reviewerUserSelect')?.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const email = selected.dataset.email || '';
+        if (!email) return;
+        document.querySelectorAll('#reviewerCredentialsList input[name*="[username]"]').forEach(input => {
+            input.value = email;
+        });
+    });
 });
 </script>
 
@@ -1812,7 +1822,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="hidden" name="submission_ids" class="bulk-submission-ids">
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Tipe Penugasan <span class="text-danger">*</span></label>
                             <select class="form-select" name="assignment_type" id="reviewerAssignmentType" required>
                                 <option value="">-- Pilih Tipe --</option>
@@ -1820,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <option value="reviewer2">Reviewer 2</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Pilih Petugas <span class="text-danger">*</span></label>
                             <select class="form-select" name="petugas_id" required>
                                 <option value="">-- Pilih Petugas --</option>
@@ -1829,8 +1839,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pilih Reviewer <small class="text-muted">(isi otomatis username)</small></label>
+                            <select class="form-select" id="reviewerUserSelect">
+                                <option value="">-- Pilih Reviewer --</option>
+                                @foreach($reviewers as $reviewer)
+                                    <option value="{{ $reviewer->id }}"
+                                            data-email="{{ $reviewer->email }}"
+                                            data-name="{{ $reviewer->name }}">
+                                        {{ $reviewer->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Memilih reviewer akan mengisi otomatis kolom username</small>
+                        </div>
                     </div>
-                    
+
                     <div id="reviewerCredentialsContainer">
                         <label class="form-label">Username & Password per Submission:</label>
                         <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">

@@ -224,5 +224,14 @@
 | File | Perubahan |
 |------|-----------|
 | `app/Http/Controllers/Admin/SubmissionController.php` | Tambah filter `reviewer_id` ke `$query` dan `$baseQuery` (OR antara `petugas_reviewer1_id` dan `petugas_reviewer2_id`); pass `$reviewers` (User role=reviewer) ke view |
-| `resources/views/admin/submissions/monitoring.blade.php` | Tambah combo box "Reviewer" di filter form, di antara Status dan Urutkan |
+| `resources/views/admin/submissions/monitoring.blade.php` | Tambah combo box "Reviewer" di filter form (di antara Status dan Urutkan); tambah combo "Pilih Reviewer" di modal Penugasan Massal Reviewer — memilih reviewer user (role=reviewer) auto-isi kolom username ke semua baris credential |
+
+
+## 21. 🔄 Update: up rev
+
+- **Commit:** `cf4dcb8` — 16:52 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/SubmissionController.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/submissions/monitoring.blade.php`
 
