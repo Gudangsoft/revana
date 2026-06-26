@@ -1,16 +1,9 @@
 @php
-    $currentRoute   = Route::currentRouteName();
-    $currentProgram = request('program');
+    $currentRoute = Route::currentRouteName();
 
-    $isSubmissionRoute   = str_starts_with($currentRoute, 'admin.submissions');
-    $isJournalRoute      = str_starts_with($currentRoute, 'admin.journal-masters')
+    $isJournalRoute = str_starts_with($currentRoute, 'admin.journal-masters')
         || str_starts_with($currentRoute, 'admin.journal-slots')
         || str_starts_with($currentRoute, 'admin.accreditations');
-    $fastrackActive      = str_starts_with($currentRoute, 'admin.fasttrack-management')
-        || str_starts_with($currentRoute, 'admin.fasttrack');
-    $normalActive        = $isSubmissionRoute && !$currentProgram;
-    $bkdActive           = $isSubmissionRoute && $currentProgram === 'bkd';
-    $jafaActive          = $isSubmissionRoute && $currentProgram === 'jafa';
 
     $pendingValidationCount = \Illuminate\Support\Facades\Cache::remember('admin.pending_validation_count', 120,
         fn() => \App\Models\Submission::where('status', 'like', '%_SUBMITTED')->count()
@@ -69,113 +62,30 @@
 </div>
 
 {{-- Jurnal Normal --}}
-<div class="accordion accordion-flush" id="accordionNormalPR">
-    <div class="accordion-item bg-transparent border-0">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ $normalActive ? 'active' : '' }}"
-                    type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseNormalPR"
-                    aria-expanded="{{ $normalActive ? 'true' : 'false' }}">
-                <i class="bi bi-file-earmark-richtext-fill" style="color:#c084fc;"></i> Jurnal Normal
-            </button>
-        </h2>
-        <div id="collapseNormalPR" class="accordion-collapse collapse {{ $normalActive ? 'show' : '' }}">
-            <div class="accordion-body p-0">
-                <a href="{{ route('admin.submissions.index') }}"
-                   class="nav-link ps-5 {{ $normalActive && str_starts_with($currentRoute, 'admin.submissions') ? 'active' : '' }}">
-                    <i class="bi bi-table" style="color:#c084fc;"></i> Data Submit
-                </a>
-                <a href="{{ route('admin.submissions.monitoring') }}"
-                   class="nav-link ps-5 {{ $normalActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-kanban-fill" style="color:#c084fc;"></i> Monitoring
-                    @if($pendingValidationCount > 0)
-                        <span class="badge bg-warning text-dark ms-1">{{ $pendingValidationCount }}</span>
-                    @endif
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<a href="{{ route('admin.pic-reviewer.submissions', 'normal') }}"
+   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'normal' ? 'active' : '' }}">
+    <i class="bi bi-file-earmark-richtext-fill" style="color:#c084fc;"></i> Jurnal Normal
+</a>
 
 {{-- Jurnal Fasttrack --}}
 @feature('fasttrack')
-<div class="accordion accordion-flush" id="accordionFastrackPR">
-    <div class="accordion-item bg-transparent border-0">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ $fastrackActive ? 'active' : '' }}"
-                    type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseFastrackPR"
-                    aria-expanded="{{ $fastrackActive ? 'true' : 'false' }}">
-                <i class="bi bi-lightning-charge-fill text-warning"></i> Jurnal Fasttrack
-            </button>
-        </h2>
-        <div id="collapseFastrackPR" class="accordion-collapse collapse {{ $fastrackActive ? 'show' : '' }}">
-            <div class="accordion-body p-0">
-                <a href="{{ route('admin.fasttrack-management.submissions.index') }}"
-                   class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.submissions.index' ? 'active' : '' }}">
-                    <i class="bi bi-table text-warning"></i> Data Submit
-                </a>
-                <a href="{{ route('admin.fasttrack-management.monitoring.index') }}"
-                   class="nav-link ps-5 {{ $currentRoute == 'admin.fasttrack-management.monitoring.index' ? 'active' : '' }}">
-                    <i class="bi bi-kanban text-warning"></i> Monitoring
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<a href="{{ route('admin.pic-reviewer.submissions', 'fasttrack') }}"
+   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'fasttrack' ? 'active' : '' }}">
+    <i class="bi bi-lightning-charge-fill text-warning"></i> Jurnal Fasttrack
+</a>
 @endfeature
 
 {{-- Jurnal BKD --}}
-<div class="accordion accordion-flush" id="accordionBKDPR">
-    <div class="accordion-item bg-transparent border-0">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ $bkdActive ? 'active' : '' }}"
-                    type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseBKDPR"
-                    aria-expanded="{{ $bkdActive ? 'true' : 'false' }}">
-                <i class="bi bi-briefcase-fill" style="color:#38bdf8;"></i> Jurnal BKD
-            </button>
-        </h2>
-        <div id="collapseBKDPR" class="accordion-collapse collapse {{ $bkdActive ? 'show' : '' }}">
-            <div class="accordion-body p-0">
-                <a href="{{ route('admin.submissions.index', ['program' => 'bkd']) }}"
-                   class="nav-link ps-5 {{ $bkdActive && str_starts_with($currentRoute, 'admin.submissions') ? 'active' : '' }}">
-                    <i class="bi bi-table" style="color:#38bdf8;"></i> Data Submit
-                </a>
-                <a href="{{ route('admin.submissions.monitoring', ['program' => 'bkd']) }}"
-                   class="nav-link ps-5 {{ $bkdActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-kanban-fill" style="color:#38bdf8;"></i> Monitoring
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<a href="{{ route('admin.pic-reviewer.submissions', 'bkd') }}"
+   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'bkd' ? 'active' : '' }}">
+    <i class="bi bi-briefcase-fill" style="color:#38bdf8;"></i> Jurnal BKD
+</a>
 
 {{-- Jurnal JAFA --}}
-<div class="accordion accordion-flush" id="accordionJAFAPR">
-    <div class="accordion-item bg-transparent border-0">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed nav-link text-white {{ $jafaActive ? 'active' : '' }}"
-                    type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseJAFAPR"
-                    aria-expanded="{{ $jafaActive ? 'true' : 'false' }}">
-                <i class="bi bi-folder-fill" style="color:#4ade80;"></i> Jurnal JAFA
-            </button>
-        </h2>
-        <div id="collapseJAFAPR" class="accordion-collapse collapse {{ $jafaActive ? 'show' : '' }}">
-            <div class="accordion-body p-0">
-                <a href="{{ route('admin.submissions.index', ['program' => 'jafa']) }}"
-                   class="nav-link ps-5 {{ $jafaActive && str_starts_with($currentRoute, 'admin.submissions') ? 'active' : '' }}">
-                    <i class="bi bi-table" style="color:#4ade80;"></i> Data Submit
-                </a>
-                <a href="{{ route('admin.submissions.monitoring', ['program' => 'jafa']) }}"
-                   class="nav-link ps-5 {{ $jafaActive && $currentRoute == 'admin.submissions.monitoring' ? 'active' : '' }}">
-                    <i class="bi bi-kanban-fill" style="color:#4ade80;"></i> Monitoring
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<a href="{{ route('admin.pic-reviewer.submissions', 'jafa') }}"
+   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'jafa' ? 'active' : '' }}">
+    <i class="bi bi-folder-fill" style="color:#4ade80;"></i> Jurnal JAFA
+</a>
 
 {{-- ═══ REVIEWER ═══ --}}
 <div class="sidebar-section-label">Reviewer</div>

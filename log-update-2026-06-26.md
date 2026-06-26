@@ -117,7 +117,19 @@
 | `app/Http/Controllers/Admin/LoaController.php` | Tambah method `updateMarketingMetadata()` dengan pengecekan ownership marketing; pass `isMarketingView: true` dari `showMarketing()` |
 | `resources/views/admin/loa/receipt.blade.php` | Tampilkan tombol & modal jika `isAdminView` ATAU `isMarketingView`; form action dinamis sesuai konteks (admin route vs marketing route) |
 
-## 9. 🔄 Update: rev
+## 9. Halaman Submission Khusus PIC Reviewer (Normal/Fasttrack/BKD/JAFA)
+
+**Tujuan:** PIC Reviewer punya halaman submission sendiri yang ringkas dan read-friendly, terpisah dari halaman admin penuh
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicReviewerJournalController.php` | Controller baru: method `submissions($type)` filter berdasarkan tipe (normal/fasttrack/bkd/jafa), mendukung search, filter status, filter jurnal |
+| `resources/views/admin/pic-reviewer/submissions.blade.php` | View baru: tabel submission dengan kolom kode, judul, jurnal, penulis, reviewer, status, tanggal — filter bar di atas, pagination di bawah |
+| `routes/web.php` | Route baru: `GET /admin/pic-reviewer/submissions/{type}` → `PicReviewerJournalController@submissions` |
+| `resources/views/admin/partials/sidebar-pic-reviewer.blade.php` | Ganti accordion Jurnal Normal/Fasttrack/BKD/JAFA menjadi link langsung ke route pic-reviewer; bersihkan variabel yang tidak terpakai |
+
+## 10. 🔄 Update: rev
 
 - **Commit:** `505d53b` — 15:39 oleh Gudangsoft
 - **File berubah:** 4 file
@@ -142,4 +154,14 @@
 - `app/Http/Controllers/Admin/PicReviewerDashboardController.php`
 - `log-update-2026-06-26.md`
 - `resources/views/admin/pic-reviewer/dashboard.blade.php`
+
+
+## 13. 🔄 Update: loa mar
+
+- **Commit:** `6b88c2e` — 16:02 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/loa/receipt.blade.php`
+- `routes/web.php`
 
