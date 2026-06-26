@@ -281,6 +281,10 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.pics.') ? 'active' : '' }}">
     <i class="bi bi-person-badge-fill" style="color:#60a5fa;"></i> PIC
 </a>
+<a href="{{ route('admin.users.index', ['role' => 'pic_reviewer']) }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.users') && request('role') === 'pic_reviewer' ? 'active' : '' }}">
+    <i class="bi bi-clipboard2-pulse-fill" style="color:#a78bfa;"></i> PIC Reviewer
+</a>
 {{-- ═══ LAPORAN ═══ --}}
 <div class="sidebar-section-label">Laporan</div>
 

@@ -18,7 +18,14 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Daftar Pengguna</h5>
+            <h5 class="mb-0">
+                Daftar Pengguna
+                @if(isset($roleFilter) && $roleFilter)
+                    <span class="badge ms-2" style="background:#6366f1; font-size:0.75rem;">
+                        {{ $roleFilter === 'pic_reviewer' ? 'PIC Reviewer' : ucfirst($roleFilter) }}
+                    </span>
+                @endif
+            </h5>
             <div class="d-flex gap-2">
                 @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'Role', 'Tanggal Dibuat', 'Aksi'], 'columnOffset' => 1])
                 <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
@@ -30,12 +37,15 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <form action="{{ route('admin.users.index') }}" method="GET">
+                        @if(isset($roleFilter) && $roleFilter)
+                            <input type="hidden" name="role" value="{{ $roleFilter }}">
+                        @endif
                         <div class="input-group">
                             <input type="text" name="search" class="form-control" placeholder="Cari nama, email, atau role..." value="{{ $search ?? '' }}">
                             <button class="btn btn-primary" type="submit">
                                 <i class="bi bi-search"></i> Cari
                             </button>
-                            @if(request('search'))
+                            @if(request('search') || request('role'))
                                 <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
                                     <i class="bi bi-x-circle"></i> Reset
                                 </a>

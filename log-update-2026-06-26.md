@@ -57,7 +57,18 @@
 | `resources/views/admin/users/edit.blade.php` | Tambah opsi PIC Reviewer di dropdown role |
 | `routes/web.php` | Route baru: `GET /admin/pic-reviewer/dashboard` → `PicReviewerDashboardController@index` |
 
-## 5. 🔄 Update: meta loa
+## 5. Tambah Menu PIC Reviewer di Sidebar Admin
+
+**Tujuan:** Admin bisa langsung melihat daftar pengguna PIC Reviewer dari sidebar SDM
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah link "PIC Reviewer" di seksi SDM, setelah PIC |
+| `app/Http/Controllers/Admin/UserController.php` | `index()` mendukung filter `?role=` untuk tampilkan pengguna per role |
+| `resources/views/admin/users/index.blade.php` | Badge judul saat filter role aktif; search form mempertahankan filter role; Reset muncul saat ada filter role aktif |
+
+## 6. 🔄 Update: meta loa
 
 - **Commit:** `53291f4` — 13:57 oleh Gudangsoft
 - **File berubah:** 6 file
@@ -67,4 +78,20 @@
 - `log-update-2026-06-26.md`
 - `resources/views/admin/loa/receipt.blade.php`
 - `routes/web.php`
+
+
+## 6. 🔄 Update: up revierw
+
+- **Commit:** `47e3f71` — 15:24 oleh Gudangsoft
+- **File berubah:** 13 file
+- `app/Http/Controllers/Admin/PicReviewerDashboardController.php`
+- `app/Http/Controllers/Admin/UserController.php`
+- `app/Http/Controllers/Auth/LoginController.php`
+- `app/Http/Middleware/AdminMiddleware.php`
+- `app/Models/User.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/partials/sidebar-pic-reviewer.blade.php`
+- `resources/views/admin/pic-reviewer/dashboard.blade.php`
+- `resources/views/admin/users/create.blade.php`
+- `resources/views/admin/users/edit.blade.php`
 

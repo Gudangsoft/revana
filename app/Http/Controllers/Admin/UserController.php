@@ -13,19 +13,21 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        
+        $search     = $request->get('search');
+        $roleFilter = $request->get('role');
+
         $users = User::query()
-            ->when($search, function($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('role', 'like', "%{$search}%");
-            })
+            ->when($search, fn($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('role', 'like', "%{$search}%")
+            )
+            ->when($roleFilter, fn($q) => $q->where('role', $roleFilter))
             ->latest()
-            ->paginate(request()->input('per_page', 15))
-            ->appends(['search' => $search]);
-            
-        return view('admin.users.index', compact('users', 'search'));
+            ->paginate($request->input('per_page', 15))
+            ->appends(['search' => $search, 'role' => $roleFilter]);
+
+        return view('admin.users.index', compact('users', 'search', 'roleFilter'));
     }
 
     public function create()
