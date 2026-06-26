@@ -131,8 +131,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/pic-reviewer/dashboard', [\App\Http\Controllers\Admin\PicReviewerDashboardController::class, 'index'])->name('pic-reviewer.dashboard');
-        Route::get('/pic-reviewer/submissions/{type}', [\App\Http\Controllers\Admin\PicReviewerJournalController::class, 'submissions'])->name('pic-reviewer.submissions')
-            ->where('type', 'normal|fasttrack|bkd|jafa');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
         Route::get('/export-completed-reviews', [AdminDashboard::class, 'exportCompletedReviews'])->name('export.completed.reviews');
         Route::get('/component-overview', [AdminDashboard::class, 'componentOverview'])->name('component-overview');

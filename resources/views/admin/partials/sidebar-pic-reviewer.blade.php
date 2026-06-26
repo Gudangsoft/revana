@@ -62,28 +62,28 @@
 </div>
 
 {{-- Jurnal Normal --}}
-<a href="{{ route('admin.pic-reviewer.submissions', 'normal') }}"
-   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'normal' ? 'active' : '' }}">
+<a href="{{ route('admin.submissions.monitoring') }}"
+   class="nav-link {{ $currentRoute === 'admin.submissions.monitoring' && !request('program') ? 'active' : '' }}">
     <i class="bi bi-file-earmark-richtext-fill" style="color:#c084fc;"></i> Jurnal Normal
 </a>
 
 {{-- Jurnal Fasttrack --}}
 @feature('fasttrack')
-<a href="{{ route('admin.pic-reviewer.submissions', 'fasttrack') }}"
-   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'fasttrack' ? 'active' : '' }}">
+<a href="{{ route('admin.fasttrack-management.monitoring.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.fasttrack-management.monitoring') ? 'active' : '' }}">
     <i class="bi bi-lightning-charge-fill text-warning"></i> Jurnal Fasttrack
 </a>
 @endfeature
 
 {{-- Jurnal BKD --}}
-<a href="{{ route('admin.pic-reviewer.submissions', 'bkd') }}"
-   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'bkd' ? 'active' : '' }}">
+<a href="{{ route('admin.submissions.monitoring', ['program' => 'bkd']) }}"
+   class="nav-link {{ $currentRoute === 'admin.submissions.monitoring' && request('program') === 'bkd' ? 'active' : '' }}">
     <i class="bi bi-briefcase-fill" style="color:#38bdf8;"></i> Jurnal BKD
 </a>
 
 {{-- Jurnal JAFA --}}
-<a href="{{ route('admin.pic-reviewer.submissions', 'jafa') }}"
-   class="nav-link {{ $currentRoute === 'admin.pic-reviewer.submissions' && request()->route('type') === 'jafa' ? 'active' : '' }}">
+<a href="{{ route('admin.submissions.monitoring', ['program' => 'jafa']) }}"
+   class="nav-link {{ $currentRoute === 'admin.submissions.monitoring' && request('program') === 'jafa' ? 'active' : '' }}">
     <i class="bi bi-folder-fill" style="color:#4ade80;"></i> Jurnal JAFA
 </a>
 

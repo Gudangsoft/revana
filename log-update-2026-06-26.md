@@ -127,7 +127,7 @@
 | `app/Http/Controllers/Admin/PicReviewerJournalController.php` | Controller baru: method `submissions($type)` filter berdasarkan tipe (normal/fasttrack/bkd/jafa), mendukung search, filter status, filter jurnal |
 | `resources/views/admin/pic-reviewer/submissions.blade.php` | View baru: tabel submission dengan kolom kode, judul, jurnal, penulis, reviewer, status, tanggal — filter bar di atas, pagination di bawah |
 | `routes/web.php` | Route baru: `GET /admin/pic-reviewer/submissions/{type}` → `PicReviewerJournalController@submissions` |
-| `resources/views/admin/partials/sidebar-pic-reviewer.blade.php` | Ganti accordion Jurnal Normal/Fasttrack/BKD/JAFA menjadi link langsung ke route pic-reviewer; bersihkan variabel yang tidak terpakai |
+| `resources/views/admin/partials/sidebar-pic-reviewer.blade.php` | Link Jurnal Normal/BKD/JAFA → `admin.submissions.monitoring?program=`, Fasttrack → `admin.fasttrack-management.monitoring.index`; tidak perlu controller/view baru karena layout.blade.php sudah override sidebar untuk pic_reviewer |
 
 ## 10. 🔄 Update: rev
 
@@ -163,5 +163,16 @@
 - `app/Http/Controllers/Admin/LoaController.php`
 - `log-update-2026-06-26.md`
 - `resources/views/admin/loa/receipt.blade.php`
+- `routes/web.php`
+
+
+## 15. 🔄 Update: up
+
+- **Commit:** `a7d6623` — 16:09 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/PicReviewerJournalController.php`
+- `log-update-2026-06-26.md`
+- `resources/views/admin/partials/sidebar-pic-reviewer.blade.php`
+- `resources/views/admin/pic-reviewer/submissions.blade.php`
 - `routes/web.php`
 
