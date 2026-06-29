@@ -380,7 +380,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
         <span style="margin-left:16px; color:#ccc;">LOA: {{ $submission->kode_submit }}</span>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
-        @if((!empty($isAdminView) && $isAdminView) || $canEditDate)
+        @if((!empty($isAdminView) && $isAdminView) || $canEditDate || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
         <label style="color:#ccc; font-size:12px; display:flex; align-items:center; gap:6px;">
             📅 Tanggal LOA:
             <input type="date" id="loa-date-picker"
@@ -388,7 +388,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
                    style="background:#2a2a2a; color:#fff; border:1px solid #555; border-radius:4px; padding:3px 8px; font-size:12px; cursor:pointer;">
         </label>
         @endif
-        @if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView))
+        @if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView) || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
         <button onclick="document.getElementById('modal-meta-loa').style.display='flex'"
            style="background:#2a6496; color:#fff; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; font-size:12px;">
             ✏ Edit Metadata LOA
@@ -405,7 +405,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
 });
 </script>
 
-@if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView))
+@if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView) || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
 {{-- ── Modal Edit Metadata LOA (screen only, no-print) ──────────── --}}
 <div id="modal-meta-loa" class="no-print"
      style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;

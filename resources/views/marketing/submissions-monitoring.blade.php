@@ -222,7 +222,7 @@
                                 <i class="bi bi-eye"></i>
                             </a>
                             @if($submission->kode_loa)
-                            <a href="{{ route('loa.public', $submission->kode_loa) }}" target="_blank"
+                            <a href="{{ route('marketing.submissions.loa', $submission) }}" target="_blank"
                                class="btn btn-sm {{ $submission->production_valid ? 'btn-success' : 'btn-outline-secondary' }} ms-1" title="Cek LOA">
                                 <i class="bi bi-file-earmark-check{{ $submission->production_valid ? '-fill' : '' }}"></i>
                             </a>

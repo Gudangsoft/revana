@@ -277,6 +277,17 @@
 |------|-----------|
 | `resources/views/public/author-portal.blade.php` | Hapus brand "SIPERA" dari top nav; ubah badge "Portal Resmi SIPERA" → "Portal Resmi APJI"; hapus 3 feature pills (Status Real-time, Unduh LOA, Pilih Tanggal); hapus badge status di result header; ganti baris "Tgl Submit" → "Volume / Issue" (Vol/No/Bulan/Tahun); hapus seluruh section Progress Artikel (stepper + status bar current) |
 
+## 27. Fix Bulan LOA & Edit Metadata pada LOA Publik
+
+**Tujuan:** (1) Tanggal LOA kini konsisten dengan bulan slot publikasi — bukan lagi `now()`; (2) Tombol Edit Metadata LOA kini muncul saat admin login meski mengakses via URL publik `/loa/{kode_loa}`
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | Tambah parameter `$slot` ke `loaDate()` — saat tidak ada date override dan tidak ada `loa_tanggal` jurnal, gunakan bulan/tahun dari slot; tambah helper `loaDateRawString()` untuk konsistensi nilai date picker; update semua pemanggil `loaDate()` dan `loaDateRaw` di `publicView()`, `show()`, `showMarketing()` |
+| `resources/views/admin/loa/receipt.blade.php` | Tambahkan kondisi `auth()->check() && auth()->user()->hasAdminAccess()` pada tampilan date picker, tombol Edit Metadata, dan modal Edit Metadata — agar fitur edit muncul ketika admin mengakses LOA via URL publik |
+| `resources/views/marketing/submissions-monitoring.blade.php` | Ganti tombol LOA dari `route('loa.public', kode_loa)` → `route('marketing.submissions.loa', $submission)` agar marketing membuka LOA view dengan fitur edit metadata |
+
 
 ## 27. 🔄 Update: a
 
@@ -284,4 +295,11 @@
 - **File berubah:** 2 file
 - `log-update-2026-06-26.md`
 - `resources/views/public/author-portal.blade.php`
+
+
+## 28. 🔄 Update: a
+
+- **Commit:** `d623660` — 21:22 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-06-26.md`
 
