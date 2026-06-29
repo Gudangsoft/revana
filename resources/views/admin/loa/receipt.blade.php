@@ -449,7 +449,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <div style="margin-bottom:24px;">
                 <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">
                     Tanggal LOA
-                    <span style="color:#888; font-size:11px;">(kosong = ikuti setting jurnal)</span>
+                    <span style="color:#888; font-size:11px;">(kosong = tanggal hari ini)</span>
                 </label>
                 <input type="date" name="tanggal_loa"
                        value="{{ old('tanggal_loa', $submission->tanggal_loa?->toDateString()) }}"

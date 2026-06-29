@@ -231,7 +231,6 @@ class LoaController extends Controller
     private function loaDateRawString(?string $dateOverride, $journal, $slot): string
     {
         if ($dateOverride) return $dateOverride;
-        if ($journal?->loa_tanggal) return \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString();
         return now()->toDateString();
     }
 
@@ -239,8 +238,6 @@ class LoaController extends Controller
     {
         if ($dateOverride) {
             $dt = \Carbon\Carbon::parse($dateOverride);
-        } elseif ($journal?->loa_tanggal) {
-            $dt = \Carbon\Carbon::parse($journal->loa_tanggal);
         } else {
             $dt = now();
         }
