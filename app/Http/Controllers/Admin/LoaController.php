@@ -232,15 +232,6 @@ class LoaController extends Controller
     {
         if ($dateOverride) return $dateOverride;
         if ($journal?->loa_tanggal) return \Carbon\Carbon::parse($journal->loa_tanggal)->toDateString();
-        if ($slot?->bulan && $slot?->tahun) {
-            $monthMap = [
-                'januari'=>1,'februari'=>2,'maret'=>3,'april'=>4,
-                'mei'=>5,'juni'=>6,'juli'=>7,'agustus'=>8,
-                'september'=>9,'oktober'=>10,'november'=>11,'desember'=>12,
-            ];
-            $monthNum = $monthMap[strtolower(trim($slot->bulan))] ?? now()->month;
-            return \Carbon\Carbon::createFromDate((int)$slot->tahun, $monthNum, 1)->toDateString();
-        }
         return now()->toDateString();
     }
 
@@ -250,14 +241,6 @@ class LoaController extends Controller
             $dt = \Carbon\Carbon::parse($dateOverride);
         } elseif ($journal?->loa_tanggal) {
             $dt = \Carbon\Carbon::parse($journal->loa_tanggal);
-        } elseif ($slot?->bulan && $slot?->tahun) {
-            $monthMap = [
-                'januari'=>1,'februari'=>2,'maret'=>3,'april'=>4,
-                'mei'=>5,'juni'=>6,'juli'=>7,'agustus'=>8,
-                'september'=>9,'oktober'=>10,'november'=>11,'desember'=>12,
-            ];
-            $monthNum = $monthMap[strtolower(trim($slot->bulan))] ?? now()->month;
-            $dt = \Carbon\Carbon::createFromDate((int)$slot->tahun, $monthNum, 1);
         } else {
             $dt = now();
         }
