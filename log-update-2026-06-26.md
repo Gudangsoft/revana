@@ -288,6 +288,15 @@
 | `resources/views/admin/loa/receipt.blade.php` | Tambahkan kondisi `auth()->check() && auth()->user()->hasAdminAccess()` pada tampilan date picker, tombol Edit Metadata, dan modal Edit Metadata — agar fitur edit muncul ketika admin mengakses LOA via URL publik |
 | `resources/views/marketing/submissions-monitoring.blade.php` | Ganti tombol LOA dari `route('loa.public', kode_loa)` → `route('marketing.submissions.loa', $submission)` agar marketing membuka LOA view dengan fitur edit metadata |
 
+## 28. Sesuaikan Struktur LOA Bahasa Inggris dengan Bahasa Indonesia
+
+**Tujuan:** LOA bahasa Inggris kini mengikuti tata letak yang sama dengan LOA bahasa Indonesia — No/Subject header, alamat, body, judul+kode dalam tabel, "ACCEPTED" besar di tengah, lalu info jurnal — namun tetap berbahasa Inggris
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Restruktur format English: tambah header tabel No/Subject; ganti judul inline → tabel "Manuscript Title / Article Code"; tambah "ACCEPTED" besar di tengah; ganti "for publication in..." inline → "for publication in:" + blok info jurnal terformat; tambah `linkSkAkreditasi` di status row; konsisten dengan struktur Indonesia |
+
 
 ## 27. 🔄 Update: a
 

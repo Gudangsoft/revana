@@ -637,35 +637,54 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
         <p class="body-text">Atas perhatian dan kontribusi Saudara, kami ucapkan terima kasih.</p>
 
         @else
-        {{-- ── FORMAT ENGLISH ── --}}
-        <div class="doc-subtitle">{{ $L['p1_subtitle'] }}</div>
-        <div class="doc-no">No. {{ $loaNumber }}</div>
+        {{-- ── FORMAT ENGLISH (mirrored from Indonesian structure) ── --}}
+        <table style="border-collapse:collapse; font-size:12pt; margin-bottom:16px;">
+            <tr>
+                <td style="padding:1px 4px 1px 0; white-space:nowrap;">No</td>
+                <td style="padding:1px 10px 1px 0;">:</td>
+                <td>{{ $loaNumber }}</td>
+            </tr>
+            <tr>
+                <td style="padding:1px 4px 1px 0;">Subject</td>
+                <td style="padding:1px 10px 1px 0;">:</td>
+                <td><strong>Manuscript Accepted</strong></td>
+            </tr>
+        </table>
 
         <div class="to-block">
             <p>{{ $L['salutation1'] }}</p>
-            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $allAuthorNames }}</span></p>
-            <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
+            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<strong>{{ $firstAuthor }}</strong></p>
+            <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>{{ $afiliasi ?: '—' }}</strong></p>
         </div>
 
         <p class="body-text">{{ $L['greeting'] }}</p>
-        <p class="body-text">
-            {{ $L['body1_pre'] }} <strong>{{ $jurnalNama }}</strong>
+        <p class="body-text" style="text-align:justify; line-height:1.2;">
+            {{ $L['body1_pre'] }} <strong>{{ $jurnalNama }}</strong>@if($kodeSingkat) ({{ $kodeSingkat }})@endif
             @if($eIssn) ({{ $L['body1_issn'] }} <strong>{{ $eIssn }}</strong>)@endif,
             {{ $L['body1_post'] }}
         </p>
-        <p class="body-text" style="text-align:center; font-style:italic; font-size:11pt;">
-            &ldquo;<span class="hl">{{ $judul }}</span>&rdquo;
-        </p>
-        <p class="body-text">
-            {{ $L['body2_pre'] }} <strong>{{ $L['body2_accepted'] }}</strong>
-            {{ $L['body2_post'] }} <span class="hl"><em>{{ $jurnalNama }}</em>,
-            Volume {{ $volume }}, No. {{ $nomor }}, {{ $bulan }} {{ $tahun }}</span>.
-        </p>
 
-        @if($eIssn || $pIssn || $loaStatus || $penerbit || $journal?->link_jurnal)
+        <table class="detail-table">
+            <colgroup><col style="width:110px;"><col style="width:12px;"><col></colgroup>
+            <tr>
+                <td>Manuscript Title</td><td>:</td>
+                <td><strong>{{ $judul }}</strong></td>
+            </tr>
+            <tr>
+                <td>Article Code</td><td>:</td>
+                <td>{{ $kodeArtikel }}</td>
+            </tr>
+        </table>
+
+        <div style="text-align:center; font-size:16pt; font-weight:900; letter-spacing:4px; margin:10px 0 8px;">
+            ACCEPTED
+        </div>
+
+        <p class="body-text" style="margin-bottom:4px;">for publication in:</p>
         <div class="jrn-info-block">
             <div class="jrn-info-name">{{ $jurnalNama }}</div>
-            <table>
+            <table style="border-collapse:collapse;width:100%;">
+                <colgroup><col style="width:76px;"><col style="width:12px;"><col></colgroup>
                 @if($eIssn || $pIssn)
                 <tr>
                     <td>ISSN</td><td>:</td>
@@ -681,20 +700,25 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                     <td>Volume {{ $volume }}, No. {{ $nomor }} ({{ $tahun }})</td>
                 </tr>
                 @if($loaStatus)
-                <tr><td>Status</td><td>:</td><td>{{ $loaStatus }}</td></tr>
+                <tr>
+                    <td style="vertical-align:top;">Status</td><td style="vertical-align:top;">:</td>
+                    <td>{{ $loaStatus }}@if($linkSkAkreditasi) — <a href="{{ $linkSkAkreditasi }}" target="_blank" style="color:inherit;">{{ $linkSkAkreditasi }}</a>@endif</td>
+                </tr>
                 @endif
                 @if($penerbit)
-                <tr><td>Publisher</td><td>:</td><td>{{ $penerbit }}</td></tr>
+                <tr>
+                    <td>Publisher</td><td>:</td>
+                    <td>{{ $penerbit }}</td>
+                </tr>
                 @endif
                 @if($journal?->link_jurnal)
                 <tr>
                     <td>URL</td><td>:</td>
-                    <td><a href="{{ $journal->link_jurnal }}" target="_blank">{{ $journal->link_jurnal }}</a></td>
+                    <td><a href="{{ $journal->link_jurnal }}" target="_blank" style="color:inherit;">{{ $journal->link_jurnal }}</a></td>
                 </tr>
                 @endif
             </table>
         </div>
-        @endif
 
         <p class="body-text">{{ $L['body3'] }}</p>
         <p class="body-text">{{ $L['body4'] }}</p>
