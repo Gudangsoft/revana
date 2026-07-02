@@ -68,7 +68,7 @@
         'meta_code'     => 'Kode Artikel',
         'meta_title'    => 'Judul',
         'criteria_hdr'  => 'KRITERIA PENILAIAN',
-        'criteria_note' => '[DAPAT DIREVISI OLEH REVIEWER]',
+        'criteria_note' => '',
         'col_no'        => 'No',
         'col_desc'      => 'Uraian',
         'col_comment'   => 'Komentar',
@@ -86,7 +86,7 @@
             ['Penggunaan <strong>Bahasa</strong>',                                                'Baik.'],
         ],
         'decision_hdr'  => 'KEPUTUSAN REVIEWER',
-        'decision_note' => '[DAPAT DIREVISI OLEH REVIEWER]',
+        'decision_note' => '',
         'decisions'     => [
             'Artikel dapat diterbitkan tanpa revisi',
             'Artikel dapat diterbitkan dengan revisi kecil',
@@ -176,7 +176,7 @@
     padding: 0;
     page-break-after: always;
   }
-  .page-inner { padding: 14mm 18mm 10mm 18mm; }
+  .page-inner { padding: 3mm 18mm 10mm 18mm; }
 }
 
 /* ── Print ───────────────────────────────────────────── */
@@ -185,7 +185,7 @@
   body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
   @page { size: A4; margin: 0; }
   .a4-page { width: 210mm; min-height: 297mm; page-break-after: always; margin: 0; }
-  .page-inner { padding: 14mm 18mm 10mm 18mm; }
+  .page-inner { padding: 3mm 18mm 10mm 18mm; }
 }
 
 /* ── Common ─────────────────────────────────────────── */
@@ -227,17 +227,17 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
 
 /* Address block */
 .to-block { margin-bottom: 12px; }
-.to-block p { line-height: 1.8; font-size: 12pt; }
+.to-block p { line-height: 1; font-size: 12pt; }
 .hl { background: transparent; padding: 0; }
 
 /* Body text */
-.body-text { font-size: 12pt; line-height: 1.7; margin-bottom: 10px; }
+.body-text { font-size: 12pt; line-height: 1.15; margin-bottom: 4px; }
 
 /* Journal info block */
-.jrn-info-block { margin: 12px 0 14px; font-size: 12pt; }
+.jrn-info-block { margin: 5px 0 6px; font-size: 12pt; }
 .jrn-info-block .jrn-info-name { font-weight: bold; font-size: 12pt; margin-bottom: 4px; }
 .jrn-info-block table { border-collapse: collapse; width: 100%; }
-.jrn-info-block td { padding: 1px 4px 1px 0; vertical-align: top; line-height: 1.5; }
+.jrn-info-block td { padding: 0px 4px 0px 0; vertical-align: top; line-height: 1.1; }
 .jrn-info-block td:first-child { white-space: nowrap; min-width: 80px; }
 .jrn-info-block td:nth-child(2) { width: 12px; }
 .jrn-info-block a { color: inherit; }
@@ -331,43 +331,49 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
 
 /* ── Evaluation sheet ────────────────────────────────── */
 .eval-section { margin-top: 14px; }
-.eval-title { font-size: 13pt; font-weight: 900; text-align: center; letter-spacing: 1px; margin-bottom: 12px; }
+.eval-title { font-size: 14pt; font-weight: 900; text-align: center; letter-spacing: 1px; margin-bottom: 12px; }
 .eval-meta table { width: 100%; font-size: 12pt; margin-bottom: 12px; }
 .eval-meta td { padding: 2px 4px; vertical-align: top; }
 .eval-meta td:first-child { width: 100px; }
 .eval-meta td:nth-child(2) { width: 10px; }
 
 .criteria-title {
-  font-size: 8.5pt; font-weight: bold;
-  color: {{ $primaryColor }};
-  border: 1px solid {{ $primaryColor }};
+  font-size: 12pt; font-weight: bold;
+  {{--color: {{ $primaryColor }};
+  border: 1px solid {{ $primaryColor }}; --}}
+  color: #000;
+  border:  #000;
   padding: 3px 8px; margin-bottom: 0;
-  text-align: center;
+  text-align: center; 
 }
-.criteria-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.criteria-table { width: 100%; border-collapse: collapse; font-size: 12pt; }
 .criteria-table th {
-  background: {{ $primaryColor }}; color: #fff;
-  padding: 4px 6px; text-align: center; border: 1px solid #ccc;
-  font-size: 8.5pt;
+  {{--background: {{ $primaryColor }}; color: #fff; --}}
+  background: #D3D3D3;
+  color: #000;
+  padding: 4px 6px; text-align: center; border: 1px solid #000;
+  font-size: 12pt;
 }
-.criteria-table td { border: 1px solid #ccc; padding: 4px 6px; vertical-align: top; }
+.criteria-table td { border: 1px solid #000; padding: 4px 6px; vertical-align: top; }
 .criteria-table td:first-child { text-align: center; width: 28px; }
 
 .decision-title {
-  font-size: 8.5pt; font-weight: bold;
-  color: {{ $primaryColor }};
-  border: 1px solid {{ $primaryColor }};
+  font-size: 12pt; font-weight: bold;
+ {{--color: {{ $primaryColor }};
+  border: 1px solid {{ $primaryColor }};--}}
+  color: #000;
+  border: none;
   padding: 3px 8px; margin: 8px 0 0;
   text-align: center;
 }
-.decision-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
-.decision-table td { border: 1px solid #ccc; padding: 3px 6px; vertical-align: middle; }
+.decision-table { width: 100%; border-collapse: collapse; font-size: 12pt; }
+.decision-table td { border: none; solid #ccc; padding: 3px 6px; vertical-align: middle; }
 .chk { text-align: center; width: 28px; font-size: 12pt; }
 .chk-checked { font-size: 12pt; color: #000; }
 
 /* Article detail table (ID format) */
-.detail-table { border-collapse: collapse; font-size: 12pt; margin: 10px 0; }
-.detail-table td { padding: 2px 6px 2px 0; vertical-align: top; line-height: 1.7; }
+.detail-table { border-collapse: collapse; font-size: 12pt; margin: 4px 0; text-align:justify  }
+.detail-table td { padding: 0px 6px 0px 0; vertical-align: top; line-height: 1.2; }
 </style>
 </head>
 <body>
@@ -380,7 +386,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
         <span style="margin-left:16px; color:#ccc;">LOA: {{ $submission->kode_submit }}</span>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
-        @if((!empty($isAdminView) && $isAdminView) || $canEditDate || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
+        @if((!empty($isAdminView) && $isAdminView) || $canEditDate)
         <label style="color:#ccc; font-size:12px; display:flex; align-items:center; gap:6px;">
             📅 Tanggal LOA:
             <input type="date" id="loa-date-picker"
@@ -388,15 +394,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
                    style="background:#2a2a2a; color:#fff; border:1px solid #555; border-radius:4px; padding:3px 8px; font-size:12px; cursor:pointer;">
         </label>
         @endif
-        @if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView) || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
-        <button onclick="document.getElementById('modal-meta-loa').style.display='flex'"
-           style="background:#2a6496; color:#fff; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; font-size:12px;">
-            ✏ Edit Metadata LOA
-        </button>
-        <button onclick="document.getElementById('modal-send-loa').style.display='flex'"
-           style="background:#1a7a4a; color:#fff; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; font-size:12px;">
-            📤 Kirim ke Author
-        </button>
+        @if(!empty($isAdminView) && $isAdminView)
+        <a href="{{ route('admin.submissions.edit', $submission) }}"
+           style="color:#90CAF9; text-decoration:none; font-size:12px;">
+            ✏ Edit Afiliasi & Data
+        </a>
         @endif
         <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
@@ -408,256 +410,6 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
     window.location.href = url.toString();
 });
 </script>
-
-@if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView) || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
-{{-- ── Modal Edit Metadata LOA (screen only, no-print) ──────────── --}}
-<div id="modal-meta-loa" class="no-print"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;
-            align-items:center; justify-content:center; font-family:sans-serif;">
-    <div style="background:#1e1e2e; color:#e0e0e0; border-radius:10px; width:100%; max-width:480px;
-                padding:28px 32px; box-shadow:0 8px 40px rgba(0,0,0,.6); position:relative;">
-        <h3 style="margin:0 0 20px; font-size:16px; color:#90CAF9;">
-            ✏ Edit Metadata LOA
-            <span style="font-size:12px; color:#aaa; font-weight:normal; margin-left:8px;">
-                {{ $submission->kode_submit }}
-            </span>
-        </h3>
-
-        <form method="POST" action="{{ (!empty($isMarketingView) && $isMarketingView)
-            ? route('marketing.submissions.loa.update-metadata', $submission)
-            : route('admin.submissions.loa.update-metadata', $submission) }}">
-            @csrf
-
-            <div style="margin-bottom:16px;">
-                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Nama Penulis *</label>
-                <input type="text" name="nama_penulis" required
-                       value="{{ old('nama_penulis', $submission->nama_penulis) }}"
-                       style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
-                              border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box;">
-            </div>
-
-            <div style="margin-bottom:16px;">
-                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Afiliasi</label>
-                <textarea name="affiliation_penulis" rows="2"
-                          style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
-                                 border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; resize:vertical;">{{ old('affiliation_penulis', $submission->affiliation_penulis) }}</textarea>
-            </div>
-
-            <div style="margin-bottom:16px;">
-                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Judul Artikel *</label>
-                <textarea name="judul_artikel" rows="3" required
-                          style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
-                                 border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; resize:vertical;">{{ old('judul_artikel', $submission->judul_artikel) }}</textarea>
-            </div>
-
-            <div style="margin-bottom:24px;">
-                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">
-                    Tanggal LOA
-                    <span style="color:#888; font-size:11px;">(kosong = tanggal hari ini)</span>
-                </label>
-                <input type="date" name="tanggal_loa"
-                       value="{{ old('tanggal_loa', $submission->tanggal_loa?->toDateString()) }}"
-                       style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
-                              border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; cursor:pointer;">
-                @if($submission->tanggal_loa)
-                <div style="margin-top:4px; font-size:11px; color:#f0ad4e;">
-                    ⚠ Tanggal override aktif: {{ $submission->tanggal_loa->format('d M Y') }}
-                </div>
-                @endif
-            </div>
-
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button type="button"
-                        onclick="document.getElementById('modal-meta-loa').style.display='none'"
-                        style="padding:8px 20px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
-                    Batal
-                </button>
-                <button type="submit"
-                        style="padding:8px 24px; background:#2a6496; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">
-                    Simpan
-                </button>
-            </div>
-        </form>
-
-        <button onclick="document.getElementById('modal-meta-loa').style.display='none'"
-                style="position:absolute; top:12px; right:16px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1;">×</button>
-    </div>
-</div>
-
-{{-- ── Modal Kirim LOA ke Author ──────────────────────────────────── --}}
-<div id="modal-send-loa" class="no-print"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;
-            align-items:center; justify-content:center; font-family:sans-serif;">
-    <div style="background:#1e1e2e; color:#e0e0e0; border-radius:10px; width:100%; max-width:500px;
-                padding:28px 32px; box-shadow:0 8px 40px rgba(0,0,0,.6); position:relative;">
-        <h3 style="margin:0 0 20px; font-size:16px; color:#90CAF9;">
-            📤 Kirim LOA ke Author
-            <span style="font-size:12px; color:#aaa; font-weight:normal; margin-left:8px;">
-                {{ $submission->kode_submit }}
-            </span>
-        </h3>
-
-        @php
-            $loaPublicUrl = route('loa.public', ['kode_loa' => $submission->kode_loa ?: $submission->kode_submit]);
-            $authorName   = $submission->nama_penulis ?? 'Yth. Penulis';
-            $waMsg = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di *{$jurnalNama}*.\n\nSilakan unduh/cetak LOA melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\n_Tim Redaksi {$jurnalNama}_";
-            $emailSubject = "Letter of Acceptance (LOA) – {$jurnalNama}";
-            $emailBody    = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di {$jurnalNama}.\n\nSilakan akses LOA Anda melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\nSalam hormat,\nTim Redaksi {$jurnalNama}";
-            $noHp    = preg_replace('/[^0-9]/', '', $submission->no_hp_penulis ?? '');
-            if (str_starts_with($noHp, '0')) $noHp = '62' . substr($noHp, 1);
-            $emailPenulis = $submission->email_penulis ?? '';
-            $updateContactRoute = (!empty($isMarketingView) && $isMarketingView)
-                ? route('marketing.submissions.loa.update-metadata', $submission)
-                : route('admin.submissions.loa.update-metadata', $submission);
-        @endphp
-
-        {{-- Info author --}}
-        <div style="background:#2a2a3e; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px;">
-            <div style="margin-bottom:8px;">
-                <span style="color:#90CAF9; font-size:11px;">Penulis</span><br>
-                <strong>{{ $submission->nama_penulis ?? '—' }}</strong>
-            </div>
-            <div style="display:flex; gap:24px; flex-wrap:wrap;">
-                <div>
-                    <span style="color:#90CAF9; font-size:11px;">No HP/WA</span><br>
-                    {{ $submission->no_hp_penulis ?: '—' }}
-                </div>
-                <div>
-                    <span style="color:#90CAF9; font-size:11px;">Email</span><br>
-                    {{ $emailPenulis ?: '—' }}
-                </div>
-            </div>
-        </div>
-
-        {{-- Form isi email/HP jika kosong --}}
-        @if(!$emailPenulis || !$submission->no_hp_penulis)
-        <form method="POST" action="{{ $updateContactRoute }}" style="margin-bottom:16px;">
-            @csrf
-            {{-- field wajib lainnya dikirim hidden agar validasi tidak gagal --}}
-            <input type="hidden" name="nama_penulis"        value="{{ $submission->nama_penulis }}">
-            <input type="hidden" name="judul_artikel"       value="{{ $submission->judul_artikel }}">
-            <input type="hidden" name="affiliation_penulis" value="{{ $submission->affiliation_penulis }}">
-            <input type="hidden" name="tanggal_loa"         value="{{ $submission->tanggal_loa?->toDateString() }}">
-
-            <div style="font-size:11px; color:#f0ad4e; margin-bottom:8px;">
-                ⚠ Lengkapi kontak author agar tombol kirim aktif:
-            </div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-                @if(!$emailPenulis)
-                <div style="flex:1; min-width:180px;">
-                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">Email</label>
-                    <input type="email" name="email_penulis" placeholder="email@contoh.com"
-                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
-                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
-                </div>
-                @else
-                <input type="hidden" name="email_penulis" value="{{ $emailPenulis }}">
-                @endif
-
-                @if(!$submission->no_hp_penulis)
-                <div style="flex:1; min-width:140px;">
-                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">No HP/WA</label>
-                    <input type="text" name="no_hp_penulis" placeholder="08xxxxxxxxxx"
-                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
-                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
-                </div>
-                @else
-                <input type="hidden" name="no_hp_penulis" value="{{ $submission->no_hp_penulis }}">
-                @endif
-
-                <button type="submit"
-                        style="padding:7px 16px; background:#2a6496; color:#fff; border:none;
-                               border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; white-space:nowrap;">
-                    💾 Simpan
-                </button>
-            </div>
-        </form>
-        @endif
-
-        {{-- Link LOA --}}
-        <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:4px;">Link LOA (untuk dikirim ke author)</label>
-            <div style="display:flex; gap:6px;">
-                <input type="text" id="loa-copy-link" readonly value="{{ $loaPublicUrl }}"
-                       style="flex:1; padding:7px 10px; background:#2a2a3e; border:1px solid #444;
-                              border-radius:6px; color:#ccc; font-size:12px; box-sizing:border-box;">
-                <button onclick="copyLoaLink(event)" title="Salin link"
-                        style="padding:7px 12px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; flex-shrink:0;">
-                    📋 Salin
-                </button>
-            </div>
-        </div>
-
-        {{-- Tombol kirim --}}
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            @if($noHp)
-            <a href="https://wa.me/{{ $noHp }}?text={{ urlencode($waMsg) }}" target="_blank"
-               style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:8px;
-                      background:#25D366; color:#fff; padding:10px 16px; border-radius:8px;
-                      text-decoration:none; font-size:13px; font-weight:bold;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Kirim via WhatsApp
-            </a>
-            @else
-            <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
-                        background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">
-                ⚠ No HP tidak tersedia
-            </div>
-            @endif
-
-            @if($emailPenulis)
-            <a href="mailto:{{ $emailPenulis }}?subject={{ urlencode($emailSubject) }}&body={{ urlencode($emailBody) }}"
-               style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:8px;
-                      background:#0078D4; color:#fff; padding:10px 16px; border-radius:8px;
-                      text-decoration:none; font-size:13px; font-weight:bold;">
-                ✉ Kirim via Email
-            </a>
-            @else
-            <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
-                        background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">
-                ⚠ Email tidak tersedia
-            </div>
-            @endif
-        </div>
-
-        <div style="margin-top:16px; text-align:right;">
-            <button type="button"
-                    onclick="document.getElementById('modal-send-loa').style.display='none'"
-                    style="padding:8px 20px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
-                Tutup
-            </button>
-        </div>
-
-        <button onclick="document.getElementById('modal-send-loa').style.display='none'"
-                style="position:absolute; top:12px; right:16px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1;">×</button>
-    </div>
-</div>
-<script>
-function copyLoaLink(e) {
-    var inp = document.getElementById('loa-copy-link');
-    inp.select();
-    inp.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(inp.value).then(function() {
-        var btn = e.target;
-        var orig = btn.textContent;
-        btn.textContent = '✓ Tersalin';
-        btn.style.background = '#2e7d32';
-        setTimeout(function(){ btn.textContent = orig; btn.style.background = '#444'; }, 2000);
-    });
-}
-</script>
-
-@if(session('success'))
-<script>
-    // Show success notification briefly
-    var _s = document.createElement('div');
-    _s.style.cssText = 'position:fixed;top:60px;right:20px;background:#2e7d32;color:#fff;padding:12px 20px;border-radius:8px;font-family:sans-serif;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);';
-    _s.textContent = '✓ {{ session("success") }}';
-    document.body.appendChild(_s);
-    setTimeout(function(){ _s.remove(); }, 4000);
-</script>
-@endif
-@endif
 
 {{-- ══════════════════════════════════════════════════════
      PAGE 1 — RECEIPT FOR PAPER / SURAT PENERIMAAN ARTIKEL
@@ -726,18 +478,31 @@ function copyLoaLink(e) {
             </tr>
         </table>
 
-        <div class="to-block">
+    {{--<div class="to-block">
             <p>Kepada Yth.</p>
-            <p>Sdr/i. <strong>{{ $firstAuthor }}</strong></p>
-            <p>di <strong>{{ $afiliasi ?: '—' }}</strong></p>
+            <p>Sdr/i. <strong>{{ $allAuthorNames }}</strong></p>
+            <p>di &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>{{ $afiliasi ?: '—' }}</strong></p>
+        </div> --}}
+        
+        <div class="to-block">
+             <table style="width:auto;">
+                 <tr>
+                     <td valign="top" style="width:80px; white-space:nowrap;">Kepada Yth.</td>
+                     
+                     <td>{{ $allAuthorNames }}</td>
+                 </tr>
+                 <tr>
+                     <td>di</td>
+                    
+                     <td style="font-weight:bold;">{{ $afiliasi ?: '—' }}</td>
+                 </tr>
+            </table>
         </div>
 
         <p class="body-text">Dengan hormat,</p>
-        <p class="body-text" style= "text-align:justify; line-height:1.2;">
-            Sehubungan proses telaah yang telah dilakukan oleh <em>reviewer</em> kami sesuai
-            bidang kajian topik penelitian pada naskah yang telah didaftarkan, Dewan Penyunting/Editor
-            <strong>{{ $jurnalNama }}</strong>@if($kodeSingkat) ({{ $kodeSingkat }})@endif
-            memutuskan dan menyatakan bahwa naskah Saudara berikut ini:
+        <p class="body-text" style= "text-align:justify;">
+            
+            Berdasarkan hasil pemeriksaan administrasi, kesesuaian substansi, dan evaluasi yang telah dilakukan oleh Dewan Redaksi <strong>{{ $jurnalNama }}</strong>. Oleh karena itu, Dewan Redaksi memutuskan dan menyatakan bahwa naskah Saudara berikut ini:
         </p>
 
         <table class="detail-table">
@@ -752,22 +517,22 @@ function copyLoaLink(e) {
             </tr>
         </table>
 
-        <div style="text-align:center; font-size:16pt; font-weight:900; letter-spacing:4px; margin:10px 0 8px;">
+        <div style="text-align:center; font-size:14pt; font-weight:900; letter-spacing:4px; margin:10px 0 8px;">
             DITERIMA
         </div>
 
         <p class="body-text" style="margin-bottom:4px;">untuk diterbitkan di:</p>
         <div class="jrn-info-block">
             <div class="jrn-info-name">{{ $jurnalNama }}</div>
-            <table style="border-collapse:collapse;width:100%;">
+            <table style="border-collapse:collapse;width:100%; ">
                 <colgroup><col style="width:76px;"><col style="width:12px;"><col></colgroup>
                 @if($eIssn || $pIssn)
                 <tr>
                     <td>ISSN</td><td>:</td>
                     <td>
-                        @if($eIssn){{ $eIssn }} (daring)@endif
+                        @if($eIssn){{ $eIssn }} (E-ISSN)@endif
                         @if($eIssn && $pIssn); @endif
-                        @if($pIssn){{ $pIssn }} (cetak)@endif
+                        @if($pIssn){{ $pIssn }} (P-ISSN)@endif
                     </td>
                 </tr>
                 @endif
@@ -778,7 +543,7 @@ function copyLoaLink(e) {
                 @if($loaStatus)
                 <tr>
                     <td style="vertical-align:top;">Status</td><td style="vertical-align:top;">:</td>
-                    <td>{{ $loaStatus }}@if($linkSkAkreditasi) — <a href="{{ $linkSkAkreditasi }}" target="_blank" style="color:inherit;">{{ $linkSkAkreditasi }}</a>@endif</td>
+                    <td style="text-align:justify;">{{ $loaStatus }}</td>
                 </tr>
                 @endif
                 @if($penerbit)
@@ -796,62 +561,41 @@ function copyLoaLink(e) {
             </table>
         </div>
 
-        <p class="body-text">
-            Kami ucapkan selamat atas diterimanya karya ilmiah Saudara untuk diterbitkan.
-            Editor kami akan segera menghubungi Saudara untuk finalisasi proses <em>editing</em>
-            dan <em>layout</em> naskah.
+        <p class="body-text" style="text-align:justify;">
+            Kami mengucapkan selamat atas diterimanya naskah Saudara untuk dipublikasikan pada <strong>{{ $jurnalNama }}</strong>. Selanjutnya, naskah akan diproses pada tahapan editorial dan penerbitan sesuai ketentuan yang berlaku.
         </p>
-        <p class="body-text">Atas perhatian dan kontribusi Saudara, kami ucapkan terima kasih.</p>
+        <p class="body-text" style="text-align:justify;">Atas partisipasi dan kontribusi Saudara dalam pengembangan ilmu pengetahuan, kami sampaikan terima kasih.</p>
 
         @else
-        {{-- ── FORMAT ENGLISH (mirrored from Indonesian structure) ── --}}
-        <table style="border-collapse:collapse; font-size:12pt; margin-bottom:16px;">
-            <tr>
-                <td style="padding:1px 4px 1px 0; white-space:nowrap;">No</td>
-                <td style="padding:1px 10px 1px 0;">:</td>
-                <td>{{ $loaNumber }}</td>
-            </tr>
-            <tr>
-                <td style="padding:1px 4px 1px 0;">Subject</td>
-                <td style="padding:1px 10px 1px 0;">:</td>
-                <td><strong>Manuscript Accepted</strong></td>
-            </tr>
-        </table>
+        {{-- ── FORMAT ENGLISH ── --}}
+        <div class="doc-subtitle">{{ $L['p1_subtitle'] }}</div>
+        <div class="doc-no">No. {{ $loaNumber }}</div>
 
         <div class="to-block">
             <p>{{ $L['salutation1'] }}</p>
-            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<strong>{{ $firstAuthor }}</strong></p>
-            <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>{{ $afiliasi ?: '—' }}</strong></p>
+            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $allAuthorNames }}</span></p>
+            <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
         </div>
 
         <p class="body-text">{{ $L['greeting'] }}</p>
-        <p class="body-text" style="text-align:justify; line-height:1.2;">
-            {{ $L['body1_pre'] }} <strong>{{ $jurnalNama }}</strong>@if($kodeSingkat) ({{ $kodeSingkat }})@endif
+        <p class="body-text">
+            {{ $L['body1_pre'] }} <strong>{{ $jurnalNama }}</strong>
             @if($eIssn) ({{ $L['body1_issn'] }} <strong>{{ $eIssn }}</strong>)@endif,
             {{ $L['body1_post'] }}
         </p>
+        <p class="body-text" style="text-align:center; font-style:italic; font-size:11pt;">
+            &ldquo;<span class="hl">{{ $judul }}</span>&rdquo;
+        </p>
+        <p class="body-text">
+            {{ $L['body2_pre'] }} <strong>{{ $L['body2_accepted'] }}</strong>
+            {{ $L['body2_post'] }} <span class="hl"><em>{{ $jurnalNama }}</em>,
+            Volume {{ $volume }}, No. {{ $nomor }}, {{ $bulan }} {{ $tahun }}</span>.
+        </p>
 
-        <table class="detail-table">
-            <colgroup><col style="width:110px;"><col style="width:12px;"><col></colgroup>
-            <tr>
-                <td>Manuscript Title</td><td>:</td>
-                <td><strong>{{ $judul }}</strong></td>
-            </tr>
-            <tr>
-                <td>Article Code</td><td>:</td>
-                <td>{{ $kodeArtikel }}</td>
-            </tr>
-        </table>
-
-        <div style="text-align:center; font-size:16pt; font-weight:900; letter-spacing:4px; margin:10px 0 8px;">
-            ACCEPTED
-        </div>
-
-        <p class="body-text" style="margin-bottom:4px;">for publication in:</p>
+        @if($eIssn || $pIssn || $loaStatus || $penerbit || $journal?->link_jurnal)
         <div class="jrn-info-block">
             <div class="jrn-info-name">{{ $jurnalNama }}</div>
-            <table style="border-collapse:collapse;width:100%;">
-                <colgroup><col style="width:76px;"><col style="width:12px;"><col></colgroup>
+            <table>
                 @if($eIssn || $pIssn)
                 <tr>
                     <td>ISSN</td><td>:</td>
@@ -867,25 +611,20 @@ function copyLoaLink(e) {
                     <td>Volume {{ $volume }}, No. {{ $nomor }} ({{ $tahun }})</td>
                 </tr>
                 @if($loaStatus)
-                <tr>
-                    <td style="vertical-align:top;">Status</td><td style="vertical-align:top;">:</td>
-                    <td>{{ $loaStatus }}@if($linkSkAkreditasi) — <a href="{{ $linkSkAkreditasi }}" target="_blank" style="color:inherit;">{{ $linkSkAkreditasi }}</a>@endif</td>
-                </tr>
+                <tr><td>Status</td><td>:</td><td>{{ $loaStatus }} </td></tr>
                 @endif
                 @if($penerbit)
-                <tr>
-                    <td>Publisher</td><td>:</td>
-                    <td>{{ $penerbit }}</td>
-                </tr>
+                <tr><td>Publisher</td><td>:</td><td>{{ $penerbit }}</td></tr>
                 @endif
                 @if($journal?->link_jurnal)
                 <tr>
                     <td>URL</td><td>:</td>
-                    <td><a href="{{ $journal->link_jurnal }}" target="_blank" style="color:inherit;">{{ $journal->link_jurnal }}</a></td>
+                    <td><a href="{{ $journal->link_jurnal }}" target="_blank">{{ $journal->link_jurnal }}</a></td>
                 </tr>
                 @endif
             </table>
         </div>
+        @endif
 
         <p class="body-text">{{ $L['body3'] }}</p>
         <p class="body-text">{{ $L['body4'] }}</p>
@@ -1008,7 +747,7 @@ function copyLoaLink(e) {
                 <tr>
                     <th style="width:28px;">{{ $L['col_no'] }}</th>
                     <th>{{ $L['col_desc'] }}</th>
-                    <th style="width:180px;">{{ $L['col_comment'] }}</th>
+                    <th style="width:230px;">{{ $L['col_comment'] }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -1032,7 +771,7 @@ function copyLoaLink(e) {
             <tr>
                 <td>{{ $i + 1 }}. {{ $dec }}</td>
                 <td class="chk">
-                    @if($i === 1)<span class="chk-checked">&#10003;</span>@else[&nbsp;&nbsp;&nbsp;]@endif
+                    @if($i === 1)<span class="chk-checked">&#10003;</span>@else[...]@endif
                 </td>
             </tr>
             @endforeach
