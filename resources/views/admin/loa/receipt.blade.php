@@ -386,7 +386,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
         <span style="margin-left:16px; color:#ccc;">LOA: {{ $submission->kode_submit }}</span>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
-        @if((!empty($isAdminView) && $isAdminView) || $canEditDate)
+        @if((!empty($isAdminView) && $isAdminView) || $canEditDate || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
         <label style="color:#ccc; font-size:12px; display:flex; align-items:center; gap:6px;">
             📅 Tanggal LOA:
             <input type="date" id="loa-date-picker"
@@ -394,11 +394,15 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
                    style="background:#2a2a2a; color:#fff; border:1px solid #555; border-radius:4px; padding:3px 8px; font-size:12px; cursor:pointer;">
         </label>
         @endif
-        @if(!empty($isAdminView) && $isAdminView)
-        <a href="{{ route('admin.submissions.edit', $submission) }}"
-           style="color:#90CAF9; text-decoration:none; font-size:12px;">
-            ✏ Edit Afiliasi & Data
-        </a>
+        @if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView) || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
+        <button onclick="document.getElementById('modal-meta-loa').style.display='flex'"
+           style="background:#2a6496; color:#fff; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; font-size:12px;">
+            ✏ Edit Metadata LOA
+        </button>
+        <button onclick="document.getElementById('modal-send-loa').style.display='flex'"
+           style="background:#1a7a4a; color:#fff; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; font-size:12px;">
+            📤 Kirim ke Author
+        </button>
         @endif
         <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
@@ -410,6 +414,256 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
     window.location.href = url.toString();
 });
 </script>
+
+@if((!empty($isAdminView) && $isAdminView) || (!empty($isMarketingView) && $isMarketingView) || (auth()->check() && method_exists(auth()->user(), 'hasAdminAccess') && auth()->user()->hasAdminAccess()))
+{{-- ── Modal Edit Metadata LOA (screen only, no-print) ──────────── --}}
+<div id="modal-meta-loa" class="no-print"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;
+            align-items:center; justify-content:center; font-family:sans-serif;">
+    <div style="background:#1e1e2e; color:#e0e0e0; border-radius:10px; width:100%; max-width:480px;
+                padding:28px 32px; box-shadow:0 8px 40px rgba(0,0,0,.6); position:relative;">
+        <h3 style="margin:0 0 20px; font-size:16px; color:#90CAF9;">
+            ✏ Edit Metadata LOA
+            <span style="font-size:12px; color:#aaa; font-weight:normal; margin-left:8px;">
+                {{ $submission->kode_submit }}
+            </span>
+        </h3>
+
+        <form method="POST" action="{{ (!empty($isMarketingView) && $isMarketingView)
+            ? route('marketing.submissions.loa.update-metadata', $submission)
+            : route('admin.submissions.loa.update-metadata', $submission) }}">
+            @csrf
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Nama Penulis *</label>
+                <input type="text" name="nama_penulis" required
+                       value="{{ old('nama_penulis', $submission->nama_penulis) }}"
+                       style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                              border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Afiliasi</label>
+                <textarea name="affiliation_penulis" rows="2"
+                          style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                                 border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; resize:vertical;">{{ old('affiliation_penulis', $submission->affiliation_penulis) }}</textarea>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">Judul Artikel *</label>
+                <textarea name="judul_artikel" rows="3" required
+                          style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                                 border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; resize:vertical;">{{ old('judul_artikel', $submission->judul_artikel) }}</textarea>
+            </div>
+
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">
+                    Tanggal LOA
+                    <span style="color:#888; font-size:11px;">(kosong = tanggal hari ini)</span>
+                </label>
+                <input type="date" name="tanggal_loa"
+                       value="{{ old('tanggal_loa', $submission->tanggal_loa?->toDateString()) }}"
+                       style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
+                              border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; cursor:pointer;">
+                @if($submission->tanggal_loa)
+                <div style="margin-top:4px; font-size:11px; color:#f0ad4e;">
+                    ⚠ Tanggal override aktif: {{ $submission->tanggal_loa->format('d M Y') }}
+                </div>
+                @endif
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button"
+                        onclick="document.getElementById('modal-meta-loa').style.display='none'"
+                        style="padding:8px 20px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
+                    Batal
+                </button>
+                <button type="submit"
+                        style="padding:8px 24px; background:#2a6496; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">
+                    Simpan
+                </button>
+            </div>
+        </form>
+
+        <button onclick="document.getElementById('modal-meta-loa').style.display='none'"
+                style="position:absolute; top:12px; right:16px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1;">×</button>
+    </div>
+</div>
+
+{{-- ── Modal Kirim LOA ke Author ──────────────────────────────────── --}}
+<div id="modal-send-loa" class="no-print"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;
+            align-items:center; justify-content:center; font-family:sans-serif;">
+    <div style="background:#1e1e2e; color:#e0e0e0; border-radius:10px; width:100%; max-width:500px;
+                padding:28px 32px; box-shadow:0 8px 40px rgba(0,0,0,.6); position:relative;">
+        <h3 style="margin:0 0 20px; font-size:16px; color:#90CAF9;">
+            📤 Kirim LOA ke Author
+            <span style="font-size:12px; color:#aaa; font-weight:normal; margin-left:8px;">
+                {{ $submission->kode_submit }}
+            </span>
+        </h3>
+
+        @php
+            $loaPublicUrl = route('loa.public', ['kode_loa' => $submission->kode_loa ?: $submission->kode_submit]);
+            $authorName   = $submission->nama_penulis ?? 'Yth. Penulis';
+            $waMsg = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di *{$jurnalNama}*.\n\nSilakan unduh/cetak LOA melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\n_Tim Redaksi {$jurnalNama}_";
+            $emailSubject = "Letter of Acceptance (LOA) – {$jurnalNama}";
+            $emailBody    = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di {$jurnalNama}.\n\nSilakan akses LOA Anda melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\nSalam hormat,\nTim Redaksi {$jurnalNama}";
+            $noHp    = preg_replace('/[^0-9]/', '', $submission->no_hp_penulis ?? '');
+            if (str_starts_with($noHp, '0')) $noHp = '62' . substr($noHp, 1);
+            $emailPenulis = $submission->email_penulis ?? '';
+            $updateContactRoute = (!empty($isMarketingView) && $isMarketingView)
+                ? route('marketing.submissions.loa.update-metadata', $submission)
+                : route('admin.submissions.loa.update-metadata', $submission);
+        @endphp
+
+        {{-- Info author --}}
+        <div style="background:#2a2a3e; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px;">
+            <div style="margin-bottom:8px;">
+                <span style="color:#90CAF9; font-size:11px;">Penulis</span><br>
+                <strong>{{ $submission->nama_penulis ?? '—' }}</strong>
+            </div>
+            <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                <div>
+                    <span style="color:#90CAF9; font-size:11px;">No HP/WA</span><br>
+                    {{ $submission->no_hp_penulis ?: '—' }}
+                </div>
+                <div>
+                    <span style="color:#90CAF9; font-size:11px;">Email</span><br>
+                    {{ $emailPenulis ?: '—' }}
+                </div>
+            </div>
+        </div>
+
+        {{-- Form isi email/HP jika kosong --}}
+        @if(!$emailPenulis || !$submission->no_hp_penulis)
+        <form method="POST" action="{{ $updateContactRoute }}" style="margin-bottom:16px;">
+            @csrf
+            {{-- field wajib lainnya dikirim hidden agar validasi tidak gagal --}}
+            <input type="hidden" name="nama_penulis"        value="{{ $submission->nama_penulis }}">
+            <input type="hidden" name="judul_artikel"       value="{{ $submission->judul_artikel }}">
+            <input type="hidden" name="affiliation_penulis" value="{{ $submission->affiliation_penulis }}">
+            <input type="hidden" name="tanggal_loa"         value="{{ $submission->tanggal_loa?->toDateString() }}">
+
+            <div style="font-size:11px; color:#f0ad4e; margin-bottom:8px;">
+                ⚠ Lengkapi kontak author agar tombol kirim aktif:
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                @if(!$emailPenulis)
+                <div style="flex:1; min-width:180px;">
+                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">Email</label>
+                    <input type="email" name="email_penulis" placeholder="email@contoh.com"
+                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
+                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
+                </div>
+                @else
+                <input type="hidden" name="email_penulis" value="{{ $emailPenulis }}">
+                @endif
+
+                @if(!$submission->no_hp_penulis)
+                <div style="flex:1; min-width:140px;">
+                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">No HP/WA</label>
+                    <input type="text" name="no_hp_penulis" placeholder="08xxxxxxxxxx"
+                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
+                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
+                </div>
+                @else
+                <input type="hidden" name="no_hp_penulis" value="{{ $submission->no_hp_penulis }}">
+                @endif
+
+                <button type="submit"
+                        style="padding:7px 16px; background:#2a6496; color:#fff; border:none;
+                               border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; white-space:nowrap;">
+                    💾 Simpan
+                </button>
+            </div>
+        </form>
+        @endif
+
+        {{-- Link LOA --}}
+        <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:4px;">Link LOA (untuk dikirim ke author)</label>
+            <div style="display:flex; gap:6px;">
+                <input type="text" id="loa-copy-link" readonly value="{{ $loaPublicUrl }}"
+                       style="flex:1; padding:7px 10px; background:#2a2a3e; border:1px solid #444;
+                              border-radius:6px; color:#ccc; font-size:12px; box-sizing:border-box;">
+                <button onclick="copyLoaLink(event)" title="Salin link"
+                        style="padding:7px 12px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; flex-shrink:0;">
+                    📋 Salin
+                </button>
+            </div>
+        </div>
+
+        {{-- Tombol kirim --}}
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            @if($noHp)
+            <a href="https://wa.me/{{ $noHp }}?text={{ urlencode($waMsg) }}" target="_blank"
+               style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:8px;
+                      background:#25D366; color:#fff; padding:10px 16px; border-radius:8px;
+                      text-decoration:none; font-size:13px; font-weight:bold;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Kirim via WhatsApp
+            </a>
+            @else
+            <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
+                        background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">
+                ⚠ No HP tidak tersedia
+            </div>
+            @endif
+
+            @if($emailPenulis)
+            <a href="mailto:{{ $emailPenulis }}?subject={{ urlencode($emailSubject) }}&body={{ urlencode($emailBody) }}"
+               style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:8px;
+                      background:#0078D4; color:#fff; padding:10px 16px; border-radius:8px;
+                      text-decoration:none; font-size:13px; font-weight:bold;">
+                ✉ Kirim via Email
+            </a>
+            @else
+            <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
+                        background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">
+                ⚠ Email tidak tersedia
+            </div>
+            @endif
+        </div>
+
+        <div style="margin-top:16px; text-align:right;">
+            <button type="button"
+                    onclick="document.getElementById('modal-send-loa').style.display='none'"
+                    style="padding:8px 20px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
+                Tutup
+            </button>
+        </div>
+
+        <button onclick="document.getElementById('modal-send-loa').style.display='none'"
+                style="position:absolute; top:12px; right:16px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1;">×</button>
+    </div>
+</div>
+<script>
+function copyLoaLink(e) {
+    var inp = document.getElementById('loa-copy-link');
+    inp.select();
+    inp.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(inp.value).then(function() {
+        var btn = e.target;
+        var orig = btn.textContent;
+        btn.textContent = '✓ Tersalin';
+        btn.style.background = '#2e7d32';
+        setTimeout(function(){ btn.textContent = orig; btn.style.background = '#444'; }, 2000);
+    });
+}
+</script>
+
+@if(session('success'))
+<script>
+    // Show success notification briefly
+    var _s = document.createElement('div');
+    _s.style.cssText = 'position:fixed;top:60px;right:20px;background:#2e7d32;color:#fff;padding:12px 20px;border-radius:8px;font-family:sans-serif;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);';
+    _s.textContent = '✓ {{ session("success") }}';
+    document.body.appendChild(_s);
+    setTimeout(function(){ _s.remove(); }, 4000);
+</script>
+@endif
+@endif
 
 {{-- ══════════════════════════════════════════════════════
      PAGE 1 — RECEIPT FOR PAPER / SURAT PENERIMAAN ARTIKEL
