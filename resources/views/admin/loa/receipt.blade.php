@@ -506,34 +506,82 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             $noHp    = preg_replace('/[^0-9]/', '', $submission->no_hp_penulis ?? '');
             if (str_starts_with($noHp, '0')) $noHp = '62' . substr($noHp, 1);
             $emailPenulis = $submission->email_penulis ?? '';
+            $updateContactRoute = (!empty($isMarketingView) && $isMarketingView)
+                ? route('marketing.submissions.loa.update-metadata', $submission)
+                : route('admin.submissions.loa.update-metadata', $submission);
         @endphp
 
         {{-- Info author --}}
-        <div style="background:#2a2a3e; border-radius:8px; padding:12px 16px; margin-bottom:20px; font-size:13px;">
-            <div style="margin-bottom:6px;">
+        <div style="background:#2a2a3e; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px;">
+            <div style="margin-bottom:8px;">
                 <span style="color:#90CAF9; font-size:11px;">Penulis</span><br>
                 <strong>{{ $submission->nama_penulis ?? '—' }}</strong>
             </div>
             <div style="display:flex; gap:24px; flex-wrap:wrap;">
                 <div>
                     <span style="color:#90CAF9; font-size:11px;">No HP/WA</span><br>
-                    {{ $submission->no_hp_penulis ?? '<em style="color:#888;">—</em>' }}
+                    {{ $submission->no_hp_penulis ?: '—' }}
                 </div>
                 <div>
                     <span style="color:#90CAF9; font-size:11px;">Email</span><br>
-                    {{ $emailPenulis ?: '<em style="color:#888;">—</em>' }}
+                    {{ $emailPenulis ?: '—' }}
                 </div>
             </div>
         </div>
 
+        {{-- Form isi email/HP jika kosong --}}
+        @if(!$emailPenulis || !$submission->no_hp_penulis)
+        <form method="POST" action="{{ $updateContactRoute }}" style="margin-bottom:16px;">
+            @csrf
+            {{-- field wajib lainnya dikirim hidden agar validasi tidak gagal --}}
+            <input type="hidden" name="nama_penulis"        value="{{ $submission->nama_penulis }}">
+            <input type="hidden" name="judul_artikel"       value="{{ $submission->judul_artikel }}">
+            <input type="hidden" name="affiliation_penulis" value="{{ $submission->affiliation_penulis }}">
+            <input type="hidden" name="tanggal_loa"         value="{{ $submission->tanggal_loa?->toDateString() }}">
+
+            <div style="font-size:11px; color:#f0ad4e; margin-bottom:8px;">
+                ⚠ Lengkapi kontak author agar tombol kirim aktif:
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                @if(!$emailPenulis)
+                <div style="flex:1; min-width:180px;">
+                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">Email</label>
+                    <input type="email" name="email_penulis" placeholder="email@contoh.com"
+                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
+                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
+                </div>
+                @else
+                <input type="hidden" name="email_penulis" value="{{ $emailPenulis }}">
+                @endif
+
+                @if(!$submission->no_hp_penulis)
+                <div style="flex:1; min-width:140px;">
+                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">No HP/WA</label>
+                    <input type="text" name="no_hp_penulis" placeholder="08xxxxxxxxxx"
+                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
+                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
+                </div>
+                @else
+                <input type="hidden" name="no_hp_penulis" value="{{ $submission->no_hp_penulis }}">
+                @endif
+
+                <button type="submit"
+                        style="padding:7px 16px; background:#2a6496; color:#fff; border:none;
+                               border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; white-space:nowrap;">
+                    💾 Simpan
+                </button>
+            </div>
+        </form>
+        @endif
+
         {{-- Link LOA --}}
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:16px;">
             <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:4px;">Link LOA (untuk dikirim ke author)</label>
             <div style="display:flex; gap:6px;">
                 <input type="text" id="loa-copy-link" readonly value="{{ $loaPublicUrl }}"
                        style="flex:1; padding:7px 10px; background:#2a2a3e; border:1px solid #444;
                               border-radius:6px; color:#ccc; font-size:12px; box-sizing:border-box;">
-                <button onclick="copyLoaLink()" title="Salin link"
+                <button onclick="copyLoaLink(event)" title="Salin link"
                         style="padding:7px 12px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; flex-shrink:0;">
                     📋 Salin
                 </button>
@@ -585,12 +633,12 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
     </div>
 </div>
 <script>
-function copyLoaLink() {
+function copyLoaLink(e) {
     var inp = document.getElementById('loa-copy-link');
     inp.select();
     inp.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(inp.value).then(function() {
-        var btn = event.target;
+        var btn = e.target;
         var orig = btn.textContent;
         btn.textContent = '✓ Tersalin';
         btn.style.background = '#2e7d32';

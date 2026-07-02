@@ -82,6 +82,8 @@ class LoaController extends Controller
             'affiliation_penulis' => 'nullable|string|max:500',
             'judul_artikel'       => 'required|string|max:1000',
             'tanggal_loa'         => 'nullable|date',
+            'email_penulis'       => 'nullable|email|max:255',
+            'no_hp_penulis'       => 'nullable|string|max:20',
         ]);
 
         $submission->update($validated);
@@ -145,6 +147,8 @@ class LoaController extends Controller
             'affiliation_penulis' => 'nullable|string|max:500',
             'judul_artikel'       => 'required|string|max:1000',
             'tanggal_loa'         => 'nullable|date',
+            'email_penulis'       => 'nullable|email|max:255',
+            'no_hp_penulis'       => 'nullable|string|max:20',
         ]);
 
         $submission->update($validated);
