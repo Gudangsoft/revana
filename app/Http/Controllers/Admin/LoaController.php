@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Accreditation;
 use App\Models\Submission;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class LoaController extends Controller
 {
@@ -14,64 +16,18 @@ class LoaController extends Controller
     public function publicView(string $kodeLoa)
     {
         $submission = Submission::where('kode_loa', $kodeLoa)->firstOrFail();
-        $submission->load(['journalSlot.journalMaster']);
-        $journal = $submission->journalSlot?->journalMaster;
-        $slot    = $submission->journalSlot;
-        // Priority: ?tanggal param → submission.tanggal_loa → journal.loa_tanggal
-        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
-        $kode    = $submission->kode_loa ?: $submission->kode_submit;
-        $lang    = $journal?->loa_language ?? 'en';
 
-        return view('admin.loa.receipt', [
-            'submission'             => $submission,
-            'journal'                => $journal,
-            'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
-            'loaDate'                => $this->loaDate($journal, $date, $lang, $slot),
-            'loaDateRaw'             => $this->loaDateRawString($date, $journal, $slot),
-            'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'                => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'headerImageUrl'         => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
-            'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
-            'linkSkAkreditasi'       => $journal?->link_sk_akreditasi,
-            'loaStatus'              => $journal?->loa_status,
-            'pIssn'                  => $journal?->p_issn,
-            'penerbit'               => $journal?->publisher,
-            'verifyUrl'              => route('verify.direct', ['kode_loa' => $kode]),
-            'isAdminView'            => false,
-            'lang'                   => $lang,
-        ]);
+        return view('admin.loa.receipt', $this->buildViewData($submission, [
+            'isAdminView' => false,
+        ]));
     }
 
     // ── Admin: dari detail submission (butuh login) ─────────────────────
     public function show(Submission $submission)
     {
-        $submission->load(['journalSlot.journalMaster']);
-        $journal = $submission->journalSlot?->journalMaster;
-        $slot    = $submission->journalSlot;
-        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
-        $kode    = $submission->kode_loa ?: $submission->kode_submit;
-        $lang    = $journal?->loa_language ?? 'en';
-
-        return view('admin.loa.receipt', [
-            'submission'             => $submission,
-            'journal'                => $journal,
-            'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
-            'loaDate'                => $this->loaDate($journal, $date, $lang, $slot),
-            'loaDateRaw'             => $this->loaDateRawString($date, $journal, $slot),
-            'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'                => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'headerImageUrl'         => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
-            'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
-            'linkSkAkreditasi'       => $journal?->link_sk_akreditasi,
-            'loaStatus'              => $journal?->loa_status,
-            'pIssn'                  => $journal?->p_issn,
-            'penerbit'               => $journal?->publisher,
-            'verifyUrl'              => route('verify.direct', ['kode_loa' => $kode]),
-            'isAdminView'            => true,
-            'lang'                   => $lang,
-        ]);
+        return view('admin.loa.receipt', $this->buildViewData($submission, [
+            'isAdminView' => true,
+        ]));
     }
 
     // ── Admin: simpan metadata LOA (nama, afiliasi, judul, tanggal) ─────
@@ -102,35 +58,12 @@ class LoaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke LOA ini.');
         }
 
-        $submission->load(['journalSlot.journalMaster']);
-        $journal = $submission->journalSlot?->journalMaster;
-        $slot    = $submission->journalSlot;
-        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
-        $kode    = $submission->kode_loa ?: $submission->kode_submit;
-        $lang    = $journal?->loa_language ?? 'en';
-
-        return view('admin.loa.receipt', [
-            'submission'             => $submission,
-            'journal'                => $journal,
-            'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
-            'loaDate'                => $this->loaDate($journal, $date, $lang, $slot),
-            'loaDateRaw'             => $this->loaDateRawString($date, $journal, $slot),
-            'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'                => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
-            'headerImageUrl'         => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
-            'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
-            'linkSkAkreditasi'       => $journal?->link_sk_akreditasi,
-            'loaStatus'              => $journal?->loa_status,
-            'pIssn'                  => $journal?->p_issn,
-            'penerbit'               => $journal?->publisher,
-            'verifyUrl'              => route('verify.direct', ['kode_loa' => $kode]),
-            'isAdminView'            => false,
-            'isMarketingView'        => true,
-            'canEditDate'            => true,
-            'backUrl'                => route('marketing.submissions.show', $submission),
-            'lang'                   => $lang,
-        ]);
+        return view('admin.loa.receipt', $this->buildViewData($submission, [
+            'isAdminView'     => false,
+            'isMarketingView' => true,
+            'canEditDate'     => true,
+            'backUrl'         => route('marketing.submissions.show', $submission),
+        ]));
     }
 
     // ── Marketing: update metadata LOA ────────────────────────────────────
@@ -192,6 +125,54 @@ class LoaController extends Controller
         if ($params) $url .= '?' . http_build_query($params);
 
         return redirect($url);
+    }
+
+    // ── Data view LOA, dipakai bareng oleh show/publicView/showMarketing/PDF ──
+    public function buildViewData(Submission $submission, array $overrides = []): array
+    {
+        $submission->load(['journalSlot.journalMaster']);
+        $journal = $submission->journalSlot?->journalMaster;
+        $slot    = $submission->journalSlot;
+        $date    = request('tanggal') ?: ($submission->tanggal_loa?->toDateString());
+        $kode    = $submission->kode_loa ?: $submission->kode_submit;
+        $lang    = $journal?->loa_language ?? 'en';
+
+        return array_merge([
+            'submission'             => $submission,
+            'journal'                => $journal,
+            'slot'                   => $slot,
+            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
+            'loaDate'                => $this->loaDate($journal, $date, $lang, $slot),
+            'loaDateRaw'             => $this->loaDateRawString($date, $journal, $slot),
+            'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
+            'signUrl'                => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            'headerImageUrl'         => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
+            'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
+            'linkSkAkreditasi'       => $journal?->link_sk_akreditasi,
+            'loaStatus'              => $journal?->loa_status,
+            'pIssn'                  => $journal?->p_issn,
+            'penerbit'               => $journal?->publisher,
+            'verifyUrl'              => route('verify.direct', ['kode_loa' => $kode]),
+            'lang'                   => $lang,
+        ], $overrides);
+    }
+
+    // ── Render LOA jadi PDF (untuk dilampirkan ke email) ─────────────────
+    public function generateLoaPdf(Submission $submission): string
+    {
+        $data = $this->buildViewData($submission, [
+            'isAdminView' => false,
+            'pdfMode'     => true,
+        ]);
+
+        $verifyUrl = $data['verifyUrl'];
+        $qrSvg     = QrCode::format('svg')->size(80)->margin(0)->generate($verifyUrl);
+        $data['qrDataUri'] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
+
+        return Pdf::loadView('admin.loa.receipt', $data)
+            ->setOption('defaultMediaType', 'print')
+            ->setPaper('a4')
+            ->output();
     }
 
     private function resolveAccreditationLogoUrl($journal): ?string

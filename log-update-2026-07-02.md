@@ -104,3 +104,26 @@
 | `app/Http/Controllers/Marketing/DashboardController.php` | Ganti `loaMasterWaClick()` jadi `loaMasterResendWa()` yang memanggil `dispatchLoaWa()` |
 | `routes/web.php` | Ganti route `POST .../wa-click` jadi `POST .../resend-wa` untuk admin & marketing |
 | `resources/views/admin/loa/receipt.blade.php` | Tombol WhatsApp jadi `<form>` POST ke `resendWaRoute` (dengan konfirmasi JS) alih-alih `<a href="wa.me/...">`; caption "Diklik Nx" jadi "Terkirim Nx"; hapus JS `logWaClick()`/variabel `$waMsg` yang tidak terpakai; tambah handler `session('error')` untuk toast merah kalau Fonnte gagal/belum dikonfigurasi |
+
+## 12. Counter "Terkirim" Dibuat Lebih Mencolok (Badge Pill)
+
+**Tujuan:** Counter "Terkirim Nx" sebelumnya cuma teks abu-abu kecil, kurang terlihat. User minta tampilan lebih mencolok.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Counter Email/WA diubah jadi badge pill berwarna (hijau untuk WA, biru untuk email) dengan border, ikon centang, dan teks bold — alih-alih teks polos abu-abu |
+
+## 13. LOA Dikirim Sebagai Lampiran PDF di Email (Bukan Cuma Link)
+
+**Tujuan:** User tanya apakah email bisa langsung melampirkan file PDF LOA, bukan cuma link. Project sudah punya `barryvdh/laravel-dompdf` untuk generate PDF, tapi QR code di halaman LOA dibuat oleh JavaScript (`qrcode.min.js`) sehingga tidak ikut ter-render kalau PDF dibuat apa adanya (dompdf tidak menjalankan JS). Solusi: generate QR sebagai SVG di sisi server (`simplesoftwareio/simple-qrcode`, berbasis `bacon/bacon-qr-code`, tidak butuh ekstensi Imagick) lalu suntikkan sebagai `<img>` khusus mode PDF.
+
+Sudah diverifikasi: PDF hasil generate valid (`%PDF-1.7` header), dan QR SVG terbukti ter-render sebagai vector path asli di dalam content stream PDF (dicek lewat isolated test — bukan sekadar asumsi). Pipeline attachment Mailable juga sudah dites lewat `Mail::fake()` tanpa error. **Belum dites kirim email sungguhan dengan lampiran** — disarankan coba kirim ke email sendiri dulu sebelum dipakai ke author asli.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `composer.json` / `composer.lock` | Tambah `simplesoftwareio/simple-qrcode` (+ `bacon/bacon-qr-code`, `dasprid/enum`) |
+| `app/Http/Controllers/Admin/LoaController.php` | Refactor: ekstrak `buildViewData()` dipakai bareng oleh `show()`, `publicView()`, `showMarketing()` (sebelumnya duplikat 3x); tambah `generateLoaPdf()` yang generate QR SVG server-side lalu render view jadi PDF via Dompdf dengan `defaultMediaType=print` |
+| `resources/views/admin/loa/receipt.blade.php` | Tambah dukungan `$pdfMode`/`$qrDataUri`: saat mode PDF, tampilkan `<img>` QR dari data URI SVG alih-alih div kosong yang biasanya diisi JS |
+| `app/Mail/LoaAcceptedMail.php` | Tambah `attachments()`: lampirkan PDF hasil `LoaController::generateLoaPdf()` dengan nama `LOA-{kode}.pdf` |

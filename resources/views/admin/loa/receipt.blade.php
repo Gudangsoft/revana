@@ -7,6 +7,8 @@
 <title>LOA – {{ $submission->kode_submit }}</title>
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
 @php
+    $pdfMode              = $pdfMode ?? false;
+    $qrDataUri            = $qrDataUri ?? null;
     $headerImageUrl       = $headerImageUrl ?? null;
     $accreditationLogoUrl = $accreditationLogoUrl ?? null;
     $linkSkAkreditasi     = $linkSkAkreditasi ?? null;
@@ -609,8 +611,12 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                         Kirim via WhatsApp
                     </button>
                 </form>
-                <div style="text-align:center; font-size:11px; color:#888; margin-top:4px;">
-                    Terkirim {{ $submission->loa_wa_sent_count ?? 0 }}x
+                <div style="display:flex; justify-content:center; margin-top:6px;">
+                    <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(37,211,102,.18);
+                                 color:#4ee686; border:1px solid rgba(78,230,134,.4); border-radius:999px;
+                                 padding:3px 10px; font-size:11px; font-weight:bold;">
+                        ✓ Terkirim {{ $submission->loa_wa_sent_count ?? 0 }}x
+                    </span>
                 </div>
             </div>
             @else
@@ -632,8 +638,12 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                         ✉ Kirim via Email
                     </button>
                 </form>
-                <div style="text-align:center; font-size:11px; color:#888; margin-top:4px;">
-                    Terkirim {{ $submission->loa_email_sent_count ?? 0 }}x
+                <div style="display:flex; justify-content:center; margin-top:6px;">
+                    <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(0,120,212,.18);
+                                 color:#5eb3ff; border:1px solid rgba(94,179,255,.4); border-radius:999px;
+                                 padding:3px 10px; font-size:11px; font-weight:bold;">
+                        ✓ Terkirim {{ $submission->loa_email_sent_count ?? 0 }}x
+                    </span>
                 </div>
             </div>
             @else
@@ -918,7 +928,12 @@ function copyLoaLink(e) {
             <p>{{ $loaDate }}</p>
             <p style="margin-top:4px;">{{ $editorTitle }}</p>
             <p>{{ $jurnalNama }}</p>
+            @if($pdfMode && $qrDataUri)
+            <img src="{{ $qrDataUri }}" width="80" height="80" alt="QR"
+                 style="margin-top:8px; margin-left:auto; display:block;">
+            @else
             <div class="qr-wrap" id="qr1" title="{{ $L['scan_qr'] }}" style="margin-top:8px; margin-left:auto; display:inline-block;"></div>
+            @endif
             @if($signUrl)
             <img src="{{ $signUrl }}" class="sig-img" alt="Tanda tangan">
             @endif
@@ -1069,7 +1084,11 @@ function copyLoaLink(e) {
     </div>
     @endif
     <div class="verified-bar">
+        @if($pdfMode && $qrDataUri)
+        <img src="{{ $qrDataUri }}" width="80" height="80" alt="QR" style="display:block;">
+        @else
         <div class="qr-wrap" id="qr2" title="{{ $L['scan_qr'] }}"></div>
+        @endif
         <div class="verified-text-block">
             <div class="vb-row1">
                 <span style="font-weight:bold;">{{ $L['verified_by'] }}</span>
