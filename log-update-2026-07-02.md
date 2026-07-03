@@ -92,3 +92,15 @@
 | File | Perubahan |
 |------|-----------|
 | `resources/views/admin/loa/receipt.blade.php` | Hapus kondisi `@if` yang menyembunyikan form kontak saat email/HP sudah terisi; kedua input sekarang selalu tampil ter-edit dengan value saat ini (bukan hidden input); teks keterangan menyesuaikan ("Lengkapi kontak..." jika kosong, "Ubah kontak author bila perlu..." jika sudah terisi) |
+
+## 11. Tombol "Kirim via WhatsApp" di Modal LOA Kirim Otomatis Lewat Fonnte (Bukan Buka wa.me)
+
+**Tujuan:** Tombol "Kirim via WhatsApp" sebelumnya hanya membuka link `wa.me` di tab baru — admin/marketing masih harus menekan tombol kirim sendiri di WhatsApp. User minta pengiriman WA benar-benar otomatis dari sistem tanpa membuka WhatsApp lagi, sama seperti email yang sudah dibuat sistem-kirim sebelumnya. Project ternyata sudah punya integrasi WhatsApp gateway (Fonnte, `app/Services/FonnteService.php`) yang dipakai di fitur lain (notifikasi kredensial OJS) — dipakai ulang di sini.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaMasterController.php` | Tambah `dispatchLoaWa()`: kirim pesan LOA via `FonnteService`, increment `loa_wa_sent_count` hanya jika sukses; tambah endpoint `resendWa()`; hapus `waClick()`/`logWaClick()` (tidak relevan lagi karena sekarang benar-benar terkirim, bukan sekadar diklik) |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Ganti `loaMasterWaClick()` jadi `loaMasterResendWa()` yang memanggil `dispatchLoaWa()` |
+| `routes/web.php` | Ganti route `POST .../wa-click` jadi `POST .../resend-wa` untuk admin & marketing |
+| `resources/views/admin/loa/receipt.blade.php` | Tombol WhatsApp jadi `<form>` POST ke `resendWaRoute` (dengan konfirmasi JS) alih-alih `<a href="wa.me/...">`; caption "Diklik Nx" jadi "Terkirim Nx"; hapus JS `logWaClick()`/variabel `$waMsg` yang tidak terpakai; tambah handler `session('error')` untuk toast merah kalau Fonnte gagal/belum dikonfigurasi |

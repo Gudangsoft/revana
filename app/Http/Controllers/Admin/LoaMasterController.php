@@ -7,6 +7,7 @@ use App\Mail\LoaAcceptedMail;
 use App\Models\Accreditation;
 use App\Models\JournalMaster;
 use App\Models\Submission;
+use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -154,11 +155,16 @@ class LoaMasterController extends Controller
         return back()->with('success', 'LOA berhasil dikirim ulang ke ' . $submission->email_penulis);
     }
 
-    // ── AJAX: catat klik tombol "Kirim via WhatsApp" dari modal Kirim LOA ──
-    public function waClick(Submission $submission)
+    // ── Kirim/kirim ulang LOA via WhatsApp (Fonnte) langsung dari sistem ──
+    public function resendWa(Submission $submission)
     {
-        self::logWaClick($submission);
-        return response()->json(['success' => true]);
+        $result = self::dispatchLoaWa($submission);
+
+        if (!$result['success']) {
+            return back()->with('error', 'Gagal kirim WA: ' . $result['message']);
+        }
+
+        return back()->with('success', 'LOA berhasil dikirim via WhatsApp ke ' . $submission->no_hp_penulis);
     }
 
     // ── Hook: dipanggil dari SubmissionController saat step divalidasi ───
@@ -206,9 +212,36 @@ class LoaMasterController extends Controller
         }
     }
 
-    // ── Catat klik tombol "Kirim via WhatsApp" (tidak bisa verifikasi WA benar-benar terkirim) ──
-    public static function logWaClick(Submission $submission): void
+    // ── Internal: kirim LOA via WhatsApp (Fonnte) dan catat jumlah kirim sukses ──
+    public static function dispatchLoaWa(Submission $submission): array
     {
-        $submission->increment('loa_wa_sent_count');
+        if (empty($submission->no_hp_penulis)) {
+            return ['success' => false, 'message' => 'No HP/WA penulis belum diisi.'];
+        }
+
+        $fonnte = app(FonnteService::class);
+        if (!$fonnte->isConfigured()) {
+            return ['success' => false, 'message' => 'Fonnte API token belum dikonfigurasi (lihat Setting > SMS Gateway).'];
+        }
+
+        $journal      = $submission->journalSlot?->journalMaster;
+        $jurnalNama   = $journal?->nama_jurnal ?? 'Jurnal';
+        $loaPublicUrl = route('loa.public', ['kode_loa' => $submission->kode_loa ?: $submission->kode_submit]);
+        $authorName   = $submission->nama_penulis ?? 'Penulis';
+        $message = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di *{$jurnalNama}*.\n\nSilakan unduh/cetak LOA melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\n_Tim Redaksi {$jurnalNama}_";
+
+        $result = $fonnte->send(
+            target: $submission->no_hp_penulis,
+            message: $message,
+            options: ['countryCode' => '62']
+        );
+
+        if ($result['success']) {
+            $submission->increment('loa_wa_sent_count');
+        } else {
+            \Log::error('LOA WA failed for submission ' . $submission->id . ': ' . ($result['message'] ?? 'unknown'));
+        }
+
+        return $result;
     }
 }
