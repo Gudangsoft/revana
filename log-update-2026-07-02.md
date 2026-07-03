@@ -70,3 +70,16 @@
 | `routes/web.php` | Tambah route `POST /marketing/loa-master/{submission}/resend` (`marketing.loa-master.resend`) — sebelumnya hanya ada untuk admin (`admin.loa-master.resend`) |
 | `app/Http/Controllers/Marketing/DashboardController.php` | Tambah method `loaMasterResend()`: cek kepemilikan submission oleh marketing yang login, lalu panggil `LoaMasterController::dispatchLoaEmail()` untuk kirim LOA via SMTP server |
 
+## 9. Counter "Berhasil Dikirim" untuk Email & WhatsApp di Modal Kirim LOA
+
+**Tujuan:** User minta counter berapa kali LOA berhasil dikirim via Email/WA per submission, ditampilkan di modal "Kirim LOA ke Author". Email dihitung dari pengiriman sukses lewat sistem (SMTP); WA dihitung dari klik tombol "Kirim via WhatsApp" karena server tidak bisa memverifikasi apakah pesan WA benar-benar terkirim (WA membuka wa.me di sisi klien).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_02_150000_add_loa_send_counters_to_submissions_table.php` | Migration baru: tambah kolom `loa_email_sent_count` dan `loa_wa_sent_count` (unsignedInteger, default 0) ke tabel `submissions` |
+| `app/Models/Submission.php` | Tambah `loa_email_sent_count` dan `loa_wa_sent_count` ke `$fillable` |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `dispatchLoaEmail()`: increment `loa_email_sent_count` setelah kirim sukses; tambah method `logWaClick()` (increment `loa_wa_sent_count`) dan endpoint `waClick()` untuk AJAX |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah method `loaMasterWaClick()`: cek kepemilikan submission, lalu panggil `LoaMasterController::logWaClick()` |
+| `routes/web.php` | Tambah route `POST /admin/loa-master/{submission}/wa-click` dan `POST /marketing/loa-master/{submission}/wa-click` |
+| `resources/views/admin/loa/receipt.blade.php` | Tambah meta `csrf-token` di `<head>`; tampilkan caption "Terkirim Nx" (email) dan "Diklik Nx" (WA) di bawah masing-masing tombol; tambah JS `logWaClick()` yang mengirim fetch POST (keepalive) ke endpoint wa-click saat tombol WhatsApp diklik, tanpa mengganggu navigasi ke wa.me |

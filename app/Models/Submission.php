@@ -108,6 +108,8 @@ class Submission extends Model
         'edit_count',
         'program_type',
         'loa_sent_at',
+        'loa_email_sent_count',
+        'loa_wa_sent_count',
     ];
 
     protected $casts = [

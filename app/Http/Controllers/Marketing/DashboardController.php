@@ -1401,6 +1401,18 @@ class DashboardController extends Controller
         return back()->with('success', 'LOA berhasil dikirim ke ' . $submission->email_penulis);
     }
 
+    // ── AJAX: catat klik tombol "Kirim via WhatsApp" dari modal Kirim LOA ──
+    public function loaMasterWaClick(Submission $submission)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        if ($submission->marketing_id && $submission->marketing_id !== $marketing->id) {
+            abort(403, 'Anda tidak memiliki akses ke submission ini.');
+        }
+
+        \App\Http\Controllers\Admin\LoaMasterController::logWaClick($submission);
+        return response()->json(['success' => true]);
+    }
+
     /**
      * Verify the marketing user has submissions in the given journal.
      */

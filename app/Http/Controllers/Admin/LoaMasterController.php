@@ -154,6 +154,13 @@ class LoaMasterController extends Controller
         return back()->with('success', 'LOA berhasil dikirim ulang ke ' . $submission->email_penulis);
     }
 
+    // ── AJAX: catat klik tombol "Kirim via WhatsApp" dari modal Kirim LOA ──
+    public function waClick(Submission $submission)
+    {
+        self::logWaClick($submission);
+        return response()->json(['success' => true]);
+    }
+
     // ── Hook: dipanggil dari SubmissionController saat step divalidasi ───
     public static function maybeAutoSend(Submission $submission, string $stepJustValidated): void
     {
@@ -193,8 +200,15 @@ class LoaMasterController extends Controller
         try {
             Mail::to($submission->email_penulis)->send(new LoaAcceptedMail($submission));
             $submission->update(['loa_sent_at' => now()]);
+            $submission->increment('loa_email_sent_count');
         } catch (\Exception $e) {
             \Log::error('LOA email failed for submission ' . $submission->id . ': ' . $e->getMessage());
         }
+    }
+
+    // ── Catat klik tombol "Kirim via WhatsApp" (tidak bisa verifikasi WA benar-benar terkirim) ──
+    public static function logWaClick(Submission $submission): void
+    {
+        $submission->increment('loa_wa_sent_count');
     }
 }

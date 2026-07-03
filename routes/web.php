@@ -401,6 +401,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/loa-master/{journalMaster}/edit', [\App\Http\Controllers\Admin\LoaMasterController::class, 'edit'])->name('loa-master.edit');
         Route::put('/loa-master/{journalMaster}', [\App\Http\Controllers\Admin\LoaMasterController::class, 'update'])->name('loa-master.update');
         Route::post('/loa-master/{submission}/resend', [\App\Http\Controllers\Admin\LoaMasterController::class, 'resend'])->name('loa-master.resend');
+        Route::post('/loa-master/{submission}/wa-click', [\App\Http\Controllers\Admin\LoaMasterController::class, 'waClick'])->name('loa-master.wa-click');
         Route::get('/loa-master/{journalMaster}/preview-loa', [\App\Http\Controllers\Admin\LoaMasterController::class, 'previewLoa'])->name('loa-master.preview-loa');
 
         Route::get('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'index'])->name('task-point-settings.index');
@@ -709,6 +710,7 @@ Route::prefix('marketing')->group(function () {
         Route::put('/loa-master/{journalMaster}', [MarketingDashboardController::class, 'loaMasterUpdate'])->name('marketing.loa-master.update');
         Route::get('/loa-master/{journalMaster}/preview', [MarketingDashboardController::class, 'loaMasterPreview'])->name('marketing.loa-master.preview');
         Route::post('/loa-master/{submission}/resend', [MarketingDashboardController::class, 'loaMasterResend'])->name('marketing.loa-master.resend');
+        Route::post('/loa-master/{submission}/wa-click', [MarketingDashboardController::class, 'loaMasterWaClick'])->name('marketing.loa-master.wa-click');
 
         // Birthday celebration
         Route::get('/birthday', [\App\Http\Controllers\Marketing\ProfileController::class, 'birthday'])->name('marketing.birthday');
