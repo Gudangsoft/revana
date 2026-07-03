@@ -83,3 +83,12 @@
 | `app/Http/Controllers/Marketing/DashboardController.php` | Tambah method `loaMasterWaClick()`: cek kepemilikan submission, lalu panggil `LoaMasterController::logWaClick()` |
 | `routes/web.php` | Tambah route `POST /admin/loa-master/{submission}/wa-click` dan `POST /marketing/loa-master/{submission}/wa-click` |
 | `resources/views/admin/loa/receipt.blade.php` | Tambah meta `csrf-token` di `<head>`; tampilkan caption "Terkirim Nx" (email) dan "Diklik Nx" (WA) di bawah masing-masing tombol; tambah JS `logWaClick()` yang mengirim fetch POST (keepalive) ke endpoint wa-click saat tombol WhatsApp diklik, tanpa mengganggu navigasi ke wa.me |
+
+## 10. Form Kontak Author di Modal Kirim LOA Selalu Bisa Diedit (untuk Testing)
+
+**Tujuan:** Sebelumnya form email/No HP di modal "Kirim LOA ke Author" hanya muncul kalau salah satu kosong (`@if(!$emailPenulis || !$submission->no_hp_penulis)`). User perlu bisa mengubah email/No HP kapan saja untuk keperluan testing (misal ganti ke email/nomor sendiri), bukan hanya saat kosong.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Hapus kondisi `@if` yang menyembunyikan form kontak saat email/HP sudah terisi; kedua input sekarang selalu tampil ter-edit dengan value saat ini (bukan hidden input); teks keterangan menyesuaikan ("Lengkapi kontak..." jika kosong, "Ubah kontak author bila perlu..." jika sudah terisi) |

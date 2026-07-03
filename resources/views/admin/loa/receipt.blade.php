@@ -540,8 +540,7 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             </div>
         </div>
 
-        {{-- Form isi email/HP jika kosong --}}
-        @if(!$emailPenulis || !$submission->no_hp_penulis)
+        {{-- Form edit email/HP author (selalu bisa diedit, termasuk untuk keperluan testing) --}}
         <form method="POST" action="{{ $updateContactRoute }}" style="margin-bottom:16px;">
             @csrf
             {{-- field wajib lainnya dikirim hidden agar validasi tidak gagal --}}
@@ -550,31 +549,29 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <input type="hidden" name="affiliation_penulis" value="{{ $submission->affiliation_penulis }}">
             <input type="hidden" name="tanggal_loa"         value="{{ $submission->tanggal_loa?->toDateString() }}">
 
-            <div style="font-size:11px; color:#f0ad4e; margin-bottom:8px;">
+            <div style="font-size:11px; color:{{ (!$emailPenulis || !$submission->no_hp_penulis) ? '#f0ad4e' : '#888' }}; margin-bottom:8px;">
+                @if(!$emailPenulis || !$submission->no_hp_penulis)
                 ⚠ Lengkapi kontak author agar tombol kirim aktif:
+                @else
+                Ubah kontak author bila perlu (mis. untuk testing):
+                @endif
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-                @if(!$emailPenulis)
                 <div style="flex:1; min-width:180px;">
                     <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">Email</label>
                     <input type="email" name="email_penulis" placeholder="email@contoh.com"
+                           value="{{ $emailPenulis }}"
                            style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
                                   border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
                 </div>
-                @else
-                <input type="hidden" name="email_penulis" value="{{ $emailPenulis }}">
-                @endif
 
-                @if(!$submission->no_hp_penulis)
                 <div style="flex:1; min-width:140px;">
                     <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">No HP/WA</label>
                     <input type="text" name="no_hp_penulis" placeholder="08xxxxxxxxxx"
+                           value="{{ $submission->no_hp_penulis }}"
                            style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
                                   border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
                 </div>
-                @else
-                <input type="hidden" name="no_hp_penulis" value="{{ $submission->no_hp_penulis }}">
-                @endif
 
                 <button type="submit"
                         style="padding:7px 16px; background:#2a6496; color:#fff; border:none;
@@ -583,7 +580,6 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
                 </button>
             </div>
         </form>
-        @endif
 
         {{-- Link LOA --}}
         <div style="margin-bottom:16px;">
