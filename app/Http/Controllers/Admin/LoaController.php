@@ -165,6 +165,14 @@ class LoaController extends Controller
             'pdfMode'     => true,
         ]);
 
+        // dompdf punya enable_remote=false (default) sehingga tidak bisa fetch gambar via URL
+        // (http/https), termasuk URL ke domain sendiri. Untuk PDF, pakai path file lokal langsung.
+        $journal = $data['journal'];
+        $data['logoUrl']              = $this->localStoragePath($journal?->logo_path);
+        $data['signUrl']              = $this->localStoragePath($journal?->editor_signature_path);
+        $data['headerImageUrl']       = $this->localStoragePath($journal?->header_image_path);
+        $data['accreditationLogoUrl'] = $this->resolveAccreditationLogoLocalPath($journal);
+
         $verifyUrl = $data['verifyUrl'];
         $qrSvg     = QrCode::format('svg')->size(80)->margin(0)->generate($verifyUrl);
         $data['qrDataUri'] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
@@ -184,6 +192,27 @@ class LoaController extends Controller
         }
         if ($journal->accreditation_logo_path) {
             return Storage::url($journal->accreditation_logo_path);
+        }
+        return null;
+    }
+
+    // ── Path file lokal (untuk PDF) dari path relatif di disk 'public' ───
+    private function localStoragePath(?string $relativePath): ?string
+    {
+        if (!$relativePath) return null;
+        $fullPath = Storage::disk('public')->path($relativePath);
+        return is_file($fullPath) ? $fullPath : null;
+    }
+
+    private function resolveAccreditationLogoLocalPath($journal): ?string
+    {
+        if (!$journal) return null;
+        $acc = Accreditation::where('name', $journal->accreditation)->first();
+        if ($acc && $acc->logo_sinta) {
+            return $this->localStoragePath($acc->logo_sinta);
+        }
+        if ($journal->accreditation_logo_path) {
+            return $this->localStoragePath($journal->accreditation_logo_path);
         }
         return null;
     }

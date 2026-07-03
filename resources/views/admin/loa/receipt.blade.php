@@ -377,6 +377,27 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
 /* Article detail table (ID format) */
 .detail-table { border-collapse: collapse; font-size: 12pt; margin: 4px 0; text-align:justify  }
 .detail-table td { padding: 0px 6px 0px 0; vertical-align: top; line-height: 1.2; }
+
+@if($pdfMode)
+/* ── dompdf tidak mendukung display:flex — pakai display:table/table-cell ── */
+.jrn-header { display: table; width: 100%; }
+.jrn-logo, .jrn-logo-placeholder { display: table-cell; vertical-align: middle; width: 64px; }
+.jrn-title-wrap { display: table-cell; vertical-align: middle; width: auto; }
+.jrn-issn-block { display: table-cell; vertical-align: middle; white-space: nowrap; }
+
+.jrn-subbar { display: table; width: 100%; }
+.jrn-subbar span { display: table-cell; }
+.jrn-subbar span:last-child { text-align: right; }
+
+.sinta-bar { display: table; width: 100%; }
+.sinta-badge { display: inline; }
+.sinta-bar-text { display: table-cell; vertical-align: middle; padding-left: 8px; }
+
+.verified-bar { display: table !important; width: 100%; }
+.verified-text-block { display: table-cell; vertical-align: top; }
+.acred-logo-col { display: table-cell; vertical-align: middle; text-align: right; width: 110px; }
+.vb-row1 { display: block; }
+@endif
 </style>
 </head>
 <body>

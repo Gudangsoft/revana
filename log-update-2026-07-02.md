@@ -127,3 +127,17 @@ Sudah diverifikasi: PDF hasil generate valid (`%PDF-1.7` header), dan QR SVG ter
 | `app/Http/Controllers/Admin/LoaController.php` | Refactor: ekstrak `buildViewData()` dipakai bareng oleh `show()`, `publicView()`, `showMarketing()` (sebelumnya duplikat 3x); tambah `generateLoaPdf()` yang generate QR SVG server-side lalu render view jadi PDF via Dompdf dengan `defaultMediaType=print` |
 | `resources/views/admin/loa/receipt.blade.php` | Tambah dukungan `$pdfMode`/`$qrDataUri`: saat mode PDF, tampilkan `<img>` QR dari data URI SVG alih-alih div kosong yang biasanya diisi JS |
 | `app/Mail/LoaAcceptedMail.php` | Tambah `attachments()`: lampirkan PDF hasil `LoaController::generateLoaPdf()` dengan nama `LOA-{kode}.pdf` |
+
+## 14. Fix PDF LOA yang Terkirim Berantakan (Gambar Hilang, Header/Footer Tidak Sejajar)
+
+**Tujuan:** User melaporkan PDF LOA yang dikirim ke email tampil berantakan dibanding versi asli — header image tampil sebagai teks alt kosong, dan sinta-bar/verified-bar (footer dengan badge SINTA & logo akreditasi) hilang. Ditemukan 2 akar masalah:
+1. **dompdf `enable_remote` default `false`** — semua gambar yang di-fetch lewat URL (`Storage::url()`/`asset()`) gagal dimuat sama sekali di PDF (baik relative maupun absolute URL), karena dompdf tidak diizinkan fetch remote sama sekali secara default. QR code sebelumnya "kebetulan" tetap muncul karena base64 data URI tidak lewat jalur fetch remote.
+2. **dompdf tidak mendukung `display:flex` sama sekali** — header (`.jrn-header`), subbar, sinta-bar, dan verified-bar semua pakai flexbox untuk layout horizontal, sehingga elemen anak jadi bertumpuk/hilang di PDF.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | `generateLoaPdf()`: resolve `logoUrl`/`signUrl`/`headerImageUrl`/`accreditationLogoUrl` ke **path file lokal absolut** (`Storage::disk('public')->path(...)`) alih-alih URL, supaya dompdf baca langsung dari disk tanpa perlu `enable_remote` |
+| `resources/views/admin/loa/receipt.blade.php` | Tambah blok CSS `@if($pdfMode)` yang mengganti `display:flex` jadi `display:table`/`table-cell` untuk `.jrn-header`, `.jrn-subbar`, `.sinta-bar`, `.verified-bar` (dompdf-compatible); ketemu bug tersembunyi: `.verified-bar` punya `display:flex !important` di rule asli sehingga override tanpa `!important` tidak menang — ditambahkan `!important` juga supaya benar-benar jadi `display:table` |
+
+**Cara verifikasi (tanpa kirim email sungguhan):** generate PDF langsung lewat `generateLoaPdf()` untuk 2 skenario — (a) jurnal dengan `header_image_path` custom, (b) jurnal dengan logo+subbar biasa — keduanya sempat gagal dengan error dompdf "Parent table not found for table cell" sebelum fix `!important`, dan gambar terverifikasi ter-embed (`/Subtype /Image` count > 0) setelah fix path lokal.
