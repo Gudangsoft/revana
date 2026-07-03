@@ -42,3 +42,31 @@
 |------|-----------|
 | `resources/views/admin/loa/receipt.blade.php` | Restore tombol "✏ Edit Metadata LOA" dan "📤 Kirim ke Author" di print-bar beserta modal `#modal-meta-loa` (form nama/afiliasi/judul/tanggal LOA) dan `#modal-send-loa` (kirim link LOA via WhatsApp/Email); hapus link "Edit Afiliasi & Data" yang menggantikannya sementara. Perubahan spacing/tabel `to-block` dari commit sebelumnya tetap dipertahankan. |
 
+
+## 6. 🔄 Update: rec
+
+- **Commit:** `9825a1a` — 14:41 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-02.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+## 7. Fix Bug LOA Auto-Send Terkirim Terlalu Dini pada Trigger "PUBLISHED"
+
+**Tujuan:** User minta cek apakah fungsi email otomatis LOA sudah berfungsi benar. Ditemukan bug: untuk jurnal dengan `loa_auto_trigger = published` ("Saat status berubah ke PUBLISHED"), LOA ke penulis terkirim sejak tahap validasi PERTAMA (editor1/author1/dst) — bukan menunggu status submission benar-benar PUBLISHED. Penyebab: kondisi guard di `maybeAutoSend()` selalu lolos untuk trigger `published` terlepas dari step yang divalidasi, sehingga bentrok dengan `maybeAutoSendOnPublish()` yang sudah benar mengecek status PUBLISHED.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `maybeAutoSend()`: hapus bypass `$trigger !== 'published'` dari kondisi guard, sehingga trigger `published` sepenuhnya ditangani oleh `maybeAutoSendOnPublish()` (gated status PUBLISHED), bukan ikut lolos di setiap step validasi |
+
+## 8. Tombol "Kirim via Email" di Modal LOA Kirim Langsung dari Sistem (Bukan mailto:)
+
+**Tujuan:** Tombol "✉ Kirim via Email" sebelumnya memakai link `mailto:` yang membuka aplikasi email admin/marketing sendiri (perlu login ke akun email pribadi). User minta email dikirim langsung dari sistem (SMTP server aplikasi) memakai mailable `LoaAcceptedMail` yang sudah ada, jadi admin/marketing tinggal klik kirim tanpa perlu buka email sendiri.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Ganti `<a href="mailto:...">` jadi `<form>` POST ke route resend LOA (dengan konfirmasi JS sebelum submit); hapus variabel `$emailSubject`/`$emailBody` yang sudah tidak terpakai |
+| `routes/web.php` | Tambah route `POST /marketing/loa-master/{submission}/resend` (`marketing.loa-master.resend`) — sebelumnya hanya ada untuk admin (`admin.loa-master.resend`) |
+| `app/Http/Controllers/Marketing/DashboardController.php` | Tambah method `loaMasterResend()`: cek kepemilikan submission oleh marketing yang login, lalu panggil `LoaMasterController::dispatchLoaEmail()` untuk kirim LOA via SMTP server |
+

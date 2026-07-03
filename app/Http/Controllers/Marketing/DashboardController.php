@@ -1383,6 +1383,25 @@ class DashboardController extends Controller
     }
 
     /**
+     * LOA Master Resend — kirim ulang email LOA ke penulis langsung dari sistem (SMTP server), bukan mailto:.
+     */
+    public function loaMasterResend(Submission $submission)
+    {
+        $marketing = Auth::guard('marketing')->user();
+        if ($submission->marketing_id && $submission->marketing_id !== $marketing->id) {
+            abort(403, 'Anda tidak memiliki akses ke submission ini.');
+        }
+
+        if (!$submission->email_penulis) {
+            return back()->with('error', 'Submission ini tidak memiliki email penulis.');
+        }
+
+        \App\Http\Controllers\Admin\LoaMasterController::dispatchLoaEmail($submission);
+
+        return back()->with('success', 'LOA berhasil dikirim ke ' . $submission->email_penulis);
+    }
+
+    /**
      * Verify the marketing user has submissions in the given journal.
      */
     private function authorizeLoaJournal(JournalMaster $journalMaster): void

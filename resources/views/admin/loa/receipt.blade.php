@@ -507,14 +507,15 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             $loaPublicUrl = route('loa.public', ['kode_loa' => $submission->kode_loa ?: $submission->kode_submit]);
             $authorName   = $submission->nama_penulis ?? 'Yth. Penulis';
             $waMsg = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di *{$jurnalNama}*.\n\nSilakan unduh/cetak LOA melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\n_Tim Redaksi {$jurnalNama}_";
-            $emailSubject = "Letter of Acceptance (LOA) – {$jurnalNama}";
-            $emailBody    = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di {$jurnalNama}.\n\nSilakan akses LOA Anda melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\nSalam hormat,\nTim Redaksi {$jurnalNama}";
             $noHp    = preg_replace('/[^0-9]/', '', $submission->no_hp_penulis ?? '');
             if (str_starts_with($noHp, '0')) $noHp = '62' . substr($noHp, 1);
             $emailPenulis = $submission->email_penulis ?? '';
             $updateContactRoute = (!empty($isMarketingView) && $isMarketingView)
                 ? route('marketing.submissions.loa.update-metadata', $submission)
                 : route('admin.submissions.loa.update-metadata', $submission);
+            $resendLoaRoute = (!empty($isMarketingView) && $isMarketingView)
+                ? route('marketing.loa-master.resend', $submission)
+                : route('admin.loa-master.resend', $submission);
         @endphp
 
         {{-- Info author --}}
@@ -612,12 +613,16 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             @endif
 
             @if($emailPenulis)
-            <a href="mailto:{{ $emailPenulis }}?subject={{ urlencode($emailSubject) }}&body={{ urlencode($emailBody) }}"
-               style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:8px;
-                      background:#0078D4; color:#fff; padding:10px 16px; border-radius:8px;
-                      text-decoration:none; font-size:13px; font-weight:bold;">
-                ✉ Kirim via Email
-            </a>
+            <form method="POST" action="{{ $resendLoaRoute }}" style="flex:1; min-width:140px;"
+                  onsubmit="return confirm('Kirim LOA ke {{ $emailPenulis }} sekarang?');">
+                @csrf
+                <button type="submit"
+                   style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+                          background:#0078D4; color:#fff; padding:10px 16px; border-radius:8px; border:none;
+                          cursor:pointer; font-size:13px; font-weight:bold;">
+                    ✉ Kirim via Email
+                </button>
+            </form>
             @else
             <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
                         background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">

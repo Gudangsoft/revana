@@ -164,7 +164,8 @@ class LoaMasterController extends Controller
         if ($trigger === 'manual') return;
 
         // Cek apakah trigger cocok dengan step yang baru divalidasi
-        if ($trigger !== $stepJustValidated && $trigger !== 'published') return;
+        // Trigger 'published' ditangani khusus oleh maybeAutoSendOnPublish(), bukan di sini
+        if ($trigger !== $stepJustValidated) return;
 
         // Jangan kirim dua kali
         if ($submission->loa_sent_at) return;

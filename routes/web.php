@@ -708,6 +708,7 @@ Route::prefix('marketing')->group(function () {
         Route::get('/loa-master/{journalMaster}/edit', [MarketingDashboardController::class, 'loaMasterEdit'])->name('marketing.loa-master.edit');
         Route::put('/loa-master/{journalMaster}', [MarketingDashboardController::class, 'loaMasterUpdate'])->name('marketing.loa-master.update');
         Route::get('/loa-master/{journalMaster}/preview', [MarketingDashboardController::class, 'loaMasterPreview'])->name('marketing.loa-master.preview');
+        Route::post('/loa-master/{submission}/resend', [MarketingDashboardController::class, 'loaMasterResend'])->name('marketing.loa-master.resend');
 
         // Birthday celebration
         Route::get('/birthday', [\App\Http\Controllers\Marketing\ProfileController::class, 'birthday'])->name('marketing.birthday');
