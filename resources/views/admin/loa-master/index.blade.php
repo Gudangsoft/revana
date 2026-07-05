@@ -155,6 +155,8 @@
                                 <th class="loa-col-jurnal">Jurnal</th>
                                 <th class="loa-col-auto text-center">LOA Otomatis</th>
                                 <th class="loa-col-kelengkapan text-center">Kelengkapan</th>
+                                <th class="loa-col-kirim text-center">Email Terkirim</th>
+                                <th class="loa-col-kirim text-center">WA Terkirim</th>
                                 <th class="loa-col-aksi text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -168,6 +170,8 @@
                                 $complete = count($missing) === 0;
                                 $labels = \App\Http\Controllers\Admin\LoaMasterController::TRIGGER_OPTIONS;
                                 $triggerLabel = $labels[$j->loa_auto_trigger ?? 'manual'] ?? 'Manual';
+                                $emailSent = $sendStats[$j->id]->email_sent ?? 0;
+                                $waSent    = $sendStats[$j->id]->wa_sent ?? 0;
                             @endphp
                             <tr class="loa-row"
                                 data-complete="{{ $complete ? 'complete' : 'incomplete' }}"
@@ -221,6 +225,18 @@
                                 </td>
 
                                 <td class="text-center">
+                                    <span class="loa-status-badge {{ $emailSent > 0 ? 'loa-status-lengkap' : 'loa-status-manual' }}">
+                                        <i class="bi bi-envelope-check-fill"></i> {{ $emailSent }}x
+                                    </span>
+                                </td>
+
+                                <td class="text-center">
+                                    <span class="loa-status-badge {{ $waSent > 0 ? 'loa-status-aktif' : 'loa-status-manual' }}">
+                                        <i class="bi bi-whatsapp"></i> {{ $waSent }}x
+                                    </span>
+                                </td>
+
+                                <td class="text-center">
                                     <div class="btn-group btn-group-sm loa-actions" role="group">
                                         <a href="{{ route('admin.loa-master.edit', $j) }}"
                                            class="btn btn-primary" title="Setting LOA">
@@ -235,7 +251,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">
+                                <td colspan="7" class="text-center py-5 text-muted">
                                     <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
                                     Belum ada jurnal aktif.
                                 </td>
@@ -334,6 +350,7 @@
 .loa-col-no          { width: 36px; }
 .loa-col-auto        { width: 108px; }
 .loa-col-kelengkapan { width: 118px; }
+.loa-col-kirim       { width: 110px; }
 .loa-col-aksi        { width: 130px; }
 
 /* padding baris kompak — paksa override Bootstrap table-sm */

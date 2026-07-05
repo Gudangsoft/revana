@@ -36,7 +36,17 @@ class LoaMasterController extends Controller
             'auto'      => $journals->where('loa_auto_send', true)->count(),
         ];
 
-        return view('admin.loa-master.index', compact('journals', 'stats'));
+        $sendStats = Submission::query()
+            ->join('journal_slots', 'submissions.journal_slot_id', '=', 'journal_slots.id')
+            ->whereIn('journal_slots.journal_master_id', $journals->pluck('id'))
+            ->selectRaw('journal_slots.journal_master_id as journal_master_id,
+                         COALESCE(SUM(submissions.loa_email_sent_count), 0) as email_sent,
+                         COALESCE(SUM(submissions.loa_wa_sent_count), 0) as wa_sent')
+            ->groupBy('journal_slots.journal_master_id')
+            ->get()
+            ->keyBy('journal_master_id');
+
+        return view('admin.loa-master.index', compact('journals', 'stats', 'sendStats'));
     }
 
     // ── Edit: form khusus LOA per jurnal ────────────────────────────────

@@ -141,3 +141,15 @@ Sudah diverifikasi: PDF hasil generate valid (`%PDF-1.7` header), dan QR SVG ter
 | `resources/views/admin/loa/receipt.blade.php` | Tambah blok CSS `@if($pdfMode)` yang mengganti `display:flex` jadi `display:table`/`table-cell` untuk `.jrn-header`, `.jrn-subbar`, `.sinta-bar`, `.verified-bar` (dompdf-compatible); ketemu bug tersembunyi: `.verified-bar` punya `display:flex !important` di rule asli sehingga override tanpa `!important` tidak menang — ditambahkan `!important` juga supaya benar-benar jadi `display:table` |
 
 **Cara verifikasi (tanpa kirim email sungguhan):** generate PDF langsung lewat `generateLoaPdf()` untuk 2 skenario — (a) jurnal dengan `header_image_path` custom, (b) jurnal dengan logo+subbar biasa — keduanya sempat gagal dengan error dompdf "Parent table not found for table cell" sebelum fix `!important`, dan gambar terverifikasi ter-embed (`/Subtype /Image` count > 0) setelah fix path lokal.
+
+## 15. Kolom Laporan "Email Terkirim" & "WA Terkirim" di Halaman Master LOA
+
+**Tujuan:** User minta kolom laporan pengiriman LOA (email & WA) di `/admin/loa-master`, supaya bisa lihat per-jurnal berapa kali LOA sudah terkirim tanpa harus buka satu-satu submission-nya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `index()`: tambah query agregasi `$sendStats` — join `submissions` ke `journal_slots`, `SUM(loa_email_sent_count)` dan `SUM(loa_wa_sent_count)` di-`groupBy` per `journal_master_id`, di-`keyBy` supaya gampang di-lookup per jurnal di view |
+| `resources/views/admin/loa-master/index.blade.php` | Tambah 2 kolom tabel "Email Terkirim" dan "WA Terkirim" (badge angka + ikon, hijau kalau >0) setelah kolom Kelengkapan; sekalian perbaiki `colspan` empty-state yang sebelumnya salah (8, padahal cuma 5 kolom) jadi 7 sesuai jumlah kolom baru |
+
+**Diverifikasi:** query agregasi dites lewat tinker — angka `wa_sent`/`email_sent` per jurnal cocok dengan data yang sudah ada (mis. jurnal yang submission-nya baru saja di-test kirim WA tampil `1x`), dan full page render (dengan auth di-mock) berhasil tanpa error, kedua kolom baru muncul di HTML.
