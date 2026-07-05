@@ -153,3 +153,16 @@ Sudah diverifikasi: PDF hasil generate valid (`%PDF-1.7` header), dan QR SVG ter
 | `resources/views/admin/loa-master/index.blade.php` | Tambah 2 kolom tabel "Email Terkirim" dan "WA Terkirim" (badge angka + ikon, hijau kalau >0) setelah kolom Kelengkapan; sekalian perbaiki `colspan` empty-state yang sebelumnya salah (8, padahal cuma 5 kolom) jadi 7 sesuai jumlah kolom baru |
 
 **Diverifikasi:** query agregasi dites lewat tinker — angka `wa_sent`/`email_sent` per jurnal cocok dengan data yang sudah ada (mis. jurnal yang submission-nya baru saja di-test kirim WA tampil `1x`), dan full page render (dengan auth di-mock) berhasil tanpa error, kedua kolom baru muncul di HTML.
+
+## 16. Fix 500 Error di Laporan Artikel per Jurnal untuk Role Marketing
+
+**Tujuan:** User melaporkan `https://portal.apji.org/marketing/reports/journal-articles` error 500 — `View [marketing.partials.sidebar] not found`. Bug ini tidak terkait pekerjaan LOA sebelumnya, sudah ada dari awal.
+
+**Root cause:** `resources/views/reports/journal-article.blade.php` mencoba `@include('marketing.partials.sidebar')` untuk user marketing, tapi file itu tidak pernah dibuat. Selain itu `marketing.layouts.app` ternyata **tidak punya** `@yield('sidebar')` sama sekali (beda dari `layouts.app`/`pic.layouts.app`) — sidebar marketing sudah dibangun langsung di dalam layout-nya sendiri. Karena Blade tetap mengevaluasi isi `@section(...)...@endsection` di child view meskipun parent layout tidak pernah `@yield` bagian itu, `@include` yang salah tetap ikut dieksekusi dan bikin crash.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/reports/journal-article.blade.php` | Bungkus blok `@section('sidebar')` dengan `@unless(auth()->guard('marketing')->check())` — untuk marketing, section sidebar tidak didefinisikan sama sekali (sesuai perilaku `marketing.layouts.app` yang memang tidak butuh itu), menghindari `@include` ke partial yang tidak ada |
+
+**Diverifikasi:** render `ReportController::journalArticleReport()` dengan guard `marketing` login (tinker) — sebelumnya gagal dengan `ViewException`, setelah fix render sukses (panjang HTML 75869, tanpa error).

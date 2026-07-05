@@ -3,15 +3,15 @@
 @section('title', 'Laporan Artikel per Jurnal')
 @section('page-title', 'Laporan Artikel per Jurnal')
 
+@unless(auth()->guard('marketing')->check())
 @section('sidebar')
     @if(auth()->guard('pic')->check())
         @include('pic.partials.sidebar')
-    @elseif(auth()->guard('marketing')->check())
-        @include('marketing.partials.sidebar')
     @else
         @include('admin.partials.sidebar')
     @endif
 @endsection
+@endunless
 
 @section('content')
 <div class="container-fluid">
