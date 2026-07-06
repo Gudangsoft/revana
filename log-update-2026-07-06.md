@@ -66,3 +66,12 @@ Log perubahan otomatis dari git commits.
 | `app/Providers/AppServiceProvider.php` | Tambah `applyStoredMailSettings()` di `boot()`: override `config('mail...')` dari `Setting` di setiap request kalau `mail_host` sudah pernah disimpan, supaya pengiriman email sungguhan (LOA, notifikasi template) juga ikut pakai setting dari form ini — bukan cuma tombol Test Email saja |
 
 **Diverifikasi:** simulasi penuh lewat tinker — `update()` dengan data SMTP baru → `index()` (simulasi reload halaman) menampilkan kembali semua nilai yang baru disimpan (tidak hilang); `AppServiceProvider::boot()` di-trigger ulang dan `config('mail.mailers.smtp.host')` dkk terbukti ter-override sesuai data di database.
+
+## 6. 🔄 Update: Fix SMTP settings persistence by switching from .env file to database storage
+
+- **Commit:** `6707afa` — 11:51 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/EmailSettingController.php`
+- `app/Providers/AppServiceProvider.php`
+- `log-update-2026-07-06.md`
+
