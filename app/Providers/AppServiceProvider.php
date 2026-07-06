@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
         // Use Bootstrap pagination style (numbers instead of arrows)
         Paginator::useBootstrapFive();
 
+        $this->applyStoredMailSettings();
+
         // Custom Blade directives for feature toggles
         // Usage: @feature('fasttrack') ... @endfeature
         Blade::if('feature', function (string $feature) {
@@ -76,5 +78,31 @@ class AppServiceProvider extends ServiceProvider
             $view->with('appSettings', $settings);
             $view->with('settings', $settings);
         });
+    }
+
+    /**
+     * Override konfigurasi mail runtime dari Setting (DB) — dikelola lewat
+     * admin/email-settings, lebih andal daripada bergantung ke .env di server.
+     */
+    private function applyStoredMailSettings(): void
+    {
+        try {
+            $host = Setting::get('mail_host');
+            if (empty($host)) return; // belum pernah disimpan lewat form — biarkan pakai .env/config default
+
+            config([
+                'mail.default'                 => 'smtp',
+                'mail.mailers.smtp.transport'  => 'smtp',
+                'mail.mailers.smtp.host'       => $host,
+                'mail.mailers.smtp.port'       => (int) Setting::get('mail_port', 465),
+                'mail.mailers.smtp.username'   => Setting::get('mail_username'),
+                'mail.mailers.smtp.password'   => Setting::get('mail_password'),
+                'mail.mailers.smtp.encryption' => Setting::get('mail_encryption', 'ssl'),
+                'mail.from.address'            => Setting::get('mail_from_address') ?: Setting::get('mail_username'),
+                'mail.from.name'               => Setting::get('mail_from_name') ?: config('app.name'),
+            ]);
+        } catch (\Throwable) {
+            // Tabel settings belum ada (mis. sebelum migrate) — abaikan, pakai config bawaan.
+        }
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 
 class EmailSettingController extends Controller
@@ -58,16 +58,17 @@ class EmailSettingController extends Controller
 
     public function index()
     {
+        // .env cuma dipakai sebagai fallback (mis. sebelum pernah disimpan lewat form ini)
         $env = $this->parseEnvFile();
 
         $settings = [
-            'mail_host'         => $env['MAIL_HOST']         ?? '',
-            'mail_port'         => $env['MAIL_PORT']         ?? '465',
-            'mail_username'     => $env['MAIL_USERNAME']     ?? '',
-            'mail_password'     => $env['MAIL_PASSWORD']     ?? '',
-            'mail_encryption'   => $env['MAIL_ENCRYPTION']   ?? 'ssl',
-            'mail_from_address' => $env['MAIL_FROM_ADDRESS'] ?? '',
-            'mail_from_name'    => $env['MAIL_FROM_NAME']    ?? '',
+            'mail_host'         => Setting::get('mail_host',         $env['MAIL_HOST']         ?? ''),
+            'mail_port'         => Setting::get('mail_port',         $env['MAIL_PORT']         ?? '465'),
+            'mail_username'     => Setting::get('mail_username',     $env['MAIL_USERNAME']     ?? ''),
+            'mail_password'     => Setting::get('mail_password',     $env['MAIL_PASSWORD']     ?? ''),
+            'mail_encryption'   => Setting::get('mail_encryption',   $env['MAIL_ENCRYPTION']   ?? 'ssl'),
+            'mail_from_address' => Setting::get('mail_from_address', $env['MAIL_FROM_ADDRESS'] ?? ''),
+            'mail_from_name'    => Setting::get('mail_from_name',    $env['MAIL_FROM_NAME']    ?? ''),
         ];
 
         return view('admin.email-settings.index', compact('settings'));
@@ -85,66 +86,67 @@ class EmailSettingController extends Controller
             'mail_from_name'    => 'nullable|string|max:255',
         ]);
 
-        $envPath = base_path('.env');
-
-        // Pre-flight: cek keberadaan dan permission file
-        if (!file_exists($envPath)) {
-            return back()->withInput()->with('error', 'File .env tidak ditemukan di: ' . $envPath);
-        }
-        if (!is_writable($envPath)) {
-            return back()->withInput()->with('error',
-                'File .env tidak dapat ditulis (permission denied). '
-                . 'Jalankan: chmod 664 .env && chown www-data:www-data .env di server.'
-            );
-        }
-
-        $envContent = file_get_contents($envPath);
-        if ($envContent === false) {
-            return back()->withInput()->with('error', 'Gagal membaca file .env.');
-        }
-
         // Pertahankan password lama jika field dikosongkan
         if (empty($validated['mail_password'])) {
-            $existing = $this->parseEnvFile();
-            $validated['mail_password'] = $existing['MAIL_PASSWORD'] ?? '';
+            $validated['mail_password'] = Setting::get('mail_password', '');
         }
 
-        $map = [
-            'MAIL_MAILER'       => 'smtp',
-            'MAIL_HOST'         => $validated['mail_host'],
-            'MAIL_PORT'         => (string) $validated['mail_port'],
-            'MAIL_USERNAME'     => $validated['mail_username'],
-            'MAIL_PASSWORD'     => $validated['mail_password'],
-            'MAIL_ENCRYPTION'   => $validated['mail_encryption'],
-            'MAIL_FROM_ADDRESS' => $validated['mail_from_address'] ?? '',
-            'MAIL_FROM_NAME'    => $validated['mail_from_name']    ?? '',
-        ];
+        // ── Simpan ke database (sumber utama — tidak tergantung permission file server) ──
+        Setting::set('mail_host',         $validated['mail_host']);
+        Setting::set('mail_port',         (string) $validated['mail_port']);
+        Setting::set('mail_username',     $validated['mail_username']);
+        Setting::set('mail_password',     $validated['mail_password']);
+        Setting::set('mail_encryption',   $validated['mail_encryption']);
+        Setting::set('mail_from_address', $validated['mail_from_address'] ?? '');
+        Setting::set('mail_from_name',    $validated['mail_from_name']    ?? '');
 
-        foreach ($map as $key => $value) {
-            $envContent = $this->setEnvLine($envContent, $key, $value);
-        }
-
-        $written = file_put_contents($envPath, $envContent, LOCK_EX);
-        if ($written === false) {
+        // Verifikasi tersimpan di DB — ini yang menentukan sukses/gagalnya penyimpanan
+        if (Setting::get('mail_host') !== $validated['mail_host']) {
             return back()->withInput()->with('error',
-                'Gagal menyimpan ke file .env. Periksa permission write di server (chmod 664 .env).'
+                'Gagal menyimpan pengaturan email ke database. Coba lagi atau hubungi administrator server.'
             );
         }
 
-        // Verifikasi: baca ulang dan pastikan nilai tersimpan
-        $verify = $this->parseEnvFile();
-        if (($verify['MAIL_HOST'] ?? '') !== $validated['mail_host']) {
-            return back()->withInput()->with('error',
-                'Data tertulis (' . $written . ' bytes) tapi verifikasi gagal — '
-                . 'kemungkinan ada proses lain yang menimpa file .env.'
-            );
-        }
+        // Best-effort: tulis juga ke .env supaya tetap sinkron kalau ada proses lain yang baca .env langsung.
+        // Kalau gagal (permission dsb), tidak masalah — DB tetap jadi sumber utama.
+        $this->tryWriteEnv($validated);
 
         try { \Artisan::call('config:clear'); } catch (\Exception $e) {}
         try { \Artisan::call('cache:clear');  } catch (\Exception $e) {}
 
         return redirect()->route('admin.email-settings.index')
-            ->with('success', 'Pengaturan email berhasil diperbarui! (' . $written . ' bytes ditulis)');
+            ->with('success', 'Pengaturan email berhasil disimpan.');
+    }
+
+    /** Best-effort sync ke .env — kegagalan di sini tidak menggagalkan penyimpanan (DB sudah jadi sumber utama) */
+    private function tryWriteEnv(array $validated): void
+    {
+        try {
+            $envPath = base_path('.env');
+            if (!file_exists($envPath) || !is_writable($envPath)) return;
+
+            $envContent = file_get_contents($envPath);
+            if ($envContent === false) return;
+
+            $map = [
+                'MAIL_MAILER'       => 'smtp',
+                'MAIL_HOST'         => $validated['mail_host'],
+                'MAIL_PORT'         => (string) $validated['mail_port'],
+                'MAIL_USERNAME'     => $validated['mail_username'],
+                'MAIL_PASSWORD'     => $validated['mail_password'],
+                'MAIL_ENCRYPTION'   => $validated['mail_encryption'],
+                'MAIL_FROM_ADDRESS' => $validated['mail_from_address'] ?? '',
+                'MAIL_FROM_NAME'    => $validated['mail_from_name']    ?? '',
+            ];
+
+            foreach ($map as $key => $value) {
+                $envContent = $this->setEnvLine($envContent, $key, $value);
+            }
+
+            @file_put_contents($envPath, $envContent, LOCK_EX);
+        } catch (\Throwable $e) {
+            \Log::warning('Best-effort .env sync for mail settings failed: ' . $e->getMessage());
+        }
     }
 
     public function testEmail(Request $request)
@@ -154,22 +156,20 @@ class EmailSettingController extends Controller
         ]);
 
         try {
-            // Read FRESH values directly from .env — bypasses runtime config cache
-            $env = $this->parseEnvFile();
-
-            $host       = $env['MAIL_HOST']         ?? '';
-            $port       = (int) ($env['MAIL_PORT']  ?? 465);
-            $username   = $env['MAIL_USERNAME']      ?? '';
-            $password   = $env['MAIL_PASSWORD']      ?? '';
-            $encryption = $env['MAIL_ENCRYPTION']    ?? 'ssl';
-            $fromAddr   = $env['MAIL_FROM_ADDRESS']  ?? $username;
-            $fromName   = $env['MAIL_FROM_NAME']     ?? 'SIPERA System';
+            // Baca fresh dari database (sumber utama) — bypass cache runtime
+            $host       = Setting::get('mail_host', '');
+            $port       = (int) Setting::get('mail_port', 465);
+            $username   = Setting::get('mail_username', '');
+            $password   = Setting::get('mail_password', '');
+            $encryption = Setting::get('mail_encryption', 'ssl');
+            $fromAddr   = Setting::get('mail_from_address') ?: $username;
+            $fromName   = Setting::get('mail_from_name') ?: 'SIPERA System';
 
             if (empty($host) || empty($username) || empty($password)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Konfigurasi SMTP belum lengkap. Pastikan Host, Username, dan Password sudah diisi dan disimpan.',
-                    'error'   => 'MAIL_HOST, MAIL_USERNAME, atau MAIL_PASSWORD kosong di .env',
+                    'error'   => 'mail_host, mail_username, atau mail_password kosong — simpan pengaturan terlebih dahulu.',
                 ], 422);
             }
 

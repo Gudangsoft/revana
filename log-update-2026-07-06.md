@@ -45,3 +45,24 @@ Log perubahan otomatis dari git commits.
 | `resources/views/admin/loa/receipt.blade.php` | Tulis ulang blok "FORMAT ENGLISH" di halaman 1 supaya strukturnya identik dengan "FORMAT INDONESIA": tabel No/Subject ("Manuscript Accepted"), tabel "To,/at" (pengganti paragraf salutation lama), tabel detail "Manuscript title/Manuscript code", blok "ACCEPTED" besar di tengah, lalu `jrn-info-block` dan 2 paragraf penutup — hanya beda teks (Inggris vs Indonesia), layout & class CSS sama persis |
 
 **Diverifikasi:** render `admin.loa.receipt` dengan `loa_language=en` lewat tinker — berhasil tanpa error, mengandung "ACCEPTED", "Manuscript title", dan baris "Subject" sesuai struktur baru; generate PDF untuk submission yang sama di kedua bahasa (`en` dan `id`) juga berhasil tanpa error dompdf.
+
+## 4. 🔄 Update: Align English LOA format structure with Indonesian version for consistency
+
+- **Commit:** `653460b` — 11:40 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-06.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+## 5. Fix Pengaturan SMTP di /admin/email-settings Hilang Setelah Disimpan
+
+**Tujuan:** User melaporkan isian form Konfigurasi SMTP (Host, Username, Password, dll) langsung hilang/balik ke placeholder setelah disimpan, padahal seharusnya tetap tampil supaya tidak perlu buka `.env` manual tiap mau lihat/ubah setting yang aktif.
+
+**Root cause:** Fitur ini sebelumnya 100% bergantung pada tulis-langsung ke file `.env` di server (`file_put_contents`), yang rawan gagal-diam di banyak setup hosting (permission, ownership, proses lain yang menimpa `.env`, dsb) — walau kode sudah antisipasi beberapa kasus itu, penulisan file tetap jauh lebih rapuh dibanding penyimpanan ke database yang sudah dipakai reliable di seluruh bagian aplikasi lain (lewat model `Setting`, sama seperti yang dipakai untuk token Fonnte).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/EmailSettingController.php` | `index()`/`update()`/`testEmail()`: ganti sumber utama data dari parsing `.env` jadi `Setting::get()/set()` (tabel `settings`, key `mail_host`, `mail_port`, dst). `.env` sekarang cuma fallback awal (kalau belum pernah disimpan lewat form ini) dan tetap ditulis best-effort untuk sinkronisasi, tapi kegagalannya tidak lagi menggagalkan penyimpanan |
+| `app/Providers/AppServiceProvider.php` | Tambah `applyStoredMailSettings()` di `boot()`: override `config('mail...')` dari `Setting` di setiap request kalau `mail_host` sudah pernah disimpan, supaya pengiriman email sungguhan (LOA, notifikasi template) juga ikut pakai setting dari form ini — bukan cuma tombol Test Email saja |
+
+**Diverifikasi:** simulasi penuh lewat tinker — `update()` dengan data SMTP baru → `index()` (simulasi reload halaman) menampilkan kembali semua nilai yang baru disimpan (tidak hilang); `AppServiceProvider::boot()` di-trigger ulang dan `config('mail.mailers.smtp.host')` dkk terbukti ter-override sesuai data di database.
