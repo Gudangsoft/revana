@@ -97,7 +97,7 @@
                                            class="form-control font-monospace @error('fonnte_api_token') is-invalid @enderror"
                                            id="fonnte_api_token"
                                            name="fonnte_api_token"
-                                           value="{{ old('fonnte_api_token', $settings['fonnte_api_token'] ?? '') }}"
+                                           value="{{ old('fonnte_api_token', $smsSettings['fonnte_api_token'] ?? '') }}"
                                            placeholder="Masukkan API Token dari Fonnte"
                                            autocomplete="off">
                                     <button class="btn btn-outline-danger" type="button" id="clearToken" title="Hapus token">
@@ -118,10 +118,10 @@
                                        class="form-control @error('fonnte_device_id') is-invalid @enderror"
                                        id="fonnte_device_id"
                                        name="fonnte_device_id"
-                                       value="{{ old('fonnte_device_id', $settings['fonnte_device_id'] ?? '') }}"
+                                       value="{{ old('fonnte_device_id', $smsSettings['fonnte_device_id'] ?? '') }}"
                                        placeholder="Opsional: ID Device di Fonnte">
-                                @if(!empty($settings['fonnte_device_id']))
-                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan: <strong>{{ $settings['fonnte_device_id'] }}</strong></small>
+                                @if(!empty($smsSettings['fonnte_device_id']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan: <strong>{{ $smsSettings['fonnte_device_id'] }}</strong></small>
                                 @else
                                     <small class="text-muted">Opsional, untuk identifikasi device</small>
                                 @endif
@@ -136,7 +136,7 @@
                                        class="form-control @error('sms_default_country_code') is-invalid @enderror"
                                        id="sms_default_country_code"
                                        name="sms_default_country_code"
-                                       value="{{ old('sms_default_country_code', $settings['sms_default_country_code'] ?? '62') }}"
+                                       value="{{ old('sms_default_country_code', $smsSettings['sms_default_country_code'] ?? '62') }}"
                                        placeholder="62">
                                 <small class="form-text text-muted">Kode negara Indonesia: 62</small>
                                 @error('sms_default_country_code')
@@ -168,7 +168,7 @@
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input toggle-setting" type="checkbox" role="switch"
                                            id="sms_gateway_enabled" name="sms_gateway_enabled" value="1"
-                                           {{ (old('sms_gateway_enabled', $settings['sms_gateway_enabled'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                           {{ (old('sms_gateway_enabled', $smsSettings['sms_gateway_enabled'] ?? '0')) == '1' ? 'checked' : '' }}>
                                     <label class="form-check-label fw-bold" for="sms_gateway_enabled">
                                         <i class="bi bi-power text-success me-1"></i>Aktifkan SMS Gateway
                                     </label>
@@ -185,7 +185,7 @@
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input toggle-setting" type="checkbox" role="switch"
                                            id="sms_notification_submit" name="sms_notification_submit" value="1"
-                                           {{ (old('sms_notification_submit', $settings['sms_notification_submit'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                           {{ (old('sms_notification_submit', $smsSettings['sms_notification_submit'] ?? '0')) == '1' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="sms_notification_submit">
                                         <i class="bi bi-file-earmark-plus text-info me-1"></i>Notifikasi Submit Artikel
                                     </label>
@@ -200,7 +200,7 @@
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input toggle-setting" type="checkbox" role="switch"
                                            id="sms_notification_status_change" name="sms_notification_status_change" value="1"
-                                           {{ (old('sms_notification_status_change', $settings['sms_notification_status_change'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                           {{ (old('sms_notification_status_change', $smsSettings['sms_notification_status_change'] ?? '0')) == '1' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="sms_notification_status_change">
                                         <i class="bi bi-arrow-repeat text-warning me-1"></i>Notifikasi Perubahan Status
                                     </label>
@@ -215,7 +215,7 @@
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input toggle-setting" type="checkbox" role="switch"
                                            id="sms_notification_published" name="sms_notification_published" value="1"
-                                           {{ (old('sms_notification_published', $settings['sms_notification_published'] ?? '0')) == '1' ? 'checked' : '' }}>
+                                           {{ (old('sms_notification_published', $smsSettings['sms_notification_published'] ?? '0')) == '1' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="sms_notification_published">
                                         <i class="bi bi-check-circle text-success me-1"></i>Notifikasi Artikel Terbit
                                     </label>
@@ -268,10 +268,10 @@
                                       id="sms_template_submit"
                                       name="sms_template_submit"
                                       rows="5"
-                                      placeholder="Template pesan saat artikel disubmit">{{ old('sms_template_submit', $settings['sms_template_submit'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat artikel disubmit">{{ old('sms_template_submit', $smsSettings['sms_template_submit'] ?? '') }}</textarea>
                             <div class="d-flex justify-content-between mt-1">
-                                @if(!empty($settings['sms_template_submit']))
-                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['sms_template_submit']) }} karakter</small>
+                                @if(!empty($smsSettings['sms_template_submit']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($smsSettings['sms_template_submit']) }} karakter</small>
                                 @else
                                     <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
                                 @endif
@@ -300,10 +300,10 @@
                                       id="sms_template_status_change"
                                       name="sms_template_status_change"
                                       rows="5"
-                                      placeholder="Template pesan saat status berubah">{{ old('sms_template_status_change', $settings['sms_template_status_change'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat status berubah">{{ old('sms_template_status_change', $smsSettings['sms_template_status_change'] ?? '') }}</textarea>
                             <div class="d-flex justify-content-between mt-1">
-                                @if(!empty($settings['sms_template_status_change']))
-                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['sms_template_status_change']) }} karakter</small>
+                                @if(!empty($smsSettings['sms_template_status_change']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($smsSettings['sms_template_status_change']) }} karakter</small>
                                 @else
                                     <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
                                 @endif
@@ -332,10 +332,10 @@
                                       id="sms_template_published"
                                       name="sms_template_published"
                                       rows="5"
-                                      placeholder="Template pesan saat artikel terbit">{{ old('sms_template_published', $settings['sms_template_published'] ?? '') }}</textarea>
+                                      placeholder="Template pesan saat artikel terbit">{{ old('sms_template_published', $smsSettings['sms_template_published'] ?? '') }}</textarea>
                             <div class="d-flex justify-content-between mt-1">
-                                @if(!empty($settings['sms_template_published']))
-                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['sms_template_published']) }} karakter</small>
+                                @if(!empty($smsSettings['sms_template_published']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($smsSettings['sms_template_published']) }} karakter</small>
                                 @else
                                     <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
                                 @endif
@@ -373,10 +373,10 @@
                                       id="wa_template_credential_new"
                                       name="wa_template_credential_new"
                                       rows="10"
-                                      placeholder="Template pesan WA saat submission baru dibuat">{{ old('wa_template_credential_new', $settings['wa_template_credential_new'] ?? '') }}</textarea>
+                                      placeholder="Template pesan WA saat submission baru dibuat">{{ old('wa_template_credential_new', $smsSettings['wa_template_credential_new'] ?? '') }}</textarea>
                             <div class="d-flex justify-content-between mt-1">
-                                @if(!empty($settings['wa_template_credential_new']))
-                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['wa_template_credential_new']) }} karakter</small>
+                                @if(!empty($smsSettings['wa_template_credential_new']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($smsSettings['wa_template_credential_new']) }} karakter</small>
                                 @else
                                     <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
                                 @endif
@@ -405,10 +405,10 @@
                                       id="wa_template_credential_update"
                                       name="wa_template_credential_update"
                                       rows="10"
-                                      placeholder="Template pesan WA saat kredensial diperbarui">{{ old('wa_template_credential_update', $settings['wa_template_credential_update'] ?? '') }}</textarea>
+                                      placeholder="Template pesan WA saat kredensial diperbarui">{{ old('wa_template_credential_update', $smsSettings['wa_template_credential_update'] ?? '') }}</textarea>
                             <div class="d-flex justify-content-between mt-1">
-                                @if(!empty($settings['wa_template_credential_update']))
-                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($settings['wa_template_credential_update']) }} karakter</small>
+                                @if(!empty($smsSettings['wa_template_credential_update']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Tersimpan · {{ mb_strlen($smsSettings['wa_template_credential_update']) }} karakter</small>
                                 @else
                                     <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Kosong — template belum diisi</small>
                                 @endif

@@ -99,3 +99,55 @@ Log perubahan otomatis dari git commits.
 - **File berubah:** 1 file
 - `log-update-2026-07-06.md`
 
+
+## 10. 🔄 Update: a
+
+- **Commit:** `85c5dc0` — 12:08 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-07-06.md`
+
+## 11. Root Cause Sebenarnya Ditemukan: Variabel `$settings` Bentrok dengan Global View Composer
+
+**Tujuan:** Setelah fix #5 (pindah ke database) ternyata TETAP tidak muncul walau sudah dipastikan deploy benar (branch `master`) dan PHP-FPM sudah di-restart. Ini memaksa investigasi lebih dalam sampai ketemu akar masalah sesungguhnya — sama sekali bukan soal `.env`, cache, atau deploy.
+
+**Root cause sebenarnya:** `AppServiceProvider::boot()` men-share variabel bernama **`settings`** ke **SEMUA view** lewat `View::composer('*', function ($view) { ... $view->with('settings', $settings); })` — isinya branding aplikasi (`app_name`, `logo`, dst). Composer ini jalan saat view di-render, **setelah** controller mengisi data lewat `compact('settings')`, sehingga composer diam-diam **menimpa** data SMTP yang sudah benar dengan array branding yang sama sekali beda struktur — hasilnya field `$settings['mail_host']` di Blade selalu `null`/kosong meski data di database/session/cache sudah benar. Ini kenapa fix sebelumnya (ganti .env ke DB) tidak berpengaruh sama sekali: datanya sudah benar sampai baris terakhir sebelum render, lalu ditimpa di detik terakhir.
+
+Dibuktikan langsung lewat tinker: render `admin.email-settings.index` dengan `compact('settings')` berisi nilai uji `PROOF-VALUE-12345` → nilai itu **hilang** dari HTML (terbukti timpa-menimpa). Setelah variabel diganti nama, nilai yang sama muncul normal.
+
+**Temuan tambahan:** `SmsGatewayController` (yang tadinya jadi acuan "sudah bisa muncul") ternyata **memakai variabel nama sama** (`compact('settings')`) dan **terbukti kena bug yang sama** saat dites dengan cara yang sama — kemungkinan belum ketahuan karena field-nya jarang dicek ulang setelah simpan, bukan berarti benar-benar bebas bug.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/EmailSettingController.php` | `index()`/`update()`: ganti nama variabel `$settings` → `$emailSettings` (dan `compact('settings')` → `compact('emailSettings')`) supaya tidak lagi ditimpa oleh view composer global |
+| `resources/views/admin/email-settings/index.blade.php` | Semua referensi `$settings['...']` diganti jadi `$emailSettings['...']` |
+
+**Diverifikasi:** render langsung dengan data uji lewat tinker — sebelum fix nilai hilang ("CLOBBERED"), setelah fix nilai tampil benar ("FIXED — value now shows correctly"); dites juga lewat pemanggilan `EmailSettingController::index()` yang sesungguhnya — `value="mail.apji.org"` muncul benar di HTML akhir.
+
+**Catatan:** `SmsGatewayController`/`admin.sms-gateway.index` kemungkinan besar punya bug identik (variabel `$settings` sama) — belum diperbaiki karena di luar permintaan awal, menunggu konfirmasi user.
+
+## 12. Fix Bug Sama di SMS Gateway (Fonnte) — Variabel `$settings` Bentrok
+
+**Tujuan:** User konfirmasi untuk sekalian perbaiki bug identik (temuan #11) di halaman SMS Gateway.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SmsGatewayController.php` | `index()`/`update()`: ganti nama variabel `$settings` → `$smsSettings` (dan `compact('settings')` → `compact('smsSettings')`) |
+| `resources/views/admin/sms-gateway/index.blade.php` | Semua referensi `$settings['...']` (24 tempat) diganti jadi `$smsSettings['...']` |
+
+**Diverifikasi:** sama seperti Email Settings — render dengan data uji `PROOF-SMS-99999` lewat tinker sebelum fix hilang dari HTML, setelah fix muncul benar; dites juga lewat `SmsGatewayController::index()` sesungguhnya dengan token asli tersimpan di DB — `value="REAL-TEST-TOKEN"` muncul benar di HTML akhir.
+
+## 13. Fix Bug Sama di Halaman Pengaturan Umum (SettingController) — Variabel `$settings` Bentrok
+
+**Tujuan:** Ditemukan instance ketiga bug yang sama saat menyisir kode: `SettingController` (halaman "Pengaturan Umum" — nama app, URL, tagline, alamat, kontak, logo, favicon, bahasa) juga pakai `compact('settings')`, sehingga field-fieldnya juga ditimpa oleh view composer global. User konfirmasi untuk sekalian diperbaiki.
+
+Catatan tambahan: controller ini juga memvalidasi & menyimpan `mail_from_address`/`mail_from_name` ke `.env` lewat regex, tapi field itu **tidak ada sama sekali di view**-nya (tidak pernah dibaca balik ke form) — kode vestigial dari iterasi form sebelumnya. Dibiarkan apa adanya karena tidak berhubungan dengan bug yang sedang diperbaiki dan tidak terlihat/dipakai user.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SettingController.php` | `index()`: ganti nama variabel `$settings` → `$generalSettings` (dan `compact('settings')` → `compact('generalSettings')`) — juga menghindari nama `appSettings` yang sama-sama dipakai composer global |
+| `resources/views/admin/settings/index.blade.php` | Semua referensi `$settings['...']` diganti jadi `$generalSettings['...']` |
+
+**Diverifikasi:** render `SettingController::index()` sesungguhnya lewat tinker — field `app_url` sebelumnya akan kosong (clobbered), setelah fix `value="http://127.0.0.1:8000"` (nilai APP_URL asli) muncul benar di HTML.

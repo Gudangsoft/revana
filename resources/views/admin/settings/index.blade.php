@@ -41,7 +41,7 @@
                         <div class="mb-3">
                             <label class="form-label">Nama Aplikasi <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('app_name') is-invalid @enderror" 
-                                   name="app_name" value="{{ old('app_name', $settings['app_name'] ?? 'SIPERA') }}" required>
+                                   name="app_name" value="{{ old('app_name', $generalSettings['app_name'] ?? 'SIPERA') }}" required>
                             @error('app_name')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -51,7 +51,7 @@
                         <div class="mb-3">
                             <label class="form-label">Kepanjangan Nama Aplikasi</label>
                             <input type="text" class="form-control @error('full_name') is-invalid @enderror" 
-                                   name="full_name" value="{{ old('full_name', $settings['full_name'] ?? '') }}" 
+                                   name="full_name" value="{{ old('full_name', $generalSettings['full_name'] ?? '') }}" 
                                    placeholder="Sistem Informasi Peer Review Artikel">
                             @error('full_name')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -62,7 +62,7 @@
                         <div class="mb-3">
                             <label class="form-label">Tagline</label>
                             <input type="text" class="form-control @error('tagline') is-invalid @enderror" 
-                                   name="tagline" value="{{ old('tagline', $settings['tagline'] ?? '') }}" 
+                                   name="tagline" value="{{ old('tagline', $generalSettings['tagline'] ?? '') }}" 
                                    placeholder="Sistem Manajemen Review Jurnal">
                             @error('tagline')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -75,10 +75,10 @@
                                 <i class="bi bi-translate"></i> Bahasa Form Registrasi & Dashboard Peserta
                             </label>
                             <select class="form-select @error('app_language') is-invalid @enderror" name="app_language">
-                                <option value="id" {{ old('app_language', $settings['app_language'] ?? 'id') === 'id' ? 'selected' : '' }}>
+                                <option value="id" {{ old('app_language', $generalSettings['app_language'] ?? 'id') === 'id' ? 'selected' : '' }}>
                                     🇮🇩 Indonesia (Bahasa Indonesia)
                                 </option>
-                                <option value="en" {{ old('app_language', $settings['app_language'] ?? 'id') === 'en' ? 'selected' : '' }}>
+                                <option value="en" {{ old('app_language', $generalSettings['app_language'] ?? 'id') === 'en' ? 'selected' : '' }}>
                                     🇬🇧 English (Bahasa Inggris)
                                 </option>
                             </select>
@@ -93,7 +93,7 @@
                         <div class="mb-3">
                             <label class="form-label">URL Aplikasi <span class="text-danger">*</span></label>
                             <input type="url" class="form-control @error('app_url') is-invalid @enderror" 
-                                   name="app_url" value="{{ old('app_url', $settings['app_url'] ?? '') }}" 
+                                   name="app_url" value="{{ old('app_url', $generalSettings['app_url'] ?? '') }}" 
                                    placeholder="https://example.com" required>
                             @error('app_url')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -109,9 +109,9 @@
                         
                         <div class="mb-3">
                             <label class="form-label">Logo Aplikasi</label>
-                            @if($settings['logo'])
+                            @if($generalSettings['logo'])
                                 <div class="mb-2">
-                                    <img src="{{ asset('storage/' . $settings['logo']) }}" alt="Logo" style="max-height: 100px;" class="img-thumbnail">
+                                    <img src="{{ asset('storage/' . $generalSettings['logo']) }}" alt="Logo" style="max-height: 100px;" class="img-thumbnail">
                                 </div>
                             @endif
                             <input type="file" class="form-control @error('logo') is-invalid @enderror" 
@@ -124,9 +124,9 @@
 
                         <div class="mb-3">
                             <label class="form-label">Favicon</label>
-                            @if($settings['favicon'])
+                            @if($generalSettings['favicon'])
                                 <div class="mb-2">
-                                    <img src="{{ asset('storage/' . $settings['favicon']) }}" alt="Favicon" style="max-height: 32px;" class="img-thumbnail">
+                                    <img src="{{ asset('storage/' . $generalSettings['favicon']) }}" alt="Favicon" style="max-height: 32px;" class="img-thumbnail">
                                 </div>
                             @endif
                             <input type="file" class="form-control @error('favicon') is-invalid @enderror" 
@@ -147,7 +147,7 @@
                             <label class="form-label">Alamat</label>
                             <textarea class="form-control @error('address') is-invalid @enderror" 
                                       name="address" rows="3" 
-                                      placeholder="Jl. Contoh No. 123, Kota">{{ old('address', $settings['address'] ?? '') }}</textarea>
+                                      placeholder="Jl. Contoh No. 123, Kota">{{ old('address', $generalSettings['address'] ?? '') }}</textarea>
                             @error('address')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -158,7 +158,7 @@
                             <label class="form-label">Kontak</label>
                             <textarea class="form-control @error('contact') is-invalid @enderror" 
                                       name="contact" rows="3" 
-                                      placeholder="Telepon: +62 xxx&#10;Email: info@example.com&#10;WhatsApp: +62 xxx">{{ old('contact', $settings['contact'] ?? '') }}</textarea>
+                                      placeholder="Telepon: +62 xxx&#10;Email: info@example.com&#10;WhatsApp: +62 xxx">{{ old('contact', $generalSettings['contact'] ?? '') }}</textarea>
                             @error('contact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

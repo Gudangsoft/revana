@@ -13,8 +13,10 @@ class SettingController extends Controller
 {
     public function index()
     {
-        // Baca file .env
-        $settings = [
+        // NB: nama variabel sengaja BUKAN "settings" (atau "appSettings") — AppServiceProvider
+        // men-share kedua nama itu ke SEMUA view lewat View::composer('*', ...), yang akan
+        // menimpa data ini kalau namanya bentrok.
+        $generalSettings = [
             'app_name' => Setting::get('app_name', env('APP_NAME', 'REVANA')),
             'full_name' => Setting::get('full_name', ''),
             'app_url' => env('APP_URL', 'http://localhost'),
@@ -28,8 +30,8 @@ class SettingController extends Controller
             'certificate_template' => Setting::get('certificate_template', ''),
             'app_language' => Setting::get('app_language', 'id'),
         ];
-        
-        return view('admin.settings.index', compact('settings'));
+
+        return view('admin.settings.index', compact('generalSettings'));
     }
     
     public function update(Request $request)

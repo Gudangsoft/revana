@@ -114,9 +114,12 @@ class SmsGatewayController extends Controller
             $this->writeToFile($merged);
         }
 
-        $settings = $this->buildSettings($merged);
+        // NB: nama variabel sengaja BUKAN "settings" — AppServiceProvider men-share
+        // variabel global bernama "settings" (branding app) ke SEMUA view lewat
+        // View::composer('*', ...), yang akan menimpa data ini kalau namanya bentrok.
+        $smsSettings = $this->buildSettings($merged);
 
-        return view('admin.sms-gateway.index', compact('settings'));
+        return view('admin.sms-gateway.index', compact('smsSettings'));
     }
 
     private function buildSettings(array $data): array
@@ -198,11 +201,11 @@ class SmsGatewayController extends Controller
 
         Log::info('SMS Gateway Settings saved', ['keys_saved' => array_keys($validated)]);
 
-        // Return view langsung dengan $settings dari data yang baru disimpan
+        // Return view langsung dengan $smsSettings dari data yang baru disimpan
         // → form selalu terisi tanpa bergantung pada keberhasilan DB/file read
-        $settings = $this->buildSettings($validated);
+        $smsSettings = $this->buildSettings($validated);
         session()->now('success', 'Pengaturan SMS Gateway berhasil disimpan!');
-        return view('admin.sms-gateway.index', compact('settings'));
+        return view('admin.sms-gateway.index', compact('smsSettings'));
     }
 
     public static function defaultCredentialNewTemplate(): string
