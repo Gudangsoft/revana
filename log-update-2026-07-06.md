@@ -82,3 +82,13 @@ Log perubahan otomatis dari git commits.
 - **File berubah:** 1 file
 - `log-update-2026-07-06.md`
 
+
+## 8. 🔄 Update: Update deployment instructions to use 'master' branch instead of 'main'
+
+- **Commit:** `a7a2d74` — 12:03 oleh Gudangsoft
+- **File berubah:** 4 file
+- `DEPLOYMENT.md`
+- `DEPLOYMENT_GUIDE.md`
+- `deploy.sh`
+- `log-update-2026-07-06.md`
+
