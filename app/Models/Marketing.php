@@ -15,6 +15,7 @@ class Marketing extends Authenticatable
         'email',
         'photo',
         'phone',
+        'additional_phones',
         'tanggal_lahir',
         'password',
         'is_active',
@@ -26,9 +27,10 @@ class Marketing extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active'     => 'boolean',
-        'total_points'  => 'float',
-        'tanggal_lahir' => 'date',
+        'is_active'         => 'boolean',
+        'total_points'      => 'float',
+        'tanggal_lahir'     => 'date',
+        'additional_phones' => 'array',
     ];
 
     public function isBirthdayToday(): bool

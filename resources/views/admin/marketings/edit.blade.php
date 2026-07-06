@@ -63,15 +63,7 @@
                         </small>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Telepon</label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                               name="phone" value="{{ old('phone', $marketing->phone) }}" 
-                               placeholder="081234567890">
-                        @error('phone')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    @include('partials.marketing-phone-fields', ['phones' => old('additional_phones', $marketing->additional_phones ?? [])])
 
                     <div class="mb-3">
                         <div class="form-check">

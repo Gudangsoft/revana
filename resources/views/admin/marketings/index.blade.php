@@ -161,7 +161,16 @@
                                 <td>{{ $loop->iteration + ($marketings->currentPage() - 1) * $marketings->perPage() }}</td>
                                 <td><strong>{{ $marketing->name }}</strong></td>
                                 <td>{{ $marketing->email ?? '-' }}</td>
-                                <td>{{ $marketing->phone ?? '-' }}</td>
+                                <td>
+                                    {{ $marketing->phone ?? '-' }}
+                                    @if(!empty($marketing->additional_phones))
+                                    <div class="small text-muted">
+                                        @foreach($marketing->additional_phones as $p)
+                                            {{ $p }}@if(!$loop->last), @endif
+                                        @endforeach
+                                    </div>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($marketing->is_active)
                                         <span class="badge bg-success">Aktif</span>

@@ -55,9 +55,13 @@ class MarketingController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
+            'additional_phones' => 'nullable|array',
+            'additional_phones.*' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
             'is_active' => 'boolean',
         ]);
+
+        $validated['additional_phones'] = $this->cleanPhones($validated['additional_phones'] ?? []);
 
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
@@ -82,9 +86,13 @@ class MarketingController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
+            'additional_phones' => 'nullable|array',
+            'additional_phones.*' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
             'is_active' => 'boolean',
         ]);
+
+        $validated['additional_phones'] = $this->cleanPhones($validated['additional_phones'] ?? []);
 
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
@@ -96,6 +104,14 @@ class MarketingController extends Controller
 
         return redirect()->route('admin.marketings.index')
             ->with('success', 'Marketing berhasil diupdate');
+    }
+
+    /**
+     * Buang entri nomor tambahan yang kosong.
+     */
+    private function cleanPhones(array $phones): array
+    {
+        return array_values(array_filter($phones, fn ($p) => filled($p)));
     }
 
     public function destroy(Marketing $marketing)
