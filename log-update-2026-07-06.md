@@ -21,3 +21,27 @@ Log perubahan otomatis dari git commits.
 | `resources/views/admin/marketings/index.blade.php` | Tampilkan nomor tambahan (kalau ada) sebagai teks kecil di bawah nomor utama pada tabel daftar marketing |
 
 **Diverifikasi:** migration jalan bersih di lokal; test lewat tinker — submit `store()` dengan 3 nomor (1 kosong) menghasilkan `additional_phones` tersimpan sebagai `["082...","083..."]` (nomor kosong otomatis terbuang); render form edit dengan data nomor tambahan berhasil tanpa error dan kedua nomor tampil di form.
+
+## 2. 🔄 Update: update nomor wa marketting
+
+- **Commit:** `7ceacef` — 11:25 oleh Gudangsoft
+- **File berubah:** 8 file
+- `app/Http/Controllers/Admin/MarketingController.php`
+- `app/Models/Marketing.php`
+- `database/migrations/2026_07_06_120000_add_additional_phones_to_marketings_table.php`
+- `log-update-2026-07-06.md`
+- `resources/views/admin/marketings/create.blade.php`
+- `resources/views/admin/marketings/edit.blade.php`
+- `resources/views/admin/marketings/index.blade.php`
+- `resources/views/partials/marketing-phone-fields.blade.php`
+
+## 3. Samakan Struktur Format LOA Bahasa Inggris dengan Bahasa Indonesia
+
+**Tujuan:** User minta format LOA formal Bahasa Inggris disamakan strukturnya dengan Bahasa Indonesia. Sebelumnya kedua bahasa punya layout yang berbeda jauh — versi Indonesia sudah pakai tabel No/Hal di atas, tabel "Kepada Yth./di", tabel detail Judul-Kode naskah, dan blok "DITERIMA", sementara versi Inggris masih pakai struktur lama berbasis paragraf (`<p>` salutation, judul artikel dicetak miring di tengah, tanpa tabel No/Subject maupun tabel detail manuskrip).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Tulis ulang blok "FORMAT ENGLISH" di halaman 1 supaya strukturnya identik dengan "FORMAT INDONESIA": tabel No/Subject ("Manuscript Accepted"), tabel "To,/at" (pengganti paragraf salutation lama), tabel detail "Manuscript title/Manuscript code", blok "ACCEPTED" besar di tengah, lalu `jrn-info-block` dan 2 paragraf penutup — hanya beda teks (Inggris vs Indonesia), layout & class CSS sama persis |
+
+**Diverifikasi:** render `admin.loa.receipt` dengan `loa_language=en` lewat tinker — berhasil tanpa error, mengandung "ACCEPTED", "Manuscript title", dan baris "Subject" sesuai struktur baru; generate PDF untuk submission yang sama di kedua bahasa (`en` dan `id`) juga berhasil tanpa error dompdf.

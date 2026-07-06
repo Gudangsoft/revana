@@ -881,35 +881,59 @@ function copyLoaLink(e) {
         <p class="body-text" style="text-align:justify;">Atas partisipasi dan kontribusi Saudara dalam pengembangan ilmu pengetahuan, kami sampaikan terima kasih.</p>
 
         @else
-        {{-- ── FORMAT ENGLISH ── --}}
-        <div class="doc-subtitle">{{ $L['p1_subtitle'] }}</div>
-        <div class="doc-no">No. {{ $loaNumber }}</div>
+        {{-- ── FORMAT ENGLISH (disamakan strukturnya dengan format Indonesia) ── --}}
+        <table style="border-collapse:collapse; font-size:12pt; margin-bottom:16px;">
+            <tr>
+                <td style="padding:1px 4px 1px 0; white-space:nowrap;">No</td>
+                <td style="padding:1px 10px 1px 0;">:</td>
+                <td>{{ $loaNumber }}</td>
+            </tr>
+            <tr>
+                <td style="padding:1px 4px 1px 0;">Subject</td>
+                <td style="padding:1px 10px 1px 0;">:</td>
+                <td><strong>Manuscript Accepted</strong></td>
+            </tr>
+        </table>
 
         <div class="to-block">
-            <p>{{ $L['salutation1'] }}</p>
-            <p>{{ $L['salutation2'] }} &nbsp;: &nbsp;<span class="hl">{{ $allAuthorNames }}</span></p>
-            <p>{{ $L['salutation3'] }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">{{ $afiliasi }}</span></p>
+             <table style="width:auto;">
+                 <tr>
+                     <td valign="top" style="width:80px; white-space:nowrap;">To,</td>
+                     <td>{{ $allAuthorNames }}</td>
+                 </tr>
+                 <tr>
+                     <td>at</td>
+                     <td style="font-weight:bold;">{{ $afiliasi ?: '—' }}</td>
+                 </tr>
+            </table>
         </div>
 
         <p class="body-text">{{ $L['greeting'] }}</p>
-        <p class="body-text">
-            {{ $L['body1_pre'] }} <strong>{{ $jurnalNama }}</strong>
-            @if($eIssn) ({{ $L['body1_issn'] }} <strong>{{ $eIssn }}</strong>)@endif,
-            {{ $L['body1_post'] }}
-        </p>
-        <p class="body-text" style="text-align:center; font-style:italic; font-size:11pt;">
-            &ldquo;<span class="hl">{{ $judul }}</span>&rdquo;
-        </p>
-        <p class="body-text">
-            {{ $L['body2_pre'] }} <strong>{{ $L['body2_accepted'] }}</strong>
-            {{ $L['body2_post'] }} <span class="hl"><em>{{ $jurnalNama }}</em>,
-            Volume {{ $volume }}, No. {{ $nomor }}, {{ $bulan }} {{ $tahun }}</span>.
+        <p class="body-text" style="text-align:justify;">
+            Based on the results of the administrative review, content suitability assessment, and evaluation conducted by the Editorial Board of <strong>{{ $jurnalNama }}</strong>. The Editorial Board has therefore decided and declares that your following manuscript:
         </p>
 
-        @if($eIssn || $pIssn || $loaStatus || $penerbit || $journal?->link_jurnal)
+        <table class="detail-table">
+            <colgroup><col style="width:110px;"><col style="width:12px;"><col></colgroup>
+            <tr>
+                <td>Manuscript title</td><td>:</td>
+                <td><strong>{{ $judul }}</strong></td>
+            </tr>
+            <tr>
+                <td>Manuscript code</td><td>:</td>
+                <td>{{ $kodeArtikel }}</td>
+            </tr>
+        </table>
+
+        <div style="text-align:center; font-size:14pt; font-weight:900; letter-spacing:4px; margin:10px 0 8px;">
+            ACCEPTED
+        </div>
+
+        <p class="body-text" style="margin-bottom:4px;">for publication in:</p>
         <div class="jrn-info-block">
             <div class="jrn-info-name">{{ $jurnalNama }}</div>
-            <table>
+            <table style="border-collapse:collapse;width:100%;">
+                <colgroup><col style="width:76px;"><col style="width:12px;"><col></colgroup>
                 @if($eIssn || $pIssn)
                 <tr>
                     <td>ISSN</td><td>:</td>
@@ -925,23 +949,29 @@ function copyLoaLink(e) {
                     <td>Volume {{ $volume }}, No. {{ $nomor }} ({{ $tahun }})</td>
                 </tr>
                 @if($loaStatus)
-                <tr><td>Status</td><td>:</td><td>{{ $loaStatus }} </td></tr>
+                <tr>
+                    <td style="vertical-align:top;">Status</td><td style="vertical-align:top;">:</td>
+                    <td style="text-align:justify;">{{ $loaStatus }}</td>
+                </tr>
                 @endif
                 @if($penerbit)
-                <tr><td>Publisher</td><td>:</td><td>{{ $penerbit }}</td></tr>
+                <tr>
+                    <td>Publisher</td><td>:</td><td>{{ $penerbit }}</td>
+                </tr>
                 @endif
                 @if($journal?->link_jurnal)
                 <tr>
                     <td>URL</td><td>:</td>
-                    <td><a href="{{ $journal->link_jurnal }}" target="_blank">{{ $journal->link_jurnal }}</a></td>
+                    <td><a href="{{ $journal->link_jurnal }}" target="_blank" style="color:inherit;">{{ $journal->link_jurnal }}</a></td>
                 </tr>
                 @endif
             </table>
         </div>
-        @endif
 
-        <p class="body-text">{{ $L['body3'] }}</p>
-        <p class="body-text">{{ $L['body4'] }}</p>
+        <p class="body-text" style="text-align:justify;">
+            We congratulate you on the acceptance of your manuscript for publication in <strong>{{ $jurnalNama }}</strong>. Your manuscript will proceed through the editorial and publication stages in accordance with applicable provisions.
+        </p>
+        <p class="body-text" style="text-align:justify;">We thank you for your participation and contribution to the advancement of science.</p>
         @endif
 
         {{-- Signature --}}
