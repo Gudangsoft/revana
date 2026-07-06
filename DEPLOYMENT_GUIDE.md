@@ -14,7 +14,7 @@ ssh user@portal.apji.org
 
 # Clone atau pull latest code
 cd /var/www/revana
-git pull origin main
+git pull origin master
 
 # Jalankan deployment script
 chmod +x deploy.sh

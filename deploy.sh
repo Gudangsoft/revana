@@ -96,7 +96,7 @@ check_status "Maintenance mode aktif"
 # Step 3: Pull latest code
 print_info "Step 3: Pull kode terbaru dari repository..."
 git fetch origin
-git pull origin main
+git pull origin master
 check_status "Git pull"
 
 # Step 4: Install/Update dependencies

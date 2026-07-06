@@ -360,7 +360,7 @@ Ketika ada update kode:
 cd /var/www/revana
 
 # Pull changes dari repository
-git pull origin main
+git pull origin master
 
 # Install dependencies baru
 composer install --optimize-autoloader --no-dev
