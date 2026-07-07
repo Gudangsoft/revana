@@ -175,3 +175,17 @@ Catatan tambahan: controller ini juga memvalidasi & menyimpan `mail_from_address
 | `resources/views/admin/sms-gateway/index.blade.php` | Dokumentasikan variabel baru di kotak info "Variabel" pada bagian Template Notifikasi Kredensial Penulis |
 
 **Diverifikasi:** lewat tinker — buat submission dengan marketing yang punya 3 nomor (1 utama + 2 tambahan), set template custom berisi `{noWaMarketing1}` s.d. `{noWaMarketing4}`, hasil render menampilkan 3 nomor asli dengan benar dan slot ke-4 yang tidak ada tampil `-`.
+
+## 16. Tambah Variabel Nomor WA Marketing di Email Template (`/admin/email-templates/{id}/edit`)
+
+**Tujuan:** User minta variabel nomor WA marketing yang sama (#15) juga tersedia di sistem Email Template (`assign_*`, `validate_*`, `notify_penulis`) — bukan cuma template WA kredensial.
+
+Karena sistem ini pakai konvensi snake_case (`nama_artikel`, `kode_submit`, dst, beda dari WA yang camelCase), variabel dinamai `{no_wa_marketing_1}` s.d. `{no_wa_marketing_5}` mengikuti konvensi yang sudah ada di sistem ini.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | Tambah helper `marketingWaVars(Submission $submission): array` (dipakai bareng, hindari duplikasi 3x) yang menghasilkan `no_wa_marketing_1` s.d. `no_wa_marketing_5`; di-merge (`...$this->marketingWaVars($submission)`) ke ketiga titik pemanggilan `$tpl->render([...])`: notifikasi assign PIC (quick assign), notifikasi validasi tahap, dan `sendPenulisEmail()` (notify_penulis) |
+| `resources/views/admin/email-templates/form.blade.php` | Tambah 5 variabel baru ke daftar chip variabel yang bisa diklik; tambah nilai contoh di JS `livePreview()` supaya preview template ikut menampilkan nomor sample |
+
+**Diverifikasi:** lewat tinker — submission dengan marketing 2 nomor, template `notify_penulis` custom berisi `{no_wa_marketing_1}` s.d. `{no_wa_marketing_3}`, hasil render: 2 nomor asli tampil benar, slot ke-3 tampil `-`.

@@ -1402,6 +1402,7 @@ class SubmissionController extends Controller
                         'username_reviewer2'=> $submission->username_reviewer2 ?? '-',
                         'password_reviewer2'=> $submission->password_reviewer2 ?? '-',
                         'app_name'          => config('app.name'),
+                        ...$this->marketingWaVars($submission),
                     ]);
                     $atts = $tpl->attachments;
                     try {
@@ -1614,6 +1615,7 @@ class SubmissionController extends Controller
                             'username_reviewer2'=> $submission->username_reviewer2 ?? '-',
                             'password_reviewer2'=> $submission->password_reviewer2 ?? '-',
                             'app_name'          => config('app.name'),
+                            ...$this->marketingWaVars($submission),
                         ]);
                         $atts = $tpl->attachments;
                         try {
@@ -2167,6 +2169,7 @@ class SubmissionController extends Controller
             'password_author'=> $submission->password_author ?? '-',
             'tanggal'        => now()->format('d/m/Y H:i'),
             'app_name'       => config('app.name'),
+            ...$this->marketingWaVars($submission),
         ]);
         $recipientEmail = $submission->email_penulis;
         $recipientName  = $submission->nama_penulis ?? $recipientEmail;
@@ -2263,6 +2266,24 @@ class SubmissionController extends Controller
      */
     /** Maksimal nomor WA marketing yang tersedia sebagai variabel template ({noWaMarketing1}, {noWaMarketing2}, dst) */
     private const MAX_MARKETING_WA_VARS = 5;
+
+    /** Variabel {no_wa_marketing_1} s.d. {no_wa_marketing_N} untuk template EmailTemplate — nomor yang tidak ada diisi '-' */
+    private function marketingWaVars(Submission $submission): array
+    {
+        if (!$submission->relationLoaded('marketing')) {
+            $submission->load('marketing');
+        }
+        $numbers = array_values(array_filter(array_merge(
+            [$submission->marketing?->phone],
+            $submission->marketing?->additional_phones ?? []
+        )));
+
+        $vars = [];
+        for ($i = 1; $i <= self::MAX_MARKETING_WA_VARS; $i++) {
+            $vars['no_wa_marketing_' . $i] = $numbers[$i - 1] ?? '-';
+        }
+        return $vars;
+    }
 
     private function buildWhatsAppMessage(Submission $submission, bool $isUpdate = false): string
     {

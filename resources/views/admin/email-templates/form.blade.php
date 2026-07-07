@@ -108,6 +108,11 @@
                                             '{username_reviewer2}' => 'Username reviewer 2',
                                             '{password_reviewer2}' => 'Password reviewer 2',
                                             '{app_name}' => 'Nama aplikasi',
+                                            '{no_wa_marketing_1}' => 'Nomor WA marketing 1 (nomor utama)',
+                                            '{no_wa_marketing_2}' => 'Nomor WA marketing 2 (nomor tambahan)',
+                                            '{no_wa_marketing_3}' => 'Nomor WA marketing 3 (nomor tambahan)',
+                                            '{no_wa_marketing_4}' => 'Nomor WA marketing 4 (nomor tambahan)',
+                                            '{no_wa_marketing_5}' => 'Nomor WA marketing 5 (nomor tambahan)',
                                         ];
                                     @endphp
                                     @foreach($vars as $var => $hint)
@@ -220,7 +225,9 @@ function livePreview() {
         'username_editor': 'editor_user', 'password_editor': 'pass1234',
         'username_reviewer1': 'rev1_user', 'password_reviewer1': 'rev1_pass',
         'username_reviewer2': 'rev2_user', 'password_reviewer2': 'rev2_pass',
-        'app_name': '{{ config("app.name") }}'
+        'app_name': '{{ config("app.name") }}',
+        'no_wa_marketing_1': '081234567890', 'no_wa_marketing_2': '081298765432',
+        'no_wa_marketing_3': '-', 'no_wa_marketing_4': '-', 'no_wa_marketing_5': '-'
     };
     var subj = subjectEl.value, body = editor.value;
     for (var k in sampleVars) {
