@@ -231,3 +231,16 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `app/Http/Controllers/Admin/LoaMasterController.php` | `dispatchLoaWa()`: baca `Setting::get('fonnte_api_token_loa')` — kalau diisi, dipakai sebagai token eksplisit ke `FonnteService::send()` (parameter `token`); kalau kosong, tetap pakai token utama seperti sebelumnya. Guard "belum dikonfigurasi" disesuaikan supaya tidak salah blokir kalau yang diisi cuma token LOA (bukan token utama) |
 
 **Diverifikasi:** lewat tinker dengan `FonnteService` di-mock (tanpa panggilan API sungguhan, untuk hindari kirim WA asli saat testing) — tanpa token LOA diisi, token yang diteruskan ke `send()` adalah `null` (pakai default/token utama); dengan token LOA diisi, token yang diteruskan persis token LOA yang tersimpan. Round-trip simpan→baca `fonnte_api_token_loa` lewat `SmsGatewayController::update()`/`index()` juga dites dan sesuai.
+
+## 20. Tombol "Cek Status Koneksi" Terpisah untuk Token LOA
+
+**Tujuan:** User mengisi token LOA lalu klik "Cek Status Koneksi" — tapi tombol itu ternyata mengecek token **utama** (kosong), bukan token LOA, jadi selalu tampil "Masukkan API Token terlebih dahulu" walau token LOA sudah diisi dan sudah bekerja dengan benar di background. User minta pengecekan status token LOA benar-benar mandiri, tidak tergantung token utama sama sekali.
+
+**Catatan:** logika pengiriman WA LOA (`dispatchLoaWa()`, #19) sebenarnya SUDAH mandiri sejak awal — cuma tombol "Cek Status Koneksi" di UI yang belum punya versi khusus LOA, jadi terlihat seperti belum berfungsi.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/sms-gateway/index.blade.php` | Tambah tombol "Cek Status Koneksi (LOA)" + area hasil terpisah (`checkStatusBtnLoa`/`statusResultLoa`) di section token LOA — memakai endpoint `check-status` yang sama tapi mengirim nilai `fonnte_api_token_loa` secara eksplisit (endpoint ini sudah mendukung override token dari body request sejak awal, jadi tidak perlu ubah backend) |
+
+**Diverifikasi:** render halaman — tombol dan area hasil baru muncul di HTML dengan benar; dikonfirmasi lewat baca kode `checkStatus()` bahwa endpoint memprioritaskan token dari request body (bukan `Setting::get('fonnte_api_token')`) sehingga pengecekan token LOA benar-benar independen dari token utama.

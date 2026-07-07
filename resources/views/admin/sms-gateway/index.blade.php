@@ -180,6 +180,14 @@
                             </div>
                         </div>
 
+                        {{-- Status Koneksi khusus token LOA — mandiri, tidak bergantung token utama --}}
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="checkStatusBtnLoa">
+                                <i class="bi bi-wifi me-1"></i>Cek Status Koneksi (LOA)
+                            </button>
+                            <div id="statusResultLoa"></div>
+                        </div>
+
                         <hr class="my-3">
 
                         {{-- Status Koneksi --}}
@@ -686,6 +694,47 @@
         .finally(() => {
             button.disabled = false;
             button.innerHTML = '<i class="bi bi-wifi me-1"></i>Cek Status Koneksi';
+        });
+    });
+
+    // Check connection status — token LOA (mandiri, tidak terikat token utama)
+    document.getElementById('checkStatusBtnLoa').addEventListener('click', function() {
+        const button = this;
+        const resultDiv = document.getElementById('statusResultLoa');
+        const token = document.getElementById('fonnte_api_token_loa').value;
+
+        if (!token) {
+            resultDiv.innerHTML = '<span class="badge bg-warning text-dark p-2"><i class="bi bi-exclamation-triangle me-1"></i>Masukkan API Token LOA terlebih dahulu</span>';
+            return;
+        }
+
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Mengecek...';
+        resultDiv.innerHTML = '';
+
+        fetch('{{ route("admin.sms-gateway.check-status") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ token: token })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resultDiv.innerHTML = '<span class="badge bg-success p-2"><i class="bi bi-check-circle me-1"></i>Terhubung</span>';
+            } else {
+                resultDiv.innerHTML = '<span class="badge bg-danger p-2"><i class="bi bi-x-circle me-1"></i>' + (data.message || 'Tidak terhubung') + '</span>';
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = '<span class="badge bg-danger p-2"><i class="bi bi-x-circle me-1"></i>Error: ' + error.message + '</span>';
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-wifi me-1"></i>Cek Status Koneksi (LOA)';
         });
     });
 
