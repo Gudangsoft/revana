@@ -244,3 +244,18 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `resources/views/admin/sms-gateway/index.blade.php` | Tambah tombol "Cek Status Koneksi (LOA)" + area hasil terpisah (`checkStatusBtnLoa`/`statusResultLoa`) di section token LOA — memakai endpoint `check-status` yang sama tapi mengirim nilai `fonnte_api_token_loa` secara eksplisit (endpoint ini sudah mendukung override token dari body request sejak awal, jadi tidak perlu ubah backend) |
 
 **Diverifikasi:** render halaman — tombol dan area hasil baru muncul di HTML dengan benar; dikonfirmasi lewat baca kode `checkStatus()` bahwa endpoint memprioritaskan token dari request body (bukan `Setting::get('fonnte_api_token')`) sehingga pengecekan token LOA benar-benar independen dari token utama.
+
+## 21. Lampirkan File PDF LOA di Pengiriman WhatsApp
+
+**Tujuan:** User melaporkan pengiriman WA LOA belum melampirkan file PDF LOA — cuma kirim teks + link ke halaman LOA, padahal versi email sudah melampirkan PDF sejak fitur #13-14.
+
+**Pendekatan:** Fonnte mengirim lampiran dengan cara fetch file dari URL publik yang diberikan (parameter `url`/`filename` di payload `send`), bukan upload binary langsung. Jadi dibuatkan endpoint publik baru yang men-generate PDF LOA secara on-demand (pakai `LoaController::generateLoaPdf()` yang sudah ada dari fitur email), lalu URL itu diteruskan ke Fonnte saat kirim WA.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah route publik `GET /loa/{kode_loa}/pdf` → `loa.public.pdf` (tanpa login, sama seperti `loa.public` — diperlukan supaya server Fonnte bisa fetch filenya) |
+| `app/Http/Controllers/Admin/LoaController.php` | Tambah `publicPdf()`: generate PDF via `generateLoaPdf()` yang sudah ada, return sebagai response `application/pdf` |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `dispatchLoaWa()`: tambah `url` (link ke `loa.public.pdf`) dan `filename` (`LOA-{kode}.pdf`) ke `options` yang dikirim ke `FonnteService::send()`, supaya Fonnte melampirkan PDF-nya di pesan WA |
+
+**Diverifikasi:** endpoint `publicPdf()` dites langsung — return HTTP 200, `Content-Type: application/pdf`, isi file valid (diawali `%PDF`). `dispatchLoaWa()` juga dites dengan `FonnteService` di-mock (tanpa kirim WA sungguhan) — `options` yang diteruskan ke `send()` terbukti berisi `url` yang mengarah ke endpoint PDF yang benar dan `filename` yang sesuai.

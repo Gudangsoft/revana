@@ -241,14 +241,20 @@ class LoaMasterController extends Controller
 
         $journal      = $submission->journalSlot?->journalMaster;
         $jurnalNama   = $journal?->nama_jurnal ?? 'Jurnal';
-        $loaPublicUrl = route('loa.public', ['kode_loa' => $submission->kode_loa ?: $submission->kode_submit]);
+        $kodeLoa      = $submission->kode_loa ?: $submission->kode_submit;
+        $loaPublicUrl = route('loa.public', ['kode_loa' => $kodeLoa]);
+        $loaPdfUrl    = route('loa.public.pdf', ['kode_loa' => $kodeLoa]);
         $authorName   = $submission->nama_penulis ?? 'Penulis';
         $message = "Yth. {$authorName},\n\nBerikut kami sampaikan Letter of Acceptance (LOA) untuk artikel Anda yang telah diterima di *{$jurnalNama}*.\n\nSilakan unduh/cetak LOA melalui tautan berikut:\n{$loaPublicUrl}\n\nTerima kasih atas kepercayaan Anda.\n\n_Tim Redaksi {$jurnalNama}_";
 
         $result = $fonnte->send(
             target: $submission->no_hp_penulis,
             message: $message,
-            options: ['countryCode' => '62'],
+            options: [
+                'countryCode' => '62',
+                'url'         => $loaPdfUrl,
+                'filename'    => 'LOA-' . $kodeLoa . '.pdf',
+            ],
             token: $loaToken
         );
 

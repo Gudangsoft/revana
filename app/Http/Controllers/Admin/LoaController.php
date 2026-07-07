@@ -22,6 +22,18 @@ class LoaController extends Controller
         ]));
     }
 
+    // ── Public: PDF LOA — no login, dipakai Fonnte untuk fetch file lampiran WA ──
+    public function publicPdf(string $kodeLoa)
+    {
+        $submission = Submission::where('kode_loa', $kodeLoa)->firstOrFail();
+        $pdf = $this->generateLoaPdf($submission);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="LOA-' . $kodeLoa . '.pdf"',
+        ]);
+    }
+
     // ── Admin: dari detail submission (butuh login) ─────────────────────
     public function show(Submission $submission)
     {

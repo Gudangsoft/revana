@@ -100,6 +100,8 @@ Route::post('/daftar-reviewer', [ReviewerRegistrationController::class, 'store']
 
 // Public LOA — no login required, untuk link di email penulis
 Route::get('/loa/{kode_loa}', [\App\Http\Controllers\Admin\LoaController::class, 'publicView'])->name('loa.public');
+// Public LOA PDF — no login required, dipakai Fonnte untuk fetch file lampiran WA
+Route::get('/loa/{kode_loa}/pdf', [\App\Http\Controllers\Admin\LoaController::class, 'publicPdf'])->name('loa.public.pdf');
 
 // Public Referensi Jurnal (no login required)
 Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');
