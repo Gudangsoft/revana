@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\LoaAcceptedMail;
 use App\Models\Accreditation;
 use App\Models\JournalMaster;
+use App\Models\Setting;
 use App\Models\Submission;
 use App\Services\FonnteService;
 use Illuminate\Http\Request;
@@ -230,7 +231,11 @@ class LoaMasterController extends Controller
         }
 
         $fonnte = app(FonnteService::class);
-        if (!$fonnte->isConfigured()) {
+        // Token khusus LOA (opsional) — kalau diisi di Setting > SMS Gateway, pengiriman WA
+        // LOA pakai device/nomor Fonnte yang terpisah dari nomor utama.
+        $loaToken = Setting::get('fonnte_api_token_loa') ?: null;
+
+        if (!$loaToken && !$fonnte->isConfigured()) {
             return ['success' => false, 'message' => 'Fonnte API token belum dikonfigurasi (lihat Setting > SMS Gateway).'];
         }
 
@@ -243,7 +248,8 @@ class LoaMasterController extends Controller
         $result = $fonnte->send(
             target: $submission->no_hp_penulis,
             message: $message,
-            options: ['countryCode' => '62']
+            options: ['countryCode' => '62'],
+            token: $loaToken
         );
 
         if ($result['success']) {

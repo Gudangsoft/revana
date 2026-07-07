@@ -147,6 +147,41 @@
 
                         <hr class="my-3">
 
+                        {{-- Token API terpisah khusus LOA --}}
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-file-earmark-check me-2"></i>WA Pengiriman LOA (Terpisah)</h6>
+                        <div class="alert alert-light border py-2 small mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Opsional. Isi kalau ingin pengiriman WA khusus LOA (tombol "Kirim via WhatsApp" di halaman LOA) memakai
+                            device/nomor Fonnte yang <strong>berbeda</strong> dari nomor utama di atas. Kosongkan untuk tetap pakai API Token utama.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="fonnte_api_token_loa" class="form-label">API Token Fonnte untuk LOA</label>
+                                <div class="input-group">
+                                    <input type="text"
+                                           class="form-control font-monospace @error('fonnte_api_token_loa') is-invalid @enderror"
+                                           id="fonnte_api_token_loa"
+                                           name="fonnte_api_token_loa"
+                                           value="{{ old('fonnte_api_token_loa', $smsSettings['fonnte_api_token_loa'] ?? '') }}"
+                                           placeholder="Kosongkan untuk pakai API Token utama"
+                                           autocomplete="off">
+                                    <button class="btn btn-outline-danger" type="button" id="clearTokenLoa" title="Hapus token LOA">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                                @if(!empty($smsSettings['fonnte_api_token_loa']))
+                                    <small class="text-success"><i class="bi bi-check-circle me-1"></i>Token LOA terpisah aktif</small>
+                                @else
+                                    <small class="text-muted">Belum diisi — LOA memakai token utama di atas</small>
+                                @endif
+                                @error('fonnte_api_token_loa')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
                         {{-- Status Koneksi --}}
                         <div class="d-flex align-items-center gap-3">
                             <button type="button" class="btn btn-outline-success" id="checkStatusBtn">
@@ -530,6 +565,13 @@
         }
     });
 
+    // Hapus / clear API token khusus LOA
+    document.getElementById('clearTokenLoa').addEventListener('click', function() {
+        if (confirm('Hapus API Token LOA? Pengiriman WA LOA akan kembali memakai API Token utama.')) {
+            document.getElementById('fonnte_api_token_loa').value = '';
+        }
+    });
+
     // Token status badge — baca dari isi input langsung (tidak bergantung PHP $settings)
     function updateTokenStatus() {
         const val = document.getElementById('fonnte_api_token').value.trim();
@@ -651,7 +693,7 @@
     // Menyimpan dan memulihkan nilai form di browser agar form tidak pernah kosong
     // meski server-side DB/file/cache gagal dibaca.
     const SMS_GW_KEY = 'sms_gw_v1';
-    const TEXT_FIELDS   = ['fonnte_api_token','fonnte_device_id','sms_default_country_code',
+    const TEXT_FIELDS   = ['fonnte_api_token','fonnte_device_id','fonnte_api_token_loa','sms_default_country_code',
                            'sms_template_submit','sms_template_status_change','sms_template_published',
                            'wa_template_credential_new','wa_template_credential_update'];
     const TOGGLE_FIELDS = ['sms_gateway_enabled','sms_notification_submit',

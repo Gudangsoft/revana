@@ -218,3 +218,16 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `resources/views/admin/assignments/create.blade.php` | Tambah 2 input tanggal (dari/sampai) + tombol "Hapus filter tanggal" di atas dropdown pencarian; JS di-refactor jadi `performSubmissionSearch()` yang dipakai bareng oleh input teks maupun input tanggal; tanggal submit tiap submission ditampilkan di teks opsi dropdown |
 
 **Diverifikasi:** lewat tinker — filter dengan rentang tanggal yang mencakup `tanggal_submit` submission uji → submission tersebut muncul di hasil; filter dengan tanggal jauh di masa depan (di luar rentang manapun) → hasil kosong (0), membuktikan filter benar-benar diterapkan di query.
+
+## 19. WA Pengiriman LOA Bisa Pakai API Fonnte Terpisah
+
+**Tujuan:** User minta pengiriman WA khusus LOA (tombol "Kirim via WhatsApp" di halaman LOA) bisa memakai API/device Fonnte yang berbeda dari nomor WA utama yang dipakai untuk notifikasi kredensial/SMS lainnya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SmsGatewayController.php` | Tambah key `fonnte_api_token_loa` ke `$keys`, `buildSettings()`, validasi `update()`, dan logika "pertahankan token lama kalau dikosongkan" (mengikuti pola yang sudah ada untuk `fonnte_api_token`) |
+| `resources/views/admin/sms-gateway/index.blade.php` | Tambah section baru "WA Pengiriman LOA (Terpisah)": input token opsional + tombol hapus, penjelasan bahwa kosong = pakai token utama; token baru ditambahkan ke `TEXT_FIELDS` supaya ikut ter-backup di localStorage seperti field lain |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `dispatchLoaWa()`: baca `Setting::get('fonnte_api_token_loa')` — kalau diisi, dipakai sebagai token eksplisit ke `FonnteService::send()` (parameter `token`); kalau kosong, tetap pakai token utama seperti sebelumnya. Guard "belum dikonfigurasi" disesuaikan supaya tidak salah blokir kalau yang diisi cuma token LOA (bukan token utama) |
+
+**Diverifikasi:** lewat tinker dengan `FonnteService` di-mock (tanpa panggilan API sungguhan, untuk hindari kirim WA asli saat testing) — tanpa token LOA diisi, token yang diteruskan ke `send()` adalah `null` (pakai default/token utama); dengan token LOA diisi, token yang diteruskan persis token LOA yang tersimpan. Round-trip simpan→baca `fonnte_api_token_loa` lewat `SmsGatewayController::update()`/`index()` juga dites dan sesuai.

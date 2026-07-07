@@ -79,7 +79,7 @@ class SmsGatewayController extends Controller
         }
 
         $keys = [
-            'fonnte_api_token', 'fonnte_device_id', 'sms_gateway_enabled',
+            'fonnte_api_token', 'fonnte_device_id', 'fonnte_api_token_loa', 'sms_gateway_enabled',
             'sms_notification_submit', 'sms_notification_status_change', 'sms_notification_published',
             'sms_default_country_code', 'sms_template_submit', 'sms_template_status_change', 'sms_template_published',
             'wa_template_credential_new', 'wa_template_credential_update',
@@ -127,6 +127,7 @@ class SmsGatewayController extends Controller
         return [
             'fonnte_api_token'               => $data['fonnte_api_token'] ?? '',
             'fonnte_device_id'               => $data['fonnte_device_id'] ?? '',
+            'fonnte_api_token_loa'           => $data['fonnte_api_token_loa'] ?? '',
             'sms_gateway_enabled'            => $data['sms_gateway_enabled'] ?? '0',
             'sms_notification_submit'        => $data['sms_notification_submit'] ?? '0',
             'sms_notification_status_change' => $data['sms_notification_status_change'] ?? '0',
@@ -145,6 +146,7 @@ class SmsGatewayController extends Controller
         $validated = $request->validate([
             'fonnte_api_token'               => 'nullable|string|max:500',
             'fonnte_device_id'               => 'nullable|string|max:255',
+            'fonnte_api_token_loa'           => 'nullable|string|max:500',
             'sms_gateway_enabled'            => 'nullable|in:0,1',
             'sms_notification_submit'        => 'nullable|in:0,1',
             'sms_notification_status_change' => 'nullable|in:0,1',
@@ -174,6 +176,15 @@ class SmsGatewayController extends Controller
                 ?: (session('sms_gw_settings', []))['fonnte_api_token'] ?? '';
             if (!empty($existing)) {
                 $validated['fonnte_api_token'] = $existing;
+            }
+        }
+        if (empty($validated['fonnte_api_token_loa'])) {
+            $existingLoa = Setting::get('fonnte_api_token_loa')
+                ?: (($this->readFromFile())['fonnte_api_token_loa'] ?? '')
+                ?: (Cache::get('sms_gw_settings', []))['fonnte_api_token_loa'] ?? ''
+                ?: (session('sms_gw_settings', []))['fonnte_api_token_loa'] ?? '';
+            if (!empty($existingLoa)) {
+                $validated['fonnte_api_token_loa'] = $existingLoa;
             }
         }
 
