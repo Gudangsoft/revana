@@ -123,7 +123,7 @@
         'meta_code'     => 'Article Code',
         'meta_title'    => 'Title',
         'criteria_hdr'  => 'EVALUATION CRITERIA',
-        'criteria_note' => '[SUBJECT TO REVISION BY THE REVIEWER]',
+        'criteria_note' => '',
         'col_no'        => 'No',
         'col_desc'      => 'Description',
         'col_comment'   => 'Comments',
@@ -141,7 +141,7 @@
             ['Use of <strong>Language</strong>',                                                  'Good.'],
         ],
         'decision_hdr'  => "REVIEWER'S DECISION",
-        'decision_note' => '[SUBJECT TO REVISION BY THE REVIEWER]',
+        'decision_note' => '',
         'decisions'     => [
             'The article can be published as is',
             'The article can be published with minor revisions',

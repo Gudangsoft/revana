@@ -259,3 +259,14 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `app/Http/Controllers/Admin/LoaMasterController.php` | `dispatchLoaWa()`: tambah `url` (link ke `loa.public.pdf`) dan `filename` (`LOA-{kode}.pdf`) ke `options` yang dikirim ke `FonnteService::send()`, supaya Fonnte melampirkan PDF-nya di pesan WA |
 
 **Diverifikasi:** endpoint `publicPdf()` dites langsung — return HTTP 200, `Content-Type: application/pdf`, isi file valid (diawali `%PDF`). `dispatchLoaWa()` juga dites dengan `FonnteService` di-mock (tanpa kirim WA sungguhan) — `options` yang diteruskan ke `send()` terbukti berisi `url` yang mengarah ke endpoint PDF yang benar dan `filename` yang sesuai.
+
+## 22. Hapus Teks "[SUBJECT TO REVISION BY THE REVIEWER]" di Format Inggris
+
+**Tujuan:** User minta teks `[SUBJECT TO REVISION BY THE REVIEWER]` di sebelah judul "EVALUATION CRITERIA" dan "REVIEWER'S DECISION" (halaman 2 LOA, format Bahasa Inggris) dihapus — versi Bahasa Indonesia sudah tidak menampilkan teks setara ini sejak commit sebelumnya (`d17a6b0`), tapi versi Inggris terlewat.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | `criteria_note` dan `decision_note` pada kamus teks Inggris (`$L`) dikosongkan, menyamakan dengan versi Indonesia yang sudah kosong lebih dulu |
+
+**Diverifikasi:** render `admin.loa.receipt` dengan `loa_language=en` lewat tinker — teks "SUBJECT TO REVISION" tidak lagi muncul di HTML.
