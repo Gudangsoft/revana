@@ -189,3 +189,32 @@ Karena sistem ini pakai konvensi snake_case (`nama_artikel`, `kode_submit`, dst,
 | `resources/views/admin/email-templates/form.blade.php` | Tambah 5 variabel baru ke daftar chip variabel yang bisa diklik; tambah nilai contoh di JS `livePreview()` supaya preview template ikut menampilkan nomor sample |
 
 **Diverifikasi:** lewat tinker — submission dengan marketing 2 nomor, template `notify_penulis` custom berisi `{no_wa_marketing_1}` s.d. `{no_wa_marketing_3}`, hasil render: 2 nomor asli tampil benar, slot ke-3 tampil `-`.
+
+## 17. Fix Submission Lama Tidak Muncul di Dropdown "Pilih Submission" (`/admin/assignments/create`)
+
+**Tujuan:** User melaporkan submission tanggal 1 Juli tidak muncul di dropdown pilihan artikel saat membuat penugasan reviewer.
+
+**Root cause:** Dropdown "Pilih Submission" di-preload dari query `Submission::whereNotNull('id_artikel')->orderBy('created_at','desc')->limit(500)->get()` — HANYA 500 submission TERBARU yang dikirim ke browser. Kotak pencarian di atas dropdown cuma filter client-side (`option.style.display='none'`) atas opsi yang SUDAH dimuat — jadi begitu total submission (dengan `id_artikel` terisi) melebihi 500, submission yang lebih lama (spt. tanggal 1 Juli) otomatis terpotong dari daftar dan **tidak mungkin ditemukan** lewat pencarian apa pun, karena datanya memang tidak pernah sampai ke browser.
+
+Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK termasuk dalam 30 (atau 500) data preload terbaru, sehingga sebelum fix ini dijamin tidak akan muncul di dropdown.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ReviewAssignmentController.php` | `create()`: kurangi preload jadi 30 submission terbaru saja (bukan 500) — cuma untuk tampilan awal. Tambah `searchSubmissions()`: endpoint AJAX baru yang query LANGSUNG ke database (`id_artikel`/`judul_artikel`/nama jurnal, `LIKE %q%`) tanpa batas berdasarkan usia data, return JSON max 50 hasil |
+| `routes/web.php` | Tambah route `GET admin/assignments/search-submissions` → `searchSubmissions` |
+| `resources/views/admin/assignments/create.blade.php` | JS pencarian submission diganti dari filter client-side ke AJAX `fetch()` (debounce 300ms) ke endpoint baru — dropdown di-render ulang dari hasil pencarian server, bukan cuma sembunyikan/tampilkan opsi yang sudah ada. Update teks bantuan supaya jelas bahwa mengetik akan mencari ke seluruh data |
+
+**Diverifikasi:** lewat tinker — cari submission tertua di database (yang terbukti TIDAK ada di 30 data preload terbaru) lewat `searchSubmissions()` langsung → ditemukan dengan benar. Endpoint juga dites pencarian berdasarkan `id_artikel` — hasil sesuai termasuk nama jurnal.
+
+## 18. Tambah Filter Tanggal di Pencarian Submission (`/admin/assignments/create`)
+
+**Tujuan:** User minta filter tanggal ditambahkan ke fitur pencarian submission yang baru saja diperbaiki (#17), supaya bisa mempersempit hasil pencarian ke rentang tanggal submit tertentu.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/ReviewAssignmentController.php` | `searchSubmissions()`: tambah filter `tanggal_dari`/`tanggal_sampai` (`whereDate('tanggal_submit', ...)`) — konvensi nama parameter sama dengan filter tanggal yang sudah dipakai di seluruh `SubmissionController`; tambahkan `tanggal_submit` ke hasil JSON |
+| `resources/views/admin/assignments/create.blade.php` | Tambah 2 input tanggal (dari/sampai) + tombol "Hapus filter tanggal" di atas dropdown pencarian; JS di-refactor jadi `performSubmissionSearch()` yang dipakai bareng oleh input teks maupun input tanggal; tanggal submit tiap submission ditampilkan di teks opsi dropdown |
+
+**Diverifikasi:** lewat tinker — filter dengan rentang tanggal yang mencakup `tanggal_submit` submission uji → submission tersebut muncul di hasil; filter dengan tanggal jauh di masa depan (di luar rentang manapun) → hasil kosong (0), membuktikan filter benar-benar diterapkan di query.

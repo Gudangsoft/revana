@@ -265,6 +265,7 @@ Route::middleware('auth')->group(function () {
         // Review Assignments
         Route::get('/assignments', [AdminReviewAssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/assignments/create', [AdminReviewAssignmentController::class, 'create'])->name('assignments.create');
+        Route::get('/assignments/search-submissions', [AdminReviewAssignmentController::class, 'searchSubmissions'])->name('assignments.search-submissions');
         Route::post('/assignments', [AdminReviewAssignmentController::class, 'store'])->name('assignments.store');
         Route::post('/assignments/batch', [AdminReviewAssignmentController::class, 'storeBatch'])->name('assignments.store-batch');
         Route::get('/assignments/{assignment}', [AdminReviewAssignmentController::class, 'show'])->name('assignments.show');

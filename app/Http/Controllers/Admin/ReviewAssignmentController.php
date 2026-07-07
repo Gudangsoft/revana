@@ -52,15 +52,16 @@ class ReviewAssignmentController extends Controller
             ->select(['id', 'name', 'email', 'institution', 'field_of_study_id', 'article_languages', 'completed_reviews', 'total_points'])
             ->get();
         $fieldOfStudies = \App\Models\FieldOfStudy::active()->ordered()->get();
-        
-        // Get submissions data for dropdown (limited to avoid memory exhaustion)
+
+        // Preload cuma yang terbaru untuk tampilan awal — pencarian sebenarnya lewat
+        // searchSubmissions() (AJAX) supaya submission lama tidak pernah "hilang" karena limit.
         $submissions = \App\Models\Submission::with(['journalSlot:id,journal_master_id', 'journalSlot.journalMaster:id,nama_jurnal'])
             ->select(['id', 'id_artikel', 'judul_artikel', 'link_artikel', 'journal_slot_id'])
             ->whereNotNull('id_artikel')
             ->orderBy('created_at', 'desc')
-            ->limit(500)
+            ->limit(30)
             ->get();
-        
+
         // Get pre-selected reviewer if coming from review request approval
         $preselectedReviewerId = $request->get('reviewer_id');
         $preselectedReviewer = null;
@@ -75,6 +76,49 @@ class ReviewAssignmentController extends Controller
         }
 
         return view('admin.assignments.create', compact('reviewers', 'fieldOfStudies', 'preselectedReviewer', 'journalCount', 'reviewRequestId', 'submissions'));
+    }
+
+    /**
+     * AJAX: cari submission untuk dropdown "Pilih Submission" di halaman create assignment.
+     * Query langsung ke DB (bukan dari daftar 30 terbaru yang di-preload) supaya submission
+     * lama tetap bisa ditemukan, tidak terpotong oleh limit apa pun.
+     */
+    public function searchSubmissions(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        $query = \App\Models\Submission::with(['journalSlot:id,journal_master_id', 'journalSlot.journalMaster:id,nama_jurnal'])
+            ->select(['id', 'id_artikel', 'judul_artikel', 'link_artikel', 'journal_slot_id', 'tanggal_submit'])
+            ->whereNotNull('id_artikel');
+
+        if ($q !== '') {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('id_artikel', 'like', "%{$q}%")
+                    ->orWhere('judul_artikel', 'like', "%{$q}%")
+                    ->orWhereHas('journalSlot.journalMaster', function ($j) use ($q) {
+                        $j->where('nama_jurnal', 'like', "%{$q}%");
+                    });
+            });
+        }
+
+        // Filter tanggal submit (sama konvensi dengan filter lain di aplikasi ini)
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_submit', '>=', $request->get('tanggal_dari'));
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_submit', '<=', $request->get('tanggal_sampai'));
+        }
+
+        $submissions = $query->orderBy('created_at', 'desc')->limit(50)->get();
+
+        return response()->json($submissions->map(fn ($sub) => [
+            'id' => $sub->id,
+            'id_artikel' => $sub->id_artikel,
+            'judul_artikel' => $sub->judul_artikel,
+            'link_artikel' => $sub->link_artikel,
+            'nama_jurnal' => $sub->journalSlot?->journalMaster?->nama_jurnal ?? 'N/A',
+            'tanggal_submit' => $sub->tanggal_submit?->format('d/m/Y'),
+        ]));
     }
 
     public function store(Request $request)

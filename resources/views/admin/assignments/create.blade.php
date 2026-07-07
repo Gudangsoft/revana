@@ -252,22 +252,36 @@
                             <div class="mb-3">
                                 <label class="form-label">Pilih Submission <small class="text-muted">(Opsional - pilih untuk mengisi otomatis)</small></label>
                                 <input type="text" class="form-control mb-2" id="searchSubmission" placeholder="🔍 Cari kode artikel atau judul..." autocomplete="off">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label form-label-sm mb-1 text-muted">Tanggal submit dari</label>
+                                        <input type="date" class="form-control form-control-sm" id="submissionDateFrom">
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label form-label-sm mb-1 text-muted">sampai</label>
+                                        <input type="date" class="form-control form-control-sm" id="submissionDateTo">
+                                    </div>
+                                    <div class="col-12 col-md-4 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnClearSubmissionDate">
+                                            <i class="bi bi-x-circle me-1"></i>Hapus filter tanggal
+                                        </button>
+                                    </div>
+                                </div>
                                 <select class="form-select" id="submissionSelect" size="5" style="height: auto;">
                                     <option value="">-- Pilih Submission atau Input Manual --</option>
                                     @if(isset($submissions))
                                     @foreach($submissions as $sub)
-                                        <option value="{{ $sub->id }}" 
+                                        <option value="{{ $sub->id }}"
                                                 data-article-id="{{ $sub->id_artikel }}"
                                                 data-article-title="{{ $sub->judul_artikel }}"
                                                 data-article-link="{{ $sub->link_artikel }}"
-                                                data-journal-name="{{ $sub->journalSlot?->journalMaster?->nama_jurnal ?? '' }}"
-                                                data-search="{{ strtolower($sub->id_artikel . ' ' . $sub->judul_artikel . ' ' . ($sub->journalSlot?->journalMaster?->nama_jurnal ?? '')) }}">
+                                                data-journal-name="{{ $sub->journalSlot?->journalMaster?->nama_jurnal ?? '' }}">
                                             [{{ $sub->id_artikel }}] {{ Str::limit($sub->judul_artikel, 50) }} - {{ $sub->journalSlot?->journalMaster?->nama_jurnal ?? 'N/A' }}
                                         </option>
                                     @endforeach
                                     @endif
                                 </select>
-                                <small class="text-muted">Memilih submission akan mengisi otomatis Nomor Artikel, Judul Artikel, dan Link Submit</small>
+                                <small class="text-muted">Menampilkan 30 submission terbaru. Ketik untuk mencari di seluruh data (termasuk yang lebih lama). Memilih submission akan mengisi otomatis Nomor Artikel, Judul Artikel, dan Link Submit</small>
                             </div>
                         </div>
                     </div>
@@ -726,27 +740,75 @@ document.addEventListener('DOMContentLoaded', function() {
     // Submission search and auto-fill functionality
     const searchSubmission = document.getElementById('searchSubmission');
     const submissionSelect = document.getElementById('submissionSelect');
+    const dateFrom = document.getElementById('submissionDateFrom');
+    const dateTo = document.getElementById('submissionDateTo');
+    const btnClearDate = document.getElementById('btnClearSubmissionDate');
     const articleTitle = document.getElementById('article_title');
     const articleNumber = document.getElementById('article_number');
     const submitLink = document.getElementById('submit_link');
-    
+
     if (searchSubmission && submissionSelect) {
-        // Search filter
-        searchSubmission.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const options = submissionSelect.querySelectorAll('option');
-            
-            options.forEach(option => {
-                if (option.value === '') {
-                    option.style.display = '';
-                    return;
-                }
-                
-                const searchData = option.getAttribute('data-search') || '';
-                option.style.display = searchData.includes(searchTerm) ? '' : 'none';
+        let searchDebounce = null;
+        let searchAbortCtrl = null;
+
+        function renderSubmissionOptions(items) {
+            const frag = document.createDocumentFragment();
+            const emptyOpt = document.createElement('option');
+            emptyOpt.value = '';
+            emptyOpt.textContent = '-- Pilih Submission atau Input Manual --';
+            frag.appendChild(emptyOpt);
+
+            items.forEach(function (sub) {
+                const opt = document.createElement('option');
+                opt.value = sub.id;
+                opt.setAttribute('data-article-id', sub.id_artikel || '');
+                opt.setAttribute('data-article-title', sub.judul_artikel || '');
+                opt.setAttribute('data-article-link', sub.link_artikel || '');
+                opt.setAttribute('data-journal-name', sub.nama_jurnal || '');
+                const title = (sub.judul_artikel || '').length > 50
+                    ? sub.judul_artikel.substring(0, 50) + '…'
+                    : (sub.judul_artikel || '');
+                const tanggal = sub.tanggal_submit ? ' (' + sub.tanggal_submit + ')' : '';
+                opt.textContent = '[' + sub.id_artikel + '] ' + title + ' - ' + (sub.nama_jurnal || 'N/A') + tanggal;
+                frag.appendChild(opt);
             });
+
+            submissionSelect.innerHTML = '';
+            submissionSelect.appendChild(frag);
+        }
+
+        // Cari langsung ke server (bukan cuma filter opsi yang sudah dimuat) supaya
+        // submission lama tidak "hilang" gara-gara batas jumlah data yang di-preload.
+        function performSubmissionSearch() {
+            const term = searchSubmission.value.trim();
+            const params = new URLSearchParams({ q: term });
+            if (dateFrom.value) params.set('tanggal_dari', dateFrom.value);
+            if (dateTo.value) params.set('tanggal_sampai', dateTo.value);
+
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(function () {
+                if (searchAbortCtrl) searchAbortCtrl.abort();
+                searchAbortCtrl = new AbortController();
+
+                fetch('{{ route("admin.assignments.search-submissions") }}?' + params.toString(), {
+                    signal: searchAbortCtrl.signal,
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(function (res) { return res.json(); })
+                    .then(function (items) { renderSubmissionOptions(items); })
+                    .catch(function (err) { if (err.name !== 'AbortError') console.error(err); });
+            }, 300);
+        }
+
+        searchSubmission.addEventListener('input', performSubmissionSearch);
+        dateFrom.addEventListener('change', performSubmissionSearch);
+        dateTo.addEventListener('change', performSubmissionSearch);
+        btnClearDate.addEventListener('click', function () {
+            dateFrom.value = '';
+            dateTo.value = '';
+            performSubmissionSearch();
         });
-        
+
         // Auto-fill when submission selected
         submissionSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
