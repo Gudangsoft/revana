@@ -151,3 +151,27 @@ Catatan tambahan: controller ini juga memvalidasi & menyimpan `mail_from_address
 | `resources/views/admin/settings/index.blade.php` | Semua referensi `$settings['...']` diganti jadi `$generalSettings['...']` |
 
 **Diverifikasi:** render `SettingController::index()` sesungguhnya lewat tinker — field `app_url` sebelumnya akan kosong (clobbered), setelah fix `value="http://127.0.0.1:8000"` (nilai APP_URL asli) muncul benar di HTML.
+
+## 14. 🔄 Update: smpt
+
+- **Commit:** `35c754c` — 12:40 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/EmailSettingController.php`
+- `app/Http/Controllers/Admin/SettingController.php`
+- `app/Http/Controllers/Admin/SmsGatewayController.php`
+- `log-update-2026-07-06.md`
+- `resources/views/admin/email-settings/index.blade.php`
+- `resources/views/admin/settings/index.blade.php`
+- `resources/views/admin/sms-gateway/index.blade.php`
+
+## 15. Tambah Variabel Nomor WA Marketing di Template Notifikasi Kredensial
+
+**Tujuan:** User minta variabel nomor WA marketing (nomor 1, 2, dst — mengacu ke fitur multi-nomor marketing yang dibuat sebelumnya) tersedia di template notifikasi kredensial penulis, supaya pesan WA ke penulis bisa mencantumkan kontak marketing yang menangani submission-nya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | `buildWhatsAppMessage()`: load relasi `marketing` dari submission, gabungkan nomor utama (`phone`) + nomor tambahan (`additional_phones`) jadi satu daftar, lalu tambahkan variabel `{noWaMarketing1}` s.d. `{noWaMarketing5}` (`MAX_MARKETING_WA_VARS = 5`) ke proses `str_replace` template — nomor yang tidak ada diisi `-` |
+| `resources/views/admin/sms-gateway/index.blade.php` | Dokumentasikan variabel baru di kotak info "Variabel" pada bagian Template Notifikasi Kredensial Penulis |
+
+**Diverifikasi:** lewat tinker — buat submission dengan marketing yang punya 3 nomor (1 utama + 2 tambahan), set template custom berisi `{noWaMarketing1}` s.d. `{noWaMarketing4}`, hasil render menampilkan 3 nomor asli dengan benar dan slot ke-4 yang tidak ada tampil `-`.

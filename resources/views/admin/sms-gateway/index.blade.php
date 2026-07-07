@@ -353,6 +353,10 @@
                             <i class="bi bi-info-circle me-2"></i>
                             <strong>Variabel:</strong>
                             <code>{nama}</code> <code>{kode}</code> <code>{judul}</code> <code>{namaJurnal}</code> <code>{linkSubmit}</code> <code>{username}</code> <code>{password}</code>
+                            <code>{noWaMarketing1}</code> <code>{noWaMarketing2}</code> <code>{noWaMarketing3}</code> <code>{noWaMarketing4}</code> <code>{noWaMarketing5}</code>
+                            <div class="text-muted mt-1" style="font-size:.75rem;">
+                                Nomor WA marketing yang menangani submission ini (nomor utama + nomor tambahan). Kalau marketing cuma punya 1 nomor, <code>{noWaMarketing2}</code> dst akan tampil "-".
+                            </div>
                         </div>
 
                         <div class="mb-4">

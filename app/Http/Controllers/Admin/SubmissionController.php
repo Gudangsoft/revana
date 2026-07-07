@@ -2261,6 +2261,9 @@ class SubmissionController extends Controller
      * @param Submission $submission
      * @param bool $isUpdate Apakah ini notifikasi update kredensial
      */
+    /** Maksimal nomor WA marketing yang tersedia sebagai variabel template ({noWaMarketing1}, {noWaMarketing2}, dst) */
+    private const MAX_MARKETING_WA_VARS = 5;
+
     private function buildWhatsAppMessage(Submission $submission, bool $isUpdate = false): string
     {
         $nama = $submission->nama_penulis ?? '-';
@@ -2277,6 +2280,14 @@ class SubmissionController extends Controller
             $namaJurnal = $submission->journalSlot->journalMaster->nama_jurnal ?? '-';
         }
 
+        if (!$submission->relationLoaded('marketing')) {
+            $submission->load('marketing');
+        }
+        $marketingNumbers = array_values(array_filter(array_merge(
+            [$submission->marketing?->phone],
+            $submission->marketing?->additional_phones ?? []
+        )));
+
         $key = $isUpdate ? 'wa_template_credential_update' : 'wa_template_credential_new';
         $defaultFn = $isUpdate
             ? [\App\Http\Controllers\Admin\SmsGatewayController::class, 'defaultCredentialUpdateTemplate']
@@ -2284,11 +2295,15 @@ class SubmissionController extends Controller
 
         $template = Setting::get($key) ?: call_user_func($defaultFn);
 
-        return str_replace(
-            ['{nama}', '{kode}', '{judul}', '{namaJurnal}', '{linkSubmit}', '{username}', '{password}'],
-            [$nama, $kode, $judul, $namaJurnal, $linkSubmit, $username, $password],
-            $template
-        );
+        $searchVars  = ['{nama}', '{kode}', '{judul}', '{namaJurnal}', '{linkSubmit}', '{username}', '{password}'];
+        $replaceVars = [$nama, $kode, $judul, $namaJurnal, $linkSubmit, $username, $password];
+
+        for ($i = 1; $i <= self::MAX_MARKETING_WA_VARS; $i++) {
+            $searchVars[]  = '{noWaMarketing' . $i . '}';
+            $replaceVars[] = $marketingNumbers[$i - 1] ?? '-';
+        }
+
+        return str_replace($searchVars, $replaceVars, $template);
     }
 
     private function applyProgramFilter(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
