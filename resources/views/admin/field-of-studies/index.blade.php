@@ -188,9 +188,8 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <form action="{{ route('admin.field-of-studies.destroy', $field) }}" method="POST" class="d-inline">
+                                                    <form action="{{ route('admin.field-of-studies.remove', $field) }}" method="POST" class="d-inline">
                                                         @csrf
-                                                        @method('DELETE')
                                                         <button type="submit" class="btn btn-danger">Hapus</button>
                                                     </form>
                                                 </div>
@@ -281,9 +280,8 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="bulkDeleteForm" action="{{ route('admin.field-of-studies.bulk-delete') }}" method="POST">
+                <form id="bulkDeleteForm" action="{{ route('admin.field-of-studies.bulk-remove') }}" method="POST">
                     @csrf
-                    @method('DELETE')
                     <div class="modal-body">
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle"></i>

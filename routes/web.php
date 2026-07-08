@@ -386,6 +386,10 @@ Route::middleware('auth')->group(function () {
         // Field of Study Management
         Route::resource('field-of-studies', \App\Http\Controllers\Admin\FieldOfStudyController::class)->except(['show']);
         Route::post('/field-of-studies/{fieldOfStudy}/toggle', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'toggleStatus'])->name('field-of-studies.toggle');
+        // Hapus lewat POST biasa (bukan spoof DELETE via _method) — lebih tahan terhadap
+        // proxy/middleware yang kadang tidak meneruskan method override dengan benar.
+        Route::post('/field-of-studies/{fieldOfStudy}/remove', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'destroy'])->name('field-of-studies.remove');
+        Route::post('/field-of-studies-bulk-remove', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'bulkDelete'])->name('field-of-studies.bulk-remove');
         Route::post('/field-of-studies-import', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'import'])->name('field-of-studies.import');
         Route::get('/field-of-studies-template', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'downloadTemplate'])->name('field-of-studies.template');
         Route::get('/field-of-studies-export', [\App\Http\Controllers\Admin\FieldOfStudyController::class, 'export'])->name('field-of-studies.export');

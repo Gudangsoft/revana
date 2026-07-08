@@ -282,3 +282,19 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `resources/views/admin/field-of-studies/index.blade.php` | Tambah form pencarian (GET) di atas tabel: input teks cari + dropdown status + tombol Cari/Reset, mengikuti gaya filter yang sudah ada di halaman admin lain |
 
 **Diverifikasi:** lewat tinker — query filter `name LIKE`/`description LIKE` diuji langsung terhadap data uji: pencarian yang cocok mengembalikan hasil yang benar, pencarian yang tidak cocok mengembalikan 0 hasil. Render halaman (dengan data dummy untuk menghindari isu skema `reviewer_registrations` yang sudah ada sebelumnya di lokal, tidak terkait perubahan ini) berhasil menampilkan input pencarian dengan benar.
+
+## 24. Fix 404 Saat Hapus Bidang Ilmu
+
+**Tujuan:** User melaporkan klik "Hapus" pada bidang ilmu (mis. dari hasil pencarian #23) berujung ke halaman 404 (`/admin/field-of-studies/640`) alih-alih terhapus dan kembali ke daftar.
+
+**Root cause (dugaan kuat berdasarkan pengujian):** tombol Hapus (dan bulk-delete) memakai form `method="POST"` dengan `@method('DELETE')` — Laravel men-spoof method lewat field `_method` tersembunyi. Route `admin.field-of-studies.destroy` (dari `Route::resource(...)`) cuma terdaftar untuk verb `DELETE`, TIDAK ada route untuk `POST` biasa ke URI yang sama. Kalau proses method-override ini gagal diteruskan dengan benar di production (banyak kemungkinan penyebab: proxy/CDN yang strip field tertentu, cache, dsb — tombol "Nonaktifkan" yang pakai `Route::post()` biasa terbukti tetap jalan normal), request akhirnya jatuh sebagai POST murni ke `/field-of-studies/{id}` yang tidak match route manapun (resource route tidak mendaftarkan POST untuk member URI) → 404.
+
+**Fix:** hilangkan ketergantungan pada method-spoofing untuk aksi hapus — pakai route `POST` biasa (sama seperti tombol Aktifkan/Nonaktifkan yang sudah terbukti bekerja), tanpa `@method('DELETE')` sama sekali.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah `POST /field-of-studies/{fieldOfStudy}/remove` (`admin.field-of-studies.remove`) dan `POST /field-of-studies-bulk-remove` (`admin.field-of-studies.bulk-remove`), keduanya mengarah ke controller method yang sama (`destroy`/`bulkDelete`) — route `DELETE` lama tetap ada (tidak dihapus) untuk kompatibilitas |
+| `resources/views/admin/field-of-studies/index.blade.php` | Form hapus per-baris dan bulk-delete diubah memakai route POST baru tanpa `@method('DELETE')` |
+
+**Diverifikasi:** `php artisan route:list` mengonfirmasi kedua route POST baru terdaftar dengan benar; render halaman mengonfirmasi form Hapus sekarang mengarah ke route `.../remove` (bukan lagi resource `destroy` yang di-spoof) dan tidak ada lagi `@method('DELETE')` tersisa di halaman.
