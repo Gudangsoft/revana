@@ -48,6 +48,37 @@
         </div>
     @endif
 
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-12 col-md-5">
+                    <label class="form-label small text-muted mb-1">Cari</label>
+                    <input type="text" name="search" class="form-control form-control-sm"
+                           placeholder="Cari nama atau deskripsi bidang ilmu..."
+                           value="{{ request('search') }}">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small text-muted mb-1">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">Semua Status</option>
+                        <option value="active"   {{ request('status') == 'active'   ? 'selected' : '' }}>Aktif</option>
+                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
+                    @if(request()->hasAny(['search', 'status']))
+                    <a href="{{ route('admin.field-of-studies.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times"></i> Reset
+                    </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="table-responsive">

@@ -14,12 +14,26 @@ class FieldOfStudyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $fields = FieldOfStudy::withCount(['users', 'reviewerRegistrations'])
-            ->ordered()
-            ->paginate(request()->input('per_page', 15));
-        
+        $query = FieldOfStudy::withCount(['users', 'reviewerRegistrations']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $fields = $query->ordered()
+            ->paginate($request->input('per_page', 15))
+            ->withQueryString();
+
         return view('admin.field-of-studies.index', compact('fields'));
     }
 

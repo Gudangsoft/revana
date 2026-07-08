@@ -270,3 +270,15 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `resources/views/admin/loa/receipt.blade.php` | `criteria_note` dan `decision_note` pada kamus teks Inggris (`$L`) dikosongkan, menyamakan dengan versi Indonesia yang sudah kosong lebih dulu |
 
 **Diverifikasi:** render `admin.loa.receipt` dengan `loa_language=en` lewat tinker — teks "SUBJECT TO REVISION" tidak lagi muncul di HTML.
+
+## 23. Tambah Pencarian di Halaman Manajemen Bidang Ilmu (`/admin/field-of-studies`)
+
+**Tujuan:** User melaporkan halaman Manajemen Bidang Ilmu belum ada fitur pencarian — sebelumnya cuma paginasi tanpa filter apa pun.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/FieldOfStudyController.php` | `index()`: tambah filter `search` (cari di kolom `name` dan `description`) dan `status` (aktif/nonaktif), pakai `withQueryString()` supaya filter tetap terbawa saat ganti halaman/per-page |
+| `resources/views/admin/field-of-studies/index.blade.php` | Tambah form pencarian (GET) di atas tabel: input teks cari + dropdown status + tombol Cari/Reset, mengikuti gaya filter yang sudah ada di halaman admin lain |
+
+**Diverifikasi:** lewat tinker — query filter `name LIKE`/`description LIKE` diuji langsung terhadap data uji: pencarian yang cocok mengembalikan hasil yang benar, pencarian yang tidak cocok mengembalikan 0 hasil. Render halaman (dengan data dummy untuk menghindari isu skema `reviewer_registrations` yang sudah ada sebelumnya di lokal, tidak terkait perubahan ini) berhasil menampilkan input pencarian dengan benar.
