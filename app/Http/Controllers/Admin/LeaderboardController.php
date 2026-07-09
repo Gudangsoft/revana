@@ -33,7 +33,17 @@ class LeaderboardController extends Controller
                     $q->whereIn('status', ['PENDING', 'ACCEPTED', 'SUBMITTED']);
                 }
             ])
-            ->withSum('pointHistories as total_points_earned', 'points')
+            // Hitung poin dari riwayat transaksi (point_histories) sebagai sumber kebenaran,
+            // dipisah per type — sebelumnya di-sum tanpa filter type sehingga poin EARNED dan
+            // REDEEMED (keduanya disimpan sebagai angka positif) ikut terjumlah bersama,
+            // membuat "total poin" tampil lebih besar dari yang sebenarnya untuk reviewer
+            // yang pernah menukar reward.
+            ->withSum(['pointHistories as total_points_earned' => function ($q) {
+                $q->where('type', 'EARNED');
+            }], 'points')
+            ->withSum(['pointHistories as total_points_redeemed' => function ($q) {
+                $q->where('type', 'REDEEMED');
+            }], 'points')
             ->with(['rewardRedemptions' => function($q) {
                 $q->where('status', 'COMPLETED')
                   ->with('reward:id,name,tier');
@@ -42,11 +52,14 @@ class LeaderboardController extends Controller
             ->map(function($reviewer) {
                 // Calculate redemption stats
                 $completedRedemptions = $reviewer->rewardRedemptions;
-                
+
                 $reviewer->total_redemptions = $completedRedemptions->count();
                 $reviewer->total_points_spent = $completedRedemptions->sum('points_used');
                 $reviewer->total_points_earned = $reviewer->total_points_earned ?? 0;
-                $reviewer->current_points = $reviewer->available_points ?? 0;
+                // Poin saat ini dihitung langsung dari riwayat transaksi (bukan dari kolom
+                // users.available_points yang cuma cache) — supaya selalu sinkron walau
+                // kolom cache-nya pernah tidak ter-update dengan benar.
+                $reviewer->current_points = $reviewer->total_points_earned - ($reviewer->total_points_redeemed ?? 0);
                 
                 // Count rewards by tier - using pluck to get nested reward tier
                 $tiers = $completedRedemptions->pluck('reward.tier');
