@@ -50,3 +50,13 @@ Log perubahan otomatis dari git commits.
 **Perlu dijalankan di production setelah deploy:** `php artisan reviewers:sync-points --dry-run` dulu untuk lihat berapa yang akan disinkronkan, lalu `php artisan reviewers:sync-points` tanpa `--dry-run` untuk benar-benar menyimpannya.
 
 **Belum diperbaiki (di luar cakupan permintaan ini, cuma dimitigasi):** ketidakcocokan kolom `required_reviews` vs `required_points` di tabel `badges` — sudah tidak lagi menggagalkan pemberian poin (dibungkus try/catch + log), tapi badge memang tidak akan pernah otomatis ke-assign sampai ini diperbaiki terpisah. Perlu konfirmasi nama kolom yang benar di production sebelum diperbaiki, karena migration file dan skema aktual ternyata tidak cocok.
+
+## 4. 🔄 Update: Fix reviewer points synchronization by awarding points to all assigned reviewers and updating leaderboard calculations
+
+- **Commit:** `aa21db0` — 21:27 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Console/Commands/SyncReviewerPoints.php`
+- `app/Http/Controllers/Admin/LeaderboardController.php`
+- `app/Models/ReviewAssignment.php`
+- `log-update-2026-07-09.md`
+
