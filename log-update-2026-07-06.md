@@ -298,3 +298,16 @@ Dibuktikan langsung lewat tinker: submission tertua di database dicek — TIDAK 
 | `resources/views/admin/field-of-studies/index.blade.php` | Form hapus per-baris dan bulk-delete diubah memakai route POST baru tanpa `@method('DELETE')` |
 
 **Diverifikasi:** `php artisan route:list` mengonfirmasi kedua route POST baru terdaftar dengan benar; render halaman mengonfirmasi form Hapus sekarang mengarah ke route `.../remove` (bukan lagi resource `destroy` yang di-spoof) dan tidak ada lagi `@method('DELETE')` tersisa di halaman.
+
+## 25. Tambah Menu "Pengaturan Point Reviewer" di Sidebar
+
+**Tujuan:** User minta menu untuk pengaturan point reviewer.
+
+**Temuan:** Fitur ini **sudah ada** sejak lama — `PointSettingController` (`admin.point-settings.index`/`.update`, atur nilai rupiah per point, point per hari penyelesaian review, bonus cepat/kualitas, kriteria tambahan) dan view `admin/point-settings/index.blade.php` sudah lengkap dan berfungsi. Masalahnya: **tidak ada link menu di sidebar sama sekali** ke halaman ini, jadi tidak bisa diakses lewat navigasi (harus tahu URL persis). Ditemukan juga variabel `$pointActive` di sidebar yang sudah dihitung untuk halaman ini tapi tidak pernah benar-benar dipakai di mana pun (dead code).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah link "Pengaturan Point Reviewer" → `admin.point-settings.index` di accordion "Laporan Point", setelah "Pengaturan Point" (task-point-settings, untuk PIC/Marketing); masukkan prefix `admin.point-settings` ke `$laporanPointActive` supaya accordion otomatis terbuka saat halaman ini dibuka; hapus variabel `$pointActive` yang sudah tidak terpakai |
+
+**Diverifikasi:** render `PointSettingController::index()` langsung — berhasil tanpa error (halaman ini belum pernah dites lewat navigasi sebelumnya karena memang tidak ada link-nya). Render sidebar dengan `currentRoute=admin.point-settings.index` mengonfirmasi link baru muncul dengan href yang benar.

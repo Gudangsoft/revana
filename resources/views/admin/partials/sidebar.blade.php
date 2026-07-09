@@ -40,12 +40,12 @@
     $bkdActive      = $isSubmissionRoute && $currentProgram === 'bkd';
     $jafaActive     = $isSubmissionRoute && $currentProgram === 'jafa';
 
-    $pointActive    = str_starts_with($currentRoute, 'admin.points') || str_starts_with($currentRoute, 'admin.point-settings');
     $laporanPointActive = str_starts_with($currentRoute, 'admin.marketing-points')
         || str_starts_with($currentRoute, 'admin.pic-points')
         || str_starts_with($currentRoute, 'admin.pics.activity')
         || str_starts_with($currentRoute, 'admin.task-point-settings')
         || str_starts_with($currentRoute, 'admin.point-rankings')
+        || str_starts_with($currentRoute, 'admin.point-settings')
         || str_starts_with($currentRoute, 'admin.team-');
 @endphp
 
@@ -308,6 +308,10 @@
                 <a href="{{ route('admin.task-point-settings.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.task-point-settings') ? 'active' : '' }}">
                     <i class="bi bi-sliders text-secondary"></i> Pengaturan Point
+                </a>
+                <a href="{{ route('admin.point-settings.index') }}"
+                   class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}">
+                    <i class="bi bi-sliders" style="color:#60a5fa;"></i> Pengaturan Point Reviewer
                 </a>
                 <a href="{{ route('admin.marketing-points.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.marketing-points') ? 'active' : '' }}">
