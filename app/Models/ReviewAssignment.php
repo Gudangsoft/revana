@@ -172,14 +172,28 @@ class ReviewAssignment extends Model
             'approved_at' => now(),
         ]);
 
-        // Hitung lama hari review (dari created_at sampai approved_at)
-        $daysToComplete = $this->created_at->diffInDays(now());
-        
+        $this->awardPointsToAllReviewers(now());
+    }
+
+    /**
+     * Beri poin ke SEMUA reviewer yang ditugaskan di artikel ini (reviewer utama + reviewer
+     * 2-5 kalau diisi) — sebelumnya cuma reviewer utama (reviewer_id) yang dapat poin,
+     * reviewer pendamping tidak pernah tercatat sama sekali. Idempoten (aman dipanggil
+     * berkali-kali, mis. untuk sinkronisasi retroaktif) karena awardPointsTo() cek dulu
+     * apakah reviewer+assignment ini sudah pernah dapat poin.
+     *
+     * @return int jumlah reviewer yang BARU diberi poin (0 kalau semua sudah pernah)
+     */
+    public function awardPointsToAllReviewers(\Carbon\Carbon $completedAt): int
+    {
+        // Hitung lama hari review (dari created_at sampai selesai)
+        $daysToComplete = $this->created_at->diffInDays($completedAt);
+
         // Jika 0 hari (selesai di hari yang sama), hitung sebagai 1 hari
         if ($daysToComplete == 0) {
             $daysToComplete = 1;
         }
-        
+
         // Maksimal 5 hari untuk perhitungan poin
         if ($daysToComplete > 5) {
             $daysToComplete = 5;
@@ -187,22 +201,61 @@ class ReviewAssignment extends Model
 
         // Get points berdasarkan lama hari dari tabel point_day_settings
         $points = \App\Models\PointDaySetting::getPointsByDays($daysToComplete);
-        
-        $this->reviewer->increment('total_points', $points);
-        $this->reviewer->increment('available_points', $points);
-        $this->reviewer->increment('completed_reviews');
 
-        // Create point history dengan keterangan lama hari
+        $awarded = 0;
+        foreach ($this->assignedReviewerIds() as $reviewerId) {
+            if ($this->awardPointsTo($reviewerId, $points, $daysToComplete)) {
+                $awarded++;
+            }
+        }
+        return $awarded;
+    }
+
+    /** ID semua reviewer yang ditugaskan di assignment ini (reviewer utama + 2-5), tanpa duplikat */
+    public function assignedReviewerIds(): array
+    {
+        return array_values(array_unique(array_filter([
+            $this->reviewer_id,
+            $this->reviewer_2_id,
+            $this->reviewer_3_id,
+            $this->reviewer_4_id,
+            $this->reviewer_5_id,
+        ])));
+    }
+
+    /** @return bool true kalau poin baru saja diberikan, false kalau sudah pernah (dilewati) */
+    private function awardPointsTo(int $reviewerId, int $points, int $daysToComplete): bool
+    {
+        // Jangan kirim dua kali untuk reviewer+assignment yang sama
+        if (PointHistory::where('user_id', $reviewerId)->where('review_assignment_id', $this->id)->exists()) {
+            return false;
+        }
+
+        $reviewer = User::find($reviewerId);
+        if (!$reviewer) return false;
+
+        $reviewer->increment('total_points', $points);
+        $reviewer->increment('available_points', $points);
+        $reviewer->increment('completed_reviews');
+
         PointHistory::create([
-            'user_id' => $this->reviewer_id,
+            'user_id' => $reviewerId,
             'review_assignment_id' => $this->id,
             'points' => $points,
             'type' => 'EARNED',
             'description' => "Review artikel: {$this->article_title} (selesai dalam {$daysToComplete} hari)",
         ]);
 
-        // Check and award badges
-        $this->reviewer->checkAndAwardBadges();
+        // Badge-awarding tidak boleh menggagalkan pemberian poin ke reviewer lain di
+        // assignment yang sama — kalau gagal (mis. skema tabel badges bermasalah),
+        // cukup dicatat ke log, poin yang sudah diberikan di atas tetap tersimpan.
+        try {
+            $reviewer->checkAndAwardBadges();
+        } catch (\Throwable $e) {
+            \Log::error("checkAndAwardBadges failed for user {$reviewerId}: " . $e->getMessage());
+        }
+
+        return true;
     }
 
     public function requestRevision()

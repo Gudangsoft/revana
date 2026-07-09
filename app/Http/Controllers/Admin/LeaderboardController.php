@@ -21,18 +21,37 @@ class LeaderboardController extends Controller
         return view('admin.leaderboard.index', compact('reviewers'));
     }
 
+    /** Kondisi "user ini ditugaskan di assignment ini" — cek SEMUA slot reviewer (utama + 2-5), bukan cuma reviewer_id */
+    private function anyReviewerSlotMatchesUser($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereColumn('review_assignments.reviewer_id', 'users.id')
+              ->orWhereColumn('review_assignments.reviewer_2_id', 'users.id')
+              ->orWhereColumn('review_assignments.reviewer_3_id', 'users.id')
+              ->orWhereColumn('review_assignments.reviewer_4_id', 'users.id')
+              ->orWhereColumn('review_assignments.reviewer_5_id', 'users.id');
+        });
+    }
+
     private function buildLeaderboard()
     {
         // Get reviewers with their statistics
+        // NB: total_reviews/pending_reviews sebelumnya cuma hitung assignment di mana user
+        // jadi reviewer UTAMA (reviewer_id) — reviewer pendamping (reviewer_2..5_id) tidak
+        // pernah terhitung sama sekali, padahal hampir semua assignment punya reviewer
+        // pendamping. Sekarang dihitung lewat subquery yang cek kelima slot reviewer.
         $reviewers = User::where('role', 'reviewer')
-            ->withCount([
-                'reviewAssignments as total_reviews' => function($q) {
-                    $q->where('status', 'APPROVED');
-                },
-                'reviewAssignments as pending_reviews' => function($q) {
-                    $q->whereIn('status', ['PENDING', 'ACCEPTED', 'SUBMITTED']);
-                }
-            ])
+            ->select('users.*')
+            ->selectSub(function ($q) {
+                $this->anyReviewerSlotMatchesUser(
+                    $q->from('review_assignments')->where('status', 'APPROVED')
+                )->selectRaw('count(*)');
+            }, 'total_reviews')
+            ->selectSub(function ($q) {
+                $this->anyReviewerSlotMatchesUser(
+                    $q->from('review_assignments')->whereIn('status', ['PENDING', 'ACCEPTED', 'SUBMITTED'])
+                )->selectRaw('count(*)');
+            }, 'pending_reviews')
             // Hitung poin dari riwayat transaksi (point_histories) sebagai sumber kebenaran,
             // dipisah per type — sebelumnya di-sum tanpa filter type sehingga poin EARNED dan
             // REDEEMED (keduanya disimpan sebagai angka positif) ikut terjumlah bersama,
