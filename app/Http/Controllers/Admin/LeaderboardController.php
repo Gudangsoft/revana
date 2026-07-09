@@ -87,16 +87,20 @@ class LeaderboardController extends Controller
                 $reviewer->silver_count = $tiers->filter(fn($tier) => $tier === 'Silver')->count();
                 $reviewer->bronze_count = $tiers->filter(fn($tier) => $tier === 'Bronze')->count();
                 
-                // Calculate tier score for ranking
-                $reviewer->tier_score = 
-                    ($reviewer->platinum_count * 1000) + 
-                    ($reviewer->gold_count * 100) + 
-                    ($reviewer->silver_count * 10) + 
+                // Tier score dari reward masih dihitung untuk ditampilkan sebagai badge
+                // Platinum/Gold/Silver/Bronze di tabel, tapi bukan lagi dasar ranking (lihat
+                // sortByDesc di bawah) — ranking sekarang langsung berdasarkan poin, karena
+                // tier score selalu 0 untuk reviewer yang belum pernah redeem reward,
+                // sehingga urutan rank jadi acak dan tidak mencerminkan poin sama sekali.
+                $reviewer->tier_score =
+                    ($reviewer->platinum_count * 1000) +
+                    ($reviewer->gold_count * 100) +
+                    ($reviewer->silver_count * 10) +
                     ($reviewer->bronze_count * 1);
-                
+
                 return $reviewer;
             })
-            ->sortByDesc('tier_score')
+            ->sortByDesc('current_points')
             ->values();
 
         // Assign ranks

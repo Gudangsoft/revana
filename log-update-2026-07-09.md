@@ -60,3 +60,24 @@ Log perubahan otomatis dari git commits.
 - `app/Models/ReviewAssignment.php`
 - `log-update-2026-07-09.md`
 
+
+## 5. 🔄 Update: a
+
+- **Commit:** `6d1543b` — 21:29 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-07-09.md`
+
+## 6. Ranking Leaderboard Diubah Jadi Berdasarkan Poin (bukan Tier Reward)
+
+**Tujuan:** User minta sinkronkan "rangking point" di `/admin/leaderboard`. Setelah fix poin di section #3 dijalankan, poin masing-masing reviewer sudah benar, tapi kolom **Rank** tetap tidak nyambung dengan kolom **Points** di baris yang sama — karena rank dihitung dari `tier_score` (poin dari reward yang sudah ditukar: Platinum=1000/Gold=100/Silver=10/Bronze=1), bukan dari poin reviewer itu sendiri. Selama belum ada reviewer yang redeem reward, `tier_score` semua orang = 0, jadi urutan rank jadi acak walau Points-nya beda-beda — ini yang bikin ranking terlihat "belum sinkron". Dikonfirmasi ke user: pilihannya diubah total ke ranking berbasis poin (rank #1 = poin tertinggi), bukan cuma dijadikan tie-breaker.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LeaderboardController.php` | `buildLeaderboard()`: sort diganti dari `sortByDesc('tier_score')` ke `sortByDesc('current_points')`. `tier_score` tetap dihitung (dipakai buat badge jumlah Platinum/Gold/Silver/Bronze di tabel), tapi bukan lagi dasar urutan rank |
+| `resources/views/admin/leaderboard/index.blade.php` | Judul card diganti "Peringkat Reviewer Berdasarkan Poin", badge header jadi "Diurutkan berdasarkan poin tertinggi"; card "Cara Perhitungan Rank" ditulis ulang menjelaskan ranking berbasis poin; badge di card "Top 3 Performers" diganti dari jumlah reward jadi jumlah poin (`current_points`), supaya konsisten dengan dasar ranking yang baru |
+
+**Diverifikasi lewat tinker:** 3 reviewer diberi riwayat poin buatan (500, 200-80=120, 50) → hasil `buildLeaderboard()` mengurutkan rank #1/#2/#3 sesuai urutan poin (500 > 120 > 50), bukan tier_score (yang sama-sama 0 untuk ketiganya). Data uji dihapus setelah verifikasi.
+
+**Catatan:** halaman leaderboard di-cache 5 menit (`Cache::remember(..., 300, ...)`) per tenant — setelah deploy, jalankan `php artisan cache:clear` di production supaya hasil baru langsung terlihat, tanpa perlu menunggu 5 menit.
+

@@ -71,8 +71,8 @@
 <!-- Leaderboard Table -->
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-trophy-fill"></i> Peringkat Reviewer Berdasarkan Reward</span>
-        <span class="badge bg-primary">Diurutkan berdasarkan tier reward tertinggi</span>
+        <span><i class="bi bi-trophy-fill"></i> Peringkat Reviewer Berdasarkan Poin</span>
+        <span class="badge bg-primary">Diurutkan berdasarkan poin tertinggi</span>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -199,16 +199,14 @@
                 <i class="bi bi-info-circle"></i> Cara Perhitungan Rank
             </div>
             <div class="card-body">
-                <p class="mb-2">Ranking dihitung berdasarkan <strong>Tier Score</strong>:</p>
+                <p class="mb-2">Ranking dihitung langsung berdasarkan <strong>Poin</strong> (total poin dikurangi poin yang sudah ditukar reward):</p>
                 <ul class="mb-0">
-                    <li>💎 <strong>Platinum</strong> = 1,000 poin</li>
-                    <li>🥇 <strong>Gold</strong> = 100 poin</li>
-                    <li>🥈 <strong>Silver</strong> = 10 poin</li>
-                    <li>🥉 <strong>Bronze</strong> = 1 poin</li>
+                    <li>Rank #1 = reviewer dengan <strong>Points</strong> tertinggi di kolom tabel</li>
+                    <li>Badge 💎 Platinum / 🥇 Gold / 🥈 Silver / 🥉 Bronze hanya menampilkan jumlah reward yang sudah ditukar, tidak memengaruhi urutan rank</li>
                 </ul>
                 <hr>
                 <p class="small text-muted mb-0">
-                    <strong>Contoh:</strong> Reviewer dengan 2 Platinum + 3 Gold = (2×1000) + (3×100) = 2,300 poin
+                    <strong>Contoh:</strong> Reviewer A (500 poin) berada di atas Reviewer B (300 poin), walau Reviewer B punya lebih banyak reward yang sudah ditukar.
                 </p>
             </div>
         </div>
@@ -231,7 +229,7 @@
                         <strong>{{ $top->name }}</strong>
                     </div>
                     <div>
-                        <span class="badge bg-primary">{{ $top->total_redemptions }} rewards</span>
+                        <span class="badge bg-primary">{{ number_format($top->current_points) }} pts</span>
                     </div>
                 </div>
                 @endforeach
