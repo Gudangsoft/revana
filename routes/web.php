@@ -103,6 +103,11 @@ Route::get('/loa/{kode_loa}', [\App\Http\Controllers\Admin\LoaController::class,
 // Public LOA PDF — no login required, dipakai Fonnte untuk fetch file lampiran WA
 Route::get('/loa/{kode_loa}/pdf', [\App\Http\Controllers\Admin\LoaController::class, 'publicPdf'])->name('loa.public.pdf');
 
+// Public Kwitansi PDF — no login required, dipakai Fonnte untuk fetch file lampiran WA.
+// Data pembayaran dibawa lewat query string (tidak disimpan di DB), makanya URL yang
+// dikirim ke Fonnte sudah menyertakan nama_pembayar/jumlah/keterangan/dst secara lengkap.
+Route::get('/kwitansi/{kode_submit}/pdf', [\App\Http\Controllers\Admin\KwitansiController::class, 'publicPdf'])->name('kwitansi.public.pdf');
+
 // Public Referensi Jurnal (no login required)
 Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');
 
@@ -202,6 +207,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/submissions/{submission}/loa', [\App\Http\Controllers\Admin\LoaController::class, 'show'])->name('submissions.loa');
         Route::post('/submissions/{submission}/loa-metadata', [\App\Http\Controllers\Admin\LoaController::class, 'updateMetadata'])->name('submissions.loa.update-metadata');
         Route::get('/submissions/{submission}/kwitansi', [\App\Http\Controllers\Admin\KwitansiController::class, 'show'])->name('submissions.kwitansi');
+        Route::post('/submissions/{submission}/kwitansi/send-email', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendEmail'])->name('submissions.kwitansi.send-email');
+        Route::post('/submissions/{submission}/kwitansi/send-wa', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendWa'])->name('submissions.kwitansi.send-wa');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');
@@ -687,6 +694,8 @@ Route::prefix('marketing')->group(function () {
         Route::get('/submissions/{submission}/loa', [\App\Http\Controllers\Admin\LoaController::class, 'showMarketing'])->name('marketing.submissions.loa');
         Route::post('/submissions/{submission}/loa-metadata', [\App\Http\Controllers\Admin\LoaController::class, 'updateMarketingMetadata'])->name('marketing.submissions.loa.update-metadata');
         Route::get('/submissions/{submission}/kwitansi', [\App\Http\Controllers\Admin\KwitansiController::class, 'showMarketing'])->name('marketing.submissions.kwitansi');
+        Route::post('/submissions/{submission}/kwitansi/send-email', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendMarketingEmail'])->name('marketing.submissions.kwitansi.send-email');
+        Route::post('/submissions/{submission}/kwitansi/send-wa', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendMarketingWa'])->name('marketing.submissions.kwitansi.send-wa');
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');

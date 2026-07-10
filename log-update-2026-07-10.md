@@ -169,3 +169,39 @@ Log perubahan otomatis dari git commits.
 - `resources/views/admin/partials/sidebar.blade.php`
 - `routes/web.php`
 
+
+## 12. 🔄 Update: up
+
+- **Commit:** `bebc8fc` — 14:05 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-07-10.md`
+
+## 13. Tombol Kirim Email & WhatsApp di Halaman Kwitansi
+
+**Tujuan:** User minta tombol kirim email & WA ditambahkan di halaman kwitansi, mengikuti pola yang sudah ada di LOA (`LoaMasterController::dispatchLoaEmail()`/`dispatchLoaWa()`).
+
+**Tantangan utama:** data kwitansi (nama pembayar, jumlah, keterangan, metode bayar, tanggal) sengaja **tidak disimpan ke database** (lihat section #7) — jadi aksi kirim tidak bisa "ambil data dari DB" seperti LOA, melainkan harus membawa data yang SEDANG ditampilkan di halaman (lewat query string) ke proses pengiriman, supaya PDF yang dikirim persis sama dengan yang sedang dilihat admin/marketing saat klik kirim.
+
+### File Baru
+| File | Keterangan |
+|------|-----------|
+| `app/Mail/KwitansiMail.php` | Mailable — subjek "Kwitansi Pembayaran – {kode}", body render dari `emails.kwitansi`, lampiran PDF di-generate on-the-fly lewat `KwitansiController::generateKwitansiPdf()` (bukan dibaca dari file tersimpan, karena memang tidak ada file tersimpan) |
+| `resources/views/emails/kwitansi.blade.php` | Template email kwitansi (header jurnal, ringkasan pembayaran, catatan PDF terlampir) — gaya mengikuti `emails/loa-accepted.blade.php` yang sudah ada |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/KwitansiController.php` | Refactor besar: `buildViewData()` sekarang menerima `array $params` (bukan `Request` langsung) supaya bisa dipanggil dari jalur GET (tampil halaman) MAUPUN POST (kirim email/WA) dengan cara baca yang sama (`resolveParams()` pakai `$request->input()`, bukan `$request->query()`, supaya baca query string ATAU form POST). Tambah: `generateKwitansiPdf()` (dompdf, mirip `LoaController::generateLoaPdf()`), `publicPdf()` (route publik tanpa login, dipakai Fonnte fetch lampiran WA — dikunci pakai `kode_submit`, bukan ID mentah, konsisten dengan pola `kode_loa` di LOA), `sendEmail()`/`sendMarketingEmail()` (kirim `KwitansiMail`), `sendWa()`/`sendMarketingWa()` (kirim via `FonnteService`, pakai token `fonnte_api_token_loa` kalau ada seperti LOA). **Tidak ada counter/timestamp pengiriman yang disimpan ke `submissions`** (beda dari LOA yang mencatat `loa_email_sent_count`/`loa_wa_sent_count`) — konsisten dengan permintaan awal "tidak disimpan ke database", jadi tidak ada riwayat kirim kwitansi yang tercatat |
+| `resources/views/admin/kwitansi/receipt.blade.php` | Tambah tombol "✉ Kirim Email" (tampil kalau `email_penulis` ada) dan "📱 Kirim WA" (tampil kalau `no_hp_penulis` ada) di print-bar — masing-masing form POST dengan confirm dialog, membawa 5 field pembayaran yang SEDANG ditampilkan sebagai hidden input, supaya kwitansi yang dikirim = persis kwitansi yang dilihat. Flash message sukses/error ditampilkan di bawah print-bar setelah kirim. Tombol dibungkus `@if(isset($sendEmailRoute) ...)` supaya tidak error saat view ini dipanggil dari jalur PDF generation (`generateKwitansiPdf()`/`publicPdf()`) yang tidak menyertakan route kirim (karena PDF tidak butuh tombol interaktif apapun) |
+| `routes/web.php` | Tambah `kwitansi.public.pdf` (publik, no-auth), `admin.submissions.kwitansi.send-email`/`.send-wa`, `marketing.submissions.kwitansi.send-email`/`.send-wa` |
+
+**Diverifikasi lewat tinker (render & dispatch langsung, bukan cuma baca kode):**
+1. `generateKwitansiPdf()` dengan data pembayaran uji → PDF valid 1 halaman (dicek `/Pages /Count` di raw PDF).
+2. `KwitansiMail::render()` → email berisi nama pembayar & jumlah yang benar, `attachments()` menghasilkan 1 lampiran PDF.
+3. Route publik `GET /kwitansi/{kode_submit}/pdf?nama_pembayar=...&jumlah=...` (tanpa login) → status 200, `Content-Type: application/pdf` — mengonfirmasi Fonnte bisa fetch tanpa autentikasi.
+4. Halaman kwitansi (`GET /admin/submissions/{id}/kwitansi`) via HTTP request asli (login admin) → tombol "Kirim WA" muncul untuk submission yang punya `no_hp_penulis`.
+5. `sendEmail()` untuk submission TANPA `email_penulis` → redirect dengan flash error "Submission ini tidak memiliki email penulis" (bukan exception) — dicek juga redirect URL-nya membawa balik semua parameter pembayaran lewat query string (`?nama_pembayar=...&jumlah=...`), jadi kwitansi yang tadi sedang dilihat tidak hilang setelah klik kirim.
+6. Tidak dilakukan pengiriman WA/email SUNGGUHAN ke nomor/email asli manapun selama verifikasi (cuma jalur validasi & PDF/mail rendering yang dites) untuk menghindari mengirim pesan ke kontak asli di database lokal.
+
+**Catatan:** pengiriman WA memakai token Fonnte yang sama dengan LOA (`fonnte_api_token_loa`, fallback ke token utama) — kalau token belum diisi di Setting > SMS Gateway, tombol "Kirim WA" akan gagal dengan pesan error yang jelas, bukan crash.
+

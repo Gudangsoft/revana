@@ -120,8 +120,41 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
         <a href="{{ url()->previous() }}" class="btn-back">&larr; Kembali</a>
         <span style="margin-left:16px; color:#ccc;">Kwitansi: {{ $submission->kode_submit }}</span>
     </div>
-    <button class="btn-print" onclick="window.print()">&#128424; Print / Save PDF</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+        @if(isset($sendEmailRoute) && $submission->email_penulis)
+        <form method="POST" action="{{ route($sendEmailRoute, $submission) }}" style="display:inline;"
+              onsubmit="return confirm('Kirim kwitansi ke email {{ $submission->email_penulis }}?');">
+            @csrf
+            @foreach(['nama_pembayar' => $namaPembayar, 'jumlah' => $jumlah, 'keterangan' => $keterangan, 'metode_bayar' => $metodeBayar, 'tanggal' => $tanggal->toDateString()] as $field => $value)
+            <input type="hidden" name="{{ $field }}" value="{{ $value }}">
+            @endforeach
+            <button type="submit" class="btn-back" style="background:#0078D4;">&#9993; Kirim Email</button>
+        </form>
+        @endif
+        @if(isset($sendWaRoute) && $submission->no_hp_penulis)
+        <form method="POST" action="{{ route($sendWaRoute, $submission) }}" style="display:inline;"
+              onsubmit="return confirm('Kirim kwitansi via WhatsApp ke {{ $submission->no_hp_penulis }}?');">
+            @csrf
+            @foreach(['nama_pembayar' => $namaPembayar, 'jumlah' => $jumlah, 'keterangan' => $keterangan, 'metode_bayar' => $metodeBayar, 'tanggal' => $tanggal->toDateString()] as $field => $value)
+            <input type="hidden" name="{{ $field }}" value="{{ $value }}">
+            @endforeach
+            <button type="submit" class="btn-back" style="background:#25D366;">&#128241; Kirim WA</button>
+        </form>
+        @endif
+        <button class="btn-print" onclick="window.print()">&#128424; Print / Save PDF</button>
+    </div>
 </div>
+
+@if(session('success'))
+<div class="no-print" style="background:#1a7a4a; color:#fff; padding:10px 24px; font-family:sans-serif; font-size:13px;">
+    &#10003; {{ session('success') }}
+</div>
+@endif
+@if(session('error'))
+<div class="no-print" style="background:#c62828; color:#fff; padding:10px 24px; font-family:sans-serif; font-size:13px;">
+    &#9888; {{ session('error') }}
+</div>
+@endif
 
 {{-- ── Form isi data pembayaran — GET, TIDAK menyimpan apapun ke database,
        cuma reload halaman ini dengan query string berbeda ────────────────── --}}
