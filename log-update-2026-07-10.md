@@ -52,3 +52,28 @@ Log perubahan otomatis dari git commits.
 **Diverifikasi lewat tinker:** dicoba simpan `nama_penulis` & `affiliation_penulis` dengan string 288 karakter (persis daftar 11 nama penulis yang dilaporkan user) ke submission asli → berhasil tersimpan utuh (288 karakter, cocok persis) setelah migrasi & fix validasi; data asli submission dikembalikan (restore) setelah verifikasi. Dicek juga langsung pakai Laravel Validator: dengan rule baru — lolos; dengan rule lama (`max:255`) — gagal (mengonfirmasi ini memang penyebab bug yang dilaporkan).
 
 **Catatan:** endpoint LAIN yang menulis ke `affiliation_penulis` (form submission biasa di `SubmissionController`, `JournalManagementController`, `Marketing\DashboardController`) masih membatasi validasinya sendiri di `max:500` — tidak ikut diubah karena bukan bagian dari laporan ini (halaman metadata LOA), tapi sudah aman dari crash database karena kolomnya sendiri sekarang `TEXT`.
+
+## 4. 🔄 Update: long uathor
+
+- **Commit:** `f0a8c68` — 12:49 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `database/migrations/2026_07_10_000001_change_affiliation_penulis_to_text.php`
+- `log-update-2026-07-09.md`
+- `log-update-2026-07-10.md`
+
+## 5. Fix Halaman LOA PDF Selalu Kelebihan 1 Halaman Kosong (`/marketing/submissions/{id}/loa`, `/admin/submissions/{id}/loa`)
+
+**Tujuan:** User melaporkan (dengan screenshot print preview) ada yang "over" di halaman LOA — minta dioptimalkan supaya halaman LOA tidak berlebih.
+
+**Root cause:** LOA seharusnya cuma 2 halaman (Halaman 1: Surat Penerimaan/Receipt, Halaman 2: Lembar Penilaian/Evaluation Sheet), tapi PDF yang dihasilkan selalu 3 halaman — ada 1 halaman kosong ekstra di akhir. **Ini bug lama, tidak ada hubungannya dengan panjang nama penulis** (diverifikasi: submission dengan nama penulis pendek pun tetap menghasilkan 3 halaman). Penyebabnya adalah quirk dompdf: kedua `<div class="a4-page">` (halaman 1 dan halaman 2) memakai CSS class yang sama, yang di dalamnya ada `page-break-after: always`. Untuk halaman 1 ini benar (perlu pindah ke halaman 2). Tapi karena halaman 2 (yang terakhir/tidak ada konten lagi sesudahnya) ikut memakai class yang sama, dompdf tetap memaksa "mulai halaman baru" setelah halaman 2 — menghasilkan halaman ke-3 yang kosong. Dikonfirmasi lewat eksperimen terisolasi: div `.a4-page` dengan `min-height:297mm` + `page-break-after:always` SENDIRIAN (cuma teks "Hello", tanpa konten lain sesudahnya) sudah menghasilkan 2 halaman PDF, bukan 1 — jadi bukan soal konten kepanjangan/overflow beneran, tapi soal `page-break-after` yang salah sasaran dipasang di halaman terakhir.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | CSS `.a4-page` (di `@media screen` dan `@media print`) tidak lagi otomatis punya `page-break-after: always` — dipindah ke class terpisah `.a4-page-break`. Class `.a4-page-break` cuma ditempel di `<div>` halaman 1 (Surat Penerimaan); `<div>` halaman 2 (Lembar Penilaian, halaman terakhir) tetap polos `class="a4-page"` tanpa break, karena memang tidak boleh ada halaman sesudahnya |
+
+**Diverifikasi lewat tinker + dompdf langsung (bukan cuma baca kode):** generate PDF LOA asli lewat `LoaController::generateLoaPdf()`, dicek jumlah halaman via `/Pages /Count` di raw PDF. Sebelum fix: 3 halaman (baik pakai nama penulis panjang 288 karakter maupun nama pendek biasa — job berlangsung dengan search-bisection sampai ditemukan kalau halaman 1 sendirian = 1 halaman, halaman 2 sendirian = 2 halaman/sudah overflow duluan tanpa perlu digabung dengan halaman 1). Sesudah fix: PDF asli (nama penulis panjang maupun pendek) sama-sama tepat 2 halaman. Data submission asli yang dipakai untuk test tidak pernah di-save ke database (cuma diubah in-memory untuk generate PDF), dicek ulang setelah verifikasi bahwa data di DB tidak berubah.
+
+**Catatan:** halaman print-preview browser (`window.print()`, dipakai user di screenshot) memakai HTML/CSS yang sama dengan yang dipakai dompdf untuk PDF, jadi fix ini otomatis berlaku juga untuk tombol "🖨 Print / Save PDF" di halaman LOA, tidak cuma untuk PDF yang dikirim via WA/email.
+

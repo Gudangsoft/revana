@@ -177,8 +177,13 @@
     background: #fff; margin: 24px auto;
     box-shadow: 0 4px 24px rgba(0,0,0,.25);
     padding: 0;
-    page-break-after: always;
   }
+  /* Break cuma dipasang di halaman PERTAMA (lihat class "a4-page-break" di HTML) —
+     kalau dipasang di SEMUA .a4-page (termasuk halaman terakhir), dompdf/browser
+     print nge-render 1 halaman kosong tambahan setelah halaman terakhir, karena
+     page-break-after dianggap "mulai halaman baru" walau tidak ada konten lagi
+     sesudahnya. Makanya total halaman LOA jadi 3 padahal isinya cuma 2 halaman. */
+  .a4-page-break { page-break-after: always; }
   .page-inner { padding: 3mm 18mm 10mm 18mm; }
 }
 
@@ -187,7 +192,8 @@
   .print-bar, .no-print { display: none !important; }
   body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
   @page { size: A4; margin: 0; }
-  .a4-page { width: 210mm; min-height: 297mm; page-break-after: always; margin: 0; }
+  .a4-page { width: 210mm; min-height: 297mm; margin: 0; }
+  .a4-page-break { page-break-after: always; }
   .page-inner { padding: 3mm 18mm 10mm 18mm; }
 }
 
@@ -728,7 +734,7 @@ function copyLoaLink(e) {
 {{-- ══════════════════════════════════════════════════════
      PAGE 1 — RECEIPT FOR PAPER / SURAT PENERIMAAN ARTIKEL
      ══════════════════════════════════════════════════════ --}}
-<div class="a4-page">
+<div class="a4-page a4-page-break">
 
     {{-- Watermark --}}
     <div class="watermark" aria-hidden="true">
