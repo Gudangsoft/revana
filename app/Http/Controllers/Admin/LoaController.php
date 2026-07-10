@@ -46,8 +46,8 @@ class LoaController extends Controller
     public function updateMetadata(Request $request, Submission $submission)
     {
         $validated = $request->validate([
-            'nama_penulis'        => 'required|string|max:255',
-            'affiliation_penulis' => 'nullable|string|max:500',
+            'nama_penulis'        => 'required|string',
+            'affiliation_penulis' => 'nullable|string',
             'judul_artikel'       => 'required|string|max:1000',
             'tanggal_loa'         => 'nullable|date',
             'email_penulis'       => 'nullable|email|max:255',
@@ -88,8 +88,8 @@ class LoaController extends Controller
         }
 
         $validated = $request->validate([
-            'nama_penulis'        => 'required|string|max:255',
-            'affiliation_penulis' => 'nullable|string|max:500',
+            'nama_penulis'        => 'required|string',
+            'affiliation_penulis' => 'nullable|string',
             'judul_artikel'       => 'required|string|max:1000',
             'tanggal_loa'         => 'nullable|date',
             'email_penulis'       => 'nullable|email|max:255',

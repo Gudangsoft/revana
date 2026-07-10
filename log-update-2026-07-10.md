@@ -1,0 +1,54 @@
+# Log Update — 10 July 2026
+
+## Ringkasan
+Log perubahan otomatis dari git commits.
+
+---
+
+## 1. Ranking Leaderboard Diubah Jadi Berdasarkan Poin (bukan Tier Reward)
+
+**Tujuan:** User minta sinkronkan "rangking point" di `/admin/leaderboard`. Setelah fix poin reviewer sebelumnya dijalankan, poin masing-masing reviewer sudah benar, tapi kolom **Rank** tetap tidak nyambung dengan kolom **Points** di baris yang sama — karena rank dihitung dari `tier_score` (poin dari reward yang sudah ditukar: Platinum=1000/Gold=100/Silver=10/Bronze=1), bukan dari poin reviewer itu sendiri. Selama belum ada reviewer yang redeem reward, `tier_score` semua orang = 0, jadi urutan rank jadi acak walau Points-nya beda-beda — ini yang bikin ranking terlihat "belum sinkron". Dikonfirmasi ke user: pilihannya diubah total ke ranking berbasis poin (rank #1 = poin tertinggi), bukan cuma dijadikan tie-breaker.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LeaderboardController.php` | `buildLeaderboard()`: sort diganti dari `sortByDesc('tier_score')` ke `sortByDesc('current_points')`. `tier_score` tetap dihitung (dipakai buat badge jumlah Platinum/Gold/Silver/Bronze di tabel), tapi bukan lagi dasar urutan rank |
+| `resources/views/admin/leaderboard/index.blade.php` | Judul card diganti "Peringkat Reviewer Berdasarkan Poin", badge header jadi "Diurutkan berdasarkan poin tertinggi"; card "Cara Perhitungan Rank" ditulis ulang menjelaskan ranking berbasis poin; badge di card "Top 3 Performers" diganti dari jumlah reward jadi jumlah poin (`current_points`), supaya konsisten dengan dasar ranking yang baru |
+
+**Diverifikasi lewat tinker:** 3 reviewer diberi riwayat poin buatan (500, 200-80=120, 50) → hasil `buildLeaderboard()` mengurutkan rank #1/#2/#3 sesuai urutan poin (500 > 120 > 50), bukan tier_score (yang sama-sama 0 untuk ketiganya). Data uji dihapus setelah verifikasi.
+
+**Catatan:** halaman leaderboard di-cache 5 menit (`Cache::remember(..., 300, ...)`) per tenant — setelah deploy, jalankan `php artisan cache:clear` di production supaya hasil baru langsung terlihat, tanpa perlu menunggu 5 menit.
+
+## 2. Fix Tombol Upload Hasil Review Hilang untuk Reviewer Pendamping (`/reviewer/tasks/{id}`)
+
+**Tujuan:** User melapor di `https://portal.apji.org/reviewer/tasks/32`, reviewer 2 tidak punya tombol/form upload hasil review sama sekali.
+
+**Root cause:** Kolom `status` di tabel `review_assignments` dipakai BERSAMA oleh semua reviewer (reviewer utama + reviewer 2-5) pada satu assignment — bukan per-reviewer. Form input review di halaman detail tugas (dan route `reviewer.results.create`) hanya tampil kalau `$assignment->status` bernilai `ON_PROGRESS` atau `REVISION`. Begitu reviewer utama submit review-nya duluan, `ReviewAssignment::submit()` mengubah status jadi `SUBMITTED` untuk SELURUH assignment (bukan cuma untuk reviewer utama) — akibatnya reviewer pendamping yang **belum pernah** mengisi review-nya sendiri ikut kehilangan tombol/form tersebut, karena status sudah keburu lewat dari `ON_PROGRESS`/`REVISION`. Direproduksi lokal: assignment dengan 2 reviewer, reviewer 1 submit → status jadi `SUBMITTED` → dengan logic lama, reviewer 2 (yang belum submit apa-apa) tidak lagi melihat form; dengan logic baru, form tetap muncul karena reviewer 2 belum punya `ReviewResult` sendiri.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/reviewer/tasks/show.blade.php` | Kondisi tampil form "FORMULIR REVIEW ARTIKEL ILMIAH SIPERA" ditambah: selain status `ON_PROGRESS`/`REVISION`, sekarang juga tampil saat status `SUBMITTED` **selama** reviewer yang login belum punya `$myReviewResult` sendiri (menandakan reviewer lain yang submit duluan, bukan dirinya) |
+| `app/Http/Controllers/Reviewer/ReviewResultController.php` | `create()`: kalau reviewer yang login sudah pernah submit review-nya sendiri, redirect balik dengan pesan info (tidak perlu isi ulang); kalau belum, gate status diperluas dari `['ON_PROGRESS','REVISION']` jadi `['ON_PROGRESS','REVISION','SUBMITTED']` supaya reviewer pendamping tetap bisa buka form walau status assignment sudah maju duluan oleh reviewer lain |
+
+**Diverifikasi lewat tinker:** dibuat assignment uji dengan reviewer utama + 1 reviewer pendamping (status awal `ON_PROGRESS`). Reviewer utama submit review → `assignment->submit()` → status jadi `SUBMITTED`. Dicek kondisi tampil form untuk reviewer pendamping: logic LAMA = tidak tampil (bug, sesuai laporan user), logic BARU = tetap tampil karena reviewer pendamping belum punya `ReviewResult` sendiri. Data uji dihapus setelah verifikasi.
+
+**Catatan:** perbaikan ini cuma menyentuh sisi tampilan/akses form untuk reviewer pendamping (agar tidak terkunci), tidak mengubah cara kolom `status` bekerja secara keseluruhan (masih 1 kolom dipakai bersama, dipakai juga oleh dashboard admin dll) — perubahan ke skema per-reviewer status yang lebih menyeluruh di luar cakupan laporan ini.
+
+## 3. Fix Metadata LOA Gagal Disimpan untuk Daftar Penulis Panjang (>255 Karakter)
+
+**Tujuan:** User melapor metadata LOA tidak tersimpan saat nama penulis berisi banyak nama (11 penulis, ± 288 karakter) — minta batas karakternya ditambah/dibuat panjang.
+
+**Root cause:** Kolom `nama_penulis` di tabel `submissions` sebenarnya sudah pernah dimigrasikan ke tipe `TEXT` (migrasi `2026_06_22_000002_change_nama_penulis_to_text.php`, dari fix sebelumnya) — jadi dari sisi database sudah tidak ada batas praktis. Tapi validasi request di endpoint simpan metadata LOA (`LoaController::updateMetadata` untuk admin, `updateMarketingMetadata` untuk marketing) **belum ikut diperbarui** dan masih memaksa `'nama_penulis' => 'required|string|max:255'` — jadi request dengan >255 karakter ditolak oleh validasi Laravel sebelum sempat sampai ke database sama sekali. Controller lain di codebase (`SubmissionController`, `JournalManagementController`, `Marketing\DashboardController`) sudah tidak punya batas `max` untuk field ini — cuma 2 endpoint LOA ini yang ketinggalan.
+
+**Temuan tambahan (ikut diperbaiki karena satu fitur & pola masalah yang sama):** kolom `affiliation_penulis` ternyata **belum** pernah dimigrasikan ke `TEXT` (masih `VARCHAR(255)` bawaan Laravel `string()`), padahal validasinya sudah mengizinkan sampai `max:500` di banyak tempat termasuk 2 endpoint LOA ini. Ini bug laten kebalikan dari yang dilaporkan: validasi lolos, tapi baru gagal saat query INSERT/UPDATE ke database ("Data too long for column") — akan muncul kalau daftar afiliasi 11 penulis juga digabung jadi satu string panjang, kemungkinan besar kasus berikutnya yang akan ditemui user.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | `updateMetadata()` dan `updateMarketingMetadata()`: validasi `nama_penulis` diubah dari `required\|string\|max:255` jadi `required\|string` (tanpa batas, konsisten dengan kolom `TEXT` dan controller lain); `affiliation_penulis` diubah dari `nullable\|string\|max:500` jadi `nullable\|string` |
+| `database/migrations/2026_07_10_000001_change_affiliation_penulis_to_text.php` (baru) | Migrasi kolom `affiliation_penulis` dari `VARCHAR(255)` ke `TEXT`, supaya konsisten dengan `nama_penulis` dan tidak lagi punya risiko "Data too long for column" |
+
+**Diverifikasi lewat tinker:** dicoba simpan `nama_penulis` & `affiliation_penulis` dengan string 288 karakter (persis daftar 11 nama penulis yang dilaporkan user) ke submission asli → berhasil tersimpan utuh (288 karakter, cocok persis) setelah migrasi & fix validasi; data asli submission dikembalikan (restore) setelah verifikasi. Dicek juga langsung pakai Laravel Validator: dengan rule baru — lolos; dengan rule lama (`max:255`) — gagal (mengonfirmasi ini memang penyebab bug yang dilaporkan).
+
+**Catatan:** endpoint LAIN yang menulis ke `affiliation_penulis` (form submission biasa di `SubmissionController`, `JournalManagementController`, `Marketing\DashboardController`) masih membatasi validasinya sendiri di `max:500` — tidak ikut diubah karena bukan bagian dari laporan ini (halaman metadata LOA), tapi sudah aman dari crash database karena kolomnya sendiri sekarang `TEXT`.
