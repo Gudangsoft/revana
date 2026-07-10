@@ -308,3 +308,34 @@ Log perubahan otomatis dari git commits.
 **Catatan:** selama pengujian nomor 3 di atas, `marketing_id` pada submission uji sempat diubah ke `null` untuk keperluan tes kepemilikan (ownership check) tanpa mencatat nilai aslinya lebih dulu — karena distribusi `marketing_id` di data lokal kira-kira 50/50 terisi/kosong, nilai aslinya tidak bisa dipastikan lagi. Ini **cuma memengaruhi data development lokal**, tidak menyentuh database production sama sekali.
 
 
+
+## 20. 🔄 Update: Add Invoice feature (same concept as kwitansi, plus bank account and marketing CP)
+
+- **Commit:** `2af7918` — 15:22 oleh Gudangsoft
+- **File berubah:** 14 file
+- `app/Http/Controllers/Admin/InvoiceController.php`
+- `app/Http/Controllers/Admin/InvoiceMasterController.php`
+- `app/Mail/InvoiceMail.php`
+- `app/Models/JournalMaster.php`
+- `database/migrations/2026_07_10_000003_add_bank_account_to_journal_masters_table.php`
+- `log-update-2026-07-10.md`
+- `resources/views/admin/invoice-master/edit.blade.php`
+- `resources/views/admin/invoice-master/index.blade.php`
+- `resources/views/admin/invoice/receipt.blade.php`
+- `resources/views/admin/partials/sidebar.blade.php`
+
+## 21. Tombol Kwitansi & Invoice di Daftar Submission Marketing (Digabung ke Dropdown "Dokumen")
+
+**Tujuan:** User minta tombol Invoice & Kwitansi juga ditambahkan di kolom "Aksi" halaman daftar submission marketing (`/marketing/submissions`), tapi diatur rapi supaya tidak berjubel — kolom Aksi ini sebelumnya cuma punya 2 tombol (Detail, LOA) berdampingan pakai `d-flex gap-1`, dan menambah 2 tombol lagi langsung di baris yang sama akan membuatnya sempit/berantakan terutama di tabel dengan banyak kolom.
+
+**Pendekatan:** Tombol "Detail" tetap sendiri (aksi paling sering dipakai), sedangkan LOA/Kwitansi/Invoice digabung jadi satu dropdown "📄 Dokumen" — jadi kolom Aksi tetap cuma 2 elemen terlihat (Detail + Dokumen ▾) berapa pun jumlah jenis dokumen yang tersedia ke depannya, tidak perlu menambah lebar kolom tiap kali ada dokumen baru.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/submissions.blade.php` | Tombol "LOA" yang sebelumnya berdiri sendiri diubah jadi salah satu item di dalam dropdown "Dokumen" (`data-bs-toggle="dropdown"`), ditambah item baru "Kwitansi" dan "Invoice" yang mengarah ke `marketing.submissions.kwitansi`/`marketing.submissions.invoice` (route yang sudah dibuat di section #17 & #19). Dropdown diberi `data-bs-boundary="viewport"` supaya menu-nya tidak terpotong oleh `.table-responsive` yang membungkus tabel (masalah umum Bootstrap dropdown di dalam container `overflow-x:auto`) |
+
+**Diverifikasi lewat HTTP request asli (login sebagai akun marketing sungguhan):** `GET /marketing/submissions` → status 200, tombol "Dokumen" (dropdown) muncul, link ke halaman Kwitansi dan Invoice untuk submission yang benar (`/marketing/submissions/{id}/kwitansi` dan `/invoice`) ada di dalam dropdown, atribut `data-bs-boundary="viewport"` terpasang.
+
+**Catatan:** halaman lain yang juga menampilkan tombol LOA di tabel listing (`admin/submissions/monitoring.blade.php`, `admin/fasttrack/monitoring.blade.php`, dll — pakai badge kecil, bukan tombol besar seperti di sini) belum ikut diubah karena bukan bagian dari permintaan ini dan gaya tampilannya berbeda (badge inline, bukan grup tombol) — kalau nanti diminta, pola dropdown yang sama bisa diterapkan di situ juga.
+

@@ -157,12 +157,30 @@
                                    class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-eye"></i> Detail
                                 </a>
-                                @if($submission->kode_loa)
-                                <a href="{{ route('marketing.submissions.loa', $submission) }}"
-                                   target="_blank" class="btn btn-sm btn-success">
-                                    <i class="bi bi-file-earmark-check me-1"></i>LOA
-                                </a>
-                                @endif
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false">
+                                        <i class="bi bi-file-earmark-text"></i> Dokumen
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        @if($submission->kode_loa)
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('marketing.submissions.loa', $submission) }}" target="_blank">
+                                                <i class="bi bi-file-earmark-check text-success me-1"></i> LOA
+                                            </a>
+                                        </li>
+                                        @endif
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('marketing.submissions.kwitansi', $submission) }}" target="_blank">
+                                                <i class="bi bi-receipt text-primary me-1"></i> Kwitansi
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('marketing.submissions.invoice', $submission) }}" target="_blank">
+                                                <i class="bi bi-file-earmark-text text-info me-1"></i> Invoice
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </td>
                     </tr>
