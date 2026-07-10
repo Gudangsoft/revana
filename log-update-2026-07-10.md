@@ -205,3 +205,28 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** pengiriman WA memakai token Fonnte yang sama dengan LOA (`fonnte_api_token_loa`, fallback ke token utama) — kalau token belum diisi di Setting > SMS Gateway, tombol "Kirim WA" akan gagal dengan pesan error yang jelas, bukan crash.
 
+
+## 14. 🔄 Update: Add email and WhatsApp sending for kwitansi receipts
+
+- **Commit:** `1bac71f` — 14:21 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/KwitansiController.php`
+- `app/Mail/KwitansiMail.php`
+- `log-update-2026-07-10.md`
+- `resources/views/admin/kwitansi/receipt.blade.php`
+- `resources/views/emails/kwitansi.blade.php`
+- `routes/web.php`
+
+## 15. Kop Surat Kwitansi Pakai Gambar Header yang Sudah Diupload di LOA
+
+**Tujuan:** User minta header kwitansi pakai gambar kop surat yang sudah diupload lewat Master LOA (`header_image_path`), tidak perlu upload ulang khusus kwitansi.
+
+**Root cause:** `KwitansiController::buildViewData()` sebenarnya SUDAH mengambil `headerImageUrl` dari `$journal->header_image_path` (kolom yang sama dipakai LOA) sejak awal — tapi `resources/views/admin/kwitansi/receipt.blade.php` tidak pernah memakai variabel itu, selalu me-render header generik (logo bulat + nama jurnal) tanpa mengecek apakah kop surat custom sudah ada.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/kwitansi/receipt.blade.php` | Header kwitansi sekarang cek `$headerImageUrl` dulu (persis pola yang sama di `admin/loa/receipt.blade.php`): kalau jurnal sudah punya gambar kop surat custom (diupload lewat Master LOA / Journal Master), dipakai langsung sebagai `<img>` full-width; kalau belum ada, baru fallback ke header generik (logo + nama jurnal) |
+
+**Diverifikasi lewat tinker:** dicek 2 kondisi — (1) jurnal TANPA `header_image_path` → render fallback header generik (`class="jrn-header"` muncul), (2) jurnal DENGAN `header_image_path` diisi sementara ke DB (`journals/headers/fake-test-header.png`, langsung dikembalikan ke `null` setelah tes) → render `<img>` kop surat, fallback header generik TIDAK muncul lagi. Kedua kondisi sesuai ekspektasi, data uji sudah dikembalikan.
+

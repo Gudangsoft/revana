@@ -191,6 +191,11 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
 </form>
 
 <div class="a4-page">
+    {{-- Kop surat: pakai gambar header yang sudah diupload lewat Master LOA (kalau ada),
+         supaya tidak perlu input/upload ulang khusus untuk kwitansi --}}
+    @if(!empty($headerImageUrl))
+    <img src="{{ $headerImageUrl }}" style="width:100%;display:block;" alt="Header {{ $jurnalNama }}">
+    @else
     <div class="jrn-header">
         @if($logoUrl)
             <img src="{{ $logoUrl }}" class="jrn-logo" alt="Logo">
@@ -202,6 +207,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
             <div class="jrn-name-sub">{{ $jurnalNama }}</div>
         </div>
     </div>
+    @endif
 
     <div class="page-inner">
         <div class="doc-title">KWITANSI</div>
