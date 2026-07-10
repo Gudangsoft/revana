@@ -154,3 +154,18 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** perlu `php artisan migrate --force` di production setelah deploy (ada migration baru, kolom `bendahara_name`/`bendahara_signature_path`).
 
+
+## 11. 🔄 Update: Add Master Kwitansi menu with per-journal Bendahara settings and submission search
+
+- **Commit:** `ca1e8ea` — 14:05 oleh Gudangsoft
+- **File berubah:** 9 file
+- `app/Http/Controllers/Admin/KwitansiController.php`
+- `app/Http/Controllers/Admin/KwitansiMasterController.php`
+- `app/Models/JournalMaster.php`
+- `database/migrations/2026_07_10_000002_add_bendahara_to_journal_masters_table.php`
+- `log-update-2026-07-10.md`
+- `resources/views/admin/kwitansi-master/edit.blade.php`
+- `resources/views/admin/kwitansi-master/index.blade.php`
+- `resources/views/admin/partials/sidebar.blade.php`
+- `routes/web.php`
+
