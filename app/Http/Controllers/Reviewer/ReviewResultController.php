@@ -26,10 +26,20 @@ class ReviewResultController extends Controller
             abort(403);
         }
 
-        if (!in_array($assignment->status, ['ON_PROGRESS', 'REVISION'])) {
+        // Kolom `status` dipakai bersama oleh semua reviewer (1-5) pada assignment yang sama.
+        // Kalau reviewer lain sudah submit duluan, status ikut berubah jadi SUBMITTED untuk
+        // semua reviewer -- reviewer yang belum submit review-nya sendiri harus tetap bisa
+        // masuk ke form ini selama dia belum punya ReviewResult sendiri.
+        $myReviewResult = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
+        if ($myReviewResult) {
+            return redirect()->route('reviewer.tasks.show', $assignment)
+                ->with('error', 'Anda sudah submit review untuk tugas ini.');
+        }
+
+        if (!in_array($assignment->status, ['ON_PROGRESS', 'REVISION', 'SUBMITTED'])) {
             return back()->with('error', 'Review belum dimulai');
         }
-        
+
         // Check if expired
         if ($assignment->isExpired()) {
             return back()->with('error', 'Task sudah melewati deadline dan tidak dapat dikerjakan lagi');

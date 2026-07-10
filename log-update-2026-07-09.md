@@ -81,3 +81,28 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** halaman leaderboard di-cache 5 menit (`Cache::remember(..., 300, ...)`) per tenant — setelah deploy, jalankan `php artisan cache:clear` di production supaya hasil baru langsung terlihat, tanpa perlu menunggu 5 menit.
 
+
+## 7. 🔄 Update: a
+
+- **Commit:** `fbc5eb5` — 21:45 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/LeaderboardController.php`
+- `log-update-2026-07-09.md`
+- `resources/views/admin/leaderboard/index.blade.php`
+
+## 8. Fix Tombol Upload Hasil Review Hilang untuk Reviewer Pendamping (`/reviewer/tasks/{id}`)
+
+**Tujuan:** User melapor di `https://portal.apji.org/reviewer/tasks/32`, reviewer 2 tidak punya tombol/form upload hasil review sama sekali.
+
+**Root cause:** Kolom `status` di tabel `review_assignments` dipakai BERSAMA oleh semua reviewer (reviewer utama + reviewer 2-5) pada satu assignment — bukan per-reviewer. Form input review di halaman detail tugas (dan route `reviewer.results.create`) hanya tampil kalau `$assignment->status` bernilai `ON_PROGRESS` atau `REVISION`. Begitu reviewer utama submit review-nya duluan, `ReviewAssignment::submit()` mengubah status jadi `SUBMITTED` untuk SELURUH assignment (bukan cuma untuk reviewer utama) — akibatnya reviewer pendamping yang **belum pernah** mengisi review-nya sendiri ikut kehilangan tombol/form tersebut, karena status sudah keburu lewat dari `ON_PROGRESS`/`REVISION`. Direproduksi lokal: assignment dengan 2 reviewer, reviewer 1 submit → status jadi `SUBMITTED` → dengan logic lama, reviewer 2 (yang belum submit apa-apa) tidak lagi melihat form; dengan logic baru, form tetap muncul karena reviewer 2 belum punya `ReviewResult` sendiri.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/reviewer/tasks/show.blade.php` | Kondisi tampil form "FORMULIR REVIEW ARTIKEL ILMIAH SIPERA" ditambah: selain status `ON_PROGRESS`/`REVISION`, sekarang juga tampil saat status `SUBMITTED` **selama** reviewer yang login belum punya `$myReviewResult` sendiri (menandakan reviewer lain yang submit duluan, bukan dirinya) |
+| `app/Http/Controllers/Reviewer/ReviewResultController.php` | `create()`: kalau reviewer yang login sudah pernah submit review-nya sendiri, redirect balik dengan pesan info (tidak perlu isi ulang); kalau belum, gate status diperluas dari `['ON_PROGRESS','REVISION']` jadi `['ON_PROGRESS','REVISION','SUBMITTED']` supaya reviewer pendamping tetap bisa buka form walau status assignment sudah maju duluan oleh reviewer lain |
+
+**Diverifikasi lewat tinker:** dibuat assignment uji dengan reviewer utama + 1 reviewer pendamping (status awal `ON_PROGRESS`). Reviewer utama submit review → `assignment->submit()` → status jadi `SUBMITTED`. Dicek kondisi tampil form untuk reviewer pendamping: logic LAMA = tidak tampil (bug, sesuai laporan user), logic BARU = tetap tampil karena reviewer pendamping belum punya `ReviewResult` sendiri. Data uji dihapus setelah verifikasi.
+
+**Catatan:** perbaikan ini cuma menyentuh sisi tampilan/akses form untuk reviewer pendamping (agar tidak terkunci), tidak mengubah cara kolom `status` bekerja secara keseluruhan (masih 1 kolom dipakai bersama, dipakai juga oleh dashboard admin dll) — perubahan ke skema per-reviewer status yang lebih menyeluruh di luar cakupan laporan ini.
+

@@ -146,8 +146,16 @@
                     $myReviewResult = $assignment->reviewResults()->where('reviewer_id', auth()->id())->first();
                 @endphp
 
-                <!-- Form Input Review (untuk status ON_PROGRESS dan REVISION) -->
-                @if(in_array($assignment->status, ['ON_PROGRESS', 'REVISION']) && !$assignment->isExpired())
+                {{--
+                    Status ON_PROGRESS/REVISION/SUBMITTED dicek, bukan cuma ON_PROGRESS/REVISION:
+                    kolom `status` di review_assignments dipakai BERSAMA oleh semua reviewer (1-5)
+                    pada assignment yang sama. Kalau reviewer utama sudah submit duluan, status
+                    ikut berubah jadi SUBMITTED untuk SEMUA reviewer, sehingga reviewer pendamping
+                    yang belum submit review-nya sendiri jadi kehilangan tombol/form ini walau
+                    mereka belum pernah mengisi apa-apa. Makanya form tetap ditampilkan selama
+                    reviewer yang login belum punya $myReviewResult sendiri.
+                --}}
+                @if(!$myReviewResult && in_array($assignment->status, ['ON_PROGRESS', 'REVISION', 'SUBMITTED']) && !$assignment->isExpired())
                 <div class="card mt-3 border-primary">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> FORMULIR REVIEW ARTIKEL ILMIAH SIPERA</h5>
