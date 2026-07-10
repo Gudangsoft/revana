@@ -209,6 +209,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/submissions/{submission}/kwitansi', [\App\Http\Controllers\Admin\KwitansiController::class, 'show'])->name('submissions.kwitansi');
         Route::post('/submissions/{submission}/kwitansi/send-email', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendEmail'])->name('submissions.kwitansi.send-email');
         Route::post('/submissions/{submission}/kwitansi/send-wa', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendWa'])->name('submissions.kwitansi.send-wa');
+        Route::post('/submissions/{submission}/kwitansi/update-contact', [\App\Http\Controllers\Admin\KwitansiController::class, 'updateContact'])->name('submissions.kwitansi.update-contact');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');
@@ -696,6 +697,7 @@ Route::prefix('marketing')->group(function () {
         Route::get('/submissions/{submission}/kwitansi', [\App\Http\Controllers\Admin\KwitansiController::class, 'showMarketing'])->name('marketing.submissions.kwitansi');
         Route::post('/submissions/{submission}/kwitansi/send-email', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendMarketingEmail'])->name('marketing.submissions.kwitansi.send-email');
         Route::post('/submissions/{submission}/kwitansi/send-wa', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendMarketingWa'])->name('marketing.submissions.kwitansi.send-wa');
+        Route::post('/submissions/{submission}/kwitansi/update-contact', [\App\Http\Controllers\Admin\KwitansiController::class, 'updateMarketingContact'])->name('marketing.submissions.kwitansi.update-contact');
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');

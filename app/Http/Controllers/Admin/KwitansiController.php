@@ -18,8 +18,10 @@ class KwitansiController extends Controller
     public function show(Request $request, Submission $submission)
     {
         $data = $this->buildViewData($submission, $this->resolveParams($request));
-        $data['sendEmailRoute'] = 'admin.submissions.kwitansi.send-email';
-        $data['sendWaRoute']    = 'admin.submissions.kwitansi.send-wa';
+        $data['sendEmailRoute']    = 'admin.submissions.kwitansi.send-email';
+        $data['sendWaRoute']       = 'admin.submissions.kwitansi.send-wa';
+        $data['updateContactRoute'] = 'admin.submissions.kwitansi.update-contact';
+        $data['publicPdfUrl']      = $this->publicPdfUrl($submission, $data);
 
         return view('admin.kwitansi.receipt', $data);
     }
@@ -33,10 +35,24 @@ class KwitansiController extends Controller
         }
 
         $data = $this->buildViewData($submission, $this->resolveParams($request));
-        $data['sendEmailRoute'] = 'marketing.submissions.kwitansi.send-email';
-        $data['sendWaRoute']    = 'marketing.submissions.kwitansi.send-wa';
+        $data['sendEmailRoute']    = 'marketing.submissions.kwitansi.send-email';
+        $data['sendWaRoute']       = 'marketing.submissions.kwitansi.send-wa';
+        $data['updateContactRoute'] = 'marketing.submissions.kwitansi.update-contact';
+        $data['publicPdfUrl']      = $this->publicPdfUrl($submission, $data);
 
         return view('admin.kwitansi.receipt', $data);
+    }
+
+    /** Link PDF publik (tanpa login) untuk dibagikan/disalin ke author — sudah membawa semua parameter pembayaran */
+    private function publicPdfUrl(Submission $submission, array $data): string
+    {
+        return route('kwitansi.public.pdf', array_merge(['kode_submit' => $submission->kode_submit], [
+            'nama_pembayar' => $data['namaPembayar'],
+            'jumlah'        => $data['jumlah'],
+            'keterangan'    => $data['keterangan'],
+            'metode_bayar'  => $data['metodeBayar'],
+            'tanggal'       => $data['tanggal']->toDateString(),
+        ]));
     }
 
     // ── Public: dipakai Fonnte untuk fetch PDF lampiran WA (tanpa login) ──
@@ -83,6 +99,44 @@ class KwitansiController extends Controller
         }
 
         return $this->dispatchWa($submission, $this->resolveParams($request), 'marketing.submissions.kwitansi');
+    }
+
+    // ── Admin: update kontak (email/HP) author dari modal "Kirim ke Author" ──
+    public function updateContact(Request $request, Submission $submission)
+    {
+        return $this->dispatchUpdateContact($request, $submission, 'admin.submissions.kwitansi');
+    }
+
+    // ── Marketing: update kontak (email/HP) author dari modal "Kirim ke Author" ──
+    public function updateMarketingContact(Request $request, Submission $submission)
+    {
+        if (!$this->marketingOwnsSubmission($submission)) {
+            return redirect()->route('marketing.submissions')
+                ->with('error', 'Anda tidak memiliki akses ke submission ini.');
+        }
+
+        return $this->dispatchUpdateContact($request, $submission, 'marketing.submissions.kwitansi');
+    }
+
+    /**
+     * Update email_penulis/no_hp_penulis milik Submission (data kontak, BUKAN data
+     * kwitansi — kontak ini memang sudah tersimpan di DB sejak awal, terpisah dari field
+     * pembayaran kwitansi yang sengaja tidak disimpan). Redirect balik ke kwitansi (bukan
+     * ke halaman LOA) sambil membawa lagi semua parameter pembayaran yang sedang dilihat.
+     */
+    private function dispatchUpdateContact(Request $request, Submission $submission, string $backRoute)
+    {
+        $validated = $request->validate([
+            'email_penulis' => 'nullable|email|max:255',
+            'no_hp_penulis' => 'nullable|string|max:20',
+        ]);
+
+        $submission->update($validated);
+
+        $params = $this->resolveParams($request);
+
+        return redirect()->route($backRoute, array_merge([$submission], $params))
+            ->with('success', 'Kontak author berhasil diperbarui.');
     }
 
     private function marketingOwnsSubmission(Submission $submission): bool

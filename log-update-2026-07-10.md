@@ -230,3 +230,30 @@ Log perubahan otomatis dari git commits.
 
 **Diverifikasi lewat tinker:** dicek 2 kondisi — (1) jurnal TANPA `header_image_path` → render fallback header generik (`class="jrn-header"` muncul), (2) jurnal DENGAN `header_image_path` diisi sementara ke DB (`journals/headers/fake-test-header.png`, langsung dikembalikan ke `null` setelah tes) → render `<img>` kop surat, fallback header generik TIDAK muncul lagi. Kedua kondisi sesuai ekspektasi, data uji sudah dikembalikan.
 
+
+## 16. 🔄 Update: Reuse LOA header image for kwitansi kop surat
+
+- **Commit:** `eedccfa` — 14:27 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-10.md`
+- `resources/views/admin/kwitansi/receipt.blade.php`
+
+## 17. Tombol "Kirim ke Author" di Kwitansi (Modal, Mengikuti Pola LOA)
+
+**Tujuan:** User melapor tombol kirim email/WA di kwitansi tidak muncul untuk sebuah submission (screenshot: `portal.apji.org/marketing/submissions/9864/kwitansi`), minta ditambahkan tombol "Kirim ke Author" seperti di LOA.
+
+**Root cause:** Tombol kirim di section #13 sebelumnya cuma tampil kalau `submission->email_penulis`/`no_hp_penulis` SUDAH terisi — kalau salah satu atau keduanya kosong (kasus di screenshot user), tombol itu hilang total tanpa cara untuk mengisinya dari halaman kwitansi. LOA sudah punya solusi untuk masalah ini: modal "Kirim ke Author" yang isinya form edit kontak (email/HP) yang bisa diisi langsung di situ, baru tombol kirim aktif sesuai kontak yang tersedia.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/KwitansiController.php` | Tambah `updateContact()` (admin) & `updateMarketingContact()` (marketing) — update `email_penulis`/`no_hp_penulis` pada `Submission` (data kontak ini MEMANG sudah tersimpan di DB sejak awal, beda dari data kwitansi yang sengaja tidak disimpan) lalu redirect balik ke halaman **kwitansi** (bukan ke LOA — perlu method terpisah dari `LoaController::updateMetadata()` yang selalu redirect ke `submissions.loa`) sambil membawa lagi semua parameter pembayaran yang sedang dilihat. `show()`/`showMarketing()` sekarang juga mengirim `updateContactRoute` dan `publicPdfUrl` (link PDF publik siap disalin, sudah menyertakan semua parameter pembayaran) ke view |
+| `resources/views/admin/kwitansi/receipt.blade.php` | Tombol "Kirim Email"/"Kirim WA" yang lama (langsung di print-bar, cuma tampil kalau kontak sudah ada) diganti satu tombol "📤 Kirim ke Author" yang SELALU tampil, membuka modal — isinya: info pembayar, form edit email/HP (kalau kosong ada peringatan kuning), link PDF publik yang bisa disalin, dan 2 tombol kirim (WhatsApp/Email) yang aktif/nonaktif mengikuti kontak yang tersedia. Struktur & gaya modal disamakan dengan `modal-send-loa` di `admin/loa/receipt.blade.php` |
+| `routes/web.php` | Tambah `admin.submissions.kwitansi.update-contact` dan `marketing.submissions.kwitansi.update-contact` |
+
+**Diverifikasi lewat HTTP request asli + tinker:**
+1. Render halaman kwitansi untuk submission yang HP-nya ada tapi email kosong (persis kasus di screenshot user) → tombol "Kirim ke Author" & modal muncul, di dalam modal tombol "Kirim via WhatsApp" aktif dan "Email tidak tersedia" ditampilkan dengan benar.
+2. `updateContact()` dipanggil dengan email baru → tersimpan ke `Submission`, redirect ke `admin.submissions.kwitansi` (BUKAN ke halaman LOA) dengan seluruh parameter pembayaran (`nama_pembayar`, `jumlah`, dst) tetap terbawa di query string → data uji dikembalikan ke `null` setelah verifikasi.
+
+**Catatan:** form edit kontak di modal ini MENYIMPAN ke database (`email_penulis`/`no_hp_penulis` pada tabel `submissions`) — ini bukan pelanggaran terhadap keputusan "data kwitansi tidak disimpan", karena kontak author bukan bagian dari data kwitansi itu sendiri (jumlah/keterangan/dst), melainkan data submission yang memang sudah ada sejak awal dan dipakai bersama oleh LOA & kwitansi.
+

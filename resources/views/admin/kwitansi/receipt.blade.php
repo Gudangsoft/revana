@@ -121,29 +121,166 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
         <span style="margin-left:16px; color:#ccc;">Kwitansi: {{ $submission->kode_submit }}</span>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
-        @if(isset($sendEmailRoute) && $submission->email_penulis)
-        <form method="POST" action="{{ route($sendEmailRoute, $submission) }}" style="display:inline;"
-              onsubmit="return confirm('Kirim kwitansi ke email {{ $submission->email_penulis }}?');">
-            @csrf
-            @foreach(['nama_pembayar' => $namaPembayar, 'jumlah' => $jumlah, 'keterangan' => $keterangan, 'metode_bayar' => $metodeBayar, 'tanggal' => $tanggal->toDateString()] as $field => $value)
-            <input type="hidden" name="{{ $field }}" value="{{ $value }}">
-            @endforeach
-            <button type="submit" class="btn-back" style="background:#0078D4;">&#9993; Kirim Email</button>
-        </form>
-        @endif
-        @if(isset($sendWaRoute) && $submission->no_hp_penulis)
-        <form method="POST" action="{{ route($sendWaRoute, $submission) }}" style="display:inline;"
-              onsubmit="return confirm('Kirim kwitansi via WhatsApp ke {{ $submission->no_hp_penulis }}?');">
-            @csrf
-            @foreach(['nama_pembayar' => $namaPembayar, 'jumlah' => $jumlah, 'keterangan' => $keterangan, 'metode_bayar' => $metodeBayar, 'tanggal' => $tanggal->toDateString()] as $field => $value)
-            <input type="hidden" name="{{ $field }}" value="{{ $value }}">
-            @endforeach
-            <button type="submit" class="btn-back" style="background:#25D366;">&#128241; Kirim WA</button>
-        </form>
+        @if(isset($sendEmailRoute))
+        <button type="button" onclick="document.getElementById('modal-send-kwitansi').style.display='flex'"
+                style="background:#1a7a4a; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold;">
+            &#128228; Kirim ke Author
+        </button>
         @endif
         <button class="btn-print" onclick="window.print()">&#128424; Print / Save PDF</button>
     </div>
 </div>
+
+{{-- ── Modal Kirim Kwitansi ke Author (mirip modal LOA) ──────────────────
+       Field pembayaran (nama_pembayar, jumlah, dst) dibawa sebagai hidden input
+       dari halaman ini persis apa adanya, TIDAK disimpan ke database — cuma
+       kontak (email/HP) yang boleh diedit & disimpan di sini, karena kontak
+       memang sudah jadi bagian data Submission sejak awal. --}}
+@if(isset($sendEmailRoute))
+@php
+    $kwtParams = ['nama_pembayar' => $namaPembayar, 'jumlah' => $jumlah, 'keterangan' => $keterangan, 'metode_bayar' => $metodeBayar, 'tanggal' => $tanggal->toDateString()];
+@endphp
+<div id="modal-send-kwitansi" class="no-print"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9999;
+            align-items:center; justify-content:center; font-family:sans-serif;">
+    <div style="background:#1e1e2e; color:#e0e0e0; border-radius:10px; width:100%; max-width:500px;
+                padding:28px 32px; box-shadow:0 8px 40px rgba(0,0,0,.6); position:relative;">
+        <h3 style="margin:0 0 20px; font-size:16px; color:#90CAF9;">
+            &#128228; Kirim Kwitansi ke Author
+            <span style="font-size:12px; color:#aaa; font-weight:normal; margin-left:8px;">{{ $submission->kode_submit }}</span>
+        </h3>
+
+        {{-- Info author --}}
+        <div style="background:#2a2a3e; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px;">
+            <div style="margin-bottom:8px;">
+                <span style="color:#90CAF9; font-size:11px;">Pembayar</span><br>
+                <strong>{{ $namaPembayar }}</strong>
+            </div>
+        </div>
+
+        {{-- Form edit kontak (email/HP) — INI yang disimpan ke DB, terpisah dari data kwitansi --}}
+        <form method="POST" action="{{ route($updateContactRoute, $submission) }}" style="margin-bottom:16px;">
+            @csrf
+            @foreach($kwtParams as $field => $value)
+            <input type="hidden" name="{{ $field }}" value="{{ $value }}">
+            @endforeach
+
+            <div style="font-size:11px; color:{{ (!$submission->email_penulis || !$submission->no_hp_penulis) ? '#f0ad4e' : '#888' }}; margin-bottom:8px;">
+                @if(!$submission->email_penulis || !$submission->no_hp_penulis)
+                &#9888; Lengkapi kontak author agar tombol kirim aktif:
+                @else
+                Ubah kontak author bila perlu:
+                @endif
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                <div style="flex:1; min-width:180px;">
+                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">Email</label>
+                    <input type="email" name="email_penulis" placeholder="email@contoh.com"
+                           value="{{ $submission->email_penulis }}"
+                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
+                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:3px;">No HP/WA</label>
+                    <input type="text" name="no_hp_penulis" placeholder="08xxxxxxxxxx"
+                           value="{{ $submission->no_hp_penulis }}"
+                           style="width:100%; padding:7px 10px; background:#1e1e2e; border:1px solid #555;
+                                  border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;">
+                </div>
+                <button type="submit"
+                        style="padding:7px 16px; background:#2a6496; color:#fff; border:none;
+                               border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; white-space:nowrap;">
+                    &#128190; Simpan
+                </button>
+            </div>
+        </form>
+
+        {{-- Link PDF publik --}}
+        <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:11px; color:#90CAF9; margin-bottom:4px;">Link PDF Kwitansi (untuk dikirim ke author)</label>
+            <div style="display:flex; gap:6px;">
+                <input type="text" id="kwt-copy-link" readonly value="{{ $publicPdfUrl }}"
+                       style="flex:1; padding:7px 10px; background:#2a2a3e; border:1px solid #444;
+                              border-radius:6px; color:#ccc; font-size:12px; box-sizing:border-box;">
+                <button onclick="copyKwtLink(event)" title="Salin link"
+                        style="padding:7px 12px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; flex-shrink:0;">
+                    &#128203; Salin
+                </button>
+            </div>
+        </div>
+
+        {{-- Tombol kirim --}}
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            @if($submission->no_hp_penulis)
+            <form method="POST" action="{{ route($sendWaRoute, $submission) }}" style="flex:1; min-width:140px;"
+                  onsubmit="return confirm('Kirim kwitansi via WhatsApp ke {{ $submission->no_hp_penulis }}?');">
+                @csrf
+                @foreach($kwtParams as $field => $value)
+                <input type="hidden" name="{{ $field }}" value="{{ $value }}">
+                @endforeach
+                <button type="submit"
+                   style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+                          background:#25D366; color:#fff; padding:10px 16px; border-radius:8px; border:none;
+                          cursor:pointer; font-size:13px; font-weight:bold;">
+                    &#128241; Kirim via WhatsApp
+                </button>
+            </form>
+            @else
+            <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
+                        background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">
+                &#9888; No HP tidak tersedia
+            </div>
+            @endif
+
+            @if($submission->email_penulis)
+            <form method="POST" action="{{ route($sendEmailRoute, $submission) }}" style="flex:1; min-width:140px;"
+                  onsubmit="return confirm('Kirim kwitansi ke email {{ $submission->email_penulis }}?');">
+                @csrf
+                @foreach($kwtParams as $field => $value)
+                <input type="hidden" name="{{ $field }}" value="{{ $value }}">
+                @endforeach
+                <button type="submit"
+                   style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+                          background:#0078D4; color:#fff; padding:10px 16px; border-radius:8px; border:none;
+                          cursor:pointer; font-size:13px; font-weight:bold;">
+                    &#9993; Kirim via Email
+                </button>
+            </form>
+            @else
+            <div style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center;
+                        background:#333; color:#888; padding:10px 16px; border-radius:8px; font-size:12px;">
+                &#9888; Email tidak tersedia
+            </div>
+            @endif
+        </div>
+
+        <div style="margin-top:16px; text-align:right;">
+            <button type="button"
+                    onclick="document.getElementById('modal-send-kwitansi').style.display='none'"
+                    style="padding:8px 20px; background:#444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
+                Tutup
+            </button>
+        </div>
+
+        <button onclick="document.getElementById('modal-send-kwitansi').style.display='none'"
+                style="position:absolute; top:12px; right:16px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+</div>
+<script>
+function copyKwtLink(e) {
+    var inp = document.getElementById('kwt-copy-link');
+    inp.select();
+    inp.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(inp.value).then(function() {
+        var btn = e.target;
+        var orig = btn.textContent;
+        btn.textContent = '✓ Tersalin';
+        btn.style.background = '#2e7d32';
+        setTimeout(function(){ btn.textContent = orig; btn.style.background = '#444'; }, 2000);
+    });
+}
+</script>
+@endif
 
 @if(session('success'))
 <div class="no-print" style="background:#1a7a4a; color:#fff; padding:10px 24px; font-family:sans-serif; font-size:13px;">
