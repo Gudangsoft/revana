@@ -132,6 +132,21 @@
         </script>
         @endif
 
+        {{-- Kwitansi Card --}}
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary bg-opacity-10 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-receipt text-primary"></i>
+                <span class="fw-semibold text-primary">Kwitansi Pembayaran</span>
+            </div>
+            <div class="card-body py-3">
+                <a href="{{ route('marketing.submissions.kwitansi', $submission) }}"
+                   target="_blank" class="btn btn-primary btn-sm px-4">
+                    <i class="bi bi-eye me-1"></i> Lihat / Cetak Kwitansi
+                </a>
+                <div class="form-text mt-1">Nama pembayar, jumlah, dan keterangan bisa diisi/diubah langsung di halaman kwitansi — tidak disimpan ke database.</div>
+            </div>
+        </div>
+
         <!-- Progress Card - Using Shared Component -->
         <x-tracking-table :submission="$submission" />
 

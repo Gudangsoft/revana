@@ -77,3 +77,32 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** halaman print-preview browser (`window.print()`, dipakai user di screenshot) memakai HTML/CSS yang sama dengan yang dipakai dompdf untuk PDF, jadi fix ini otomatis berlaku juga untuk tombol "🖨 Print / Save PDF" di halaman LOA, tidak cuma untuk PDF yang dikirim via WA/email.
 
+
+## 6. 🔄 Update: a
+
+- **Commit:** `ffb46d4` — 13:35 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-10.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+## 7. Fitur Baru: Kwitansi Pembayaran (Tanpa Simpan ke Database)
+
+**Tujuan:** User minta fitur kwitansi dengan konsep visual/struktur sama seperti LOA (header jurnal, watermark, footer verifikasi, tombol print/save PDF), tapi data pembayaran (nama pembayar, jumlah, keterangan, metode bayar, tanggal) sengaja **tidak disimpan ke database** — dikonfirmasi ke user: identitas artikel/penulis tetap diambil dari data `submissions` yang sudah ada, sedangkan field pembayaran (belum ada kolomnya sama sekali di database) diisi manual tiap kali lewat form di halaman kwitansi itu sendiri.
+
+**Pendekatan:** Semua field pembayaran dibaca dari query string (`?nama_pembayar=...&jumlah=...&keterangan=...&metode_bayar=...&tanggal=...`) memakai pola yang SAMA seperti override `?tanggal=` yang sudah ada di LOA (`LoaController`) — reload halaman dengan query string berbeda menghasilkan kwitansi berbeda, tapi tidak ada satu baris pun yang ditulis ke database. Nomor kwitansi juga dihitung on-the-fly dari kode submit + tanggal (format `KWT/{kode_submit}/{bulan_romawi}/{tahun}`), bukan disimpan/di-generate-sequence dari tabel manapun — konsekuensinya: kwitansi yang sama persis (nama, jumlah, tanggal) akan selalu menghasilkan nomor yang sama juga (idempoten), tapi SIPERA tidak punya riwayat/daftar kwitansi yang pernah diterbitkan (sesuai permintaan user).
+
+### File Baru
+| File | Keterangan |
+|------|-----------|
+| `app/Http/Controllers/Admin/KwitansiController.php` | `show()` (admin) dan `showMarketing()` (marketing, dengan pengecekan `marketing_id` seperti LOA) — keduanya cuma MEMBACA data `Submission`+`JournalMaster` dan query string, tidak pernah memanggil `->save()`/`->update()`. Termasuk helper `terbilang()` (angka ke teks Bahasa Indonesia, rekursif) untuk baris "Terbilang: ..." di kwitansi |
+| `resources/views/admin/kwitansi/receipt.blade.php` | Halaman kwitansi 1 halaman A4 (beda dari LOA yang 2 halaman) — header jurnal, badge SINTA, box jumlah uang, terbilang, tanda tangan, footer verifikasi. Ada form GET (bukan POST) di bagian atas (no-print) untuk isi/ubah nama pembayar, jumlah, metode bayar, tanggal, keterangan — submit-nya cuma reload halaman dengan query string baru, tidak ada request POST/simpan sama sekali. **Sengaja tidak diberi `page-break-after`** sama sekali (beda dari bug LOA di section #5) karena cuma 1 halaman, tidak butuh paksa pindah halaman |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah `admin.submissions.kwitansi` (GET `/admin/submissions/{submission}/kwitansi`) dan `marketing.submissions.kwitansi` (GET `/marketing/submissions/{submission}/kwitansi`), mengikuti pola route LOA yang sudah ada |
+| `resources/views/admin/submissions/show.blade.php` | Tambah tombol "Kwitansi" di sebelah tombol "LOA" |
+| `resources/views/marketing/show-submission.blade.php` | Tambah card "Kwitansi Pembayaran" dengan tombol "Lihat/Cetak Kwitansi", mirip card LOA yang sudah ada |
+
+**Diverifikasi lewat tinker (render langsung, bukan cuma baca kode):** render `KwitansiController::show()` dengan submission asli + query string `jumlah=750000&keterangan=...` → halaman berhasil render, menampilkan "Rp 750.000" dan "Terbilang: Tujuh ratus lima puluh ribu rupiah" dengan benar. Dicek fungsi `terbilang()` untuk beberapa angka (12.000 → "Dua belas ribu", 1.000.000 → "Satu juta", 999.999 → "Sembilan ratus sembilan puluh sembilan ribu sembilan ratus sembilan puluh sembilan") — semua benar. Dicek juga render TANPA query string sama sekali → otomatis pakai `nama_penulis` submission sebagai nama pembayar default dan jumlah default Rp 0 / terbilang "-". Dipastikan setelah semua test, tidak ada perubahan apapun tersimpan di tabel `submissions` (cuma dibaca, model tidak pernah di-save).
+

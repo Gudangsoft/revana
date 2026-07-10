@@ -201,6 +201,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/toggle-valid-field', [SubmissionController::class, 'toggleValidField'])->name('submissions.toggle-valid-field');
         Route::get('/submissions/{submission}/loa', [\App\Http\Controllers\Admin\LoaController::class, 'show'])->name('submissions.loa');
         Route::post('/submissions/{submission}/loa-metadata', [\App\Http\Controllers\Admin\LoaController::class, 'updateMetadata'])->name('submissions.loa.update-metadata');
+        Route::get('/submissions/{submission}/kwitansi', [\App\Http\Controllers\Admin\KwitansiController::class, 'show'])->name('submissions.kwitansi');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');
@@ -682,6 +683,7 @@ Route::prefix('marketing')->group(function () {
         Route::get('/submissions/{submission}', [MarketingDashboardController::class, 'showSubmission'])->name('marketing.submissions.show');
         Route::get('/submissions/{submission}/loa', [\App\Http\Controllers\Admin\LoaController::class, 'showMarketing'])->name('marketing.submissions.loa');
         Route::post('/submissions/{submission}/loa-metadata', [\App\Http\Controllers\Admin\LoaController::class, 'updateMarketingMetadata'])->name('marketing.submissions.loa.update-metadata');
+        Route::get('/submissions/{submission}/kwitansi', [\App\Http\Controllers\Admin\KwitansiController::class, 'showMarketing'])->name('marketing.submissions.kwitansi');
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');

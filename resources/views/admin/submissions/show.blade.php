@@ -17,6 +17,9 @@
                     <a href="{{ route('admin.submissions.loa', $submission) }}" class="btn btn-primary" target="_blank">
                         <i class="bi bi-file-earmark-check"></i> LOA
                     </a>
+                    <a href="{{ route('admin.submissions.kwitansi', $submission) }}" class="btn btn-outline-primary" target="_blank">
+                        <i class="bi bi-receipt"></i> Kwitansi
+                    </a>
                     <a href="{{ route('admin.submissions.process', $submission) }}" class="btn btn-info">
                         <i class="bi bi-gear"></i> Lihat Proses
                     </a>
