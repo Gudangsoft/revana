@@ -392,6 +392,10 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.loa-master') ? 'active' : '' }}">
     <i class="bi bi-file-earmark-check-fill" style="color:#34d399;"></i> Master LOA
 </a>
+<a href="{{ route('admin.kwitansi-master.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.kwitansi-master') ? 'active' : '' }}">
+    <i class="bi bi-receipt" style="color:#fbbf24;"></i> Master Kwitansi
+</a>
 <a href="{{ route('admin.email-logs.index') }}"
    class="nav-link {{ str_starts_with($currentRoute, 'admin.email-logs') ? 'active' : '' }}">
     <i class="bi bi-envelope-check-fill" style="color:#34d399;"></i> Log Pengiriman Email

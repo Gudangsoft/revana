@@ -411,6 +411,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/loa-master/{submission}/resend', [\App\Http\Controllers\Admin\LoaMasterController::class, 'resend'])->name('loa-master.resend');
         Route::post('/loa-master/{submission}/resend-wa', [\App\Http\Controllers\Admin\LoaMasterController::class, 'resendWa'])->name('loa-master.resend-wa');
         Route::get('/loa-master/{journalMaster}/preview-loa', [\App\Http\Controllers\Admin\LoaMasterController::class, 'previewLoa'])->name('loa-master.preview-loa');
+        Route::get('/kwitansi-master', [\App\Http\Controllers\Admin\KwitansiMasterController::class, 'index'])->name('kwitansi-master.index');
+        Route::get('/kwitansi-master/{journalMaster}/edit', [\App\Http\Controllers\Admin\KwitansiMasterController::class, 'edit'])->name('kwitansi-master.edit');
+        Route::put('/kwitansi-master/{journalMaster}', [\App\Http\Controllers\Admin\KwitansiMasterController::class, 'update'])->name('kwitansi-master.update');
 
         Route::get('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'index'])->name('task-point-settings.index');
         Route::put('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'update'])->name('task-point-settings.update');

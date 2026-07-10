@@ -33,6 +33,8 @@ class JournalMaster extends Model
         'editor_name',
         'editor_title',
         'editor_signature_path',
+        'bendahara_name',
+        'bendahara_signature_path',
         'primary_color',
         'secondary_color',
         'loa_kota',

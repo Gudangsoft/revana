@@ -64,10 +64,13 @@ class KwitansiController extends Controller
             'metodeBayar'      => $metodeBayar,
             'tanggal'          => $tanggal,
             'logoUrl'          => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'          => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            // Kwitansi ditandatangani Bendahara, bukan Ketua Dewan Redaksi (editor_name/
+            // editor_signature_path dipakai LOA) — pakai field terpisah yang diatur lewat
+            // menu "Master Kwitansi", supaya tidak salah pakai tanda tangan LOA di kwitansi.
+            'signUrl'          => $journal?->bendahara_signature_path ? Storage::url($journal->bendahara_signature_path) : null,
             'headerImageUrl'   => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
-            'editorName'       => $journal?->editor_name ?? '',
-            'editorTitle'      => $journal?->editor_title ?? 'Bendahara',
+            'editorName'       => $journal?->bendahara_name ?? '',
+            'editorTitle'      => 'Bendahara',
             'kota'             => $journal?->loa_kota ?? 'Semarang',
             'primaryColor'     => $journal?->primary_color ?? '#1A237E',
             'secondaryColor'   => $journal?->secondary_color ?? '#8B6914',

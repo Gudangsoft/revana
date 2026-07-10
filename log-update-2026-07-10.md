@@ -118,3 +118,39 @@ Log perubahan otomatis dari git commits.
 - `resources/views/marketing/show-submission.blade.php`
 - `routes/web.php`
 
+
+## 9. 🔄 Update: a
+
+- **Commit:** `3011227` — 13:52 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-07-10.md`
+
+## 10. Menu "Master Kwitansi" di Admin (Pengaturan Bendahara + Cari Submission)
+
+**Tujuan:** User minta menu "Master Kwitansi" di sidebar admin, mirip "Master LOA" yang sudah ada. Dikonfirmasi ke user isinya mau **keduanya**: (a) halaman cari submission untuk langsung buka kwitansi, dan (b) pengaturan per-jurnal — khusus nama & tanda tangan **Bendahara** (penandatangan kwitansi), karena sebelumnya (section #7) kwitansi masih ikut memakai `editor_name`/`editor_signature_path` milik LOA (Ketua Dewan Redaksi) — salah secara konsep, kwitansi seharusnya ditandatangani Bendahara, bukan editor jurnal.
+
+### File Baru
+| File | Keterangan |
+|------|-----------|
+| `database/migrations/2026_07_10_000002_add_bendahara_to_journal_masters_table.php` | Tambah kolom `bendahara_name` dan `bendahara_signature_path` ke tabel `journal_masters` — terpisah dari `editor_name`/`editor_signature_path` yang dipakai LOA |
+| `app/Http/Controllers/Admin/KwitansiMasterController.php` | `index()`: tabel semua jurnal aktif + status Bendahara (nama/TTD sudah diisi atau belum), plus form pencarian submission (nama penulis/kode submit/judul) dengan tombol "Lihat Kwitansi" langsung ke `admin.submissions.kwitansi`. `edit()`/`update()`: form nama Bendahara + upload/hapus tanda tangan (pola sama seperti upload TTD editor di `journal-masters/edit.blade.php`) |
+| `resources/views/admin/kwitansi-master/index.blade.php` | View index — tabel jurnal (Bendahara) + tabel hasil pencarian submission (dengan pagination) |
+| `resources/views/admin/kwitansi-master/edit.blade.php` | Form pengaturan Bendahara per jurnal |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/JournalMaster.php` | Tambah `bendahara_name`, `bendahara_signature_path` ke `$fillable` |
+| `app/Http/Controllers/Admin/KwitansiController.php` | `signUrl`/`editorName`/`editorTitle` yang dipakai kwitansi diganti dari `editor_signature_path`/`editor_name` (milik LOA) jadi `bendahara_signature_path`/`bendahara_name` (diatur lewat Master Kwitansi) — kalau belum diisi, otomatis kosong/blank (tidak lagi salah pakai TTD editor) |
+| `routes/web.php` | Tambah `admin.kwitansi-master.index`, `.edit`, `.update` |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah menu "Master Kwitansi" persis di bawah "Master LOA" |
+
+**Diverifikasi lewat HTTP request asli (login sebagai admin sungguhan lewat `Auth::login()`, request lewat `app()->handle()`, bukan cuma panggil method controller manual)** — supaya semua middleware, view composer (`$currentRoute`, `$appSettings`, dst), dan layout `layouts.app` ikut jalan seperti request browser sungguhan:
+1. `GET /admin/kwitansi-master` → status 200, halaman berisi "Master Kwitansi".
+2. `GET /admin/kwitansi-master/{id}/edit` → status 200, form berisi field `bendahara_name`.
+3. `GET /admin/kwitansi-master?search=Candra` → status 200, hasil pencarian submission dengan nama itu muncul di tabel.
+4. Update Bendahara (`bendahara_name` = "TEST Bendahara Sementara") lewat controller langsung → tersimpan ke DB dengan benar → **dihapus lagi setelah verifikasi** (dikembalikan ke `null`).
+5. Kwitansi (`KwitansiController::show()`) untuk submission dengan jurnal yang bendahara-nya diisi ("Siti Aminah, S.E.") → nama itu muncul di halaman kwitansi dengan label "Bendahara" → data test dihapus lagi setelah verifikasi.
+
+**Catatan:** perlu `php artisan migrate --force` di production setelah deploy (ada migration baru, kolom `bendahara_name`/`bendahara_signature_path`).
+
