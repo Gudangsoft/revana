@@ -20,6 +20,9 @@
                     <a href="{{ route('admin.submissions.kwitansi', $submission) }}" class="btn btn-outline-primary" target="_blank">
                         <i class="bi bi-receipt"></i> Kwitansi
                     </a>
+                    <a href="{{ route('admin.submissions.invoice', $submission) }}" class="btn btn-outline-primary" target="_blank">
+                        <i class="bi bi-file-earmark-text"></i> Invoice
+                    </a>
                     <a href="{{ route('admin.submissions.process', $submission) }}" class="btn btn-info">
                         <i class="bi bi-gear"></i> Lihat Proses
                     </a>

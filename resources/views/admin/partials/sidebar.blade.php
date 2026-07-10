@@ -396,6 +396,10 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.kwitansi-master') ? 'active' : '' }}">
     <i class="bi bi-receipt" style="color:#fbbf24;"></i> Master Kwitansi
 </a>
+<a href="{{ route('admin.invoice-master.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.invoice-master') ? 'active' : '' }}">
+    <i class="bi bi-file-earmark-text-fill" style="color:#60a5fa;"></i> Master Invoice
+</a>
 <a href="{{ route('admin.email-logs.index') }}"
    class="nav-link {{ str_starts_with($currentRoute, 'admin.email-logs') ? 'active' : '' }}">
     <i class="bi bi-envelope-check-fill" style="color:#34d399;"></i> Log Pengiriman Email

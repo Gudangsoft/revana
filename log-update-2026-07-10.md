@@ -257,3 +257,54 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** form edit kontak di modal ini MENYIMPAN ke database (`email_penulis`/`no_hp_penulis` pada tabel `submissions`) — ini bukan pelanggaran terhadap keputusan "data kwitansi tidak disimpan", karena kontak author bukan bagian dari data kwitansi itu sendiri (jumlah/keterangan/dst), melainkan data submission yang memang sudah ada sejak awal dan dipakai bersama oleh LOA & kwitansi.
 
+
+## 18. 🔄 Update: Replace kwitansi send buttons with a "Kirim ke Author" modal
+
+- **Commit:** `53560cd` — 14:44 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/KwitansiController.php`
+- `log-update-2026-07-10.md`
+- `resources/views/admin/kwitansi/receipt.blade.php`
+- `routes/web.php`
+
+## 19. Fitur Baru: Invoice (Konsep Sama dengan Kwitansi + Info Rekening & CP Marketing)
+
+**Tujuan:** User minta fitur Invoice dengan konsep sama seperti Kwitansi (halaman 1 halaman A4, data pembayaran tidak disimpan ke database, tombol Kirim ke Author, dll), ditambah 2 field baru: info rekening bank dan CP (contact person) marketing.
+
+**Keputusan desain (dikonfirmasi ke user):**
+- **Info rekening** (nama bank, no rekening, atas nama) diatur SEKALI per jurnal lewat menu baru **Master Invoice** (mirip Bendahara di Master Kwitansi) — otomatis muncul tiap invoice dibuat, tapi tetap bisa di-override manual di form invoice tanpa mengubah setting jurnal.
+- **CP Marketing** default otomatis dari nama & kontak (phone/email) akun marketing yang sedang login saat invoice dibuka dari sisi marketing; kalau dibuka dari sisi admin (tidak ada "marketing yang login"), field ini kosong dan harus diisi manual — keduanya tetap bisa diedit di form invoice.
+- Semua field invoice lainnya (nama pembayar, jumlah, keterangan, tanggal, metode bayar) — sama seperti kwitansi, dibaca dari query string/form tiap request, TIDAK disimpan ke database.
+
+### File Baru
+| File | Keterangan |
+|------|-----------|
+| `database/migrations/2026_07_10_000003_add_bank_account_to_journal_masters_table.php` | Tambah `bank_name`, `bank_account_number`, `bank_account_holder` ke tabel `journal_masters` |
+| `app/Http/Controllers/Admin/InvoiceController.php` | Sepenuhnya mengikuti struktur `KwitansiController` (buildViewData berbasis `array $params`, `generateInvoicePdf()`, `publicPdf()`, `sendEmail`/`sendMarketingEmail`, `sendWa`/`sendMarketingWa`, `updateContact`/`updateMarketingContact`) — ditambah `resolveParams()` yang menerima parameter opsional `$marketingUser` untuk default CP Marketing, dan logic fallback rekening dari `$journal->bank_name`/dst kalau parameter tidak di-override |
+| `app/Http/Controllers/Admin/InvoiceMasterController.php` | Sama seperti `KwitansiMasterController` — index (tabel jurnal + status rekening, cari submission → buka invoice), edit/update (form rekening per jurnal) |
+| `app/Mail/InvoiceMail.php` | Mailable — lampiran PDF di-generate on-the-fly lewat `generateInvoicePdf()` |
+| `resources/views/admin/invoice/receipt.blade.php` | Halaman invoice 1 halaman A4 — struktur sama seperti kwitansi (kop surat dari LOA, modal "Kirim ke Author", tanpa `page-break-after` supaya tidak kena bug halaman kosong seperti LOA dulu) + tambahan: box "Instruksi Pembayaran" (bank/no rekening/atas nama) dan baris CP Marketing. Wording disesuaikan konteks invoice ("Ditagihkan kepada" bukan "Telah diterima dari", karena invoice = tagihan, bukan bukti sudah bayar seperti kwitansi). Edit-bar di atas ditambah 5 field baru: `bank_name`, `bank_account_number`, `bank_account_holder`, `cp_marketing_nama`, `cp_marketing_kontak` |
+| `resources/views/emails/invoice.blade.php` | Template email invoice — ringkasan tagihan + instruksi pembayaran + CP marketing |
+| `resources/views/admin/invoice-master/index.blade.php`, `edit.blade.php` | View Master Invoice, sama strukturnya dengan Master Kwitansi |
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/JournalMaster.php` | Tambah `bank_name`, `bank_account_number`, `bank_account_holder` ke `$fillable` |
+| `routes/web.php` | Tambah semua route invoice (show, send-email, send-wa, update-contact, public-pdf) untuk admin & marketing, plus `admin.invoice-master.index`/`.edit`/`.update` |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah menu "Master Invoice" di bawah "Master Kwitansi" |
+| `resources/views/admin/submissions/show.blade.php` | Tambah tombol "Invoice" di sebelah tombol "Kwitansi" |
+| `resources/views/marketing/show-submission.blade.php` | Tambah card "Invoice" mirip card Kwitansi |
+
+**Diverifikasi lewat HTTP request asli + tinker (bukan cuma baca kode):**
+1. Halaman invoice admin (`GET /admin/submissions/{id}/invoice`) → status 200, judul "INVOICE" muncul, tombol "Kirim ke Author" muncul.
+2. Info rekening jurnal diisi sementara ke DB (Bank BCA/1234567890) → halaman invoice otomatis menampilkan info itu tanpa perlu input manual → data dikembalikan ke `null` setelah verifikasi.
+3. Login sebagai akun marketing sungguhan (`Wandi`) → buka invoice dari sisi marketing → nama akun marketing itu otomatis muncul sebagai CP Marketing di halaman invoice, tanpa perlu diisi manual.
+4. Master Invoice index & edit (`GET /admin/invoice-master`, `GET /admin/invoice-master/{id}/edit`) → status 200, field `bank_name` muncul di form edit.
+5. `generateInvoicePdf()` dengan data lengkap (termasuk rekening & CP marketing) → PDF valid 1 halaman.
+6. Route publik `GET /invoice/{kode_submit}/pdf` (tanpa login) → status 200, `Content-Type: application/pdf`.
+7. `InvoiceMail::render()` → email berisi nama pembayar, info bank, dan CP marketing yang benar; 1 lampiran PDF.
+
+**Catatan:** selama pengujian nomor 3 di atas, `marketing_id` pada submission uji sempat diubah ke `null` untuk keperluan tes kepemilikan (ownership check) tanpa mencatat nilai aslinya lebih dulu — karena distribusi `marketing_id` di data lokal kira-kira 50/50 terisi/kosong, nilai aslinya tidak bisa dipastikan lagi. Ini **cuma memengaruhi data development lokal**, tidak menyentuh database production sama sekali.
+
+

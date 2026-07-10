@@ -147,6 +147,21 @@
             </div>
         </div>
 
+        {{-- Invoice Card --}}
+        <div class="card mb-4 border-info">
+            <div class="card-header bg-info bg-opacity-10 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-text text-info"></i>
+                <span class="fw-semibold text-info">Invoice</span>
+            </div>
+            <div class="card-body py-3">
+                <a href="{{ route('marketing.submissions.invoice', $submission) }}"
+                   target="_blank" class="btn btn-info btn-sm px-4 text-white">
+                    <i class="bi bi-eye me-1"></i> Lihat / Cetak Invoice
+                </a>
+                <div class="form-text mt-1">Info rekening otomatis dari Master Invoice, CP Marketing otomatis dari akun Anda yang sedang login — keduanya tetap bisa diubah manual di halaman invoice.</div>
+            </div>
+        </div>
+
         <!-- Progress Card - Using Shared Component -->
         <x-tracking-table :submission="$submission" />
 

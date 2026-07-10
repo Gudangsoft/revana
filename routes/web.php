@@ -108,6 +108,9 @@ Route::get('/loa/{kode_loa}/pdf', [\App\Http\Controllers\Admin\LoaController::cl
 // dikirim ke Fonnte sudah menyertakan nama_pembayar/jumlah/keterangan/dst secara lengkap.
 Route::get('/kwitansi/{kode_submit}/pdf', [\App\Http\Controllers\Admin\KwitansiController::class, 'publicPdf'])->name('kwitansi.public.pdf');
 
+// Public Invoice PDF — no login required, dipakai Fonnte untuk fetch file lampiran WA.
+Route::get('/invoice/{kode_submit}/pdf', [\App\Http\Controllers\Admin\InvoiceController::class, 'publicPdf'])->name('invoice.public.pdf');
+
 // Public Referensi Jurnal (no login required)
 Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalController::class, 'index'])->name('public.referensi-jurnal');
 
@@ -210,6 +213,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/submissions/{submission}/kwitansi/send-email', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendEmail'])->name('submissions.kwitansi.send-email');
         Route::post('/submissions/{submission}/kwitansi/send-wa', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendWa'])->name('submissions.kwitansi.send-wa');
         Route::post('/submissions/{submission}/kwitansi/update-contact', [\App\Http\Controllers\Admin\KwitansiController::class, 'updateContact'])->name('submissions.kwitansi.update-contact');
+        Route::get('/submissions/{submission}/invoice', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('submissions.invoice');
+        Route::post('/submissions/{submission}/invoice/send-email', [\App\Http\Controllers\Admin\InvoiceController::class, 'sendEmail'])->name('submissions.invoice.send-email');
+        Route::post('/submissions/{submission}/invoice/send-wa', [\App\Http\Controllers\Admin\InvoiceController::class, 'sendWa'])->name('submissions.invoice.send-wa');
+        Route::post('/submissions/{submission}/invoice/update-contact', [\App\Http\Controllers\Admin\InvoiceController::class, 'updateContact'])->name('submissions.invoice.update-contact');
         Route::get('/submissions/{submission}/process', [SubmissionController::class, 'process'])->name('submissions.process');
         Route::get('/submissions/{submission}/history', [SubmissionController::class, 'history'])->name('submissions.history');
         Route::post('/submissions/{submission}/update-process', [SubmissionController::class, 'updateProcess'])->name('submissions.update-process');
@@ -422,6 +429,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/kwitansi-master', [\App\Http\Controllers\Admin\KwitansiMasterController::class, 'index'])->name('kwitansi-master.index');
         Route::get('/kwitansi-master/{journalMaster}/edit', [\App\Http\Controllers\Admin\KwitansiMasterController::class, 'edit'])->name('kwitansi-master.edit');
         Route::put('/kwitansi-master/{journalMaster}', [\App\Http\Controllers\Admin\KwitansiMasterController::class, 'update'])->name('kwitansi-master.update');
+        Route::get('/invoice-master', [\App\Http\Controllers\Admin\InvoiceMasterController::class, 'index'])->name('invoice-master.index');
+        Route::get('/invoice-master/{journalMaster}/edit', [\App\Http\Controllers\Admin\InvoiceMasterController::class, 'edit'])->name('invoice-master.edit');
+        Route::put('/invoice-master/{journalMaster}', [\App\Http\Controllers\Admin\InvoiceMasterController::class, 'update'])->name('invoice-master.update');
 
         Route::get('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'index'])->name('task-point-settings.index');
         Route::put('/task-point-settings', [\App\Http\Controllers\Admin\TaskPointSettingController::class, 'update'])->name('task-point-settings.update');
@@ -698,6 +708,10 @@ Route::prefix('marketing')->group(function () {
         Route::post('/submissions/{submission}/kwitansi/send-email', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendMarketingEmail'])->name('marketing.submissions.kwitansi.send-email');
         Route::post('/submissions/{submission}/kwitansi/send-wa', [\App\Http\Controllers\Admin\KwitansiController::class, 'sendMarketingWa'])->name('marketing.submissions.kwitansi.send-wa');
         Route::post('/submissions/{submission}/kwitansi/update-contact', [\App\Http\Controllers\Admin\KwitansiController::class, 'updateMarketingContact'])->name('marketing.submissions.kwitansi.update-contact');
+        Route::get('/submissions/{submission}/invoice', [\App\Http\Controllers\Admin\InvoiceController::class, 'showMarketing'])->name('marketing.submissions.invoice');
+        Route::post('/submissions/{submission}/invoice/send-email', [\App\Http\Controllers\Admin\InvoiceController::class, 'sendMarketingEmail'])->name('marketing.submissions.invoice.send-email');
+        Route::post('/submissions/{submission}/invoice/send-wa', [\App\Http\Controllers\Admin\InvoiceController::class, 'sendMarketingWa'])->name('marketing.submissions.invoice.send-wa');
+        Route::post('/submissions/{submission}/invoice/update-contact', [\App\Http\Controllers\Admin\InvoiceController::class, 'updateMarketingContact'])->name('marketing.submissions.invoice.update-contact');
         Route::post('/submissions/{submission}/catatan', [MarketingDashboardController::class, 'updateCatatan'])->name('marketing.submissions.update-catatan');
         Route::get('/submissions-monitoring', [MarketingDashboardController::class, 'submissionsMonitoring'])->name('marketing.submissions.monitoring');
         Route::get('/points', [MarketingDashboardController::class, 'points'])->name('marketing.points');
