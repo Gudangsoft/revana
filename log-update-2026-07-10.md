@@ -106,3 +106,15 @@ Log perubahan otomatis dari git commits.
 
 **Diverifikasi lewat tinker (render langsung, bukan cuma baca kode):** render `KwitansiController::show()` dengan submission asli + query string `jumlah=750000&keterangan=...` → halaman berhasil render, menampilkan "Rp 750.000" dan "Terbilang: Tujuh ratus lima puluh ribu rupiah" dengan benar. Dicek fungsi `terbilang()` untuk beberapa angka (12.000 → "Dua belas ribu", 1.000.000 → "Satu juta", 999.999 → "Sembilan ratus sembilan puluh sembilan ribu sembilan ratus sembilan puluh sembilan") — semua benar. Dicek juga render TANPA query string sama sekali → otomatis pakai `nama_penulis` submission sebagai nama pembayar default dan jumlah default Rp 0 / terbilang "-". Dipastikan setelah semua test, tidak ada perubahan apapun tersimpan di tabel `submissions` (cuma dibaca, model tidak pernah di-save).
 
+
+## 8. 🔄 Update: kwitansi
+
+- **Commit:** `81a7454` — 13:46 oleh Gudangsoft
+- **File berubah:** 6 file
+- `app/Http/Controllers/Admin/KwitansiController.php`
+- `log-update-2026-07-10.md`
+- `resources/views/admin/kwitansi/receipt.blade.php`
+- `resources/views/admin/submissions/show.blade.php`
+- `resources/views/marketing/show-submission.blade.php`
+- `routes/web.php`
+
