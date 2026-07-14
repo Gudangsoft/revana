@@ -339,3 +339,24 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** halaman lain yang juga menampilkan tombol LOA di tabel listing (`admin/submissions/monitoring.blade.php`, `admin/fasttrack/monitoring.blade.php`, dll — pakai badge kecil, bukan tombol besar seperti di sini) belum ikut diubah karena bukan bagian dari permintaan ini dan gaya tampilannya berbeda (badge inline, bukan grup tombol) — kalau nanti diminta, pola dropdown yang sama bisa diterapkan di situ juga.
 
+
+## 22. 🔄 Update: Add Kwitansi/Invoice links to marketing submissions list via a dropdown
+
+- **Commit:** `37c4ce8` — 15:41 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-10.md`
+- `resources/views/marketing/submissions.blade.php`
+
+## 23. Fix Pilihan Reviewer Hilang Diam-Diam di Form Tugaskan Reviewer (`/admin/assignments/create`)
+
+**Tujuan:** User melapor setiap mengisi form "Tugaskan Reviewer" harus mengulang terus karena "kehabisan waktu" — muncul error "The reviewer id field is required" padahal sudah memilih reviewer, sementara field lain (judul artikel, deadline, bahasa, dll) tetap tersimpan.
+
+**Root cause:** BUKAN soal session timeout (`SESSION_LIFETIME` di `.env` = 120 menit, cukup lama) — ini murni bug JavaScript di widget pencarian reviewer. Kotak pencarian reviewer (`🔍 Ketik untuk mencari reviewer...`) punya event listener `keydown` yang **mengosongkan pilihan reviewer setiap kali ada tombol apapun ditekan di kotak itu** (`resources/views/admin/assignments/create.blade.php`, fungsi `initializeReviewerSearch()`), bukan cuma saat user benar-benar mengetik ulang pencarian baru. Begitu reviewer sudah dipilih (kotak menampilkan "Nama - email"), kalau kotak itu ter-fokus lagi karena apapun (klik balik untuk cek, Tab pindah antar field, dst) dan ada tombol tertekan, `<select name="reviewer_id">` di baliknya langsung dikosongkan diam-diam — teks di kotak pencarian TETAP terlihat seperti sudah terpilih, padahal value sesungguhnya sudah kosong. User baru sadar setelah selesai mengisi seluruh form (makanya terasa seperti "kehabisan waktu") dan submit gagal dengan error reviewer_id kosong, harus mengulang dari pencarian reviewer lagi.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/assignments/create.blade.php` | Listener `keydown` yang mengosongkan pilihan tanpa syarat **dihapus**. Logic pengosongan dipindah ke dalam listener `input` (yang cuma jalan kalau isi kotak pencarian BENAR-BENAR berubah), dan dibandingkan dengan `confirmedLabel` (label "Nama - email" yang disimpan saat reviewer terakhir kali benar-benar dipilih) — pilihan reviewer cuma dianggap batal kalau teks di kotak pencarian sudah tidak sama persis dengan label yang dikonfirmasi itu. Fokus ulang, Tab, atau tombol navigasi lain yang tidak mengubah isi teks tidak lagi menghapus pilihan. Berlaku untuk semua slot reviewer (1-5) karena `initializeReviewerSearch()` dipakai bersama |
+
+**Catatan:** dicek juga `SESSION_LIFETIME=120` (menit) di `.env` — bukan penyebabnya, form validation error yang muncul di screenshot user (field lain tetap terisi via `old()`) memang ciri khas kegagalan validasi Laravel biasa, bukan sesi/CSRF kedaluwarsa (yang biasanya menampilkan halaman 419, bukan halaman form dengan `old()` terisi). Perbaikan ini murni sisi client-side (JS), tidak ada perubahan controller/route/database.
+

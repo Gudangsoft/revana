@@ -667,26 +667,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function initializeReviewerSearch(searchInput, selectElement, num) {
         if (!searchInput || !selectElement) return;
-        
+
+        // Label yang terakhir dikonfirmasi (diisi otomatis oleh handler 'change' saat
+        // reviewer dipilih). Dipakai untuk membedakan "user memang mengetik ulang
+        // pencarian baru" vs "cuma klik/tab masuk lagi ke field tanpa niat mengubah
+        // pilihan" — supaya reviewer yang sudah dipilih tidak hilang diam-diam kalau
+        // field ini sempat ter-fokus lagi (mis. saat mengisi field lain di bawahnya).
+        let confirmedLabel = '';
+
         // Focus handler
         searchInput.addEventListener('focus', function() {
             if (this.value.length > 0) {
                 selectElement.style.display = 'block';
             }
         });
-        
+
         // Input handler for search and filter
         searchInput.addEventListener('input', function() {
+            // Reviewer yang sudah dipilih cuma dianggap "batal" kalau teksnya BENAR-BENAR
+            // berubah dari label yang dikonfirmasi (bukan cuma karena keydown/fokus
+            // tanpa perubahan apa pun — itu sebabnya reset ini dipindah dari event
+            // 'keydown' ke sini, dan dibandingkan dengan confirmedLabel).
+            if (selectElement.value && this.value !== confirmedLabel) {
+                selectElement.value = '';
+            }
+
             const searchTerm = this.value.toLowerCase();
             const options = selectElement.querySelectorAll('option');
             let visibleCount = 0;
-            
+
             options.forEach(option => {
                 if (option.value === '') {
                     option.style.display = 'none';
                     return;
                 }
-                
+
                 const searchData = option.getAttribute('data-search') || '';
                 if (searchData.includes(searchTerm)) {
                     option.style.display = 'block';
@@ -695,33 +710,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.style.display = 'none';
                 }
             });
-            
+
             if (visibleCount > 0 && searchTerm.length > 0) {
                 selectElement.style.display = 'block';
             } else if (searchTerm.length === 0) {
                 selectElement.style.display = 'none';
             }
         });
-        
+
         // Selection handler
         selectElement.addEventListener('change', function() {
             if (this.value) {
                 const selectedOption = this.options[this.selectedIndex];
                 const name = selectedOption.getAttribute('data-name');
                 const email = selectedOption.getAttribute('data-email');
-                
-                searchInput.value = name + ' - ' + email;
+
+                confirmedLabel = name + ' - ' + email;
+                searchInput.value = confirmedLabel;
                 this.style.display = 'none';
             }
         });
-        
-        // Clear selection when typing again
-        searchInput.addEventListener('keydown', function() {
-            if (selectElement.value) {
-                selectElement.value = '';
-            }
-        });
-        
+
         // Hide select when clicking outside
         document.addEventListener('click', function(e) {
             if (!searchInput.contains(e.target) && !selectElement.contains(e.target)) {
