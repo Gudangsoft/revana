@@ -360,3 +360,18 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** dicek juga `SESSION_LIFETIME=120` (menit) di `.env` — bukan penyebabnya, form validation error yang muncul di screenshot user (field lain tetap terisi via `old()`) memang ciri khas kegagalan validasi Laravel biasa, bukan sesi/CSRF kedaluwarsa (yang biasanya menampilkan halaman 419, bukan halaman form dengan `old()` terisi). Perbaikan ini murni sisi client-side (JS), tidak ada perubahan controller/route/database.
 
+## 24. Fix Badge SINTA "Mengambang" di Tengah Halaman Kwitansi & Invoice
+
+**Tujuan:** User melaporkan (dengan screenshot) badge akreditasi SINTA (mis. "S4") di kwitansi dan invoice posisinya masih di tengah halaman, bukan di posisi footer yang wajar.
+
+**Root cause:** CSS `.a4-page` di `kwitansi/receipt.blade.php` dan `invoice/receipt.blade.php` tidak punya mekanisme apapun untuk menempelkan footer (`sinta-bar` + `verified-bar`) ke BAWAH halaman — keduanya cuma mengikuti alur dokumen biasa, langsung sesudah konten kwitansi/invoice berakhir. LOA (2 halaman penuh) tidak kelihatan masalah ini karena kontennya nyaris memenuhi 297mm, tapi kwitansi/invoice jauh lebih pendek (cuma beberapa baris info + tanda tangan), jadi footer-nya "mengambang" tepat di bawah konten — yang terlihat seperti di tengah halaman karena sisa `min-height:297mm` yang kosong ada di BAWAH footer itu, bukan di sekitarnya secara merata.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/kwitansi/receipt.blade.php` | `.a4-page` diberi `position:relative`; `sinta-bar` + `verified-bar` dibungkus `<div class="page-footer">` dengan CSS baru `.page-footer { position:absolute; left:0; bottom:0; width:100% }` — footer sekarang selalu menempel di bawah fisik halaman A4, berapa pun pendeknya konten di atasnya |
+| `resources/views/admin/invoice/receipt.blade.php` | Perubahan identik dengan kwitansi |
+
+**Diverifikasi lewat tinker + dompdf:** generate ulang PDF kwitansi & invoice (dengan `accreditation` jurnal disetel sementara ke "SINTA 4" supaya badge SINTA muncul, lalu dikembalikan lagi setelah tes) — dipastikan jumlah halaman TETAP 1 (tidak ada overflow baru akibat `position:absolute`, teknik yang sama sudah terbukti aman dipakai untuk watermark di LOA). Verifikasi visual pixel-perfect tidak dilakukan (tidak ada tool rasterisasi PDF di environment lokal), tapi mekanisme CSS-nya adalah teknik standar (parent `position:relative` + child `position:absolute;bottom:0`) yang sudah terbukti didukung dompdf lewat watermark LOA yang sudah berjalan.
+
+

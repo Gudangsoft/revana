@@ -47,7 +47,7 @@
     width: 210mm; min-height: 297mm;
     background: #fff; margin: 24px auto;
     box-shadow: 0 4px 24px rgba(0,0,0,.25);
-    padding: 0;
+    padding: 0; position: relative;
   }
   .page-inner { padding: 10mm 18mm; }
 }
@@ -56,9 +56,16 @@
   .print-bar, .edit-bar, .no-print { display: none !important; }
   body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
   @page { size: A4; margin: 0; }
-  .a4-page { width: 210mm; min-height: 297mm; margin: 0; }
+  .a4-page { width: 210mm; min-height: 297mm; margin: 0; position: relative; }
   .page-inner { padding: 10mm 18mm; }
 }
+
+/* Footer (badge SINTA + catatan verifikasi) dipin ke BAWAH halaman lewat
+   position:absolute, bukan cuma mengikuti alur dokumen — kwitansi/invoice jauh
+   lebih pendek dari 1 halaman penuh, jadi tanpa ini footer akan "mengambang" di
+   tengah halaman (persis sesudah konten berakhir), bukan di posisi footer yang
+   wajar. dompdf mendukung position:absolute (sudah dipakai juga di watermark LOA). */
+.page-footer { position: absolute; left: 0; bottom: 0; width: 100%; }
 
 body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #222; }
 
@@ -429,14 +436,16 @@ function copyInvLink(e) {
         </div>
     </div>
 
-    @if($sintaLevel)
-    <div class="sinta-bar">
-        <span class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></span>
-        <span style="font-size:8pt; font-weight:bold; padding-left:10px;">Accredited SINTA {{ $sintaLevel }}</span>
-    </div>
-    @endif
-    <div class="verified-bar">
-        <strong>Invoice ini digenerate otomatis dan tidak memerlukan tanda tangan basah.</strong>
+    <div class="page-footer">
+        @if($sintaLevel)
+        <div class="sinta-bar">
+            <span class="sinta-badge"><span class="sinta-s">S</span><span class="sinta-n">{{ $sintaLevel }}</span></span>
+            <span style="font-size:8pt; font-weight:bold; padding-left:10px;">Accredited SINTA {{ $sintaLevel }}</span>
+        </div>
+        @endif
+        <div class="verified-bar">
+            <strong>Invoice ini digenerate otomatis dan tidak memerlukan tanda tangan basah.</strong>
+        </div>
     </div>
 </div>
 
