@@ -11,6 +11,7 @@ use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class InvoiceController extends Controller
 {
@@ -23,6 +24,7 @@ class InvoiceController extends Controller
         $data['sendWaRoute']        = 'admin.submissions.invoice.send-wa';
         $data['updateContactRoute'] = 'admin.submissions.invoice.update-contact';
         $data['publicPdfUrl']       = $this->publicPdfUrl($submission, $params);
+        $data['verifyUrl']         = $data['publicPdfUrl'];
 
         return view('admin.invoice.receipt', $data);
     }
@@ -41,6 +43,7 @@ class InvoiceController extends Controller
         $data['sendWaRoute']        = 'marketing.submissions.invoice.send-wa';
         $data['updateContactRoute'] = 'marketing.submissions.invoice.update-contact';
         $data['publicPdfUrl']       = $this->publicPdfUrl($submission, $params);
+        $data['verifyUrl']         = $data['publicPdfUrl'];
 
         return view('admin.invoice.receipt', $data);
     }
@@ -279,6 +282,7 @@ class InvoiceController extends Controller
             'primaryColor'       => $journal?->primary_color ?? '#1A237E',
             'secondaryColor'     => $journal?->secondary_color ?? '#8B6914',
             'accreditationLogoUrl' => $this->resolveAccreditationLogoUrl($journal),
+            'linkSkAkreditasi'   => $journal?->link_sk_akreditasi,
         ];
     }
 
@@ -287,11 +291,17 @@ class InvoiceController extends Controller
     {
         $data = $this->buildViewData($submission, $params);
         $journal = $data['journal'];
+        $data['pdfMode'] = true;
 
         $data['logoUrl']              = $this->localStoragePath($journal?->logo_path);
         $data['signUrl']              = $this->localStoragePath($journal?->bendahara_signature_path);
         $data['headerImageUrl']       = $this->localStoragePath($journal?->header_image_path);
         $data['accreditationLogoUrl'] = $this->resolveAccreditationLogoLocalPath($journal);
+
+        // QR verifikasi — sama seperti LOA, mengarah ke link PDF publik invoice ini.
+        $verifyUrl = $this->publicPdfUrl($submission, $params);
+        $qrSvg = QrCode::format('svg')->size(80)->margin(0)->generate($verifyUrl);
+        $data['qrDataUri'] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
 
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.invoice.receipt', $data)
             ->setOption('defaultMediaType', 'print')

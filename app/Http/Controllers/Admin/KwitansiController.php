@@ -11,6 +11,7 @@ use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class KwitansiController extends Controller
 {
@@ -22,6 +23,7 @@ class KwitansiController extends Controller
         $data['sendWaRoute']       = 'admin.submissions.kwitansi.send-wa';
         $data['updateContactRoute'] = 'admin.submissions.kwitansi.update-contact';
         $data['publicPdfUrl']      = $this->publicPdfUrl($submission, $data);
+        $data['verifyUrl']         = $data['publicPdfUrl'];
 
         return view('admin.kwitansi.receipt', $data);
     }
@@ -39,6 +41,7 @@ class KwitansiController extends Controller
         $data['sendWaRoute']       = 'marketing.submissions.kwitansi.send-wa';
         $data['updateContactRoute'] = 'marketing.submissions.kwitansi.update-contact';
         $data['publicPdfUrl']      = $this->publicPdfUrl($submission, $data);
+        $data['verifyUrl']         = $data['publicPdfUrl'];
 
         return view('admin.kwitansi.receipt', $data);
     }
@@ -286,6 +289,7 @@ class KwitansiController extends Controller
             'primaryColor'     => $journal?->primary_color ?? '#1A237E',
             'secondaryColor'   => $journal?->secondary_color ?? '#8B6914',
             'accreditationLogoUrl' => $this->resolveAccreditationLogoUrl($journal),
+            'linkSkAkreditasi' => $journal?->link_sk_akreditasi,
         ];
     }
 
@@ -294,12 +298,20 @@ class KwitansiController extends Controller
     {
         $data = $this->buildViewData($submission, $params);
         $journal = $data['journal'];
+        $data['pdfMode'] = true;
 
         // dompdf punya enable_remote=false (default), pakai path file lokal untuk gambar
         $data['logoUrl']              = $this->localStoragePath($journal?->logo_path);
         $data['signUrl']              = $this->localStoragePath($journal?->bendahara_signature_path);
         $data['headerImageUrl']       = $this->localStoragePath($journal?->header_image_path);
         $data['accreditationLogoUrl'] = $this->resolveAccreditationLogoLocalPath($journal);
+
+        // QR verifikasi — sama seperti LOA, tapi mengarah ke link PDF publik kwitansi ini
+        // (satu-satunya cara "verifikasi" yang masuk akal untuk dokumen yang datanya tidak
+        // disimpan di DB: scan ulang akan selalu menghasilkan PDF yang identik).
+        $verifyUrl = $this->publicPdfUrl($submission, $data);
+        $qrSvg = QrCode::format('svg')->size(80)->margin(0)->generate($verifyUrl);
+        $data['qrDataUri'] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
 
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.kwitansi.receipt', $data)
             ->setOption('defaultMediaType', 'print')

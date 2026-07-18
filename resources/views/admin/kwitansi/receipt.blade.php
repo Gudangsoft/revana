@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Kwitansi – {{ $submission->kode_submit }}</title>
+<script src="{{ asset('js/qrcode.min.js') }}"></script>
 @php
+    $pdfMode   = $pdfMode ?? false;
+    $qrDataUri = $qrDataUri ?? null;
     $jurnalNama = $journal?->nama_jurnal ?? 'Jurnal';
     $kodeSingkat = $journal?->kode_singkat ?? '';
     $eIssn = $journal?->e_issn ?? '';
@@ -65,7 +68,7 @@
    lebih pendek dari 1 halaman penuh, jadi tanpa ini footer akan "mengambang" di
    tengah halaman (persis sesudah konten berakhir), bukan di posisi footer yang
    wajar. dompdf mendukung position:absolute (sudah dipakai juga di watermark LOA). */
-.page-footer { position: absolute; left: 0; bottom: 0; width: 100%; }
+.page-footer { position: absolute; left: 0; bottom: 0; width: 100%; z-index: 1; }
 
 body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #222; }
 
@@ -116,8 +119,36 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
 .verified-bar {
   background: #f5f5f5; color: #333; padding: 6px 18px;
   font-size: 7pt; border-top: 1px solid #ddd;
+  display: table; width: 100%;
 }
 .verified-bar strong { font-size: 8pt; }
+.verified-text-block { display: table-cell; vertical-align: top; }
+.vb-row1 { font-weight: bold; font-size: 8pt; margin-bottom: 2px; }
+.vb-row3 { font-size: 6.5pt; color: #555; margin-top: 1px; font-weight: bold; }
+.acred-logo-col { display: table-cell; vertical-align: middle; text-align: right; width: 110px; }
+
+/* Watermark — sama seperti LOA, supaya kwitansi/invoice punya penanda visual
+   verifikasi yang konsisten dengan dokumen lain (LOA) di SIPERA */
+.a4-page { overflow: hidden; }
+.watermark {
+  position: absolute; top: -80%; left: -40%;
+  width: 210%; height: 280%;
+  z-index: 0; pointer-events: none;
+  transform: rotate(-38deg);
+  display: flex; flex-direction: column; justify-content: space-around;
+  overflow: hidden;
+}
+.wm-row { white-space: nowrap; }
+.wm-text {
+  font-size: 16pt; font-weight: 900;
+  color: rgba(26,35,126,.055);
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 6px; text-transform: uppercase;
+  padding-right: 60px; display: inline-block;
+}
+.jrn-header, .page-inner { position: relative; z-index: 1; }
+
+.qr-wrap img, .qr-wrap canvas { display: block; width: 80px !important; height: 80px !important; }
 </style>
 </head>
 <body>
@@ -335,6 +366,18 @@ function copyKwtLink(e) {
 </form>
 
 <div class="a4-page">
+    {{-- Watermark: sama seperti LOA, penanda visual verifikasi --}}
+    <div class="watermark" aria-hidden="true">
+        @php $wmLabel = strtoupper(($kodeSingkat ?: 'SIPERA') . ' • VERIFIED'); @endphp
+        @for($wi = 0; $wi < 9; $wi++)
+        <div class="wm-row">
+            <span class="wm-text">{{ $wmLabel }}</span>
+            <span class="wm-text">{{ $wmLabel }}</span>
+            <span class="wm-text">{{ $wmLabel }}</span>
+        </div>
+        @endfor
+    </div>
+
     {{-- Kop surat: pakai gambar header yang sudah diupload lewat Master LOA (kalau ada),
          supaya tidak perlu input/upload ulang khusus untuk kwitansi --}}
     @if(!empty($headerImageUrl))
@@ -387,12 +430,19 @@ function copyKwtLink(e) {
             <p>{{ $kota }}, {{ $tanggal->translatedFormat('d F Y') }}</p>
             <p class="sig-role" style="margin-top:4px;">{{ $editorTitle }}</p>
             <p>{{ $jurnalNama }}</p>
+            @if($pdfMode && $qrDataUri)
+            <img src="{{ $qrDataUri }}" width="80" height="80" alt="QR"
+                 style="margin-top:8px; margin-left:auto; display:block;">
+            @else
+            <div class="qr-wrap" id="qr1" title="Scan QR untuk verifikasi" style="margin-top:8px; margin-left:auto; display:inline-block;"></div>
+            @endif
             @if($signUrl)
             <img src="{{ $signUrl }}" class="sig-img" alt="Tanda tangan">
             @endif
             @if($editorName)
             <p class="sig-name" style="margin-top:6px;">{{ $editorName }}</p>
             @endif
+            <div style="font-size:6.5pt; margin-top:3px; text-align:right;">Scan QR untuk verifikasi</div>
         </div>
     </div>
 
@@ -404,10 +454,47 @@ function copyKwtLink(e) {
         </div>
         @endif
         <div class="verified-bar">
-            <strong>Kwitansi ini digenerate otomatis dan tidak memerlukan tanda tangan basah.</strong>
+            <div class="verified-text-block">
+                <div class="vb-row1">Diverifikasi oleh</div>
+                <div class="vb-row3">Doc ID: {{ $submission->kode_submit }}</div>
+            </div>
+            @if($accreditationLogoUrl)
+            <div class="acred-logo-col">
+                @if(!empty($linkSkAkreditasi))
+                    <a href="{{ $linkSkAkreditasi }}" target="_blank" style="display:inline-block;">
+                        <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+                    </a>
+                @else
+                    <img src="{{ $accreditationLogoUrl }}" style="height:44px;width:auto;object-fit:contain;" alt="Logo Akreditasi">
+                @endif
+            </div>
+            @endif
         </div>
     </div>
 </div>
 
+<script>
+(function () {
+    var verifyUrl = '{{ $verifyUrl ?? '' }}';
+
+    function renderQr(elId) {
+        var el = document.getElementById(elId);
+        if (!el || typeof QRCode === 'undefined' || !verifyUrl) return;
+        el.innerHTML = '';
+        new QRCode(el, {
+            text         : verifyUrl,
+            width        : 80,
+            height       : 80,
+            colorDark    : '#000000',
+            colorLight   : '#ffffff',
+            correctLevel : QRCode.CorrectLevel.L
+        });
+    }
+
+    window.addEventListener('load', function () {
+        renderQr('qr1');
+    });
+})();
+</script>
 </body>
 </html>

@@ -374,4 +374,22 @@ Log perubahan otomatis dari git commits.
 
 **Diverifikasi lewat tinker + dompdf:** generate ulang PDF kwitansi & invoice (dengan `accreditation` jurnal disetel sementara ke "SINTA 4" supaya badge SINTA muncul, lalu dikembalikan lagi setelah tes) — dipastikan jumlah halaman TETAP 1 (tidak ada overflow baru akibat `position:absolute`, teknik yang sama sudah terbukti aman dipakai untuk watermark di LOA). Verifikasi visual pixel-perfect tidak dilakukan (tidak ada tool rasterisasi PDF di environment lokal), tapi mekanisme CSS-nya adalah teknik standar (parent `position:relative` + child `position:absolute;bottom:0`) yang sudah terbukti didukung dompdf lewat watermark LOA yang sudah berjalan.
 
+## 25. Header/Footer Kwitansi & Invoice Disamakan Penuh dengan LOA (Watermark, Doc ID, Logo Akreditasi, QR Verifikasi)
+
+**Tujuan:** User minta header & footer kwitansi/invoice mengikuti LOA sepenuhnya, dan minta dicek ulang semua datanya sudah "tersinkron" (konsisten dengan LOA). Sebelumnya kwitansi/invoice cuma meniru sebagian kecil LOA (header/kop surat saja, dari fix sebelumnya) — watermark, baris "Doc ID", kolom logo akreditasi, dan QR kode verifikasi (semua bagian standar dokumen resmi LOA) belum ada sama sekali di kwitansi/invoice.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/KwitansiController.php` | Tambah `linkSkAkreditasi` ke `buildViewData()`. `generateKwitansiPdf()`: set `pdfMode=true` dan generate QR code (SVG, base64 data URI) mengarah ke link PDF publik kwitansi ini sendiri — satu-satunya bentuk "verifikasi" yang masuk akal untuk dokumen yang datanya tidak disimpan di DB (scan ulang selalu menghasilkan PDF yang identik). `show()`/`showMarketing()` sekarang juga kirim `verifyUrl` (dipakai QR di tampilan layar) |
+| `app/Http/Controllers/Admin/InvoiceController.php` | Perubahan identik dengan Kwitansi |
+| `resources/views/admin/kwitansi/receipt.blade.php` | Tambah watermark diagonal berulang ("{KODE} • VERIFIED", persis pola LOA) dengan CSS `.watermark`/`.wm-row`/`.wm-text`; `.a4-page` diberi `overflow:hidden` supaya watermark tidak bocor keluar batas halaman, `.jrn-header`/`.page-inner` diberi `position:relative;z-index:1` supaya konten tetap di atas watermark (bukan tertutup olehnya). Footer `verified-bar` diubah dari teks statis jadi struktur sama seperti LOA: "Diverifikasi oleh" + "Doc ID: {kode_submit}" + kolom logo akreditasi (link ke SK Akreditasi kalau ada). Tambah QR code di `sig-block` (server-generated SVG saat mode PDF, atau di-render lewat `qrcode.min.js` saat dilihat di layar browser) yang mengarah ke link PDF publik kwitansi |
+| `resources/views/admin/invoice/receipt.blade.php` | Perubahan identik dengan kwitansi |
+
+**Diverifikasi lewat tinker + HTTP request asli:**
+1. Generate PDF kwitansi & invoice (dengan `accreditation`="SINTA 4" dan `link_sk_akreditasi` diisi sementara ke jurnal, dikembalikan lagi setelah tes) → tetap 1 halaman, ukuran file PDF naik signifikan (kwitansi ~6KB→10.8KB, invoice ~7KB→13.4KB) — mengonfirmasi watermark+QR benar-benar ikut ter-render, bukan gagal diam-diam.
+2. `GET /admin/submissions/{id}/kwitansi` dan `/invoice` (HTTP request asli, login admin) → status 200, halaman berisi `<div class="watermark">`, `<div id="qr1">`, teks "Doc ID:", dan script `renderQr` — semua elemen tampilan-layar (bukan cuma PDF) sudah konsisten dengan LOA.
+
+**Catatan penting (bug yang sempat ditemukan & diperbaiki sendiri saat mengerjakan ini):** rule CSS gabungan yang tadinya ditulis `.jrn-header, .page-inner, .page-footer { position:relative; z-index:1 }` HAMPIR menimpa balik fix `position:absolute` pada `.page-footer` dari section #24 (karena aturan CSS yang muncul belakangan menang kalau selector & spesifisitasnya sama) — sudah dikoreksi sebelum commit: `.page-footer` tetap `position:absolute` (ditambah `z-index:1` langsung di rule aslinya), cuma `.jrn-header`/`.page-inner` yang dapat `position:relative` baru.
+
 
