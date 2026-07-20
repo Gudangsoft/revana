@@ -93,3 +93,29 @@ Semua data uji (request, perubahan deadline, activity log) dihapus/dikembalikan 
 **Diverifikasi lewat tinker + HTTP request asli:** submission dengan `tanggal_loa` kosong → dibuka modal Edit Metadata (via request HTTP asli, login admin) → value input terisi otomatis `2026-07-20` (tanggal hari ini saat tes), bukan kosong. Disimulasikan submit form persis seperti kalau admin klik Simpan tanpa ubah tanggal → `tanggal_loa` tersimpan `2026-07-20` di database, dan `loaNumber()` menghasilkan angka romawi `VII` (Juli, sesuai tanggal yang tersimpan) — sebelumnya, kalau dibiarkan `null`, nomor LOA akan jatuh ke periode slot jurnal (`Januari-Juni/2025`, bukan bulan tunggal yang valid). Data uji dikembalikan ke `null` setelah verifikasi.
 
 
+
+## 6. 🔄 Update: Default the LOA date field to today instead of leaving it empty
+
+- **Commit:** `80e059b` — 11:31 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-20.md`
+- `resources/views/admin/loa/receipt.blade.php`
+
+## 5. Fix Angka Romawi di Nomor LOA Tidak Sinkron dengan "Tanggal LOA"
+
+**Tujuan:** User melaporkan (dengan screenshot) angka romawi bulan di nomor LOA ("VI") tidak sama dengan bulan yang ditampilkan di picker "Tanggal LOA" (20/07/2026 = Juli = seharusnya "VII").
+
+**Root cause:** `LoaController::buildViewData()` menghitung 3 nilai (`loaNumber`, `loaDate`, `loaDateRaw`) lewat 3 fungsi terpisah yang MASING-MASING punya rantai fallback sendiri saat tidak ada override tanggal (`?tanggal=` di query string maupun `tanggal_loa` tersimpan):
+- `loaDateRawString()` & `loaDate()` (teks tanda tangan + value picker "Tanggal LOA") → jatuh ke `now()`.
+- `loaNumber()` (angka romawi) → jatuh ke `journal->loa_tanggal` kalau ada, kalau tidak baru ke `slot->bulan`/`slot->tahun` (periode terbitan jurnal).
+
+Karena `slot->bulan` isinya bisa berupa rentang seperti `"Januari-Juni"` (bukan 1 nama bulan bersih), dan ini SAMA SEKALI independen dari `now()` yang dipakai 2 fungsi lain, angka romawi bisa menampilkan bulan yang berbeda dari yang ditampilkan di picker "Tanggal LOA" — persis seperti yang dilaporkan user (VI vs Juli/VII).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LoaController.php` | `buildViewData()` sekarang menghitung SATU `$effectiveDate` (Carbon instance) di satu tempat — dari query `?tanggal=` atau `tanggal_loa` tersimpan, fallback ke `journal->loa_tanggal`, fallback terakhir ke `now()` — lalu dipakai bersama oleh `loaNumber()`, `loaDate()`, dan `loaDateRaw` sekaligus. `loaNumber()` dan `loaDate()` diubah supaya menerima `Carbon $date` langsung (bukan re-derive fallback masing-masing). Method `loaDateRawString()` dan `romanMonth()` dihapus karena sudah tidak dipakai lagi (fallback ke periode slot jurnal yang jadi sumber bug ini dibuang sepenuhnya, bukan cuma ditambal) |
+
+**Diverifikasi lewat tinker + HTTP request asli:** direproduksi persis skenario user — submission dengan `tanggal_loa` kosong, di jurnal yang `slot->bulan`-nya `"Januari-Juni"` (bukan nama bulan tunggal) → SEBELUM fix, `loaNumber()` akan menghasilkan romawi dari fallback slot yang tidak sinkron; SESUDAH fix, `loaNumber` menghasilkan `.../VII/2026` dan `loaDateRaw` menghasilkan `2026-07-20` — konsisten, sama-sama Juli. Dicek juga dengan `?tanggal=2026-03-15` (override manual) → `loaNumber`, `loaDate`, dan `loaDateRaw` ketiganya konsisten menunjukkan Maret/`III`. Dicek lewat request HTTP asli ke halaman LOA sungguhan (bukan cuma panggil method) — nomor LOA di HTML menunjukkan `VII` sesuai `loaDateRaw`. Data uji (`tanggal_loa`) sudah `null` dari awal, tidak ada yang perlu dikembalikan.
+
+

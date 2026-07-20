@@ -149,13 +149,24 @@ class LoaController extends Controller
         $kode    = $submission->kode_loa ?: $submission->kode_submit;
         $lang    = $journal?->loa_language ?? 'en';
 
+        // Satu sumber kebenaran untuk tanggal efektif LOA — dipakai bareng oleh angka
+        // romawi di nomor LOA, teks tanggal tanda tangan, DAN picker "Tanggal LOA" yang
+        // tampil di layar, supaya ketiganya selalu menunjuk ke bulan yang SAMA persis.
+        // Sebelumnya nomor LOA & teks tanggal punya rantai fallback sendiri-sendiri yang
+        // beda (nomor LOA sempat jatuh ke periode slot jurnal seperti "Juni", sementara
+        // teks tanggal & picker jatuh ke now() — bisa "Juli") sehingga menampilkan bulan
+        // yang berbeda satu sama lain.
+        $effectiveDate = $date
+            ? \Carbon\Carbon::parse($date)
+            : ($journal?->loa_tanggal ? \Carbon\Carbon::parse($journal->loa_tanggal) : now());
+
         return array_merge([
             'submission'             => $submission,
             'journal'                => $journal,
             'slot'                   => $slot,
-            'loaNumber'              => $this->loaNumber($submission, $journal, $slot, $date),
-            'loaDate'                => $this->loaDate($journal, $date, $lang, $slot),
-            'loaDateRaw'             => $this->loaDateRawString($date, $journal, $slot),
+            'loaNumber'              => $this->loaNumber($submission, $journal, $effectiveDate),
+            'loaDate'                => $this->loaDate($journal, $effectiveDate, $lang),
+            'loaDateRaw'             => $effectiveDate->toDateString(),
             'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
             'signUrl'                => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'         => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
@@ -231,63 +242,30 @@ class LoaController extends Controller
 
     // ── helpers ────────────────────────────────────────────────────────────
 
-    private function loaNumber(Submission $s, $j, $slot, ?string $dateOverride = null): string
+    private function loaNumber(Submission $s, $j, \Carbon\Carbon $date): string
     {
         $kode       = $j?->kode_singkat ?: 'SIPERA';
         $id         = $s->id_artikel ?: $s->kode_submit;
         $kodeSubmit = $s->kode_submit ?? '';
         $kodeSubmitLabel = str_ends_with(strtoupper($kodeSubmit), 'SIPERA') ? $kodeSubmit : $kodeSubmit . 'SIPERA';
 
-        if ($dateOverride) {
-            $dt    = \Carbon\Carbon::parse($dateOverride);
-            $roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][$dt->month - 1];
-            $year  = $dt->year;
-        } elseif ($j?->loa_tanggal) {
-            $dt    = \Carbon\Carbon::parse($j->loa_tanggal);
-            $roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][$dt->month - 1];
-            $year  = $dt->year;
-        } else {
-            $roman = $this->romanMonth($slot?->bulan);
-            $year  = $slot?->tahun ?? now()->year;
-        }
+        $roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][$date->month - 1];
 
-        return $id . '/' . $kodeSubmitLabel . '/' . $kode . '/' . $roman . '/' . $year;
+        return $id . '/' . $kodeSubmitLabel . '/' . $kode . '/' . $roman . '/' . $date->year;
     }
 
-    private function loaDateRawString(?string $dateOverride, $journal, $slot): string
+    private function loaDate($journal, \Carbon\Carbon $date, string $lang = 'en'): string
     {
-        if ($dateOverride) return $dateOverride;
-        return now()->toDateString();
-    }
-
-    private function loaDate($journal, ?string $dateOverride = null, string $lang = 'en', $slot = null): string
-    {
-        if ($dateOverride) {
-            $dt = \Carbon\Carbon::parse($dateOverride);
-        } else {
-            $dt = now();
-        }
         $kota = $journal?->loa_kota ?? 'Semarang';
 
         if ($lang === 'id') {
             $months = ['Januari','Februari','Maret','April','Mei','Juni',
                        'Juli','Agustus','September','Oktober','November','Desember'];
-            $dateStr = $dt->day . ' ' . $months[$dt->month - 1] . ' ' . $dt->year;
+            $dateStr = $date->day . ' ' . $months[$date->month - 1] . ' ' . $date->year;
         } else {
-            $dateStr = $dt->format('F j, Y');
+            $dateStr = $date->format('F j, Y');
         }
 
         return $kota . ', ' . $dateStr;
-    }
-
-    private function romanMonth(?string $bulan): string
-    {
-        $map = [
-            'januari'   => 'I',   'februari'  => 'II',   'maret'     => 'III',
-            'april'     => 'IV',  'mei'        => 'V',    'juni'      => 'VI',
-            'juli'      => 'VII', 'agustus'   => 'VIII', 'september' => 'IX',
-            'oktober'   => 'X',   'november'  => 'XI',   'desember'  => 'XII',
-        ];
-        return $map[strtolower(trim($bulan ?? ''))] ?? (string) now()->month;
     }
 }
