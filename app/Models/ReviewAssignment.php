@@ -121,6 +121,17 @@ class ReviewAssignment extends Model
         return $this->hasOne(ReviewResult::class);
     }
 
+    public function extensionRequests()
+    {
+        return $this->hasMany(DeadlineExtensionRequest::class);
+    }
+
+    /** Permintaan perpanjangan milik reviewer tertentu (null kalau belum pernah mengajukan) */
+    public function extensionRequestFor(int $reviewerId): ?DeadlineExtensionRequest
+    {
+        return $this->extensionRequests->firstWhere('reviewer_id', $reviewerId);
+    }
+
     public function reviewResults()
     {
         return $this->hasMany(ReviewResult::class);

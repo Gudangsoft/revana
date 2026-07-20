@@ -192,8 +192,34 @@
                         @else
                             <span class="badge bg-secondary">N/A</span>
                         @endif
+                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#extendDeadlineModal">
+                            <i class="bi bi-hourglass-split"></i> Perpanjang
+                        </button>
                     </div>
                 </div>
+
+                @if($assignment->extensionRequests->isNotEmpty())
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Riwayat Perpanjangan:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        @foreach($assignment->extensionRequests as $ext)
+                        <div class="small mb-1">
+                            <strong>{{ $ext->reviewer->name ?? '—' }}</strong> —
+                            @if($ext->status === 'PENDING')
+                                <span class="badge bg-warning text-dark">Menunggu</span>
+                            @elseif($ext->status === 'APPROVED')
+                                <span class="badge bg-success">Disetujui</span>
+                            @else
+                                <span class="badge bg-danger">Ditolak</span>
+                            @endif
+                            <span class="text-muted">— {{ $ext->reason }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <strong>File Artikel:</strong>
@@ -822,5 +848,38 @@
     font-size: 1.2rem;
 }
 </style>
+
+{{-- Modal: admin memperpanjang deadline langsung, tanpa perlu ada request dari reviewer --}}
+<div class="modal fade" id="extendDeadlineModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('admin.assignments.extend-deadline', $assignment) }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-hourglass-split"></i> Perpanjang Deadline</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">
+                        Deadline saat ini: <strong>{{ $assignment->deadline?->format('d M Y') ?? 'N/A' }}</strong>
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Deadline Baru <span class="text-danger">*</span></label>
+                        <input type="date" name="new_deadline" class="form-control"
+                               value="{{ $assignment->deadline?->addDays(7)?->toDateString() }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan (opsional)</label>
+                        <textarea name="note" class="form-control" rows="2" placeholder="Alasan perpanjangan..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Perpanjang Deadline</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 

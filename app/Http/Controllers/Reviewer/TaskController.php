@@ -42,12 +42,14 @@ class TaskController extends Controller
         }
 
         // Load reviewResult yang sesuai dengan reviewer yang login
-        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5']);
+        $assignment->load(['journal', 'reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'extensionRequests']);
         $assignment->load(['reviewResult' => function($query) {
             $query->where('reviewer_id', auth()->id());
         }]);
-        
-        return view('reviewer.tasks.show', compact('assignment'));
+
+        $myExtensionRequest = $assignment->extensionRequestFor(auth()->id());
+
+        return view('reviewer.tasks.show', compact('assignment', 'myExtensionRequest'));
     }
 
     public function accept(ReviewAssignment $assignment)

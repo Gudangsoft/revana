@@ -443,6 +443,34 @@
                     <hr>
                 @endif
 
+                {{-- Request Perpanjangan Waktu — 1x per reviewer per assignment, tersedia
+                     selama task belum final (APPROVED/REJECTED), termasuk saat sudah expired --}}
+                @if(!in_array($assignment->status, ['APPROVED', 'REJECTED']))
+                    @if($myExtensionRequest)
+                        <div class="alert {{ $myExtensionRequest->status === 'PENDING' ? 'alert-warning' : ($myExtensionRequest->status === 'APPROVED' ? 'alert-success' : 'alert-danger') }} py-2 mb-2">
+                            <div class="fw-bold" style="font-size:0.85rem;">
+                                <i class="bi bi-hourglass-split"></i> Perpanjangan Waktu:
+                                @if($myExtensionRequest->status === 'PENDING')
+                                    Menunggu persetujuan admin
+                                @elseif($myExtensionRequest->status === 'APPROVED')
+                                    Disetujui
+                                @else
+                                    Ditolak
+                                @endif
+                            </div>
+                            @if($myExtensionRequest->status === 'APPROVED')
+                                <small>Deadline baru: {{ $assignment->deadline->format('d M Y') }}</small>
+                            @elseif($myExtensionRequest->status === 'REJECTED' && $myExtensionRequest->admin_note)
+                                <small>Catatan admin: {{ $myExtensionRequest->admin_note }}</small>
+                            @endif
+                        </div>
+                    @else
+                        <button type="button" class="btn btn-outline-warning w-100 mb-2" data-bs-toggle="modal" data-bs-target="#extensionRequestModal">
+                            <i class="bi bi-hourglass-split"></i> Request Perpanjangan Waktu
+                        </button>
+                    @endif
+                @endif
+
                 @if($assignment->isExpired() && !in_array($assignment->status, ['APPROVED', 'SUBMITTED']))
                     <div class="alert alert-danger">
                         <i class="bi bi-lock-fill"></i> Task sudah expired dan tidak dapat dikerjakan
@@ -578,6 +606,40 @@
                     @endif
                 </ul>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extension Request Modal -->
+<div class="modal fade" id="extensionRequestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-hourglass-split"></i> Request Perpanjangan Waktu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('reviewer.tasks.request-extension', $assignment) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info py-2" style="font-size:0.85rem;">
+                        <i class="bi bi-info-circle"></i> Anda hanya bisa mengajukan permintaan perpanjangan waktu <strong>satu kali</strong> untuk tugas ini.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alasan <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="reason" rows="4" required></textarea>
+                        <small class="text-muted">Jelaskan alasan Anda membutuhkan waktu tambahan</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal yang Diminta (opsional)</label>
+                        <input type="date" class="form-control" name="requested_deadline" min="{{ now()->addDay()->toDateString() }}">
+                        <small class="text-muted">Kosongkan kalau menyerahkan tanggal barunya ke admin</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">Ajukan Permintaan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

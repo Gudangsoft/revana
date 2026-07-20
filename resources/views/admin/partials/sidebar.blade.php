@@ -263,6 +263,13 @@
     @endif
 </a>
 @endfeature
+<a href="{{ route('admin.extension-requests.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.extension-requests') ? 'active' : '' }}">
+    <i class="bi bi-hourglass-split" style="color:#fb923c;"></i> Perpanjangan Waktu
+    @if(isset($pendingExtensionRequests) && $pendingExtensionRequests > 0)
+        <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingExtensionRequests }}</span>
+    @endif
+</a>
 @feature('leaderboard')
 <a href="{{ route('admin.leaderboard.index') }}"
    class="nav-link {{ str_starts_with($currentRoute, 'admin.leaderboard') ? 'active' : '' }}">

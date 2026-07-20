@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use App\Models\ReviewRequest;
+use App\Models\DeadlineExtensionRequest;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -20,10 +21,15 @@ class ViewServiceProvider extends ServiceProvider
                 $pendingReviewRequests = Cache::remember('admin.pending_review_requests.' . $tenantKey, 300, fn() =>
                     ReviewRequest::where('status', 'pending')->count()
                 );
+                $pendingExtensionRequests = Cache::remember('admin.pending_extension_requests.' . $tenantKey, 300, fn() =>
+                    DeadlineExtensionRequest::where('status', 'PENDING')->count()
+                );
             } catch (\Throwable) {
                 $pendingReviewRequests = 0;
+                $pendingExtensionRequests = 0;
             }
             $view->with('pendingReviewRequests', $pendingReviewRequests);
+            $view->with('pendingExtensionRequests', $pendingExtensionRequests);
         });
     }
 }

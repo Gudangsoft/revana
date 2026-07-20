@@ -327,7 +327,7 @@ class ReviewAssignmentController extends Controller
 
     public function show(ReviewAssignment $assignment)
     {
-        $assignment->load(['reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResults.reviewer']);
+        $assignment->load(['reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResults.reviewer', 'extensionRequests.reviewer']);
         return view('admin.assignments.show', compact('assignment'));
     }
 
@@ -429,6 +429,25 @@ class ReviewAssignmentController extends Controller
         $reviewerName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $reviewer ? $reviewer->name : 'reviewer');
         $filename = 'Review_' . $articleCode . '_' . $reviewerName . '_' . date('YmdHis') . '.pdf';
         return $pdf->download($filename);
+    }
+
+    // ── Admin memperpanjang deadline langsung, tanpa perlu ada request dari reviewer ──
+    public function extendDeadline(Request $request, ReviewAssignment $assignment)
+    {
+        $validated = $request->validate([
+            'new_deadline' => 'required|date',
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        $oldDeadline = $assignment->deadline?->format('d M Y');
+        $assignment->update(['deadline' => $validated['new_deadline']]);
+
+        ActivityLog::record('deadline_extended', $assignment, ['deadline' => $oldDeadline], [
+            'deadline' => $assignment->deadline->format('d M Y'),
+            'note' => $validated['note'] ?? null,
+        ]);
+
+        return back()->with('success', 'Deadline berhasil diperpanjang ke ' . $assignment->deadline->format('d M Y') . '.');
     }
 
     public function destroy(ReviewAssignment $assignment)

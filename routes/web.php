@@ -291,6 +291,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/assignments/{assignment}/approve', [AdminReviewAssignmentController::class, 'approve'])->name('assignments.approve');
         Route::post('/assignments/{assignment}/revision', [AdminReviewAssignmentController::class, 'revision'])->name('assignments.revision');
         Route::delete('/assignments/{assignment}', [AdminReviewAssignmentController::class, 'destroy'])->name('assignments.destroy');
+        Route::post('/assignments/{assignment}/extend-deadline', [AdminReviewAssignmentController::class, 'extendDeadline'])->name('assignments.extend-deadline');
         
         // Reviewers
         Route::get('/reviewers', [ReviewerController::class, 'index'])->name('reviewers.index');
@@ -488,6 +489,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
         
         // Review Requests Management (Admin)
+        Route::get('/extension-requests', [\App\Http\Controllers\Admin\DeadlineExtensionController::class, 'index'])->name('extension-requests.index');
+        Route::post('/extension-requests/{extensionRequest}/approve', [\App\Http\Controllers\Admin\DeadlineExtensionController::class, 'approve'])->name('extension-requests.approve');
+        Route::post('/extension-requests/{extensionRequest}/reject', [\App\Http\Controllers\Admin\DeadlineExtensionController::class, 'reject'])->name('extension-requests.reject');
         Route::get('/review-requests', [ReviewRequestController::class, 'index'])->name('review-requests.index');
         Route::get('/review-requests/export/excel', [ReviewRequestController::class, 'export'])->name('review-requests.export');
         Route::get('/review-requests/{reviewRequest}', [ReviewRequestController::class, 'show'])->name('review-requests.show');
@@ -535,6 +539,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/tasks/{assignment}/accept', [TaskController::class, 'accept'])->name('tasks.accept');
         Route::post('/tasks/{assignment}/reject', [TaskController::class, 'reject'])->name('tasks.reject');
         Route::post('/tasks/{assignment}/start', [TaskController::class, 'startProgress'])->name('tasks.start');
+        Route::post('/tasks/{assignment}/request-extension', [\App\Http\Controllers\Reviewer\DeadlineExtensionController::class, 'store'])->name('tasks.request-extension');
         
         // Review Results
         Route::get('/tasks/{assignment}/submit', [ReviewResultController::class, 'create'])->name('results.create');
