@@ -145,7 +145,7 @@
 <!-- Submissions Table -->
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
-        @include('partials.column-toggle', ['tableId' => 'mktSubmMonTable', 'columns' => ['Kode Submit', 'ID Artikel', 'Judul Artikel', 'No HP', 'Jurnal / Slot', 'Akreditasi', 'Tanggal Submit', 'Status', 'Progress', 'Aksi'], 'columnOffset' => 0])
+        @include('partials.column-toggle', ['tableId' => 'mktSubmMonTable', 'columns' => ['Kode Submit', 'ID Artikel', 'Judul Artikel', 'No HP', 'Jurnal / Slot', 'Akreditasi', 'Tanggal Submit', 'Status', 'Aksi'], 'columnOffset' => 0])
         <div class="table-responsive">
             <table id="mktSubmMonTable" class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -159,7 +159,6 @@
                         <th>Akreditasi</th>
                         <th>Tanggal Submit</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center">Progress</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -177,7 +176,7 @@
                         </td>
                         <td>{{ $submission->id_artikel ?: '-' }}</td>
                         <td>
-                            <div class="fw-semibold">{{ Str::limit($submission->judul_artikel, 40) }}</div>
+                            <div class="fw-semibold">{{ $submission->judul_artikel }}</div>
                             <small class="text-muted">{{ $submission->nama_penulis }}</small>
                         </td>
                         <td class="text-center" style="background:#fffbf0;">
@@ -212,9 +211,6 @@
                         </td>
                         <td class="text-center">
                             <x-submission-status :submission="$submission" size="small" />
-                        </td>
-                        <td>
-                            <x-submission-progress :submission="$submission" :height="8" :min-width="80" />
                         </td>
                         <td class="text-center">
                             <a href="{{ route('marketing.submissions.show', $submission) }}"

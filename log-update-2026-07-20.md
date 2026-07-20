@@ -139,3 +139,23 @@ Karena `slot->bulan` isinya bisa berupa rentang seperti `"Januari-Juni"` (bukan 
 **Diverifikasi lewat HTTP request asli (login sebagai akun marketing sungguhan):** `GET /marketing/submissions` → status 200, header "Progress" dan "Edit Count" sudah tidak ada di HTML, jumlah `<th>` di tabel berkurang dari 9 jadi 7 (sesuai kolom yang tersisa), judul artikel penuh (tidak dipotong) muncul di HTML.
 
 
+
+## 10. 🔄 Update: Remove Progress/Edit Count columns and show full article titles
+
+- **Commit:** `0941f35` — 13:52 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-20.md`
+- `resources/views/marketing/submissions.blade.php`
+
+## 7. Terapkan Juga di Halaman Submissions Monitoring Marketing
+
+**Tujuan:** User minta perubahan yang sama di section #6 (sembunyikan Progress, judul artikel penuh) juga diterapkan di `/marketing/submissions-monitoring`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/submissions-monitoring.blade.php` | Hapus `<th>`/`<td>` kolom "Progress" (`<x-submission-progress>`) — halaman ini tidak punya kolom "Edit Count" jadi tidak ada yang perlu dihapus untuk itu. Update daftar kolom di `partials.column-toggle` (dari 10 jadi 9 entri). `Judul Artikel` diubah dari `Str::limit($submission->judul_artikel, 40)` jadi tanpa potongan |
+
+**Diverifikasi lewat HTTP request asli (login marketing sungguhan):** `GET /marketing/submissions-monitoring` → status 200, header "Progress" sudah tidak ada, jumlah `<th>` di header (10) sama persis dengan jumlah `<td>` di baris data (10) — tidak ada kolom yang bergeser/tidak sejajar akibat penghapusan.
+
+
