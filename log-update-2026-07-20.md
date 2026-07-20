@@ -70,3 +70,26 @@ Semua data uji (request, perubahan deadline, activity log) dihapus/dikembalikan 
 1. Assignment dibuat expired sementara (`deadline` di-set ke 3 hari lalu) → halaman menampilkan card baru dengan badge "EXPIRED" dan "Belum mengajukan" untuk reviewer yang belum pernah request.
 2. Ditambahkan `DeadlineExtensionRequest` PENDING untuk reviewer yang sama → baris berubah menampilkan badge "Menunggu" dan tombol "Perpanjang" cepat diganti jadi teks "Lihat di tabel bawah" (supaya admin diarahkan approve/reject lewat mekanisme yang benar, bukan bypass langsung).
 3. Semua data uji (deadline assignment, request buatan) dikembalikan/dihapus setelah verifikasi.
+
+## 4. 🔄 Update: Show all expired reviewers on the extension-requests page, not just requesters
+
+- **Commit:** `a289395` — 11:06 oleh Gudangsoft
+- **File berubah:** 3 file
+- `app/Http/Controllers/Admin/DeadlineExtensionController.php`
+- `log-update-2026-07-20.md`
+- `resources/views/admin/extension-requests/index.blade.php`
+
+## 4. Isi Otomatis "Tanggal LOA" dengan Hari Ini di Modal Edit Metadata LOA
+
+**Tujuan:** User minta field "Tanggal LOA" di modal Edit Metadata LOA otomatis terisi tanggal hari ini, supaya saat tombol LOA diklik, angka romawi (bulan) di nomor LOA menyesuaikan tanggal yang benar.
+
+**Root cause:** Field `tanggal_loa` di modal sebelumnya dibiarkan KOSONG kalau belum pernah diisi (cuma ada teks bantuan "kosong = tanggal hari ini"). Kalau admin klik "Simpan" tanpa menyentuh field ini, `tanggal_loa` tetap tersimpan `null` — akibatnya nomor LOA (`LoaController::loaNumber()`) dan tanggal tanda tangan (`loaDate()`) tidak pernah benar-benar terkunci ke tanggal LOA diterbitkan, melainkan JATUH KE FALLBACK yang beda-beda: `loaDate()` jatuh ke `now()` (jadi tanggal tanda tangan "berjalan maju" tiap kali halaman LOA dibuka ulang di hari lain), sedangkan `loaNumber()` jatuh ke `slot->bulan`/`slot->tahun` (periode terbitan jurnal, yang formatnya kadang bukan 1 nama bulan bersih, mis. "Januari-Juni/2025" — tidak cocok dipetakan ke 1 angka romawi bulan dengan benar).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/loa/receipt.blade.php` | Input `tanggal_loa` di modal Edit Metadata LOA sekarang default terisi `now()->toDateString()` (bukan kosong) kalau submission belum punya `tanggal_loa` — jadi begitu admin klik "Simpan" (walau tanpa menyentuh field ini), tanggal hari ini langsung terkunci sebagai `tanggal_loa`, dan nomor LOA + tanggal tanda tangan konsisten memakai tanggal itu selamanya (tidak lagi jatuh ke fallback `now()`/periode slot yang bisa berubah-ubah) |
+
+**Diverifikasi lewat tinker + HTTP request asli:** submission dengan `tanggal_loa` kosong → dibuka modal Edit Metadata (via request HTTP asli, login admin) → value input terisi otomatis `2026-07-20` (tanggal hari ini saat tes), bukan kosong. Disimulasikan submit form persis seperti kalau admin klik Simpan tanpa ubah tanggal → `tanggal_loa` tersimpan `2026-07-20` di database, dan `loaNumber()` menghasilkan angka romawi `VII` (Juli, sesuai tanggal yang tersimpan) — sebelumnya, kalau dibiarkan `null`, nomor LOA akan jatuh ke periode slot jurnal (`Januari-Juni/2025`, bukan bulan tunggal yang valid). Data uji dikembalikan ke `null` setelah verifikasi.
+
+

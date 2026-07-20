@@ -489,10 +489,16 @@ document.getElementById('loa-date-picker')?.addEventListener('change', function(
             <div style="margin-bottom:24px;">
                 <label style="display:block; font-size:12px; color:#90CAF9; margin-bottom:4px;">
                     Tanggal LOA
-                    <span style="color:#888; font-size:11px;">(kosong = tanggal hari ini)</span>
                 </label>
+                {{--
+                    Diisi otomatis dengan tanggal hari ini (bukan dibiarkan kosong) supaya begitu
+                    disimpan, tanggal ini langsung terkunci sebagai tanggal_loa — kalau dibiarkan
+                    kosong/null, nomor LOA & tanggal tanda tangan yang ditampilkan (loaNumber/
+                    loaDate di LoaController) ikut pakai now() tiap kali halaman LOA dibuka, jadi
+                    bisa "berjalan maju" seiring waktu alih-alih tetap sama sejak pertama disimpan.
+                --}}
                 <input type="date" name="tanggal_loa"
-                       value="{{ old('tanggal_loa', $submission->tanggal_loa?->toDateString()) }}"
+                       value="{{ old('tanggal_loa', $submission->tanggal_loa?->toDateString() ?? now()->toDateString()) }}"
                        style="width:100%; padding:8px 12px; background:#2a2a3e; border:1px solid #444;
                               border-radius:6px; color:#fff; font-size:13px; box-sizing:border-box; cursor:pointer;">
                 @if($submission->tanggal_loa)
