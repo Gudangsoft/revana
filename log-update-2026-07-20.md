@@ -40,3 +40,33 @@
 Semua data uji (request, perubahan deadline, activity log) dihapus/dikembalikan ke nilai semula setelah verifikasi selesai.
 
 **Catatan:** perlu `php artisan migrate --force` di production setelah deploy (ada migration baru, tabel `deadline_extension_requests`).
+
+## 2. 🔄 Update: Add deadline extension request system for reviewers
+
+- **Commit:** `593f431` — 10:51 oleh Gudangsoft
+- **File berubah:** 14 file
+- `app/Http/Controllers/Admin/DeadlineExtensionController.php`
+- `app/Http/Controllers/Admin/ReviewAssignmentController.php`
+- `app/Http/Controllers/Reviewer/DeadlineExtensionController.php`
+- `app/Http/Controllers/Reviewer/TaskController.php`
+- `app/Models/DeadlineExtensionRequest.php`
+- `app/Models/ReviewAssignment.php`
+- `app/Providers/ViewServiceProvider.php`
+- `database/migrations/2026_07_18_000001_create_deadline_extension_requests_table.php`
+- `log-update-2026-07-20.md`
+- `resources/views/admin/assignments/show.blade.php`
+
+## 3. Tampilkan Semua Reviewer dengan Deadline Terlewat di Halaman Perpanjangan Waktu
+
+**Tujuan:** User minta halaman `/admin/extension-requests` juga menampilkan SEMUA reviewer yang deadline-nya sudah lewat, baik yang sudah mengajukan request maupun yang belum — sebelumnya halaman ini cuma menampilkan reviewer yang SUDAH mengajukan request, jadi admin tidak punya gambaran reviewer mana saja yang stuck tapi belum/tidak mengajukan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DeadlineExtensionController.php` | `index()` sekarang juga bangun `$expiredReviewers` — daftar SEMUA reviewer (dari `assignedReviewerIds()`, jadi mencakup reviewer utama + pendamping 2-5) pada assignment yang deadline-nya sudah lewat (`deadline < hari ini`) dan belum selesai (`status` bukan `APPROVED`/`REJECTED`), lengkap dengan status request masing-masing reviewer (`extensionRequestFor()`) — `null` kalau belum pernah mengajukan sama sekali. Paginasi tabel request lama diberi nama page terpisah (`requests_page`) supaya tidak bentrok kalau nanti daftar reviewer expired ini juga perlu paginasi |
+| `resources/views/admin/extension-requests/index.blade.php` | Tambah card baru "Reviewer dengan Deadline Terlewat" di atas tabel request yang sudah ada — badge jumlah, per baris menampilkan artikel/reviewer/deadline (EXPIRED)/status request (`Belum mengajukan` kalau `null`, atau badge status kalau sudah ada). Untuk reviewer yang belum mengajukan atau requestnya sudah diproses (bukan PENDING), ada tombol "Perpanjang" langsung (modal, reuse `admin.assignments.extend-deadline`) — dengan catatan penjelas bahwa deadline dipakai bersama semua reviewer di assignment itu, supaya admin tidak salah kira ini cuma memperpanjang untuk 1 reviewer saja |
+
+**Diverifikasi lewat tinker + HTTP request asli:**
+1. Assignment dibuat expired sementara (`deadline` di-set ke 3 hari lalu) → halaman menampilkan card baru dengan badge "EXPIRED" dan "Belum mengajukan" untuk reviewer yang belum pernah request.
+2. Ditambahkan `DeadlineExtensionRequest` PENDING untuk reviewer yang sama → baris berubah menampilkan badge "Menunggu" dan tombol "Perpanjang" cepat diganti jadi teks "Lihat di tabel bawah" (supaya admin diarahkan approve/reject lewat mekanisme yang benar, bukan bypass langsung).
+3. Semua data uji (deadline assignment, request buatan) dikembalikan/dihapus setelah verifikasi.
