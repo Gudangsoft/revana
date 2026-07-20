@@ -89,7 +89,7 @@
 <div class="card">
     <div class="card-body p-0">
         <div class="px-3 pt-2 d-flex justify-content-end">
-            @include('partials.column-toggle', ['tableId' => 'mktSubmTable', 'columns' => ['Kode', 'Judul Artikel', 'Jurnal', 'Penulis', 'Tanggal Submit', 'Status', 'Progress', 'Edit Count', 'Aksi'], 'columnOffset' => 0])
+            @include('partials.column-toggle', ['tableId' => 'mktSubmTable', 'columns' => ['Kode', 'Judul Artikel', 'Jurnal', 'Penulis', 'Tanggal Submit', 'Status', 'Aksi'], 'columnOffset' => 0])
         </div>
         <div class="table-responsive">
             <table id="mktSubmTable" class="table table-hover align-middle mb-0">
@@ -101,8 +101,6 @@
                         <th>Penulis</th>
                         <th>Tanggal Submit</th>
                         <th class="text-center">Status</th>
-                        <th>Progress</th>
-                        <th class="text-center">Edit Count</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -122,7 +120,7 @@
                             @endif
                         </td>
                         <td>
-                            <strong>{{ Str::limit($submission->judul_artikel, 60) }}</strong>
+                            <strong>{{ $submission->judul_artikel }}</strong>
                         </td>
                         <td>
                             <small>{{ $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}</small>
@@ -133,23 +131,6 @@
                         </td>
                         <td class="text-center">
                             <x-submission-status :submission="$submission" size="small" />
-                        </td>
-                        <td>
-                            <x-submission-progress :submission="$submission" />
-                        </td>
-                        <td class="text-center">
-                            @php
-                                $editCount = $submission->edit_count ?? 0;
-                                $maxEditCount = \App\Services\FeatureSettingService::limit('max_fasttrack_edits');
-                                $remainingEdits = $maxEditCount - $editCount;
-                            @endphp
-                            @if($editCount > 0)
-                                <span class="badge {{ $remainingEdits == 0 ? 'bg-danger' : ($remainingEdits == 1 ? 'bg-warning text-dark' : 'bg-info') }}">
-                                    {{ $editCount }}x
-                                </span>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
                         </td>
                         <td class="text-center">
                             <div class="d-flex gap-1 justify-content-center">

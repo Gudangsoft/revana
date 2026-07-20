@@ -119,3 +119,23 @@ Karena `slot->bulan` isinya bisa berupa rentang seperti `"Januari-Juni"` (bukan 
 **Diverifikasi lewat tinker + HTTP request asli:** direproduksi persis skenario user — submission dengan `tanggal_loa` kosong, di jurnal yang `slot->bulan`-nya `"Januari-Juni"` (bukan nama bulan tunggal) → SEBELUM fix, `loaNumber()` akan menghasilkan romawi dari fallback slot yang tidak sinkron; SESUDAH fix, `loaNumber` menghasilkan `.../VII/2026` dan `loaDateRaw` menghasilkan `2026-07-20` — konsisten, sama-sama Juli. Dicek juga dengan `?tanggal=2026-03-15` (override manual) → `loaNumber`, `loaDate`, dan `loaDateRaw` ketiganya konsisten menunjukkan Maret/`III`. Dicek lewat request HTTP asli ke halaman LOA sungguhan (bukan cuma panggil method) — nomor LOA di HTML menunjukkan `VII` sesuai `loaDateRaw`. Data uji (`tanggal_loa`) sudah `null` dari awal, tidak ada yang perlu dikembalikan.
 
 
+
+## 8. 🔄 Update: Fix LOA Roman numeral not matching the Tanggal LOA date shown
+
+- **Commit:** `02cefe9` — 13:45 oleh Gudangsoft
+- **File berubah:** 2 file
+- `app/Http/Controllers/Admin/LoaController.php`
+- `log-update-2026-07-20.md`
+
+## 6. Sembunyikan Kolom Progress & Edit Count, Judul Artikel Ditampilkan Penuh (Daftar Submission Marketing)
+
+**Tujuan:** User minta kolom "Progress" (menampilkan angka desimal panjang seperti "90.909090909091%") dan "Edit Count" dihapus dari tabel daftar submission marketing (`/marketing/submissions`), dan kolom "Judul Artikel" ditampilkan penuh (tidak dipotong "...").
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/marketing/submissions.blade.php` | Hapus `<th>`/`<td>` kolom "Progress" (`<x-submission-progress>`) dan "Edit Count" dari tabel — termasuk variabel PHP (`$editCount`, `$maxEditCount`, `$remainingEdits`) yang cuma dipakai di situ, ikut dihapus karena sudah tidak dipakai lagi. Update daftar kolom di `partials.column-toggle` (dari 9 kolom jadi 7) supaya toggle kolom tidak menyisakan entri untuk kolom yang sudah tidak ada. `Judul Artikel` diubah dari `Str::limit($submission->judul_artikel, 60)` jadi `$submission->judul_artikel` langsung (tanpa potongan) |
+
+**Diverifikasi lewat HTTP request asli (login sebagai akun marketing sungguhan):** `GET /marketing/submissions` → status 200, header "Progress" dan "Edit Count" sudah tidak ada di HTML, jumlah `<th>` di tabel berkurang dari 9 jadi 7 (sesuai kolom yang tersisa), judul artikel penuh (tidak dipotong) muncul di HTML.
+
+
