@@ -159,3 +159,11 @@ Karena `slot->bulan` isinya bisa berupa rentang seperti `"Januari-Juni"` (bukan 
 **Diverifikasi lewat HTTP request asli (login marketing sungguhan):** `GET /marketing/submissions-monitoring` → status 200, header "Progress" sudah tidak ada, jumlah `<th>` di header (10) sama persis dengan jumlah `<td>` di baris data (10) — tidak ada kolom yang bergeser/tidak sejajar akibat penghapusan.
 
 
+
+## 12. 🔄 Update: Apply the same table cleanup to submissions-monitoring
+
+- **Commit:** `22ac82d` — 13:59 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-20.md`
+- `resources/views/marketing/submissions-monitoring.blade.php`
+
