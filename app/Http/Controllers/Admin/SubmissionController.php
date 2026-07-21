@@ -403,6 +403,16 @@ class SubmissionController extends Controller
             $validated['kode_loa']    = $validated['kode_submit'] . 'SIPERA';
         }
 
+        // Catat catatan reviewer ke riwayat SEBELUM ditimpa — kolomnya cuma menyimpan
+        // 1 nilai terakhir, jadi tanpa ini catatan lama hilang tanpa jejak begitu form
+        // edit ini menimpanya (pola sama seperti updateReviewerNotes()).
+        if (array_key_exists('catatan_reviewer1', $validated) && !empty($validated['catatan_reviewer1']) && $validated['catatan_reviewer1'] !== $submission->catatan_reviewer1) {
+            $submission->logHistory('reviewer1', 'note_added', $validated['catatan_reviewer1']);
+        }
+        if (array_key_exists('catatan_reviewer2', $validated) && !empty($validated['catatan_reviewer2']) && $validated['catatan_reviewer2'] !== $submission->catatan_reviewer2) {
+            $submission->logHistory('reviewer2', 'note_added', $validated['catatan_reviewer2']);
+        }
+
         $submission->update($validated);
 
         // Activity log — catat field yang berubah
@@ -1482,9 +1492,17 @@ class SubmissionController extends Controller
         $submission = Submission::findOrFail($request->submission_id);
         $field = $request->field;
         $value = $request->value;
-        
+
+        // Catat catatan ke riwayat SEBELUM ditimpa — field inline-edit ini sering
+        // dipakai buat catatan reviewer/validator yang cuma menyimpan 1 nilai
+        // terakhir, jadi tanpa ini catatan lama hilang tanpa jejak.
+        $catatanStepMap = ['catatan_reviewer1' => 'reviewer1', 'catatan_reviewer2' => 'reviewer2', 'catatan_validator' => 'validator'];
+        if (isset($catatanStepMap[$field]) && !empty($value) && $value !== $submission->{$field}) {
+            $submission->logHistory($catatanStepMap[$field], 'note_added', $value);
+        }
+
         $submission->update([$field => $value ?: null]);
-        
+
         return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
     }
 

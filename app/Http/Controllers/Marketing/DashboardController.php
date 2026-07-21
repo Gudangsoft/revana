@@ -632,7 +632,15 @@ class DashboardController extends Controller
         $request->validate([
             'catatan_marketing' => 'nullable|string|max:2000',
         ]);
-        
+
+        // Catat ke riwayat SEBELUM menimpa kolom — catatan_marketing cuma menyimpan
+        // 1 nilai terakhir, jadi tanpa ini seluruh riwayat catatan (termasuk yang
+        // pertama kali ditulis) tidak pernah tercatat di mana pun begitu ada
+        // perubahan berikutnya. Pola ini sama seperti updateReviewerNotes().
+        if (!empty($request->catatan_marketing) && $request->catatan_marketing !== $submission->catatan_marketing) {
+            $submission->logHistory('marketing', 'note_added', $request->catatan_marketing, null, $marketing->id);
+        }
+
         $submission->update([
             'catatan_marketing'    => $request->catatan_marketing,
             'catatan_marketing_at' => $request->catatan_marketing ? now() : null,

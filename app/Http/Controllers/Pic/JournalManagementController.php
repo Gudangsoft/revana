@@ -807,6 +807,13 @@ class JournalManagementController extends Controller
             $submission->validator_valid = false;
             $revisionStatus = 'PRODUCTION_REVISION';
             
+            // Catat ke riwayat SEBELUM menimpa kolom catatan_validator — konsisten
+            // dengan endpoint lain yang menulis field ini, supaya tidak ada
+            // catatan validator yang hilang tanpa jejak.
+            if ($request->revision_notes !== $submission->catatan_validator) {
+                $submission->logHistory('validator', 'note_added', $request->revision_notes, null, $picId);
+            }
+
             // Catat di field validator
             $submission->catatan_validator = $request->revision_notes;
         } else {
@@ -814,7 +821,6 @@ class JournalManagementController extends Controller
         }
         
         $submission->status = $revisionStatus;
-        $submission->revision_notes = $request->revision_notes;
         $submission->save();
         
         $stepName = $this->getStepFromStatus($status);
@@ -1213,9 +1219,17 @@ class JournalManagementController extends Controller
             ], 403);
         }
         
+        // Catat catatan ke riwayat SEBELUM ditimpa — field inline-edit ini cuma
+        // menyimpan 1 nilai terakhir untuk catatan reviewer/validator, jadi tanpa
+        // ini catatan lama hilang tanpa jejak begitu ditimpa catatan baru.
+        $catatanStepMap = ['catatan_reviewer1' => 'reviewer1', 'catatan_reviewer2' => 'reviewer2', 'catatan_validator' => 'validator'];
+        if (isset($catatanStepMap[$request->field]) && !empty($request->value) && $request->value !== $submission->{$request->field}) {
+            $submission->logHistory($catatanStepMap[$request->field], 'note_added', $request->value, null, $picId);
+        }
+
         // Update the field value
         $submission->{$request->field} = $request->value;
-        
+
         // Special handling for link_publish field
         if ($request->field === 'link_publish') {
             // Auto-assign current PIC as production officer if not assigned yet
