@@ -328,10 +328,21 @@ class Submission extends Model
     }
 
     // Log history
-    public function logHistory($step, $action, $notes = null, $data = null, $userId = null)
+    /**
+     * $userId pakai sentinel string '__auto__' sebagai default (BUKAN null) supaya bisa
+     * membedakan "caller tidak mengisi parameter ini" (auto-detect lewat auth()->id(),
+     * guard 'web' — perilaku lama, dipakai semua caller dari konteks admin) dari
+     * "caller sengaja mengisi null" (JANGAN fallback ke auth()->id() sama sekali —
+     * dibutuhkan saat logHistory() dipanggil dari konteks marketing/PIC, yang punya
+     * guard sendiri; auth()->id() tanpa guard eksplisit selalu cek guard 'web', jadi
+     * kalau browser yang sama kebetulan juga punya sesi admin aktif, ID admin itu akan
+     * ikut kepakai walau salah konteks — dan karena ID itu belum tentu ada di tabel
+     * `users`, insert bisa gagal foreign key violation).
+     */
+    public function logHistory($step, $action, $notes = null, $data = null, $userId = '__auto__')
     {
         $revisionNumber = 0;
-        
+
         // Calculate revision number if action is revision_request
         if ($action === 'revision_request') {
             $revisionNumber = $this->getRevisionCount($step) + 1;
@@ -339,10 +350,12 @@ class Submission extends Model
             $revisionNumber = $this->getRevisionCount($step);
         }
 
+        $resolvedUserId = $userId === '__auto__' ? auth()->id() : $userId;
+
         return $this->histories()->create([
             'step' => $step,
             'action' => $action,
-            'user_id' => $userId ?? auth()->id(),
+            'user_id' => $resolvedUserId,
             'notes' => $notes,
             'data' => $data,
             'revision_number' => $revisionNumber,

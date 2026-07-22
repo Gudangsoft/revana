@@ -814,7 +814,7 @@ class JournalManagementController extends Controller
             // ID-nya TIDAK BOLEH dipakai sebagai user_id (melanggar FK constraint).
             // Simpan lewat kolom `data` (JSON) saja, biarkan user_id null.
             if ($request->revision_notes !== $submission->catatan_validator) {
-                $submission->logHistory('validator', 'note_added', $request->revision_notes, ['pic_id' => $picId]);
+                $submission->logHistory('validator', 'note_added', $request->revision_notes, ['pic_id' => $picId], null);
             }
 
             // Catat di field validator
@@ -1229,7 +1229,7 @@ class JournalManagementController extends Controller
         // di tabel `pics` terpisah — ID-nya disimpan lewat kolom `data` (JSON) saja.
         $catatanStepMap = ['catatan_reviewer1' => 'reviewer1', 'catatan_reviewer2' => 'reviewer2', 'catatan_validator' => 'validator'];
         if (isset($catatanStepMap[$request->field]) && !empty($request->value) && $request->value !== $submission->{$request->field}) {
-            $submission->logHistory($catatanStepMap[$request->field], 'note_added', $request->value, ['pic_id' => $picId]);
+            $submission->logHistory($catatanStepMap[$request->field], 'note_added', $request->value, ['pic_id' => $picId], null);
         }
 
         // Update the field value

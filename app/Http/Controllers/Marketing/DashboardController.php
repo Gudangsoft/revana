@@ -641,8 +641,12 @@ class DashboardController extends Controller
             // user_id di submission_histories foreign key ke tabel `users`, sedangkan
             // marketing ada di tabel `marketings` terpisah — ID-nya TIDAK BOLEH dipakai
             // sebagai user_id (bakal melanggar FK constraint). Simpan identitas marketing
-            // lewat kolom `data` (JSON) saja, biarkan user_id null.
-            $submission->logHistory('marketing', 'note_added', $request->catatan_marketing, ['marketing_id' => $marketing->id, 'marketing_name' => $marketing->name]);
+            // lewat kolom `data` (JSON) saja. user_id di-pass eksplisit `null` (BUKAN
+            // dibiarkan pakai default logHistory() yang jatuh ke auth()->id() — itu
+            // selalu cek guard 'web', dan kalau browser yang sama kebetulan juga
+            // punya sesi admin/PIC aktif di guard 'web', ID guard itu ikut kepakai
+            // padahal ini konteks marketing, menyebabkan FK violation yang sama lagi).
+            $submission->logHistory('marketing', 'note_added', $request->catatan_marketing, ['marketing_id' => $marketing->id, 'marketing_name' => $marketing->name], null);
         }
 
         $submission->update([
