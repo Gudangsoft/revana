@@ -102,3 +102,26 @@ Semua data uji (poin, `completed_reviews`, baris `PointHistory`) dikembalikan ke
 
 **Catatan deploy:** tidak ada migration baru. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
 
+## 8. Backfill Riwayat Poin Lama ke Flat 10 (Retroaktif)
+
+**Tujuan:** User menunjukkan screenshot "Riwayat Points" di production yang masih memperlihatkan poin lama (+5) untuk review yang sudah selesai SEBELUM section #7 di-deploy — perubahan flat-10 hanya berlaku untuk review yang di-approve SETELAH deploy, riwayat lama tidak otomatis ikut berubah. Diminta (dan dikonfirmasi lewat pilihan eksplisit user): update SEMUA riwayat poin lama ke 10, dan sesuaikan `total_points`/`available_points` reviewer terkait dengan selisihnya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_22_000001_backfill_flat_points_per_review.php` (baru) | Migration data (bukan perubahan skema): cari semua `point_histories` dengan `type=EARNED`, `review_assignment_id` terisi (khusus poin review, bukan penyesuaian manual admin lewat `PointManagementController`), dan `points != 10` → set `points` jadi 10, tambahkan selisihnya (`10 - poin_lama`) ke `total_points` & `available_points` milik reviewer terkait. Dibungkus 1 transaction, dan mencatat ringkasan (jumlah baris + detail per baris) ke `storage/logs/laravel.log` untuk jejak audit. `down()` sengaja no-op (nilai poin lama per baris tidak disimpan di tempat lain setelah backfill, jadi tidak ada cara aman untuk rollback presisi — migration ini memang dimaksudkan sebagai koreksi satu arah) |
+
+**Diverifikasi lewat migration sungguhan (bukan cuma baca kode):** buat 1 baris `point_histories` tiruan (points=5, `review_assignment_id` terisi, meniru data lama sebelum section #7) + tambahkan manual +5 ke `total_points`/`available_points` reviewer terkait (meniru kondisi SEBELUM backfill) → jalankan `php artisan migrate` sungguhan → baris tersebut jadi `points=10`, `total_points`/`available_points` reviewer bertambah 5 (selisih yang benar), dan log `Backfill flat 10 poin/review selesai` tercatat dengan detail baris yang diubah. Data uji dihapus/dikembalikan (`total_points`/`available_points` kembali ke semula) setelah verifikasi — migration sendiri TIDAK di-rollback (memang tidak reversible by design, dan tabel `migrations` lokal vs production terpisah sehingga status "sudah dijalankan" di lokal tidak mempengaruhi production).
+
+**Catatan deploy:** migration ini **WAJIB** dijalankan di production — `git pull origin master` lalu `php artisan migrate --force`. Cek `storage/logs/laravel.log` setelah migrate untuk melihat ringkasan berapa baris & reviewer yang ter-koreksi.
+
+
+## 8. 🔄 Update: Ubah perhitungan point reviewer jadi flat 10/review, bukan per hari
+
+- **Commit:** `7f21076` — 18:27 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/PointSettingController.php`
+- `app/Models/ReviewAssignment.php`
+- `log-update-2026-07-22.md`
+- `resources/views/admin/point-settings/index.blade.php`
+
