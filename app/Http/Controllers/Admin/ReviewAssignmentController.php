@@ -328,7 +328,83 @@ class ReviewAssignmentController extends Controller
     public function show(ReviewAssignment $assignment)
     {
         $assignment->load(['reviewer', 'reviewer2', 'reviewer3', 'reviewer4', 'reviewer5', 'assignedBy', 'reviewResults.reviewer', 'extensionRequests.reviewer']);
-        return view('admin.assignments.show', compact('assignment'));
+
+        $reviewers = User::where('role', 'reviewer')
+            ->select(['id', 'name', 'email'])
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.assignments.show', compact('assignment', 'reviewers'));
+    }
+
+    /**
+     * Ganti reviewer yang sudah ditugaskan di salah satu slot (1-5) — dipakai kalau
+     * reviewer yang ditugaskan tidak responsif/berhalangan, tanpa perlu hapus &
+     * buat ulang assignment dari awal.
+     */
+    public function changeReviewer(Request $request, ReviewAssignment $assignment)
+    {
+        $validated = $request->validate([
+            'reviewer_number' => 'required|integer|in:1,2,3,4,5',
+            'new_reviewer_id' => 'required|exists:users,id',
+            'username' => 'nullable|string|max:255',
+            'password' => 'nullable|string|max:255',
+        ]);
+
+        $number = $validated['reviewer_number'];
+        $idField = $number == 1 ? 'reviewer_id' : "reviewer_{$number}_id";
+        $usernameField = $number == 1 ? 'reviewer_1_username' : "reviewer_{$number}_username";
+        $passwordField = $number == 1 ? 'reviewer_1_password' : "reviewer_{$number}_password";
+
+        $newReviewer = User::where('role', 'reviewer')->find($validated['new_reviewer_id']);
+        if (!$newReviewer) {
+            return back()->with('error', 'Reviewer yang dipilih tidak valid.');
+        }
+
+        // Jangan sampai reviewer yang sama dipilih dobel untuk slot lain di assignment ini
+        $otherReviewerIds = collect($assignment->assignedReviewerIds())
+            ->reject(fn ($id) => $id === $assignment->$idField)
+            ->values();
+        if ($otherReviewerIds->contains($newReviewer->id)) {
+            return back()->with('error', 'Reviewer tersebut sudah ditugaskan di slot lain pada assignment ini.');
+        }
+
+        $oldReviewer = $assignment->$idField ? User::find($assignment->$idField) : null;
+
+        // Kalau reviewer lama di slot ini sudah kirim hasil review, jangan diganti diam-diam
+        // — hasil review itu akan jadi "milik" reviewer yang salah kalau slotnya dipindah ke
+        // reviewer lain begitu saja.
+        if ($oldReviewer && $assignment->reviewResults()->where('reviewer_id', $oldReviewer->id)->exists()) {
+            return back()->with('error', "Reviewer {$number} ({$oldReviewer->name}) sudah mengirimkan hasil review, tidak bisa diganti. Gunakan \"Request Revision\" kalau perlu revisi ulang.");
+        }
+
+        $updateData = [$idField => $newReviewer->id];
+        if ($request->filled('username')) {
+            $updateData[$usernameField] = $validated['username'];
+        }
+        if ($request->filled('password')) {
+            $updateData[$passwordField] = $validated['password'];
+        }
+
+        $assignment->update($updateData);
+
+        ActivityLog::record('reviewer_changed', $assignment, [
+            'reviewer_number' => $number,
+            'old_reviewer' => $oldReviewer?->name,
+        ], [
+            'reviewer_number' => $number,
+            'new_reviewer' => $newReviewer->name,
+        ]);
+
+        if ($newReviewer->email) {
+            try {
+                $newReviewer->notify(new ReviewAssignmentNotification($assignment));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send review assignment notification to ' . $newReviewer->email . ': ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', "Reviewer {$number} berhasil diganti menjadi {$newReviewer->name}.");
     }
 
     public function approve(ReviewAssignment $assignment)

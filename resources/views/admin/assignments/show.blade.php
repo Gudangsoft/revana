@@ -252,7 +252,12 @@
                         <hr class="my-4">
                     @endif
                     
-                    <h6 class="mb-3"><i class="bi bi-person-badge"></i> Reviewer {{ $reviewerData['number'] }}</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0"><i class="bi bi-person-badge"></i> Reviewer {{ $reviewerData['number'] }}</h6>
+                        <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changeReviewerModal{{ $reviewerData['number'] }}">
+                            <i class="bi bi-arrow-repeat"></i> Ganti Reviewer
+                        </button>
+                    </div>
                     <div class="row mb-2">
                         <div class="col-md-4">
                             <strong>Nama:</strong>
@@ -301,6 +306,68 @@
                         </div>
                         <div class="col-md-8">
                             <span class="badge bg-warning text-dark">{{ $reviewerData['user']->total_points }} Points</span>
+                        </div>
+                    </div>
+
+                    {{-- Modal: ganti reviewer di slot ini dengan reviewer lain --}}
+                    @php
+                        // Cuma boleh diganti kalau reviewer ini BELUM kirim hasil review untuk
+                        // assignment ini secara spesifik (bukan total review dia di assignment lain).
+                        $canChangeReviewer = $assignment->reviewResults()->where('reviewer_id', $reviewerData['user']->id)->doesntExist();
+                    @endphp
+                    <div class="modal fade" id="changeReviewerModal{{ $reviewerData['number'] }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="POST" action="{{ route('admin.assignments.change-reviewer', $assignment) }}">
+                                    @csrf
+                                    <input type="hidden" name="reviewer_number" value="{{ $reviewerData['number'] }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Ganti Reviewer {{ $reviewerData['number'] }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="small text-muted">
+                                            Reviewer saat ini: <strong>{{ $reviewerData['user']->name }}</strong>
+                                        </p>
+                                        @if($canChangeReviewer)
+                                        <div class="mb-3">
+                                            <label class="form-label">Reviewer Baru <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="new_reviewer_id" required>
+                                                <option value="">-- Pilih Reviewer --</option>
+                                                @foreach($reviewers as $rev)
+                                                    @if(!in_array($rev->id, $assignment->assignedReviewerIds()) || $rev->id === $reviewerData['user']->id)
+                                                        <option value="{{ $rev->id }}" {{ $rev->id === $reviewerData['user']->id ? 'selected' : '' }}>
+                                                            {{ $rev->name }} ({{ $rev->email }})
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Username Baru</label>
+                                            <input type="text" name="username" class="form-control" value="{{ $reviewerData['username'] }}" placeholder="Kosongkan jika tidak berubah">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Password Baru</label>
+                                            <input type="text" name="password" class="form-control" value="{{ $reviewerData['password'] }}" placeholder="Kosongkan jika tidak berubah">
+                                        </div>
+                                        <div class="alert alert-warning small mb-0">
+                                            <i class="bi bi-info-circle"></i> Reviewer baru akan mendapat notifikasi email penugasan. Reviewer lama tidak lagi melihat assignment ini di daftar tugasnya.
+                                        </div>
+                                        @else
+                                        <div class="alert alert-danger mb-0">
+                                            <i class="bi bi-exclamation-triangle"></i> Reviewer ini sudah mengirimkan hasil review, tidak bisa diganti lewat sini. Gunakan tombol "Request Revision" kalau perlu revisi ulang.
+                                        </div>
+                                        @endif
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        @if($canChangeReviewer)
+                                        <button type="submit" class="btn btn-warning" onclick="return confirm('Yakin ingin mengganti Reviewer {{ $reviewerData['number'] }}?')">Ganti Reviewer</button>
+                                        @endif
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @endforeach
