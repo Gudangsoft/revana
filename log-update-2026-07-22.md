@@ -50,3 +50,26 @@ Semua data uji (reviewer_id/username/password assignment, `ReviewResult` percoba
 
 **Catatan:** tidak ada migration baru (semua kolom `reviewer_{n}_id`/`username`/`password` sudah ada). Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
 
+
+## 4. 🔄 Update: Tambah fasilitas ganti reviewer yang sudah ditugaskan
+
+- **Commit:** `fe060a3` — 17:51 oleh Gudangsoft
+- **File berubah:** 4 file
+- `app/Http/Controllers/Admin/ReviewAssignmentController.php`
+- `log-update-2026-07-22.md`
+- `resources/views/admin/assignments/show.blade.php`
+- `routes/web.php`
+
+## 5. Pindahkan Menu "Setting Point Reviewer" ke Grup Reviewer
+
+**Tujuan:** User menunjukkan screenshot sidebar grup "REVIEWER" (Penugasan Review, Daftar Reviewer, Permintaan Review, Perpanjangan Waktu, Papan Peringkat) dan minta menu setting point reviewer punya tempat sendiri di situ "biar terkelompok dengan baik" — sebelumnya menu ini ("Pengaturan Point Reviewer") nyempil di accordion "Laporan Point" (menu Laporan), bercampur dengan Point Marketing, Point PIC, dll yang topiknya beda.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/partials/sidebar.blade.php` | Pindahkan link `admin.point-settings.index` (nama ditampilkan jadi "Setting Point Reviewer") dari accordion "Laporan Point" ke grup "Reviewer" (setelah "Papan Peringkat"). Route & controller (`PointSettingController`) tidak berubah sama sekali — cuma posisi menu di sidebar |
+
+**Diverifikasi:** render sidebar lewat tinker — link "Setting Point Reviewer" muncul persis 1 kali di lokasi baru, teks lama "Pengaturan Point Reviewer" sudah tidak ada lagi di manapun (0 kemunculan), route `admin.point-settings.index` tetap resolve dengan benar.
+
+**Catatan:** murni perubahan tampilan sidebar (tidak ada migration, tidak ada perubahan logika).
+

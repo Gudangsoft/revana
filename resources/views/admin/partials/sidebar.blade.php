@@ -45,7 +45,6 @@
         || str_starts_with($currentRoute, 'admin.pics.activity')
         || str_starts_with($currentRoute, 'admin.task-point-settings')
         || str_starts_with($currentRoute, 'admin.point-rankings')
-        || str_starts_with($currentRoute, 'admin.point-settings')
         || str_starts_with($currentRoute, 'admin.team-');
 @endphp
 
@@ -276,6 +275,10 @@
     <i class="bi bi-trophy-fill text-warning"></i> Papan Peringkat
 </a>
 @endfeature
+<a href="{{ route('admin.point-settings.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}">
+    <i class="bi bi-sliders" style="color:#60a5fa;"></i> Setting Point Reviewer
+</a>
 
 {{-- ═══ SDM ═══ --}}
 <div class="sidebar-section-label">SDM</div>
@@ -315,10 +318,6 @@
                 <a href="{{ route('admin.task-point-settings.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.task-point-settings') ? 'active' : '' }}">
                     <i class="bi bi-sliders text-secondary"></i> Pengaturan Point
-                </a>
-                <a href="{{ route('admin.point-settings.index') }}"
-                   class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.point-settings') ? 'active' : '' }}">
-                    <i class="bi bi-sliders" style="color:#60a5fa;"></i> Pengaturan Point Reviewer
                 </a>
                 <a href="{{ route('admin.marketing-points.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.marketing-points') ? 'active' : '' }}">
