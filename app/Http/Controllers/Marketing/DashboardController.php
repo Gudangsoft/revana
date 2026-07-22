@@ -638,7 +638,11 @@ class DashboardController extends Controller
         // pertama kali ditulis) tidak pernah tercatat di mana pun begitu ada
         // perubahan berikutnya. Pola ini sama seperti updateReviewerNotes().
         if (!empty($request->catatan_marketing) && $request->catatan_marketing !== $submission->catatan_marketing) {
-            $submission->logHistory('marketing', 'note_added', $request->catatan_marketing, null, $marketing->id);
+            // user_id di submission_histories foreign key ke tabel `users`, sedangkan
+            // marketing ada di tabel `marketings` terpisah — ID-nya TIDAK BOLEH dipakai
+            // sebagai user_id (bakal melanggar FK constraint). Simpan identitas marketing
+            // lewat kolom `data` (JSON) saja, biarkan user_id null.
+            $submission->logHistory('marketing', 'note_added', $request->catatan_marketing, ['marketing_id' => $marketing->id, 'marketing_name' => $marketing->name]);
         }
 
         $submission->update([

@@ -809,9 +809,12 @@ class JournalManagementController extends Controller
             
             // Catat ke riwayat SEBELUM menimpa kolom catatan_validator — konsisten
             // dengan endpoint lain yang menulis field ini, supaya tidak ada
-            // catatan validator yang hilang tanpa jejak.
+            // catatan validator yang hilang tanpa jejak. user_id di submission_histories
+            // foreign key ke tabel `users`, sedangkan PIC ada di tabel `pics` terpisah —
+            // ID-nya TIDAK BOLEH dipakai sebagai user_id (melanggar FK constraint).
+            // Simpan lewat kolom `data` (JSON) saja, biarkan user_id null.
             if ($request->revision_notes !== $submission->catatan_validator) {
-                $submission->logHistory('validator', 'note_added', $request->revision_notes, null, $picId);
+                $submission->logHistory('validator', 'note_added', $request->revision_notes, ['pic_id' => $picId]);
             }
 
             // Catat di field validator
@@ -1221,10 +1224,12 @@ class JournalManagementController extends Controller
         
         // Catat catatan ke riwayat SEBELUM ditimpa — field inline-edit ini cuma
         // menyimpan 1 nilai terakhir untuk catatan reviewer/validator, jadi tanpa
-        // ini catatan lama hilang tanpa jejak begitu ditimpa catatan baru.
+        // ini catatan lama hilang tanpa jejak begitu ditimpa catatan baru. user_id
+        // di submission_histories foreign key ke tabel `users`, sedangkan PIC ada
+        // di tabel `pics` terpisah — ID-nya disimpan lewat kolom `data` (JSON) saja.
         $catatanStepMap = ['catatan_reviewer1' => 'reviewer1', 'catatan_reviewer2' => 'reviewer2', 'catatan_validator' => 'validator'];
         if (isset($catatanStepMap[$request->field]) && !empty($request->value) && $request->value !== $submission->{$request->field}) {
-            $submission->logHistory($catatanStepMap[$request->field], 'note_added', $request->value, null, $picId);
+            $submission->logHistory($catatanStepMap[$request->field], 'note_added', $request->value, ['pic_id' => $picId]);
         }
 
         // Update the field value
