@@ -73,3 +73,32 @@ Semua data uji (reviewer_id/username/password assignment, `ReviewResult` percoba
 
 **Catatan:** murni perubahan tampilan sidebar (tidak ada migration, tidak ada perubahan logika).
 
+
+## 6. 🔄 Update: Pindahkan menu Setting Point Reviewer ke grup Reviewer di sidebar
+
+- **Commit:** `8483ff4` — 18:17 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-22.md`
+- `resources/views/admin/partials/sidebar.blade.php`
+
+## 7. Ubah Perhitungan Point Reviewer: Flat 10 Poin per Review Selesai (Bukan Lagi per Hari)
+
+**Tujuan:** User minta perhitungan point reviewer di `https://portal.apji.org/admin/point-settings` diubah — sebelumnya berdasarkan lama hari pengerjaan (skala turun: 1 hari=10, 2 hari=8, 3 hari=7, 4 hari=6, 5+ hari=5 poin), sekarang setiap review yang selesai dapat poin yang SAMA yaitu 10, berapa pun lama hari pengerjaannya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/ReviewAssignment.php` | `awardPointsToAllReviewers()`: poin sekarang diambil flat dari setting `points_per_review` (bukan lagi `PointDaySetting::getPointsByDays()`). Lama hari pengerjaan tetap dihitung tapi cuma untuk teks keterangan di riwayat poin, tidak lagi mempengaruhi jumlah poin |
+| `app/Http/Controllers/Admin/PointSettingController.php` | Default `points_per_review` diubah dari 5 jadi 10. `update()`: field `day_points` (skala per-hari) dihapus dari validasi & penyimpanan, diganti validasi `points_per_review` |
+| `resources/views/admin/point-settings/index.blade.php` | Bagian "Point Review Berdasarkan Lama Hari Selesai" (form per-bracket 1-5 hari) diganti jadi 1 input tunggal "Point per Review Selesai". Bagian "Hasil Perhitungan (Contoh)" disederhanakan jadi 1 hasil (bukan 3 skenario hari berbeda) |
+
+**Catatan implementasi:** tabel & model `PointDaySetting` (skala lama per-hari) sengaja TIDAK dihapus — sudah tidak dipakai di kode manapun, tapi datanya dibiarkan ada di database (tidak ada migration drop table) supaya tidak ada risiko kehilangan data histori kalau suatu saat dibutuhkan lagi.
+
+**Diverifikasi lewat tinker:**
+1. Halaman setting di-render lewat controller asli — form baru "Point / Review" tampil, setting `points_per_review` di database sudah bernilai `10`.
+2. `awardPointsToAllReviewers()` dipanggil langsung pada assignment yang sudah berumur 189 hari (jauh di atas 5 hari, dulunya cuma dapat 5 poin) → SEKARANG kedua reviewer (utama & pendamping) tetap dapat **10 poin flat masing-masing**, `completed_reviews` naik 1, `PointHistory` tercatat dengan keterangan "selesai dalam 189 hari" (informasi hari tetap ada, tapi tidak lagi mengurangi poin).
+
+Semua data uji (poin, `completed_reviews`, baris `PointHistory`) dikembalikan ke 0/kosong setelah verifikasi.
+
+**Catatan deploy:** tidak ada migration baru. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
+

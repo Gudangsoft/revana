@@ -197,21 +197,16 @@ class ReviewAssignment extends Model
      */
     public function awardPointsToAllReviewers(\Carbon\Carbon $completedAt): int
     {
-        // Hitung lama hari review (dari created_at sampai selesai)
-        $daysToComplete = $this->created_at->diffInDays($completedAt);
+        // Poin flat per review SELESAI — bukan lagi berdasarkan lama hari pengerjaan
+        // (skala per-hari lama sudah tidak dipakai, lihat admin/point-settings).
+        $points = (int) \App\Models\Setting::get('points_per_review', 10);
 
-        // Jika 0 hari (selesai di hari yang sama), hitung sebagai 1 hari
+        // Lama hari dikerjakan cuma dipakai untuk keterangan riwayat, tidak lagi
+        // mempengaruhi jumlah poin yang didapat.
+        $daysToComplete = $this->created_at->diffInDays($completedAt);
         if ($daysToComplete == 0) {
             $daysToComplete = 1;
         }
-
-        // Maksimal 5 hari untuk perhitungan poin
-        if ($daysToComplete > 5) {
-            $daysToComplete = 5;
-        }
-
-        // Get points berdasarkan lama hari dari tabel point_day_settings
-        $points = \App\Models\PointDaySetting::getPointsByDays($daysToComplete);
 
         $awarded = 0;
         foreach ($this->assignedReviewerIds() as $reviewerId) {

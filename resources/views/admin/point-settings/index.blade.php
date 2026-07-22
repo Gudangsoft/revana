@@ -102,45 +102,29 @@
                             </div>
                         </div>
 
-                        <!-- Setting 2: Point per Review Berdasarkan Lama Hari -->
+                        <!-- Setting 2: Point per Review Selesai -->
                         <div class="card mb-3 border-0 bg-light">
                             <div class="card-body">
                                 <h6 class="fw-bold text-success mb-3">
-                                    <i class="bi bi-2-circle-fill"></i> Point Review Berdasarkan Lama Hari Selesai
+                                    <i class="bi bi-2-circle-fill"></i> Point per Review Selesai
                                 </h6>
                                 <div class="alert alert-info mb-3">
                                     <small>
-                                        <i class="bi bi-info-circle"></i> 
-                                        <strong>Ketentuan:</strong> Semakin cepat reviewer menyelesaikan review, semakin banyak point yang didapat.
+                                        <i class="bi bi-info-circle"></i>
+                                        <strong>Ketentuan:</strong> Setiap review yang selesai & disetujui admin dapat point yang SAMA, berapa pun lama hari pengerjaannya (tidak lagi dihitung per hari).
                                     </small>
                                 </div>
-                                
-                                @foreach($pointDaySettings as $daySetting)
-                                <div class="row mb-2 align-items-center">
-                                    <div class="col-md-4">
-                                        <strong>Lama {{ $daySetting->days }} Hari:</strong>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="input-group">
-                                            <input type="number" 
-                                                   class="form-control @error('day_points.' . $daySetting->days) is-invalid @enderror" 
-                                                   name="day_points[{{ $daySetting->days }}]" 
-                                                   value="{{ old('day_points.' . $daySetting->days, $daySetting->points) }}"
-                                                   min="1" 
-                                                   required>
-                                            <span class="input-group-text">Point</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
 
-                                <div class="alert alert-success mt-3 mb-0">
-                                    <small>
-                                        <strong>Contoh Perhitungan:</strong><br>
-                                        @foreach($pointDaySettings as $daySetting)
-                                        → Review selesai dalam <strong>{{ $daySetting->days }} hari</strong> = dapat <strong>{{ $daySetting->points }} point</strong><br>
-                                        @endforeach
-                                    </small>
+                                <div class="input-group input-group-lg">
+                                    <input type="number"
+                                           class="form-control @error('points_per_review') is-invalid @enderror"
+                                           name="points_per_review"
+                                           value="{{ old('points_per_review', $settings['points_per_review'] ?? 10) }}"
+                                           min="1" required>
+                                    <span class="input-group-text">Point / Review</span>
+                                    @error('points_per_review')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -151,16 +135,10 @@
                                 <h5 class="fw-bold mb-3">
                                     <i class="bi bi-calculator-fill text-warning"></i> Hasil Perhitungan (Contoh)
                                 </h5>
-                                <div class="row g-3">
-                                    @foreach($pointDaySettings->take(3) as $daySetting)
-                                    <div class="col-md-4">
-                                        <div class="text-center p-3 bg-white rounded">
-                                            <small class="text-muted d-block">Selesai {{ $daySetting->days }} Hari</small>
-                                            <strong class="text-primary">{{ $daySetting->points }} Point</strong><br>
-                                            <small class="text-success">Rp {{ number_format(($settings['point_value'] ?? 1000) * $daySetting->points, 0, ',', '.') }}</small>
-                                        </div>
-                                    </div>
-                                    @endforeach
+                                <div class="text-center p-3 bg-white rounded">
+                                    <small class="text-muted d-block">Setiap Review Selesai</small>
+                                    <strong class="text-primary">{{ $settings['points_per_review'] ?? 10 }} Point</strong><br>
+                                    <small class="text-success">Rp {{ number_format(($settings['point_value'] ?? 1000) * ($settings['points_per_review'] ?? 10), 0, ',', '.') }}</small>
                                 </div>
                             </div>
                         </div>
