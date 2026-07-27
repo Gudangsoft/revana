@@ -17,9 +17,13 @@ class MarketingPointReportController extends Controller
      */
     public function index(Request $request)
     {
+        // Urutkan berdasarkan total_points (kolom yang sama yang ditampilkan di tabel) —
+        // sebelumnya diurutkan berdasarkan submissions_count, yang bisa beda dari
+        // total_points kalau rate poin per submission pernah berubah, membuat leaderboard
+        // tampak salah urutan dibanding angka yang ditampilkan.
         $query = Marketing::where('is_active', true)
             ->withCount('submissions')
-            ->orderByDesc('submissions_count');
+            ->orderByDesc('total_points');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -33,7 +37,7 @@ class MarketingPointReportController extends Controller
 
         $totalMarketings = Marketing::where('is_active', true)->count();
         $totalSubmissions = \App\Models\Submission::whereNotNull('marketing_id')->count();
-        $totalPoints = $totalSubmissions;
+        $totalPoints = (float) MarketingPointHistory::sum('points_earned');
 
         // Top performer this month
         $month = now()->month;
@@ -197,24 +201,19 @@ class MarketingPointReportController extends Controller
     }
 
     /**
-     * Sync all marketing points (1 submission = 1 point)
+     * Sync all marketing points — backfill riwayat yang hilang lalu hitung ulang
+     * total_points dari SUM riwayat (bukan lagi COUNT submission, karena rate poin
+     * per submission bisa berubah dari waktu ke waktu, lihat TaskPointSetting).
      */
     public function syncAllPoints()
     {
+        $submitPoints = (float) (\App\Models\TaskPointSetting::getMarketingPoints('submit') ?? 1);
         $marketings = Marketing::all();
         $synced = 0;
         $created = 0;
 
         foreach ($marketings as $marketing) {
-            $submissionCount = \App\Models\Submission::where('marketing_id', $marketing->id)->count();
-            $oldTotal = $marketing->total_points ?? 0;
-
-            if ($submissionCount != $oldTotal) {
-                $marketing->update(['total_points' => $submissionCount]);
-                $synced++;
-            }
-
-            // Create missing point history records
+            // Create missing point history records (pakai rate yang berlaku saat ini)
             $submissions = \App\Models\Submission::where('marketing_id', $marketing->id)
                 ->whereDoesntHave('marketingPointHistory')
                 ->get();
@@ -223,10 +222,18 @@ class MarketingPointReportController extends Controller
                 MarketingPointHistory::create([
                     'marketing_id' => $marketing->id,
                     'submission_id' => $submission->id,
-                    'points_earned' => 1,
+                    'points_earned' => $submitPoints,
                     'description' => mb_substr("Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}", 0, 255),
                 ]);
                 $created++;
+            }
+
+            $actualPoints = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');
+            $oldTotal = $marketing->total_points ?? 0;
+
+            if (round((float) $oldTotal, 4) !== round((float) $actualPoints, 4)) {
+                $marketing->update(['total_points' => $actualPoints]);
+                $synced++;
             }
         }
 

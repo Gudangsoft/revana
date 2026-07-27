@@ -27,12 +27,17 @@ class SyncController extends Controller
         $slotOutOfSync = $slots->filter(fn($s) => $s->slot_terpakai !== $s->actual_used)->count();
         $totalSlots    = $slots->count();
 
-        // --- Marketing Points ---
-        $marketings         = Marketing::withCount([
-            'submissions as actual_points' => fn($q) => $q->where('status', '!=', 'REJECTED'),
-        ])->get();
-        // Use != (loose) — total_points is cast as float, actual_points is int from withCount
-        $marketingOutOfSync = $marketings->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
+        // --- Marketing Points --- (SUM riwayat, bukan COUNT submission — rate poin per
+        // submission bisa berubah dari waktu ke waktu, lihat TaskPointSetting)
+        $marketingActuals = \App\Models\MarketingPointHistory::selectRaw('marketing_id, SUM(points_earned) as total')
+            ->groupBy('marketing_id')
+            ->pluck('total', 'marketing_id');
+
+        $marketings = Marketing::select('id', 'total_points')->get()->map(function ($m) use ($marketingActuals) {
+            $m->actual_points = (float) ($marketingActuals[$m->id] ?? 0);
+            return $m;
+        });
+        $marketingOutOfSync = $marketings->filter(fn($m) => round((float) $m->total_points, 4) !== round((float) $m->actual_points, 4))->count();
         $totalMarketings    = $marketings->count();
 
         // --- PIC Points --- (single aggregated query instead of N per-PIC queries)
@@ -98,9 +103,9 @@ class SyncController extends Controller
         $updated    = 0;
 
         foreach ($marketings as $marketing) {
-            $actual = $marketing->submissions()->where('status', '!=', 'REJECTED')->count();
-            // Use loose comparison — total_points is float, $actual is int
-            if ((int) round($marketing->total_points) !== $actual) {
+            // SUM riwayat poin — bukan COUNT submission (lihat catatan di gatherStats())
+            $actual = (float) $marketing->pointHistories()->sum('points_earned');
+            if (round((float) $marketing->total_points, 4) !== round($actual, 4)) {
                 $marketing->update(['total_points' => $actual]);
                 $updated++;
             }
@@ -140,9 +145,10 @@ class SyncController extends Controller
             // Slots
             JournalSlot::recalculateAll();
 
-            // Marketing points — 1 point per non-rejected submission
+            // Marketing points — rebuild total_points dari SUM marketing_point_histories
+            // (bukan lagi COUNT submission, lihat catatan di gatherStats())
             foreach (Marketing::all() as $m) {
-                $actual = $m->submissions()->where('status', '!=', 'REJECTED')->count();
+                $actual = (float) $m->pointHistories()->sum('points_earned');
                 $m->update(['total_points' => $actual]);
             }
 
@@ -169,10 +175,15 @@ class SyncController extends Controller
                 'submissions as actual_used' => fn($q) => $q->where('status', '!=', 'REJECTED'),
             ])->get()->filter(fn($s) => $s->slot_terpakai !== $s->actual_used)->count();
 
-            // Marketing — single withCount query
-            $marketingOutOfSync = Marketing::withCount([
-                'submissions as actual_points' => fn($q) => $q->where('status', '!=', 'REJECTED'),
-            ])->get()->filter(fn($m) => (int) round($m->total_points) !== (int) $m->actual_points)->count();
+            // Marketing — single aggregated query, SUM riwayat (bukan COUNT submission)
+            $marketingActuals = \App\Models\MarketingPointHistory::selectRaw('marketing_id, SUM(points_earned) as total')
+                ->groupBy('marketing_id')
+                ->pluck('total', 'marketing_id');
+
+            $marketingOutOfSync = Marketing::select('id', 'total_points')->get()->filter(function ($m) use ($marketingActuals) {
+                $actual = (float) ($marketingActuals[$m->id] ?? 0);
+                return round((float) $m->total_points, 4) !== round($actual, 4);
+            })->count();
 
             // PIC — single aggregated query instead of N per-PIC queries
             $picActuals = PicPointHistory::selectRaw('pic_id, SUM(points_earned) as total')

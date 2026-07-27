@@ -62,21 +62,24 @@ class Marketing extends Authenticatable
     }
 
     /**
-     * Get real-time point count (1 submission = 1 point)
+     * Get real-time point total — SUM riwayat poin, BUKAN COUNT submission. Poin per
+     * submission mengikuti TaskPointSetting yang berlaku SAAT poin itu diberikan, jadi
+     * kalau rate-nya pernah diubah, COUNT submission tidak akan cocok lagi dengan SUM
+     * riwayat yang sebenarnya (lihat MarketingPointHistory::awardPoints()).
      */
-    public function getActualPoints(): int
+    public function getActualPoints(): float
     {
-        return $this->submissions()->count();
+        return (float) $this->pointHistories()->sum('points_earned');
     }
 
     /**
-     * Sync total_points column with actual submission count
+     * Sync total_points column dari SUM riwayat poin yang sebenarnya.
      */
-    public function syncPoints(): int
+    public function syncPoints(): float
     {
         $actualPoints = $this->getActualPoints();
-        // total_points is cast as float; compare loosely to avoid false positives
-        if ((int) round($this->total_points) !== $actualPoints) {
+        // round() ke 4 desimal untuk hindari false positive akibat presisi float
+        if (round((float) $this->total_points, 4) !== round($actualPoints, 4)) {
             $this->update(['total_points' => $actualPoints]);
         }
         return $actualPoints;

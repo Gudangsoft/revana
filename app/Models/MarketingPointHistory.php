@@ -84,9 +84,11 @@ class MarketingPointHistory extends Model
             'description' => $description ?? "Submit artikel berhasil",
         ]);
 
-        // Sync total_points from actual submission count (1 submission = 1 point)
-        $submissionCount = \App\Models\Submission::where('marketing_id', $marketingId)->count();
-        Marketing::where('id', $marketingId)->update(['total_points' => $submissionCount]);
+        // Sync total_points dari SUM riwayat poin — BUKAN COUNT submission, karena rate
+        // poin per submission bisa berubah dari waktu ke waktu (lihat TaskPointSetting),
+        // jadi COUNT tidak akan cocok dengan total yang sebenarnya pernah diberikan.
+        $actualPoints = self::where('marketing_id', $marketingId)->sum('points_earned');
+        Marketing::where('id', $marketingId)->update(['total_points' => $actualPoints]);
 
         Cache::forget('rankings.topMarketings');
 

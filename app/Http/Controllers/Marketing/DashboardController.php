@@ -268,7 +268,7 @@ class DashboardController extends Controller
     {
         $marketing = Auth::guard('marketing')->user();
         
-        // Sync total_points = submission count (1 submission = 1 point)
+        // Sync total_points dari SUM riwayat poin (bukan lagi COUNT submission)
         $totalPoints = $marketing->syncPoints();
         
         $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
