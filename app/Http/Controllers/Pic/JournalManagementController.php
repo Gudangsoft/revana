@@ -1505,56 +1505,23 @@ class JournalManagementController extends Controller
                     break;
             }
             
-            // Get points from settings
-            $pointsToAdd = $stepName ? PicPointHistory::getPointsForStep($stepName) : 0;
-            
-            if ($pointsToAdd > 0 && $stepName) {
+            // Award points pakai helper idempoten (cek dulu apakah pic_id+submission_id+step
+            // sudah pernah dapat poin) — bukan cuma andalkan guard "$oldValue != true" di atas,
+            // karena toggle di-unvalid lalu di-valid lagi (mis. admin membetulkan kesalahan)
+            // akan lolos guard itu (oldValue balik jadi false) dan dobel poin kalau masih
+            // pakai PicPointHistory::create() langsung tanpa cek riwayat yang sudah ada.
+            if ($stepName) {
                 try {
-                    // Add points to the assigned PIC
                     $petugasField = $fieldMap[$request->field];
                     $picId = $submission->{$petugasField};
-                    
+
                     if ($picId) {
-                        $pic = Pic::find($picId);
-                        if ($pic) {
-                            // Update total points
-                            $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
-                            $pic->save();
-                            
-                            // Log point history with correct fields
-                            PicPointHistory::create([
-                                'pic_id' => $picId,
-                                'submission_id' => $submission->id,
-                                'step' => $stepName,
-                                'points_earned' => $pointsToAdd,
-                                'description' => "Validasi {$stageName} - {$submission->kode_submit}",
-                            ]);
-                        }
+                        PicPointHistory::awardPoints($picId, $submission->id, $stepName, "Validasi {$stageName} - {$submission->kode_submit}");
                     }
-                    
+
                     // Also add points to marketing if this is the final validation (production)
                     if ($request->field === 'production_valid' && $submission->marketing_id) {
-                        $marketing = Marketing::find($submission->marketing_id);
-                        if ($marketing) {
-                            $marketingPoints = MarketingPointHistory::getPointsForSubmission();
-                            
-                            // Log marketing point history (idempoten: skip if already recorded)
-                            MarketingPointHistory::firstOrCreate(
-                                [
-                                    'marketing_id' => $marketing->id,
-                                    'submission_id' => $submission->id,
-                                ],
-                                [
-                                    'points_earned' => $marketingPoints,
-                                    'description' => "Artikel selesai (Production Valid) - {$submission->kode_submit}",
-                                ]
-                            );
-                            
-                            // Sync total_points from actual submission count (1 submission = 1 point)
-                            $submissionCount = \App\Models\Submission::where('marketing_id', $marketing->id)->count();
-                            $marketing->total_points = $submissionCount;
-                            $marketing->save();
-                        }
+                        MarketingPointHistory::awardPoints($submission->marketing_id, $submission->id, "Artikel selesai (Production Valid) - {$submission->kode_submit}");
                     }
                 } catch (\Exception $e) {
                     // Log error but don't fail the validation
@@ -2023,24 +1990,15 @@ class JournalManagementController extends Controller
             'process_type' => 'fasttrack'
         ], $adminUser->id);
 
-        // Award points to PIC
+        // Award points to PIC (idempoten via PicPointHistory::awardPoints())
         $pic = auth()->guard('pic')->user();
-        $pointsToAdd = PicPointHistory::getPointsForStep('submit');
         $pointMessage = '';
-        
-        if ($pointsToAdd > 0 && $pic) {
-            $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
-            $pic->save();
-            
-            PicPointHistory::create([
-                'pic_id' => $pic->id,
-                'submission_id' => $submission->id,
-                'step' => 'submit',
-                'points_earned' => $pointsToAdd,
-                'description' => "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}",
-            ]);
-            
-            $pointMessage = " Anda mendapatkan +{$pointsToAdd} point!";
+
+        if ($pic) {
+            $picHistory = PicPointHistory::awardPoints($pic->id, $submission->id, 'submit', "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}");
+            if ($picHistory) {
+                $pointMessage = " Anda mendapatkan +{$picHistory->points_earned} point!";
+            }
         }
 
         // Award points to Marketing if assigned

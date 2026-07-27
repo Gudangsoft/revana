@@ -1812,47 +1812,18 @@ class SubmissionController extends Controller
             'process_type' => 'fasttrack'
         ]);
 
-        // Award points to PIC if assigned
+        // Award points to PIC if assigned (idempoten via PicPointHistory::awardPoints())
         $pointMessage = '';
         if (isset($validated['petugas_submit_id']) && $validated['petugas_submit_id']) {
-            $pic = Pic::find($validated['petugas_submit_id']);
-            $pointsToAdd = PicPointHistory::getPointsForStep('submit');
-            
-            if ($pointsToAdd > 0 && $pic) {
-                $pic->total_points = ($pic->total_points ?? 0) + $pointsToAdd;
-                $pic->save();
-                
-                PicPointHistory::create([
-                    'pic_id' => $pic->id,
-                    'submission_id' => $submission->id,
-                    'step' => 'submit',
-                    'points_earned' => $pointsToAdd,
-                    'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
-                ]);
-                
-                $pointMessage = " (+{$pointsToAdd} point untuk PIC)";
+            $picHistory = PicPointHistory::awardPoints($validated['petugas_submit_id'], $submission->id, 'submit', "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}");
+            if ($picHistory) {
+                $pointMessage = " (+{$picHistory->points_earned} point untuk PIC)";
             }
         }
-        
-        // Award points to Marketing if assigned
+
+        // Award points to Marketing if assigned (idempoten via MarketingPointHistory::awardPoints())
         if (isset($validated['marketing_id']) && $validated['marketing_id']) {
-            $marketing = Marketing::find($validated['marketing_id']);
-            if ($marketing) {
-                $marketingPoints = MarketingPointHistory::getPointsForSubmission();
-                if ($marketingPoints > 0) {
-                    MarketingPointHistory::create([
-                        'marketing_id' => $marketing->id,
-                        'submission_id' => $submission->id,
-                        'points_earned' => $marketingPoints,
-                        'description' => "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}",
-                    ]);
-                    
-                    // Sync total_points from actual submission count (1 submission = 1 point)
-                    $submissionCount = Submission::where('marketing_id', $marketing->id)->count();
-                    $marketing->total_points = $submissionCount;
-                    $marketing->save();
-                }
-            }
+            MarketingPointHistory::awardPoints($validated['marketing_id'], $submission->id, "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}");
         }
 
         // Kirim email acknowledgement ke penulis jika template aktif

@@ -125,3 +125,30 @@ Semua data uji (poin, `completed_reviews`, baris `PointHistory`) dikembalikan ke
 - `log-update-2026-07-22.md`
 - `resources/views/admin/point-settings/index.blade.php`
 
+
+## 10. 🔄 Update: Backfill riwayat poin review lama ke flat 10 (retroaktif)
+
+- **Commit:** `9214092` — 18:36 oleh Gudangsoft
+- **File berubah:** 2 file
+- `database/migrations/2026_07_22_000001_backfill_flat_points_per_review.php`
+- `log-update-2026-07-22.md`
+
+## 11. Point PIC & Marketing: Perbaiki Celah Dobel-Poin Supaya Selalu Update Tanpa Perlu Klik Sinkron
+
+**Tujuan:** User bertanya soal `https://portal.apji.org/pic/points` — apakah poin PIC & Marketing bisa auto-update tanpa perlu klik sinkron (sinkron tetap ada khusus untuk admin). Investigasi menemukan: poin PIC/Marketing SUDAH otomatis ter-update saat pekerjaan selesai (lewat `toggleValidation()` & alur fasttrack) — tombol sinkron (baik punya admin maupun "Refresh Point" milik PIC sendiri di `/pic/points`) memang sudah cuma jadi jaring pengaman/backfill, bukan satu-satunya jalur. Tapi ditemukan 1 celah nyata: beberapa jalur pemberian poin masih pakai `PicPointHistory::create()`/`MarketingPointHistory::create()` langsung, bukan helper idempoten `awardPoints()` yang sudah ada — artinya kalau PIC meng-unvalid lalu meng-valid ulang suatu tahap (mis. membetulkan kesalahan klik), poin bisa dobel karena guard `$oldValue != true` di `toggleValidation()` tidak melindungi dari skenario ini (oldValue kembali jadi false setelah di-unvalid).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `toggleValidation()`: ganti `PicPointHistory::create()` + update manual `total_points` jadi `PicPointHistory::awardPoints()` (idempoten — cek dulu apakah pic_id+submission_id+step sudah pernah dapat poin). Bagian poin Marketing (production_valid) ganti dari `MarketingPointHistory::firstOrCreate()` jadi `MarketingPointHistory::awardPoints()` (fungsinya sama, cuma konsisten pakai 1 helper). PIC punya `fasttrackStore()`: ganti pola yang sama jadi `PicPointHistory::awardPoints()` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | Admin punya `fasttrackStore()`: ganti `PicPointHistory::create()` & `MarketingPointHistory::create()` jadi `PicPointHistory::awardPoints()` & `MarketingPointHistory::awardPoints()` |
+
+**Diverifikasi lewat tinker (mereproduksi skenario dobel-poin sungguhan, bukan cuma baca kode):**
+1. Panggil `toggleValidation()` sungguhan untuk validasi `editor1` sebuah submission → poin PIC bertambah 1 (sesuai `PicPointHistory::POINT_CONFIG`), 1 baris riwayat tercatat.
+2. Panggil lagi dengan `value=false` (simulasi PIC batal-validasi) lalu `value=true` lagi (simulasi validasi ulang) → SEBELUM fix ini akan dobel poin (karena `$oldValue` balik jadi false, guard lama lolos); SESUDAH fix, poin PIC TETAP di angka yang sama (tidak nambah lagi), tetap cuma 1 baris riwayat.
+3. Test terpisah untuk `MarketingPointHistory::awardPoints()`: hapus 1 baris riwayat marketing yang sudah ada (disimpan datanya dulu), panggil `awardPoints()` 2x berturut-turut untuk pasangan marketing+submission yang sama → panggilan ke-2 mengembalikan `null` (tidak nambah), cuma 1 baris riwayat tersisa, `total_points` marketing tidak berubah.
+
+Semua data uji (status validasi submission, riwayat poin, total_points PIC/Marketing) dikembalikan persis ke nilai semula (termasuk restore baris riwayat marketing yang sempat dihapus untuk keperluan test, dengan id & `created_at` yang sama) setelah verifikasi.
+
+**Catatan:** tidak ada migration baru, tidak ada perubahan skema. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`. Tombol sinkron (admin & PIC) tetap ada seperti biasa, sekarang cuma lebih jarang dibutuhkan karena jalur otomatisnya sudah tidak punya celah dobel-poin.
+
