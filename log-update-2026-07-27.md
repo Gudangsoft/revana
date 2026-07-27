@@ -38,3 +38,16 @@ Log perubahan otomatis dari git commits.
 **Catatan deploy:** migration ini **WAJIB** dijalankan di production — `git pull origin master` lalu `php artisan migrate --force`. Cek `storage/logs/laravel.log` untuk ringkasan marketing mana saja yang terkoreksi. Setelah ini, poin PIC & Marketing sudah benar-benar konsisten di semua laporan admin (`/admin/pic-points`, `/admin/marketing-points`, `/admin/sync`, `/admin/point-rankings`) dan tidak akan lagi diam-diam turun.
 
 
+
+## 3. 🔄 Update: Fix poin Marketing bisa turun diam-diam (formula COUNT vs SUM riwayat)
+
+- **Commit:** `4ff8fd5` — 19:33 oleh Gudangsoft
+- **File berubah:** 7 file
+- `app/Http/Controllers/Admin/MarketingPointReportController.php`
+- `app/Http/Controllers/Admin/SyncController.php`
+- `app/Http/Controllers/Marketing/DashboardController.php`
+- `app/Models/Marketing.php`
+- `app/Models/MarketingPointHistory.php`
+- `database/migrations/2026_07_27_000001_fix_marketing_points_count_to_sum_formula.php`
+- `log-update-2026-07-27.md`
+
