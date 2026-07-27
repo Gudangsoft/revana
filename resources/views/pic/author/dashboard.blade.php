@@ -48,14 +48,6 @@
 </div>
 @endif
 
-{{-- Sync Point Reminder --}}
-@include('partials.sync-point-reminder', [
-    'reminderId' => 'pic_sync_point',
-    'syncRoute'  => route('pic.points.sync'),
-    'syncLabel'  => 'Sinkronkan Point Saya Sekarang',
-    'syncMethod' => 'POST',
-])
-
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">

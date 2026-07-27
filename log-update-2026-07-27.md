@@ -64,7 +64,24 @@ Log perubahan otomatis dari git commits.
 
 **Catatan:** murni perubahan tampilan (navbar), tidak ada perubahan logika/route/migration. Rute `pic.points.sync` & controllernya tidak disentuh sama sekali — cuma tidak lagi ditaruh di navbar.
 
-**Temuan tambahan (belum diubah, menunggu keputusan user):** ada widget terpisah "Pengingat Sinkronisasi Point" (`resources/views/partials/sync-point-reminder.blade.php`, dipakai di dashboard admin/marketing/PIC) yang muncul sebagai banner sekali sehari dan menyarankan "lakukan sinkronisasi secara rutin agar data akurat" — pesan ini sudah agak usang sejak poin sudah auto-update, tapi dipakai di banyak dashboard sekaligus jadi belum disentuh tanpa konfirmasi lebih dulu.
+**Temuan tambahan, sudah ditindaklanjuti di section #5 di bawah:** ada widget terpisah "Pengingat Sinkronisasi Point" yang muncul sebagai banner sekali sehari di dashboard admin/marketing/PIC — user konfirmasi untuk dihapus juga di dashboard marketing & PIC.
+
+## 5. Hapus Banner "Pengingat Sinkronisasi Point" di Dashboard Marketing & PIC
+
+**Tujuan:** Lanjutan dari temuan section #4 — banner "Pengingat Sinkronisasi Point" (muncul sekali sehari, dismissable) di dashboard marketing & PIC menyarankan "lakukan sinkronisasi secara rutin agar data akurat", padahal poin sudah auto-update & idempoten sejak perbaikan hari ini. User konfirmasi untuk dihapus.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/author/dashboard.blade.php` | Hapus `@include('partials.sync-point-reminder', ...)` yang menyarankan PIC sync poin sendiri secara rutin |
+| `resources/views/marketing/dashboard.blade.php` | Hapus `@include('partials.sync-point-reminder', ...)` yang sama untuk marketing |
+
+**Sengaja TIDAK dihapus:** versi di `resources/views/admin/dashboard.blade.php` — banner itu cuma mengarahkan admin ke halaman laporan poin PIC (`admin.pic-points.index`), bukan mengklaim data admin sendiri "tidak akurat kalau tidak disinkronkan", jadi tetap relevan sebagai pengingat admin untuk sesekali meninjau laporan. Partial `resources/views/partials/sync-point-reminder.blade.php` sendiri tidak dihapus karena masih dipakai admin.
+
+**Diverifikasi lewat tinker:** render dashboard PIC & Marketing lewat controller asli — teks "Pengingat Sinkronisasi Point" sudah 0 kemunculan di keduanya. Render dashboard admin — banner itu masih ada (1 kemunculan), tidak terpengaruh.
+
+**Catatan:** murni perubahan tampilan, tidak ada perubahan logika/route/migration.
+
 
 
 
@@ -73,4 +90,12 @@ Log perubahan otomatis dari git commits.
 - **Commit:** `3bc0693` — 20:12 oleh Gudangsoft
 - **File berubah:** 1 file
 - `log-update-2026-07-27.md`
+
+
+## 6. 🔄 Update: Sembunyikan tombol Sync Point di navbar PIC
+
+- **Commit:** `0b63e2c` — 20:29 oleh Gudangsoft
+- **File berubah:** 2 file
+- `log-update-2026-07-27.md`
+- `resources/views/pic/layouts/app.blade.php`
 
