@@ -51,3 +51,26 @@ Log perubahan otomatis dari git commits.
 - `database/migrations/2026_07_27_000001_fix_marketing_points_count_to_sum_formula.php`
 - `log-update-2026-07-27.md`
 
+## 4. Sembunyikan Tombol "Sync Point" di Navbar PIC
+
+**Tujuan:** User menunjukkan screenshot tombol "Sync Point" yang selalu tampil di navbar atas setiap halaman PIC (`/pic/dashboard` dst.) dan minta tombol itu disembunyikan, dengan syarat poin PIC tetap benar-benar ter-update otomatis tanpa perlu klik apa pun. Berdasarkan perbaikan sebelumnya (section #1 hari ini) yang sudah memastikan poin PIC ter-update otomatis & aman dari dobel-poin persis saat tugas diselesaikan, tombol sync di navbar (yang selalu terlihat di SEMUA halaman) tidak lagi diperlukan sebagai jalur utama — cuma jadi jaring pengaman untuk kasus langka.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/layouts/app.blade.php` | Hapus tombol "Sync Point" dari navbar (tampil di semua halaman PIC) beserta JS/CSS animasi loading-nya yang jadi tidak terpakai. Tombol "Sync & Logout" di modal logout dan tombol "Refresh Point" di halaman `/pic/points` sendiri TIDAK dihapus — tetap tersedia sebagai jalur manual kalau PIC butuh, cuma tidak lagi dipaksakan tampil di setiap halaman |
+
+**Diverifikasi lewat tinker:** render halaman `/pic/dashboard` lewat controller asli — teks "Sync Point" sudah 0 kemunculan (navbar), halaman tetap render normal. Render halaman `/pic/points` — tombol "Refresh Point" masih ada (1 kemunculan), tidak terpengaruh perubahan ini.
+
+**Catatan:** murni perubahan tampilan (navbar), tidak ada perubahan logika/route/migration. Rute `pic.points.sync` & controllernya tidak disentuh sama sekali — cuma tidak lagi ditaruh di navbar.
+
+**Temuan tambahan (belum diubah, menunggu keputusan user):** ada widget terpisah "Pengingat Sinkronisasi Point" (`resources/views/partials/sync-point-reminder.blade.php`, dipakai di dashboard admin/marketing/PIC) yang muncul sebagai banner sekali sehari dan menyarankan "lakukan sinkronisasi secara rutin agar data akurat" — pesan ini sudah agak usang sejak poin sudah auto-update, tapi dipakai di banyak dashboard sekaligus jadi belum disentuh tanpa konfirmasi lebih dulu.
+
+
+
+## 4. 🔄 Update: Update log to reflect fix for Marketing points calculation (COUNT vs SUM)
+
+- **Commit:** `3bc0693` — 20:12 oleh Gudangsoft
+- **File berubah:** 1 file
+- `log-update-2026-07-27.md`
+

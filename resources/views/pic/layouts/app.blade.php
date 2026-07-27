@@ -187,16 +187,6 @@
                             <i class="bi bi-layout-sidebar" id="sidebarToggleIcon"></i>
                         </button>
                     </li>
-                    {{-- Tombol sync point strategis di navbar --}}
-                    <li class="nav-item">
-                        <form method="POST" action="{{ route('pic.points.sync') }}" class="d-inline" id="navSyncForm">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-warning fw-semibold" id="navSyncBtn" title="Sinkronkan Point Saya">
-                                <i class="bi bi-arrow-repeat" id="navSyncIcon"></i>
-                                <span class="d-none d-md-inline"> Sync Point</span>
-                            </button>
-                        </form>
-                    </li>
                     <li class="nav-item">
                         <button id="themeToggleBtn" onclick="toggleTheme()" title="">
                             <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
@@ -364,15 +354,7 @@
             if (collapsed && sidebar) sidebar.classList.add('sidebar-collapsed');
             if (icon) icon.className = collapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar';
         });
-        // Sync button loading state
-        var nsf = document.getElementById('navSyncForm');
-        if (nsf) nsf.addEventListener('submit', function() {
-            var btn = document.getElementById('navSyncBtn');
-            var ico = document.getElementById('navSyncIcon');
-            if (btn) { btn.disabled = true; ico.style.animation = 'spin .8s linear infinite'; }
-        });
     </script>
-    <style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
 
     <!-- PIC Logout Modal -->
     <div class="modal fade" id="picLogoutModal" tabindex="-1" aria-hidden="true">
