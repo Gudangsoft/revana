@@ -121,7 +121,8 @@ class LaporanKinerjaController extends Controller
                 $totalTugas      += $count;
             }
 
-            $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
+            // $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
+            $totalPoin = number_format((float) ($picPointSums->get($pic->id)->total ?? 0), 2, '.', ',');
 
             return [
                 'pic'         => $pic,
