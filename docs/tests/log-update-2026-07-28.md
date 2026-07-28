@@ -221,3 +221,18 @@ Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh
 **Diverifikasi lewat tinker (data real, bukan simulasi):** untuk marketing "Rafael" (2.322 baris riwayat) — filter `period=today` mengembalikan 6 baris, `period=week` 30 baris, tanpa filter 2.322 baris, semua cocok persis dengan hitungan manual langsung ke database. Untuk PIC (5.522 baris riwayat) — `period=year` mengembalikan 5.522, cocok dengan hitungan manual (seluruh riwayatnya memang dari tahun berjalan). Render halaman dicek untuk kedua sistem — tombol filter yang aktif ter-highlight dengan benar, kombinasi `period` + `step` (PIC) bekerja bersamaan tanpa saling mengganggu, dan pagination (`per-page-selector`) sudah otomatis mempertahankan filter lewat `withQueryString()` yang sudah ada sebelumnya.
 
 **Catatan:** murni penambahan fitur filter, tidak ada perubahan logika poin/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
+
+## 12. Tombol Sinkron Data Point di `/admin/laporan-kinerja`
+
+**Tujuan:** User minta ditambahkan cara untuk menyinkronkan data poin sesuai ketentuan terbaru di halaman `/admin/laporan-kinerja`. Halaman ini sendiri sudah menghitung poin langsung dari SUM riwayat (bukan cache), jadi tidak butuh "sync" untuk tampilannya — yang dibutuhkan adalah memastikan riwayat `pic_point_histories`/`marketing_point_histories` sendiri lengkap (ada baris untuk semua tugas yang memenuhi syarat).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah route `POST /admin/laporan-kinerja/sync` → `laporan-kinerja.sync` |
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | Method baru `syncPoints()`: panggil `PicPointReportController::runBulkSync()` & `MarketingPointReportController::runBulkSync()` (keduanya sudah diperbaiki hari ini — cuma mengisi baris yang belum ada, tidak pernah menimpa yang sudah ada), lalu samakan kolom cache `total_points` PIC & Marketing dengan SUM riwayat terbaru. Redirect kembali ke halaman laporan (mempertahankan filter bulan/tahun/rentang tanggal yang sedang aktif) dengan pesan jumlah riwayat baru yang ditambahkan |
+| `resources/views/admin/laporan-kinerja/index.blade.php` | Tambah tombol "Sinkron Data Point" (dengan konfirmasi) di sebelah tombol export Excel/PDF, dan tampilan pesan sukses (`session('success')`) yang sebelumnya tidak ada di halaman ini |
+
+**Diverifikasi lewat data real (bukan simulasi):** jalankan `syncPoints()` sungguhan — menemukan & mengisi 7 baris riwayat PIC yang memang belum tercatat (step `production`, tanggal dibackfill sesuai `production_validated_at` asli, bukan waktu sync dijalankan), 0 baris marketing baru (sudah lengkap). `total_points` ke-6 PIC yang terdampak dicek ulang — semua cocok persis dengan SUM riwayat. Jalankan sync KEDUA KALINYA → melaporkan 0/0 (idempoten, aman diklik berkali-kali). Baris yang di-backfill BUKAN data uji — representasi tugas produksi yang benar-benar sudah selesai tapi belum tercatat poinnya, jadi tidak dihapus/dikembalikan.
+
+**Catatan:** tidak ada migration baru. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.

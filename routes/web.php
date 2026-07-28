@@ -400,6 +400,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan-kinerja', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'index'])->name('laporan-kinerja.index');
         Route::get('/laporan-kinerja/export-excel', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'exportExcel'])->name('laporan-kinerja.export-excel');
         Route::get('/laporan-kinerja/export-pdf', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'exportPdf'])->name('laporan-kinerja.export-pdf');
+        Route::post('/laporan-kinerja/sync', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'syncPoints'])->name('laporan-kinerja.sync');
         
         // Field of Study Management
         Route::resource('field-of-studies', \App\Http\Controllers\Admin\FieldOfStudyController::class)->except(['show']);
