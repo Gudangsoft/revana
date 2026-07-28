@@ -188,3 +188,20 @@ Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh
 - `GET /README.md` (kontrol negatif, file di root yang memang boleh diakses) → **200 OK** ✅ (tidak ikut ke-block, tidak ada regresi)
 
 **Catatan:** ini melindungi skenario Apache. Kalau server produksi ternyata pakai Nginx dengan `root` yang salah diarahkan ke root project (bukan `public/`), `.htaccess` tidak berlaku sama sekali di Nginx — perlu aturan `location` terpisah di config Nginx (`location ^~ /docs/ { deny all; return 404; }`) yang tidak bisa ditambahkan dari sini karena bukan bagian dari repo. Rekomendasi utama tetap: pastikan DocumentRoot/`root` server produksi mengarah ke `public/`, bukan root project — ini menutup celah untuk SEMUA folder di luar `public/`, bukan cuma `docs/`.
+
+## 10. Fix Error "Data truncated for column 'status'" Saat PIC Submit Pekerjaan
+
+**Tujuan:** User melapor error di `http://127.0.0.1:8000/pic/submissions/13932/submit-work`: `SQLSTATE[01000]: Warning: 1265 Data truncated for column 'status' at row 1` saat mencoba `UPDATE submissions SET status = PRODUCTION_SUBMITTED`.
+
+**Root cause:** Kolom `submissions.status` HARUSNYA sudah `VARCHAR(50)` sejak migration `2026_01_21_000001_add_submitted_status_to_submissions.php` (dibuat khusus supaya status `*_SUBMITTED` bisa dipakai bebas — komentar migration itu sendiri bilang "karena ENUM di MySQL sulit untuk di-alter"). Tapi kolom LIVE-nya ternyata masih ENUM tanpa satu pun nilai `*_SUBMITTED` (`SUBMITTED, EDITOR1_PROCESS, ..., PRODUCTION_PROCESS, VALIDATOR_PROCESS, PUBLISHED, REJECTED`) — tidak ditemukan migration manapun yang mengubahnya balik jadi ENUM (dicek lewat `grep` semua migration), jadi kemungkinan besar ada `ALTER TABLE` manual di luar sistem migration di masa lalu. Akibatnya: PIC yang submit pekerjaan di TAHAP MANAPUN (bukan cuma production) gagal, karena kode (`JournalManagementController::submitWork()`) selalu mengubah status jadi `{STEP}_SUBMITTED` yang tidak ada satupun di ENUM tersebut.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_28_000003_restore_submissions_status_to_varchar.php` (baru) | `ALTER TABLE submissions MODIFY COLUMN status VARCHAR(50)` — mengembalikan ke tipe yang seharusnya sudah berlaku sejak Januari. Aman & idempoten (cuma ubah tipe kolom, isi data tidak berubah) |
+
+**Diverifikasi:**
+1. Snapshot checksum seluruh nilai `status` dari 14.185 submission SEBELUM migration, bandingkan SETELAH migration → checksum identik (tidak ada data yang berubah/hilang, cuma tipe kolom).
+2. Reproduksi persis skenario error: panggil `submitWork()` sungguhan untuk submission 13932 (status `PRODUCTION_PROCESS`, PIC produksi asli) → SEBELUM fix akan gagal dengan error yang sama; SESUDAH fix berhasil, status berubah jadi `PRODUCTION_SUBMITTED`, redirect 302. Data uji (status submission, baris `submission_histories`) dikembalikan ke semula setelah verifikasi.
+
+**Catatan:** tidak ada perubahan kode PHP, cuma migration schema. Deploy: `git pull origin master` lalu `php artisan migrate --force`.
