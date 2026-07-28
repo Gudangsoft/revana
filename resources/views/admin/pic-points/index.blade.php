@@ -198,10 +198,10 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <span class="fw-bold text-success fs-5">{{ number_format($pic->total_points) }}</span>
+                                    <span class="fw-bold text-success fs-5">{{ number_format($pic->total_points, 2) }}</span>
                                 </td>
                                 <td class="text-end">
-                                    <span class="badge bg-primary">+{{ number_format($pic->points_this_month) }}</span>
+                                    <span class="badge bg-primary">+{{ number_format($pic->points_this_month, 2) }}</span>
                                 </td>
                                 <td class="text-end">{{ number_format($pic->total_tasks_completed) }}</td>
                                 <td class="text-center">
@@ -239,7 +239,7 @@
                                 <div class="modal-body">
                                     <div class="mb-3">
                                         <label class="form-label">Point Saat Ini</label>
-                                        <input type="text" class="form-control" value="{{ number_format($pic->total_points) }}" readonly>
+                                        <input type="text" class="form-control" value="{{ number_format($pic->total_points, 2) }}" readonly>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Penyesuaian <span class="text-danger">*</span></label>

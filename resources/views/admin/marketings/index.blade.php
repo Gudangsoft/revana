@@ -59,7 +59,7 @@
                         <td>{{ $marketing->email ?? '-' }}</td>
                         <td class="text-center">
                             <span class="badge bg-success" style="font-size: 1rem;">
-                                {{ number_format($marketing->total_points ?? 0) }}
+                                {{ number_format($marketing->total_points ?? 0, 2) }}
                             </span>
                         </td>
                     </tr>

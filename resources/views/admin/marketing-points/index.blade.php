@@ -71,7 +71,7 @@
                             {{ $topPerformerThisMonth?->name ?? 'N/A' }}
                         </h5>
                         @if($topPerformerThisMonth)
-                        <small>{{ number_format($topPerformerThisMonth->points_this_month ?? 0) }} point</small>
+                        <small>{{ number_format($topPerformerThisMonth->points_this_month ?? 0, 2) }} point</small>
                         @endif
                     </div>
                     <i class="bi bi-star fs-1 opacity-50"></i>

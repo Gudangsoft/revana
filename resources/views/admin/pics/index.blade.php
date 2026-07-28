@@ -57,7 +57,7 @@
                         </td>
                         <td class="text-center">
                             <span class="badge bg-primary" style="font-size: 1rem;">
-                                {{ number_format($pic->total_points ?? 0) }}
+                                {{ number_format($pic->total_points ?? 0, 2) }}
                             </span>
                         </td>
                     </tr>

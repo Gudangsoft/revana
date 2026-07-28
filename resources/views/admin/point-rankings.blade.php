@@ -18,7 +18,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-1">Total Point PIC</h6>
-                        <h3 class="mb-0">{{ number_format($totalPicPoints) }}</h3>
+                        <h3 class="mb-0">{{ number_format($totalPicPoints, 2) }}</h3>
                     </div>
                     <i class="bi bi-trophy-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
                 </div>
@@ -31,7 +31,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-1">Total Point Marketing</h6>
-                        <h3 class="mb-0">{{ number_format($totalMarketingPoints) }}</h3>
+                        <h3 class="mb-0">{{ number_format($totalMarketingPoints, 2) }}</h3>
                     </div>
                     <i class="bi bi-trophy-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
                 </div>
@@ -129,7 +129,7 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-primary" style="font-size: 1rem;">
-                                        {{ number_format($pic->total_points ?? 0) }}
+                                        {{ number_format($pic->total_points ?? 0, 2) }}
                                     </span>
                                 </td>
                             </tr>
@@ -213,7 +213,7 @@
                                 <td>{{ $marketing->email ?? '-' }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-success" style="font-size: 1rem;">
-                                        {{ number_format($marketing->total_points ?? 0) }}
+                                        {{ number_format($marketing->total_points ?? 0, 2) }}
                                     </span>
                                 </td>
                             </tr>
