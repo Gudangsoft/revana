@@ -100,16 +100,6 @@
                         </a>
                     </div>
                 </form>
-                <form action="{{ route('admin.laporan-kinerja.sync') }}" method="POST" class="mt-2 text-end">
-                    @csrf
-                    @foreach($exportParams as $key => $value)
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                    @endforeach
-                    <button type="submit" class="btn btn-outline-warning btn-sm"
-                            onclick="return confirm('Sinkronkan riwayat poin PIC & Marketing sesuai ketentuan poin yang berlaku sekarang? Ini cuma mengisi riwayat yang belum ada, tidak menimpa data yang sudah ada.')">
-                        <i class="bi bi-arrow-repeat"></i> Sinkron Data Point
-                    </button>
-                </form>
             </div>
         </div>
     </div>

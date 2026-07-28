@@ -304,3 +304,16 @@ User dikonfirmasi (dengan angka dampak eksplisit ditunjukkan dulu) untuk **mengo
 **Diverifikasi lewat migration sungguhan (bukan simulasi):** dijalankan `php artisan migrate` sungguhan di lokal. Baris penyesuaian manual (submission_id NULL) dipastikan TIDAK tersentuh (diuji dengan baris tiruan bernilai 999, tetap 999 setelah migration). Sum tiap tahap setelah migration dicocokkan dengan `jumlah_baris × rate` — semua cocok persis (selisih hanya pembulatan float, <0,01). Pengecekan akhir `SyncController::gatherStats()` — 0 dari 70 PIC, 0 dari 15 marketing, 0 dari 8.343 slot out-of-sync.
 
 **Catatan deploy — PENTING:** migration ini **WAJIB** dijalankan di production — `git pull origin master` lalu `php artisan migrate --force`. Ini mengubah TOTAL POIN SEMUA PIC SECARA SIGNIFIKAN (turun ~70% rata-rata) — pastikan tim terkait sudah diberi tahu sebelum deploy, karena akan langsung terlihat di leaderboard/laporan begitu migration jalan. Cek `storage/logs/laravel.log` (log key: `"Koreksi retroaktif riwayat poin PIC ke rate per tahap yang berlaku sekarang"`) untuk detail lengkap jumlah baris per tahap yang terkoreksi di production.
+
+## 16. Sembunyikan Tombol "Sinkron Data Point" di `/admin/laporan-kinerja`
+
+**Tujuan:** Setelah dikonfirmasi bahwa laporan sudah menghitung poin langsung dari riwayat (selalu up-to-date tanpa perlu sinkron manual), user minta tombol "Sinkron Data Point" (section #12) disembunyikan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/laporan-kinerja/index.blade.php` | Hapus tombol & form "Sinkron Data Point" dari halaman. Route (`admin.laporan-kinerja.sync`) dan method `LaporanKinerjaController::syncPoints()` TIDAK dihapus — tetap ada kalau suatu saat dibutuhkan lagi sebagai jaring pengaman manual |
+
+**Diverifikasi:** render halaman lewat controller asli — teks "Sinkron Data Point" sudah 0 kemunculan.
+
+**Catatan:** murni perubahan tampilan, tidak ada perubahan logika/route/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
