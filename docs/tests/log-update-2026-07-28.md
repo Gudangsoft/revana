@@ -256,3 +256,20 @@ Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh
 **Diverifikasi lewat render sungguhan (bukan cuma baca kode):** semua 8 file di-render lewat controller asli dengan data real — PIC (total 5.518 poin) tampil "5,518.00" di halaman Point Saya, sidebar, DAN rankings; Marketing (total 1.161 poin) tampil "1,161.00" di halaman Point Saya, navbar, DAN rankings — konsisten di semua tempat. Nilai non-poin (Total Tugas, jumlah PIC/Marketing aktif) dipastikan TIDAK ikut diberi desimal karena itu hitungan bilangan bulat, bukan poin.
 
 **Catatan:** murni perubahan tampilan (format angka), tidak ada perubahan data/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
+
+## 14. Filter Bulan di `/admin/laporan-kinerja` Pakai Periode Cutoff 26–25
+
+**Tujuan:** User minta filter "Bulan" di halaman ini bisa melintasi 2 bulan kalender — contoh diberikan "26 Juli - 25 [Agustus]" — semacam periode cutoff penilaian kinerja (payroll-style), bukan kalender 1–31 biasa. Dikonfirmasi: dropdown Bulan+Tahun yang SUDAH ADA diubah artinya (bukan menambah opsi baru) — pilih "Juli 2026" sekarang berarti periode 26 Juni 2026 s/d 25 Juli 2026.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | Tambah method privat `resolvePeriod()` (dipakai bersama oleh `index()` & `buildData()`, sebelumnya logika periode ter-duplikasi di 2 tempat) — kalau filter tanggal manual (`dari_tanggal`/`sampai_tanggal`) diisi, dipakai apa adanya; kalau tidak (pakai dropdown Bulan/Tahun), periode dihitung sebagai **26 (bulan-1) s/d 25 (bulan)**, termasuk penanganan pergantian tahun (Januari → 26 Desember tahun sebelumnya). Semua query (`whereMonth`/`whereYear` yang lama) diganti seragam jadi `whereDate(...>=...)`/`whereDate(...<=...)` berdasar periode ini. Label periode (`$namaBulan`) sekarang SELALU berupa rentang tanggal eksplisit (mis. "26 Juni 2026 — 25 Juli 2026"), bukan cuma nama bulan, supaya jelas kalau periodenya melintasi 2 bulan kalender |
+| `resources/views/admin/laporan-kinerja/index.blade.php` | Tambah ikon info dengan tooltip di label "Bulan" menjelaskan konvensi cutoff 26–25 |
+
+**Diverifikasi lewat tinker (data real, bukan simulasi):**
+1. `resolvePeriod()` untuk "Juli 2026" → `2026-06-26` s/d `2026-07-25`, label "26 Juni 2026 — 25 Juli 2026". Untuk "Januari 2026" (uji pergantian tahun) → `2025-12-26` s/d `2026-01-25`, label "26 Desember 2025 — 25 Januari 2026". Untuk rentang tanggal manual → tetap dipakai apa adanya, tidak terpengaruh.
+2. `index()` dipanggil sungguhan untuk "Juli 2026" → `totalPicPoin` yang dihasilkan (27.722,65) dicocokkan dengan query manual langsung ke `pic_point_histories` untuk rentang `2026-06-26` s/d `2026-07-25` → **identik persis**.
+3. Render halaman penuh & kedua export (`exportExcel`, `exportPdf`) — semua berhasil tanpa error, label periode baru tampil dengan benar di halaman.
+
+**Catatan:** murni perubahan logika filter tampilan, tidak ada perubahan data/migration. Laporan bulan-bulan SEBELUMNYA otomatis ikut memakai definisi periode baru ini kalau diakses ulang (karena datanya dihitung on-the-fly dari riwayat, bukan cache) — ini sesuai maksud user (mendefinisikan ulang arti "1 bulan" untuk laporan kinerja). Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.

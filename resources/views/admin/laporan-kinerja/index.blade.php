@@ -23,7 +23,11 @@
                 <form action="{{ route('admin.laporan-kinerja.index') }}" method="GET" class="row g-2 align-items-end">
                     {{-- Filter Bulanan --}}
                     <div class="col-auto">
-                        <label class="form-label mb-1 small fw-semibold text-muted">Bulan</label>
+                        <label class="form-label mb-1 small fw-semibold text-muted">
+                            Bulan
+                            <i class="bi bi-info-circle text-muted"
+                               title="Periode kinerja memakai cutoff 26–25, bukan kalender 1–31. Contoh: pilih Juli = periode 26 Juni s/d 25 Juli."></i>
+                        </label>
                         <select name="bulan" class="form-select form-select-sm sel-bulanan" id="selBulan">
                             @foreach(range(1,12) as $m)
                                 <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>

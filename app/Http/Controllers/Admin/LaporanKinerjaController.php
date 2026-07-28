@@ -27,7 +27,17 @@ class LaporanKinerjaController extends Controller
         'validator'  => 'Validator',
     ];
 
-    public function index(Request $request)
+    /**
+     * Resolve rentang tanggal efektif dari request.
+     *
+     * Kalau dari_tanggal/sampai_tanggal diisi manual, pakai itu apa adanya.
+     * Kalau tidak (pilih dropdown Bulan+Tahun), periode SATU "bulan" diartikan
+     * sebagai periode cutoff 26–25 (mis. pilih "Juli 2026" = 26 Juni 2026 s/d
+     * 25 Juli 2026) — BUKAN kalender 1–31 biasa, sesuai periode penilaian
+     * kinerja yang dipakai. $namaBulan selalu berupa label rentang tanggal
+     * eksplisit supaya jelas kalau periodenya melintasi 2 bulan kalender.
+     */
+    private function resolvePeriod(Request $request): array
     {
         $dariTanggal   = $request->input('dari_tanggal');   // Y-m-d, opsional
         $sampaiTanggal = $request->input('sampai_tanggal'); // Y-m-d, opsional
@@ -37,14 +47,29 @@ class LaporanKinerjaController extends Controller
         $isRange = $dariTanggal && $sampaiTanggal;
 
         if ($isRange) {
-            $namaBulan = \Carbon\Carbon::parse($dariTanggal)->locale('id')->translatedFormat('d F Y')
-                . ' — '
-                . \Carbon\Carbon::parse($sampaiTanggal)->locale('id')->translatedFormat('d F Y');
+            $periodStart = \Carbon\Carbon::parse($dariTanggal)->startOfDay();
+            $periodEnd   = \Carbon\Carbon::parse($sampaiTanggal)->endOfDay();
         } else {
-            $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
-                ->locale('id')
-                ->translatedFormat('F Y');
+            $prevMonth = $bulan - 1;
+            $prevYear  = $tahun;
+            if ($prevMonth < 1) {
+                $prevMonth = 12;
+                $prevYear--;
+            }
+            $periodStart = \Carbon\Carbon::createFromDate($prevYear, $prevMonth, 26)->startOfDay();
+            $periodEnd   = \Carbon\Carbon::createFromDate($tahun, $bulan, 25)->endOfDay();
         }
+
+        $namaBulan = $periodStart->locale('id')->translatedFormat('d F Y')
+            . ' — '
+            . $periodEnd->locale('id')->translatedFormat('d F Y');
+
+        return [$periodStart, $periodEnd, $namaBulan, $isRange, $bulan, $tahun, $dariTanggal, $sampaiTanggal];
+    }
+
+    public function index(Request $request)
+    {
+        [$periodStart, $periodEnd, $namaBulan, $isRange, $bulan, $tahun, $dariTanggal, $sampaiTanggal] = $this->resolvePeriod($request);
 
         // --- Rekap PIC ---
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
@@ -71,12 +96,8 @@ class LaporanKinerjaController extends Controller
             if ($cfg['valid']) {
                 $q->where($cfg['valid'], true);
             }
-            if ($isRange) {
-                $q->whereDate($cfg['date'], '>=', $dariTanggal)
-                  ->whereDate($cfg['date'], '<=', $sampaiTanggal);
-            } else {
-                $q->whereMonth($cfg['date'], $bulan)->whereYear($cfg['date'], $tahun);
-            }
+            $q->whereDate($cfg['date'], '>=', $periodStart->toDateString())
+              ->whereDate($cfg['date'], '<=', $periodEnd->toDateString());
             foreach ($q->selectRaw("{$cfg['petugas']} as pic_id, COUNT(*) as cnt")->groupBy($cfg['petugas'])->get() as $row) {
                 $submissionCounts[$row->pic_id][$step] = (int) $row->cnt;
             }
@@ -86,13 +107,9 @@ class LaporanKinerjaController extends Controller
         // INI seperti sebelumnya) — supaya laporan bulan lalu tidak ikut berubah setiap
         // kali admin mengubah rate poin di /admin/task-point-settings. Step 'adjustment'
         // otomatis ikut terhitung karena disaring dari created_at yang sama seperti step lain.
-        $picPointQuery = PicPointHistory::query();
-        if ($isRange) {
-            $picPointQuery->whereDate('created_at', '>=', $dariTanggal)
-                          ->whereDate('created_at', '<=', $sampaiTanggal);
-        } else {
-            $picPointQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
-        }
+        $picPointQuery = PicPointHistory::query()
+            ->whereDate('created_at', '>=', $periodStart->toDateString())
+            ->whereDate('created_at', '<=', $periodEnd->toDateString());
         $picPointSums = $picPointQuery->selectRaw('pic_id, SUM(points_earned) as total')
                                       ->groupBy('pic_id')->get()->keyBy('pic_id');
 
@@ -122,13 +139,9 @@ class LaporanKinerjaController extends Controller
         // --- Rekap Marketing --- (single aggregated query)
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
 
-        $mktQuery = MarketingPointHistory::selectRaw('marketing_id, COUNT(*) as task_count, SUM(points_earned) as total_points');
-        if ($isRange) {
-            $mktQuery->whereDate('created_at', '>=', $dariTanggal)
-                     ->whereDate('created_at', '<=', $sampaiTanggal);
-        } else {
-            $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
-        }
+        $mktQuery = MarketingPointHistory::selectRaw('marketing_id, COUNT(*) as task_count, SUM(points_earned) as total_points')
+            ->whereDate('created_at', '>=', $periodStart->toDateString())
+            ->whereDate('created_at', '<=', $periodEnd->toDateString());
         $mktAggregates = $mktQuery->groupBy('marketing_id')->get()->keyBy('marketing_id');
 
         $mktRekap = $marketings->map(function ($mkt) use ($mktAggregates) {
@@ -225,20 +238,7 @@ class LaporanKinerjaController extends Controller
 
     private function buildData(Request $request, bool $withTotals = false): array
     {
-        $dariTanggal   = $request->input('dari_tanggal');
-        $sampaiTanggal = $request->input('sampai_tanggal');
-        $bulan         = (int) $request->input('bulan', now()->month);
-        $tahun         = (int) $request->input('tahun', now()->year);
-        $isRange       = $dariTanggal && $sampaiTanggal;
-
-        if ($isRange) {
-            $namaBulan = \Carbon\Carbon::parse($dariTanggal)->locale('id')->translatedFormat('d F Y')
-                . ' — '
-                . \Carbon\Carbon::parse($sampaiTanggal)->locale('id')->translatedFormat('d F Y');
-        } else {
-            $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)
-                ->locale('id')->translatedFormat('F Y');
-        }
+        [$periodStart, $periodEnd, $namaBulan] = $this->resolvePeriod($request);
 
         $pics = Pic::where('is_active', true)->orderBy('name')->get();
 
@@ -261,12 +261,8 @@ class LaporanKinerjaController extends Controller
             if ($cfg['valid']) {
                 $q->where($cfg['valid'], true);
             }
-            if ($isRange) {
-                $q->whereDate($cfg['date'], '>=', $dariTanggal)
-                  ->whereDate($cfg['date'], '<=', $sampaiTanggal);
-            } else {
-                $q->whereMonth($cfg['date'], $bulan)->whereYear($cfg['date'], $tahun);
-            }
+            $q->whereDate($cfg['date'], '>=', $periodStart->toDateString())
+              ->whereDate($cfg['date'], '<=', $periodEnd->toDateString());
             foreach ($q->selectRaw("{$cfg['petugas']} as pic_id, COUNT(*) as cnt")->groupBy($cfg['petugas'])->get() as $row) {
                 $submissionCounts[$row->pic_id][$step] = (int) $row->cnt;
             }
@@ -274,13 +270,9 @@ class LaporanKinerjaController extends Controller
 
         // Poin PIC per periode: SUM(points_earned) riwayat ASLI (bukan count × rate saat
         // ini), lihat catatan lengkap di method index() di atas.
-        $picPointQuery = PicPointHistory::query();
-        if ($isRange) {
-            $picPointQuery->whereDate('created_at', '>=', $dariTanggal)
-                          ->whereDate('created_at', '<=', $sampaiTanggal);
-        } else {
-            $picPointQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
-        }
+        $picPointQuery = PicPointHistory::query()
+            ->whereDate('created_at', '>=', $periodStart->toDateString())
+            ->whereDate('created_at', '<=', $periodEnd->toDateString());
         $picPointSums = $picPointQuery->selectRaw('pic_id, SUM(points_earned) as total')
                                       ->groupBy('pic_id')->get()->keyBy('pic_id');
 
@@ -303,13 +295,9 @@ class LaporanKinerjaController extends Controller
         })->filter(fn($r) => $r['total_tugas'] > 0)->sortByDesc('total_poin')->values();
 
         $marketings = Marketing::where('is_active', true)->orderBy('name')->get();
-        $mktQuery = MarketingPointHistory::query();
-        if ($isRange) {
-            $mktQuery->whereDate('created_at', '>=', $dariTanggal)
-                     ->whereDate('created_at', '<=', $sampaiTanggal);
-        } else {
-            $mktQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
-        }
+        $mktQuery = MarketingPointHistory::query()
+            ->whereDate('created_at', '>=', $periodStart->toDateString())
+            ->whereDate('created_at', '<=', $periodEnd->toDateString());
         $mktHistories = $mktQuery->get()->groupBy('marketing_id');
 
         $mktRekap = $marketings->map(function ($mkt) use ($mktHistories) {
