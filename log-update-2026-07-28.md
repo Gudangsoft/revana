@@ -104,3 +104,18 @@ Sekaligus, user memutuskan kebijakan poin submit Marketing ke depan adalah **0,5
 
 **Catatan:** murni perubahan tampilan, tidak ada perubahan logika poin/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`. Setelah deploy, badge navbar & kartu "Total Point" di halaman rankings akan selalu menampilkan angka yang sama.
 
+## 6. Dokumentasi Sistem Poin PIC & Marketing
+
+**Tujuan:** User minta dokumentasi lengkap bagaimana sistem poin PIC & Marketing bekerja dan apa saja yang dipengaruhinya, untuk referensi ke depan (terutama setelah rangkaian insiden 27–28 Juli di atas). Dibuat lewat investigasi menyeluruh kode (model, controller, migration) plus rangkuman naratif insiden dari log update sebelumnya.
+
+Isi dokumen mencakup: skema tabel poin, rate per step (tabel `task_point_settings`), alur pemberian poin lewat `awardPoints()`, apa saja yang membaca poin (leaderboard/dashboard, bukan reward/redemption), ringkasan kronologis insiden 27–28 Juli, dan **dua bug residual yang belum diperbaiki** yang ditemukan selama investigasi ini (belum disentuh oleh perbaikan sebelumnya):
+- `LaporanKinerjaController` (laporan kinerja PIC) masih menghitung `count × rate saat ini` alih-alih `SUM(points_earned)` — angka historis bisa berubah diam-diam saat rate diubah.
+- `SubmissionController::destroy()` masih menimpa `total_points` marketing dengan `COUNT(submissions)` mentah saat sebuah submission dihapus — bug sejenis insiden 27/28 Juli, masih aktif.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `docs/issues/sistem-poin-pic-marketing.md` (baru) | Dokumentasi lengkap sistem poin PIC/Marketing: skema data, rate, alur pemberian poin, apa yang dipengaruhi, riwayat insiden 27–28 Juli, dan 2 bug residual yang belum diperbaiki |
+
+**Catatan:** dokumentasi murni, tidak ada perubahan kode/logika/migration. Dua bug residual yang disebut di atas belum diperbaiki — perlu keputusan/prioritas terpisah dari user sebelum dikerjakan.
+
