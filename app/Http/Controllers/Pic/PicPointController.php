@@ -20,26 +20,30 @@ class PicPointController extends Controller
         $backfilled = 0;
 
         // --- BACKFILL: step submit ---
-        // Award point for every submission where this PIC is petugas_submit but has no history
+        // Award point for every submission where this PIC is petugas_submit but has no history.
+        // Tanggal riwayat (created_at) diisi dari submission->created_at, BUKAN waktu sync
+        // ini berjalan — supaya tanggal penyelesaian tugas tidak ikut berubah ke tanggal
+        // sync setiap kali PIC menekan tombol "Sinkronkan Poin Saya".
         $submitSubmissions = \App\Models\Submission::where('petugas_submit_id', $picId)->get();
         foreach ($submitSubmissions as $submission) {
             $history = PicPointHistory::awardPoints(
                 $picId, $submission->id, 'submit',
-                "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
+                "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}",
+                $submission->created_at
             );
             if ($history) $backfilled++;
         }
 
         // --- BACKFILL: workflow steps (only if step is validated / done) ---
         $workflowSteps = [
-            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1'],
-            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1'],
-            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2'],
-            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1'],
-            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2'],
-            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3'],
-            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2'],
-            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production'],
+            ['field' => 'petugas_editor1_id',   'valid' => 'editor1_valid',   'step' => 'editor1',   'validated_at' => 'editor1_validated_at'],
+            ['field' => 'petugas_author1_id',    'valid' => 'author1_valid',   'step' => 'author1',   'validated_at' => 'author1_validated_at'],
+            ['field' => 'petugas_editor2_id',    'valid' => 'editor2_valid',   'step' => 'editor2',   'validated_at' => 'editor2_validated_at'],
+            ['field' => 'petugas_reviewer1_id',  'valid' => 'reviewer1_valid', 'step' => 'reviewer1', 'validated_at' => 'reviewer1_validated_at'],
+            ['field' => 'petugas_reviewer2_id',  'valid' => 'reviewer2_valid', 'step' => 'reviewer2', 'validated_at' => 'reviewer2_validated_at'],
+            ['field' => 'petugas_editor3_id',    'valid' => 'editor3_valid',   'step' => 'editor3',   'validated_at' => 'editor3_validated_at'],
+            ['field' => 'petugas_author2_id',    'valid' => 'author2_valid',   'step' => 'author2',   'validated_at' => 'author2_validated_at'],
+            ['field' => 'petugas_production_id', 'valid' => 'production_valid','step' => 'production', 'validated_at' => 'production_validated_at'],
         ];
 
         foreach ($workflowSteps as $ws) {
@@ -49,7 +53,8 @@ class PicPointController extends Controller
             foreach ($submissions as $submission) {
                 $history = PicPointHistory::awardPoints(
                     $picId, $submission->id, $ws['step'],
-                    "Menyelesaikan tugas {$ws['step']} untuk artikel: {$submission->kode_submit}"
+                    "Menyelesaikan tugas {$ws['step']} untuk artikel: {$submission->kode_submit}",
+                    $submission->{$ws['validated_at']} ?? $submission->updated_at
                 );
                 if ($history) $backfilled++;
             }

@@ -455,13 +455,14 @@ class SubmissionController extends Controller
                 $pointHistory->delete();
             }
             
-            // Recalculate total_points from actual submission count (minus this one being deleted)
+            // Recalculate total_points dari SUM riwayat poin — BUKAN COUNT submission,
+            // karena rate poin per submission bisa berubah dari waktu ke waktu (lihat
+            // TaskPointSetting), jadi COUNT tidak akan cocok dengan total yang sebenarnya.
             $marketing = Marketing::find($submission->marketing_id);
             if ($marketing) {
-                $remainingSubmissions = Submission::where('marketing_id', $submission->marketing_id)
-                    ->where('id', '!=', $submission->id)
-                    ->count();
-                $marketing->total_points = $remainingSubmissions;
+                $actualPoints = MarketingPointHistory::where('marketing_id', $submission->marketing_id)
+                    ->sum('points_earned');
+                $marketing->total_points = $actualPoints;
                 $marketing->save();
             }
         }

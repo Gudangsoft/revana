@@ -82,40 +82,32 @@ class LaporanKinerjaController extends Controller
             }
         }
 
-        // Point value per step
-        $pointValues = [];
-        foreach (array_keys(self::STEPS) as $step) {
-            $pointValues[$step] = PicPointHistory::getPointsForStep($step);
-        }
-
-        // Manual adjustments still from history (date-filtered)
-        $adjQuery = PicPointHistory::where('step', 'adjustment');
+        // Poin PIC per periode: SUM(points_earned) riwayat ASLI (bukan count × rate SAAT
+        // INI seperti sebelumnya) — supaya laporan bulan lalu tidak ikut berubah setiap
+        // kali admin mengubah rate poin di /admin/task-point-settings. Step 'adjustment'
+        // otomatis ikut terhitung karena disaring dari created_at yang sama seperti step lain.
+        $picPointQuery = PicPointHistory::query();
         if ($isRange) {
-            $adjQuery->whereDate('created_at', '>=', $dariTanggal)
-                     ->whereDate('created_at', '<=', $sampaiTanggal);
+            $picPointQuery->whereDate('created_at', '>=', $dariTanggal)
+                          ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
-            $adjQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+            $picPointQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
-        $adjustments = $adjQuery->selectRaw('pic_id, SUM(points_earned) as total_adj')
-                                ->groupBy('pic_id')->get()->keyBy('pic_id');
+        $picPointSums = $picPointQuery->selectRaw('pic_id, SUM(points_earned) as total')
+                                      ->groupBy('pic_id')->get()->keyBy('pic_id');
 
-        $picRekap = $pics->map(function ($pic) use ($submissionCounts, $pointValues, $adjustments) {
+        $picRekap = $pics->map(function ($pic) use ($submissionCounts, $picPointSums) {
             $picCounts  = $submissionCounts[$pic->id] ?? [];
             $stepCounts = [];
             $totalTugas = 0;
-            $totalPoin  = 0.0;
 
             foreach (self::STEPS as $key => $label) {
                 $count            = $picCounts[$key] ?? 0;
                 $stepCounts[$key] = $count;
                 $totalTugas      += $count;
-                $totalPoin       += $count * ($pointValues[$key] ?? 0);
             }
 
-            $adj = $adjustments->get($pic->id);
-            if ($adj) {
-                $totalPoin += (float) $adj->total_adj;
-            }
+            $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
 
             return [
                 'pic'         => $pic,
@@ -242,36 +234,28 @@ class LaporanKinerjaController extends Controller
             }
         }
 
-        $pointValues = [];
-        foreach (array_keys(self::STEPS) as $step) {
-            $pointValues[$step] = PicPointHistory::getPointsForStep($step);
-        }
-
-        $adjQuery = PicPointHistory::where('step', 'adjustment');
+        // Poin PIC per periode: SUM(points_earned) riwayat ASLI (bukan count × rate saat
+        // ini), lihat catatan lengkap di method index() di atas.
+        $picPointQuery = PicPointHistory::query();
         if ($isRange) {
-            $adjQuery->whereDate('created_at', '>=', $dariTanggal)
-                     ->whereDate('created_at', '<=', $sampaiTanggal);
+            $picPointQuery->whereDate('created_at', '>=', $dariTanggal)
+                          ->whereDate('created_at', '<=', $sampaiTanggal);
         } else {
-            $adjQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
+            $picPointQuery->whereMonth('created_at', $bulan)->whereYear('created_at', $tahun);
         }
-        $adjustments = $adjQuery->selectRaw('pic_id, SUM(points_earned) as total_adj')
-                                ->groupBy('pic_id')->get()->keyBy('pic_id');
+        $picPointSums = $picPointQuery->selectRaw('pic_id, SUM(points_earned) as total')
+                                      ->groupBy('pic_id')->get()->keyBy('pic_id');
 
-        $picRekap = $pics->map(function ($pic) use ($submissionCounts, $pointValues, $adjustments) {
+        $picRekap = $pics->map(function ($pic) use ($submissionCounts, $picPointSums) {
             $picCounts  = $submissionCounts[$pic->id] ?? [];
             $stepCounts = [];
             $totalTugas = 0;
-            $totalPoin  = 0.0;
             foreach (self::STEPS as $key => $label) {
                 $count            = $picCounts[$key] ?? 0;
                 $stepCounts[$key] = $count;
                 $totalTugas      += $count;
-                $totalPoin       += $count * ($pointValues[$key] ?? 0);
             }
-            $adj = $adjustments->get($pic->id);
-            if ($adj) {
-                $totalPoin += (float) $adj->total_adj;
-            }
+            $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
             return [
                 'pic'         => $pic,
                 'step_counts' => $stepCounts,

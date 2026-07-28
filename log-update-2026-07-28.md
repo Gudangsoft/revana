@@ -119,3 +119,27 @@ Isi dokumen mencakup: skema tabel poin, rate per step (tabel `task_point_setting
 
 **Catatan:** dokumentasi murni, tidak ada perubahan kode/logika/migration. Dua bug residual yang disebut di atas belum diperbaiki — perlu keputusan/prioritas terpisah dari user sebelum dikerjakan.
 
+## 7. Perbaikan 2 Bug Residual + Bug Baru: Tanggal Penyelesaian Tugas Berubah Saat Sinkronisasi
+
+**Tujuan:** Menindaklanjuti section #6 — user meminta 2 bug residual (`LaporanKinerjaController`, `SubmissionController::destroy()`) diperbaiki, sekaligus melaporkan bug baru: setiap admin melakukan sinkronisasi poin, tanggal penyelesaian tugas (kolom `created_at` di riwayat poin) milik PIC/Marketing ikut berubah ke tanggal sinkronisasi dijalankan, padahal seharusnya tetap sesuai tanggal tugas benar-benar selesai.
+
+Investigasi menemukan akar bug tanggal: 3 jalur sync/backfill menulis riwayat poin baru dengan `created_at = NOW()` (waktu sync) alih-alih tanggal asli tugas selesai:
+- `PicPointReportController::runBulkSync()` — backfill step `submit` hardcode `NOW(), NOW()` di raw SQL (step workflow lain di fungsi yang sama sudah benar pakai tanggal `*_validated_at`).
+- `PicPointController::syncMyPoints()` (tombol "Sinkronkan Poin Saya" milik PIC) — pakai `PicPointHistory::awardPoints()` tanpa memberi tanggal asli, sehingga Eloquent default ke `now()`.
+- `MarketingPointReportController::syncAllPoints()` (tombol sync di `/admin/marketing-points`) — pakai `MarketingPointHistory::create([...])` langsung tanpa `created_at` eksplisit.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/PicPointHistory.php` | `awardPoints()` menerima parameter opsional `$occurredAt` — kalau diisi, `created_at`/`updated_at` riwayat di-set ke tanggal itu, bukan waktu fungsi dipanggil |
+| `app/Models/MarketingPointHistory.php` | `awardPoints()` menerima parameter opsional `$occurredAt` yang sama |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `runBulkSync()`: backfill step `submit` pakai `COALESCE(s.created_at, NOW())`, bukan hardcode `NOW()` |
+| `app/Http/Controllers/Pic/PicPointController.php` | `syncMyPoints()`: kirim `submission->created_at` (step submit) / `submission->{step}_validated_at` (step workflow) sebagai `$occurredAt` ke `awardPoints()` |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | `syncAllPoints()`: ganti `MarketingPointHistory::create()` manual jadi `awardPoints(..., $submission->created_at)` |
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | `index()` & `buildData()`: `total_poin` PIC per periode sekarang dari `SUM(points_earned)` riwayat asli (date-filtered), bukan `count × rate saat ini` |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `destroy()`: recalculate `total_points` marketing dari `SUM(points_earned)`, bukan `COUNT(submissions)` |
+| `docs/issues/sistem-poin-pic-marketing.md` | Section 7 diupdate: 3 bug (2 residual + 1 bug tanggal) ditandai FIXED dengan penjelasan perbaikannya |
+
+**Catatan penting:** perbaikan ini mencegah kerusakan tanggal ke depan saja. Baris riwayat yang tanggalnya sudah kadung berubah jadi tanggal sync di masa lalu (sebelum fix ini) **tidak** ikut diperbaiki — kalau perlu dipulihkan, butuh migration restorasi terpisah (perlu identifikasi baris mana yang tanggalnya terbukti salah, mirip pendekatan migration insiden 27/28 Juli di atas). Jalur pemberian poin **live** (saat validasi benar-benar terjadi) tidak diubah — tetap memakai `now()` seperti sebelumnya karena itu memang saat tugas selesai.
+
+**Verifikasi:** `php -l` pada seluruh file yang diubah — tidak ada syntax error.

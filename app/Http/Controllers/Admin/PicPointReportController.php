@@ -276,7 +276,7 @@ class PicPointReportController extends Controller
                 INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
                 SELECT s.petugas_submit_id, s.id, 'submit', ?,
                        CONCAT('Submit artikel: ', COALESCE(s.kode_submit,''), ' - ', COALESCE(s.judul_artikel,'')),
-                       NOW(), NOW()
+                       COALESCE(s.created_at, NOW()), COALESCE(s.created_at, NOW())
                 FROM submissions s
                 WHERE s.petugas_submit_id IS NOT NULL
                   AND NOT EXISTS (

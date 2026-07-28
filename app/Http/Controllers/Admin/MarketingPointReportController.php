@@ -206,25 +206,29 @@ class MarketingPointReportController extends Controller
      */
     public function syncAllPoints()
     {
-        $submitPoints = (float) (\App\Models\TaskPointSetting::getMarketingPoints('submit') ?? 1);
         $marketings = Marketing::all();
         $synced = 0;
         $created = 0;
 
         foreach ($marketings as $marketing) {
-            // Create missing point history records (pakai rate yang berlaku saat ini)
+            // Create missing point history records (pakai rate yang berlaku saat ini).
+            // Tanggal riwayat (created_at) diisi dari submission->created_at, BUKAN waktu
+            // sync ini berjalan — supaya tanggal penyelesaian tugas tidak ikut berubah
+            // ke tanggal sync setiap kali admin menekan tombol sinkronisasi.
             $submissions = \App\Models\Submission::where('marketing_id', $marketing->id)
                 ->whereDoesntHave('marketingPointHistory')
                 ->get();
 
             foreach ($submissions as $submission) {
-                MarketingPointHistory::create([
-                    'marketing_id' => $marketing->id,
-                    'submission_id' => $submission->id,
-                    'points_earned' => $submitPoints,
-                    'description' => mb_substr("Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}", 0, 255),
-                ]);
-                $created++;
+                $history = MarketingPointHistory::awardPoints(
+                    $marketing->id,
+                    $submission->id,
+                    mb_substr("Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}", 0, 255),
+                    $submission->created_at
+                );
+                if ($history) {
+                    $created++;
+                }
             }
 
             $actualPoints = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');

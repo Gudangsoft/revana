@@ -161,28 +161,37 @@ Ringkasan kronologis (detail lengkap ada di `log-update-2026-07-27.md` dan `log-
 
 ---
 
-## 7. Bug residual yang BELUM diperbaiki (risiko aktif)
+## 7. Bug residual — sudah diperbaiki 2026-07-28
 
-Dua tempat masih memakai pola "COUNT dianggap = poin" yang sama persis dengan akar masalah insiden di atas — **belum disentuh** oleh perbaikan 27/28 Juli:
+Tiga bug tambahan ditemukan dan diperbaiki sesudah dokumen ini pertama kali ditulis (semua dari kelas masalah yang sama dengan insiden §6, ditemukan lewat investigasi kode langsung, bukan laporan user):
 
-### a) `LaporanKinerjaController` — laporan kinerja PIC pakai COUNT × rate saat ini
-`app/Http/Controllers/Admin/LaporanKinerjaController.php:85-113` (dan ~245-269) menghitung `total_poin` PIC per periode sebagai:
+### a) `LaporanKinerjaController` — laporan kinerja PIC pakai COUNT × rate saat ini (FIXED)
+`app/Http/Controllers/Admin/LaporanKinerjaController.php` (method `index()` dan `buildData()`) dulu menghitung `total_poin` PIC per periode sebagai:
 ```php
 $count = $picCounts[$key] ?? 0;                       // jumlah submission tervalidasi di periode itu
 $totalPoin += $count * ($pointValues[$key] ?? 0);     // count × rate SAAT INI, bukan SUM(points_earned)
 ```
-Kalau rate sebuah step pernah berubah, angka "total poin" laporan untuk bulan-bulan lama **tidak akan cocok** dengan SUM riwayat aslinya, dan akan berubah diam-diam setiap kali seseorang menjalankan ulang laporan setelah rate diubah. Sisi Marketing di controller yang sama sudah benar (pakai `SUM(points_earned)`); hanya sisi PIC yang masih pakai pola lama ini.
+Kalau rate sebuah step pernah berubah, angka "total poin" laporan untuk bulan-bulan lama tidak cocok dengan SUM riwayat aslinya, dan berubah diam-diam tiap kali laporan dijalankan ulang setelah rate diubah. **Fix:** `total_poin` sekarang diambil dari `SUM(points_earned)` di `pic_point_histories`, difilter periode yang sama (`created_at`) — sama seperti pola yang sudah dipakai di sisi Marketing pada controller yang sama.
 
-### b) `SubmissionController::destroy()` — hapus submission recalculate poin marketing pakai COUNT
-`app/Http/Controllers/Admin/SubmissionController.php:445-467`:
+### b) `SubmissionController::destroy()` — hapus submission recalculate poin marketing pakai COUNT (FIXED)
+`app/Http/Controllers/Admin/SubmissionController.php:445-467` dulu:
 ```php
 $remainingSubmissions = Submission::where('marketing_id', $submission->marketing_id)
     ->where('id', '!=', $submission->id)->count();
 $marketing->total_points = $remainingSubmissions;   // COUNT, bukan SUM(points_earned)
 ```
-Dengan rate saat ini 0,5/submission, menghapus submission milik marketing yang masih punya submission lain akan **menimpa `total_points` dengan jumlah submission mentah** (mis. 20 submission tersisa → `total_points` di-set 20, padahal seharusnya SUM `points_earned` yang benar, mis. 10). Ini bug yang sama persis kelasnya dengan insiden 27/28 Juli, masih hidup, khusus di jalur hapus submission.
+Dengan rate 0,5/submission, menghapus submission menimpa `total_points` dengan jumlah submission mentah (mis. 20 tersisa → `total_points` di-set 20, padahal seharusnya SUM `points_earned`, mis. 10). **Fix:** sekarang recalculate dari `MarketingPointHistory::where('marketing_id', ...)->sum('points_earned')`.
 
-**Rekomendasi:** perbaiki kedua tempat ini agar konsisten pakai `SUM(points_earned)`, sama seperti pola yang sudah diterapkan di jalur-jalur lain pasca-insiden.
+### c) Tanggal penyelesaian tugas berubah jadi tanggal sinkronisasi, bukan tanggal tugas selesai (FIXED)
+Dilaporkan user: setiap admin melakukan sinkronisasi poin, `created_at` pada baris riwayat yang di-backfill ikut berubah jadi **waktu sinkronisasi dijalankan**, bukan tanggal tugas/submission itu sebenarnya selesai. Ditemukan di 3 tempat:
+
+- `PicPointReportController::runBulkSync()` — backfill step `submit` hardcode `NOW(), NOW()` di raw SQL, bukan `COALESCE(s.created_at, NOW())` seperti yang sudah benar dipakai untuk step workflow lain di fungsi yang sama.
+- `PicPointController::syncMyPoints()` (tombol "Sinkronkan Poin Saya" milik PIC) — memanggil `PicPointHistory::awardPoints()` tanpa memberi tahu tanggal asli, sehingga Eloquent memakai `now()` sebagai `created_at`.
+- `MarketingPointReportController::syncAllPoints()` (tombol sync di `/admin/marketing-points`) — memakai `MarketingPointHistory::create([...])` langsung tanpa `created_at` eksplisit, jadi Eloquent juga memakai `now()`.
+
+**Fix:** kedua helper `PicPointHistory::awardPoints()` dan `MarketingPointHistory::awardPoints()` sekarang menerima parameter opsional `$occurredAt` — kalau diisi, `created_at`/`updated_at` baris riwayat di-set ke tanggal itu (bukan waktu saat fungsi dipanggil). Semua jalur sync/backfill di atas sekarang mengirim tanggal asli (`submission->created_at` untuk step `submit`, kolom `*_validated_at` submission untuk step workflow lain). Jalur pemberian poin **live** (saat PIC/admin benar-benar meng-klik validasi) tidak diubah — tetap tidak mengirim `$occurredAt`, sehingga tetap memakai `now()` seperti semula (memang benar karena itu momen tugas selesai).
+
+**Catatan:** perbaikan ini mencegah kerusakan tanggal ke depan. Baris riwayat yang tanggalnya sudah kadung berubah jadi tanggal sync di masa lalu **tidak** diperbaiki oleh perubahan ini (butuh migration restorasi terpisah kalau diperlukan, mirip pola di §6).
 
 ---
 

@@ -60,9 +60,15 @@ class MarketingPointHistory extends Model
     }
 
     /**
-     * Award points to Marketing for a successful submission
+     * Award points to Marketing for a successful submission.
+     *
+     * $occurredAt: tanggal SEBENARNYA submission ini selesai (mis. submission->created_at).
+     * Wajib diisi oleh pemanggil yang bersifat backfill/sync (bukan event langsung saat
+     * itu juga) — kalau dibiarkan null, timestamp riwayat memakai waktu SEKARANG (saat
+     * fungsi ini dipanggil), yang salah untuk sync karena tanggal penyelesaian tugas jadi
+     * ikut berubah ke tanggal sync, bukan tanggal submission yang sebenarnya.
      */
-    public static function awardPoints(int $marketingId, int $submissionId, ?string $description = null): ?self
+    public static function awardPoints(int $marketingId, int $submissionId, ?string $description = null, $occurredAt = null): ?self
     {
         // Check if points already awarded for this submission
         $existing = self::where('marketing_id', $marketingId)
@@ -83,6 +89,13 @@ class MarketingPointHistory extends Model
             'points_earned' => $points,
             'description' => $description ?? "Submit artikel berhasil",
         ]);
+
+        if ($occurredAt) {
+            $history->forceFill([
+                'created_at' => $occurredAt,
+                'updated_at' => $occurredAt,
+            ])->save();
+        }
 
         // Sync total_points dari SUM riwayat poin — BUKAN COUNT submission, karena rate
         // poin per submission bisa berubah dari waktu ke waktu (lihat TaskPointSetting),

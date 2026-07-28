@@ -94,12 +94,19 @@ class PicPointHistory extends Model
     }
 
     /**
-     * Award points to a PIC for completing a step
+     * Award points to a PIC for completing a step.
+     *
+     * $occurredAt: tanggal SEBENARNYA tugas ini selesai (mis. submission->created_at
+     * untuk step 'submit', atau kolom *_validated_at untuk step lain). Wajib diisi oleh
+     * pemanggil yang bersifat backfill/sync (bukan event langsung saat itu juga) — kalau
+     * dibiarkan null, timestamp riwayat akan memakai waktu SEKARANG (saat fungsi ini
+     * dipanggil), yang salah untuk sync karena tanggal penyelesaian tugas jadi ikut
+     * berubah ke tanggal sync, bukan tanggal tugas benar-benar selesai.
      */
-    public static function awardPoints(int $picId, int $submissionId, string $step, ?string $description = null): ?self
+    public static function awardPoints(int $picId, int $submissionId, string $step, ?string $description = null, $occurredAt = null): ?self
     {
         $points = self::getPointsForStep($step);
-        
+
         if ($points <= 0) {
             return null;
         }
@@ -122,6 +129,13 @@ class PicPointHistory extends Model
             'points_earned' => $points,
             'description' => $description ?? "Menyelesaikan tugas " . self::getLabelForStep($step),
         ]);
+
+        if ($occurredAt) {
+            $history->forceFill([
+                'created_at' => $occurredAt,
+                'updated_at' => $occurredAt,
+            ])->save();
+        }
 
         // Update total points on PIC
         Pic::where('id', $picId)->increment('total_points', $points);
