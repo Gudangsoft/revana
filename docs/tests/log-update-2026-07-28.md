@@ -771,6 +771,24 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 | `resources/views/admin/sync/index.blade.php` | Hapus blok danger merah + peringatan ">20 menit" yang menyebut cron scheduler; ganti jadi info netral yang menjelaskan trigger otomatis lewat `AdminMiddleware` |
 | `tests/Feature/Points/SyncPageRenderTest.php` | `test_sync_page_shows_warning_when_auto_sync_never_ran` diganti jadi `test_sync_page_shows_neutral_message_when_auto_sync_never_ran` — assert teks baru "belum pernah berjalan" dan pastikan kata "cron" sudah tidak ada di halaman |
 
-**Catatan penting (belum deploy):** perbaikan tanpa-cron di section #40 (`PointsAutoSync.php`, `AdminMiddleware::terminate()`, command wrapper, test) **masih belum di-commit/deploy** ke server saat pesan ini dihapus — dicek lewat `git status`/`git log` dan ternyata hanya sampai commit `ec57485` (penghapusan tombol sync manual) yang sudah live. Artinya sebelum kode section #40 benar-benar di-deploy, mekanisme auto-sync tanpa-cron ini belum berjalan nyata di production — indikator akan tetap menampilkan pesan netral "belum pernah berjalan" (bukan lagi merah) sampai deploy dilakukan.
+**Catatan proses:** saat mulai mengerjakan ini, `git status` sempat menunjukkan file-file section #40 (`PointsAutoSync.php`, `AdminMiddleware::terminate()`, dll.) sebagai belum ter-commit — sempat dikira berarti belum pernah deploy. Setelah dicek ulang dengan `git log`, ternyata section #40 **sudah ter-commit duluan** di `b13c025` (di luar sesi chat ini, sebelum sesi ini lanjut) sehingga mekanismenya memang sudah aktif — konsisten dengan konfirmasi user bahwa indikator sempat menunjukkan status sehat.
 
-**Diverifikasi:** full test suite `tests/Feature/Points` (13 test terkait, 34 assertion) **PASS** setelah penyesuaian assertion teks.
+**Diverifikasi:** full test suite `tests/Feature/Points` (13 test terkait, 34 assertion) **PASS** setelah penyesuaian assertion teks. Commit: `c2950b2`.
+
+## 42. Hapus Hook `post-commit` Lama yang Menulis Log ke Root (Bukan `docs/tests/`)
+
+**Tujuan:** commit section #41 memicu error `post-commit` hook ("syntax error in expression"). Ditelusuri, ternyata ada hook lama di `.git/hooks/post-commit` yang otomatis menulis ringkasan tiap commit ke `log-update-{tanggal}.md` di **root project** — bertentangan langsung dengan konvensi CLAUDE.md saat ini (log dipindah ke `docs/tests/` sejak 28 Juli 2026, dan file stub duplikat di root ini bahkan sudah pernah dihapus sekali sebelumnya di commit `daa5d1d` dengan alasan yang sama, tapi hook ini terus membuatnya lagi tiap kali commit).
+
+**Root cause error:** baris `ENTRY_NUM=$(grep -c "^## [0-9]" "$LOG_FILE" 2>/dev/null || echo 0)` — kalau tidak ada baris yang cocok, `grep -c` tetap mencetak `0` ke stdout tapi keluar dengan exit code 1 (dianggap "tidak ditemukan"), sehingga `|| echo 0` ikut jalan juga. Hasilnya `ENTRY_NUM` berisi dua baris ("0\n0"), lalu `$((ENTRY_NUM + 1))` gagal karena bukan angka tunggal yang valid.
+
+**Dampak:** dicek dengan `diff` antara isi file sebelum dan sesudah commit — **tidak ada kerusakan data**, karena error terjadi sebelum baris yang menulis (append) ke file, jadi hook gagal duluan sebelum sempat menulis apa pun. Cuma pesan error yang mengganggu di setiap commit.
+
+**Solusi (dikonfirmasi user):** hapus hook-nya sepenuhnya (bukan diperbaiki) — karena log update sekarang sudah ditulis manual & terstruktur di `docs/tests/log-update-*.md` tiap sesi sesuai CLAUDE.md, mekanisme auto-generate dari commit message ini jadi duplikat yang keliru lokasinya dan sudah tidak diperlukan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `.git/hooks/post-commit` | Dihapus (bukan bagian dari repo/tidak di-*track* git, jadi tidak muncul di `git diff` — perubahan lokal saja) |
+| `log-update-2026-07-28.md` (root) | Dihapus lagi — isinya cuma stub kosong tanpa entry berarti (hook selalu gagal sebelum sempat menulis apa pun) |
+
+**Diverifikasi:** `git commit` berikutnya tidak lagi memicu error hook.
