@@ -218,7 +218,7 @@
                              COUNT submission, karena poin per submission tidak selalu 1 (rate bisa
                              berubah, lihat TaskPointSetting). Cache 120 detik sebelumnya membuat
                              angka ini beda dari halaman lain sesaat setelah total_points ter-update. --}}
-                        <i class="bi bi-star-fill"></i> {{ number_format(auth()->guard('marketing')->user()->total_points) }} Point
+                        <i class="bi bi-star-fill"></i> {{ number_format(auth()->guard('marketing')->user()->total_points, 2) }} Point
                     </span>
                     <a href="{{ route('marketing.refresh-points') }}" class="btn btn-sm btn-light rounded-circle" title="Refresh Point" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-clockwise text-success"></i>

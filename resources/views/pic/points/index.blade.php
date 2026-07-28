@@ -24,7 +24,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Total Point</h6>
-                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points']) }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points'], 2) }}</h2>
                     </div>
                     <i class="bi bi-trophy fs-1 opacity-50"></i>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Point Hari Ini</h6>
-                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today']) }}</h2>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today'], 2) }}</h2>
                     </div>
                     <i class="bi bi-calendar-check fs-1 opacity-50"></i>
                 </div>
@@ -52,7 +52,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Point Bulan Ini</h6>
-                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month']) }}</h2>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month'], 2) }}</h2>
                     </div>
                     <i class="bi bi-calendar-month fs-1 opacity-50"></i>
                 </div>
@@ -114,7 +114,7 @@
                     <div class="col-md-4 mb-3">
                         <div class="border rounded p-3 text-center">
                             <small class="text-muted d-block">{{ \App\Models\PicPointHistory::getLabelForStep($stepData->step) }}</small>
-                            <h4 class="mb-0 text-primary">{{ number_format($stepData->total) }}</h4>
+                            <h4 class="mb-0 text-primary">{{ number_format($stepData->total, 2) }}</h4>
                             <small class="text-muted">{{ $stepData->count }} tugas</small>
                         </div>
                     </div>
@@ -228,7 +228,7 @@
                         <td>{{ $history->description ?? '-' }}</td>
                         <td class="text-end">
                             <span class="badge {{ $history->points_earned >= 0 ? 'bg-success' : 'bg-danger' }} fs-6">
-                                {{ $history->points_earned >= 0 ? '+' : '' }}{{ $history->points_earned }}
+                                {{ $history->points_earned >= 0 ? '+' : '' }}{{ number_format($history->points_earned, 2) }}
                             </span>
                         </td>
                     </tr>

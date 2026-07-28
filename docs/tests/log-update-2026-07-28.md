@@ -236,3 +236,23 @@ Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh
 **Diverifikasi lewat data real (bukan simulasi):** jalankan `syncPoints()` sungguhan — menemukan & mengisi 7 baris riwayat PIC yang memang belum tercatat (step `production`, tanggal dibackfill sesuai `production_validated_at` asli, bukan waktu sync dijalankan), 0 baris marketing baru (sudah lengkap). `total_points` ke-6 PIC yang terdampak dicek ulang — semua cocok persis dengan SUM riwayat. Jalankan sync KEDUA KALINYA → melaporkan 0/0 (idempoten, aman diklik berkali-kali). Baris yang di-backfill BUKAN data uji — representasi tugas produksi yang benar-benar sudah selesai tapi belum tercatat poinnya, jadi tidak dihapus/dikembalikan.
 
 **Catatan:** tidak ada migration baru. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
+
+## 13. Tampilkan Poin PIC & Marketing dengan 2 Desimal di Semua Halaman
+
+**Tujuan:** User minta penulisan poin PIC & Marketing di dashboard/halaman "Point Saya" pakai format desimal, supaya konsisten dengan kebijakan poin yang sekarang bisa pecahan (mis. rate submit marketing 0,5/submission). Sebelumnya banyak tempat memakai `number_format($x)` tanpa parameter desimal, yang MEMBULATKAN ke bilangan bulat — nilai asli seperti 1.122,5 tampil sebagai "1,123" (salah, membulatkan), padahal seharusnya "1,122.50".
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/author/dashboard.blade.php` | Ranking PIC & Marketing di dashboard PIC: `number_format(..., 2)` |
+| `resources/views/pic/partials/sidebar.blade.php` | Badge "Point Saya" di sidebar PIC |
+| `resources/views/pic/points/index.blade.php` | Total Point, Point Hari Ini, Point Bulan Ini, breakdown poin per tahap, dan nilai poin per baris riwayat (Total Tugas TIDAK diubah — itu jumlah tugas, bukan poin) |
+| `resources/views/pic/points/rankings.blade.php` | Semua kartu & baris tabel poin PIC/Marketing (jumlah PIC/Marketing aktif TIDAK diubah — itu hitungan orang, bukan poin) |
+| `resources/views/marketing/dashboard.blade.php` | Total Point di header, ringkasan poin, ranking PIC/Marketing, dan nilai poin per baris riwayat terbaru |
+| `resources/views/marketing/layouts/app.blade.php` | Badge poin di navbar (yang baru diperbaiki formulanya sebelumnya, sekarang juga pakai 2 desimal) |
+| `resources/views/marketing/point-rankings.blade.php` | Sama seperti rankings PIC |
+| `resources/views/marketing/points.blade.php` | Total Point, Point Hari Ini, Point Bulan Ini, dan nilai poin per baris riwayat |
+
+**Diverifikasi lewat render sungguhan (bukan cuma baca kode):** semua 8 file di-render lewat controller asli dengan data real — PIC (total 5.518 poin) tampil "5,518.00" di halaman Point Saya, sidebar, DAN rankings; Marketing (total 1.161 poin) tampil "1,161.00" di halaman Point Saya, navbar, DAN rankings — konsisten di semua tempat. Nilai non-poin (Total Tugas, jumlah PIC/Marketing aktif) dipastikan TIDAK ikut diberi desimal karena itu hitungan bilangan bulat, bukan poin.
+
+**Catatan:** murni perubahan tampilan (format angka), tidak ada perubahan data/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.

@@ -395,7 +395,7 @@
         <i class="bi bi-trophy-fill"></i>
         <span>Point Saya</span>
         @if($totalPoints > 0)
-            <span class="badge bg-success">{{ number_format($totalPoints) }}</span>
+            <span class="badge bg-success">{{ number_format($totalPoints, 2) }}</span>
         @endif
     </a>
     <a href="{{ route('pic.points.rankings') }}"

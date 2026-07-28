@@ -18,7 +18,7 @@
                 <small class="text-muted">dari {{ $activeMarketingCount }} Marketing</small>
             </div>
             <div class="col-md-3 text-center border-end">
-                <div class="h4 mb-0 text-primary">{{ number_format($currentMarketing->total_points ?? 0) }}</div>
+                <div class="h4 mb-0 text-primary">{{ number_format($currentMarketing->total_points ?? 0, 2) }}</div>
                 <small class="text-muted">Total Point</small>
             </div>
             <div class="col-md-3 text-center border-end">
@@ -34,7 +34,7 @@
                     </div>
                     <small class="text-muted">Anda yang terbaik!</small>
                 @elseif($pointsToNextRank > 0)
-                    <div class="h4 mb-0 text-danger">+{{ number_format($pointsToNextRank) }}</div>
+                    <div class="h4 mb-0 text-danger">+{{ number_format($pointsToNextRank, 2) }}</div>
                     <small class="text-muted">Point ke peringkat {{ $currentMarketingRank - 1 }}</small>
                 @else
                     <div class="h5 mb-0 text-success">
@@ -56,7 +56,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-1">Total Point PIC</h6>
-                        <h3 class="mb-0">{{ number_format($totalPicPoints) }}</h3>
+                        <h3 class="mb-0">{{ number_format($totalPicPoints, 2) }}</h3>
                     </div>
                     <i class="bi bi-trophy-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
                 </div>
@@ -69,7 +69,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-1">Total Point Marketing</h6>
-                        <h3 class="mb-0">{{ number_format($totalMarketingPoints) }}</h3>
+                        <h3 class="mb-0">{{ number_format($totalMarketingPoints, 2) }}</h3>
                     </div>
                     <i class="bi bi-trophy-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
                 </div>
@@ -149,7 +149,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-success" style="font-size:1rem;">{{ number_format($mkt->total_points ?? 0) }}</span>
+                                    <span class="badge bg-success" style="font-size:1rem;">{{ number_format($mkt->total_points ?? 0, 2) }}</span>
                                 </td>
                             </tr>
                             @endforeach
@@ -206,7 +206,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-primary" style="font-size:1rem;">{{ number_format($pic->total_points ?? 0) }}</span>
+                                    <span class="badge bg-primary" style="font-size:1rem;">{{ number_format($pic->total_points ?? 0, 2) }}</span>
                                 </td>
                             </tr>
                             @endforeach

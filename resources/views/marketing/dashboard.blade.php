@@ -42,7 +42,7 @@
                 <div class="display-3 mb-2 opacity-75">
                     <i class="bi bi-trophy-fill"></i>
                 </div>
-                <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points']) }}</h2>
+                <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points'], 2) }}</h2>
                 <small class="opacity-75">Total Point</small>
             </div>
         </div>
@@ -261,7 +261,7 @@
                         <div>
                             <i class="bi bi-coin"></i> <strong>Total Point</strong>
                         </div>
-                        <div class="fs-3 fw-bold">{{ number_format($stats['total_points']) }}</div>
+                        <div class="fs-3 fw-bold">{{ number_format($stats['total_points'], 2) }}</div>
                     </div>
                 </div>
                 
@@ -273,9 +273,9 @@
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     @if($history->points_earned >= 0)
-                                    <span class="badge bg-success">+{{ $history->points_earned }}</span>
+                                    <span class="badge bg-success">+{{ number_format($history->points_earned, 2) }}</span>
                                     @else
-                                    <span class="badge bg-danger">{{ $history->points_earned }}</span>
+                                    <span class="badge bg-danger">{{ number_format($history->points_earned, 2) }}</span>
                                     @endif
                                     <small class="text-muted">{{ $history->created_at->diffForHumans() }}</small>
                                 </div>
@@ -362,7 +362,7 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-success" style="font-size: 1rem;">
-                                        {{ number_format($mkt->total_points ?? 0) }}
+                                        {{ number_format($mkt->total_points ?? 0, 2) }}
                                     </span>
                                 </td>
                             </tr>
@@ -431,7 +431,7 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-primary" style="font-size: 1rem;">
-                                        {{ number_format($pic->total_points ?? 0) }}
+                                        {{ number_format($pic->total_points ?? 0, 2) }}
                                     </span>
                                 </td>
                             </tr>
