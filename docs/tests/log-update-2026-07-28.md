@@ -664,3 +664,40 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 **Diverifikasi:** full test suite (`tests/Feature/Points`, 42 test, 88 assertion) **PASS**.
 
 **Kesimpulan untuk kasus Eko Siswanto:** kombinasi 2 penyebab — (1) data lama sudah kadung desync dari SEBELUM perbaikan atomik section #31 [belum tentu sudah dibetulkan otomatis kalau auto-sync section #33/34 belum sempat jalan/belum di-deploy], DAN (2) walau datanya sudah benar di database, widget dashboard bisa tetap menampilkan cache lama sampai 5 menit karena bug cache di atas. Setelah perbaikan ini di-deploy, kedua penyebab sudah tertutup — poin baru akan langsung terlihat di dashboard tanpa delay cache yang salah.
+
+## 36. Revert Filter "Bulan" di Laporan Kinerja — Balik ke Kalender Biasa (Bukan Cutoff 26-25)
+
+**Tujuan:** User melaporkan `/admin/laporan-kinerja` dengan filter default "Juli 2026" tidak menampilkan data yang seharusnya ada — data baru (sekitar tanggal 26-28 Juli) tidak muncul padahal harusnya "bulan ini" menampilkan semua data bulan berjalan.
+
+**Root cause:** filter dropdown Bulan+Tahun sejak section #13 diartikan sebagai periode **cutoff 26-25** (pilih "Juli 2026" = 26 Juni s/d 25 Juli), bukan kalender 1-31 biasa — awalnya memang permintaan eksplisit user untuk keperluan periode penilaian kinerja/gajian. Tapi karena section #28 menyederhanakan LABEL dari "26 Juni — 25 Juli 2026" jadi cuma "Juli 2026", tampilannya sekarang terlihat seperti kalender biasa padahal logikanya tetap cutoff — jadi kalau hari ini tanggal 28 Juli, semua aktivitas tanggal 26-28 Juli TIDAK MASUK filter "Juli 2026" (baru muncul kalau pilih "Agustus 2026"). Dikonfirmasi ke user: mereka mau kalender biasa, bukan cutoff.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | `resolvePeriod()`: mode dropdown Bulan+Tahun sekarang `$periodStart` = awal bulan (`startOfMonth()`), `$periodEnd` = akhir bulan (`endOfMonth()`) — kalender biasa. Mode custom date range (dari_tanggal/sampai_tanggal) tidak berubah |
+| `tests/Feature/Points/LaporanKinerjaPeriodTest.php` (baru, 2 test) | Kunci perilaku baru: filter "Juli 2026" harus mencakup 1-31 Juli penuh (bukan 26 Jun-25 Jul), dan data di tanggal 28 pasti termasuk |
+
+**Juga dicek menyeluruh** (permintaan user: "pastikan data poin di admin itu up to date") — halaman lain terkait poin:
+- `/admin/pic-points` & `/admin/marketing-points`: sudah benar, pakai `whereMonth`/`whereYear` kalender biasa, TIDAK ada cache Laravel sama sekali di query utamanya — selalu live setiap request.
+- Dashboard PIC (`Pic\AuthorController`) & Dashboard Marketing (`Marketing\DashboardController`): pakai cache `rankings.topPics/topMarketings.{tenantKey}` yang SAMA dengan yang sudah diperbaiki lewat `RankingCache` di section #35 — otomatis ikut ter-cover.
+- `PicReviewerDashboardController` (cache `pic_reviewer.dashboard_stats`): dicek, tidak terkait data poin PIC/Marketing sama sekali (soal reviewer assignment), tidak perlu diubah.
+
+**Diverifikasi:** `php artisan tinker` mengonfirmasi periode "Juli 2026" sekarang = 2026-07-01 00:00:00 s/d 2026-07-31 23:59:59. Full test suite (`tests/Feature/Points`, 44 test, 94 assertion) **PASS**.
+
+## 37. Indikator "Kapan Auto-Sync Terakhir Berjalan" di `/admin/sync` (Diagnostik Tanpa Perlu SSH)
+
+**Tujuan:** User masih melihat "EKO SISWANTO PIC" Total Point 0 di `/admin/pics` dan `/admin/point-rankings` — 2 halaman yang SUDAH dikonfirmasi tidak pakai cache sama sekali (query langsung ke `pics.total_points`). Ini berarti akar masalahnya BUKAN cache lagi, tapi salah satu dari: (a) cron scheduler server belum aktif sehingga `points:auto-sync` (section #33/34) tidak pernah benar-benar berjalan otomatis, atau (b) riwayat poin PIC tsb memang sudah kosong (mis. ikut terhapus reset kedua) dan belum ada aktivitas baru. User tidak familiar cara cek `storage/logs/laravel.log`/SSH untuk memastikan mana penyebabnya.
+
+**Solusi:** command `points:auto-sync` sekarang mencatat kapan terakhir berjalan + ringkasan hasilnya ke cache, dan halaman `/admin/sync` menampilkannya sebagai indikator visual — bisa dicek lewat browser biasa, tanpa akses server.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Console/Commands/AutoSyncPicMarketingPoints.php` | Setiap kali dijalankan, simpan `points.auto_sync.last_run_at` (timestamp) + `points.auto_sync.last_result` (jumlah PIC/Marketing yang dikoreksi) ke cache (TTL 1 hari) |
+| `app/Http/Controllers/Admin/SyncController.php` | `index()`: ambil kedua data cache di atas, kirim ke view |
+| `resources/views/admin/sync/index.blade.php` | Tambah card indikator: kalau pernah jalan → tampilkan "X menit yang lalu" + ringkasan (hijau kalau ≤20 menit, kuning + peringatan kalau lebih — mengindikasikan cron mungkin tidak aktif); kalau belum pernah terdeteksi sama sekali → peringatan merah dengan instruksi cek Cron Job di hosting |
+| `tests/Feature/Points/SyncPageRenderTest.php` | Tambah 2 test: peringatan muncul kalau belum pernah jalan; "X menit yang lalu" muncul setelah command benar-benar dijalankan |
+
+**Cara pakai untuk user:** buka `/admin/sync` — kalau indikatornya menunjukkan "belum pernah terdeteksi berjalan" atau sudah lebih dari 20 menit, itu tandanya cron scheduler di server (`* * * * * php artisan schedule:run`) belum aktif dan perlu disetel di panel hosting (cPanel biasanya ada menu "Cron Jobs"). Kalau indikatornya sehat (hijau, baru beberapa menit lalu) tapi PIC tertentu masih 0, kemungkinan besar riwayat poinnya memang kosong (bukan bug) — perlu aktivitas baru dari PIC tsb untuk mendapat poin lagi.
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 46 test, 100 assertion) **PASS**.

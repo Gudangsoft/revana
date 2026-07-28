@@ -52,6 +52,46 @@
         @endif
     </div>
 
+    {{-- Status Auto-Sync Otomatis (scheduler tiap 15 menit) --}}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body py-3">
+                @if($autoSyncLastRunAt)
+                    @php
+                        $menitLalu = $autoSyncLastRunAt->diffInMinutes(now());
+                        $sehat = $menitLalu <= 20; // toleransi: jadwal tiap 15 menit
+                    @endphp
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <i class="bi {{ $sehat ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-warning' }} fs-5"></i>
+                        <div>
+                            <strong>Auto-Sync Poin Otomatis:</strong>
+                            terakhir berjalan <strong>{{ $menitLalu }} menit yang lalu</strong>
+                            ({{ $autoSyncLastRunAt->locale('id')->translatedFormat('d M Y, H:i') }})
+                            @if($autoSyncLastResult)
+                                — {{ $autoSyncLastResult['pic_synced'] }} PIC & {{ $autoSyncLastResult['mkt_synced'] }} marketing dikoreksi saat itu.
+                            @endif
+                            @if(!$sehat)
+                                <span class="text-warning d-block small">
+                                    ⚠ Sudah lebih dari 20 menit sejak terakhir jalan (jadwalnya tiap 15 menit) — kemungkinan cron scheduler di server tidak aktif. Cek pengaturan Cron Job di hosting.
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                        <div>
+                            <strong class="text-danger">Auto-Sync Poin Otomatis belum pernah terdeteksi berjalan.</strong>
+                            <span class="d-block small text-muted">
+                                Ini mengindikasikan cron scheduler (<code>* * * * * php artisan schedule:run</code>) belum aktif di server, atau perubahan kode terbarunya belum sempat ter-deploy. Cek pengaturan Cron Job di hosting.
+                            </span>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
     {{-- ================================================ --}}
     {{-- SLOT JURNAL --}}
     {{-- ================================================ --}}

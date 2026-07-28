@@ -80,7 +80,13 @@ class SyncController extends Controller
             + $stats['marketing']['out_of_sync']
             + $stats['pic']['out_of_sync'];
 
-        return view('admin.sync.index', compact('stats', 'totalOutOfSync'));
+        // Kapan auto-sync otomatis (scheduler, tiap 15 menit) TERAKHIR benar-benar
+        // berjalan — dipakai untuk memastikan cron server aktif tanpa perlu buka
+        // storage/logs/laravel.log atau SSH (lihat AutoSyncPicMarketingPoints).
+        $autoSyncLastRunAt = Cache::get('points.auto_sync.last_run_at');
+        $autoSyncLastResult = Cache::get('points.auto_sync.last_result');
+
+        return view('admin.sync.index', compact('stats', 'totalOutOfSync', 'autoSyncLastRunAt', 'autoSyncLastResult'));
     }
 
     /**

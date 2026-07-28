@@ -66,6 +66,17 @@ class AutoSyncPicMarketingPoints extends Command
             $this->info('Auto-sync poin: semua PIC & Marketing sudah sinkron, tidak ada yang perlu dikoreksi.');
         }
 
+        // Catat kapan & apa hasil auto-sync TERAKHIR berjalan — dipakai halaman
+        // /admin/sync untuk menunjukkan indikator "terakhir berjalan kapan", supaya
+        // admin bisa memastikan cron scheduler benar-benar aktif tanpa perlu buka
+        // storage/logs/laravel.log atau SSH ke server. TTL panjang (1 hari) supaya
+        // tetap terbaca walau auto-sync sempat berhenti jalan.
+        Cache::put('points.auto_sync.last_run_at', now(), now()->addDay());
+        Cache::put('points.auto_sync.last_result', [
+            'pic_synced' => $picSynced,
+            'mkt_synced' => $mktSynced,
+        ], now()->addDay());
+
         return self::SUCCESS;
     }
 }

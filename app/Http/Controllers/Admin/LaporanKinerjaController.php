@@ -31,11 +31,10 @@ class LaporanKinerjaController extends Controller
      * Resolve rentang tanggal efektif dari request.
      *
      * Kalau dari_tanggal/sampai_tanggal diisi manual, pakai itu apa adanya.
-     * Kalau tidak (pilih dropdown Bulan+Tahun), periode SATU "bulan" diartikan
-     * sebagai periode cutoff 26–25 (mis. pilih "Juli 2026" = 26 Juni 2026 s/d
-     * 25 Juli 2026) — BUKAN kalender 1–31 biasa, sesuai periode penilaian
-     * kinerja yang dipakai. $namaBulan selalu berupa label rentang tanggal
-     * eksplisit supaya jelas kalau periodenya melintasi 2 bulan kalender.
+     * Kalau tidak (pilih dropdown Bulan+Tahun), periode SATU "bulan" adalah
+     * kalender biasa 1 s/d akhir bulan itu (BUKAN cutoff 26-25 — sempat dipakai di
+     * section #13, tapi di-revert karena membingungkan: data hari-hari terakhir
+     * bulan berjalan jadi tidak muncul sampai periode "bulan berikutnya" dipilih).
      */
     private function resolvePeriod(Request $request): array
     {
@@ -50,14 +49,8 @@ class LaporanKinerjaController extends Controller
             $periodStart = \Carbon\Carbon::parse($dariTanggal)->startOfDay();
             $periodEnd   = \Carbon\Carbon::parse($sampaiTanggal)->endOfDay();
         } else {
-            $prevMonth = $bulan - 1;
-            $prevYear  = $tahun;
-            if ($prevMonth < 1) {
-                $prevMonth = 12;
-                $prevYear--;
-            }
-            $periodStart = \Carbon\Carbon::createFromDate($prevYear, $prevMonth, 26)->startOfDay();
-            $periodEnd   = \Carbon\Carbon::createFromDate($tahun, $bulan, 25)->endOfDay();
+            $periodStart = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+            $periodEnd   = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
         }
 
         if ($isRange) {
@@ -65,10 +58,6 @@ class LaporanKinerjaController extends Controller
                 . ' — '
                 . $periodEnd->locale('id')->translatedFormat('d F Y');
         } else {
-            // Label sederhana "Bulan Tahun" (bukan rentang cutoff 26-25) — menampilkan
-            // rentang tanggal cutoff di sini membingungkan admin yang cuma pilih
-            // dropdown Bulan+Tahun biasa. Filter data TETAP memakai cutoff 26-25 (lihat
-            // $periodStart/$periodEnd di atas) — cuma labelnya yang disederhanakan.
             $namaBulan = \Carbon\Carbon::create()->month($bulan)->locale('id')->translatedFormat('F') . ' ' . $tahun;
         }
 

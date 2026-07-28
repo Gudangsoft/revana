@@ -85,4 +85,30 @@ class SyncPageRenderTest extends TestCase
         $response->assertOk();
         $response->assertSee(route('admin.sync.index'), false);
     }
+
+    /**
+     * Indikator "kapan auto-sync otomatis terakhir jalan" — dipakai admin untuk
+     * memastikan cron scheduler server aktif tanpa perlu buka log/SSH.
+     */
+    public function test_sync_page_shows_warning_when_auto_sync_never_ran(): void
+    {
+        $this->actingAsAdmin();
+
+        $response = $this->get(route('admin.sync.index'));
+
+        $response->assertOk();
+        $response->assertSee('belum pernah terdeteksi berjalan');
+    }
+
+    public function test_sync_page_shows_last_run_time_after_auto_sync_command_runs(): void
+    {
+        $this->actingAsAdmin();
+        $this->artisan('points:auto-sync')->assertSuccessful();
+
+        $response = $this->get(route('admin.sync.index'));
+
+        $response->assertOk();
+        $response->assertSee('menit yang lalu');
+        $response->assertDontSee('belum pernah terdeteksi berjalan');
+    }
 }
