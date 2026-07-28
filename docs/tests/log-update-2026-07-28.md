@@ -758,3 +758,19 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 **Diverifikasi:** full test suite (`tests/Feature/Points`, 51 test, 115 assertion) **PASS**, termasuk test integrasi HTTP nyata yang membuktikan `AdminMiddleware::terminate()` benar-benar terpanggil oleh Laravel.
 
 **Cara memverifikasi setelah deploy:** cukup buka halaman admin apa saja (tidak harus `/admin/sync`), lalu buka `/admin/sync` — indikator "Auto-Sync Poin Otomatis" seharusnya langsung menunjukkan waktu baru saja, tanpa perlu menyetel apa pun di panel hosting.
+
+## 41. Hapus Pesan Merah "Cron Belum Terdeteksi" di /admin/sync
+
+**Tujuan:** user melihat kotak merah "Auto-Sync Poin Otomatis belum pernah terdeteksi berjalan... cron scheduler belum aktif..." masih tampil di production, lalu minta pesan itu dihapus karena mekanismenya sudah tidak lagi bergantung pada cron (lihat section #40 — fallback `AdminMiddleware::terminate()`). Pesan lama menyalahkan cron padahal cron memang sengaja tidak lagi dibutuhkan, sehingga berpotensi membuat user sibuk mengecek pengaturan Cron Job di hosting padahal tidak perlu.
+
+**Solusi:** kotak peringatan merah (danger) untuk kondisi "belum pernah jalan" diganti jadi info netral (abu-abu) tanpa menyebut cron sama sekali — cukup menjelaskan bahwa auto-sync akan langsung jalan begitu ada admin membuka halaman admin mana pun. Peringatan "⚠ sudah lebih dari 20 menit, cron mungkin tidak aktif" pada kondisi *sudah pernah jalan tapi lama* juga dihapus karena alasan yang sama.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/sync/index.blade.php` | Hapus blok danger merah + peringatan ">20 menit" yang menyebut cron scheduler; ganti jadi info netral yang menjelaskan trigger otomatis lewat `AdminMiddleware` |
+| `tests/Feature/Points/SyncPageRenderTest.php` | `test_sync_page_shows_warning_when_auto_sync_never_ran` diganti jadi `test_sync_page_shows_neutral_message_when_auto_sync_never_ran` — assert teks baru "belum pernah berjalan" dan pastikan kata "cron" sudah tidak ada di halaman |
+
+**Catatan penting (belum deploy):** perbaikan tanpa-cron di section #40 (`PointsAutoSync.php`, `AdminMiddleware::terminate()`, command wrapper, test) **masih belum di-commit/deploy** ke server saat pesan ini dihapus — dicek lewat `git status`/`git log` dan ternyata hanya sampai commit `ec57485` (penghapusan tombol sync manual) yang sudah live. Artinya sebelum kode section #40 benar-benar di-deploy, mekanisme auto-sync tanpa-cron ini belum berjalan nyata di production — indikator akan tetap menampilkan pesan netral "belum pernah berjalan" (bukan lagi merah) sampai deploy dilakukan.
+
+**Diverifikasi:** full test suite `tests/Feature/Points` (13 test terkait, 34 assertion) **PASS** setelah penyesuaian assertion teks.

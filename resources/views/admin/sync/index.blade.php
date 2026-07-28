@@ -41,9 +41,10 @@
         @endif
     </div>
 
-    {{-- Status Auto-Sync Otomatis (scheduler tiap 15 menit) — hanya membetulkan
-    total_points PIC/Marketing dari riwayat yang SUDAH ADA, tidak pernah membuat
-    riwayat baru dari data lama (lihat AutoSyncPicMarketingPoints). --}}
+    {{-- Status Auto-Sync Otomatis (dipicu tiap ada admin membuka halaman admin,
+    dibatasi 1x/15 menit — tidak butuh cron) — hanya membetulkan total_points
+    PIC/Marketing dari riwayat yang SUDAH ADA, tidak pernah membuat riwayat baru
+    dari data lama (lihat PointsAutoSync). --}}
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-body py-3">
@@ -61,20 +62,15 @@
                             @if($autoSyncLastResult)
                                 — {{ $autoSyncLastResult['pic_synced'] }} PIC & {{ $autoSyncLastResult['mkt_synced'] }} marketing dikoreksi saat itu.
                             @endif
-                            @if(!$sehat)
-                                <span class="text-warning d-block small">
-                                    ⚠ Sudah lebih dari 20 menit sejak terakhir jalan (jadwalnya tiap 15 menit) — kemungkinan cron scheduler di server tidak aktif. Cek pengaturan Cron Job di hosting.
-                                </span>
-                            @endif
                         </div>
                     </div>
                 @else
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                        <i class="bi bi-info-circle-fill text-muted fs-5"></i>
                         <div>
-                            <strong class="text-danger">Auto-Sync Poin Otomatis belum pernah terdeteksi berjalan.</strong>
+                            <strong>Auto-Sync Poin Otomatis belum pernah berjalan.</strong>
                             <span class="d-block small text-muted">
-                                Ini mengindikasikan cron scheduler (<code>* * * * * php artisan schedule:run</code>) belum aktif di server, atau perubahan kode terbarunya belum sempat ter-deploy. Cek pengaturan Cron Job di hosting.
+                                Akan berjalan otomatis begitu ada admin membuka halaman admin mana pun.
                             </span>
                         </div>
                     </div>
