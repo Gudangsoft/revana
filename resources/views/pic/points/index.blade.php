@@ -147,6 +147,25 @@
         </div>
     </div>
     <div class="card-body">
+        <!-- Filter Cepat: Hari Ini/Minggu Ini/Bulan Ini/Tahun Ini -->
+        @php
+            $picPeriodOptions = [
+                ''      => 'Semua',
+                'today' => 'Hari Ini',
+                'week'  => 'Minggu Ini',
+                'month' => 'Bulan Ini',
+                'year'  => 'Tahun Ini',
+            ];
+        @endphp
+        <div class="btn-group mb-3 flex-wrap" role="group">
+            @foreach($picPeriodOptions as $value => $label)
+            <a href="{{ route('pic.points.index', array_merge(request()->except(['period', 'tanggal_dari', 'tanggal_sampai', 'page']), $value ? ['period' => $value] : [])) }}"
+               class="btn btn-sm {{ request('period', '') === $value ? 'btn-primary' : 'btn-outline-primary' }}">
+                {{ $label }}
+            </a>
+            @endforeach
+        </div>
+
         <!-- Filter Form -->
         <form method="GET" class="row g-2 mb-3">
             <div class="col-md-3">
@@ -176,7 +195,7 @@
                 </a>
             </div>
         </form>
-        
+
         <!-- History Table -->
         <div class="table-responsive">
             <table class="table table-hover table-striped" id="picPointsTable">

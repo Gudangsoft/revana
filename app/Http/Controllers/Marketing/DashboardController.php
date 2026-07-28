@@ -270,11 +270,22 @@ class DashboardController extends Controller
         
         // Sync total_points dari SUM riwayat poin (bukan lagi COUNT submission)
         $totalPoints = $marketing->syncPoints();
-        
-        $pointHistories = MarketingPointHistory::where('marketing_id', $marketing->id)
-            ->with('submission.journalSlot.journalMaster')
-            ->latest()
-            ->paginate(request()->input('per_page', 20));
+
+        $query = MarketingPointHistory::where('marketing_id', $marketing->id)
+            ->with('submission.journalSlot.journalMaster');
+
+        // Filter cepat: hari ini/minggu ini/bulan ini/tahun ini
+        if (request()->filled('period')) {
+            match (request('period')) {
+                'today' => $query->whereDate('created_at', today()),
+                'week'  => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+                'month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+                'year'  => $query->whereYear('created_at', now()->year),
+                default => null,
+            };
+        }
+
+        $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Statistics
         $pointsToday = MarketingPointHistory::where('marketing_id', $marketing->id)

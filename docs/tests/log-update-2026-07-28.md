@@ -205,3 +205,19 @@ Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh
 2. Reproduksi persis skenario error: panggil `submitWork()` sungguhan untuk submission 13932 (status `PRODUCTION_PROCESS`, PIC produksi asli) → SEBELUM fix akan gagal dengan error yang sama; SESUDAH fix berhasil, status berubah jadi `PRODUCTION_SUBMITTED`, redirect 302. Data uji (status submission, baris `submission_histories`) dikembalikan ke semula setelah verifikasi.
 
 **Catatan:** tidak ada perubahan kode PHP, cuma migration schema. Deploy: `git pull origin master` lalu `php artisan migrate --force`.
+
+## 11. Tambah Filter Cepat (Hari Ini/Minggu Ini/Bulan Ini/Tahun Ini) di Halaman Point Saya PIC & Marketing
+
+**Tujuan:** User minta ditambahkan filter cepat berdasarkan periode di setiap halaman "Point Saya" — baik untuk PIC (`/pic/points`) maupun Marketing (`/marketing/points`).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/PicPointController.php` | `index()`: tambah parameter `period` (`today`/`week`/`month`/`year`) yang memfilter query riwayat poin. Kalau `period` diisi, dipakai (mengabaikan filter tanggal manual yang sudah ada); kalau tidak, tetap jatuh ke filter `tanggal_dari`/`tanggal_sampai` manual seperti sebelumnya. Filter `step` tetap bisa dikombinasikan dengan `period` |
+| `app/Http/Controllers/Marketing/DashboardController.php` | `points()`: tambah filter `period` yang sama — sebelumnya halaman ini TIDAK punya filter apa pun pada daftar riwayat (cuma menampilkan semua riwayat tanpa filter) |
+| `resources/views/pic/points/index.blade.php` | Tambah grup tombol filter cepat (Semua/Hari Ini/Minggu Ini/Bulan Ini/Tahun Ini) di atas form filter tanggal manual yang sudah ada. Tombol aktif ter-highlight (`btn-primary`), lainnya `btn-outline-primary`. Link mempertahankan filter `step` yang sedang aktif |
+| `resources/views/marketing/points.blade.php` | Tambah grup tombol filter cepat yang sama di atas tabel riwayat poin |
+
+**Diverifikasi lewat tinker (data real, bukan simulasi):** untuk marketing "Rafael" (2.322 baris riwayat) — filter `period=today` mengembalikan 6 baris, `period=week` 30 baris, tanpa filter 2.322 baris, semua cocok persis dengan hitungan manual langsung ke database. Untuk PIC (5.522 baris riwayat) — `period=year` mengembalikan 5.522, cocok dengan hitungan manual (seluruh riwayatnya memang dari tahun berjalan). Render halaman dicek untuk kedua sistem — tombol filter yang aktif ter-highlight dengan benar, kombinasi `period` + `step` (PIC) bekerja bersamaan tanpa saling mengganggu, dan pagination (`per-page-selector`) sudah otomatis mempertahankan filter lewat `withQueryString()` yang sudah ada sebelumnya.
+
+**Catatan:** murni penambahan fitur filter, tidak ada perubahan logika poin/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.

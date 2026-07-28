@@ -90,15 +90,26 @@ class PicPointController extends Controller
         
         // Get point histories with pagination
         $query = $pic->pointHistories()->with('submission');
-        
-        // Filter by date range
-        if ($request->filled('tanggal_dari')) {
-            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+
+        // Filter cepat (hari ini/minggu ini/bulan ini/tahun ini) — kalau dipilih, ini
+        // yang dipakai; kalau tidak, jatuh ke filter tanggal_dari/tanggal_sampai manual.
+        if ($request->filled('period')) {
+            match ($request->period) {
+                'today' => $query->whereDate('created_at', today()),
+                'week'  => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+                'month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+                'year'  => $query->whereYear('created_at', now()->year),
+                default => null,
+            };
+        } else {
+            if ($request->filled('tanggal_dari')) {
+                $query->whereDate('created_at', '>=', $request->tanggal_dari);
+            }
+            if ($request->filled('tanggal_sampai')) {
+                $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+            }
         }
-        if ($request->filled('tanggal_sampai')) {
-            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
-        }
-        
+
         // Filter by step
         if ($request->filled('step')) {
             $query->where('step', $request->step);

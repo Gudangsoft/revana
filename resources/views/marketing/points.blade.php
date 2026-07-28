@@ -63,12 +63,31 @@
     <strong>Sistem Point Marketing:</strong> Setiap artikel yang berhasil disubmit akan memberikan <strong>+{{ \App\Models\TaskPointSetting::getMarketingPoints('submit') }} point</strong>.
 </div>
 
+@php
+    $mktPeriodOptions = [
+        ''      => 'Semua',
+        'today' => 'Hari Ini',
+        'week'  => 'Minggu Ini',
+        'month' => 'Bulan Ini',
+        'year'  => 'Tahun Ini',
+    ];
+@endphp
+
 <!-- Point History -->
 <div class="card">
     <div class="card-header">
         <i class="bi bi-clock-history"></i> Riwayat Perolehan Point
     </div>
     <div class="card-body">
+        <div class="btn-group mb-3 flex-wrap" role="group">
+            @foreach($mktPeriodOptions as $value => $label)
+            <a href="{{ route('marketing.points', array_merge(request()->except(['period', 'page']), $value ? ['period' => $value] : [])) }}"
+               class="btn btn-sm {{ request('period', '') === $value ? 'btn-primary' : 'btn-outline-primary' }}">
+                {{ $label }}
+            </a>
+            @endforeach
+        </div>
+
         @if($pointHistories->count() > 0)
         @include('partials.column-toggle', ['tableId' => 'mktPointsTable', 'columns' => ['Tanggal', 'Point', 'Keterangan', 'Artikel'], 'columnOffset' => 0])
         <div class="table-responsive">
