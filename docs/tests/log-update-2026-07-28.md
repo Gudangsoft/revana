@@ -143,3 +143,48 @@ Investigasi menemukan akar bug tanggal: 3 jalur sync/backfill menulis riwayat po
 **Catatan penting:** perbaikan ini mencegah kerusakan tanggal ke depan saja. Baris riwayat yang tanggalnya sudah kadung berubah jadi tanggal sync di masa lalu (sebelum fix ini) **tidak** ikut diperbaiki — kalau perlu dipulihkan, butuh migration restorasi terpisah (perlu identifikasi baris mana yang tanggalnya terbukti salah, mirip pendekatan migration insiden 27/28 Juli di atas). Jalur pemberian poin **live** (saat validasi benar-benar terjadi) tidak diubah — tetap memakai `now()` seperti sebelumnya karena itu memang saat tugas selesai.
 
 **Verifikasi:** `php -l` pada seluruh file yang diubah — tidak ada syntax error.
+
+## 8. Rapikan File Test/Log/Script di Root Project → `docs/tests/`
+
+**Tujuan:** User minta root project dirapikan — banyak file test/one-off script, changelog lama, file `.sql`, dan script shell/`.ps1` yang menumpuk di root sejak lama. Semua dipindah ke `docs/tests/` (termasuk file yang sedang dibuka user, `update-auto-valid-production.php`).
+
+Sebelum memindah, dicek dulu (grep di seluruh codebase) apakah ada file-file ini direferensikan di tempat lain — tidak ada referensi ke script/`.sql`/shell manapun, aman dipindah. Untuk `log-update*.md` dan `CHANGELOG*.md`, ditemukan SATU referensi: `app/Services/FeatureSettingService.php::changelogs()` yang men-scan pola ini dari `base_path()` (root) untuk ditampilkan di `/admin/feature-management` tab Changelog — path ini diupdate mengikuti lokasi baru supaya fitur itu tidak rusak.
+
+### File yang Dipindahkan (93 file, `git mv` — history tetap terjaga)
+- 46 file `log-update-*.md`
+- 9 file `CHANGELOG_*.md`
+- 9 file `.sql` (script fix/insert data satu kali)
+- 7 file `.sh`/`.ps1` (deploy, backup, rollback, fix server/permission)
+- 21 file `.php`/`.py` ad hoc (`check-*`, `check_*`, `fix-*`, `patch_*`, `refactor.*`, `sync-*`, `test-*`, `update-*`, `verify-*`, `delete-*`)
+
+**Tidak dipindah:** dokumentasi panduan yang masih aktif dipakai (README.md, DEPLOYMENT.md, INSTALL.md, USER_GUIDE.md, PIC_LOGIN_GUIDE.md, SECURITY_AUDIT.md, dll.) — ini bukan file test/log, jadi dibiarkan di root sesuai lingkup permintaan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Services/FeatureSettingService.php` | `changelogs()`: glob path diubah dari `base_path('log-update*.md')`/`base_path('CHANGELOG*.md')` jadi `base_path('docs/tests/log-update*.md')`/`base_path('docs/tests/CHANGELOG*.md')` |
+| `CLAUDE.md` | Aturan wajib log update: lokasi file log diubah dari root project jadi `docs/tests/`; ditambahkan catatan lokasi baru untuk file test/one-off script |
+
+**Verifikasi:** dijalankan `FeatureSettingService::changelogs()` lewat tinker setelah perpindahan — berhasil membaca 55 file (46 log-update + 9 CHANGELOG) dari lokasi baru, fitur Changelog di `/admin/feature-management` tidak rusak.
+
+**Catatan:** mulai sekarang, entry log-update harian (termasuk entry ini sendiri) ditulis ke `docs/tests/log-update-YYYY-MM-DD.md`, bukan lagi ke root project.
+
+## 9. Blokir Akses Publik ke Folder `docs/` (termasuk `docs/tests`)
+
+**Tujuan:** Setelah `log-update*.md`, `CHANGELOG*.md`, dan berbagai script test/one-off dipindah ke `docs/` pada section #8, user minta dipastikan folder ini tidak bisa diakses lewat browser publik.
+
+Investigasi: root project punya `.htaccess` (bukan cuma `public/.htaccess`) yang me-redirect semua request ke `public/$1` KECUALI kalau path yang diminta adalah file/folder yang benar-benar ada secara fisik di root (`RewriteCond %{REQUEST_FILENAME} !-d`/`!-f`). Artinya kalau server di-setup dengan DocumentRoot mengarah ke root project (bukan `public/` seperti yang didokumentasikan di `docs/DEPLOYMENT.md`) — pola umum di hosting bersama (shared hosting) yang tidak bisa ubah DocumentRoot — maka file apapun yang benar-benar ada di `docs/` (termasuk `docs/tests`, isinya sekarang berupa log, changelog, script SQL/shell, dan kredensial default PIC) akan disajikan langsung sebagai file statis, TIDAK ikut ke-redirect ke `public/`.
+
+Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh di `docs/DEPLOYMENT.md`), folder ini otomatis sudah tidak bisa diakses sama sekali. Tapi karena tidak bisa dipastikan environment produksi yang sebenarnya dipakai yang mana, ditambahkan lapisan pertahanan langsung di `docs/.htaccess`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `docs/.htaccess` (baru) | `Require all denied` (Apache 2.4) + `Deny from all` (Apache 2.2 fallback) — blokir semua akses HTTP ke seluruh isi `docs/`, termasuk `docs/tests` dan subfolder lain |
+
+**Verifikasi (bukan cuma baca kode — dites fungsional):** dijalankan instance Apache lokal sungguhan dengan DocumentRoot disetel ke root project (mensimulasikan skenario shared-hosting yang paling berisiko) dan menyalin isi project + `.htaccess` ke luar folder yang dibatasi macOS. Hasil:
+- `GET /docs/tests/log-update-2026-07-28.md` → **403 Forbidden** ✅
+- `GET /docs/issues/sistem-poin-pic-marketing.md` → **403 Forbidden** ✅ (ikut terlindungi sebagai bonus)
+- `GET /README.md` (kontrol negatif, file di root yang memang boleh diakses) → **200 OK** ✅ (tidak ikut ke-block, tidak ada regresi)
+
+**Catatan:** ini melindungi skenario Apache. Kalau server produksi ternyata pakai Nginx dengan `root` yang salah diarahkan ke root project (bukan `public/`), `.htaccess` tidak berlaku sama sekali di Nginx — perlu aturan `location` terpisah di config Nginx (`location ^~ /docs/ { deny all; return 404; }`) yang tidak bisa ditambahkan dari sini karena bukan bagian dari repo. Rekomendasi utama tetap: pastikan DocumentRoot/`root` server produksi mengarah ke `public/`, bukan root project — ini menutup celah untuk SEMUA folder di luar `public/`, bukan cuma `docs/`.

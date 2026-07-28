@@ -10,8 +10,8 @@
 Setiap selesai mengerjakan perubahan kode, **wajib** tulis ke file log:
 
 ### Nama File
-`log-update-YYYY-MM-DD.md` di root project.
-Contoh: `log-update-2026-05-05.md`
+`log-update-YYYY-MM-DD.md` di `docs/tests/` (dipindahkan dari root project 2026-07-28).
+Contoh: `docs/tests/log-update-2026-05-05.md`
 
 ### Format Entry
 ```markdown
@@ -41,4 +41,5 @@ Contoh: `log-update-2026-05-05.md`
 - **Layout utama:** `resources/views/layouts/app.blade.php`
 - **Auto-refresh partial:** `@include('partials.auto-refresh', ['interval' => 30])`
 - **Session:** file driver; admin single-session via Cache key `admin_session:{id}`
-- **Log files dibaca:** pattern `log-update*.md` dan `CHANGELOG*.md` di root project
+- **Log files dibaca:** pattern `log-update*.md` dan `CHANGELOG*.md` di `docs/tests/` (bukan root project)
+- **File test/one-off (script `check-*`, `fix-*`, `patch_*`, `.sql`, `.sh`, `.ps1` dll.):** disimpan di `docs/tests/`, bukan root project

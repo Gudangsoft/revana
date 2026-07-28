@@ -1,0 +1,23 @@
+# Blokir akses publik ke seluruh folder docs/ (dokumentasi internal, log
+# perubahan, script test/one-off, kredensial default, dll — tidak pernah
+# dimaksudkan untuk diakses lewat browser).
+#
+# Ini lapisan pertahanan tambahan untuk skenario hosting yang DocumentRoot-nya
+# di-set ke root project (bukan public/) dan memakai .htaccess di root project
+# untuk redirect ke public/ (lihat .htaccess di root). Pada skenario itu, file
+# yang benar-benar ada secara fisik (seperti isi folder ini) tidak ikut ter-redirect
+# dan bisa langsung disajikan sebagai file statis kalau tidak diblokir di sini.
+#
+# Kalau DocumentRoot server sudah benar diarahkan ke public/ (lihat DEPLOYMENT.md),
+# folder ini otomatis tidak bisa diakses sama sekali dan aturan ini jadi lapisan
+# ekstra yang tidak berpengaruh (tidak ada downside).
+
+<IfModule mod_authz_core.c>
+    # Apache 2.4+
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    # Apache 2.2
+    Order deny,allow
+    Deny from all
+</IfModule>

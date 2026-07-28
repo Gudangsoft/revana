@@ -673,14 +673,14 @@ class FeatureSettingService
     }
 
     /**
-     * Parse all log-update files in the project root.
+     * Parse all log-update files in docs/tests (dipindahkan dari root project).
      */
     public static function changelogs(): array
     {
         $changelogs = [];
         $files = array_merge(
-            glob(base_path('log-update*.md')) ?: [],
-            glob(base_path('CHANGELOG*.md')) ?: []
+            glob(base_path('docs/tests/log-update*.md')) ?: [],
+            glob(base_path('docs/tests/CHANGELOG*.md')) ?: []
         );
 
         foreach ($files as $file) {
