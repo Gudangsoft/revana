@@ -607,3 +607,38 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 | `resources/views/marketing/points.blade.php` | Perubahan sama untuk 3 card + baris "Total Point" hasil filter |
 
 **Diverifikasi:** dicek tidak ada `number_format(..., 1)` tersisa yang tidak sengaja ikut ter-revert (cuma 4 baris yang memang dimaksud di tiap file, dicek lewat grep sebelum & sesudah). Kedua file lolos compile. Full test suite (`tests/Feature/Points`, 36 test) tetap **PASS**.
+
+## 33. Auto-Sync Berkala (Scheduler) untuk Data PIC/Marketing yang Sudah Terlanjur Desync
+
+**Tujuan:** PIC "Eko Siswanto" di production masih menunjukkan Total Point 0 walau riwayatnya benar (+0,25) — karena data itu sudah kadung rusak SEBELUM perbaikan atomik section #31 di-deploy (perbaikan itu cuma mencegah kejadian BARU, tidak membetulkan data lama). User eksplisit tidak mau bergantung pada klik manual `/admin/sync` sebagai kebiasaan — minta perbaikan otomatis berkala.
+
+**Solusi:** buat command Artisan baru yang menjalankan logika sinkronisasi (`runFullSync()` PIC & Marketing yang sudah ada) secara **otomatis setiap 15 menit** lewat scheduler Laravel — tanpa perlu klik apa pun. Kalau semua data sudah sinkron, command diam saja (tidak menulis log, supaya tidak spam). Kalau ada yang perlu dikoreksi, otomatis dibetulkan + dicatat ke log + cache leaderboard dibersihkan.
+
+### File yang Diubah/Ditambah
+| File | Perubahan |
+|------|-----------|
+| `app/Console/Commands/AutoSyncPicMarketingPoints.php` (baru) | Command `points:auto-sync` — jalankan `PicPointReportController::runFullSync()` + `MarketingPointReportController::runFullSync()`, log hanya kalau ada perubahan nyata |
+| `app/Console/Kernel.php` | Daftarkan `points:auto-sync` di scheduler: `->everyFifteenMinutes()->withoutOverlapping()` — pola sama seperti 2 scheduled command lain yang sudah ada (`wa:reviewer-reminders`, `tenants:check-expiry`) |
+| `tests/Feature/Points/AutoSyncCommandTest.php` (baru, 3 test) | Simulasi persis kasus Eko Siswanto (riwayat +0,25 benar, total_points 0 salah) untuk PIC & Marketing → jalankan command → `total_points` otomatis terkoreksi. Test ketiga: command diam (tidak melaporkan perubahan) kalau semua memang sudah sinkron |
+
+**PENTING — syarat di server production:** scheduler Laravel **hanya jalan otomatis kalau ada 1 baris cron di server** yang menjalankan `php artisan schedule:run` setiap menit (biasanya sudah disetel via cPanel/SSH: `* * * * * cd /path/ke/project && php artisan schedule:run >> /dev/null 2>&1`). Karena 2 scheduled command lain (`wa:reviewer-reminders` jam 08:00, `tenants:check-expiry` jam 07:00) **sudah ada dan diasumsikan berjalan**, kemungkinan besar cron ini **sudah tersetel** di server — tapi saya tidak punya akses langsung ke production untuk memastikan. Kalau setelah deploy `points:auto-sync` ternyata tidak pernah jalan otomatis (bisa dicek lewat `storage/logs/laravel.log`, cari baris "Auto-sync poin"), berarti cron itu perlu dicek/disetel dulu di server.
+
+**Diverifikasi:** dijalankan langsung (`php artisan points:auto-sync`) — cepat (data lokal sudah sinkron, langsung "tidak ada yang perlu dikoreksi"). Terdaftar dengan benar di `php artisan schedule:list` (jadwal tiap 15 menit). Full test suite (`tests/Feature/Points`, 39 test, 81 assertion) **PASS**.
+
+## 34. PERBAIKAN URGENT: `points:auto-sync` (section #33) Menghidupkan Kembali Data yang Sudah Direset
+
+**Tujuan:** User melaporkan Total Poin & Total Tugas muncul lagi dengan angka besar (mis. 2836 tugas/418,5 poin) di Laporan Kinerja, padahal sudah direset ke 0 sebelumnya. Diminta: kalau ada sinkron, mulai dari data terbaru saja, jangan tarik data lama juga.
+
+**Root cause — bug di section #33 sendiri:** command `points:auto-sync` yang baru dibuat memanggil `runFullSync()` (PIC & Marketing), yang di dalamnya ADA logika backfill (`runBulkSync()`) yang membuat riwayat baru untuk **SEMUA** submission tervalidasi yang belum punya baris riwayat — tanpa peduli tua atau baru. Begitu admin reset semua poin ke 0 (hapus seluruh `pic_point_histories`/`marketing_point_histories`), SEMUA submission lama yang pernah tervalidasi jadi terlihat "belum punya riwayat" di mata logika backfill ini. Karena auto-sync berjalan **otomatis tiap 15 menit**, dalam waktu singkat semua data lama itu **dibangun ulang dari nol** — persis menghidupkan kembali apa yang sengaja dihapus. Ini kesalahan desain saya sendiri saat membuat section #33, tidak mempertimbangkan skenario reset.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Console/Commands/AutoSyncPicMarketingPoints.php` | Tulis ulang total — **TIDAK lagi memanggil `runFullSync()`/`runBulkSync()`** (yang membackfill). Sekarang HANYA menjalankan 1 query `UPDATE ... SET total_points = SUM(riwayat yang SUDAH ADA)` untuk PIC & Marketing — tidak pernah membuat baris riwayat baru dalam kondisi apa pun. Backfill dari submission lama sekarang MURNI tindakan manual lewat tombol "Sinkronisasi Point" di `/admin/sync` |
+| `tests/Feature/Points/AutoSyncCommandTest.php` | Tambah `test_auto_sync_command_does_not_resurrect_old_data_after_reset` — mensimulasikan persis kondisi setelah reset (submission tervalidasi ada, riwayat SENGAJA kosong) dan membuktikan auto-sync TIDAK membuat riwayat baru serta `total_points` TETAP 0 |
+
+**Diverifikasi:** 4 test (termasuk test baru di atas) **PASS**. Full test suite (`tests/Feature/Points`, 40 test, 84 assertion) **PASS**.
+
+**TINDAKAN YANG DIPERLUKAN DARI USER:**
+1. **Deploy perbaikan ini SEGERA** — kalau section #33 sudah di-deploy dan cron sudah aktif, command yang salah kemungkinan sudah/akan terus membangun ulang data lama tiap 15 menit sampai perbaikan ini menggantikannya.
+2. **Data yang sudah kadung "muncul lagi" di production** (mis. 2836 tugas/418,5 poin di screenshot) itu **BENAR secara historis** (bukan data palsu — itu riwayat asli yang tadinya dihapus, sekarang dibangun ulang oleh bug ini) — tapi kalau tujuan Anda tetap "mulai dari 0", perlu klik "Reset Semua Point" SEKALI LAGI setelah perbaikan ini di-deploy, supaya kali ini tetap 0 (auto-sync yang sudah diperbaiki tidak akan menariknya kembali).

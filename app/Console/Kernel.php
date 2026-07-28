@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('wa:reviewer-reminders')->dailyAt('08:00');
         $schedule->command('tenants:check-expiry')->dailyAt('07:00');
+        $schedule->command('points:auto-sync')->everyFifteenMinutes()->withoutOverlapping();
     }
 
     protected function commands()
