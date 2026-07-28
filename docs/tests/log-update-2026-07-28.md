@@ -738,3 +738,23 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 **Diverifikasi:** dicek tidak ada sisa referensi ke `logoutModal`/`sync-and-logout`/`syncAllAndLogout` di seluruh `resources/views`, `app/`, `routes/`. Semua file lolos compile/lint. Full test suite (`tests/Feature/Points`, 47 test, 106 assertion) **PASS**.
 
 **Ringkasan gabungan section #38+#39:** semua jalur yang bisa memicu backfill penuh (membangun ulang riwayat dari submission lama) di admin panel sudah dihapus total — baik tombol manual di `/admin/sync`, link-link yang mengarah ke sana, maupun modal logout. Satu-satunya mekanisme yang tersisa untuk menjaga `total_points` tetap akurat adalah **auto-sync otomatis berkala** (section #33/34/37) yang sengaja dirancang HANYA mengoreksi dari riwayat yang sudah ada, tidak pernah membuat riwayat baru dari data lama.
+
+## 40. Auto-Sync Tanpa Cron — Jaring Pengaman Kalau Server Tidak Bisa/Sulit Setel Cron Job
+
+**Tujuan:** dicek ulang indikator di `/admin/sync` — cron scheduler MASIH belum pernah terdeteksi berjalan (user sudah beberapa kali diberi instruksi menyetel cron di hosting, tapi belum berhasil/belum sempat). User pilih solusi yang tidak butuh akses cron/SSH sama sekali.
+
+**Solusi:** logika inti auto-sync diekstrak ke class `App\Support\PointsAutoSync` (dipakai bersama oleh command terjadwal MAUPUN pemicu baru), lalu `AdminMiddleware` (sudah berjalan di SEMUA route admin) dipasangi trigger tambahan: setiap kali ada admin membuka halaman admin apa pun, sistem cek "sudah 15 menit sejak auto-sync terakhir jalan?" — kalau iya, jalankan sinkronisasi (logika SAMA PERSIS dengan command terjadwal: HANYA recompute dari riwayat yang sudah ada, tidak backfill). Dijalankan lewat `terminate()` (Laravel memanggilnya SETELAH response terkirim ke browser) supaya admin **tidak merasakan delay sama sekali**.
+
+### File yang Ditambah/Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Support/PointsAutoSync.php` (baru) | `run()` — logika inti (dipindah dari command, TIDAK berubah). `runIfDue()` — pakai `Cache::add()` (atomik) sebagai kunci throttle 15 menit terpisah dari `last_run_at`, supaya request yang datang bersamaan tidak ikut lolos throttle |
+| `app/Console/Commands/AutoSyncPicMarketingPoints.php` | Disederhanakan jadi wrapper tipis di atas `PointsAutoSync::run()` — tetap ada untuk cron kalau nanti berhasil diaktifkan |
+| `app/Http/Middleware/AdminMiddleware.php` | Tambah method `terminate()` yang memanggil `PointsAutoSync::runIfDue()` |
+| `tests/Feature/Points/PointsAutoSyncTest.php` (baru, 4 test) | Sync jalan saat belum pernah dipanggil; throttle diam kalau dipanggil 2x dalam 15 menit; tidak membangun ulang data lama (skenario reset); **test integrasi ujung-ke-ujung** — request HTTP ke halaman admin biasa (bukan `/admin/sync`) memicu sinkronisasi lewat `terminate()` |
+
+**Catatan proses debugging:** test throttle sempat "gagal" saat pertama ditulis — ternyata bukan bug di `PointsAutoSync`, tapi kesalahan di test itu sendiri: `$pic->update([...])` dipanggil pada objek Eloquent yang atributnya masih nilai lama di memori (karena `run()` meng-update database lewat raw SQL, bukan lewat Eloquent), sehingga Eloquent menganggap "tidak ada perubahan" dan diam-diam tidak mengirim query UPDATE meski tetap mengembalikan `true`. Diperbaiki dengan `$pic->refresh()` sebelum update manual di test. Dikonfirmasi lewat debug langsung (`Cache::add()` terbukti mengembalikan `false` dengan benar pada panggilan kedua) sebelum menyimpulkan ini murni masalah test, bukan kode produksi.
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 51 test, 115 assertion) **PASS**, termasuk test integrasi HTTP nyata yang membuktikan `AdminMiddleware::terminate()` benar-benar terpanggil oleh Laravel.
+
+**Cara memverifikasi setelah deploy:** cukup buka halaman admin apa saja (tidak harus `/admin/sync`), lalu buka `/admin/sync` — indikator "Auto-Sync Poin Otomatis" seharusnya langsung menunjukkan waktu baru saja, tanpa perlu menyetel apa pun di panel hosting.
