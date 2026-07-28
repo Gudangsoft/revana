@@ -7,9 +7,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Verifikasi sementara (bukan bagian permanen test suite poin) untuk memastikan
- * halaman /admin/sync render tanpa error setelah konsolidasi 7 tombol sinkronisasi
- * point jadi 1 — dan halaman yang tombolnya baru dihapus juga tetap render normal.
+ * Riwayat fitur: 7 tombol sinkronisasi point yang tersebar sempat dikonsolidasi jadi
+ * 1 tombol di /admin/sync (section #22) — lalu tombol backfill manual itu SENDIRI
+ * dihapus total (section #38) karena berisiko membangun ulang data lama yang sudah
+ * sengaja direset admin. Sinkronisasi total_points sekarang murni lewat auto-sync
+ * otomatis (scheduler, hanya recompute dari riwayat yang SUDAH ADA, tidak backfill).
  */
 class SyncPageRenderTest extends TestCase
 {
@@ -26,25 +28,42 @@ class SyncPageRenderTest extends TestCase
         return $admin;
     }
 
-    public function test_sync_page_renders_with_merged_point_button(): void
+    public function test_sync_page_no_longer_has_manual_point_sync_button(): void
     {
         $this->actingAsAdmin();
 
         $response = $this->get(route('admin.sync.index'));
 
         $response->assertOk();
-        $response->assertSee('Sinkronisasi Point (PIC & Marketing)', false);
-        $response->assertSee(route('admin.sync.points'), false);
+        $response->assertDontSee('Sinkronisasi Point (PIC & Marketing)', false);
     }
 
-    public function test_sync_points_action_runs_without_error(): void
+    public function test_manual_point_sync_routes_no_longer_exist(): void
+    {
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('admin.sync.points'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('admin.sync.all'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('admin.pic-points.sync-all'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('admin.marketing-points.sync-all'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('admin.sync-and-logout'),
+            '"Sinkronkan & Logout" di modal logout admin juga memicu backfill penuh — dihapus total');
+    }
+
+    /**
+     * Modal "Sebelum Logout" (dengan pilihan "Sinkronkan & Logout") dihapus total —
+     * itu jalur LAIN yang juga memicu backfill penuh (runBulkSync()) setiap kali
+     * dipakai, kemungkinan turut menyebabkan data lama "muncul lagi" setelah reset.
+     * Admin sekarang logout langsung tanpa modal, sama seperti PIC/Marketing/Reviewer.
+     */
+    public function test_admin_page_renders_without_sync_and_logout_modal(): void
     {
         $this->actingAsAdmin();
 
-        $response = $this->post(route('admin.sync.points'));
+        $response = $this->get(route('admin.sync.index'));
 
-        $response->assertRedirect();
-        $this->assertNotNull(session('success'));
+        $response->assertOk();
+        $response->assertDontSee('id="logoutModal"', false);
+        $response->assertDontSee('Sinkronkan & Logout', false);
+        $response->assertDontSee('Sebelum Logout', false);
     }
 
     public function test_pic_points_page_renders_without_removed_button(): void
@@ -66,24 +85,24 @@ class SyncPageRenderTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_team_performance_report_renders_with_link_to_sync_page(): void
+    public function test_team_performance_report_renders_without_sync_link(): void
     {
         $this->actingAsAdmin();
 
         $response = $this->get(route('admin.team-performance', ['step' => 'pic']));
 
         $response->assertOk();
-        $response->assertSee(route('admin.sync.index'), false);
+        $response->assertDontSee('Sinkronisasi Point', false);
     }
 
-    public function test_team_marketing_performance_report_renders_with_link_to_sync_page(): void
+    public function test_team_marketing_performance_report_renders_without_sync_link(): void
     {
         $this->actingAsAdmin();
 
         $response = $this->get(route('admin.team-marketing-performance'));
 
         $response->assertOk();
-        $response->assertSee(route('admin.sync.index'), false);
+        $response->assertDontSee('Sinkronisasi Point', false);
     }
 
     /**

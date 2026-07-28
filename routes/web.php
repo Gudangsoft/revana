@@ -155,9 +155,7 @@ Route::middleware('auth')->group(function () {
         
         // Data Synchronization
         Route::get('/sync', [AdminSyncController::class, 'index'])->name('sync.index');
-        Route::post('/sync/all', [AdminSyncController::class, 'syncAll'])->name('sync.all');
         Route::post('/sync/slots', [AdminSyncController::class, 'syncSlots'])->name('sync.slots');
-        Route::post('/sync/points', [AdminSyncController::class, 'syncPoints'])->name('sync.points');
 
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
@@ -345,7 +343,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketing-points/{marketing}', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'show'])->name('marketing-points.show');
         Route::post('/marketing-points/{marketing}/adjust', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'adjustPoints'])->name('marketing-points.adjust');
         Route::get('/marketing-points/{marketing}/export', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'exportExcel'])->name('marketing-points.export');
-        Route::post('/marketing-points/sync-all', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'syncAllPoints'])->name('marketing-points.sync-all');
         Route::post('/marketing-points/reset-all', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'resetAllPoints'])->name('marketing-points.reset-all');
 
         // PIC Management
@@ -376,10 +373,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/point-rankings', [\App\Http\Controllers\Admin\DashboardController::class, 'pointRankings'])->name('point-rankings');
         Route::get('/pic-points', [\App\Http\Controllers\Admin\PicPointReportController::class, 'index'])->name('pic-points.index');
         Route::get('/pic-points/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'export'])->name('pic-points.export');
-        Route::post('/pic-points/sync-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllPoints'])->name('pic-points.sync-all');
         Route::post('/pic-points/reset-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'resetAllPoints'])->name('pic-points.reset-all');
         Route::post('/pic-points/recalculate-all', [\App\Http\Controllers\Admin\PicPointReportController::class, 'recalculateAllPoints'])->name('pic-points.recalculate-all');
-        Route::post('/sync-and-logout', [\App\Http\Controllers\Admin\PicPointReportController::class, 'syncAllAndLogout'])->name('sync-and-logout');
         Route::get('/pic-points/{pic}', [\App\Http\Controllers\Admin\PicPointReportController::class, 'show'])->name('pic-points.show');
         Route::get('/pic-points/{pic}/export', [\App\Http\Controllers\Admin\PicPointReportController::class, 'exportShow'])->name('pic-points.export-show');
         Route::get('/pic-points/{pic}/pending-tasks', [\App\Http\Controllers\Admin\PicPointReportController::class, 'pendingTasks'])->name('pic-points.pending-tasks');

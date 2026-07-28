@@ -100,52 +100,6 @@ class SyncController extends Controller
     }
 
     /**
-     * Sinkronisasi point PIC & Marketing sekaligus — satu-satunya tombol sinkronisasi
-     * point di admin panel (konsolidasi dari 7 tombol yang sebelumnya tersebar di
-     * /admin/pic-points, /admin/marketing-points, /admin/reports/team-performance, dan
-     * halaman ini sendiri — semuanya melakukan hal serupa dengan tingkat kelengkapan
-     * yang tidak konsisten). Memakai logika PALING lengkap yang sudah ada: backfill
-     * riwayat hilang, perbaiki tanggal yang tidak cocok dengan tanggal validasi asli
-     * (lihat insiden 28 Juli 2026), hitung ulang total_points, dan hapus riwayat orphan.
-     */
-    public function syncPoints()
-    {
-        [$picBackfilled, $picRepaired, $picSynced, $picOrphans] = PicPointReportController::runFullSync();
-        [$mktCreated, $mktSynced] = MarketingPointReportController::runFullSync();
-
-        self::clearSyncCache();
-
-        $msg = "✅ Sinkronisasi point selesai. PIC: {$picBackfilled} riwayat baru, {$picRepaired} tanggal dikoreksi, {$picSynced} PIC diperbarui";
-        if ($picOrphans > 0) {
-            $msg .= ", {$picOrphans} riwayat orphan dihapus";
-        }
-        $msg .= ". Marketing: {$mktCreated} riwayat baru, {$mktSynced} marketing diperbarui.";
-
-        return back()->with('success', $msg);
-    }
-
-    /**
-     * Sinkronisasi semua data sekaligus (slot + point PIC & Marketing, versi lengkap).
-     */
-    public function syncAll()
-    {
-        $slotCount = JournalSlot::recalculateAll();
-        [$picBackfilled, $picRepaired, $picSynced, $picOrphans] = PicPointReportController::runFullSync();
-        [$mktCreated, $mktSynced] = MarketingPointReportController::runFullSync();
-
-        self::clearSyncCache();
-
-        $msg = "✅ Sinkronisasi semua data berhasil! {$slotCount} slot jurnal diperbarui. "
-            . "PIC: {$picBackfilled} riwayat baru, {$picRepaired} tanggal dikoreksi, {$picSynced} PIC diperbarui";
-        if ($picOrphans > 0) {
-            $msg .= ", {$picOrphans} riwayat orphan dihapus";
-        }
-        $msg .= ". Marketing: {$mktCreated} riwayat baru, {$mktSynced} marketing diperbarui.";
-
-        return back()->with('success', $msg);
-    }
-
-    /**
      * Cek apakah ada data yang tidak sinkron (digunakan sidebar — hasil di-cache 5 menit).
      */
     public static function countOutOfSync(): int

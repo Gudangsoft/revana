@@ -96,9 +96,6 @@
             <a href="{{ route('admin.team-marketing-performance', array_merge(request()->query(), ['export' => 'excel_all'])) }}" class="btn btn-info text-white">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Export Seluruh Rekap (Excel)
             </a>
-            <a href="{{ route('admin.sync.index') }}" class="btn btn-outline-warning" title="Sinkronisasi point sekarang dilakukan dari satu halaman terpusat">
-                <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point
-            </a>
         </div>
     </div>
 </div>

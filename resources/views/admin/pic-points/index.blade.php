@@ -120,9 +120,6 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard PIC</span>
                 <div class="d-flex gap-2 align-items-center">
-                    <a href="{{ route('admin.sync.index') }}" class="btn btn-outline-warning btn-sm" title="Sinkronisasi point sekarang dilakukan dari satu halaman terpusat">
-                        <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point
-                    </a>
                     <a href="{{ route('admin.pic-points.export') }}" class="btn btn-success btn-sm">
                         <i class="bi bi-download"></i> Export Excel
                     </a>

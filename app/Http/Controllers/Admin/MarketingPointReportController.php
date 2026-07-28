@@ -202,63 +202,6 @@ class MarketingPointReportController extends Controller
     }
 
     /**
-     * Sync all marketing points — backfill riwayat yang hilang lalu hitung ulang
-     * total_points dari SUM riwayat (bukan lagi COUNT submission, karena rate poin
-     * per submission bisa berubah dari waktu ke waktu, lihat TaskPointSetting).
-     */
-    public function syncAllPoints()
-    {
-        [$created, $synced] = self::runFullSync();
-
-        return redirect()->back()
-            ->with('success', "Sinkronisasi selesai! {$synced} marketing point diperbarui, {$created} riwayat point baru dibuat.");
-    }
-
-    /**
-     * Sinkronisasi Marketing paling lengkap: backfill riwayat hilang (pakai rate yang
-     * berlaku saat ini, tanggal riwayat dari submission->created_at) + hitung ulang
-     * total_points dari SUM riwayat (bukan COUNT submission — rate poin per submission
-     * bisa berubah dari waktu ke waktu, lihat TaskPointSetting). Dipakai oleh
-     * syncAllPoints() (tombol di /admin/marketing-points) dan
-     * SyncController::syncPoints() (tombol tunggal di /admin/sync).
-     * Returns [$created, $synced].
-     */
-    public static function runFullSync(): array
-    {
-        $marketings = Marketing::all();
-        $synced = 0;
-        $created = 0;
-
-        foreach ($marketings as $marketing) {
-            $submissions = \App\Models\Submission::where('marketing_id', $marketing->id)
-                ->whereDoesntHave('marketingPointHistory')
-                ->get();
-
-            foreach ($submissions as $submission) {
-                $history = MarketingPointHistory::awardPoints(
-                    $marketing->id,
-                    $submission->id,
-                    mb_substr("Sinkronisasi: {$submission->kode_submit} - {$submission->judul_artikel}", 0, 255),
-                    $submission->created_at
-                );
-                if ($history) {
-                    $created++;
-                }
-            }
-
-            $actualPoints = MarketingPointHistory::where('marketing_id', $marketing->id)->sum('points_earned');
-            $oldTotal = $marketing->total_points ?? 0;
-
-            if (round((float) $oldTotal, 4) !== round((float) $actualPoints, 4)) {
-                $marketing->update(['total_points' => $actualPoints]);
-                $synced++;
-            }
-        }
-
-        return [$created, $synced];
-    }
-
-    /**
      * Hard reset: hapus semua riwayat point Marketing dan set total_points = 0.
      * Konfirmasi wajib ketik "RESET" — sama seperti PicPointReportController::resetAllPoints().
      */

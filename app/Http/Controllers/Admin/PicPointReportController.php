@@ -208,56 +208,7 @@ class PicPointReportController extends Controller
     }
 
     /**
-     * Sync all PIC points from point history (comprehensive sync with backfill).
-     * Uses bulk INSERT/UPDATE to avoid N+1 timeouts on large datasets.
-     */
-    public function syncAllPoints()
-    {
-        [$backfilled, $repaired, $synced, $orphanCount] = self::runFullSync();
-
-        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$repaired} tanggal dikoreksi, {$synced} PIC diperbarui";
-        if ($orphanCount > 0) {
-            $msg .= ", {$orphanCount} riwayat orphan dihapus";
-        }
-
-        return redirect()->route('admin.pic-points.index')->with('success', $msg . '.');
-    }
-
-    /**
-     * Sinkronisasi PIC paling lengkap: backfill riwayat hilang + perbaiki tanggal yang
-     * tidak cocok (lewat runBulkSync()) + hitung ulang total_points + hapus riwayat
-     * orphan. Dipakai oleh syncAllPoints() (tombol di /admin/pic-points) dan
-     * SyncController::syncPoints() (tombol tunggal di /admin/sync).
-     * Returns [$backfilled, $repaired, $synced, $orphanCount].
-     */
-    public static function runFullSync(): array
-    {
-        [$backfilled, $repaired] = self::runBulkSync();
-
-        // Recalculate total_points for all PICs via single SQL UPDATE
-        $synced = \DB::affectingStatement('
-            UPDATE pics p
-            LEFT JOIN (
-                SELECT pic_id, COALESCE(SUM(points_earned), 0) AS actual
-                FROM pic_point_histories
-                GROUP BY pic_id
-            ) h ON h.pic_id = p.id
-            SET p.total_points = COALESCE(h.actual, 0)
-            WHERE p.total_points != COALESCE(h.actual, 0)
-        ');
-
-        // Remove orphan point histories
-        $validPicIds = Pic::pluck('id');
-        $orphanCount = PicPointHistory::whereNotIn('pic_id', $validPicIds)->count();
-        if ($orphanCount > 0) {
-            PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
-        }
-
-        return [$backfilled, $repaired, $synced, $orphanCount];
-    }
-
-    /**
-     * Core bulk sync logic shared by syncAllPoints(), syncAllAndLogout(), and TaskPointSettingController.
+     * Core bulk sync logic used by TaskPointSettingController.
      * Returns [$backfilled, $repaired].
      */
     public static function runBulkSync(): array
@@ -530,29 +481,4 @@ class PicPointReportController extends Controller
             ->with('success', "Reset berhasil! {$totalHistories} riwayat dihapus, {$affectedPics} PIC diset ke 0 point.");
     }
 
-    /**
-     * Sync all PIC points then logout admin
-     */
-    public function syncAllAndLogout()
-    {
-        [$backfilled] = self::runBulkSync();
-
-        // Recalculate total_points for all PICs
-        \DB::statement('
-            UPDATE pics p
-            LEFT JOIN (
-                SELECT pic_id, COALESCE(SUM(points_earned), 0) AS actual
-                FROM pic_point_histories
-                GROUP BY pic_id
-            ) h ON h.pic_id = p.id
-            SET p.total_points = COALESCE(h.actual, 0)
-        ');
-
-        auth()->logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        return redirect()->route('login')
-            ->with('success', "Sinkronisasi selesai ({$backfilled} riwayat baru). Anda telah logout.");
-    }
 }

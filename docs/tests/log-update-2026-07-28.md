@@ -701,3 +701,40 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 **Cara pakai untuk user:** buka `/admin/sync` — kalau indikatornya menunjukkan "belum pernah terdeteksi berjalan" atau sudah lebih dari 20 menit, itu tandanya cron scheduler di server (`* * * * * php artisan schedule:run`) belum aktif dan perlu disetel di panel hosting (cPanel biasanya ada menu "Cron Jobs"). Kalau indikatornya sehat (hijau, baru beberapa menit lalu) tapi PIC tertentu masih 0, kemungkinan besar riwayat poinnya memang kosong (bukan bug) — perlu aktivitas baru dari PIC tsb untuk mendapat poin lagi.
 
 **Diverifikasi:** full test suite (`tests/Feature/Points`, 46 test, 100 assertion) **PASS**.
+
+## 38. Hapus Total Tombol Sinkronisasi Poin Manual (Backfill) di `/admin/sync`
+
+**Tujuan:** setelah dikonfirmasi cron scheduler server belum aktif (section #37), user sempat mencoba tombol manual di `/admin/sync` dan itu membangun ulang SEMUA data lama yang sudah direset — user minta fitur ini **dihapus total**, bukan cuma disembunyikan, supaya tidak ada jalan sama sekali (sengaja atau tidak sengaja) untuk membawa kembali data lama.
+
+**Audit sebelum menghapus** (supaya tidak salah hapus logic yang masih dipakai fitur lain):
+- `runBulkSync()` (PIC & Marketing) — logika INTI backfill — **TETAP DIPERTAHANKAN**, karena masih dipakai `TaskPointSettingController::syncTotals()` (dipanggil otomatis saat admin menyimpan/menghapus pengaturan rate poin task — fitur terpisah, tidak disebutkan user, tidak diubah) dan `PicPointReportController::syncAllAndLogout()` (dipakai fitur "Sinkronkan & Logout" di modal logout admin — lihat catatan penting di bawah).
+- `runFullSync()` (wrapper `runBulkSync()` + recompute total + hapus orphan) — HANYA dipanggil dari `SyncController` dan `syncAllPoints()` (yang keduanya dihapus) — **DIHAPUS**, sudah benar-benar tidak dipakai di mana pun.
+
+### File yang Dihapus/Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SyncController.php` | Hapus method `syncAll()` dan `syncPoints()` sepenuhnya |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Hapus method `syncAllPoints()` dan `runFullSync()` |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | Hapus method `syncAllPoints()` dan `runFullSync()` |
+| `routes/web.php` | Hapus route `admin.sync.all`, `admin.sync.points`, `admin.pic-points.sync-all`, `admin.marketing-points.sync-all` |
+| `resources/views/admin/sync/index.blade.php` | Hapus tombol "Sinkronisasi Semua Sekarang" di header + seluruh card "Point PIC & Marketing". Halaman sekarang cuma: indikator auto-sync (section #37), card Slot Jurnal, info box |
+| `resources/views/admin/pic-points/index.blade.php`, `admin/marketing-points/index.blade.php`, `admin/reports/team-performance.blade.php`, `admin/reports/team-marketing-performance.blade.php` | Hapus link "Sinkronisasi Point" yang mengarah ke `/admin/sync` (sekarang menyesatkan karena halaman itu tidak lagi punya fungsi itu) |
+| `tests/Feature/Points/SyncPageRenderTest.php`, `RunBulkSyncTest.php` | Perbarui test yang sebelumnya menguji tombol/route yang dihapus — 2 test baru membuktikan route benar-benar hilang (`Route::has()` false) |
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 46 test, 101 assertion) **PASS**. Semua file Blade yang diubah dicek lolos compile.
+
+## 39. Hapus Modal "Sinkronkan & Logout" — Jalur Lain yang Juga Memicu Backfill Penuh
+
+**Tujuan:** melanjutkan section #38 — ditemukan fitur LAIN yang juga memicu backfill penuh: modal konfirmasi "Sebelum Logout" yang muncul saat admin logout, dengan pilihan "Sinkronkan & Logout" (`admin.sync-and-logout` → `PicPointReportController::syncAllAndLogout()` → `runBulkSync()`). Kemungkinan besar ini **sumber tambahan** kenapa data lama sempat "muncul lagi" setelah direset — kalau siapa pun yang pegang akun admin terbiasa klik itu (bukan "Logout Saja"), backfill penuh terpicu lagi setiap kali logout. User minta dihapus sekalian.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/layouts/app.blade.php` | Hapus modal `#logoutModal` beserta script-nya sepenuhnya. Tombol Logout admin sekarang langsung submit form ke `route('logout')` tanpa modal — konsisten dengan PIC/Marketing/Reviewer yang memang sudah begitu dari awal |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Hapus method `syncAllAndLogout()`. `runBulkSync()` (dipanggil dari method ini sebelumnya) **tetap dipertahankan** — masih dipakai `TaskPointSettingController` |
+| `routes/web.php` | Hapus route `admin.sync-and-logout` |
+| `tests/Feature/Points/SyncPageRenderTest.php` | Tambah assertion route `admin.sync-and-logout` sudah tidak ada, dan test baru `test_admin_page_renders_without_sync_and_logout_modal` — memastikan modal & teksnya benar-benar hilang dari halaman |
+
+**Diverifikasi:** dicek tidak ada sisa referensi ke `logoutModal`/`sync-and-logout`/`syncAllAndLogout` di seluruh `resources/views`, `app/`, `routes/`. Semua file lolos compile/lint. Full test suite (`tests/Feature/Points`, 47 test, 106 assertion) **PASS**.
+
+**Ringkasan gabungan section #38+#39:** semua jalur yang bisa memicu backfill penuh (membangun ulang riwayat dari submission lama) di admin panel sudah dihapus total — baik tombol manual di `/admin/sync`, link-link yang mengarah ke sana, maupun modal logout. Satu-satunya mekanisme yang tersisa untuk menjaga `total_points` tetap akurat adalah **auto-sync otomatis berkala** (section #33/34/37) yang sengaja dirancang HANYA mengoreksi dari riwayat yang sudah ada, tidak pernah membuat riwayat baru dari data lama.

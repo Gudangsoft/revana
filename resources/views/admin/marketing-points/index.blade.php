@@ -88,9 +88,6 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard Marketing</span>
                 <div class="d-flex gap-2 align-items-center">
-                    <a href="{{ route('admin.sync.index') }}" class="btn btn-sm btn-outline-warning" title="Sinkronisasi point sekarang dilakukan dari satu halaman terpusat">
-                        <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point
-                    </a>
                     <a href="{{ route('admin.marketing-points.export-leaderboard') }}{{ request('search') ? '?search=' . urlencode(request('search')) : '' }}" class="btn btn-sm btn-info">
                         <i class="bi bi-file-excel"></i> Export Excel
                     </a>

@@ -4,7 +4,6 @@ namespace Tests\Feature\Points;
 
 use App\Http\Controllers\Admin\MarketingPointReportController;
 use App\Http\Controllers\Admin\PicPointReportController;
-use App\Http\Controllers\Admin\SyncController;
 use App\Models\MarketingPointHistory;
 use App\Models\PicPointHistory;
 use App\Models\TaskPointSetting;
@@ -151,12 +150,13 @@ class RunBulkSyncTest extends TestCase
 
     /**
      * Regresi langsung untuk pertanyaan user (28 Juli 2026): "ketika klik sinkron
-     * harusnya tidak merubah tanggal kerja". Mengunci lewat tombol tunggal
-     * SyncController::syncPoints() (hasil konsolidasi section #22, dipakai
-     * /admin/sync): baris yang tanggalnya SUDAH BENAR harus tetap sama persis
-     * setelah sinkron — bukan ikut tertimpa ke tanggal sinkron dijalankan.
+     * harusnya tidak merubah tanggal kerja". Mengunci lewat runBulkSync() (dipakai
+     * TaskPointSettingController & syncAllAndLogout() — tombol backfill manual di
+     * /admin/sync sendiri sudah dihapus total di section #38): baris yang tanggalnya
+     * SUDAH BENAR harus tetap sama persis setelah sinkron — bukan ikut tertimpa ke
+     * tanggal sinkron dijalankan.
      */
-    public function test_sync_points_button_does_not_change_created_at_of_already_correct_history(): void
+    public function test_run_bulk_sync_does_not_change_created_at_of_already_correct_history(): void
     {
         $pic = $this->makePic();
         $submission = $this->makeSubmission([
@@ -174,22 +174,22 @@ class RunBulkSyncTest extends TestCase
             'created_at' => '2026-07-20 09:00:00', 'updated_at' => '2026-07-20 09:00:00',
         ]);
 
-        (new SyncController())->syncPoints();
+        PicPointReportController::runBulkSync();
 
         $this->assertEquals(
             '2026-07-20 09:00:00',
             DB::table('pic_point_histories')->where('id', $historyId)->value('created_at'),
-            'Tombol Sinkronisasi Data tidak boleh mengubah tanggal riwayat yang sudah benar'
+            'runBulkSync() tidak boleh mengubah tanggal riwayat yang sudah benar'
         );
     }
 
     /**
      * Pasangan test di atas: kalau tanggalnya SUDAH TELANJUR SALAH (mis. dari insiden
-     * sebelum fix section #21), tombol sinkron harus MEMPERBAIKI ke tanggal validasi
+     * sebelum fix section #21), runBulkSync() harus MEMPERBAIKI ke tanggal validasi
      * asli — bukan membiarkannya salah, dan bukan pula menimpanya ke tanggal sinkron
      * dijalankan.
      */
-    public function test_sync_points_button_repairs_mismatched_created_at_to_true_validated_at(): void
+    public function test_run_bulk_sync_repairs_mismatched_created_at_to_true_validated_at(): void
     {
         $pic = $this->makePic();
         $submission = $this->makeSubmission([
@@ -204,12 +204,12 @@ class RunBulkSyncTest extends TestCase
             'created_at' => '2026-07-25 15:00:00', 'updated_at' => '2026-07-25 15:00:00',
         ]);
 
-        (new SyncController())->syncPoints();
+        PicPointReportController::runBulkSync();
 
         $this->assertEquals(
             '2026-07-21 10:00:00',
             DB::table('pic_point_histories')->where('id', $historyId)->value('created_at'),
-            'Tombol Sinkronisasi Data harus memperbaiki tanggal yang salah ke tanggal validasi asli, bukan ke tanggal sinkron dijalankan'
+            'runBulkSync() harus memperbaiki tanggal yang salah ke tanggal validasi asli, bukan ke tanggal sinkron dijalankan'
         );
     }
 }
