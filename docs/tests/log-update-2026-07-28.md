@@ -792,3 +792,20 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 | `log-update-2026-07-28.md` (root) | Dihapus lagi — isinya cuma stub kosong tanpa entry berarti (hook selalu gagal sebelum sempat menulis apa pun) |
 
 **Diverifikasi:** `git commit` berikutnya tidak lagi memicu error hook.
+
+## 43. Hapus Script Berbahaya `sync-marketing-points.php` (Timpa total_points dengan COUNT, Bukan SUM)
+
+**Tujuan:** user melaporkan `/admin/marketings` & `/admin/point-rankings` menampilkan "EKO SISWANTO MARKETING — Total Point: 1", padahal seharusnya 0.23 (sesuai rate poin submit yang berlaku di `TaskPointSetting`). Ditelusuri lewat riwayat commit — ternyata bukan bug di kode aplikasi, melainkan dari **script one-off** `docs/tests/sync-marketing-points.php` (ditambahkan developer lain, "jarwonozt", di commit `8bd245b`, terpisah dari sesi ini).
+
+**Root cause:** script ini punya 2 bagian. Bagian pertama sudah benar (memanggil `MarketingPointHistory::awardPoints()` untuk submission yang belum punya riwayat, rate-based via `TaskPointSetting`). Tapi bagian KEDUA (baris 75-90) kemudian **menimpa ulang** `total_points` semua marketing dengan **COUNT submission** ("1 submission = 1 point"), membuang begitu saja nilai rate-based yang baru saja benar dihitung di bagian pertama. Ini persis pola yang sudah diperingatkan lewat komentar eksplisit di `app/Models/MarketingPointHistory.php:114-117`: *"Sync total_points dari SUM riwayat poin — BUKAN COUNT submission, karena rate poin per submission bisa berubah dari waktu ke waktu."* Kalau Eko Siswanto Marketing punya 1 submission, COUNT-nya = 1 — cocok persis dengan angka yang tampil di screenshot, padahal SUM riwayat poin yang benar seharusnya 0.23.
+
+**Dampak:** kalau script ini dijalankan lagi kapan pun di masa depan (siapa pun yang punya akses SSH/terminal ke server), SEMUA `total_points` marketing akan kembali rusak jadi versi COUNT, menimpa hasil kerja `PointsAutoSync` (section #40) yang sudah dirancang khusus supaya HANYA merecompute dari SUM riwayat yang benar.
+
+**Solusi (dikonfirmasi user):** hapus seluruh script — tidak diperbaiki, karena fungsinya (membuatkan riwayat poin untuk submission yang belum punya) sudah tidak diperlukan lagi; `PointsAutoSync` + `AdminMiddleware::terminate()` sudah menjaga akurasi `total_points` secara otomatis & aman (hanya dari SUM riwayat yang sudah ada).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `docs/tests/sync-marketing-points.php` | Dihapus sepenuhnya — dicek dulu dengan `grep` lintas repo, tidak ada file lain yang mereferensikannya |
+
+**Catatan untuk deploy:** setelah `PointsAutoSync` berjalan di production (throttle 15 menit, terpicu lewat halaman admin mana pun), `total_points` Eko Siswanto Marketing seharusnya otomatis kembali ke 0.23 — TANPA perlu intervensi manual — asalkan riwayat poinnya (`marketing_point_histories`) memang sudah tersimpan benar (dari bagian pertama script sebelum ditimpa). Kalau setelah beberapa saat masih menampilkan angka salah, kemungkinan riwayatnya sendiri yang perlu dicek langsung di database production.
