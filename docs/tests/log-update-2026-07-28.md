@@ -273,3 +273,34 @@ Kalau DocumentRoot server sudah benar mengarah ke `public/` (sesuai vhost contoh
 3. Render halaman penuh & kedua export (`exportExcel`, `exportPdf`) — semua berhasil tanpa error, label periode baru tampil dengan benar di halaman.
 
 **Catatan:** murni perubahan logika filter tampilan, tidak ada perubahan data/migration. Laporan bulan-bulan SEBELUMNYA otomatis ikut memakai definisi periode baru ini kalau diakses ulang (karena datanya dihitung on-the-fly dari riwayat, bukan cache) — ini sesuai maksud user (mendefinisikan ulang arti "1 bulan" untuk laporan kinerja). Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
+
+## 15. Koreksi Retroaktif Riwayat Poin PIC ke Rate Per Tahap yang Berlaku Sekarang (Perubahan Besar)
+
+**Tujuan:** User minta cek kesesuaian laporan kinerja dengan `task_point_settings`. Ditemukan: rate poin PIC per tahap SUDAH dikonfigurasi berbeda-beda sejak Mei–Juli 2026 (editor1/author1=0,1, editor2/reviewer1/reviewer2=0,2, submit=0,25, validator=0,33, editor3/author2=0, production=1) — tapi 99%+ riwayat `pic_point_histories` (dari 10 Juni sampai 27 Juli 2026, di HAMPIR SEMUA tahap kecuali production) tetap menunjukkan flat 1 poin/tugas (0 untuk validator).
+
+**Root cause bukan migration hari ini** — dikonfirmasi lewat investigasi: sebaran tanggalnya merata dari 10 Juni s/d 27 Juli (bukan cuma satu waktu), jauh melebihi skala migration pagi ini. ini bug lama pada mekanisme pemberian poin real-time yang membuat rate yang benar tidak pernah terpakai selama lebih dari sebulan — baru mulai benar (0,25 utk submit dst.) sejak sekitar jam 08:49 pagi ini (28 Juli 2026), entah karena perbaikan `runBulkSync()` sebelumnya hari ini atau sebab lain yang belum terpastikan 100%. Kolom `validator` khususnya SEMPAT ikut salah oleh migration saya sebelumnya (section #1) yang salah asumsi validator=0 padahal rate sebenarnya 0,33.
+
+User dikonfirmasi (dengan angka dampak eksplisit ditunjukkan dulu) untuk **mengoreksi riwayat lama secara retroaktif** ke rate saat ini — BUKAN dibiarkan apa adanya seperti prinsip yang dipakai untuk Marketing, karena ini murni bug (bukan perubahan kebijakan yang disengaja untuk periode tertentu).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_28_000004_correct_pic_history_to_current_step_rates.php` (baru) | Ambil rate PIC aktif DINAMIS dari `task_point_settings` (bukan hardcode), lalu untuk tiap tahap, koreksi SEMUA baris `pic_point_histories` yang terhubung ke submission asli (`submission_id` terisi) dan nilainya tidak cocok dengan rate saat ini. Penyesuaian manual admin (`submission_id` NULL, step `adjustment`) otomatis tidak tersentuh (tidak ada entry 'adjustment' di `task_point_settings`). Hitung ulang `total_points` semua PIC setelahnya. Catat ringkasan lengkap (jumlah baris per tahap) ke `storage/logs/laravel.log` |
+
+### Dampak (dikonfirmasi ke user SEBELUM dijalankan)
+| Tahap | Baris terkoreksi | Rate |
+|---|---|---|
+| Editor 1 | 14.214 | 0,1 |
+| Author 1 | 14.064 | 0,1 |
+| Editor 2 | 14.157 | 0,2 |
+| Reviewer 1 | 13.958 | 0,2 |
+| Reviewer 2 | 13.986 | 0,2 |
+| Editor 3 | 289 | 0 |
+| Submit | 13.337 | 0,25 |
+| Validator | 1.610 | 0,33 |
+
+**Total poin PIC seluruh sistem turun dari ~97.529 menjadi ~29.678** (data terus bertambah dari aktivitas normal selama investigasi, sehingga total akhir sedikit berbeda dari preview awal ~28.637 — perbedaan wajar, bukan indikasi masalah).
+
+**Diverifikasi lewat migration sungguhan (bukan simulasi):** dijalankan `php artisan migrate` sungguhan di lokal. Baris penyesuaian manual (submission_id NULL) dipastikan TIDAK tersentuh (diuji dengan baris tiruan bernilai 999, tetap 999 setelah migration). Sum tiap tahap setelah migration dicocokkan dengan `jumlah_baris × rate` — semua cocok persis (selisih hanya pembulatan float, <0,01). Pengecekan akhir `SyncController::gatherStats()` — 0 dari 70 PIC, 0 dari 15 marketing, 0 dari 8.343 slot out-of-sync.
+
+**Catatan deploy — PENTING:** migration ini **WAJIB** dijalankan di production — `git pull origin master` lalu `php artisan migrate --force`. Ini mengubah TOTAL POIN SEMUA PIC SECARA SIGNIFIKAN (turun ~70% rata-rata) — pastikan tim terkait sudah diberi tahu sebelum deploy, karena akan langsung terlihat di leaderboard/laporan begitu migration jalan. Cek `storage/logs/laravel.log` (log key: `"Koreksi retroaktif riwayat poin PIC ke rate per tahap yang berlaku sekarang"`) untuk detail lengkap jumlah baris per tahap yang terkoreksi di production.
