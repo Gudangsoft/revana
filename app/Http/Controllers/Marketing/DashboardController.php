@@ -285,8 +285,13 @@ class DashboardController extends Controller
             };
         }
 
+        // Total tugas & total point untuk hasil filter saat ini (bukan keseluruhan) —
+        // dihitung dari query yang sama sebelum paginate, supaya tetap akurat walau
+        // hasil filter lebih dari 1 halaman.
+        $filteredTotals = (clone $query)->selectRaw('COUNT(*) as total_tasks, COALESCE(SUM(points_earned), 0) as total_points')->first();
+
         $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
-        
+
         // Statistics
         $pointsToday = MarketingPointHistory::where('marketing_id', $marketing->id)
             ->whereDate('created_at', today())
@@ -304,7 +309,7 @@ class DashboardController extends Controller
             'total_tasks' => $pointHistories->total(),
         ];
         
-        return view('marketing.points', compact('marketing', 'pointHistories', 'stats'));
+        return view('marketing.points', compact('marketing', 'pointHistories', 'stats', 'filteredTotals'));
     }
 
     /**

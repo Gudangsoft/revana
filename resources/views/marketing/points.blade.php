@@ -88,6 +88,12 @@
             @endforeach
         </div>
 
+        <!-- Total Hasil Filter -->
+        <div class="alert alert-light border d-flex flex-wrap gap-3 align-items-center mb-3">
+            <span><i class="bi bi-list-check"></i> Total Tugas: <strong>{{ number_format($filteredTotals->total_tasks, 0, ',', '.') }}</strong></span>
+            <span><i class="bi bi-trophy"></i> Total Point: <strong class="text-success">+{{ number_format($filteredTotals->total_points, 2) }}</strong></span>
+        </div>
+
         @if($pointHistories->count() > 0)
         @include('partials.column-toggle', ['tableId' => 'mktPointsTable', 'columns' => ['Tanggal', 'Point', 'Keterangan', 'Artikel'], 'columnOffset' => 0])
         <div class="table-responsive">

@@ -317,3 +317,73 @@ User dikonfirmasi (dengan angka dampak eksplisit ditunjukkan dulu) untuk **mengo
 **Diverifikasi:** render halaman lewat controller asli — teks "Sinkron Data Point" sudah 0 kemunculan.
 
 **Catatan:** murni perubahan tampilan, tidak ada perubahan logika/route/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`/`cache:clear`.
+
+## 17. Fix Data Poin PIC Kembar (Race Condition) + Tambah Unique Constraint
+
+**Tujuan:** User menunjukkan screenshot riwayat poin PIC dengan baris identik berulang (3x "Validasi Production - SUB202607170013" jam 11:53, 2x "Validasi Production - SUB202607170014" jam 11:49, semua +1,00) dan minta dicek alasannya lalu diperbaiki.
+
+**Root cause:** `pic_point_histories` tidak punya batasan UNIK di database untuk kombinasi (pic_id, submission_id, step). Satu-satunya perlindungan dari poin dobel adalah pengecekan "sudah ada atau belum" di `PicPointHistory::awardPoints()` — TIDAK atomik. Kalau 2 permintaan datang hampir bersamaan (klik ganda tombol validasi, atau retry jaringan), keduanya bisa lolos pengecekan di saat yang sama sebelum salah satunya sempat tersimpan, menghasilkan baris kembar. Dicek di database lokal: **1.610 kelompok data kembar, 1.786 baris berlebih** — bug struktural, bukan kasus terisolasi.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_28_000005_deduplicate_and_constrain_pic_point_histories.php` (baru) | Hapus baris kembar (simpan yang id-nya paling kecil/paling awal per kelompok, hapus sisanya) — baris `submission_id` NULL (penyesuaian manual admin) TIDAK terpengaruh. Tambah `UNIQUE INDEX (pic_id, submission_id, step)` supaya database sendiri menolak percobaan kembar ke depan (index unik tidak berlaku untuk NULL, jadi penyesuaian manual tetap bisa berkali-kali). Hitung ulang `total_points` PIC yang terdampak |
+| `app/Models/PicPointHistory.php` | `awardPoints()`: bungkus `create()` dengan try/catch — kalau constraint baru menolak (race benar-benar terjadi), tangkap dan kembalikan `null` (sama seperti "sudah pernah diberi"), bukan crash 500 ke pengguna |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `runBulkSync()`: 2 query bulk INSERT (submit & per-tahap alur kerja) diganti jadi `INSERT IGNORE` — defensif terhadap constraint baru, supaya 1 baris yang kebetulan bentrok tidak menggagalkan seluruh batch |
+
+**Diverifikasi lewat migration & simulasi race sungguhan:**
+1. Buat 3 baris kembar asli (PIC+submission+step sama) + 2 baris penyesuaian manual (submission_id NULL) untuk PIC yang sama → jalankan migration → kelompok kembar berkurang jadi 1 baris (yang id-nya paling kecil), 2 baris penyesuaian manual TIDAK tersentuh, unique index berhasil dibuat.
+2. Coba INSERT langsung baris kembar baru setelah constraint ada → **ditolak database** dengan pesan sesuai nama constraint.
+3. Test region normal `awardPoints()`: award baru berhasil, award kedua untuk kombinasi sama mengembalikan `null` (lewat pengecekan biasa, bukan exception) — tidak ada regresi.
+4. `runBulkSync()` dijalankan ulang setelah perubahan `INSERT IGNORE` — tetap berjalan normal, backfill & idempoten seperti sebelumnya.
+5. Pengecekan akhir: 0 kelompok kembar tersisa, 0 dari 70 PIC/15 marketing/8.343 slot out-of-sync.
+
+**Catatan deploy:** migration ini **WAJIB** dijalankan di production — `git pull origin master` lalu `php artisan migrate --force`. Ini akan MENGHAPUS baris kembar (mengurangi total poin PIC yang punya duplikasi) — cek `storage/logs/laravel.log` (log key: `"Hapus data poin PIC kembar + tambah unique constraint"`) untuk detail jumlah baris yang dihapus per production.
+
+## 18. Bangun Test Suite Otomatis untuk Sistem Poin (PIC & Marketing)
+
+**Tujuan:** Setelah rentetan bug poin hari ini (rate salah, badge navbar tidak sinkron, data kembar), user minta langkah pencegahan jangka panjang. Prioritas pertama yang dipilih: test otomatis, supaya bug serupa (rate ketimpa saat sync, formula SUM vs COUNT ketuker, constraint kembar bolong) langsung ketahuan sebelum sampai production, bukan lewat laporan user.
+
+**Kondisi awal:** PHPUnit 10 sudah ada di `composer.json` tapi scaffolding test 100% belum ada — tidak ada `phpunit.xml`, `tests/TestCase.php`, `.env.testing`, atau database test. Dibangun dari nol.
+
+**Keputusan desain:** pakai database MySQL terpisah sungguhan (`dbrevana_testing`), BUKAN SQLite in-memory — karena kode banyak bergantung pada perilaku spesifik MySQL (`INSERT IGNORE`, unique index yang mengecualikan NULL, `whereRaw('ABS(...) > 0.0001')`, kolom ENUM) yang tidak direplikasi persis oleh SQLite. Pakai `RefreshDatabase` (transaksi per test, rollback otomatis) untuk isolasi cepat.
+
+### File yang Diubah/Ditambah
+| File | Perubahan |
+|------|-----------|
+| `phpunit.xml` (baru) | Konfigurasi standar Laravel 10, testsuite Unit/Feature, koneksi ke `dbrevana_testing` |
+| `.env.testing` (baru) | Environment khusus testing — cache/session/mail pakai driver `array`, DB ke `dbrevana_testing` |
+| `tests/TestCase.php`, `tests/CreatesApplication.php` (baru) | Base class standar Laravel yang sebelumnya tidak ada |
+| `tests/Feature/Points/CreatesPointTestFixtures.php` (baru) | Trait helper bikin data minimal (User→JournalMaster→JournalSlot→Submission, Pic, Marketing) sesuai rantai foreign key asli |
+| `tests/Feature/Points/PicPointHistoryAwardTest.php` (baru, 7 test) | `awardPoints()` pakai rate dari `TaskPointSetting` yang aktif; idempoten; DB menolak baris kembar (pic_id+submission_id+step) lewat unique constraint dari section #17; baris penyesuaian manual (submission_id NULL) tidak kena constraint; fallback ke `POINT_CONFIG` saat tidak ada setting aktif |
+| `tests/Feature/Points/MarketingPointHistoryAwardTest.php` (baru, 4 test) | Regresi langsung insiden badge navbar (section #2): `getActualPoints()` harus SUM riwayat, bukan COUNT submission — dibuktikan dengan rate lama (10/submission) vs rate baru (0,5) yang kalau salah pakai COUNT akan menghasilkan angka yang jauh beda dari SUM sebenarnya |
+| `tests/Feature/Points/RunBulkSyncTest.php` (baru, 6 test) | Jaminan inti `runBulkSync()` PIC & Marketing: **backfill-only, never rewrite** — baris yang sudah ada tidak boleh tertimpa walau rate berubah (regresi langsung insiden section #14, penurunan ~70% poin PIC); baris yang benar-benar hilang tetap terisi dengan rate saat ini; panggilan berulang tidak menghasilkan duplikat; total_points dihitung ulang sebagai SUM bukan COUNT |
+
+**Hasil:** 18 test, 30 assertion, semua **PASS** (`./vendor/bin/phpunit tests/Feature/Points --testdox`).
+
+**Catatan:** ini scaffolding awal, belum menjalankan test di CI (belum ada pipeline CI di project ini) — untuk sekarang dijalankan manual sebelum commit perubahan di area poin. Tidak ada perubahan ke kode aplikasi/production di section ini, murni infrastruktur test lokal + `.env.testing` (tidak ikut ke production, hanya dipakai `php artisan test`/`phpunit` lokal).
+
+## 19. Tambah Total Tugas & Total Point di Hasil Filter "Riwayat Perolehan Point" (PIC & Marketing)
+
+**Tujuan:** User minta ringkasan total tugas dan total point untuk hasil yang sedang difilter (bukan cuma total keseluruhan yang sudah ada di stats card atas), supaya saat filter periode/tanggal/tipe tugas diterapkan, langsung terlihat berapa tugas dan berapa poin dari hasil filter itu tanpa harus menjumlahkan manual dari tabel (terutama kalau hasilnya lebih dari 1 halaman).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/PicPointController.php` | `index()`: tambah `$filteredTotals` — hasil `(clone $query)->selectRaw('COUNT(*) as total_tasks, COALESCE(SUM(points_earned), 0) as total_points')->first()` dari query yang sama (setelah semua filter period/tanggal/step diterapkan, sebelum `paginate()`) — supaya akurat lintas halaman |
+| `app/Http/Controllers/Marketing/DashboardController.php` | `points()`: tambah `$filteredTotals` dengan pola sama |
+| `resources/views/pic/points/index.blade.php` | Tambah baris ringkasan "Total Tugas" & "Total Point" di atas tabel riwayat, di dalam card yang sama dengan tombol filter periode |
+| `resources/views/marketing/points.blade.php` | Tambah baris ringkasan yang sama |
+
+**Diverifikasi:** dicek lewat `php artisan tinker` — hasil `$filteredTotals` (COUNT + SUM lewat clone query) dicocokkan dengan hitungan langsung dari tabel `pic_point_histories` untuk PIC yang punya 3.387 riwayat — cocok persis (3387 tugas, 1593.35 point). Kedua file Blade dicek lolos compile (`Blade::compileString`) tanpa error.
+
+## 20. Tutup Celah Crash 500 di `MarketingPointHistory::awardPoints()` Saat Race Condition
+
+**Tujuan:** Saat membahas rencana deploy fix data kembar PIC (section #17) ke production, dicek juga apakah sisi Marketing punya risiko serupa. Ternyata `marketing_point_histories` **sudah** punya UNIQUE constraint (`marketing_id`, `submission_id`) sejak awal — jadi database tidak pernah menyimpan baris kembar (dikonfirmasi: 0 kelompok duplikat di data lokal). Tapi `MarketingPointHistory::awardPoints()` **belum** dibungkus try/catch seperti `PicPointHistory::awardPoints()` — kalau race condition benar-benar terjadi (klik ganda submit, retry jaringan), `create()` yang kedua akan menabrak constraint dan **crash dengan error 500** ke user, bukan pulang mulus. Bug laten ini sudah ada sejak sebelum sesi ini, ditemukan saat investigasi, langsung diperbaiki agar konsisten dengan penanganan di sisi PIC.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/MarketingPointHistory.php` | `awardPoints()`: bungkus `self::create()` dengan try/catch — kalau `QueryException` dengan pesan mengandung nama constraint `marketing_point_histories_marketing_id_submission_id_unique`, kembalikan `null` (dianggap "sudah pernah diberi"); exception lain tetap dilempar ulang |
+
+**Diverifikasi:** lewat `php artisan tinker` (dalam transaksi yang di-rollback, tidak menyentuh data asli) — dibuat 2 baris `MarketingPointHistory::create()` dengan `marketing_id`+`submission_id` sama persis, baris kedua ditangkap `QueryException` dan pesan errornya dicocokkan persis dengan string yang dicek di `awardPoints()` — **cocok**. Full test suite (`tests/Feature/Points`, 18 test) tetap **PASS** setelah perubahan ini (perubahan tidak mengubah alur normal, hanya menambah jaring pengaman untuk kasus race yang jarang terjadi).

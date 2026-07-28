@@ -121,14 +121,27 @@ class PicPointHistory extends Model
             return null; // Already awarded
         }
 
-        // Create point history
-        $history = self::create([
-            'pic_id' => $picId,
-            'submission_id' => $submissionId,
-            'step' => $step,
-            'points_earned' => $points,
-            'description' => $description ?? "Menyelesaikan tugas " . self::getLabelForStep($step),
-        ]);
+        // Create point history. Pengecekan di atas TIDAK atomik — kalau 2 permintaan
+        // datang hampir bersamaan (klik ganda, retry jaringan), keduanya bisa lolos
+        // pengecekan sebelum salah satunya sempat tersimpan. UNIQUE index
+        // (pic_id, submission_id, step) di database jadi penjaga terakhir; kalau
+        // race itu terjadi, INSERT kedua akan gagal dengan duplicate-key — tangkap
+        // di sini dan perlakukan sama seperti "sudah pernah diberi" (return null),
+        // bukan crash 500.
+        try {
+            $history = self::create([
+                'pic_id' => $picId,
+                'submission_id' => $submissionId,
+                'step' => $step,
+                'points_earned' => $points,
+                'description' => $description ?? "Menyelesaikan tugas " . self::getLabelForStep($step),
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'pic_point_histories_unique_award')) {
+                return null;
+            }
+            throw $e;
+        }
 
         if ($occurredAt) {
             $history->forceFill([

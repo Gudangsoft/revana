@@ -114,7 +114,12 @@ class PicPointController extends Controller
         if ($request->filled('step')) {
             $query->where('step', $request->step);
         }
-        
+
+        // Total tugas & total point untuk hasil filter saat ini (bukan keseluruhan) —
+        // dihitung dari query yang sama sebelum paginate, supaya tetap akurat walau
+        // hasil filter lebih dari 1 halaman.
+        $filteredTotals = (clone $query)->selectRaw('COUNT(*) as total_tasks, COALESCE(SUM(points_earned), 0) as total_points')->first();
+
         $pointHistories = $query->latest()->paginate(request()->input('per_page', 20));
         
         // Statistics - calculate real-time from point histories
@@ -166,7 +171,8 @@ class PicPointController extends Controller
             'stats',
             'monthlyPoints',
             'pointsByStep',
-            'stepConfig'
+            'stepConfig',
+            'filteredTotals'
         ));
     }
 

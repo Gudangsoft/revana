@@ -196,6 +196,12 @@
             </div>
         </form>
 
+        <!-- Total Hasil Filter -->
+        <div class="alert alert-light border d-flex flex-wrap gap-3 align-items-center mb-3">
+            <span><i class="bi bi-list-check"></i> Total Tugas: <strong>{{ number_format($filteredTotals->total_tasks, 0, ',', '.') }}</strong></span>
+            <span><i class="bi bi-trophy"></i> Total Point: <strong class="{{ $filteredTotals->total_points >= 0 ? 'text-success' : 'text-danger' }}">{{ $filteredTotals->total_points >= 0 ? '+' : '' }}{{ number_format($filteredTotals->total_points, 2) }}</strong></span>
+        </div>
+
         <!-- History Table -->
         <div class="table-responsive">
             <table class="table table-hover table-striped" id="picPointsTable">

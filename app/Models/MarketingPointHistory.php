@@ -82,13 +82,25 @@ class MarketingPointHistory extends Model
         // Get points from config
         $points = self::getPointsForSubmission();
 
-        // Create point history
-        $history = self::create([
-            'marketing_id' => $marketingId,
-            'submission_id' => $submissionId,
-            'points_earned' => $points,
-            'description' => $description ?? "Submit artikel berhasil",
-        ]);
+        // Create point history. Kalau 2 request datang hampir bersamaan (race condition:
+        // klik ganda, retry jaringan), keduanya bisa lolos pengecekan "sudah ada atau
+        // belum" di atas sebelum salah satu sempat tersimpan — constraint unique
+        // (marketing_id, submission_id) di database akan menolak yang kedua. Tangkap di
+        // sini supaya user dapat respons mulus (null, "sudah pernah diberi"), bukan
+        // crash 500 — sama seperti penanganan di PicPointHistory::awardPoints().
+        try {
+            $history = self::create([
+                'marketing_id' => $marketingId,
+                'submission_id' => $submissionId,
+                'points_earned' => $points,
+                'description' => $description ?? "Submit artikel berhasil",
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'marketing_point_histories_marketing_id_submission_id_unique')) {
+                return null;
+            }
+            throw $e;
+        }
 
         if ($occurredAt) {
             $history->forceFill([

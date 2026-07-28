@@ -270,10 +270,13 @@ class PicPointReportController extends Controller
         // (dipicu admin menyimpan setting poin TUGAS APAPUN) — itu menghancurkan riwayat
         // poin PIC yang sudah benar begitu rate berubah. Sekarang HANYA mengisi baris yang
         // belum ada; baris yang sudah ada tidak pernah ditimpa lagi.
+        // INSERT IGNORE: sekarang ada UNIQUE index (pic_id, submission_id, step), jadi
+        // kalau ada race kecil dengan awardPoints() yang berjalan bersamaan, baris yang
+        // bentrok cukup dilewati (bukan menggagalkan seluruh batch INSERT).
         $submitPoints = PicPointHistory::getPointsForStep('submit');
         if ($submitPoints > 0) {
             $backfilled += \DB::affectingStatement("
-                INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
+                INSERT IGNORE INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
                 SELECT s.petugas_submit_id, s.id, 'submit', ?,
                        CONCAT('Submit artikel: ', COALESCE(s.kode_submit,''), ' - ', COALESCE(s.judul_artikel,'')),
                        COALESCE(s.created_at, NOW()), COALESCE(s.created_at, NOW())
@@ -292,7 +295,7 @@ class PicPointReportController extends Controller
 
             if ($points > 0) {
                 $backfilled += \DB::affectingStatement("
-                    INSERT INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
+                    INSERT IGNORE INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
                     SELECT s.{$ws['field']}, s.id, '{$ws['step']}', ?,
                            CONCAT('Menyelesaikan tugas {$ws['step']} untuk: ', COALESCE(s.kode_submit,'')),
                            COALESCE(s.{$ws['validated_at']}, NOW()), COALESCE(s.{$ws['validated_at']}, NOW())
