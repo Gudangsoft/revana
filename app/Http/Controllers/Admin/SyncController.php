@@ -10,7 +10,6 @@ use App\Models\PicPointHistory;
 use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class SyncController extends Controller
 {
@@ -95,73 +94,49 @@ class SyncController extends Controller
     }
 
     /**
-     * Sinkronisasi total_points semua marketing.
+     * Sinkronisasi point PIC & Marketing sekaligus — satu-satunya tombol sinkronisasi
+     * point di admin panel (konsolidasi dari 7 tombol yang sebelumnya tersebar di
+     * /admin/pic-points, /admin/marketing-points, /admin/reports/team-performance, dan
+     * halaman ini sendiri — semuanya melakukan hal serupa dengan tingkat kelengkapan
+     * yang tidak konsisten). Memakai logika PALING lengkap yang sudah ada: backfill
+     * riwayat hilang, perbaiki tanggal yang tidak cocok dengan tanggal validasi asli
+     * (lihat insiden 28 Juli 2026), hitung ulang total_points, dan hapus riwayat orphan.
      */
-    public function syncMarketingPoints()
+    public function syncPoints()
     {
-        $marketings = Marketing::all();
-        $updated    = 0;
-
-        foreach ($marketings as $marketing) {
-            // SUM riwayat poin — bukan COUNT submission (lihat catatan di gatherStats())
-            $actual = (float) $marketing->pointHistories()->sum('points_earned');
-            if (round((float) $marketing->total_points, 4) !== round($actual, 4)) {
-                $marketing->update(['total_points' => $actual]);
-                $updated++;
-            }
-        }
+        [$picBackfilled, $picRepaired, $picSynced, $picOrphans] = PicPointReportController::runFullSync();
+        [$mktCreated, $mktSynced] = MarketingPointReportController::runFullSync();
 
         self::clearSyncCache();
-        return back()->with('success', "✅ Sinkronisasi point marketing berhasil. {$updated} dari {$marketings->count()} marketing diperbarui.");
+
+        $msg = "✅ Sinkronisasi point selesai. PIC: {$picBackfilled} riwayat baru, {$picRepaired} tanggal dikoreksi, {$picSynced} PIC diperbarui";
+        if ($picOrphans > 0) {
+            $msg .= ", {$picOrphans} riwayat orphan dihapus";
+        }
+        $msg .= ". Marketing: {$mktCreated} riwayat baru, {$mktSynced} marketing diperbarui.";
+
+        return back()->with('success', $msg);
     }
 
     /**
-     * Sinkronisasi total_points semua PIC dari riwayat point mereka.
-     */
-    public function syncPicPoints()
-    {
-        $pics    = Pic::select('id', 'total_points')->get();
-        $updated = 0;
-
-        foreach ($pics as $pic) {
-            $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-            // round() to 4 decimal places avoids float imprecision false positives
-            if (round((float) $pic->total_points, 4) !== round($actual, 4)) {
-                $pic->update(['total_points' => $actual]);
-                $updated++;
-            }
-        }
-
-        self::clearSyncCache();
-        return back()->with('success', "✅ Sinkronisasi point PIC berhasil. {$updated} dari {$pics->count()} PIC diperbarui.");
-    }
-
-    /**
-     * Sinkronisasi semua data sekaligus.
+     * Sinkronisasi semua data sekaligus (slot + point PIC & Marketing, versi lengkap).
      */
     public function syncAll()
     {
-        DB::transaction(function () {
-            // Slots
-            JournalSlot::recalculateAll();
-
-            // Marketing points — rebuild total_points dari SUM marketing_point_histories
-            // (bukan lagi COUNT submission, lihat catatan di gatherStats())
-            foreach (Marketing::all() as $m) {
-                $actual = (float) $m->pointHistories()->sum('points_earned');
-                $m->update(['total_points' => $actual]);
-            }
-
-            // PIC points — rebuild total_points from pic_point_histories sum.
-            // This also corrects any double-counted values from historical bugs.
-            foreach (Pic::select('id', 'total_points')->get() as $pic) {
-                $actual = (float) PicPointHistory::where('pic_id', $pic->id)->sum('points_earned');
-                $pic->update(['total_points' => $actual]);
-            }
-        });
+        $slotCount = JournalSlot::recalculateAll();
+        [$picBackfilled, $picRepaired, $picSynced, $picOrphans] = PicPointReportController::runFullSync();
+        [$mktCreated, $mktSynced] = MarketingPointReportController::runFullSync();
 
         self::clearSyncCache();
-        return back()->with('success', '✅ Sinkronisasi semua data berhasil! Slot jurnal, point marketing, dan point PIC telah diperbarui.');
+
+        $msg = "✅ Sinkronisasi semua data berhasil! {$slotCount} slot jurnal diperbarui. "
+            . "PIC: {$picBackfilled} riwayat baru, {$picRepaired} tanggal dikoreksi, {$picSynced} PIC diperbarui";
+        if ($picOrphans > 0) {
+            $msg .= ", {$picOrphans} riwayat orphan dihapus";
+        }
+        $msg .= ". Marketing: {$mktCreated} riwayat baru, {$mktSynced} marketing diperbarui.";
+
+        return back()->with('success', $msg);
     }
 
     /**

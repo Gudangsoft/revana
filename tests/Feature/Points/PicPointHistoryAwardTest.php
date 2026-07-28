@@ -136,4 +136,24 @@ class PicPointHistoryAwardTest extends TestCase
 
         $this->assertEquals(1, PicPointHistory::getPointsForStep('production'));
     }
+
+    /**
+     * Regresi untuk bug "tanggal kerja berubah" (28 Juli 2026): 3 tempat yang
+     * mengaward poin secara langsung/real-time (JournalManagementController,
+     * SubmissionController::validateStep, SubmissionController::toggleValidField)
+     * dulu tidak mengirim $occurredAt ke awardPoints() — kalau baris poin baru
+     * berhasil tersimpan belakangan (race/retry), tanggalnya jadi "sekarang", bukan
+     * tanggal validasi sebenarnya. Test ini mengunci kontrak: kalau $occurredAt
+     * dikirim, created_at HARUS mengikutinya, bukan waktu saat baris dibuat.
+     */
+    public function test_award_points_backdates_created_at_to_provided_occurred_at(): void
+    {
+        $pic = $this->makePic();
+        $submission = $this->makeSubmission();
+        $occurredAt = now()->subDays(3);
+
+        $history = PicPointHistory::awardPoints($pic->id, $submission->id, 'editor1', 'Validasi Editor 1', $occurredAt);
+
+        $this->assertEquals($occurredAt->format('Y-m-d H:i:s'), $history->created_at->format('Y-m-d H:i:s'));
+    }
 }

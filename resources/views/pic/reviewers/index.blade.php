@@ -99,7 +99,7 @@
                                 <a href="mailto:{{ $reviewer->email }}" class="btn btn-sm btn-outline-primary" title="Kirim Email">
                                     <i class="bi bi-envelope"></i>
                                 </a>
-                                <form action="{{ route('pic.reviewers.login-as', $reviewer) }}" method="POST" class="d-inline">
+                                <form action="{{ route('pic.reviewers.login-as', $reviewer) }}" method="POST" class="d-inline" target="_blank">
                                     @csrf
                                     <button type="submit" class="btn btn-sm btn-warning" title="Login sebagai {{ $reviewer->name }}" onclick="return confirm('Login sebagai {{ $reviewer->name }}?')">
                                         <i class="bi bi-box-arrow-in-right"></i>

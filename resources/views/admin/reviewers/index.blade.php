@@ -168,7 +168,7 @@
                                         <a href="{{ route('admin.reviewers.edit', $reviewer) }}" class="btn btn-sm btn-primary" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
-                                        <form action="{{ route('admin.reviewers.login-as', $reviewer) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.reviewers.login-as', $reviewer) }}" method="POST" class="d-inline" target="_blank">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" title="Login sebagai {{ $reviewer->name }}">
                                                 <i class="bi bi-box-arrow-in-right"></i>

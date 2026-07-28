@@ -88,15 +88,15 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-trophy"></i> Leaderboard Marketing</span>
                 <div class="d-flex gap-2 align-items-center">
-                    <form method="POST" action="{{ route('admin.marketing-points.sync-all') }}" class="d-inline" onsubmit="return confirm('Sinkronkan semua point marketing dari data submission?')">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-warning">
-                            <i class="bi bi-arrow-repeat"></i> Sinkronkan Point
-                        </button>
-                    </form>
+                    <a href="{{ route('admin.sync.index') }}" class="btn btn-sm btn-outline-warning" title="Sinkronisasi point sekarang dilakukan dari satu halaman terpusat">
+                        <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point
+                    </a>
                     <a href="{{ route('admin.marketing-points.export-leaderboard') }}{{ request('search') ? '?search=' . urlencode(request('search')) : '' }}" class="btn btn-sm btn-info">
                         <i class="bi bi-file-excel"></i> Export Excel
                     </a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#resetAllMarketingPointsModal">
+                        <i class="bi bi-trash3"></i> Reset Semua Point
+                    </button>
                     @include('partials.column-toggle', ['tableId' => 'dataTable', 'columns' => ['Nama', 'Email', 'Phone', 'Total Submission', 'Total Point', 'Aksi'], 'columnOffset' => 1])
                 <form method="GET" class="d-flex gap-2">
                     <input type="text" name="search" class="form-control form-control-sm" 
@@ -209,6 +209,47 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-warning btn-sm">
                         <i class="bi bi-check-circle"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Reset Semua Point Marketing --}}
+<div class="modal fade" id="resetAllMarketingPointsModal" tabindex="-1" aria-labelledby="resetAllMarketingPointsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="resetAllMarketingPointsModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Reset Semua Point Marketing
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.marketing-points.reset-all') }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <strong>⚠ Peringatan Keras!</strong><br>
+                        Tindakan ini akan:
+                        <ul class="mb-0 mt-1">
+                            <li>Menghapus <strong>SEMUA riwayat point</strong> dari semua Marketing secara permanen</li>
+                            <li>Mengeset <strong>total_points = 0</strong> untuk semua Marketing</li>
+                            <li><strong>Tidak bisa dibatalkan</strong> setelah dikonfirmasi</li>
+                        </ul>
+                    </div>
+                    <p class="mb-1">Total sekarang: <strong class="text-success">{{ number_format($totalPoints, 2) }} point</strong> dari <strong>{{ number_format($totalMarketings) }} Marketing</strong> dan <strong>{{ number_format($totalHistories) }} riwayat</strong>.</p>
+                    <p class="mb-3">Ketik <strong>RESET</strong> (huruf kapital) untuk mengkonfirmasi:</p>
+                    <input type="text" name="konfirmasi" class="form-control @error('konfirmasi') is-invalid @enderror"
+                           placeholder="Ketik RESET di sini..." autocomplete="off" required>
+                    @error('konfirmasi')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3-fill me-1"></i>Ya, Reset Semua Point
                     </button>
                 </div>
             </form>

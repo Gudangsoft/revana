@@ -122,21 +122,9 @@
             <a href="{{ route('admin.team-performance', array_merge(request()->query(), ['export' => 'excel_all'])) }}" class="btn btn-info text-white">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Export Seluruh Rekap (Excel)
             </a>
-            @if($step === 'marketing')
-            <form method="POST" action="{{ route('admin.sync.marketing-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua Marketing berdasarkan jumlah submission?\n\nProses ini akan menghitung ulang total_points semua Marketing.')">
-                @csrf
-                <button type="submit" class="btn btn-warning">
-                    <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point Marketing
-                </button>
-            </form>
-            @else
-            <form method="POST" action="{{ route('admin.sync.pic-points') }}" class="d-inline" onsubmit="return confirm('Sinkronisasi total point semua PIC berdasarkan riwayat tugas?\n\nProses ini akan menghitung ulang total_points semua PIC.')">
-                @csrf
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point PIC
-                </button>
-            </form>
-            @endif
+            <a href="{{ route('admin.sync.index') }}" class="btn btn-outline-warning" title="Sinkronisasi point sekarang dilakukan dari satu halaman terpusat">
+                <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point
+            </a>
         </div>
     </div>
 </div>

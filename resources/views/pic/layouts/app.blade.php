@@ -158,6 +158,19 @@
     </style>
 </head>
 <body>
+    @if(session('admin_impersonating'))
+    <div class="bg-warning text-dark py-1 px-3 d-flex align-items-center gap-2" style="font-size:.85rem; border-bottom: 2px solid #ffc107;">
+        <i class="bi bi-eye-fill"></i>
+        <strong>Mode Admin:</strong> Anda sedang melihat sebagai <strong>{{ auth()->guard('pic')->user()->name }}</strong>
+        <form method="POST" action="{{ route('admin.pics.return-to-admin') }}" class="ms-auto mb-0">
+            @csrf
+            <button type="submit" class="btn btn-dark btn-sm fw-bold">
+                <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin
+            </button>
+        </form>
+    </div>
+    @endif
+
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('pic.author.dashboard') }}">

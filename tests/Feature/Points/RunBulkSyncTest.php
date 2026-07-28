@@ -4,10 +4,12 @@ namespace Tests\Feature\Points;
 
 use App\Http\Controllers\Admin\MarketingPointReportController;
 use App\Http\Controllers\Admin\PicPointReportController;
+use App\Http\Controllers\Admin\SyncController;
 use App\Models\MarketingPointHistory;
 use App\Models\PicPointHistory;
 use App\Models\TaskPointSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -145,5 +147,69 @@ class RunBulkSyncTest extends TestCase
         MarketingPointReportController::runBulkSync();
 
         $this->assertEquals(20, $marketing->fresh()->total_points);
+    }
+
+    /**
+     * Regresi langsung untuk pertanyaan user (28 Juli 2026): "ketika klik sinkron
+     * harusnya tidak merubah tanggal kerja". Mengunci lewat tombol tunggal
+     * SyncController::syncPoints() (hasil konsolidasi section #22, dipakai
+     * /admin/sync): baris yang tanggalnya SUDAH BENAR harus tetap sama persis
+     * setelah sinkron — bukan ikut tertimpa ke tanggal sinkron dijalankan.
+     */
+    public function test_sync_points_button_does_not_change_created_at_of_already_correct_history(): void
+    {
+        $pic = $this->makePic();
+        $submission = $this->makeSubmission([
+            'petugas_editor1_id' => $pic->id,
+            'editor1_valid' => true,
+            'editor1_validated_at' => '2026-07-20 09:00:00',
+        ]);
+
+        // Insert langsung via query builder (bukan Eloquent create()) supaya created_at
+        // benar-benar ter-set ke tanggal yang sudah cocok dengan validated_at — created_at
+        // bukan kolom fillable di PicPointHistory, jadi create() akan mengabaikannya.
+        $historyId = DB::table('pic_point_histories')->insertGetId([
+            'pic_id' => $pic->id, 'submission_id' => $submission->id, 'step' => 'editor1',
+            'points_earned' => 1, 'description' => 'sudah benar',
+            'created_at' => '2026-07-20 09:00:00', 'updated_at' => '2026-07-20 09:00:00',
+        ]);
+
+        (new SyncController())->syncPoints();
+
+        $this->assertEquals(
+            '2026-07-20 09:00:00',
+            DB::table('pic_point_histories')->where('id', $historyId)->value('created_at'),
+            'Tombol Sinkronisasi Data tidak boleh mengubah tanggal riwayat yang sudah benar'
+        );
+    }
+
+    /**
+     * Pasangan test di atas: kalau tanggalnya SUDAH TELANJUR SALAH (mis. dari insiden
+     * sebelum fix section #21), tombol sinkron harus MEMPERBAIKI ke tanggal validasi
+     * asli — bukan membiarkannya salah, dan bukan pula menimpanya ke tanggal sinkron
+     * dijalankan.
+     */
+    public function test_sync_points_button_repairs_mismatched_created_at_to_true_validated_at(): void
+    {
+        $pic = $this->makePic();
+        $submission = $this->makeSubmission([
+            'petugas_editor1_id' => $pic->id,
+            'editor1_valid' => true,
+            'editor1_validated_at' => '2026-07-21 10:00:00',
+        ]);
+
+        $historyId = DB::table('pic_point_histories')->insertGetId([
+            'pic_id' => $pic->id, 'submission_id' => $submission->id, 'step' => 'editor1',
+            'points_earned' => 1, 'description' => 'telanjur salah tanggal',
+            'created_at' => '2026-07-25 15:00:00', 'updated_at' => '2026-07-25 15:00:00',
+        ]);
+
+        (new SyncController())->syncPoints();
+
+        $this->assertEquals(
+            '2026-07-21 10:00:00',
+            DB::table('pic_point_histories')->where('id', $historyId)->value('created_at'),
+            'Tombol Sinkronisasi Data harus memperbaiki tanggal yang salah ke tanggal validasi asli, bukan ke tanggal sinkron dijalankan'
+        );
     }
 }

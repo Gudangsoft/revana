@@ -117,6 +117,18 @@ class CertificateController extends Controller
         $reviewerName = strtoupper($reviewer->name);
         $articleTitle = $assignment->article_title;
         $articleNumber = $assignment->article_number;
+
+        // ReviewAssignment tidak menyimpan link balik ke jurnal aslinya (journal_id
+        // selalu null, lihat ReviewAssignmentController::store()) — jadi nomor surat
+        // (kode LOA), nama jurnal, dan nama publisher dicari lewat pencocokan
+        // submit_link == submissions.link_artikel (dikonfirmasi cocok 100% untuk
+        // semua assignment approved yang ada).
+        $sourceSubmission = \App\Models\Submission::where('link_artikel', $assignment->submit_link)
+            ->with('journalSlot.journalMaster')
+            ->first();
+        $nomorSurat    = $sourceSubmission ? ($sourceSubmission->kode_loa ?: $sourceSubmission->kode_submit) : '-';
+        $namaJurnal    = $sourceSubmission?->journalSlot?->journalMaster?->nama_jurnal ?? '-';
+        $namaPublisher = $sourceSubmission?->journalSlot?->journalMaster?->publisher ?? '-';
         
         // Get reviewer position
         $position = ($assignment->reviewer_id == auth()->id()) ? 'REVIEWER 1' : 'REVIEWER 2';
@@ -172,7 +184,21 @@ class CertificateController extends Controller
             $font->align('center');
             $font->valign('middle');
         });
-        
+
+        // Nomor Surat (kode LOA), Nama Jurnal, dan Publisher — satu baris kecil di
+        // bawah tanggal, sebelum border bawah. CATATAN: posisi Y ini perkiraan
+        // berdasarkan template referensi (file template AKTIF tidak tersedia untuk
+        // dites render langsung) — cek visual hasil sertifikat asli, geser
+        // "$height - 110" kalau ternyata tumpang tindih dengan elemen lain.
+        $infoText = "No. Surat: {$nomorSurat}   |   Jurnal: {$namaJurnal}   |   Publisher: {$namaPublisher}";
+        $image->text($infoText, $width / 2, $height - 110, function($font) use ($fontRegular) {
+            $font->filename($fontRegular);
+            $font->size(26);
+            $font->color('#8B6914');
+            $font->align('center');
+            $font->valign('middle');
+        });
+
         // Save file
         if ($forPreview) {
             // Save to public/temp for preview

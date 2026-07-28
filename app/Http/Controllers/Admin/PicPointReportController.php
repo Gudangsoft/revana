@@ -213,6 +213,25 @@ class PicPointReportController extends Controller
      */
     public function syncAllPoints()
     {
+        [$backfilled, $repaired, $synced, $orphanCount] = self::runFullSync();
+
+        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$repaired} tanggal dikoreksi, {$synced} PIC diperbarui";
+        if ($orphanCount > 0) {
+            $msg .= ", {$orphanCount} riwayat orphan dihapus";
+        }
+
+        return redirect()->route('admin.pic-points.index')->with('success', $msg . '.');
+    }
+
+    /**
+     * Sinkronisasi PIC paling lengkap: backfill riwayat hilang + perbaiki tanggal yang
+     * tidak cocok (lewat runBulkSync()) + hitung ulang total_points + hapus riwayat
+     * orphan. Dipakai oleh syncAllPoints() (tombol di /admin/pic-points) dan
+     * SyncController::syncPoints() (tombol tunggal di /admin/sync).
+     * Returns [$backfilled, $repaired, $synced, $orphanCount].
+     */
+    public static function runFullSync(): array
+    {
         [$backfilled, $repaired] = self::runBulkSync();
 
         // Recalculate total_points for all PICs via single SQL UPDATE
@@ -234,12 +253,7 @@ class PicPointReportController extends Controller
             PicPointHistory::whereNotIn('pic_id', $validPicIds)->delete();
         }
 
-        $msg = "Sinkronisasi selesai! {$backfilled} riwayat baru ditambahkan, {$repaired} tanggal dikoreksi, {$synced} PIC diperbarui";
-        if ($orphanCount > 0) {
-            $msg .= ", {$orphanCount} riwayat orphan dihapus";
-        }
-
-        return redirect()->route('admin.pic-points.index')->with('success', $msg . '.');
+        return [$backfilled, $repaired, $synced, $orphanCount];
     }
 
     /**
@@ -497,10 +511,22 @@ class PicPointReportController extends Controller
         $totalHistories = PicPointHistory::count();
         $affectedPics   = Pic::where('total_points', '!=', 0)->count();
 
+        // PENTING: pakai delete(), BUKAN truncate() — TRUNCATE adalah statement DDL di
+        // MySQL yang menyebabkan implicit commit, memutus transaksi yang sedang
+        // berjalan dan membuat DB::transaction() gagal dengan "There is no active
+        // transaction" saat mencoba commit di akhir. delete() adalah DML biasa, aman
+        // dipakai di dalam transaksi.
         \DB::transaction(function () {
-            PicPointHistory::truncate();
+            PicPointHistory::query()->delete();
             Pic::query()->update(['total_points' => 0]);
         });
+
+        // Hapus cache leaderboard supaya tidak menampilkan data lama sampai 5 menit
+        // ke depan (rankings.topPics diisi ulang otomatis saat diakses berikutnya).
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        \Illuminate\Support\Facades\Cache::forget('rankings.topPics');
+        \Illuminate\Support\Facades\Cache::forget("rankings.topPics.{$tenantKey}");
+        \Illuminate\Support\Facades\Cache::forget('sync.out_of_sync_count');
 
         return redirect()->route('admin.pic-points.index')
             ->with('success', "Reset berhasil! {$totalHistories} riwayat dihapus, {$affectedPics} PIC diset ke 0 point.");

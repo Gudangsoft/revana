@@ -387,3 +387,175 @@ User dikonfirmasi (dengan angka dampak eksplisit ditunjukkan dulu) untuk **mengo
 | `app/Models/MarketingPointHistory.php` | `awardPoints()`: bungkus `self::create()` dengan try/catch — kalau `QueryException` dengan pesan mengandung nama constraint `marketing_point_histories_marketing_id_submission_id_unique`, kembalikan `null` (dianggap "sudah pernah diberi"); exception lain tetap dilempar ulang |
 
 **Diverifikasi:** lewat `php artisan tinker` (dalam transaksi yang di-rollback, tidak menyentuh data asli) — dibuat 2 baris `MarketingPointHistory::create()` dengan `marketing_id`+`submission_id` sama persis, baris kedua ditangkap `QueryException` dan pesan errornya dicocokkan persis dengan string yang dicek di `awardPoints()` — **cocok**. Full test suite (`tests/Feature/Points`, 18 test) tetap **PASS** setelah perubahan ini (perubahan tidak mengubah alur normal, hanya menambah jaring pengaman untuk kasus race yang jarang terjadi).
+
+## 21. Fix Tanggal Riwayat Poin Ikut Berubah ke "Hari Ini" Saat Validasi (Bukan Tanggal Kerja Asli)
+
+**Tujuan:** User melaporkan (dengan screenshot) bahwa setelah klik "Refresh Point", riwayat poin PIC untuk tugas yang dikerjakan tanggal 27 Juli malah tercatat tanggal 28 Juli (hari ini) — dan PIC tersebut (contoh: Dila) jadi tidak muncul di Laporan Kinerja periode 27 Juli.
+
+**Root cause (dibuktikan dengan data nyata):** submission `SUB202607170018` — `production_validated_at` = **27 Jul 11:38:47** (tanggal PIC sungguh menyelesaikan tugas), tapi baris `pic_point_histories`-nya tercatat `created_at` = **28 Jul 11:53** (satu hari kemudian). Ditemukan 3 tempat yang mengaward poin secara langsung/real-time saat validasi dicentang, semuanya memanggil `PicPointHistory::awardPoints()` / `MarketingPointHistory::awardPoints()` **tanpa** parameter `$occurredAt` — mengandalkan "now" implisit yang HANYA benar kalau baris poin berhasil tersimpan PAS di detik yang sama dengan validasi. Begitu ada jeda (race condition/retry — pola yang sama dengan insiden section #17), baris poin baru berhasil tersimpan belakangan dengan tanggal "sekarang", bukan tanggal validasi asli.
+
+**Dampak ke Laporan Kinerja:** `LaporanKinerjaController` menghitung kolom "Total Tugas" dari `submissions.{step}_validated_at` (benar) tapi kolom "Total Poin" dari `pic_point_histories.created_at` (bisa salah karena bug ini) — 2 sumber tanggal berbeda untuk baris & periode yang sama, menyebabkan kejanggalan seperti yang dilaporkan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `updateValidation()`: kirim `$occurredAt` (nilai `{field}_validated_at` yang baru saja di-set) ke `PicPointHistory::awardPoints()` dan `MarketingPointHistory::awardPoints()` (bonus production) |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `validateStep()` dan `toggleValidField()`: kirim `$occurredAt` (`{step}_validated_at`) ke `PicPointHistory::awardPoints()` |
+| `tests/Feature/Points/PicPointHistoryAwardTest.php` | Tambah `test_award_points_backdates_created_at_to_provided_occurred_at` — mengunci kontrak: kalau `$occurredAt` dikirim, `created_at` HARUS mengikutinya |
+
+**Catatan:** 6 pemanggilan `awardPoints()` lain untuk step `submit` (di `DashboardController`, `PicPointController`, `JournalManagementController`, `SubmissionController`) **tidak** diubah — semuanya mengaward poin PAS saat submission dibuat/di-assign, jadi "now" memang tanggal yang benar untuk aksi tersebut (tidak ada field `*_validated_at` terpisah yang perlu dicocokkan).
+
+**Perbaikan data yang sudah telanjur salah tanggal:** logika "betulkan tanggal yang tidak cocok" **sudah ada** di `PicPointReportController::runBulkSync()` (dipakai tombol "Sinkronkan Point" yang **sudah ada dan tetap terlihat** di `/admin/pic-points` — beda dari tombol di `/admin/laporan-kinerja` yang disembunyikan di section #16). Diverifikasi lewat simulasi persis kondisi bug (dalam transaksi yang di-rollback): dibuat riwayat dengan `created_at` 28 Jul tapi `production_validated_at` 27 Jul → jalankan `runBulkSync()` → `created_at` riwayat otomatis terkoreksi jadi 27 Jul. **Tidak perlu kode/fitur baru untuk perbaikan data ini** — admin tinggal klik tombol "Sinkronkan Point" yang sudah ada di `/admin/pic-points` setelah fix kode ini di-deploy.
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 19 test, 31 assertion) **PASS**. Simulasi manual lewat `php artisan tinker` (transaksi di-rollback) membuktikan mekanisme backdate & perbaikan bekerja persis seperti dirancang.
+
+## 22. Konsolidasi Tombol "Sinkronkan Point" — dari 7 Tombol Tersebar Jadi 1
+
+**Tujuan:** User minta tombol "Sinkronkan Point" di halaman admin disisakan 1 saja, ditempatkan di lokasi yang strategis. Audit menemukan **7 tombol berbeda** (di 5 halaman) yang semuanya melakukan sinkronisasi poin dengan tingkat kelengkapan tidak konsisten — sebagian cuma menghitung ulang `total_points`, sebagian juga membackfill riwayat hilang, hanya 1 yang juga membetulkan tanggal (section #21). Ini persis rekomendasi #3 dari diskusi strategis di awal sesi ("konsolidasi mekanisme sinkron yang tersebar").
+
+**Lokasi terpilih:** `/admin/sync` ("Sinkronisasi Data") — sudah jadi hub sinkronisasi khusus, sudah ada di sidebar dengan badge penghitung "tidak sinkron", dan sudah menampilkan status per-modul sebelum sinkron.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Ekstrak isi `syncAllPoints()` jadi `runFullSync(): array` (static, reusable) — backfill + perbaiki tanggal + recompute + hapus orphan. `syncAllPoints()` jadi wrapper tipis |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | Ekstrak isi `syncAllPoints()` jadi `runFullSync(): array` (static, reusable) — backfill + recompute. `syncAllPoints()` jadi wrapper tipis |
+| `app/Http/Controllers/Admin/SyncController.php` | Tambah `syncPoints()` — panggil `PicPointReportController::runFullSync()` + `MarketingPointReportController::runFullSync()` sekaligus (logika PALING lengkap). `syncAll()` diupgrade memakai logika yang sama (dulu cuma recompute-only). Hapus `syncMarketingPoints()`/`syncPicPoints()` (recompute-only, sudah tidak dipakai tombol manapun setelah perubahan ini) |
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | Hapus `syncPoints()` — sudah tidak ada tombol yang memanggilnya sejak section #16, dan sekarang sepenuhnya digantikan oleh tombol terpusat |
+| `routes/web.php` | Hapus route `sync.marketing-points`, `sync.pic-points`, `laporan-kinerja.sync`. Tambah `sync.points` → `SyncController::syncPoints()` |
+| `resources/views/admin/sync/index.blade.php` | Gabung card "Point Marketing" + "Point PIC" jadi 1 card "Point PIC & Marketing" dengan 1 tombol → `admin.sync.points` |
+| `resources/views/admin/pic-points/index.blade.php` | Hapus form/tombol "Sinkronkan Point" + JS handler-nya, ganti jadi link ke `/admin/sync` |
+| `resources/views/admin/marketing-points/index.blade.php` | Hapus form/tombol "Sinkronkan Point", ganti jadi link ke `/admin/sync` |
+| `resources/views/admin/reports/team-performance.blade.php` | Hapus 2 tombol (PIC/Marketing conditional), ganti jadi 1 link ke `/admin/sync` |
+| `resources/views/admin/reports/team-marketing-performance.blade.php` | Hapus tombol "Sinkronisasi Point Marketing", ganti jadi link ke `/admin/sync` |
+| `tests/Feature/Points/SyncPageRenderTest.php` (baru, 6 test) | Verifikasi HTTP-level (bukan cuma compile-check): halaman sync render dengan tombol gabungan, tombol berfungsi tanpa error, 4 halaman yang tombolnya dihapus tetap render normal |
+
+**Route yang TIDAK diubah (tetap ada, dipakai internal):** `admin.pic-points.sync-all` dan `admin.marketing-points.sync-all` — controller-nya sekarang jadi wrapper tipis di atas `runFullSync()` yang sama, dipertahankan sebagai kemungkinan pemakaian langsung di masa depan (bukan dead code — logic intinya aktif dipakai).
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 25 test, 43 assertion) **PASS**, termasuk test HTTP-level baru yang benar-benar me-render halaman lewat request ter-autentikasi (bukan sekadar cek sintaks Blade) dan mengklik tombol sungguhan untuk memastikan tidak error.
+
+## 23. Verifikasi Ulang: Tombol "Sinkronisasi Data" Terkonsolidasi TIDAK Mengubah Tanggal Pengerjaan
+
+**Tujuan:** User minta dicek ulang — setelah tombol sinkron dikonsolidasi jadi 1 (section #22), apakah tanggal pengerjaan asli tetap terjaga (bukan ikut berubah ke tanggal saat tombol sinkron diklik), sesuai fix section #21.
+
+**Diverifikasi lewat 2 skenario nyata** (simulasi `SyncController::syncPoints()` — persis method di balik tombol "Sinkronisasi Point (PIC & Marketing)"):
+1. **Riwayat yang tanggalnya sudah BENAR** (`created_at` sudah cocok dengan `editor1_validated_at`, di-insert langsung lewat query builder supaya bebas dari auto-timestamp Eloquent) → setelah klik sinkron: **`created_at` tetap persis sama**, tidak ikut berubah ke tanggal hari ini.
+2. **Riwayat yang tanggalnya TELANJUR SALAH** (skenario insiden section #21 — `created_at` = tanggal sync lama, beda dari `validated_at` sebenarnya) → setelah klik sinkron: **`created_at` diperbaiki ke tanggal validasi asli**, bukan ke tanggal sinkron dijalankan.
+
+Kedua hasil ini **membuktikan tombol terkonsolidasi masih memakai logika yang sama persis** (`PicPointReportController::runFullSync()` → `runBulkSync()`, yang backfill/repair-nya sudah dipastikan pakai `s.{step}_validated_at`, bukan `NOW()`) — konsolidasi tombol di section #22 tidak menghilangkan atau melemahkan perbaikan tanggal dari section #21.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `tests/Feature/Points/RunBulkSyncTest.php` | Tambah 2 test permanen: `test_sync_points_button_does_not_change_created_at_of_already_correct_history` dan `test_sync_points_button_repairs_mismatched_created_at_to_true_validated_at` — mengunci kedua skenario di atas lewat `SyncController::syncPoints()` langsung (bukan cuma `runBulkSync()` mentah), supaya kalau ada perubahan di masa depan yang tidak sengaja menghapus/melemahkan logika ini, test langsung gagal |
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 27 test, 45 assertion) **PASS**.
+
+## 24. Uji Nyata: Hapus Semua Riwayat Poin (Lokal) + Sinkron Ulang dari Nol
+
+**Tujuan:** User minta pembuktian nyata (bukan cuma test) — hapus SEMUA riwayat poin PIC & Marketing di database lokal sampai 0, lalu jalankan sinkronisasi penuh, untuk memastikan mekanisme sinkron benar-benar bisa membangun ulang data yang sinkron dari nol. Dilakukan di **database lokal (`dbrevana`) saja** — production TIDAK disentuh (tidak ada akses langsung).
+
+**Langkah:** backup penuh 4 tabel terkait (`pic_point_histories`, `marketing_point_histories`, `pics`, `marketings`) ke `backup_before_full_point_wipe_2026-07-28.sql` (16,6 MB, di scratchpad) → `TRUNCATE` kedua tabel riwayat + reset `total_points` ke 0 semua PIC/Marketing → jalankan `SyncController::syncPoints()` (tombol tunggal hasil konsolidasi section #22) → verifikasi hasil.
+
+**Hasil sinkronisasi:** selesai ~4,4 menit tanpa error. 97.086 riwayat PIC baru + 14.182 riwayat Marketing baru dibuat. Setelah sinkron: **100% sinkron** (70/70 PIC, 15/15 Marketing, 8.343/8.343 slot — `total_points` cocok persis `SUM(riwayat)` di semua baris), **0 kelompok duplikat** di kedua tabel.
+
+**Temuan penting — sinkronisasi dari nol TIDAK sepenuhnya lossless (di luar penyesuaian manual yang sudah diketahui):**
+1. **Penyesuaian manual PIC** (194 baris, submission_id NULL, 41,70 poin) — sudah diketahui & disetujui sebelumnya, tidak bisa direkonstruksi karena tidak terkait submission apa pun.
+2. **[Temuan baru] Step dengan rate saat ini = 0** — `editor3` rate-nya 0 (aktif tapi 0 poin), jadi backfill (`if ($points > 0)` di `runBulkSync()`) sama sekali tidak membuat baris untuk step ini. **286 baris riwayat "siapa mengerjakan Editor 3" hilang total** (nilai poin 0, tapi jejak siapa yang mengerjakan hilang).
+3. **[Temuan baru] "Reassignment drift"** — 36 baris PIC + 22 baris Marketing (total 29,40 poin: 18,40 PIC + 11,00 Marketing) hilang karena field petugas/marketing_id di `submissions` **diubah SETELAH** tugas divalidasi (mis. admin mengoreksi salah assign). Riwayat asli benar mencatat siapa yang SUNGGUH mengerjakan saat itu, tapi backfill hanya bisa merekonstruksi berdasarkan assignment **saat ini** — begitu riwayat dihapus, jejak assignment historis hilang permanen. Dibuktikan lewat query silang riwayat lama (dari backup) vs `submissions.petugas_*_id`/`*_valid` saat ini — jumlah baris yang cocok pola ini PERSIS sama dengan selisih yang ditemukan (36 dan 22).
+
+**Total poin sebelum → sesudah:** PIC 28.079,68 → 28.019,58 (turun 60,10 = 41,70 manual + 18,40 drift). Marketing 7.102,00 → 7.091,00 (turun 11,00 = drift).
+
+**Keputusan user:** setelah diberi tahu temuan lengkap (dan opsi restore dari backup), user memilih **membiarkan kondisi hasil resync** (tidak restore) — tujuan verifikasi sudah tercapai.
+
+**Implikasi untuk production:** temuan ini memperkuat rekomendasi sebelumnya untuk TIDAK PERNAH melakukan hapus-total di production — bukan cuma karena penyesuaian manual hilang, tapi juga karena riwayat "siapa sungguh mengerjakan" bisa hilang kalau ada step berate 0 atau assignment yang pernah dikoreksi. Backup SQL (`backup_before_full_point_wipe_2026-07-28.sql`) masih disimpan di scratchpad kalau sewaktu-waktu dibutuhkan untuk memulihkan 322 baris yang hilang di database lokal.
+
+## 25. Tambah "Reset Semua Point" untuk Marketing (Sebelumnya Cuma Ada di PIC) + Perbaiki Cache Leaderboard
+
+**Tujuan:** User ingin benar-benar mereset poin PIC & Marketing ke 0 (dibiarkan 0, bukan disinkron ulang) di **production** — akan dijalankan sendiri oleh user, bukan oleh saya (tidak ada akses ke server production). Fitur "Reset Semua Point" untuk PIC sudah ada (dengan konfirmasi ketik "RESET"), tapi Marketing belum punya fitur setara — supaya user bisa melakukan ini dengan aman lewat UI yang sudah teruji, bukan lewat SQL/tinker mentah langsung di production.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | Tambah `resetAllPoints(Request $request)` — pola identik dengan punya PIC: wajib ketik "RESET", `DB::transaction` truncate `marketing_point_histories` + set `total_points=0` semua Marketing, hapus cache leaderboard. `index()` tambah variabel `$totalHistories` untuk ditampilkan di modal konfirmasi |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `resetAllPoints()`: **perbaikan bug kecil** — sebelumnya tidak menghapus cache `rankings.topPics`/`sync.out_of_sync_count` setelah reset, jadi leaderboard PIC bisa menampilkan data lama sampai 5 menit setelah reset. Sekarang cache langsung dihapus |
+| `routes/web.php` | Tambah `POST /admin/marketing-points/reset-all` → `admin.marketing-points.reset-all` |
+| `resources/views/admin/marketing-points/index.blade.php` | Tambah tombol "Reset Semua Point" + modal konfirmasi (ketik "RESET"), identik gaya dengan yang di `/admin/pic-points` |
+| `tests/Feature/Points/ResetAllPointsTest.php` (baru, 5 test) | Konfirmasi salah → ditolak, riwayat/total tidak berubah. Konfirmasi "RESET" → riwayat terhapus & total jadi 0 (PIC & Marketing). Kedua halaman menampilkan tombol |
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 32 test, 65 assertion) **PASS**.
+
+**Instruksi untuk production (dijalankan sendiri oleh user):**
+1. `git pull origin master` (setelah commit) — tidak ada migration baru di section ini, cukup deploy kode.
+2. **Sangat disarankan:** backup dulu (`mysqldump` tabel `pic_point_histories`, `marketing_point_histories`, `pics`, `marketings`) sebelum reset — sama seperti yang dilakukan untuk uji coba lokal di section #24. Reset ini **permanen**, tidak ada tombol undo.
+3. Buka `/admin/pic-points` → klik "Reset Semua Point" → ketik `RESET` → konfirmasi.
+4. Buka `/admin/marketing-points` → klik "Reset Semua Point" (tombol baru) → ketik `RESET` → konfirmasi.
+5. Setelah kedua langkah di atas, seluruh leaderboard, riwayat perolehan poin PIC/Marketing, dan laporan terkait poin di admin (`/admin/laporan-kinerja`, `/admin/reports/team-performance`, dll — semuanya membaca dari tabel yang sama) otomatis akan menunjukkan 0, karena semuanya menghitung langsung dari `pic_point_histories`/`marketing_point_histories` yang baru saja dikosongkan — tidak perlu langkah tambahan.
+
+## 26. Fix Crash "There is no active transaction" di Tombol Reset Semua Point
+
+**Tujuan:** User mencoba tombol "Reset Semua Point" PIC di lokal (`/admin/pic-points/reset-all`) untuk uji coba sebelum diterapkan di production, dan mendapat halaman error `PDOException: There is no active transaction`.
+
+**Root cause:** `TRUNCATE TABLE` adalah statement **DDL** di MySQL, dan DDL menyebabkan **implicit commit** — begitu `PicPointHistory::truncate()` jalan di dalam closure `DB::transaction()`, MySQL langsung meng-commit transaksi yang sedang berjalan tanpa sepengetahuan Laravel. Statement berikutnya (`Pic::query()->update(...)`) tetap berhasil (berjalan ter-autocommit sendiri), tapi begitu closure selesai dan Laravel mencoba `COMMIT` transaksi yang menurutnya masih aktif, PDO/MySQL bilang "There is no active transaction" → exception. **Bug ini sudah ada SEBELUM sesi ini** di kode PIC yang asli (section ini cuma pertama kali membuatnya benar-benar terpanggil) — dan otomatis ikut ter-copy ke kode Marketing yang baru dibuat di section #25.
+
+**Efek samping penting:** karena implicit commit terjadi SEBELUM exception dilempar, **kedua statement (truncate + update total_points) sudah benar-benar berhasil dieksekusi** sebelum error muncul — jadi walau user melihat halaman error, data PIC yang di-reset **sungguhan sudah ter-reset ke 0** (dikonfirmasi langsung: `pic_point_histories` 0 baris, `SUM(total_points)` 0 di database lokal user). Errornya murni salah pesan (gagal di langkah commit terakhir), bukan kegagalan operasi.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `resetAllPoints()`: ganti `PicPointHistory::truncate()` → `PicPointHistory::query()->delete()` (DML biasa, aman di dalam transaksi, tidak memicu implicit commit) |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | `resetAllPoints()`: perbaikan yang sama |
+
+**Catatan penting soal testing:** ke-5 test di `ResetAllPointsTest.php` (section #25) **LOLOS** walau bug ini masih ada — karena `RefreshDatabase` sendiri membungkus setiap test dalam transaksi luar, membuat `DB::transaction()` di dalam kode yang diuji berjalan sebagai *nested transaction* (pakai SAVEPOINT, bukan BEGIN/COMMIT asli) — sehingga implicit-commit dari TRUNCATE tidak memicu error yang sama seperti saat berjalan asli (top-level transaction sungguhan) di luar test. Ini keterbatasan nyata dari pendekatan testing berbasis `RefreshDatabase`: bug seputar interaksi DDL+transaksi tidak akan pernah tertangkap lewat test semacam ini. Diverifikasi manual lewat `php artisan tinker` langsung ke database nyata (bukan test-wrapped) untuk memastikan fix benar-benar menghilangkan error tsb.
+
+**Diverifikasi:** dipanggil `resetAllPoints()` PIC & Marketing langsung ke database lokal nyata (`dbrevana`, bukan `dbrevana_testing`) setelah fix — keduanya berhasil tanpa error. Full test suite (`tests/Feature/Points`, 32 test, 65 assertion) tetap **PASS**.
+
+**Catatan deploy:** fix ini **WAJIB** ikut di-deploy ke production SEBELUM mencoba tombol "Reset Semua Point" di sana — kalau tidak, akan mengalami crash yang sama seperti yang dialami user di lokal (walau operasinya sendiri kemungkinan besar tetap berhasil di baliknya).
+
+## 27. Tombol "Kembali ke Admin" Belum Terlihat Jelas di Halaman PIC Saat Impersonasi
+
+**Tujuan:** User minta ditambahkan tombol "kembali ke halaman admin" di `/pic/dashboard` saat admin sedang login-as (impersonasi) seorang PIC.
+
+**Temuan:** fitur impersonasi (`PicController::loginAs()`/`returnToAdmin()`) sudah ada, dan sebetulnya sudah ada badge indikator "Mode Admin" yang selalu terlihat di navbar PIC — tapi tombol AKSI "Kembali ke Admin" yang sebenarnya tersembunyi di dalam dropdown profil (harus klik nama dulu, baru terlihat). Dibandingkan dengan layout Marketing (`marketing/layouts/app.blade.php`) yang sudah punya **banner penuh selebar halaman** di bagian paling atas dengan tombol "Kembali ke Admin" langsung terlihat tanpa perlu klik apa pun — PIC belum punya banner setara ini, cuma badge pasif.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/layouts/app.blade.php` | Tambah banner kuning selebar halaman di awal `<body>` (persis pola yang sudah ada di layout Marketing) — muncul kalau `session('admin_impersonating')` ada, berisi nama PIC yang sedang dilihat + tombol "Kembali ke Admin" yang langsung submit ke `admin.pics.return-to-admin`. Badge kecil di navbar (sudah ada sebelumnya) dibiarkan tetap ada untuk konsistensi dengan Marketing |
+| `tests/Feature/Points/PicImpersonationBannerTest.php` (baru, 2 test) | Banner + tombol muncul saat `admin_impersonating` di-set di session; tidak muncul untuk sesi PIC normal (bukan hasil impersonasi) |
+
+Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian dari layout bersama.
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 34 test, 71 assertion) **PASS**.
+
+## 28. Format Angka Point/Tugas, Sederhanakan Label Periode Laporan Kinerja, dan "Login As" Buka Tab Baru
+
+**Tujuan:** 3 perbaikan kecil dari feedback user:
+1. Card "Total Point"/"Point Hari Ini"/"Point Bulan Ini" di halaman poin PIC & Marketing pakai 1 desimal (`0.0`), bukan 2 (`0.00`). Card "Total Tugas" PIC pakai pemisah ribuan titik, bukan koma default PHP.
+2. Label periode di `/admin/laporan-kinerja` yang menampilkan rentang cutoff mentah ("26 Juni 2026 — 25 Juli 2026") membingungkan untuk mode dropdown Bulan+Tahun biasa — disederhanakan jadi "Juli 2026".
+3. Tombol "Login As" (PIC/Marketing/Reviewer/User/Reviewer-dari-PIC) membuka tab baru supaya halaman admin yang sedang dibuka tidak hilang.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/points/index.blade.php` | Card Total Point/Point Hari Ini/Point Bulan Ini + baris "Total Point" hasil filter: `number_format(..., 2)` → `1`. Card Total Tugas: tambah pemisah ribuan titik (`, 0, ',', '.'`) |
+| `resources/views/marketing/points.blade.php` | Perubahan sama untuk 3 card + baris "Total Point" hasil filter |
+| `app/Http/Controllers/Admin/LaporanKinerjaController.php` | `resolvePeriod()`: `$namaBulan` sekarang beda tergantung mode — mode custom date range tetap tampilkan rentang eksplisit (berguna di sana), mode dropdown Bulan+Tahun tampilkan label sederhana "Bulan Tahun". **Filter data TIDAK berubah** — `$periodStart`/`$periodEnd` tetap cutoff 26-25 seperti sebelumnya (section #13), cuma labelnya yang disederhanakan |
+| `resources/views/admin/pics/index.blade.php`, `admin/marketings/index.blade.php`, `admin/users/index.blade.php`, `admin/reviewers/index.blade.php`, `pic/reviewers/index.blade.php` | Tambah `target="_blank"` ke form tombol "Login As" — supaya halaman asal (mis. daftar PIC di admin) tetap terbuka di tab lama |
+
+**Catatan presisi:** card "Total Point" adalah nilai AGREGAT (jumlah dari banyak riwayat) yang bisa memuat rate pecahan (0.1/0.2/0.25/0.33) — menampilkannya dengan 1 desimal berarti nilai seperti 45.28 akan tampil "45.3" (dibulatkan tampilannya saja, nilai asli di database tidak berubah). Badge poin per-baris riwayat (mis. "+0.25", "+0.33") **TIDAK diubah**, tetap 2 desimal — kalau dibulatkan ke 1 desimal, rate 0.25 dan 0.33 akan sama-sama tampil "0.3", menghilangkan bedanya.
+
+**Diverifikasi:** dicek lewat `php artisan tinker` — `resolvePeriod()` menghasilkan label "Juli 2026" untuk mode dropdown (periode filter tetap 26 Jun–25 Jul, tidak berubah) dan tetap "27 Juni 2026 — 27 Juli 2026" untuk mode custom range. Test HTTP-level (request asli, bukan compile-check) mengonfirmasi teks rentang cutoff sudah tidak muncul dan label sederhana muncul dengan benar. Semua file Blade yang diubah dicek lolos compile. Full test suite (`tests/Feature/Points`, 34 test) tetap **PASS**.
+
+## 29. Tambah Nomor Surat (Kode LOA), Nama Jurnal, dan Publisher di Sertifikat Reviewer
+
+**Tujuan:** User minta 3 info tambahan ditampilkan di sertifikat reviewer (`/reviewer/certificates`): nomor surat (pakai kode LOA), nama jurnal, dan nama publisher.
+
+**Temuan:** sertifikat dibuat dengan menimpakan teks ke atas gambar template statis (`Reviewer\CertificateController::generateCertificate()`, pakai Intervention Image), bukan render HTML/Blade. `ReviewAssignment` (model yang menyimpan data reviewer/artikel untuk sertifikat) **tidak menyimpan** link ke jurnal aslinya — kolom `journal_id` selalu di-set `null` saat dibuat (`ReviewAssignmentController::store()`), dan tabel `journals` kosong (0 baris) di database. Setelah dikonfirmasi ke user: solusinya adalah mencocokkan `submit_link` milik assignment dengan `submissions.link_artikel` — dicek cocok **100% (49 dari 49)** assignment approved yang ada saat ini.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `generateCertificate()`: cari `Submission` lewat `link_artikel == submit_link`, ambil `kode_loa` (nomor surat), `journalSlot.journalMaster.nama_jurnal`, dan `.publisher`. Tambah 1 baris teks kecil di bawah tanggal pada gambar sertifikat: "No. Surat: ... \| Jurnal: ... \| Publisher: ..." |
+
+**Diverifikasi:** file template AKTIF (`certificates/kTM1Uo9...jpg`) tidak ada di lokal (cuma record database yang tersinkron, bukan file storage), tapi ditemukan file template lain dengan desain identik (`SH3jkSPPS...jpg`) yang dipakai untuk uji render nyata — hasilnya (gambar terlampir ke user) menunjukkan baris info baru pas di bawah tanggal, tidak tumpang tindih dengan logo SIPERA atau border bawah. Data uji pakai assignment sungguhan (id=30) dengan kode_loa/jurnal/publisher lengkap. **Catatan:** posisi taksiran berdasarkan template referensi — kalau template AKTIF di production sedikit berbeda proporsinya, mungkin perlu penyesuaian koordinat Y kecil (sudah diberi komentar jelas di kode).

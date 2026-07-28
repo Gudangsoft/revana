@@ -1515,13 +1515,24 @@ class JournalManagementController extends Controller
                     $petugasField = $fieldMap[$request->field];
                     $picId = $submission->{$petugasField};
 
+                    // Tanggal validasi sebenarnya (baru saja di-set di atas) — dikirim
+                    // eksplisit ke awardPoints(), BUKAN dibiarkan default ke "now" implisit.
+                    // Kalau baris poin ini baru berhasil tersimpan belakangan (race
+                    // condition/retry, exception yang tertangkap lalu berhasil di percobaan
+                    // berikutnya), tanggalnya tetap mencerminkan kapan tugas SUNGGUH
+                    // divalidasi, bukan kapan baris ini kebetulan berhasil disimpan —
+                    // supaya "Total Tugas" (dari submissions.validated_at) dan "Total Poin"
+                    // (dari pic_point_histories.created_at) di Laporan Kinerja selalu
+                    // memakai tanggal yang sama untuk periode yang sama.
+                    $occurredAt = isset($validatedAtMap[$request->field]) ? $submission->{$validatedAtMap[$request->field]} : null;
+
                     if ($picId) {
-                        PicPointHistory::awardPoints($picId, $submission->id, $stepName, "Validasi {$stageName} - {$submission->kode_submit}");
+                        PicPointHistory::awardPoints($picId, $submission->id, $stepName, "Validasi {$stageName} - {$submission->kode_submit}", $occurredAt);
                     }
 
                     // Also add points to marketing if this is the final validation (production)
                     if ($request->field === 'production_valid' && $submission->marketing_id) {
-                        MarketingPointHistory::awardPoints($submission->marketing_id, $submission->id, "Artikel selesai (Production Valid) - {$submission->kode_submit}");
+                        MarketingPointHistory::awardPoints($submission->marketing_id, $submission->id, "Artikel selesai (Production Valid) - {$submission->kode_submit}", $occurredAt);
                     }
                 } catch (\Exception $e) {
                     // Log error but don't fail the validation

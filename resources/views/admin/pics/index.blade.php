@@ -152,7 +152,7 @@
                                             </button>
                                         </form>
                                         @if($pic->is_active)
-                                        <form action="{{ route('admin.pics.login-as', $pic) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.pics.login-as', $pic) }}" method="POST" class="d-inline" target="_blank">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-info" title="Login sebagai {{ $pic->name }}">
                                                 <i class="bi bi-box-arrow-in-right"></i>

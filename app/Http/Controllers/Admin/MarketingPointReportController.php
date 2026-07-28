@@ -38,6 +38,7 @@ class MarketingPointReportController extends Controller
         $totalMarketings = Marketing::where('is_active', true)->count();
         $totalSubmissions = \App\Models\Submission::whereNotNull('marketing_id')->count();
         $totalPoints = (float) MarketingPointHistory::sum('points_earned');
+        $totalHistories = MarketingPointHistory::count();
 
         // Top performer this month
         $month = now()->month;
@@ -60,6 +61,7 @@ class MarketingPointReportController extends Controller
             'totalMarketings',
             'totalPoints',
             'totalSubmissions',
+            'totalHistories',
             'topPerformerThisMonth'
         ));
     }
@@ -206,15 +208,28 @@ class MarketingPointReportController extends Controller
      */
     public function syncAllPoints()
     {
+        [$created, $synced] = self::runFullSync();
+
+        return redirect()->back()
+            ->with('success', "Sinkronisasi selesai! {$synced} marketing point diperbarui, {$created} riwayat point baru dibuat.");
+    }
+
+    /**
+     * Sinkronisasi Marketing paling lengkap: backfill riwayat hilang (pakai rate yang
+     * berlaku saat ini, tanggal riwayat dari submission->created_at) + hitung ulang
+     * total_points dari SUM riwayat (bukan COUNT submission — rate poin per submission
+     * bisa berubah dari waktu ke waktu, lihat TaskPointSetting). Dipakai oleh
+     * syncAllPoints() (tombol di /admin/marketing-points) dan
+     * SyncController::syncPoints() (tombol tunggal di /admin/sync).
+     * Returns [$created, $synced].
+     */
+    public static function runFullSync(): array
+    {
         $marketings = Marketing::all();
         $synced = 0;
         $created = 0;
 
         foreach ($marketings as $marketing) {
-            // Create missing point history records (pakai rate yang berlaku saat ini).
-            // Tanggal riwayat (created_at) diisi dari submission->created_at, BUKAN waktu
-            // sync ini berjalan — supaya tanggal penyelesaian tugas tidak ikut berubah
-            // ke tanggal sync setiap kali admin menekan tombol sinkronisasi.
             $submissions = \App\Models\Submission::where('marketing_id', $marketing->id)
                 ->whereDoesntHave('marketingPointHistory')
                 ->get();
@@ -240,8 +255,42 @@ class MarketingPointReportController extends Controller
             }
         }
 
-        return redirect()->back()
-            ->with('success', "Sinkronisasi selesai! {$synced} marketing point diperbarui, {$created} riwayat point baru dibuat.");
+        return [$created, $synced];
+    }
+
+    /**
+     * Hard reset: hapus semua riwayat point Marketing dan set total_points = 0.
+     * Konfirmasi wajib ketik "RESET" — sama seperti PicPointReportController::resetAllPoints().
+     */
+    public function resetAllPoints(Request $request)
+    {
+        $request->validate([
+            'konfirmasi' => 'required|in:RESET',
+        ], [
+            'konfirmasi.required' => 'Ketik RESET untuk konfirmasi.',
+            'konfirmasi.in'       => 'Konfirmasi tidak valid. Ketik RESET (huruf kapital).',
+        ]);
+
+        $totalHistories     = MarketingPointHistory::count();
+        $affectedMarketings = Marketing::where('total_points', '!=', 0)->count();
+
+        // PENTING: pakai delete(), BUKAN truncate() — TRUNCATE adalah statement DDL di
+        // MySQL yang menyebabkan implicit commit, memutus transaksi yang sedang
+        // berjalan dan membuat DB::transaction() gagal dengan "There is no active
+        // transaction" saat mencoba commit di akhir. delete() adalah DML biasa, aman
+        // dipakai di dalam transaksi.
+        \DB::transaction(function () {
+            MarketingPointHistory::query()->delete();
+            Marketing::query()->update(['total_points' => 0]);
+        });
+
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        \Illuminate\Support\Facades\Cache::forget('rankings.topMarketings');
+        \Illuminate\Support\Facades\Cache::forget("rankings.topMarketings.{$tenantKey}");
+        \Illuminate\Support\Facades\Cache::forget('sync.out_of_sync_count');
+
+        return redirect()->route('admin.marketing-points.index')
+            ->with('success', "Reset berhasil! {$totalHistories} riwayat dihapus, {$affectedMarketings} marketing diset ke 0 point.");
     }
 
     /**

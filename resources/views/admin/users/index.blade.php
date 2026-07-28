@@ -90,7 +90,7 @@
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     @if(!$user->isAdmin())
-                                    <form action="{{ route('admin.users.login-as', $user) }}" method="POST" class="d-inline"
+                                    <form action="{{ route('admin.users.login-as', $user) }}" method="POST" class="d-inline" target="_blank"
                                           onsubmit="return confirm('Login sebagai {{ addslashes($user->name) }}?')">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-success" title="Login As">

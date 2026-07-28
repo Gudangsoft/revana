@@ -24,7 +24,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Total Point</h6>
-                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points'], 2) }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points'], 1) }}</h2>
                     </div>
                     <i class="bi bi-trophy fs-1 opacity-50"></i>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Point Hari Ini</h6>
-                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today'], 2) }}</h2>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today'], 1) }}</h2>
                     </div>
                     <i class="bi bi-calendar-check fs-1 opacity-50"></i>
                 </div>
@@ -52,7 +52,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Point Bulan Ini</h6>
-                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month'], 2) }}</h2>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month'], 1) }}</h2>
                     </div>
                     <i class="bi bi-calendar-month fs-1 opacity-50"></i>
                 </div>
@@ -66,7 +66,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Total Tugas</h6>
-                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_tasks']) }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_tasks'], 0, ',', '.') }}</h2>
                     </div>
                     <i class="bi bi-list-check fs-1 opacity-50"></i>
                 </div>
@@ -199,7 +199,7 @@
         <!-- Total Hasil Filter -->
         <div class="alert alert-light border d-flex flex-wrap gap-3 align-items-center mb-3">
             <span><i class="bi bi-list-check"></i> Total Tugas: <strong>{{ number_format($filteredTotals->total_tasks, 0, ',', '.') }}</strong></span>
-            <span><i class="bi bi-trophy"></i> Total Point: <strong class="{{ $filteredTotals->total_points >= 0 ? 'text-success' : 'text-danger' }}">{{ $filteredTotals->total_points >= 0 ? '+' : '' }}{{ number_format($filteredTotals->total_points, 2) }}</strong></span>
+            <span><i class="bi bi-trophy"></i> Total Point: <strong class="{{ $filteredTotals->total_points >= 0 ? 'text-success' : 'text-danger' }}">{{ $filteredTotals->total_points >= 0 ? '+' : '' }}{{ number_format($filteredTotals->total_points, 1) }}</strong></span>
         </div>
 
         <!-- History Table -->

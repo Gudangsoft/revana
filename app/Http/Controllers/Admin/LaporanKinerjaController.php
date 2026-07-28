@@ -60,9 +60,17 @@ class LaporanKinerjaController extends Controller
             $periodEnd   = \Carbon\Carbon::createFromDate($tahun, $bulan, 25)->endOfDay();
         }
 
-        $namaBulan = $periodStart->locale('id')->translatedFormat('d F Y')
-            . ' — '
-            . $periodEnd->locale('id')->translatedFormat('d F Y');
+        if ($isRange) {
+            $namaBulan = $periodStart->locale('id')->translatedFormat('d F Y')
+                . ' — '
+                . $periodEnd->locale('id')->translatedFormat('d F Y');
+        } else {
+            // Label sederhana "Bulan Tahun" (bukan rentang cutoff 26-25) — menampilkan
+            // rentang tanggal cutoff di sini membingungkan admin yang cuma pilih
+            // dropdown Bulan+Tahun biasa. Filter data TETAP memakai cutoff 26-25 (lihat
+            // $periodStart/$periodEnd di atas) — cuma labelnya yang disederhanakan.
+            $namaBulan = \Carbon\Carbon::create()->month($bulan)->locale('id')->translatedFormat('F') . ' ' . $tahun;
+        }
 
         return [$periodStart, $periodEnd, $namaBulan, $isRange, $bulan, $tahun, $dariTanggal, $sampaiTanggal];
     }
@@ -171,44 +179,6 @@ class LaporanKinerjaController extends Controller
             'totalMktSubmit', 'totalMktPoin',
             'tahunList'
         ));
-    }
-
-    /**
-     * Sinkronkan data poin PIC & Marketing sesuai ketentuan (rate) poin yang berlaku
-     * SEKARANG — backfill baris riwayat yang belum ada untuk submission/tugas yang
-     * memenuhi syarat, pakai runBulkSync() yang sudah aman (cuma mengisi yang belum
-     * ada, tidak pernah menimpa ulang baris yang sudah ada — lihat perbaikan insiden
-     * poin 28 Juli 2026). Laporan di halaman ini sendiri sudah menghitung poin
-     * langsung dari SUM riwayat, jadi begitu riwayat lengkap, laporan otomatis akurat
-     * tanpa langkah tambahan.
-     */
-    public function syncPoints(Request $request)
-    {
-        [$picBackfilled] = PicPointReportController::runBulkSync();
-        [$mktBackfilled] = MarketingPointReportController::runBulkSync();
-
-        // Samakan juga kolom total_points (cache) dengan SUM riwayat terbaru
-        \DB::affectingStatement('
-            UPDATE pics p
-            LEFT JOIN (
-                SELECT pic_id, COALESCE(SUM(points_earned), 0) AS actual
-                FROM pic_point_histories
-                GROUP BY pic_id
-            ) h ON h.pic_id = p.id
-            SET p.total_points = COALESCE(h.actual, 0)
-            WHERE p.total_points != COALESCE(h.actual, 0)
-        ');
-        \DB::affectingStatement('
-            UPDATE marketings m
-            SET m.total_points = (
-                SELECT COALESCE(SUM(mph.points_earned), 0)
-                FROM marketing_point_histories mph
-                WHERE mph.marketing_id = m.id
-            )
-        ');
-
-        return redirect()->route('admin.laporan-kinerja.index', $request->query())
-            ->with('success', "Sinkronisasi selesai. {$picBackfilled} riwayat poin PIC baru, {$mktBackfilled} riwayat poin Marketing baru ditambahkan.");
     }
 
     public function exportExcel(Request $request)

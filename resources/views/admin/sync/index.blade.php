@@ -18,7 +18,7 @@
                 <p class="text-muted mb-0">Pastikan semua counter data sesuai dengan data aktual di database.</p>
             </div>
             <form method="POST" action="{{ route('admin.sync.all') }}"
-                  onsubmit="return confirm('Sinkronisasi SEMUA data sekarang?\n\nProses ini akan memperbarui:\n• Slot terpakai jurnal\n• Total point marketing\n• Total point PIC')">
+                  onsubmit="return confirm('Sinkronisasi SEMUA data sekarang?\n\nProses ini akan memperbarui:\n• Slot terpakai jurnal\n• Riwayat & total point PIC (termasuk backfill dan perbaikan tanggal)\n• Riwayat & total point Marketing')">
                 @csrf
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="bi bi-arrow-repeat"></i> Sinkronisasi Semua Sekarang
@@ -101,95 +101,77 @@
     </div>
 
     {{-- ================================================ --}}
-    {{-- POINT MARKETING --}}
+    {{-- POINT PIC & MARKETING (satu-satunya tombol sinkronisasi point — konsolidasi --}}
+    {{-- dari 7 tombol yang sebelumnya tersebar di beberapa halaman) --}}
     {{-- ================================================ --}}
-    <div class="col-lg-4">
+    <div class="col-lg-8">
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-header bg-white border-bottom d-flex align-items-center gap-2">
-                <i class="bi bi-megaphone text-info fs-5"></i>
-                <span class="fw-semibold">Point Marketing</span>
-                @if($stats['marketing']['out_of_sync'] > 0)
-                    <span class="badge bg-warning text-dark ms-auto">{{ $stats['marketing']['out_of_sync'] }} tidak sinkron</span>
+                <i class="bi bi-trophy text-warning fs-5"></i>
+                <span class="fw-semibold">Point PIC & Marketing</span>
+                @php $pointOutOfSync = $stats['marketing']['out_of_sync'] + $stats['pic']['out_of_sync']; @endphp
+                @if($pointOutOfSync > 0)
+                    <span class="badge bg-warning text-dark ms-auto">{{ $pointOutOfSync }} tidak sinkron</span>
                 @else
                     <span class="badge bg-success ms-auto">Sinkron</span>
                 @endif
             </div>
             <div class="card-body">
                 <p class="text-muted small mb-3">
-                    <code>total_points</code> marketing dihitung ulang berdasarkan jumlah submission mereka yang berstatus bukan <em>REJECTED</em>.
+                    Mengisi riwayat point yang belum ada, membetulkan tanggal riwayat yang tidak cocok dengan tanggal validasi asli, menghitung ulang <code>total_points</code> dari SUM riwayat, dan menghapus riwayat orphan — untuk PIC dan Marketing sekaligus.
                 </p>
-                <div class="row text-center g-2 mb-3">
-                    <div class="col-4">
-                        <div class="bg-light rounded p-2">
-                            <div class="fw-bold fs-5">{{ $stats['marketing']['total'] }}</div>
-                            <div class="text-muted small">Total</div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="text-muted small fw-semibold mb-2"><i class="bi bi-person-badge"></i> PIC</div>
+                        <div class="row text-center g-2">
+                            <div class="col-4">
+                                <div class="bg-light rounded p-2">
+                                    <div class="fw-bold fs-6">{{ $stats['pic']['total'] }}</div>
+                                    <div class="text-muted small">Total</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-success bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold fs-6 text-success">{{ $stats['pic']['synced'] }}</div>
+                                    <div class="text-muted small">Sinkron</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-warning bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold fs-6 text-warning">{{ $stats['pic']['out_of_sync'] }}</div>
+                                    <div class="text-muted small">Perlu Sync</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-4">
-                        <div class="bg-success bg-opacity-10 rounded p-2">
-                            <div class="fw-bold fs-5 text-success">{{ $stats['marketing']['synced'] }}</div>
-                            <div class="text-muted small">Sinkron</div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="bg-warning bg-opacity-10 rounded p-2">
-                            <div class="fw-bold fs-5 text-warning">{{ $stats['marketing']['out_of_sync'] }}</div>
-                            <div class="text-muted small">Perlu Sync</div>
+                    <div class="col-md-6">
+                        <div class="text-muted small fw-semibold mb-2"><i class="bi bi-megaphone"></i> Marketing</div>
+                        <div class="row text-center g-2">
+                            <div class="col-4">
+                                <div class="bg-light rounded p-2">
+                                    <div class="fw-bold fs-6">{{ $stats['marketing']['total'] }}</div>
+                                    <div class="text-muted small">Total</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-success bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold fs-6 text-success">{{ $stats['marketing']['synced'] }}</div>
+                                    <div class="text-muted small">Sinkron</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-warning bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold fs-6 text-warning">{{ $stats['marketing']['out_of_sync'] }}</div>
+                                    <div class="text-muted small">Perlu Sync</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <form method="POST" action="{{ route('admin.sync.marketing-points') }}">
+                <form method="POST" action="{{ route('admin.sync.points') }}">
                     @csrf
-                    <button type="submit" class="btn btn-outline-info w-100">
-                        <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point Marketing
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- ================================================ --}}
-    {{-- POINT PIC --}}
-    {{-- ================================================ --}}
-    <div class="col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom d-flex align-items-center gap-2">
-                <i class="bi bi-person-badge text-success fs-5"></i>
-                <span class="fw-semibold">Point PIC</span>
-                @if($stats['pic']['out_of_sync'] > 0)
-                    <span class="badge bg-warning text-dark ms-auto">{{ $stats['pic']['out_of_sync'] }} tidak sinkron</span>
-                @else
-                    <span class="badge bg-success ms-auto">Sinkron</span>
-                @endif
-            </div>
-            <div class="card-body">
-                <p class="text-muted small mb-3">
-                    <code>total_points</code> PIC dihitung ulang berdasarkan jumlah total poin dari riwayat tugas (<em>PicPointHistory</em>) mereka.
-                </p>
-                <div class="row text-center g-2 mb-3">
-                    <div class="col-4">
-                        <div class="bg-light rounded p-2">
-                            <div class="fw-bold fs-5">{{ $stats['pic']['total'] }}</div>
-                            <div class="text-muted small">Total</div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="bg-success bg-opacity-10 rounded p-2">
-                            <div class="fw-bold fs-5 text-success">{{ $stats['pic']['synced'] }}</div>
-                            <div class="text-muted small">Sinkron</div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="bg-warning bg-opacity-10 rounded p-2">
-                            <div class="fw-bold fs-5 text-warning">{{ $stats['pic']['out_of_sync'] }}</div>
-                            <div class="text-muted small">Perlu Sync</div>
-                        </div>
-                    </div>
-                </div>
-                <form method="POST" action="{{ route('admin.sync.pic-points') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-outline-success w-100">
-                        <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point PIC
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="bi bi-arrow-repeat"></i> Sinkronisasi Point (PIC & Marketing)
                     </button>
                 </form>
             </div>

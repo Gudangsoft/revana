@@ -157,8 +157,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/sync', [AdminSyncController::class, 'index'])->name('sync.index');
         Route::post('/sync/all', [AdminSyncController::class, 'syncAll'])->name('sync.all');
         Route::post('/sync/slots', [AdminSyncController::class, 'syncSlots'])->name('sync.slots');
-        Route::post('/sync/marketing-points', [AdminSyncController::class, 'syncMarketingPoints'])->name('sync.marketing-points');
-        Route::post('/sync/pic-points', [AdminSyncController::class, 'syncPicPoints'])->name('sync.pic-points');
+        Route::post('/sync/points', [AdminSyncController::class, 'syncPoints'])->name('sync.points');
 
         // Monitoring
         Route::get('/monitoring', [AdminReviewAssignmentController::class, 'monitoring'])->name('monitoring');
@@ -347,7 +346,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/marketing-points/{marketing}/adjust', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'adjustPoints'])->name('marketing-points.adjust');
         Route::get('/marketing-points/{marketing}/export', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'exportExcel'])->name('marketing-points.export');
         Route::post('/marketing-points/sync-all', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'syncAllPoints'])->name('marketing-points.sync-all');
-        
+        Route::post('/marketing-points/reset-all', [\App\Http\Controllers\Admin\MarketingPointReportController::class, 'resetAllPoints'])->name('marketing-points.reset-all');
+
         // PIC Management
         Route::resource('pics', PicController::class)->except(['show']);
         Route::get('/pics-export', [PicController::class, 'export'])->name('pics.export');
@@ -400,7 +400,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan-kinerja', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'index'])->name('laporan-kinerja.index');
         Route::get('/laporan-kinerja/export-excel', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'exportExcel'])->name('laporan-kinerja.export-excel');
         Route::get('/laporan-kinerja/export-pdf', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'exportPdf'])->name('laporan-kinerja.export-pdf');
-        Route::post('/laporan-kinerja/sync', [\App\Http\Controllers\Admin\LaporanKinerjaController::class, 'syncPoints'])->name('laporan-kinerja.sync');
         
         // Field of Study Management
         Route::resource('field-of-studies', \App\Http\Controllers\Admin\FieldOfStudyController::class)->except(['show']);

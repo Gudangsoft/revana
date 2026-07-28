@@ -712,11 +712,17 @@ class SubmissionController extends Controller
         if (isset($stepToPetugasField[$step])) {
             $petugasId = $submission->{$stepToPetugasField[$step]};
             if ($petugasId) {
+                // Tanggal validasi sebenarnya (baru saja di-set oleh validateXxx() di atas)
+                // — dikirim eksplisit ke awardPoints(), BUKAN dibiarkan default ke "now"
+                // implisit, supaya kalau baris poin ini baru berhasil tersimpan belakangan
+                // (race condition/retry), tanggalnya tetap mencerminkan kapan tugas SUNGGUH
+                // divalidasi. Lihat catatan sama di JournalManagementController::updateValidation().
                 $pointHistory = PicPointHistory::awardPoints(
                     $petugasId,
                     $submission->id,
                     $step,
-                    "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($step)
+                    "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($step),
+                    $submission->{"{$step}_validated_at"} ?? null
                 );
                 
                 if ($pointHistory) {
@@ -1574,12 +1580,15 @@ class SubmissionController extends Controller
 
             if ($petugasId) {
                 if ($newValue) {
-                    // Validasi diaktifkan → beri point
+                    // Validasi diaktifkan → beri point. Tanggal validasi sebenarnya
+                    // (baru saja di-set di atas) dikirim eksplisit — lihat catatan sama
+                    // di JournalManagementController::updateValidation().
                     PicPointHistory::awardPoints(
                         $petugasId,
                         $submission->id,
                         $stepCfg['step'],
-                        "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($stepCfg['step'])
+                        "Validasi {$submission->kode_submit} - " . PicPointHistory::getLabelForStep($stepCfg['step']),
+                        isset($validatedAtMap[$field]) ? $submission->{$validatedAtMap[$field]} : null
                     );
                 } else {
                     // Validasi dibatalkan → cabut point
