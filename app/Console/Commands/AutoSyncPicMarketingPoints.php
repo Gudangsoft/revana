@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\RankingCache;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -52,8 +53,8 @@ class AutoSyncPicMarketingPoints extends Command
         ');
 
         if ($picSynced > 0 || $mktSynced > 0) {
-            Cache::forget('rankings.topPics');
-            Cache::forget('rankings.topMarketings');
+            RankingCache::forgetPics();
+            RankingCache::forgetMarketings();
             Cache::forget('sync.out_of_sync_count');
 
             $pesan = "Auto-sync poin: {$picSynced} PIC dan {$mktSynced} marketing di-sinkronkan ulang "

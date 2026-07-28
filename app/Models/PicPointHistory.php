@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\RankingCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PicPointHistory extends Model
@@ -168,7 +168,7 @@ class PicPointHistory extends Model
             throw $e;
         }
 
-        Cache::forget('rankings.topPics');
+        RankingCache::forgetPics();
 
         return $history;
     }
@@ -199,7 +199,7 @@ class PicPointHistory extends Model
         $actual = self::where('pic_id', $picId)->sum('points_earned');
         Pic::where('id', $picId)->update(['total_points' => max(0, $actual)]);
 
-        Cache::forget('rankings.topPics');
+        RankingCache::forgetPics();
 
         return true;
     }

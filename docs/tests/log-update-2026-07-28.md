@@ -642,3 +642,25 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 **TINDAKAN YANG DIPERLUKAN DARI USER:**
 1. **Deploy perbaikan ini SEGERA** — kalau section #33 sudah di-deploy dan cron sudah aktif, command yang salah kemungkinan sudah/akan terus membangun ulang data lama tiap 15 menit sampai perbaikan ini menggantikannya.
 2. **Data yang sudah kadung "muncul lagi" di production** (mis. 2836 tugas/418,5 poin di screenshot) itu **BENAR secara historis** (bukan data palsu — itu riwayat asli yang tadinya dihapus, sekarang dibangun ulang oleh bug ini) — tapi kalau tujuan Anda tetap "mulai dari 0", perlu klik "Reset Semua Point" SEKALI LAGI setelah perbaikan ini di-deploy, supaya kali ini tetap 0 (auto-sync yang sudah diperbaiki tidak akan menariknya kembali).
+
+## 35. Analisis: Kenapa Widget "Peringkat Point PIC" di Dashboard Admin Tidak Ter-update
+
+**Tujuan:** User minta dicek kenapa PIC "Eko Siswanto" masih Total Point 0 di widget "Peringkat Point PIC" (ternyata ini widget di **halaman Dashboard Admin**, bukan `/admin/point-rankings` — beda halaman, beda sumber data).
+
+**Ditemukan bug cache TAMBAHAN (di luar root cause section #31):** widget ini (`admin/partials/point-rankings.blade.php`, di-include dari `admin/dashboard.blade.php`) mengambil data `$topPics`/`$topMarketings` dari `DashboardController::dashboard()`, yang menyimpannya di cache dengan **key BER-TENANT**: `Cache::remember("rankings.topPics.{$tenantKey}", 300, ...)` (TTL 5 menit). Tapi HAMPIR SEMUA tempat di kode yang seharusnya menghapus cache ini setelah poin berubah (`PicPointHistory::awardPoints()`, `revokePoints()`, `MarketingPointHistory::awardPoints()`, `PicPointReportController::recalculateAllPoints()`, `SyncController::clearSyncCache()`) cuma memanggil `Cache::forget('rankings.topPics')` **TANPA** akhiran tenant — jadi cache yang BENAR-BENAR dipakai widget dashboard **tidak pernah ter-hapus** oleh kode-kode itu, cuma bergantung pada TTL 5 menit kadaluarsa sendiri. Ini bug lama yang sudah ada dari sebelum sesi ini, baru ketahuan sekarang.
+
+### File yang Diubah/Ditambah
+| File | Perubahan |
+|------|-----------|
+| `app/Support/RankingCache.php` (baru) | Helper terpusat `forgetPics()`/`forgetMarketings()` — sekali panggil, menghapus KEDUA variasi key (polos & ber-tenant) sekaligus. Dibuat supaya tidak ada lagi tempat baru yang salah lupa salah satu variasi (persis penyebab bug ini) |
+| `app/Models/PicPointHistory.php` | `awardPoints()` & `revokePoints()`: ganti `Cache::forget('rankings.topPics')` → `RankingCache::forgetPics()` |
+| `app/Models/MarketingPointHistory.php` | `awardPoints()`: ganti jadi `RankingCache::forgetMarketings()` |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `recalculateAllPoints()` & `resetAllPoints()`: pakai `RankingCache::forgetPics()` |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | `resetAllPoints()`: pakai `RankingCache::forgetMarketings()` |
+| `app/Http/Controllers/Admin/SyncController.php` | `clearSyncCache()`: sebelumnya HANYA menghapus `sync.out_of_sync_count`, sama sekali tidak menyentuh cache ranking — sekarang tambah `RankingCache::forgetPics()` + `forgetMarketings()`. Artinya tombol "Sinkronisasi Point" di `/admin/sync` sekarang juga langsung membersihkan cache dashboard, bukan cuma database |
+| `app/Console/Commands/AutoSyncPicMarketingPoints.php` | Pakai `RankingCache` juga, konsisten dengan tempat lain |
+| `tests/Feature/Points/RankingCacheTest.php` (baru, 2 test) | Membuktikan `forgetPics()`/`forgetMarketings()` menghapus KEDUA variasi key cache sekaligus |
+
+**Diverifikasi:** full test suite (`tests/Feature/Points`, 42 test, 88 assertion) **PASS**.
+
+**Kesimpulan untuk kasus Eko Siswanto:** kombinasi 2 penyebab — (1) data lama sudah kadung desync dari SEBELUM perbaikan atomik section #31 [belum tentu sudah dibetulkan otomatis kalau auto-sync section #33/34 belum sempat jalan/belum di-deploy], DAN (2) walau datanya sudah benar di database, widget dashboard bisa tetap menampilkan cache lama sampai 5 menit karena bug cache di atas. Setelah perbaikan ini di-deploy, kedua penyebab sudah tertutup — poin baru akan langsung terlihat di dashboard tanpa delay cache yang salah.

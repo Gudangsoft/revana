@@ -284,9 +284,7 @@ class MarketingPointReportController extends Controller
             Marketing::query()->update(['total_points' => 0]);
         });
 
-        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
-        \Illuminate\Support\Facades\Cache::forget('rankings.topMarketings');
-        \Illuminate\Support\Facades\Cache::forget("rankings.topMarketings.{$tenantKey}");
+        \App\Support\RankingCache::forgetMarketings();
         \Illuminate\Support\Facades\Cache::forget('sync.out_of_sync_count');
 
         return redirect()->route('admin.marketing-points.index')

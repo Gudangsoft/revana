@@ -484,7 +484,7 @@ class PicPointReportController extends Controller
             ');
         });
 
-        \Illuminate\Support\Facades\Cache::forget('rankings.topPics');
+        \App\Support\RankingCache::forgetPics();
 
         $pointsAfter = (float) Pic::sum('total_points');
         $diff        = $pointsAfter - $pointsBefore;
@@ -523,9 +523,7 @@ class PicPointReportController extends Controller
 
         // Hapus cache leaderboard supaya tidak menampilkan data lama sampai 5 menit
         // ke depan (rankings.topPics diisi ulang otomatis saat diakses berikutnya).
-        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
-        \Illuminate\Support\Facades\Cache::forget('rankings.topPics');
-        \Illuminate\Support\Facades\Cache::forget("rankings.topPics.{$tenantKey}");
+        \App\Support\RankingCache::forgetPics();
         \Illuminate\Support\Facades\Cache::forget('sync.out_of_sync_count');
 
         return redirect()->route('admin.pic-points.index')

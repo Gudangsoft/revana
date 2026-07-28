@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\RankingCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class MarketingPointHistory extends Model
@@ -127,7 +127,7 @@ class MarketingPointHistory extends Model
             throw $e;
         }
 
-        Cache::forget('rankings.topMarketings');
+        RankingCache::forgetMarketings();
 
         return $history;
     }

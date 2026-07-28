@@ -174,9 +174,11 @@ class SyncController extends Controller
         });
     }
 
-    /** Bersihkan cache sinkronisasi. */
+    /** Bersihkan cache sinkronisasi + cache leaderboard (widget dashboard admin). */
     private static function clearSyncCache(): void
     {
         Cache::forget('sync.out_of_sync_count');
+        \App\Support\RankingCache::forgetPics();
+        \App\Support\RankingCache::forgetMarketings();
     }
 }
