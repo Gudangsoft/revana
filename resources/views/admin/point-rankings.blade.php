@@ -8,6 +8,8 @@
 @endsection
 
 @section('content')
+@include('partials.auto-refresh', ['interval' => 30, 'arId' => 'admin-point-rankings'])
+
 {{-- Statistics Cards --}}
 <div class="row mb-4">
     <div class="col-md-3">
