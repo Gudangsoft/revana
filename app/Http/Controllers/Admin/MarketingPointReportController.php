@@ -161,6 +161,12 @@ class MarketingPointReportController extends Controller
      * Bulk sync: backfill missing marketing_point_histories + recalculate totals.
      * Called from TaskPointSettingController after saving settings.
      * Returns [$created, $synced].
+     *
+     * PENTING: versi sebelumnya juga menimpa ulang `points_earned` pada baris yang SUDAH
+     * ADA setiap kali fungsi ini terpanggil (dipicu oleh admin menyimpan setting poin
+     * TUGAS APAPUN, bukan cuma marketing) — itu menghancurkan riwayat poin yang sudah
+     * benar milik ribuan submission lama begitu rate poin submit berubah. Sekarang HANYA
+     * mengisi baris yang belum ada; baris yang sudah ada tidak pernah disentuh lagi.
      */
     public static function runBulkSync(): array
     {
@@ -179,13 +185,6 @@ class MarketingPointReportController extends Controller
                   WHERE mph.marketing_id = s.marketing_id AND mph.submission_id = s.id
               )
         ", [$submitPoints]);
-
-        // Update existing records if point value changed
-        \DB::affectingStatement("
-            UPDATE marketing_point_histories
-            SET points_earned = ?, updated_at = NOW()
-            WHERE ABS(points_earned - ?) > 0.0001
-        ", [$submitPoints, $submitPoints]);
 
         // Recalculate total_points = SUM of points_earned per marketing
         $synced = \DB::affectingStatement('

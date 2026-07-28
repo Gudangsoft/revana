@@ -99,3 +99,12 @@ Log perubahan otomatis dari git commits.
 - `log-update-2026-07-27.md`
 - `resources/views/pic/layouts/app.blade.php`
 
+
+## 8. 🔄 Update: Hapus banner Pengingat Sinkronisasi Point di dashboard PIC & Marketing
+
+- **Commit:** `41875b9` — 20:32 oleh Gudangsoft
+- **File berubah:** 3 file
+- `log-update-2026-07-27.md`
+- `resources/views/marketing/dashboard.blade.php`
+- `resources/views/pic/author/dashboard.blade.php`
+

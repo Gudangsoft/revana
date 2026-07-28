@@ -264,6 +264,12 @@ class PicPointReportController extends Controller
         $repaired   = 0;
 
         // Bulk INSERT missing submit histories (one query instead of one per submission)
+        //
+        // PENTING: dulu ada juga langkah "update existing records" di sini yang menimpa
+        // ulang points_earned SEMUA baris yang sudah ada setiap kali fungsi ini terpanggil
+        // (dipicu admin menyimpan setting poin TUGAS APAPUN) — itu menghancurkan riwayat
+        // poin PIC yang sudah benar begitu rate berubah. Sekarang HANYA mengisi baris yang
+        // belum ada; baris yang sudah ada tidak pernah ditimpa lagi.
         $submitPoints = PicPointHistory::getPointsForStep('submit');
         if ($submitPoints > 0) {
             $backfilled += \DB::affectingStatement("
@@ -279,12 +285,6 @@ class PicPointReportController extends Controller
                   )
             ", [$submitPoints]);
         }
-        // Update submit records if point value changed
-        $repaired += \DB::affectingStatement("
-            UPDATE pic_point_histories
-            SET points_earned = ?, updated_at = NOW()
-            WHERE step = 'submit' AND ABS(points_earned - ?) > 0.0001
-        ", [$submitPoints, $submitPoints]);
 
         // Bulk INSERT missing workflow step histories (one query per step instead of one per row)
         foreach ($workflowSteps as $ws) {
@@ -305,13 +305,6 @@ class PicPointReportController extends Controller
                       )
                 ", [$points]);
             }
-
-            // Update existing records if point value changed (handles increase, decrease, or set-to-zero)
-            $repaired += \DB::affectingStatement("
-                UPDATE pic_point_histories
-                SET points_earned = ?, updated_at = NOW()
-                WHERE step = '{$ws['step']}' AND ABS(points_earned - ?) > 0.0001
-            ", [$points, $points]);
 
             // Bulk UPDATE mismatched created_at dates (repair)
             $repaired += \DB::affectingStatement("
