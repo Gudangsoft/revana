@@ -157,7 +157,7 @@ class LaporanKinerjaController extends Controller
         $totalPicTugas  = $picRekap->sum('total_tugas');
         $totalPicPoin   = $picRekap->sum('total_poin');
         $totalMktSubmit = $mktRekap->sum('total_submit');
-        $totalMktPoin   = $mktRekap->sum('total_poin');
+        $totalMktPoin   = number_format((float) $mktRekap->sum('total_poin'), 2, '.', ',');
 
         $steps     = self::STEPS;
         $tahunList = range(now()->year, max(now()->year - 4, 2024));
