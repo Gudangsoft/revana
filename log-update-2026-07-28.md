@@ -48,3 +48,14 @@ Semua 4 skenario di kedua sistem lolos persis sesuai ekspektasi. Semua data uji 
 Migration ini **WAJIB** dijalankan di production: `git pull origin master` lalu `php artisan migrate --force`. Setelah itu, **cek `storage/logs/laravel.log`** untuk melihat berapa baris & marketing/PIC mana saja yang terkoreksi (log key: `"Restore poin PIC/Marketing yang rusak akibat bug penimpaan ulang riwayat"`). Poin Risqi diperkirakan akan kembali ke sekitar 2.245 (mendekati "2000-an" yang diingat) setelah migration ini jalan.
 
 **Yang TIDAK bisa dipulihkan dengan sempurna:** rate poin historis yang SEBENARNYA berlaku di setiap submission pada waktunya sudah hilang permanen (tertimpa oleh bug). Migration ini mengembalikan ke nilai STANDAR desain sistem (1 poin/tugas), yang merupakan pendekatan paling wajar & sesuai ekspektasi tim, tapi bukan rekonstruksi persis 1:1 dari sejarah asli.
+
+## 2. 🔄 Update: Fix bulk sync logic to prevent overwriting existing points history and add migration to restore corrupted data
+
+- **Commit:** `ba88937` — 08:09 oleh Gudangsoft
+- **File berubah:** 5 file
+- `app/Http/Controllers/Admin/MarketingPointReportController.php`
+- `app/Http/Controllers/Admin/PicPointReportController.php`
+- `database/migrations/2026_07_28_000001_restore_points_corrupted_by_rewrite_bug.php`
+- `log-update-2026-07-27.md`
+- `log-update-2026-07-28.md`
+
