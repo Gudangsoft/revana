@@ -155,7 +155,7 @@ class LaporanKinerjaController extends Controller
 
         // --- Summary stats ---
         $totalPicTugas  = $picRekap->sum('total_tugas');
-        $totalPicPoin   = $picRekap->sum('total_poin');
+        $totalPicPoin   = number_format((float) $picRekap->sum('total_poin'), 2, '.', ',');
         $totalMktSubmit = $mktRekap->sum('total_submit');
         $totalMktPoin   = number_format((float) $mktRekap->sum('total_poin'), 2, '.', ',');
 
