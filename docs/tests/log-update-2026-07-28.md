@@ -559,3 +559,51 @@ Berlaku otomatis di SEMUA halaman PIC (bukan cuma dashboard) karena ini bagian d
 | `app/Http/Controllers/Reviewer/CertificateController.php` | `generateCertificate()`: cari `Submission` lewat `link_artikel == submit_link`, ambil `kode_loa` (nomor surat), `journalSlot.journalMaster.nama_jurnal`, dan `.publisher`. Tambah 1 baris teks kecil di bawah tanggal pada gambar sertifikat: "No. Surat: ... \| Jurnal: ... \| Publisher: ..." |
 
 **Diverifikasi:** file template AKTIF (`certificates/kTM1Uo9...jpg`) tidak ada di lokal (cuma record database yang tersinkron, bukan file storage), tapi ditemukan file template lain dengan desain identik (`SH3jkSPPS...jpg`) yang dipakai untuk uji render nyata — hasilnya (gambar terlampir ke user) menunjukkan baris info baru pas di bawah tanggal, tidak tumpang tindih dengan logo SIPERA atau border bawah. Data uji pakai assignment sungguhan (id=30) dengan kode_loa/jurnal/publisher lengkap. **Catatan:** posisi taksiran berdasarkan template referensi — kalau template AKTIF di production sedikit berbeda proporsinya, mungkin perlu penyesuaian koordinat Y kecil (sudah diberi komentar jelas di kode).
+
+## 30. `/admin/point-rankings` Tidak Auto-Refresh — Terlihat Seperti "Belum Ter-update Realtime"
+
+**Tujuan:** User melaporkan (dari production, portal.apji.org) bahwa poin di `/admin/point-rankings` tidak ter-update realtime — screenshot menunjukkan PIC dengan Total Point 0 di posisi rank 1.
+
+**Diagnosis:** dicek `DashboardController::pointRankings()` — method ini query `total_points` LANGSUNG dari tabel `pics`/`marketings` setiap request, **tidak ada cache Laravel sama sekali** di endpoint ini. Jadi kalau halaman di-refresh manual, datanya PASTI sudah yang terbaru dari database. Masalah sebenarnya: halaman ini **tidak punya mekanisme auto-refresh** (beda dengan halaman sejenis seperti `/admin/pic-points` dan `/admin/marketing-points` yang sudah auto-reload setiap 30 detik) — jadi admin yang membiarkan tab terbuka akan terus melihat data lama sampai mereka manual tekan F5, terkesan seperti "tidak realtime" padahal datanya sebenarnya sudah benar begitu di-refresh.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/point-rankings.blade.php` | Tambah `@include('partials.auto-refresh', ['interval' => 30, ...])` — halaman otomatis reload tiap 30 detik (dengan indikator countdown & tombol jeda), sama seperti pola yang sudah dipakai di halaman monitoring lain |
+
+**Catatan penting yang TIDAK bisa saya cek:** kalau setelah deploy fix ini admin masih melihat angka lama walau sudah menunggu 30 detik / refresh manual, kemungkinan ada **cache di level server/hosting** (CDN, reverse proxy, page-cache plugin) di depan aplikasi Laravel yang di luar kendali kode — ini perlu dicek langsung di konfigurasi hosting/Cloudflare production, saya tidak punya akses untuk mendiagnosis itu.
+
+**Diverifikasi:** test HTTP-level (request asli) mengonfirmasi widget auto-refresh muncul di halaman. Full test suite (`tests/Feature/Points`, 34 test) tetap **PASS**.
+
+## 31. Fix Akar Masalah: Riwayat Poin Tersimpan Tapi total_points PIC/Marketing Tidak Ikut Bertambah
+
+**Tujuan:** User melaporkan PIC baru ("Eko Siswanto") di production menunjukkan Total Point 0 padahal sudah submit 1 artikel. User eksplisit minta akar masalahnya diperbaiki, BUKAN diselesaikan dengan membiasakan klik tombol "Sinkronisasi Point" di `/admin/sync` — sistem harus otomatis akurat.
+
+**Diagnosis (dikonfirmasi langsung oleh user dari data production):** baris riwayat "Submit" milik PIC tersebut menunjukkan poin yang BENAR (+0,25, sesuai rate submit saat ini), tapi Total Point PIC tetap 0 — membuktikan ini BUKAN soal rate/konfigurasi yang salah, tapi riwayat berhasil tersimpan sementara `total_points` tidak ikut ter-update. Ini persis kelas bug yang sama dengan insiden section #17 (data tidak konsisten), tapi di sisi lain dari operasi yang sama.
+
+**Root cause:** di `PicPointHistory::awardPoints()` dan `MarketingPointHistory::awardPoints()`, urutan operasinya adalah: (1) `create()` riwayat → (2) `forceFill(['created_at' => $occurredAt, ...])->save()` untuk backdate tanggal (ditambahkan section #21) → (3) `increment('total_points', ...)` / recompute SUM. Ketiga langkah ini **TIDAK dibungkus transaksi** — kalau langkah (2) gagal karena alasan apa pun (nilai `$occurredAt` tidak valid, race condition, dll), riwayat di langkah (1) **sudah kadung tersimpan** tapi eksekusi berhenti di situ, langkah (3) tidak pernah jalan — persis gejala yang dilaporkan: riwayat benar, total tidak ikut bertambah, dan tidak akan pernah otomatis benar sampai seseorang manual klik sinkron.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/PicPointHistory.php` | `awardPoints()`: bungkus `create()` + backdate + `increment('total_points', ...)` dalam 1 `DB::transaction()` — kalau ada apa pun yang gagal di tengah, SEMUA batal bersama (rollback), bukan meninggalkan riwayat yatim |
+| `app/Models/MarketingPointHistory.php` | `awardPoints()`: perbaikan sama — `create()` + backdate + recompute SUM `total_points` dibungkus 1 transaksi |
+| `tests/Feature/Points/PicPointHistoryAwardTest.php`, `MarketingPointHistoryAwardTest.php` | Tambah `test_award_points_rolls_back_history_row_if_backdate_fails` (masing-masing) — sengaja membuat backdate gagal (occurredAt tidak valid) dan membuktikan TIDAK ADA riwayat yatim tersimpan serta `total_points` TIDAK berubah, mengunci jaminan atomik ini |
+
+**Diverifikasi:** direproduksi persis lewat `php artisan tinker` (transaksi di-rollback, tidak menyentuh data asli) — memanggil `awardPoints()` dengan `occurredAt` tidak valid, SEBELUM fix: riwayat tetap tersimpan meski exception dilempar (bukti bug). SETELAH fix: exception dilempar DAN riwayat ikut batal (rollback bersih) — dikonfirmasi count riwayat = 0, total_points = 0 setelahnya. Full test suite (`tests/Feature/Points`, 36 test, 75 assertion) **PASS**.
+
+**Catatan:** perbaikan ini menutup akar masalahnya untuk kejadian BARU ke depannya. PIC "Eko Siswanto" yang datanya SUDAH TERLANJUR desync di production tetap perlu satu kali sinkronisasi manual (`/admin/sync`) untuk membetulkan riwayat yang sudah kadung tidak konsisten — setelah itu, dengan fix ini, seharusnya tidak akan terulang lagi secara otomatis.
+
+## 32. Revert Format 1 Desimal — Balik ke 2 Desimal (Section #28 Menimbulkan Masalah Baru)
+
+**Tujuan:** User menunjukkan screenshot halaman "Point Saya" PIC menampilkan "Total Point 0.3" — tidak cocok dengan nilai sebenarnya (0,25, sesuai rate submit). Ini persis risiko presisi yang sudah diperingatkan saat section #28 dibuat: rate pecahan seperti 0,25/0,33 kalau dibulatkan ke 1 desimal bisa menampilkan angka yang salah/tidak sesuai nilai asli.
+
+**Keputusan:** revert perubahan 1 desimal dari section #28 — balik ke 2 desimal seperti semula. Perubahan "Total Tugas" pakai pemisah ribuan titik (bukan koma) TETAP dipertahankan (tidak terkait masalah presisi ini, dan sudah benar).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/pic/points/index.blade.php` | Card Total Point/Point Hari Ini/Point Bulan Ini + baris "Total Point" hasil filter: `number_format(..., 1)` → `2` (balik ke semula) |
+| `resources/views/marketing/points.blade.php` | Perubahan sama untuk 3 card + baris "Total Point" hasil filter |
+
+**Diverifikasi:** dicek tidak ada `number_format(..., 1)` tersisa yang tidak sengaja ikut ter-revert (cuma 4 baris yang memang dimaksud di tiap file, dicek lewat grep sebelum & sesudah). Kedua file lolos compile. Full test suite (`tests/Feature/Points`, 36 test) tetap **PASS**.

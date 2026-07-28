@@ -103,4 +103,28 @@ class MarketingPointHistoryAwardTest extends TestCase
 
         $this->assertEquals(10, $marketing->fresh()->total_points);
     }
+
+    /**
+     * Regresi sama seperti PicPointHistoryAwardTest — create()+backdate+recompute
+     * total_points sekarang dibungkus 1 transaksi. Kalau backdate created_at gagal,
+     * SEMUANYA batal, bukan meninggalkan riwayat yatim tanpa total_points ikut
+     * ter-update.
+     */
+    public function test_award_points_rolls_back_history_row_if_backdate_fails(): void
+    {
+        $marketing = $this->makeMarketing(['total_points' => 0]);
+        $submission = $this->makeSubmission();
+
+        try {
+            MarketingPointHistory::awardPoints($marketing->id, $submission->id, 'test', 'ini-bukan-tanggal-valid');
+            $this->fail('Seharusnya melempar exception karena occurredAt tidak valid');
+        } catch (\Throwable $e) {
+            // Exception yang dilempar Carbon saat parsing tanggal tidak valid — diharapkan.
+        }
+
+        $this->assertEquals(0, MarketingPointHistory::where('marketing_id', $marketing->id)->count(),
+            'Tidak boleh ada riwayat yatim tersimpan kalau backdate created_at gagal');
+        $this->assertEquals(0, $marketing->fresh()->total_points,
+            'total_points tidak boleh berubah kalau transaksi gagal di tengah jalan');
+    }
 }

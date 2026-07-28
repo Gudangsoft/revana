@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class MarketingPointHistory extends Model
 {
@@ -88,32 +89,43 @@ class MarketingPointHistory extends Model
         // (marketing_id, submission_id) di database akan menolak yang kedua. Tangkap di
         // sini supaya user dapat respons mulus (null, "sudah pernah diberi"), bukan
         // crash 500 — sama seperti penanganan di PicPointHistory::awardPoints().
+        //
+        // create() + backdate created_at + recompute total_points DIBUNGKUS 1 TRANSAKSI
+        // supaya atomik — kalau ada apa pun yang gagal di antara create() dan recompute
+        // (mis. forceFill()->save() untuk backdate), riwayat sudah kadung tersimpan tapi
+        // total_points tidak ikut ter-update, persis insiden nyata yang pernah ditemukan
+        // di sisi PIC (riwayat benar, total_points PIC tidak ikut bertambah).
         try {
-            $history = self::create([
-                'marketing_id' => $marketingId,
-                'submission_id' => $submissionId,
-                'points_earned' => $points,
-                'description' => $description ?? "Submit artikel berhasil",
-            ]);
+            $history = DB::transaction(function () use ($marketingId, $submissionId, $description, $points, $occurredAt) {
+                $history = self::create([
+                    'marketing_id' => $marketingId,
+                    'submission_id' => $submissionId,
+                    'points_earned' => $points,
+                    'description' => $description ?? "Submit artikel berhasil",
+                ]);
+
+                if ($occurredAt) {
+                    $history->forceFill([
+                        'created_at' => $occurredAt,
+                        'updated_at' => $occurredAt,
+                    ])->save();
+                }
+
+                // Sync total_points dari SUM riwayat poin — BUKAN COUNT submission, karena
+                // rate poin per submission bisa berubah dari waktu ke waktu (lihat
+                // TaskPointSetting), jadi COUNT tidak akan cocok dengan total yang
+                // sebenarnya pernah diberikan.
+                $actualPoints = self::where('marketing_id', $marketingId)->sum('points_earned');
+                Marketing::where('id', $marketingId)->update(['total_points' => $actualPoints]);
+
+                return $history;
+            });
         } catch (\Illuminate\Database\QueryException $e) {
             if (str_contains($e->getMessage(), 'marketing_point_histories_marketing_id_submission_id_unique')) {
                 return null;
             }
             throw $e;
         }
-
-        if ($occurredAt) {
-            $history->forceFill([
-                'created_at' => $occurredAt,
-                'updated_at' => $occurredAt,
-            ])->save();
-        }
-
-        // Sync total_points dari SUM riwayat poin — BUKAN COUNT submission, karena rate
-        // poin per submission bisa berubah dari waktu ke waktu (lihat TaskPointSetting),
-        // jadi COUNT tidak akan cocok dengan total yang sebenarnya pernah diberikan.
-        $actualPoints = self::where('marketing_id', $marketingId)->sum('points_earned');
-        Marketing::where('id', $marketingId)->update(['total_points' => $actualPoints]);
 
         Cache::forget('rankings.topMarketings');
 

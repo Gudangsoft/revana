@@ -156,4 +156,32 @@ class PicPointHistoryAwardTest extends TestCase
 
         $this->assertEquals($occurredAt->format('Y-m-d H:i:s'), $history->created_at->format('Y-m-d H:i:s'));
     }
+
+    /**
+     * Regresi untuk insiden nyata (28 Juli 2026): riwayat poin PIC berhasil tersimpan
+     * dengan points_earned yang BENAR, tapi total_points PIC tidak ikut bertambah —
+     * karena dulu increment() ada di baris TERPISAH setelah forceFill()->save() untuk
+     * backdate created_at; kalau backdate gagal (occurredAt tidak valid), riwayat
+     * sudah kadung tersimpan tapi total_points tidak sempat ter-update. Sekarang
+     * create()+backdate+increment dibungkus 1 transaksi — test ini membuktikan kalau
+     * backdate gagal, SEMUANYA batal (tidak ada riwayat yatim tanpa total_points ikut
+     * bertambah).
+     */
+    public function test_award_points_rolls_back_history_row_if_backdate_fails(): void
+    {
+        $pic = $this->makePic(['total_points' => 0]);
+        $submission = $this->makeSubmission();
+
+        try {
+            PicPointHistory::awardPoints($pic->id, $submission->id, 'editor1', 'test', 'ini-bukan-tanggal-valid');
+            $this->fail('Seharusnya melempar exception karena occurredAt tidak valid');
+        } catch (\Throwable $e) {
+            // Exception yang dilempar Carbon saat parsing tanggal tidak valid — diharapkan.
+        }
+
+        $this->assertEquals(0, PicPointHistory::where('pic_id', $pic->id)->count(),
+            'Tidak boleh ada riwayat yatim tersimpan kalau backdate created_at gagal');
+        $this->assertEquals(0, $pic->fresh()->total_points,
+            'total_points tidak boleh berubah kalau transaksi gagal di tengah jalan');
+    }
 }

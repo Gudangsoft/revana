@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class PicPointHistory extends Model
 {
@@ -128,30 +129,44 @@ class PicPointHistory extends Model
         // race itu terjadi, INSERT kedua akan gagal dengan duplicate-key — tangkap
         // di sini dan perlakukan sama seperti "sudah pernah diberi" (return null),
         // bukan crash 500.
+        //
+        // create() + backdate created_at + increment total_points DIBUNGKUS 1
+        // TRANSAKSI supaya atomik — insiden nyata: riwayat berhasil tersimpan
+        // (points_earned benar) tapi total_points PIC tidak ikut bertambah, karena
+        // sebelumnya increment() ada di baris TERPISAH setelah forceFill()->save();
+        // kalau ada apa pun yang gagal di antara create() dan increment(), riwayat
+        // sudah kadung tersimpan tapi total_points tidak ikut ter-update — state
+        // tidak konsisten yang butuh sinkronisasi manual untuk diperbaiki. Dengan
+        // transaksi, create()+backdate+increment sekarang selalu semua berhasil
+        // atau semua batal bersama.
         try {
-            $history = self::create([
-                'pic_id' => $picId,
-                'submission_id' => $submissionId,
-                'step' => $step,
-                'points_earned' => $points,
-                'description' => $description ?? "Menyelesaikan tugas " . self::getLabelForStep($step),
-            ]);
+            $history = DB::transaction(function () use ($picId, $submissionId, $step, $description, $points, $occurredAt) {
+                $history = self::create([
+                    'pic_id' => $picId,
+                    'submission_id' => $submissionId,
+                    'step' => $step,
+                    'points_earned' => $points,
+                    'description' => $description ?? "Menyelesaikan tugas " . self::getLabelForStep($step),
+                ]);
+
+                if ($occurredAt) {
+                    $history->forceFill([
+                        'created_at' => $occurredAt,
+                        'updated_at' => $occurredAt,
+                    ])->save();
+                }
+
+                // Update total points on PIC
+                Pic::where('id', $picId)->increment('total_points', $points);
+
+                return $history;
+            });
         } catch (\Illuminate\Database\QueryException $e) {
             if (str_contains($e->getMessage(), 'pic_point_histories_unique_award')) {
                 return null;
             }
             throw $e;
         }
-
-        if ($occurredAt) {
-            $history->forceFill([
-                'created_at' => $occurredAt,
-                'updated_at' => $occurredAt,
-            ])->save();
-        }
-
-        // Update total points on PIC
-        Pic::where('id', $picId)->increment('total_points', $points);
 
         Cache::forget('rankings.topPics');
 
