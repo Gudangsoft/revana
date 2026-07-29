@@ -185,7 +185,7 @@
                                     </td>
                                 @endforeach
                                 <td class="text-center fw-bold text-success">{{ $row['total_tugas'] }}</td>
-                                <td class="text-center fw-bold text-warning">{{ $row['total_poin'] }}</td>
+                                <td class="text-center fw-bold text-warning">{{ number_format($row['total_poin'], 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -198,7 +198,7 @@
                                     </td>
                                 @endforeach
                                 <td class="text-center text-success">{{ $totalPicTugas }}</td>
-                                <td class="text-center text-warning">{{ $totalPicPoin }}</td>
+                                <td class="text-center text-warning">{{ number_format($totalPicPoin, 2) }}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -241,7 +241,7 @@
                                 <td class="text-center">
                                     <span class="badge bg-info rounded-pill fs-6 px-3">{{ $row['total_submit'] }}</span>
                                 </td>
-                                <td class="text-center fw-bold text-warning">{{ $row['total_poin'] }}</td>
+                                <td class="text-center fw-bold text-warning">{{ number_format($row['total_poin'], 2) }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('admin.marketing-points.show', $row['marketing']->id) }}" class="btn btn-outline-info btn-sm py-0">
                                         <i class="bi bi-eye"></i>
@@ -254,7 +254,7 @@
                             <tr>
                                 <td colspan="2" class="text-end">TOTAL</td>
                                 <td class="text-center text-info">{{ $totalMktSubmit }}</td>
-                                <td class="text-center text-warning">{{ $totalMktPoin }}</td>
+                                <td class="text-center text-warning">{{ number_format($totalMktPoin, 2) }}</td>
                                 <td></td>
                             </tr>
                         </tfoot>

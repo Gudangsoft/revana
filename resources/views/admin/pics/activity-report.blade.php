@@ -61,7 +61,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Rata-rata</h6>
-                        <h2 class="mb-0 fw-bold">{{ $stats['total_pics'] > 0 ? number_format($stats['total_points_given'] / $stats['total_pics'], 0) : 0 }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ $stats['total_pics'] > 0 ? number_format($stats['total_points_given'] / $stats['total_pics'], 2) : '0.00' }}</h2>
                         <small>Point per PIC</small>
                     </div>
                     <i class="bi bi-graph-up fs-1 opacity-50"></i>
@@ -158,7 +158,7 @@
                         </td>
                         <td class="text-center">
                             <h5 class="mb-0">
-                                <span class="badge bg-primary">{{ number_format($picData->filtered_points) }}</span>
+                                <span class="badge bg-primary">{{ number_format($picData->filtered_points, 2) }}</span>
                             </h5>
                         </td>
                         <td class="text-center">

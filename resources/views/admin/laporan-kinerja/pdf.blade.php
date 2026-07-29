@@ -110,7 +110,7 @@
                 </td>
             @endforeach
             <td class="text-center fw-bold" style="color:#166534;">{{ $row['total_tugas'] }}</td>
-            <td class="text-center fw-bold" style="color:#854d0e;">{{ $row['total_poin'] }}</td>
+            <td class="text-center fw-bold" style="color:#854d0e;">{{ number_format($row['total_poin'], 2) }}</td>
         </tr>
         @endforeach
     </tbody>
@@ -121,7 +121,7 @@
                 <td class="text-center">{{ $picRekap->sum(fn($r) => $r['step_counts'][$key]) ?: '—' }}</td>
             @endforeach
             <td class="text-center">{{ $totalPicTugas }}</td>
-            <td class="text-center">{{ $totalPicPoin }}</td>
+            <td class="text-center">{{ number_format($totalPicPoin, 2) }}</td>
         </tr>
     </tfoot>
 </table>
@@ -147,7 +147,7 @@
             <td class="text-center">{{ $i+1 }}</td>
             <td class="fw-bold">{{ $row['marketing']->name }}</td>
             <td class="text-center"><span class="badge-mkt">{{ $row['total_submit'] }}</span></td>
-            <td class="text-center fw-bold" style="color:#854d0e;">{{ $row['total_poin'] }}</td>
+            <td class="text-center fw-bold" style="color:#854d0e;">{{ number_format($row['total_poin'], 2) }}</td>
         </tr>
         @endforeach
     </tbody>
@@ -155,7 +155,7 @@
         <tr class="foot">
             <td colspan="2" class="text-right">TOTAL</td>
             <td class="text-center">{{ $totalMktSubmit }}</td>
-            <td class="text-center">{{ $totalMktPoin }}</td>
+            <td class="text-center">{{ number_format($totalMktPoin, 2) }}</td>
         </tr>
     </tfoot>
 </table>

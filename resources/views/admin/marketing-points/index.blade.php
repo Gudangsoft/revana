@@ -39,7 +39,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Total Point</h6>
-                        <h2 class="mb-0 fw-bold">{{ number_format($totalPoints) }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ number_format($totalPoints, 2) }}</h2>
                     </div>
                     <i class="bi bi-trophy fs-1 opacity-50"></i>
                 </div>
@@ -149,7 +149,7 @@
                                     <span class="badge bg-info">{{ $marketing->submissions_count ?? $marketing->submissions->count() }}</span>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-success fs-6">{{ $marketing->total_points ?? $marketing->submissions_count ?? 0 }}</span>
+                                    <span class="badge bg-success fs-6">{{ number_format($marketing->total_points ?? 0, 2) }}</span>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">

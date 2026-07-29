@@ -178,3 +178,51 @@ git pull origin master
 php artisan migrate --force
 ```
 Migration ini **WAJIB** dijalankan sebelum tombol "Simpan & Sync" di `/admin/task-point-settings` (atau tombol "Reset Semua Point" mana pun) disentuh lagi. Setelah migration ini jalan, cek: `php artisan tinker --execute="echo DB::table('marketings')->whereNull('points_reset_at')->count();"` harus menghasilkan **0**.
+
+## 6. Audit Menyeluruh: Konsistensi 2 Desimal + Hapus Tombol Berbahaya Lain
+
+**Tujuan:** User (setelah insiden section #4-#5 selesai) minta audit menyeluruh supaya sistem poin PIC & Marketing "lebih profesional dan rapi" — konsisten 2 desimal di SEMUA halaman terkait poin (bukan cuma yang sudah kebetulan ditemukan lewat laporan bug).
+
+### Temuan A — Tombol Berbahaya Lain: "Hitung Ulang Semua Point PIC"
+
+Saat menelusuri halaman `/admin/pic-points` untuk audit desimal, ditemukan tombol **"Hitung Ulang Point"** yang mengarah ke `PicPointReportController::recalculateAllPoints()` — method ini **menimpa ulang `points_earned` di SEMUA baris riwayat yang sudah ada** supaya sama dengan rate `TaskPointSetting` yang berlaku SAAT INI:
+```php
+PicPointHistory::where('step', $setting->task_key)
+    ->whereNotIn('step', ['adjustment'])
+    ->where('points_earned', '!=', (float) $setting->points)
+    ->update(['points_earned' => (float) $setting->points]);
+```
+Ini **persis** kelas bug yang menyebabkan insiden "poin PIC anjlok dari ~97.529 jadi ~29.678" (28 Juli, lihat `docs/tests/log-update-2026-07-28.md` #15) — bedanya, di sana itu dijalankan SEKALI lewat migration terkontrol dengan persetujuan eksplisit user; tombol ini biarkan siapa saja mengklik kapan saja tanpa sadar dampaknya (menghancurkan rate historis asli, bukan cuma rate hari ini). User memutuskan **dihapus total** (bukan diamankan/diberi peringatan) — kalau suatu saat perlu koreksi retroaktif ke rate baru, itu keputusan besar yang lebih pantas lewat migration khusus (dengan diagnosa & persetujuan eksplisit dulu), bukan tombol UI.
+
+### Temuan B — Ketidakkonsistenan Desimal di 7 File
+
+Audit `number_format()` (dan echo poin mentah tanpa `number_format` sama sekali) di seluruh `resources/views`, dipisahkan dari sistem poin reviewer/redemption yang memang terpisah (integer, bukan bagian dari lingkup ini):
+
+| File | Yang diperbaiki |
+|------|-----------|
+| `resources/views/admin/pic-points/index.blade.php` | Kartu "Total Point", "Top Bulan Ini", dan teks total di modal Reset — 3 tempat tanpa desimal |
+| `resources/views/admin/marketing-points/index.blade.php` | Kartu "Total Point" tanpa desimal; baris tabel leaderboard `$marketing->total_points` tanpa `number_format` sama sekali (bonus: hapus fallback `?? $marketing->submissions_count` yang berpotensi salah tampil COUNT submission sebagai poin — kelas bug badge navbar 28 Juli) |
+| `resources/views/admin/pics/activity-report.blade.php` | Kolom "Point" per-PIC di tabel tanpa desimal; kartu "Rata-rata" diseragamkan ke 2 desimal (sebelumnya 0) |
+| `resources/views/admin/marketing-points/show.blade.php` | Nilai poin per baris riwayat (`$history->points_earned`) di-echo mentah tanpa `number_format` sama sekali |
+| `resources/views/admin/pic-points/show.blade.php` | Sama — nilai poin per baris riwayat di-echo mentah |
+| `resources/views/admin/laporan-kinerja/index.blade.php` | Kolom "Total Poin" per PIC & Marketing (baris + total) di-echo mentah, 4 tempat |
+| `resources/views/admin/laporan-kinerja/pdf.blade.php` | Sama untuk versi PDF, 4 tempat |
+
+**Tidak diubah (di luar lingkup, sistem terpisah):** halaman reviewer (`reviewer/*`), rewards/redemptions (`admin/rewards`, `admin/redemptions`, `admin/points/*`, `admin/point-settings`) — ini sistem poin reward/redemption reviewer yang integer, bukan poin tugas PIC/Marketing yang bisa pecahan. Export Excel (`PicPointsExport`, `MarketingLeaderboardExport`, dll.) juga tidak diubah — nilai float mentah tersimpan akurat di cell Excel (Excel tidak membulatkan seperti bug `number_format()` tanpa parameter di HTML), jadi bukan kelas bug yang sama; opsional kalau suatu saat mau diseragamkan formatnya juga.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Hapus route `admin.pic-points.recalculate-all` |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | Hapus method `recalculateAllPoints()` |
+| `resources/views/admin/pic-points/index.blade.php` | Hapus tombol & modal "Hitung Ulang Point" + JS handler-nya; perbaikan desimal (3 tempat) |
+| `resources/views/admin/marketing-points/index.blade.php`, `admin/pics/activity-report.blade.php`, `admin/marketing-points/show.blade.php`, `admin/pic-points/show.blade.php`, `admin/laporan-kinerja/index.blade.php`, `admin/laporan-kinerja/pdf.blade.php` | Perbaikan desimal sesuai tabel di atas |
+| `tests/Feature/Points/PointsDisplayAuditTest.php` (baru, 6 test) | Kunci: route `recalculate-all` sudah tidak ada; halaman `/admin/pic-points` tidak lagi menampilkan tombol/modal itu; 4 halaman (pic-points index, marketing-points index, activity-report, laporan-kinerja) menampilkan poin pecahan dengan benar (mis. "6.25"), tidak dibulatkan |
+
+### Verifikasi
+- Semua file blade yang diubah lolos `Blade::compileString()`.
+- Test baru (6 test, 12 assertion) — **PASS**.
+- Full regression suite `tests/Feature/Points` — **PASS**.
+
+### Catatan Deploy
+Murni perubahan kode (tidak ada migration). `git pull origin master` + `php artisan view:clear`.

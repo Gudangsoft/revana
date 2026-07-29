@@ -213,9 +213,9 @@
                                 <td>{{ $history->description ?? '-' }}</td>
                                 <td class="text-end">
                                     @if($history->points_earned > 0)
-                                        <span class="badge bg-success fs-6">+{{ $history->points_earned }}</span>
+                                        <span class="badge bg-success fs-6">+{{ number_format($history->points_earned, 2) }}</span>
                                     @else
-                                        <span class="badge bg-danger fs-6">{{ $history->points_earned }}</span>
+                                        <span class="badge bg-danger fs-6">{{ number_format($history->points_earned, 2) }}</span>
                                     @endif
                                 </td>
                             </tr>
