@@ -50,6 +50,22 @@ class PointsDisplayAuditTest extends TestCase
         $response->assertDontSee('recalculateAllPointsModal', false);
     }
 
+    public function test_task_point_settings_page_actually_loads_its_recalc_script(): void
+    {
+        // Regresi: halaman ini pakai @section('scripts') tapi layouts.app cuma
+        // menyediakan @stack('scripts') — dua mekanisme Blade yang tidak nyambung, jadi
+        // seluruh <script> (penjumlah "Total point PIC untuk alur lengkap" DAN fungsi
+        // confirmDelete() yang dipanggil tombol hapus) tidak pernah benar-benar
+        // ter-render ke halaman. Diperbaiki jadi @push('scripts')/@endpush.
+        $this->actingAsAdmin();
+
+        $response = $this->get(route('admin.task-point-settings.index'));
+
+        $response->assertOk();
+        $response->assertSee('function recalc()', false);
+        $response->assertSee('picTableTotal', false);
+    }
+
     public function test_task_point_settings_page_does_not_reference_removed_sync_ulang_poin_feature(): void
     {
         // Regresi: setelah tombol "Hitung Ulang Semua Point PIC" dihapus, teks info di

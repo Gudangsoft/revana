@@ -443,7 +443,7 @@
 </style>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 function recalc() {
     let total = 0;
@@ -482,4 +482,4 @@ document.querySelectorAll('.pic-active-toggle').forEach(el => el.addEventListene
 
 recalc();
 </script>
-@endsection
+@endpush
