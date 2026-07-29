@@ -300,3 +300,22 @@ Fix ini **hanya mencegah kebocoran ke DEPAN**. Poin PIC yang sudah kadung "bocor
 Fase 4 (pindahkan `runBulkSync()`/`PointsAutoSync` ke `PointsService`, ditunda sesuai rencana — risiko tertinggi) masih menunggu arahan terpisah kalau memang ingin dikerjakan.
 
 **Deploy:** murni kode, tidak ada migration. `git pull origin master`.
+
+## 10. Perbaiki Teks Basi di `/admin/task-point-settings` yang Menuding Fitur yang Sudah Dihapus
+
+**Tujuan:** User melihat kotak info di halaman "Simpan & Sync" masih bertuliskan *"Untuk menyinkronkan data historis secara penuh, gunakan **Sync Ulang Poin** di: Laporan Poin PIC | Laporan Poin Marketing"* — padahal tombol "Sync Ulang Poin" (nama lain untuk "Hitung Ulang Semua Point PIC") sudah dihapus total di section #6 hari ini. Teks ini jadi menyesatkan: mengarahkan admin ke halaman yang tidak lagi punya fitur yang dijanjikan.
+
+**Perbaikan bukan cuma hapus teks** — diperbaiki jadi akurat: tombol "Simpan & Sync" di halaman ini SEBENARNYA sudah mencakup pengisian riwayat poin yang belum tercatat (lewat `TaskPointSettingController::syncTotals()` yang memanggil `runBulkSync()` untuk PIC & Marketing, dilindungi `points_reset_at` sejak insiden 29 Juli #4-#5), jadi teks lama yang menyiratkan perlu "fitur lain" untuk sync historis penuh sebenarnya kurang tepat sejak awal.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/task-point-settings/index.blade.php` | Kotak info diubah dari *"...gunakan Sync Ulang Poin di: [link] \| [link]"* jadi *"...mengisi otomatis riwayat poin yang belum tercatat untuk tugas yang sudah selesai, dan menghitung ulang total poin... Lihat hasilnya di: [link] \| [link]"* — link ke Laporan Poin PIC/Marketing dipertahankan (masih relevan untuk MELIHAT hasil), cuma klaim soal fitur terpisah yang sudah dihapus yang dibuang |
+| `tests/Feature/Points/PointsDisplayAuditTest.php` | Test baru: halaman `/admin/task-point-settings` tidak lagi menyebut "Sync Ulang Poin" |
+
+### Verifikasi
+Test baru — PASS. Full suite `tests/Feature/Points` — PASS, tidak ada regresi.
+
+**Catatan:** ini pelajaran dari section #6 — menghapus sebuah fitur perlu diikuti `grep` teks/nama fitur itu ke SELURUH codebase (bukan cuma halaman tempat tombolnya berada), karena bisa direferensikan dari halaman lain yang tidak terpikir sebelumnya.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.

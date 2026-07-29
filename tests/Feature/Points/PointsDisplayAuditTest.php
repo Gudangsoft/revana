@@ -50,6 +50,19 @@ class PointsDisplayAuditTest extends TestCase
         $response->assertDontSee('recalculateAllPointsModal', false);
     }
 
+    public function test_task_point_settings_page_does_not_reference_removed_sync_ulang_poin_feature(): void
+    {
+        // Regresi: setelah tombol "Hitung Ulang Semua Point PIC" dihapus, teks info di
+        // halaman /admin/task-point-settings masih menuding fitur "Sync Ulang Poin" yang
+        // tidak ada lagi (menyesatkan admin yang mengikuti link-nya).
+        $this->actingAsAdmin();
+
+        $response = $this->get(route('admin.task-point-settings.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('Sync Ulang Poin');
+    }
+
     public function test_pic_points_index_shows_fractional_total_without_rounding(): void
     {
         $this->actingAsAdmin();

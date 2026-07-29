@@ -296,8 +296,8 @@
     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
         <div class="alert alert-info mb-0 py-2 px-3" style="font-size:.82rem; max-width:680px;">
             <i class="bi bi-info-circle-fill me-1"></i>
-            <strong>Simpan & Sync</strong> akan menyimpan pengaturan dan menghitung ulang total poin semua PIC dan Marketing secara otomatis.
-            Untuk menyinkronkan data historis secara penuh, gunakan <strong>Sync Ulang Poin</strong> di:
+            <strong>Simpan & Sync</strong> akan menyimpan pengaturan, mengisi otomatis riwayat poin yang belum tercatat untuk tugas yang sudah selesai, dan menghitung ulang total poin semua PIC dan Marketing.
+            Lihat hasilnya di:
             <a href="{{ route('admin.pic-points.index') }}" class="alert-link" target="_blank">
                 <i class="bi bi-box-arrow-up-right"></i> Laporan Poin PIC
             </a>
