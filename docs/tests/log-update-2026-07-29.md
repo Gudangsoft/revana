@@ -157,3 +157,24 @@ Kelas bug ini PERSIS SAMA dengan yang sudah diperbaiki 28 Juli (`docs/tests/log-
 ### Pelajaran
 
 Rekomendasi "klik X untuk sinkronisasi" tidak boleh diberikan lagi tanpa mengecek ulang kode SAAT ITU JUGA (bukan mengandalkan dokumentasi/log sesi sebelumnya) — sistem ini sudah berkali-kali berubah dalam hitungan hari, dan asumsi yang benar kemarin bisa sudah tidak berlaku hari ini.
+
+## 5. Celah Susulan: `points_reset_at` Kosong untuk Reset yang SUDAH Terjadi Sebelum Kolomnya Ada
+
+**Tujuan:** Setelah deploy section #4 ke production, user memverifikasi manual (bukan cuma percaya laporan) — dan tepat: query `points_reset_at` untuk marketing Risqi mengembalikan **NULL**, padahal seharusnya terisi tanggal reset (28 Juli 2026 21:59:35).
+
+**Root cause:** migration `2026_07_29_000001` (hapus data hidup lagi) dan `2026_07_29_000002` (tambah kolom `points_reset_at`) tidak mengisi nilai kolom itu untuk reset yang **sudah terjadi di masa lalu** — perlindungan yang saya tulis di section #4 hanya mencatat `points_reset_at` otomatis untuk reset yang terjadi **setelah** kode itu di-deploy (lewat `resetAllPoints()`). Akibatnya, tanpa perbaikan susulan ini, kolom `points_reset_at` NULL untuk semua PIC/Marketing → `runBulkSync()` menganggap "belum pernah direset" → **tombol "Simpan & Sync" di `/admin/task-point-settings` masih bisa mengulang insiden section #4 dari awal**, walau migration #4 sudah dijalankan.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_29_000003_backfill_points_reset_at_for_past_reset.php` (baru) | Isi `points_reset_at = '2026-07-28 21:59:35'` (momen reset yang sudah dikonfirmasi presisi di section #4) untuk SEMUA PIC & Marketing yang kolomnya masih NULL |
+
+### Verifikasi
+Dijalankan sungguhan di lokal (`php artisan migrate` lalu `migrate:rollback`): sebelum migration 70 PIC & 15 marketing NULL semua; setelah migration 0 yang NULL (semua terisi `2026-07-28 21:59:35`); setelah rollback kembali 70/15 NULL seperti semula.
+
+### Catatan Deploy
+```
+git pull origin master
+php artisan migrate --force
+```
+Migration ini **WAJIB** dijalankan sebelum tombol "Simpan & Sync" di `/admin/task-point-settings` (atau tombol "Reset Semua Point" mana pun) disentuh lagi. Setelah migration ini jalan, cek: `php artisan tinker --execute="echo DB::table('marketings')->whereNull('points_reset_at')->count();"` harus menghasilkan **0**.
