@@ -174,14 +174,20 @@ class MarketingPointReportController extends Controller
     {
         $submitPoints = (float) (\App\Models\TaskPointSetting::getMarketingPoints('submit') ?? 1);
 
-        // Bulk INSERT missing history records for all submissions without a record
+        // Bulk INSERT missing history records for all submissions without a record.
+        // JOIN marketings + cek points_reset_at: kalau marketing ini pernah di-reset
+        // (Reset Semua Point), jangan backfill submission yang lebih tua dari reset itu
+        // — kalau tidak, riwayat yang sengaja dihapus akan "hidup lagi" (insiden 29 Juli
+        // 2026, lihat docs/tests/log-update-2026-07-29.md #4).
         $created = \DB::affectingStatement("
             INSERT INTO marketing_point_histories (marketing_id, submission_id, points_earned, description, created_at, updated_at)
             SELECT s.marketing_id, s.id, ?,
                    CONCAT('Sinkronisasi: ', COALESCE(s.kode_submit,''), ' - ', COALESCE(SUBSTR(s.judul_artikel, 1, 200),'')),
                    COALESCE(s.created_at, NOW()), COALESCE(s.updated_at, NOW())
             FROM submissions s
+            INNER JOIN marketings m ON m.id = s.marketing_id
             WHERE s.marketing_id IS NOT NULL
+              AND (m.points_reset_at IS NULL OR COALESCE(s.created_at, NOW()) >= m.points_reset_at)
               AND NOT EXISTS (
                   SELECT 1 FROM marketing_point_histories mph
                   WHERE mph.marketing_id = s.marketing_id AND mph.submission_id = s.id
@@ -222,9 +228,15 @@ class MarketingPointReportController extends Controller
         // berjalan dan membuat DB::transaction() gagal dengan "There is no active
         // transaction" saat mencoba commit di akhir. delete() adalah DML biasa, aman
         // dipakai di dalam transaksi.
-        \DB::transaction(function () {
+        $resetAt = now();
+        \DB::transaction(function () use ($resetAt) {
             MarketingPointHistory::query()->delete();
-            Marketing::query()->update(['total_points' => 0]);
+            // points_reset_at dicatat supaya semua jalur backfill (runBulkSync())
+            // tahu untuk berhenti membangun ulang riwayat yang lebih tua dari reset ini
+            // — lihat insiden 29 Juli 2026 (log-update-2026-07-29.md #4) di mana backfill
+            // membangkitkan kembali ~7.000 poin marketing yang sengaja direset di sini
+            // karena tidak ada penanda seperti ini sebelumnya.
+            Marketing::query()->update(['total_points' => 0, 'points_reset_at' => $resetAt]);
         });
 
         \App\Support\RankingCache::forgetMarketings();

@@ -21,6 +21,7 @@ class Pic extends Authenticatable
         'tanggal_lahir',
         'is_active',
         'total_points',
+        'points_reset_at',
     ];
 
     protected $hidden = [
@@ -29,10 +30,11 @@ class Pic extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active'     => 'boolean',
-        'password'      => 'hashed',
-        'total_points'  => 'float',
-        'tanggal_lahir' => 'date',
+        'is_active'        => 'boolean',
+        'password'         => 'hashed',
+        'total_points'     => 'float',
+        'tanggal_lahir'    => 'date',
+        'points_reset_at'  => 'datetime',
     ];
 
     public function isBirthdayToday(): bool

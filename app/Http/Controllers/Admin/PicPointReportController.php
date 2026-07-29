@@ -246,7 +246,9 @@ class PicPointReportController extends Controller
                        CONCAT('Submit artikel: ', COALESCE(s.kode_submit,''), ' - ', COALESCE(s.judul_artikel,'')),
                        COALESCE(s.created_at, NOW()), COALESCE(s.created_at, NOW())
                 FROM submissions s
+                INNER JOIN pics p ON p.id = s.petugas_submit_id
                 WHERE s.petugas_submit_id IS NOT NULL
+                  AND (p.points_reset_at IS NULL OR COALESCE(s.created_at, NOW()) >= p.points_reset_at)
                   AND NOT EXISTS (
                       SELECT 1 FROM pic_point_histories h
                       WHERE h.pic_id = s.petugas_submit_id AND h.submission_id = s.id AND h.step = 'submit'
@@ -265,8 +267,10 @@ class PicPointReportController extends Controller
                            CONCAT('Menyelesaikan tugas {$ws['step']} untuk: ', COALESCE(s.kode_submit,'')),
                            COALESCE(s.{$ws['validated_at']}, NOW()), COALESCE(s.{$ws['validated_at']}, NOW())
                     FROM submissions s
+                    INNER JOIN pics p ON p.id = s.{$ws['field']}
                     WHERE s.{$ws['field']} IS NOT NULL
                       AND s.{$ws['valid']} = 1
+                      AND (p.points_reset_at IS NULL OR COALESCE(s.{$ws['validated_at']}, NOW()) >= p.points_reset_at)
                       AND NOT EXISTS (
                           SELECT 1 FROM pic_point_histories h
                           WHERE h.pic_id = s.{$ws['field']} AND h.submission_id = s.id AND h.step = '{$ws['step']}'
@@ -467,9 +471,15 @@ class PicPointReportController extends Controller
         // berjalan dan membuat DB::transaction() gagal dengan "There is no active
         // transaction" saat mencoba commit di akhir. delete() adalah DML biasa, aman
         // dipakai di dalam transaksi.
-        \DB::transaction(function () {
+        $resetAt = now();
+        \DB::transaction(function () use ($resetAt) {
             PicPointHistory::query()->delete();
-            Pic::query()->update(['total_points' => 0]);
+            // points_reset_at dicatat supaya semua jalur backfill (runBulkSync(),
+            // syncMyPoints()) tahu untuk berhenti membangun ulang riwayat yang lebih
+            // tua dari reset ini — lihat insiden 29 Juli 2026 (log-update-2026-07-29.md
+            // #4) di mana backfill membangkitkan kembali ~28.000 poin PIC yang sengaja
+            // direset di sini karena tidak ada penanda seperti ini sebelumnya.
+            Pic::query()->update(['total_points' => 0, 'points_reset_at' => $resetAt]);
         });
 
         // Hapus cache leaderboard supaya tidak menampilkan data lama sampai 5 menit

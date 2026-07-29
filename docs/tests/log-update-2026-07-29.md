@@ -76,8 +76,8 @@ Kesimpulan: **mekanisme backfill yang sudah ada (`runBulkSync()`, dipicu tombol 
 
 ### Catatan Deploy — PENTING
 1. `git pull origin master` (tidak ada migration baru).
-2. Setelah deploy, buka **`/admin/sync`** dan klik **"Sinkronisasi Data"** SEKALI — ini akan membackfill poin yang hilang untuk SEMUA PIC yang kena pola bug A/B/C/D di atas (termasuk kasus Aji), untuk Fasttrack, BKD, maupun JAFA sekaligus. Aman dijalankan berkali-kali (idempoten, sudah diuji ekstensif di riwayat 28 Juli).
-3. Entry Fasttrack lama yang `petugas_submit_id`-nya masih NULL (308 baris per audit lokal — kemungkinan beda jumlah di production) **tidak otomatis terisi** oleh sinkronisasi — itu perlu diisi manual satu-satu lewat `/admin/fasttrack/{id}/edit` (sekarang sudah tidak 500 lagi berkat fix E, dan sekarang otomatis memberi poin berkat fix D) kalau memang PIC-nya sudah diketahui/bisa ditelusuri dari riwayat percakapan/WA.
+2. ~~Setelah deploy, buka `/admin/sync` dan klik "Sinkronisasi Data" SEKALI...~~ **KOREKSI (lihat section #4 di bawah): instruksi ini SALAH dan JANGAN DIIKUTI.** Tombol "Sinkronisasi Data" untuk poin sudah tidak ada lagi di `/admin/sync` (sudah dihapus sejak commit `b13c025`, sebelum sesi ini dimulai — saya tidak mengecek ulang sebelum menulis rekomendasi ini). Rekomendasi pengganti (menyimpan ulang `/admin/task-point-settings` untuk memicu backfill) yang saya berikan sebagai gantinya **memicu insiden serius**: menghidupkan kembali ~112.000 baris riwayat poin PIC & Marketing yang sebelumnya SENGAJA direset admin. Insiden ini dan perbaikannya didokumentasikan lengkap di section #4.
+3. Entry Fasttrack lama yang `petugas_submit_id`-nya masih NULL (308 baris per audit lokal — kemungkinan beda jumlah di production) **tidak otomatis terisi** oleh sinkronisasi — itu perlu diisi manual satu-satu lewat `/admin/fasttrack/{id}/edit` (sekarang sudah tidak 500 lagi berkat fix E, dan sekarang otomatis memberi poin berkat fix D) kalau memang PIC-nya sudah diketahui/bisa ditelusuri dari riwayat percakapan/WA. **Jangan** memicu backfill massal manapun (termasuk tombol "Sinkronkan Poin Saya" milik PIC — lihat section #4, tombol itu punya celah yang SAMA) untuk PIC yang poinnya pernah direset, sampai perlindungan di section #4 di-deploy.
 
 ## 3. Fix: Halaman Detail Point Admin Membulatkan Poin Pecahan (Bug Tampilan, Bukan Data)
 
@@ -105,3 +105,55 @@ Kelas bug ini PERSIS SAMA dengan yang sudah diperbaiki 28 Juli (`docs/tests/log-
 - Full regression suite poin (`tests/Feature/Points`) — **PASS** setelah penambahan.
 
 **Catatan:** murni perubahan tampilan (format angka), tidak ada perubahan data/migration. Deploy cukup `git pull origin master` + `php artisan view:clear`. Total Point Risqi akan langsung tampil "26.50" begitu deploy, tanpa perlu sinkronisasi apa pun (datanya memang sudah benar).
+
+## 4. INSIDEN SERIUS: Backfill Poin Menghidupkan Kembali ~112.000 Baris Riwayat yang Sengaja Direset
+
+**Ini kesalahan asisten, bukan temuan investigasi kode biasa.** Ditulis apa adanya untuk catatan.
+
+### Kronologi
+
+1. Sebelumnya, admin menjalankan fitur **"Reset Semua Point"** untuk PIC **dan** Marketing di production (fitur ini memang ada & sengaja disediakan — lihat `docs/tests/log-update-2026-07-28.md` #25), dengan maksud poin mulai dihitung ulang dari 0 sejak hari itu. Dikonfirmasi lewat jejak `pics.updated_at`: **38 baris PIC ter-update bersamaan persis pada 2026-07-28 21:59:35** — momen reset.
+2. Untuk mengejar poin yang hilang akibat bug section #1–#2 (mis. kasus Aji), asisten merekomendasikan admin membuka `/admin/task-point-settings` dan menyimpan ulang pengaturan rate — dengan asumsi ini memicu backfill yang aman. **Asisten tidak mengecek ulang bahwa mekanisme ini (`runBulkSync()`) sama sekali tidak tahu soal reset yang baru saja terjadi.**
+3. Begitu disimpan, `TaskPointSettingController::syncTotals()` memanggil `PicPointReportController::runBulkSync()` dan `MarketingPointReportController::runBulkSync()` — keduanya membackfill SETIAP submission yang belum punya baris riwayat poin, tanpa peduli riwayatnya memang belum pernah ada ATAU baru saja SENGAJA dihapus oleh reset. Karena `submissions.marketing_id`/`petugas_*_id` tidak ikut terhapus oleh reset (cuma tabel riwayat poin yang dikosongkan), backfill menganggap SEMUA submission lama "belum tercatat poinnya" dan membuatkan ulang riwayatnya.
+4. Hasilnya: **97.832 baris riwayat PIC (28.263,03 poin, 54 PIC)** dan **14.156 baris riwayat Marketing (7.078,00 poin, 14 marketing)** yang sudah sengaja dihapus, hidup lagi — persis insiden yang sudah pernah terjadi & didokumentasikan 28 Juli (lihat docblock `App\Support\PointsAutoSync`, yang sudah lebih dulu dirancang untuk TIDAK PERNAH backfill karena alasan yang sama — sayangnya jalur `TaskPointSettingController` belum ikut dilindungi).
+
+### Diagnosa (dijalankan bersama user, langsung di production via `php artisan tinker`)
+
+- Marketing: skala dampak diukur lewat penanda deskripsi unik `"Sinkronisasi: ..."` yang HANYA pernah dihasilkan oleh `runBulkSync()` — akurasinya diverifikasi silang lewat kasus Risqi (marketing_id=10): baris bertanda ini = 2.250 (1.125 poin); total setelah insiden = 2.303 baris (1.151,50 poin); selisih 53 baris/26,50 poin **persis** cocok dengan aktivitas asli Risqi pasca-reset yang sudah diketahui sebelumnya.
+- PIC: penanda deskripsi ternyata TIDAK cukup andal (backfill yang legitimate untuk bug lain, mis. tugas yang baru selesai hari itu tapi belum tercatat poinnya, memakai format teks yang sama) — dipakai pendekatan tanggal: `pic_point_histories.created_at` (tanggal ASLI tugas, bukan tanggal baris dibuat) yang lebih tua dari momen reset PASTI hasil "hidup lagi", karena kalau reset benar-benar mengosongkan riwayat, tidak mungkin ada riwayat bertanggal sebelum reset yang absah masih ada. Titik reset PIC dikonfirmasi presisi lewat klaster `pics.updated_at` (38 baris, 2026-07-28 21:59:35) — jatuh persis di dalam jendela yang sama dengan bukti reset Marketing (gap 17:50:06–00:43:25 dari data deskripsi).
+
+### Perbaikan — 2 Bagian
+
+**A. Migration pemulihan** (`database/migrations/2026_07_29_000001_remove_points_resurrected_after_intentional_reset.php`): hapus SEMUA baris `pic_point_histories`/`marketing_point_histories` yang `created_at`-nya sebelum `2026-07-28 21:59:35`, backup dulu ke tabel `..._backup_20260729` (bisa di-`migrate:rollback` kalau ternyata keliru), lalu hitung ulang `total_points`.
+
+**B. Perlindungan permanen** — supaya kelas bug ini TIDAK BISA terjadi lagi, di mana pun/kapan pun ada reset:
+
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_07_29_000002_add_points_reset_at_to_pics_and_marketings.php` (baru) | Tambah kolom `points_reset_at` (nullable timestamp) di `pics` & `marketings` |
+| `app/Models/Pic.php`, `app/Models/Marketing.php` | Tambah `points_reset_at` ke `$fillable` & `$casts` (`datetime`) |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `resetAllPoints()`: sekarang ikut men-set `points_reset_at = now()` untuk semua PIC dalam UPDATE yang sama dengan reset `total_points` |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | `resetAllPoints()`: perbaikan identik untuk Marketing |
+| `app/Http/Controllers/Admin/PicPointReportController.php` | `runBulkSync()`: kedua query backfill (submit & workflow steps) sekarang `INNER JOIN pics p` dan menambah syarat `p.points_reset_at IS NULL OR <tanggal tugas> >= p.points_reset_at` — submission yang lebih tua dari reset PIC yang bersangkutan TIDAK PERNAH lagi di-backfill |
+| `app/Http/Controllers/Admin/MarketingPointReportController.php` | `runBulkSync()`: perbaikan identik, `JOIN marketings m` + syarat `points_reset_at` |
+| `app/Http/Controllers/Pic/PicPointController.php` | `syncMyPoints()` ("Sinkronkan Poin Saya", tombol milik PIC sendiri): tambah pengecekan sama — skip submission yang tanggalnya sebelum `$pic->points_reset_at` |
+| `tests/Feature/Points/PointsResetBoundaryTest.php` (baru, 8 test) | Mengunci: `resetAllPoints()` mencatat `points_reset_at`; ke-3 jalur backfill (PIC bulk, Marketing bulk, PIC self-service) TIDAK membackfill submission sebelum reset; ke-3 nya TETAP membackfill submission SETELAH reset (aktivitas asli periode baru, termasuk yang perlu backfill karena bug lain); bulk sync tetap backfill normal untuk PIC/marketing yang belum pernah direset sama sekali |
+
+### Verifikasi
+
+- **Migration pemulihan (bagian A):** diuji end-to-end di lokal — logika manual (backup+delete+recompute+restore) dicek row-by-row (checksum penuh identik setelah restore), LALU file migration sesungguhnya dijalankan via `php artisan migrate` + `migrate:rollback` sungguhan di lokal — row count, SUM poin, dan checksum penuh seluruh tabel **identik 100%** dengan kondisi sebelum migration setelah rollback.
+- **Perlindungan permanen (bagian B):** 8 test baru — **PASS**. Termasuk skenario yang membuktikan proteksi ini TIDAK terlalu agresif: submission yang dibuat SETELAH reset tetap ter-backfill normal kalau memang belum tercatat (mis. karena bug section #1–#2), dan PIC/marketing yang tidak pernah direset sama sekali tidak terpengaruh sedikit pun.
+- Full regression suite `tests/Feature/Points` — **PASS**.
+
+### Catatan Deploy — SANGAT PENTING, URUTAN HARUS DIIKUTI
+
+1. `git pull origin master`
+2. `php artisan migrate --force` — akan menjalankan **kedua** migration baru (`...000001` hapus data yang hidup lagi, `...000002` tambah kolom `points_reset_at`). Jalankan **sebelum** menyentuh halaman poin manapun.
+3. Cek `storage/logs/laravel.log` (log key: `"Hapus poin PIC/Marketing yang tidak sengaja hidup lagi setelah reset 28 Juli 2026"`) untuk detail jumlah baris yang dihapus di production (kemungkinan beda dari angka lokal 97.832/14.156 karena production terus berjalan sejak diagnosa dilakukan).
+4. Buka `/admin/marketing-points/10` (Risqi) dan cek beberapa PIC/marketing lain — total point seharusnya kembali ke angka yang wajar (untuk Risqi: sekitar 26,50 + aktivitas baru sejak itu, BUKAN 1.151,50).
+5. Tabel `pic_point_histories_backup_20260729` dan `marketing_point_histories_backup_20260729` **sengaja tidak dihapus otomatis** — biarkan ada beberapa hari sebagai jaring pengaman sebelum dihapus manual (`DROP TABLE ...`) kalau semua sudah dipastikan benar.
+6. **Ke depan**, "Reset Semua Point" aman dipakai kapan saja — backfill dari jalur manapun (simpan setting rate, atau tombol "Sinkronkan Poin Saya" milik PIC) sekarang otomatis menghormati tanggal reset terakhir, tidak akan menghidupkan riwayat lama lagi.
+
+### Pelajaran
+
+Rekomendasi "klik X untuk sinkronisasi" tidak boleh diberikan lagi tanpa mengecek ulang kode SAAT ITU JUGA (bukan mengandalkan dokumentasi/log sesi sebelumnya) — sistem ini sudah berkali-kali berubah dalam hitungan hari, dan asumsi yang benar kemarin bisa sudah tidak berlaku hari ini.

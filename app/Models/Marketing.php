@@ -20,6 +20,7 @@ class Marketing extends Authenticatable
         'password',
         'is_active',
         'total_points',
+        'points_reset_at',
     ];
 
     protected $hidden = [
@@ -31,6 +32,7 @@ class Marketing extends Authenticatable
         'total_points'      => 'float',
         'tanggal_lahir'     => 'date',
         'additional_phones' => 'array',
+        'points_reset_at'   => 'datetime',
     ];
 
     public function isBirthdayToday(): bool

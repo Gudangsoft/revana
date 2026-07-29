@@ -17,6 +17,7 @@ class PicPointController extends Controller
     {
         $pic = Auth::guard('pic')->user();
         $picId = $pic->id;
+        $resetAt = $pic->points_reset_at;
         $backfilled = 0;
 
         // --- BACKFILL: step submit ---
@@ -26,10 +27,18 @@ class PicPointController extends Controller
         // sync setiap kali PIC menekan tombol "Sinkronkan Poin Saya".
         $submitSubmissions = \App\Models\Submission::where('petugas_submit_id', $picId)->get();
         foreach ($submitSubmissions as $submission) {
+            $occurredAt = $submission->created_at;
+            // Jangan backfill submission yang lebih tua dari kapan poin PIC ini terakhir
+            // direset — kalau tidak, riwayat yang sengaja dihapus lewat "Reset Semua
+            // Point" akan "hidup lagi" (insiden 29 Juli 2026, lihat
+            // docs/tests/log-update-2026-07-29.md #4).
+            if ($resetAt && $occurredAt && $occurredAt->lt($resetAt)) {
+                continue;
+            }
             $history = PicPointHistory::awardPoints(
                 $picId, $submission->id, 'submit',
                 "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}",
-                $submission->created_at
+                $occurredAt
             );
             if ($history) $backfilled++;
         }
@@ -51,10 +60,14 @@ class PicPointController extends Controller
                 ->where($ws['valid'], true)
                 ->get();
             foreach ($submissions as $submission) {
+                $occurredAt = $submission->{$ws['validated_at']} ?? $submission->updated_at;
+                if ($resetAt && $occurredAt && $occurredAt->lt($resetAt)) {
+                    continue;
+                }
                 $history = PicPointHistory::awardPoints(
                     $picId, $submission->id, $ws['step'],
                     "Menyelesaikan tugas {$ws['step']} untuk artikel: {$submission->kode_submit}",
-                    $submission->{$ws['validated_at']} ?? $submission->updated_at
+                    $occurredAt
                 );
                 if ($history) $backfilled++;
             }
