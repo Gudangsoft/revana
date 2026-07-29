@@ -35,7 +35,7 @@
                 
                 <div class="row text-center">
                     <div class="col-4">
-                        <h4 class="mb-0 text-success">{{ number_format($stats['total_points']) }}</h4>
+                        <h4 class="mb-0 text-success">{{ number_format($stats['total_points'], 2) }}</h4>
                         <small class="text-muted">Total Point</small>
                     </div>
                     <div class="col-4">
@@ -43,7 +43,7 @@
                         <small class="text-muted">Submission</small>
                     </div>
                     <div class="col-4">
-                        <h4 class="mb-0 text-warning">{{ number_format($stats['points_this_month']) }}</h4>
+                        <h4 class="mb-0 text-warning">{{ number_format($stats['points_this_month'], 2) }}</h4>
                         <small class="text-muted">Bulan Ini</small>
                     </div>
                 </div>

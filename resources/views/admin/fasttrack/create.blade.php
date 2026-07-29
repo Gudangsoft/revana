@@ -290,8 +290,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="petugas_submit_id" class="form-label">PIC Submit</label>
-                                <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id">
+                                <label for="petugas_submit_id" class="form-label">PIC Submit <span class="text-danger">*</span></label>
+                                <select class="form-select @error('petugas_submit_id') is-invalid @enderror" id="petugas_submit_id" name="petugas_submit_id" required>
                                     <option value="">-- Pilih PIC --</option>
                                     @foreach($pics as $pic)
                                         <option value="{{ $pic->id }}" {{ old('petugas_submit_id') == $pic->id ? 'selected' : '' }}>

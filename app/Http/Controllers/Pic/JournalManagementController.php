@@ -492,6 +492,7 @@ class JournalManagementController extends Controller
         if ($isBkdPublish) {
             $validated['petugas_production_id'] = auth()->guard('pic')->id();
             $validated['production_valid'] = true;
+            $validated['production_validated_at'] = $validated['tanggal_submit'];
         }
 
         // Wrap dalam database transaction dengan generate kode_submit di dalam transaction
@@ -559,6 +560,22 @@ class JournalManagementController extends Controller
         if ($picHistory) {
             // Note: total_points sudah di-increment di dalam PicPointHistory::awardPoints()
             $pointMessage .= " Anda mendapatkan +{$picHistory->points_earned} point!";
+        }
+
+        // BKD langsung publish: Production ikut ter-assign & valid sejak pembuatan
+        // (lihat blok "BKD langsung publish" di atas) — poin production juga harus
+        // diberikan di sini, bukan cuma step submit.
+        if ($isBkdPublish) {
+            $prodHistory = PicPointHistory::awardPoints(
+                $pic->id,
+                $submission->id,
+                'production',
+                "Submit artikel BKD (langsung publish): {$submission->kode_submit} - {$submission->judul_artikel}",
+                $submission->production_validated_at
+            );
+            if ($prodHistory) {
+                $pointMessage .= " +{$prodHistory->points_earned} point production!";
+            }
         }
 
         // Kirim notifikasi WhatsApp ke penulis via Fonnte
@@ -1991,6 +2008,7 @@ class JournalManagementController extends Controller
         if (!empty($validated['link_publish'])) {
             $validated['petugas_production_id'] = auth()->guard('pic')->id();
             $validated['production_valid'] = true;
+            $validated['production_validated_at'] = $validated['tanggal_submit'];
         }
 
         // Wrap dalam transaction dengan retry untuk mencegah duplicate kode_submit
@@ -2010,7 +2028,7 @@ class JournalManagementController extends Controller
                         ->first();
                     $sequence = $lastSubmit ? (int)substr($lastSubmit->kode_submit, -4) + 1 : 1;
                     $validated['kode_submit'] = "FT{$today}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-                    
+
                     // Generate kode_loa
                     $validated['kode_loa'] = $validated['kode_submit'] . 'SIPERA';
 
@@ -2046,6 +2064,24 @@ class JournalManagementController extends Controller
             $picHistory = PicPointHistory::awardPoints($pic->id, $submission->id, 'submit', "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}");
             if ($picHistory) {
                 $pointMessage = " Anda mendapatkan +{$picHistory->points_earned} point!";
+            }
+
+            // Kalau link publish sudah diisi saat pembuatan, Production ikut langsung
+            // ter-assign & valid (lihat blok "Auto-assign production" di atas) — poinnya
+            // juga harus diberikan di sini, bukan cuma step submit. Sebelumnya jalur ini
+            // (fasttrack langsung publish) hanya memberi poin submit, poin production-nya
+            // hilang sama sekali.
+            if (!empty($validated['link_publish'])) {
+                $prodHistory = PicPointHistory::awardPoints(
+                    $pic->id,
+                    $submission->id,
+                    'production',
+                    "Fasttrack artikel (langsung publish): {$submission->kode_submit} - {$submission->judul_artikel}",
+                    $submission->production_validated_at
+                );
+                if ($prodHistory) {
+                    $pointMessage .= " +{$prodHistory->points_earned} point production!";
+                }
             }
         }
 

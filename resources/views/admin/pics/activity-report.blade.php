@@ -31,7 +31,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Total Point</h6>
-                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points_given']) }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points_given'], 2) }}</h2>
                         <small>Point diberikan</small>
                     </div>
                     <i class="bi bi-trophy fs-1 opacity-50"></i>

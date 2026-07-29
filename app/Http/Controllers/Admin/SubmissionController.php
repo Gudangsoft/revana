@@ -1779,7 +1779,7 @@ class SubmissionController extends Controller
             'username_author'     => 'nullable|string|max:255',
             'password_author'     => 'nullable|string|max:255',
             'marketing_id'        => 'nullable|exists:marketings,id',
-            'petugas_submit_id'   => 'nullable|exists:pics,id',
+            'petugas_submit_id'   => 'required|exists:pics,id',
             'notes'               => 'nullable|string',
             'program_type'        => ['nullable', Rule::in(['bkd', 'jafa'])],
         ]);
@@ -1921,10 +1921,33 @@ class SubmissionController extends Controller
             $newSlot->increment('slot_terpakai');
         }
 
+        // Petugas submit sebelum diupdate — dipakai untuk deteksi "baru diisi" di bawah.
+        $oldPetugasSubmitId = $submission->petugas_submit_id;
+
         $submission->update($validated);
 
         // Log history
-        $submission->logHistory('fasttrack', 'updated', 'Submission fasttrack diupdate oleh Admin');
+        // NB: 'action' di submission_histories adalah ENUM yang TIDAK punya nilai 'updated'
+        // (cek: SHOW COLUMNS submission_histories) — pakai 'updated' di sini bikin insert
+        // gagal "Data truncated for column 'action'" (500) di SETIAP penyimpanan edit
+        // fasttrack oleh admin, sebelum baris ini sempat mengubah apa pun. 'edited' adalah
+        // nilai valid yang paling sesuai maksudnya.
+        $submission->logHistory('fasttrack', 'edited', 'Submission fasttrack diupdate oleh Admin');
+
+        // Kalau PIC Submit yang tadinya kosong baru sekarang diisi (mis. memperbaiki
+        // entry lama yang dibuat sebelum field ini wajib), beri poin sekarang — jalur
+        // pembuatan (fasttrackStore) sudah memberi poin submit, tapi edit ini TIDAK
+        // pernah memanggil awardPoints() sama sekali, jadi PIC yang baru di-assign lewat
+        // edit tidak pernah tercatat poin/laporannya sampai ada sinkronisasi manual.
+        if (!$oldPetugasSubmitId && $submission->petugas_submit_id) {
+            PicPointHistory::awardPoints(
+                $submission->petugas_submit_id,
+                $submission->id,
+                'submit',
+                "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}",
+                $submission->tanggal_submit ?? $submission->created_at
+            );
+        }
 
         return redirect()->route('admin.fasttrack.monitoring')
             ->with('success', 'Fasttrack submission berhasil diupdate');

@@ -43,7 +43,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Total Point</h6>
-                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points']) }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ number_format($stats['total_points'], 2) }}</h2>
                     </div>
                     <i class="bi bi-trophy fs-1 opacity-50"></i>
                 </div>
@@ -57,7 +57,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Point Hari Ini</h6>
-                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today']) }}</h2>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_today'], 2) }}</h2>
                     </div>
                     <i class="bi bi-calendar-check fs-1 opacity-50"></i>
                 </div>
@@ -71,7 +71,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">Point Bulan Ini</h6>
-                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month']) }}</h2>
+                        <h2 class="mb-0 fw-bold">+{{ number_format($stats['points_this_month'], 2) }}</h2>
                     </div>
                     <i class="bi bi-calendar-month fs-1 opacity-50"></i>
                 </div>
