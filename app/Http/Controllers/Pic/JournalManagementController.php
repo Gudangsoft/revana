@@ -1236,26 +1236,63 @@ class JournalManagementController extends Controller
         $submission->{$request->field} = $request->value;
 
         // Special handling for link_publish field
+        $productionNewlyValidated = false;
         if ($request->field === 'link_publish') {
             // Auto-assign current PIC as production officer if not assigned yet
             if (!$submission->petugas_production_id && !empty($request->value) && trim($request->value) !== '') {
                 $submission->petugas_production_id = $picId;
             }
-            
+
+            $wasProductionValid = $submission->production_valid;
+
             // Auto-validate production when link publish is filled
             if (!empty($request->value) && trim($request->value) !== '') {
                 $submission->production_valid = true;
+                if (empty($submission->production_validated_at)) {
+                    $submission->production_validated_at = now();
+                }
             } else {
                 // Clear validation if link is removed
                 $submission->production_valid = false;
+                $submission->production_validated_at = null;
             }
-            
+
+            $productionNewlyValidated = !$wasProductionValid && $submission->production_valid;
+
             // Recalculate status based on current validation flags
             $submission->recalculateStatus();
         }
-        
+
         $submission->save();
-        
+
+        // Sama seperti toggleValidation(): produksi yang baru tervalidasi lewat jalur ini
+        // (mengisi Link Publish untuk submission yang belum punya petugas production, BUKAN
+        // klik tombol centang) tetap harus dapat poin. Sebelumnya jalur ini save() langsung
+        // tanpa awardPoints() sama sekali, jadi PIC yang mengisi link publish duluan tidak
+        // pernah tercatat poin/laporan-nya untuk tugas production tsb.
+        if ($productionNewlyValidated) {
+            try {
+                PicPointHistory::awardPoints(
+                    $submission->petugas_production_id,
+                    $submission->id,
+                    'production',
+                    "Validasi Production - {$submission->kode_submit}",
+                    $submission->production_validated_at
+                );
+
+                if ($submission->marketing_id) {
+                    MarketingPointHistory::awardPoints(
+                        $submission->marketing_id,
+                        $submission->id,
+                        "Artikel selesai (Production Valid) - {$submission->kode_submit}",
+                        $submission->production_validated_at
+                    );
+                }
+            } catch (\Exception $e) {
+                Log::error('Error adding points for production validation via link_publish: ' . $e->getMessage());
+            }
+        }
+
         return response()->json(['success' => true, 'message' => 'Berhasil disimpan']);
     }
 
