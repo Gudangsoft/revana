@@ -111,4 +111,25 @@ class PointsDisplayAuditTest extends TestCase
         $response->assertOk();
         $response->assertSee('6.25');
     }
+
+    public function test_laporan_kinerja_pic_name_links_to_detail_page(): void
+    {
+        $this->actingAsAdmin();
+        $pic = $this->makePic(['total_points' => 0, 'is_active' => true]);
+        $submission = $this->makeSubmission(['petugas_submit_id' => $pic->id]);
+        PicPointHistory::create([
+            'pic_id' => $pic->id,
+            'submission_id' => $submission->id,
+            'step' => 'submit',
+            'points_earned' => 1,
+            'description' => 'Test',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->get(route('admin.laporan-kinerja.index'));
+
+        $response->assertOk();
+        $response->assertSee(route('admin.pic-points.show', $pic->id), false);
+    }
 }

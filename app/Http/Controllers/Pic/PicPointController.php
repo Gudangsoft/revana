@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pic;
 use App\Http\Controllers\Controller;
 use App\Models\PicPointHistory;
 use App\Models\TaskPointSetting;
+use App\Services\PointsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +36,7 @@ class PicPointController extends Controller
             if ($resetAt && $occurredAt && $occurredAt->lt($resetAt)) {
                 continue;
             }
-            $history = PicPointHistory::awardPoints(
+            $history = PointsService::awardToPic(
                 $picId, $submission->id, 'submit',
                 "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}",
                 $occurredAt
@@ -64,7 +65,7 @@ class PicPointController extends Controller
                 if ($resetAt && $occurredAt && $occurredAt->lt($resetAt)) {
                     continue;
                 }
-                $history = PicPointHistory::awardPoints(
+                $history = PointsService::awardToPic(
                     $picId, $submission->id, $ws['step'],
                     "Menyelesaikan tugas {$ws['step']} untuk artikel: {$submission->kode_submit}",
                     $occurredAt

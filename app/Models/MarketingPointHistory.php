@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Support\RankingCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class MarketingPointHistory extends Model
 {
@@ -63,72 +61,22 @@ class MarketingPointHistory extends Model
     /**
      * Award points to Marketing for a successful submission.
      *
-     * $occurredAt: tanggal SEBENARNYA submission ini selesai (mis. submission->created_at).
-     * Wajib diisi oleh pemanggil yang bersifat backfill/sync (bukan event langsung saat
-     * itu juga) — kalau dibiarkan null, timestamp riwayat memakai waktu SEKARANG (saat
-     * fungsi ini dipanggil), yang salah untuk sync karena tanggal penyelesaian tugas jadi
-     * ikut berubah ke tanggal sync, bukan tanggal submission yang sebenarnya.
+     * Delegate tipis ke PointsService::awardToMarketing() — lihat docblock di sana
+     * untuk penjelasan lengkap. Method ini dipertahankan supaya titik panggilan yang
+     * sudah ada tidak perlu diubah (lihat Fase 1, docs/tests/log-update-2026-07-29.md #7).
      */
     public static function awardPoints(int $marketingId, int $submissionId, ?string $description = null, $occurredAt = null): ?self
     {
-        // Check if points already awarded for this submission
-        $existing = self::where('marketing_id', $marketingId)
-            ->where('submission_id', $submissionId)
-            ->first();
+        return \App\Services\PointsService::awardToMarketing($marketingId, $submissionId, $description, $occurredAt);
+    }
 
-        if ($existing) {
-            return null; // Already awarded
-        }
-
-        // Get points from config
-        $points = self::getPointsForSubmission();
-
-        // Create point history. Kalau 2 request datang hampir bersamaan (race condition:
-        // klik ganda, retry jaringan), keduanya bisa lolos pengecekan "sudah ada atau
-        // belum" di atas sebelum salah satu sempat tersimpan — constraint unique
-        // (marketing_id, submission_id) di database akan menolak yang kedua. Tangkap di
-        // sini supaya user dapat respons mulus (null, "sudah pernah diberi"), bukan
-        // crash 500 — sama seperti penanganan di PicPointHistory::awardPoints().
-        //
-        // create() + backdate created_at + recompute total_points DIBUNGKUS 1 TRANSAKSI
-        // supaya atomik — kalau ada apa pun yang gagal di antara create() dan recompute
-        // (mis. forceFill()->save() untuk backdate), riwayat sudah kadung tersimpan tapi
-        // total_points tidak ikut ter-update, persis insiden nyata yang pernah ditemukan
-        // di sisi PIC (riwayat benar, total_points PIC tidak ikut bertambah).
-        try {
-            $history = DB::transaction(function () use ($marketingId, $submissionId, $description, $points, $occurredAt) {
-                $history = self::create([
-                    'marketing_id' => $marketingId,
-                    'submission_id' => $submissionId,
-                    'points_earned' => $points,
-                    'description' => $description ?? "Submit artikel berhasil",
-                ]);
-
-                if ($occurredAt) {
-                    $history->forceFill([
-                        'created_at' => $occurredAt,
-                        'updated_at' => $occurredAt,
-                    ])->save();
-                }
-
-                // Sync total_points dari SUM riwayat poin — BUKAN COUNT submission, karena
-                // rate poin per submission bisa berubah dari waktu ke waktu (lihat
-                // TaskPointSetting), jadi COUNT tidak akan cocok dengan total yang
-                // sebenarnya pernah diberikan.
-                $actualPoints = self::where('marketing_id', $marketingId)->sum('points_earned');
-                Marketing::where('id', $marketingId)->update(['total_points' => $actualPoints]);
-
-                return $history;
-            });
-        } catch (\Illuminate\Database\QueryException $e) {
-            if (str_contains($e->getMessage(), 'marketing_point_histories_marketing_id_submission_id_unique')) {
-                return null;
-            }
-            throw $e;
-        }
-
-        RankingCache::forgetMarketings();
-
-        return $history;
+    /**
+     * Revoke points for a submission.
+     * Delegate tipis ke PointsService::revokeFromMarketing() — BARU di Fase 1, lihat
+     * docblock di PointsService untuk kenapa method ini sebelumnya tidak pernah ada.
+     */
+    public static function revokePoints(int $marketingId, int $submissionId): bool
+    {
+        return \App\Services\PointsService::revokeFromMarketing($marketingId, $submissionId);
     }
 }

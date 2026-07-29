@@ -15,6 +15,7 @@ use App\Models\MarketingPointHistory;
 use App\Exports\SubmissionsExport;
 use App\Imports\SubmissionsImport;
 use App\Services\FonnteService;
+use App\Services\PointsService;
 use App\Services\WaNotificationService;
 use App\Models\ActivityLog;
 use App\Models\Setting;
@@ -184,7 +185,7 @@ class SubmissionController extends Controller
         // Award points to Marketing
         $pointMessage = '';
         if (!empty($validated['marketing_id'])) {
-            $pointHistory = MarketingPointHistory::awardPoints(
+            $pointHistory = PointsService::awardToMarketing(
                 $validated['marketing_id'],
                 $submission->id,
                 "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
@@ -199,7 +200,7 @@ class SubmissionController extends Controller
         // Award points to PIC submit
         // awardPoints() handles: duplicate-check, increment total_points, and cache flush internally.
         if (!empty($validated['petugas_submit_id'])) {
-            PicPointHistory::awardPoints(
+            PointsService::awardToPic(
                 $validated['petugas_submit_id'],
                 $submission->id,
                 'submit',
@@ -444,29 +445,14 @@ class SubmissionController extends Controller
 
     public function destroy(Submission $submission)
     {
-        // Revert marketing points if any were awarded
-        if ($submission->marketing_id) {
-            $pointHistory = MarketingPointHistory::where('marketing_id', $submission->marketing_id)
-                ->where('submission_id', $submission->id)
-                ->first();
-            
-            if ($pointHistory) {
-                // Delete the point history record
-                $pointHistory->delete();
-            }
-            
-            // Recalculate total_points dari SUM riwayat poin — BUKAN COUNT submission,
-            // karena rate poin per submission bisa berubah dari waktu ke waktu (lihat
-            // TaskPointSetting), jadi COUNT tidak akan cocok dengan total yang sebenarnya.
-            $marketing = Marketing::find($submission->marketing_id);
-            if ($marketing) {
-                $actualPoints = MarketingPointHistory::where('marketing_id', $submission->marketing_id)
-                    ->sum('points_earned');
-                $marketing->total_points = $actualPoints;
-                $marketing->save();
-            }
-        }
-        
+        // Cabut SEMUA poin (PIC + Marketing) terkait submission ini SEBELUM dihapus —
+        // WAJIB sebelum delete() karena FK pic_point_histories.submission_id adalah
+        // onDelete('set null') (lihat PointsService::revokeAllForSubmission()). Dulu
+        // di sini cuma mencabut poin Marketing secara manual, poin PIC tidak pernah
+        // ikut dicabut (bocor, tetap ada walau submission-nya sudah dihapus) — celah
+        // ditutup Fase 3 konsolidasi poin, lihat docs/tests/log-update-2026-07-29.md #9.
+        PointsService::revokeAllForSubmission($submission->id);
+
         $submission->delete();
 
         return redirect()->route('admin.submissions.index')
@@ -717,7 +703,7 @@ class SubmissionController extends Controller
                 // implisit, supaya kalau baris poin ini baru berhasil tersimpan belakangan
                 // (race condition/retry), tanggalnya tetap mencerminkan kapan tugas SUNGGUH
                 // divalidasi. Lihat catatan sama di JournalManagementController::updateValidation().
-                $pointHistory = PicPointHistory::awardPoints(
+                $pointHistory = PointsService::awardToPic(
                     $petugasId,
                     $submission->id,
                     $step,
@@ -1464,7 +1450,7 @@ class SubmissionController extends Controller
 
         // Award points to marketing if newly assigned
         if ($request->marketing_id && $request->marketing_id != $oldMarketingId) {
-            MarketingPointHistory::awardPoints($request->marketing_id, $submission->id);
+            PointsService::awardToMarketing($request->marketing_id, $submission->id);
         }
 
         return response()->json(['success' => true, 'message' => 'Marketing berhasil diassign']);
@@ -1583,7 +1569,7 @@ class SubmissionController extends Controller
                     // Validasi diaktifkan → beri point. Tanggal validasi sebenarnya
                     // (baru saja di-set di atas) dikirim eksplisit — lihat catatan sama
                     // di JournalManagementController::updateValidation().
-                    PicPointHistory::awardPoints(
+                    PointsService::awardToPic(
                         $petugasId,
                         $submission->id,
                         $stepCfg['step'],
@@ -1592,7 +1578,7 @@ class SubmissionController extends Controller
                     );
                 } else {
                     // Validasi dibatalkan → cabut point
-                    PicPointHistory::revokePoints($petugasId, $submission->id, $stepCfg['step']);
+                    PointsService::revokeFromPic($petugasId, $submission->id, $stepCfg['step']);
                 }
             }
         }
@@ -1822,18 +1808,18 @@ class SubmissionController extends Controller
             'process_type' => 'fasttrack'
         ]);
 
-        // Award points to PIC if assigned (idempoten via PicPointHistory::awardPoints())
+        // Award points to PIC if assigned (idempoten via PointsService::awardToPic())
         $pointMessage = '';
         if (isset($validated['petugas_submit_id']) && $validated['petugas_submit_id']) {
-            $picHistory = PicPointHistory::awardPoints($validated['petugas_submit_id'], $submission->id, 'submit', "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}");
+            $picHistory = PointsService::awardToPic($validated['petugas_submit_id'], $submission->id, 'submit', "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}");
             if ($picHistory) {
                 $pointMessage = " (+{$picHistory->points_earned} point untuk PIC)";
             }
         }
 
-        // Award points to Marketing if assigned (idempoten via MarketingPointHistory::awardPoints())
+        // Award points to Marketing if assigned (idempoten via PointsService::awardToMarketing())
         if (isset($validated['marketing_id']) && $validated['marketing_id']) {
-            MarketingPointHistory::awardPoints($validated['marketing_id'], $submission->id, "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}");
+            PointsService::awardToMarketing($validated['marketing_id'], $submission->id, "Fasttrack artikel: {$validated['kode_submit']} - {$submission->judul_artikel}");
         }
 
         // Kirim email acknowledgement ke penulis jika template aktif
@@ -1940,7 +1926,7 @@ class SubmissionController extends Controller
         // pernah memanggil awardPoints() sama sekali, jadi PIC yang baru di-assign lewat
         // edit tidak pernah tercatat poin/laporannya sampai ada sinkronisasi manual.
         if (!$oldPetugasSubmitId && $submission->petugas_submit_id) {
-            PicPointHistory::awardPoints(
+            PointsService::awardToPic(
                 $submission->petugas_submit_id,
                 $submission->id,
                 'submit',
@@ -1961,13 +1947,18 @@ class SubmissionController extends Controller
         if ($submission->process_type !== 'fasttrack') {
             return redirect()->route('admin.submissions.index');
         }
-        
+
         // Decrement slot
         $slot = $submission->journalSlot;
         if ($slot && $slot->slot_terpakai > 0) {
             $slot->decrement('slot_terpakai');
         }
-        
+
+        // Cabut SEMUA poin (PIC + Marketing) terkait — sebelumnya method ini tidak
+        // mencabut poin sama sekali (lihat destroy() di atas untuk penjelasan lengkap
+        // & docs/tests/log-update-2026-07-29.md #9).
+        PointsService::revokeAllForSubmission($submission->id);
+
         $kode = $submission->kode_submit;
         $submission->delete();
         

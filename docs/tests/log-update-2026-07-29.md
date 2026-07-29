@@ -226,3 +226,77 @@ Audit `number_format()` (dan echo poin mentah tanpa `number_format` sama sekali)
 
 ### Catatan Deploy
 Murni perubahan kode (tidak ada migration). `git pull origin master` + `php artisan view:clear`.
+
+## 7. Konsolidasi Logika Poin — Fase 1: `PointsService`
+
+**Tujuan:** Setelah rentetan bug hari ini yang akar masalahnya sama (logika award/revoke poin ditulis ulang di 23+ titik panggilan tersebar di 4 controller), user minta dikonsolidasikan ke satu `PointsService` tunggal supaya perbaikan ke depan cukup di 1 file. Rencana lengkap (4 fase) disusun lewat Plan Mode dan disetujui user sebelum eksekusi — lihat `C:\Users\febry\.claude\plans\pure-petting-snowglobe.md`. Ini laporan Fase 1 (paling aman, dikerjakan lebih dulu): memindahkan logika ke service TANPA mengubah satu pun titik panggilan yang sudah ada.
+
+Investigasi sebelum eksekusi (lewat Explore + Plan agent) menemukan 2 hal penting di luar dugaan awal:
+- `PicPointHistory` sudah punya `revokePoints()` (dipakai 1x di `SubmissionController::toggleValidField()` untuk un-toggle validasi) — tapi `MarketingPointHistory` **sama sekali tidak punya method setara**. Asimetri ini salah satu sebab `SubmissionController::destroy()` cuma mencabut poin Marketing (manual, bukan lewat method bersama) dan diam-diam membiarkan poin PIC "bocor" tetap ada walau submission-nya sudah dihapus (`pic_point_histories.submission_id` FK-nya `onDelete('set null')`, bukan `cascade` seperti Marketing) — celah ini akan ditutup di Fase 3 (belum dikerjakan sesi ini).
+- Total 23 titik panggilan `awardPoints()` terverifikasi (14 PIC + 9 Marketing) tersebar di `JournalManagementController.php`, `Admin/SubmissionController.php`, `PicPointController.php`, `Marketing/DashboardController.php`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Services/PointsService.php` (baru) | `awardToPic()`, `awardToMarketing()`, `revokeFromPic()` — isi dipindah verbatim dari model (transaksi, penanganan race constraint, backdate, `RankingCache::forget*()` — tidak ada logika yang diubah). `revokeFromMarketing()` — **BARU**, meniru bentuk `revokeFromPic()` persis (hapus baris → decrement dengan floor-guard → recompute SUM sebagai jaring pengaman → invalidate cache) |
+| `app/Models/PicPointHistory.php` | `awardPoints()`/`revokePoints()` jadi delegate 1 baris ke `PointsService` — nama, parameter, return type identik. Import `RankingCache`/`DB` yang sudah tidak dipakai dihapus |
+| `app/Models/MarketingPointHistory.php` | `awardPoints()` jadi delegate; `revokePoints()` **ditambah baru** sebagai delegate ke `revokeFromMarketing()` (walau belum ada yang memanggilnya — supaya PIC & Marketing simetris di level model, mencegah asimetri baru) |
+| `tests/Feature/Points/PointsServiceTest.php` (baru, 10 test) | Parity check (delegate lama vs service baru menghasilkan hasil identik) untuk award PIC, award Marketing, revoke PIC; idempotensi & backdate lewat service langsung; **cakupan baru penuh untuk `revokeFromMarketing()`** (hapus baris + decrement + floor-guard + isolasi antar-submission) — sebelumnya 0 test karena method-nya belum pernah ada |
+
+### Verifikasi
+- Full suite `tests/Feature/Points` (75 test) dijalankan **tanpa diubah sama sekali** SETELAH delegate diterapkan — semua tetap PASS, membuktikan Fase 1 tidak mengubah perilaku apa pun yang teramati dari luar.
+- 10 test baru `PointsServiceTest.php` — PASS.
+- Total setelah Fase 1: lihat hasil final di bawah.
+
+### Catatan
+Fase 2 (repoint 23 titik panggilan ke `PointsService` langsung — mekanis, no-op perilaku), Fase 3 (tutup celah `destroy()`/`fasttrackDestroy()` tidak mencabut poin PIC — perubahan perilaku nyata), dan Fase 4 (pindahkan `runBulkSync()`/`PointsAutoSync` — ditunda, risiko tertinggi) **belum dikerjakan** — menunggu arahan lanjutan. Detail tiap fase ada di file plan yang disebut di atas.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.
+
+## 8. Konsolidasi Logika Poin — Fase 2: Repoint 23 Titik Panggilan ke `PointsService`
+
+**Tujuan:** Lanjutan Fase 1 (section #7) — semua titik panggilan `PicPointHistory::awardPoints()`/`revokePoints()` dan `MarketingPointHistory::awardPoints()` yang tersebar diarahkan langsung memanggil `PointsService`, supaya ke depan tinggal `grep PointsService` untuk menemukan seluruh logika poin di satu tempat (bukan lagi tersebar lewat nama class model).
+
+Murni cari-ganti nama class per titik panggilan, argumen & urutan sama persis — **secara perilaku no-op**, karena sejak Fase 1 model method sudah jadi delegate ke service yang sama. Dikerjakan 1 file per commit, urutan risiko terkecil dulu sesuai rencana, verifikasi full suite di antara tiap file.
+
+### File yang Diubah
+| File | Titik | Keterangan |
+|------|-------|-----------|
+| `app/Http/Controllers/Marketing/DashboardController.php` | 2 | `storeSubmission()`, `fasttrackStore()` |
+| `app/Http/Controllers/Pic/PicPointController.php` | 2 | `syncMyPoints()` (backfill submit + workflow steps) |
+| `app/Http/Controllers/Admin/SubmissionController.php` | 9 | `store()` (PIC+Marketing), `updateProcess()`, `quickAssignMarketing()`, `toggleValidField()` (award+revoke), `fasttrackStore()` (PIC+Marketing), `fasttrackUpdate()` |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | 11 | `submissionsStore()` (Marketing+PIC+production BKD), `submitWork()`, `updateCredential()` (PIC+Marketing), `toggleValidation()` (PIC+Marketing), `fasttrackStore()` (PIC submit+production, Marketing) |
+
+Semua 4 file menambah `use App\Services\PointsService;`; import `PicPointHistory`/`MarketingPointHistory` yang lama TETAP ada karena masih dipakai untuk query lain (mis. `getLabelForStep()`, `where(...)` stats) di file yang sama — hanya panggilan `::awardPoints()`/`::revokePoints()` yang diarahkan ulang.
+
+### Verifikasi
+Dijalankan `grep` akhir ke seluruh `app/`: **0 pemanggilan** `PicPointHistory::awardPoints(`/`revokePoints(`/`MarketingPointHistory::awardPoints(` tersisa di luar definisi method itu sendiri (yang sekarang jadi delegate) — 23 dari 23 titik berhasil direpoint. Full suite `tests/Feature/Points` dijalankan setelah **setiap** file diubah (4x total) — tetap **85 test, 215 assertion, semua PASS** di setiap langkah, tidak ada regresi sedikit pun.
+
+### Catatan
+Fase 3 (tutup celah `destroy()`/`fasttrackDestroy()`) dan Fase 4 (pindahkan `runBulkSync()`/`PointsAutoSync`, ditunda) masih menunggu arahan lanjutan.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.
+
+## 9. Konsolidasi Logika Poin — Fase 3: Tutup Celah Poin PIC "Bocor" Saat Submission Dihapus
+
+**Tujuan:** Lanjutan Fase 1-2 (section #7-#8). Berbeda dari 2 fase sebelumnya (murni refactor, no-op perilaku), ini **perbaikan bug nyata** yang ditemukan lewat investigasi Explore agent saat menyusun rencana konsolidasi: `SubmissionController::destroy()` menghapus submission tapi TIDAK PERNAH mencabut poin PIC yang sudah terlanjur diberikan untuk submission itu — poin PIC "bocor" (tetap ada selamanya) walau submission-nya sudah tidak ada. `fasttrackDestroy()` (hapus submission Fasttrack) malah tidak mencabut poin sama sekali, PIC maupun Marketing.
+
+**Root cause:** `destroy()` sebelumnya cuma menghapus baris `MarketingPointHistory` secara manual (kode ad-hoc di controller, bukan lewat method bersama) lalu recompute total Marketing — tidak ada satu baris kode pun yang menyentuh `PicPointHistory`. Ini konsisten dengan temuan Fase 1: `MarketingPointHistory` tidak (dulu) punya `revokePoints()`, jadi tidak ada "kebiasaan" memanggil method cabut-poin yang seragam — PIC kebetulan aman di jalur toggle-validasi (karena `revokePoints()`-nya sudah ada & dipakai di situ), tapi jalur hapus-submission tidak pernah diberi perlakuan setara untuk keduanya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Services/PointsService.php` | Method baru `revokeAllForSubmission(int $submissionId): array` — ambil SEMUA baris `PicPointHistory` untuk submission itu (bisa lebih dari 1 PIC/step berbeda), cabut satu-satu lewat `revokeFromPic()`; ambil 1 baris `MarketingPointHistory` kalau ada, cabut lewat `revokeFromMarketing()`. Dibungkus 1 transaksi. Return `['pic' => n, 'marketing' => n]` jumlah baris yang tercabut |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `destroy()`: ganti blok manual "hapus MarketingPointHistory + recompute" jadi 1 panggilan `PointsService::revokeAllForSubmission()`, dipanggil SEBELUM `$submission->delete()` (wajib — FK `pic_point_histories.submission_id` adalah `onDelete('set null')`, jadi setelah delete baris riwayat PIC sudah tidak bisa ditemukan lagi lewat `submission_id`). `fasttrackDestroy()`: tambah panggilan yang sama (sebelumnya tidak mencabut poin sama sekali) |
+| `tests/Feature/Points/SubmissionDeletionRevokesPointsTest.php` (baru, 6 test) | `revokeAllForSubmission()` mencabut poin dari BEBERAPA PIC berbeda sekaligus + marketing; aman untuk submission tanpa poin; tidak menyenggol submission lain; aman dipanggil 2x (idempoten); `destroy()` DAN `fasttrackDestroy()` lewat HTTP request sungguhan membuktikan poin PIC ikut tercabut (sebelumnya bocor/tidak tercabut sama sekali) |
+
+### Verifikasi
+Test baru (6 test, 24 assertion) — **PASS**, termasuk pembuktian langsung lewat HTTP request nyata (`delete()` ke route `admin.submissions.destroy` dan `admin.fasttrack.destroy`) bahwa `total_points` PIC benar-benar kembali ke 0 setelah submission satu-satunya sumber poinnya dihapus — sebelumnya perilaku ini TIDAK ADA (poin PIC tetap di angka lama selamanya).
+
+### Catatan Penting — Data Lama Tidak Ikut Diperbaiki
+Fix ini **hanya mencegah kebocoran ke DEPAN**. Poin PIC yang sudah kadung "bocor" dari submission yang DIHAPUS SEBELUM fase ini di-deploy **tidak ikut diperbaiki otomatis** — data itu sudah tercampur dengan poin sah lainnya di `total_points` PIC, tidak ada cara aman membedakan mana yang bocor dari data yang tersisa saat ini. Kalau perlu diaudit/dipulihkan, itu investigasi data terpisah (perlu tahu submission mana saja yang pernah dihapus & PIC apa yang terdampak), bukan bagian dari fase ini.
+
+### Catatan
+Fase 4 (pindahkan `runBulkSync()`/`PointsAutoSync` ke `PointsService`, ditunda sesuai rencana — risiko tertinggi) masih menunggu arahan terpisah kalau memang ingin dikerjakan.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.

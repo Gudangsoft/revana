@@ -13,6 +13,7 @@ use App\Models\Pic;
 use App\Models\PicPointHistory;
 use App\Models\Setting;
 use App\Services\FonnteService;
+use App\Services\PointsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -535,7 +536,7 @@ class JournalManagementController extends Controller
         // Award points to Marketing if assigned
         $pointMessage = '';
         if (!empty($validated['marketing_id'])) {
-            $pointHistory = MarketingPointHistory::awardPoints(
+            $pointHistory = PointsService::awardToMarketing(
                 $validated['marketing_id'],
                 $submission->id,
                 "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
@@ -551,14 +552,14 @@ class JournalManagementController extends Controller
 
         // Award points to PIC submit
         $pic = auth()->guard('pic')->user();
-        $picHistory = PicPointHistory::awardPoints(
+        $picHistory = PointsService::awardToPic(
             $pic->id,
             $submission->id,
             'submit',
             "Submit artikel: {$submission->kode_submit} - {$submission->judul_artikel}"
         );
         if ($picHistory) {
-            // Note: total_points sudah di-increment di dalam PicPointHistory::awardPoints()
+            // Note: total_points sudah di-increment di dalam PointsService::awardToPic()
             $pointMessage .= " Anda mendapatkan +{$picHistory->points_earned} point!";
         }
 
@@ -566,7 +567,7 @@ class JournalManagementController extends Controller
         // (lihat blok "BKD langsung publish" di atas) — poin production juga harus
         // diberikan di sini, bukan cuma step submit.
         if ($isBkdPublish) {
-            $prodHistory = PicPointHistory::awardPoints(
+            $prodHistory = PointsService::awardToPic(
                 $pic->id,
                 $submission->id,
                 'production',
@@ -786,8 +787,8 @@ class JournalManagementController extends Controller
             ]);
 
             // Auto-award poin per tahap saat PIC menyerahkan pekerjaan.
-            // awardPoints() sudah menangani: cek duplikat, increment total_points, dan cache flush.
-            $pointHistory = PicPointHistory::awardPoints(
+            // awardToPic() sudah menangani: cek duplikat, increment total_points, dan cache flush.
+            $pointHistory = PointsService::awardToPic(
                 $picId,
                 $submission->id,
                 $stepName,
@@ -1289,7 +1290,7 @@ class JournalManagementController extends Controller
         // pernah tercatat poin/laporan-nya untuk tugas production tsb.
         if ($productionNewlyValidated) {
             try {
-                PicPointHistory::awardPoints(
+                PointsService::awardToPic(
                     $submission->petugas_production_id,
                     $submission->id,
                     'production',
@@ -1298,7 +1299,7 @@ class JournalManagementController extends Controller
                 );
 
                 if ($submission->marketing_id) {
-                    MarketingPointHistory::awardPoints(
+                    PointsService::awardToMarketing(
                         $submission->marketing_id,
                         $submission->id,
                         "Artikel selesai (Production Valid) - {$submission->kode_submit}",
@@ -1581,12 +1582,12 @@ class JournalManagementController extends Controller
                     $occurredAt = isset($validatedAtMap[$request->field]) ? $submission->{$validatedAtMap[$request->field]} : null;
 
                     if ($picId) {
-                        PicPointHistory::awardPoints($picId, $submission->id, $stepName, "Validasi {$stageName} - {$submission->kode_submit}", $occurredAt);
+                        PointsService::awardToPic($picId, $submission->id, $stepName, "Validasi {$stageName} - {$submission->kode_submit}", $occurredAt);
                     }
 
                     // Also add points to marketing if this is the final validation (production)
                     if ($request->field === 'production_valid' && $submission->marketing_id) {
-                        MarketingPointHistory::awardPoints($submission->marketing_id, $submission->id, "Artikel selesai (Production Valid) - {$submission->kode_submit}", $occurredAt);
+                        PointsService::awardToMarketing($submission->marketing_id, $submission->id, "Artikel selesai (Production Valid) - {$submission->kode_submit}", $occurredAt);
                     }
                 } catch (\Exception $e) {
                     // Log error but don't fail the validation
@@ -2056,12 +2057,12 @@ class JournalManagementController extends Controller
             'process_type' => 'fasttrack'
         ], $adminUser->id);
 
-        // Award points to PIC (idempoten via PicPointHistory::awardPoints())
+        // Award points to PIC (idempoten via PointsService::awardToPic())
         $pic = auth()->guard('pic')->user();
         $pointMessage = '';
 
         if ($pic) {
-            $picHistory = PicPointHistory::awardPoints($pic->id, $submission->id, 'submit', "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}");
+            $picHistory = PointsService::awardToPic($pic->id, $submission->id, 'submit', "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}");
             if ($picHistory) {
                 $pointMessage = " Anda mendapatkan +{$picHistory->points_earned} point!";
             }
@@ -2072,7 +2073,7 @@ class JournalManagementController extends Controller
             // (fasttrack langsung publish) hanya memberi poin submit, poin production-nya
             // hilang sama sekali.
             if (!empty($validated['link_publish'])) {
-                $prodHistory = PicPointHistory::awardPoints(
+                $prodHistory = PointsService::awardToPic(
                     $pic->id,
                     $submission->id,
                     'production',
@@ -2087,7 +2088,7 @@ class JournalManagementController extends Controller
 
         // Award points to Marketing if assigned
         if (!empty($validated['marketing_id'])) {
-            $marketingPointHistory = MarketingPointHistory::awardPoints(
+            $marketingPointHistory = PointsService::awardToMarketing(
                 $validated['marketing_id'],
                 $submission->id,
                 "Fasttrack artikel: {$submission->kode_submit} - {$submission->judul_artikel}"

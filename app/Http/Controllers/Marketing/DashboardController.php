@@ -8,6 +8,7 @@ use App\Models\BirthdayWish;
 use App\Models\Marketing;
 use App\Models\MarketingPointHistory;
 use App\Models\Submission;
+use App\Services\PointsService;
 use App\Models\JournalMaster;
 use App\Models\JournalSlot;
 use App\Models\Accreditation;
@@ -438,7 +439,7 @@ class DashboardController extends Controller
                 ]);
                 
                 // Award points to Marketing within transaction
-                MarketingPointHistory::awardPoints(
+                PointsService::awardToMarketing(
                     $marketing->id,
                     $submission->id,
                     "Submit artikel: {$kodeSubmit} - {$submission->judul_artikel}"
@@ -963,7 +964,7 @@ class DashboardController extends Controller
         ], $adminUser->id);
 
         // Award points to Marketing
-        $pointHistory = MarketingPointHistory::awardPoints(
+        $pointHistory = PointsService::awardToMarketing(
             $marketing->id,
             $submission->id,
             "Fasttrack artikel: {$kodeSubmit} - {$submission->judul_artikel}"

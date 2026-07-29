@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Support\RankingCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class PicPointHistory extends Model
 {
@@ -97,110 +95,22 @@ class PicPointHistory extends Model
     /**
      * Award points to a PIC for completing a step.
      *
-     * $occurredAt: tanggal SEBENARNYA tugas ini selesai (mis. submission->created_at
-     * untuk step 'submit', atau kolom *_validated_at untuk step lain). Wajib diisi oleh
-     * pemanggil yang bersifat backfill/sync (bukan event langsung saat itu juga) — kalau
-     * dibiarkan null, timestamp riwayat akan memakai waktu SEKARANG (saat fungsi ini
-     * dipanggil), yang salah untuk sync karena tanggal penyelesaian tugas jadi ikut
-     * berubah ke tanggal sync, bukan tanggal tugas benar-benar selesai.
+     * Delegate tipis ke PointsService::awardToPic() — lihat docblock di sana untuk
+     * penjelasan lengkap (transaksi, penanganan race, arti $occurredAt). Method ini
+     * dipertahankan supaya ke-14 titik panggilan yang sudah ada tidak perlu diubah
+     * (lihat Fase 1, docs/tests/log-update-2026-07-29.md #7).
      */
     public static function awardPoints(int $picId, int $submissionId, string $step, ?string $description = null, $occurredAt = null): ?self
     {
-        $points = self::getPointsForStep($step);
-
-        if ($points <= 0) {
-            return null;
-        }
-
-        // Check if points already awarded for this submission + step + pic
-        $existing = self::where('pic_id', $picId)
-            ->where('submission_id', $submissionId)
-            ->where('step', $step)
-            ->first();
-
-        if ($existing) {
-            return null; // Already awarded
-        }
-
-        // Create point history. Pengecekan di atas TIDAK atomik — kalau 2 permintaan
-        // datang hampir bersamaan (klik ganda, retry jaringan), keduanya bisa lolos
-        // pengecekan sebelum salah satunya sempat tersimpan. UNIQUE index
-        // (pic_id, submission_id, step) di database jadi penjaga terakhir; kalau
-        // race itu terjadi, INSERT kedua akan gagal dengan duplicate-key — tangkap
-        // di sini dan perlakukan sama seperti "sudah pernah diberi" (return null),
-        // bukan crash 500.
-        //
-        // create() + backdate created_at + increment total_points DIBUNGKUS 1
-        // TRANSAKSI supaya atomik — insiden nyata: riwayat berhasil tersimpan
-        // (points_earned benar) tapi total_points PIC tidak ikut bertambah, karena
-        // sebelumnya increment() ada di baris TERPISAH setelah forceFill()->save();
-        // kalau ada apa pun yang gagal di antara create() dan increment(), riwayat
-        // sudah kadung tersimpan tapi total_points tidak ikut ter-update — state
-        // tidak konsisten yang butuh sinkronisasi manual untuk diperbaiki. Dengan
-        // transaksi, create()+backdate+increment sekarang selalu semua berhasil
-        // atau semua batal bersama.
-        try {
-            $history = DB::transaction(function () use ($picId, $submissionId, $step, $description, $points, $occurredAt) {
-                $history = self::create([
-                    'pic_id' => $picId,
-                    'submission_id' => $submissionId,
-                    'step' => $step,
-                    'points_earned' => $points,
-                    'description' => $description ?? "Menyelesaikan tugas " . self::getLabelForStep($step),
-                ]);
-
-                if ($occurredAt) {
-                    $history->forceFill([
-                        'created_at' => $occurredAt,
-                        'updated_at' => $occurredAt,
-                    ])->save();
-                }
-
-                // Update total points on PIC
-                Pic::where('id', $picId)->increment('total_points', $points);
-
-                return $history;
-            });
-        } catch (\Illuminate\Database\QueryException $e) {
-            if (str_contains($e->getMessage(), 'pic_point_histories_unique_award')) {
-                return null;
-            }
-            throw $e;
-        }
-
-        RankingCache::forgetPics();
-
-        return $history;
+        return \App\Services\PointsService::awardToPic($picId, $submissionId, $step, $description, $occurredAt);
     }
 
     /**
-     * Revoke points when a step validation is cancelled
+     * Revoke points when a step validation is cancelled.
+     * Delegate tipis ke PointsService::revokeFromPic().
      */
     public static function revokePoints(int $picId, int $submissionId, string $step): bool
     {
-        $history = self::where('pic_id', $picId)
-            ->where('submission_id', $submissionId)
-            ->where('step', $step)
-            ->first();
-
-        if (!$history) {
-            return false;
-        }
-
-        $points = $history->points_earned;
-        $history->delete();
-
-        // Decrement but never go below 0
-        Pic::where('id', $picId)
-            ->where('total_points', '>=', $points)
-            ->decrement('total_points', $points);
-
-        // Safety: recalculate from history sum to avoid drift
-        $actual = self::where('pic_id', $picId)->sum('points_earned');
-        Pic::where('id', $picId)->update(['total_points' => max(0, $actual)]);
-
-        RankingCache::forgetPics();
-
-        return true;
+        return \App\Services\PointsService::revokeFromPic($picId, $submissionId, $step);
     }
 }

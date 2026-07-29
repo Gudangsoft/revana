@@ -170,9 +170,11 @@
                             <tr>
                                 <td class="text-center text-muted">{{ $i + 1 }}</td>
                                 <td>
-                                    <div class="fw-semibold">{{ $row['pic']->name }}</div>
+                                    <a href="{{ route('admin.pic-points.show', $row['pic']->id) }}" class="fw-semibold text-decoration-none" title="Lihat detail pekerjaan {{ $row['pic']->name }}">
+                                        {{ $row['pic']->name }}
+                                    </a>
                                     @if($row['pic']->role)
-                                        <small class="text-muted">{{ ucfirst($row['pic']->role) }}</small>
+                                        <br><small class="text-muted">{{ ucfirst($row['pic']->role) }}</small>
                                     @endif
                                 </td>
                                 @foreach($steps as $key => $label)
