@@ -21,6 +21,13 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             overflow: hidden;
         }
+        .brand {
+            padding: 24px 28px 12px;
+            text-align: center;
+            background: #fff;
+        }
+        .brand img { max-height: 48px; max-width: 220px; }
+        .brand .text-logo { font-size: 22px; font-weight: bold; letter-spacing: 3px; color: #8B6914; }
         .card-header {
             padding: 24px 28px;
             color: #fff;
@@ -40,6 +47,13 @@
 </head>
 <body>
     <div class="card">
+        <div class="brand">
+            @if($logoUrl)
+                <img src="{{ $logoUrl }}" alt="{{ $appName }}">
+            @else
+                <span class="text-logo">{{ $appName }}</span>
+            @endif
+        </div>
         @if($valid)
             <div class="card-header valid">
                 <div class="icon">&#10003;</div>

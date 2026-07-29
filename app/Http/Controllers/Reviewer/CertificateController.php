@@ -21,19 +21,27 @@ class CertificateController extends Controller
      */
     public function verify(int $assignmentId, int $reviewerId)
     {
+        // Logo SIPERA (dikonfigurasi admin lewat Setting, sama seperti dipakai di
+        // sidebar layouts/app.blade.php) — dikirim ke SEMUA hasil (valid maupun
+        // tidak) supaya halaman publik ini tetap ada identitas resminya.
+        $brand = [
+            'logoUrl' => \App\Models\Setting::get('logo') ? asset('storage/' . \App\Models\Setting::get('logo')) : null,
+            'appName' => \App\Models\Setting::get('app_name', 'SIPERA'),
+        ];
+
         $assignment = ReviewAssignment::find($assignmentId);
 
         if (!$assignment || $assignment->status !== 'APPROVED') {
-            return view('reviewer.certificates.verify', ['valid' => false]);
+            return view('reviewer.certificates.verify', $brand + ['valid' => false]);
         }
 
         if ($assignment->reviewer_id != $reviewerId && $assignment->reviewer_2_id != $reviewerId) {
-            return view('reviewer.certificates.verify', ['valid' => false]);
+            return view('reviewer.certificates.verify', $brand + ['valid' => false]);
         }
 
         $reviewer = User::find($reviewerId);
         if (!$reviewer) {
-            return view('reviewer.certificates.verify', ['valid' => false]);
+            return view('reviewer.certificates.verify', $brand + ['valid' => false]);
         }
 
         $position = ($assignment->reviewer_id == $reviewerId) ? 'REVIEWER 1' : 'REVIEWER 2';
@@ -43,7 +51,7 @@ class CertificateController extends Controller
             ->with('journalSlot.journalMaster')
             ->first();
 
-        return view('reviewer.certificates.verify', [
+        return view('reviewer.certificates.verify', $brand + [
             'valid' => true,
             'reviewerName' => $reviewer->name,
             'articleTitle' => $assignment->article_title,
@@ -95,6 +103,43 @@ class CertificateController extends Controller
         imagedestroy($im);
 
         return $png;
+    }
+
+    /**
+     * Bungkus teks jadi beberapa baris supaya lebar hasil render TIDAK PERNAH
+     * melebihi $maxWidthPx, diukur pakai lebar piksel SESUNGGUHNYA (imagettfbbox,
+     * fungsi bawaan GD) — bukan tebak-tebakan jumlah karakter. Kata per kata
+     * ditambahkan ke baris berjalan; begitu menambah 1 kata lagi akan melebihi
+     * batas, baris ditutup dan kata itu jadi awal baris berikutnya.
+     *
+     * Catatan: kalau ada SATU kata yang sendirian sudah lebih lebar dari
+     * $maxWidthPx (jarang terjadi untuk judul artikel normal), kata itu tetap
+     * dibiarkan apa adanya di barisnya sendiri (tidak dipenggal di tengah kata).
+     */
+    private function wrapTextByWidth(string $text, string $fontFile, int $fontSize, int $maxWidthPx): array
+    {
+        $words = preg_split('/\s+/', trim($text)) ?: [];
+        $lines = [];
+        $currentLine = '';
+
+        foreach ($words as $word) {
+            $candidate = $currentLine === '' ? $word : $currentLine . ' ' . $word;
+            $bbox = imagettfbbox($fontSize, 0, $fontFile, $candidate);
+            $candidateWidth = abs($bbox[4] - $bbox[0]);
+
+            if ($candidateWidth > $maxWidthPx && $currentLine !== '') {
+                $lines[] = $currentLine;
+                $currentLine = $word;
+            } else {
+                $currentLine = $candidate;
+            }
+        }
+
+        if ($currentLine !== '') {
+            $lines[] = $currentLine;
+        }
+
+        return $lines ?: [$text];
     }
 
     public function index()
@@ -218,11 +263,7 @@ class CertificateController extends Controller
         
         // Get reviewer position
         $position = ($assignment->reviewer_id == auth()->id()) ? 'REVIEWER 1' : 'REVIEWER 2';
-        
-        // Wrap long article title (max 80 characters per line)
-        $wrappedTitle = wordwrap($articleTitle, 80, "\n");
-        $titleLines = explode("\n", $wrappedTitle);
-        
+
         // Font paths
         $fontBold = public_path('fonts/arial-bold.ttf');
         $fontRegular = public_path('fonts/arial.ttf');
@@ -245,15 +286,31 @@ class CertificateController extends Controller
         });
         
         // Article Title (center, posisi setelah "Manuscript Entitled :")
-        // Wrap long article title (max 100 characters per line for better fit)
-        $wrappedArticleTitle = wordwrap($articleTitle, 100, "\n");
-        $articleLines = explode("\n", $wrappedArticleTitle);
-        
+        //
+        // DULU dibungkus pakai wordwrap($articleTitle, 100, "\n") — membagi baris
+        // berdasar JUMLAH KARAKTER, bukan lebar piksel sesungguhnya saat dirender.
+        // Di ukuran font 60 (bold), 100 karakter bisa jadi ~3500-4500px lebar —
+        // SAMA ATAU LEBIH LEBAR dari kanvas sertifikat sendiri (3508px)! Itu sebab
+        // judul artikel yang panjang meluber keluar dari border kiri & kanan
+        // (dilaporkan user, judul "PERKEMBANGAN BUDAYA ISLAM..." terpotong di
+        // kedua sisi). Sekarang dibungkus berdasar LEBAR PIKSEL SESUNGGUHNYA
+        // (diukur pakai imagettfbbox() — fungsi GD asli, tidak butuh library
+        // tambahan) lewat wrapTextByWidth(), supaya baris manapun TIDAK PERNAH
+        // melebihi lebar aman yang ditentukan, berapa pun panjang teksnya.
+        $articleFontSize = 60;
+        // 70% dari lebar kanvas — sisakan margin kiri-kanan untuk border emas.
+        // CATATAN: sama seperti posisi elemen lain di file ini, ini perkiraan
+        // (file template AKTIF tidak tersedia untuk dites render langsung) — cek
+        // visual hasil sertifikat asli, sesuaikan $maxTitleWidthRatio kalau masih
+        // terlalu lebar/kesempitan.
+        $maxTitleWidthRatio = 0.70;
+        $articleLines = $this->wrapTextByWidth($articleTitle, $fontBold, $articleFontSize, (int) ($width * $maxTitleWidthRatio));
+
         $yArticlePosition = 1500;
-        foreach ($articleLines as $index => $articleLine) {
-            $image->text(trim($articleLine), $width / 2, $yArticlePosition, function($font) use ($fontBold) {
+        foreach ($articleLines as $articleLine) {
+            $image->text($articleLine, $width / 2, $yArticlePosition, function($font) use ($fontBold, $articleFontSize) {
                 $font->filename($fontBold);
-                $font->size(60);
+                $font->size($articleFontSize);
                 $font->color('#C9A961');
                 $font->align('center');
                 $font->valign('middle');

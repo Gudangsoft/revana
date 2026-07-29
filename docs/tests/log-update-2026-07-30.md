@@ -60,3 +60,50 @@ Sama seperti catatan lama soal posisi teks "No. Surat/Jurnal/Publisher": **file 
 
 ### Catatan Deploy
 Tidak ada migration. `git pull origin master`. Tidak perlu instalasi ekstensi PHP tambahan (justru dirancang supaya TIDAK butuh imagick). Setelah deploy, coba buka halaman "Sertifikat" sebagai reviewer (review yang sudah APPROVED) dan cek preview/download — QR harus muncul dan bisa di-scan menuju halaman verifikasi.
+
+## 3. Fix: Judul Artikel Panjang Meluber Keluar Border Sertifikat
+
+**Tujuan:** User menunjukkan screenshot sertifikat asli (production) — judul artikel panjang ("...ERKEMBANGAN BUDAYA ISLAM KONTEMPORER DAN INOVASI PRODUKSI KONTEN KEAGAMAAN DI RANAH DIGIT...") terpotong di KEDUA sisi kiri & kanan, meluber keluar dari border emas sertifikat.
+
+### Root Cause
+
+Wrapping judul artikel sebelumnya pakai `wordwrap($articleTitle, 100, "\n")` — membagi baris berdasar **jumlah karakter** (100 karakter), bukan lebar piksel sesungguhnya saat dirender. Judul dirender di ukuran font 60 (bold) di atas kanvas selebar 3508px — di ukuran itu, 100 karakter Latin biasa bisa memakan **~3500-4500px**, yaitu SAMA ATAU LEBIH LEBAR dari kanvas sertifikat itu sendiri. Karena teks di-center (`align('center')`), kelebihan lebar itu meluber rata ke KEDUA sisi — persis pola yang dilaporkan (terpotong kiri dan kanan sekaligus, bukan cuma satu sisi).
+
+### Perbaikan
+
+Dibuat `wrapTextByWidth()` — membungkus teks kata-per-kata berdasar **lebar piksel sesungguhnya**, diukur pakai `imagettfbbox()` (fungsi bawaan GD, tidak butuh library tambahan). Baris manapun dijamin tidak akan pernah melebihi batas lebar yang ditentukan (70% lebar kanvas, menyisakan margin untuk border emas), berapa pun panjang judulnya — tidak lagi soal tebak-tebakan jumlah karakter.
+
+Sekalian dibersihkan: kode wrapping lama yang sudah tidak dipakai (`$wrappedTitle`/`$titleLines`, dihitung tapi tidak pernah dipakai untuk render) dihapus.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | Method baru `wrapTextByWidth()` (wrap berbasis lebar piksel via `imagettfbbox()`). Blok render judul artikel diganti pakai method ini (70% lebar kanvas). Hapus kode wrapping lama yang mati/tidak terpakai |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | 2 test baru: judul PERSIS yang dilaporkan overflow sekarang terbagi >1 baris dan setiap barisnya dibuktikan (ukur ulang lewat `imagettfbbox()`) tidak pernah melebihi batas lebar, tanpa ada kata yang hilang; judul pendek tetap 1 baris (tidak berubah perilaku untuk kasus normal) |
+
+### Verifikasi
+- **Visual langsung** (bukan cuma unit test): direproduksi persis judul yang dilaporkan user, dirender ke background dummy dengan border emas simulasi di kiri-kanan — SEBELUM fix akan meluber sampai keluar border (dibuktikan lewat wordwrap 100-karakter di font 60 jauh melebihi lebar kanvas); SETELAH fix, judul terbagi rapi 2 baris, tetap di dalam area aman, tidak menyentuh border sama sekali.
+- Test baru (2 test, 8 assertion) — PASS.
+- Full suite `tests/Feature` — PASS, tidak ada regresi.
+
+**Catatan:** rasio 70% lebar kanvas adalah perkiraan (sama seperti posisi elemen lain di file ini — file template aktif sesungguhnya tidak tersedia untuk dites render langsung). Kalau di template asli border-nya ternyata lebih tebal/tipis dari perkiraan, tinggal sesuaikan `$maxTitleWidthRatio` di `generateCertificate()`.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.
+
+## 4. Tambah Logo SIPERA di Halaman Verifikasi Sertifikat Publik
+
+**Tujuan:** User minta logo SIPERA ditambahkan di halaman verifikasi publik (`/verify/sertifikat-reviewer/{assignment}/{reviewerId}`, dituju QR code sertifikat) supaya halaman itu terlihat resmi.
+
+**Implementasi:** dipakai pola yang SUDAH ADA di `layouts/app.blade.php` (sidebar admin/reviewer) — logo diambil dari `Setting::get('logo')` (dikonfigurasi admin lewat pengaturan aplikasi), ditampilkan sebagai `<img>`; kalau belum ada logo yang di-upload, otomatis jatuh ke teks bermerek "{app_name}" (default "SIPERA") — sama seperti fallback yang sudah dipakai di tempat lain, bukan pola baru.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `verify()`: ambil `Setting::get('logo')`/`Setting::get('app_name')`, kirim ke SEMUA hasil view (valid maupun tidak valid) |
+| `resources/views/reviewer/certificates/verify.blade.php` | Tambah section "brand" (logo/wordmark) di bagian paling atas kartu, sebelum header status hijau/merah |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | 2 test baru: logo `<img>` muncul kalau `Setting` logo terisi; jatuh ke teks nama aplikasi kalau belum ada logo |
+
+### Verifikasi
+Test baru (2 test, 5 assertion) — PASS. Full suite `tests/Feature` — PASS, tidak ada regresi.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.

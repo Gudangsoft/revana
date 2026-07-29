@@ -112,6 +112,38 @@ class ReviewerCertificateVerifyTest extends TestCase
         $response->assertSee('Tidak Ditemukan');
     }
 
+    public function test_verify_page_shows_configured_logo_when_set(): void
+    {
+        \App\Models\Setting::set('logo', 'settings/test-logo.png');
+        $reviewer = $this->makeReviewer();
+        $assignment = $this->makeApprovedAssignment(['reviewer_id' => $reviewer->id]);
+
+        $response = $this->get(route('reviewer-certificate.verify', [
+            'assignment' => $assignment->id,
+            'reviewerId' => $reviewer->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('storage/settings/test-logo.png', false);
+    }
+
+    public function test_verify_page_falls_back_to_app_name_text_when_no_logo_configured(): void
+    {
+        \App\Models\Setting::set('logo', '');
+        \App\Models\Setting::set('app_name', 'SIPERA');
+        $reviewer = $this->makeReviewer();
+        $assignment = $this->makeApprovedAssignment(['reviewer_id' => $reviewer->id]);
+
+        $response = $this->get(route('reviewer-certificate.verify', [
+            'assignment' => $assignment->id,
+            'reviewerId' => $reviewer->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('class="text-logo"', false);
+        $response->assertSee('SIPERA');
+    }
+
     public function test_verify_page_shows_invalid_for_nonexistent_assignment(): void
     {
         $response = $this->get(route('reviewer-certificate.verify', [
@@ -121,6 +153,63 @@ class ReviewerCertificateVerifyTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Tidak Ditemukan');
+    }
+
+    /**
+     * Regresi 30 Juli 2026: judul artikel panjang meluber keluar dari border kiri
+     * & kanan sertifikat (dilaporkan user via screenshot) karena wrapping lama
+     * (wordwrap 100 karakter) tidak memperhitungkan lebar piksel sesungguhnya di
+     * ukuran font 60 — bisa jadi lebih lebar dari kanvas sertifikat sendiri.
+     * wrapTextByWidth() sekarang mengukur lebar piksel asli (imagettfbbox) dan
+     * MENJAMIN setiap baris tidak pernah melebihi batas yang ditentukan.
+     */
+    public function test_wrap_text_by_width_never_exceeds_max_width_for_long_title(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextByWidth');
+        $method->setAccessible(true);
+
+        $font = file_exists(public_path('fonts/arial-bold.ttf'))
+            ? public_path('fonts/arial-bold.ttf')
+            : public_path('fonts/arial.ttf');
+
+        // Judul persis yang dilaporkan overflow.
+        $title = 'Perkembangan Budaya Islam Kontemporer dan Inovasi Produksi Konten Keagamaan di Ranah Digital';
+        $maxWidth = 2455; // 70% dari lebar kanvas 3508px, sama seperti di generateCertificate()
+
+        $lines = $method->invoke($controller, $title, $font, 60, $maxWidth);
+
+        $this->assertGreaterThan(1, count($lines), 'Judul sepanjang ini harus terbagi lebih dari 1 baris');
+
+        foreach ($lines as $line) {
+            $bbox = imagettfbbox(60, 0, $font, $line);
+            $lineWidth = abs($bbox[4] - $bbox[0]);
+            $this->assertLessThanOrEqual($maxWidth, $lineWidth,
+                "Baris \"{$line}\" selebar {$lineWidth}px, melebihi batas {$maxWidth}px");
+        }
+
+        // Rekonstruksi ulang harus tetap mengandung semua kata asli (tidak ada
+        // kata yang hilang/dipenggal saat dibungkus).
+        $this->assertEquals(
+            preg_replace('/\s+/', ' ', $title),
+            implode(' ', $lines)
+        );
+    }
+
+    public function test_wrap_text_by_width_keeps_short_title_on_a_single_line(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextByWidth');
+        $method->setAccessible(true);
+
+        $font = file_exists(public_path('fonts/arial-bold.ttf'))
+            ? public_path('fonts/arial-bold.ttf')
+            : public_path('fonts/arial.ttf');
+
+        $lines = $method->invoke($controller, 'Judul Pendek', $font, 60, 2455);
+
+        $this->assertCount(1, $lines);
+        $this->assertEquals('Judul Pendek', $lines[0]);
     }
 
     public function test_render_qr_png_produces_a_valid_decodable_png(): void
