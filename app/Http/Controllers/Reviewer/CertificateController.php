@@ -5,12 +5,98 @@ namespace App\Http\Controllers\Reviewer;
 use App\Http\Controllers\Controller;
 use App\Models\ReviewAssignment;
 use App\Models\Certificate;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use BaconQrCode\Encoder\Encoder;
 
 class CertificateController extends Controller
 {
+    /**
+     * Halaman verifikasi publik (tidak perlu login) — dituju oleh QR code yang
+     * dicetak di sertifikat. Siapa pun yang scan bisa mengecek review-nya benar
+     * asli & sudah disetujui, tanpa perlu akses ke sistem.
+     */
+    public function verify(int $assignmentId, int $reviewerId)
+    {
+        $assignment = ReviewAssignment::find($assignmentId);
+
+        if (!$assignment || $assignment->status !== 'APPROVED') {
+            return view('reviewer.certificates.verify', ['valid' => false]);
+        }
+
+        if ($assignment->reviewer_id != $reviewerId && $assignment->reviewer_2_id != $reviewerId) {
+            return view('reviewer.certificates.verify', ['valid' => false]);
+        }
+
+        $reviewer = User::find($reviewerId);
+        if (!$reviewer) {
+            return view('reviewer.certificates.verify', ['valid' => false]);
+        }
+
+        $position = ($assignment->reviewer_id == $reviewerId) ? 'REVIEWER 1' : 'REVIEWER 2';
+
+        // Pencocokan sama seperti generateCertificate() — lihat catatan di sana.
+        $sourceSubmission = \App\Models\Submission::where('link_artikel', $assignment->submit_link)
+            ->with('journalSlot.journalMaster')
+            ->first();
+
+        return view('reviewer.certificates.verify', [
+            'valid' => true,
+            'reviewerName' => $reviewer->name,
+            'articleTitle' => $assignment->article_title,
+            'articleNumber' => $assignment->article_number,
+            'position' => $position,
+            'approvedAt' => $assignment->approved_at,
+            'namaJurnal' => $sourceSubmission?->journalSlot?->journalMaster?->nama_jurnal ?? '-',
+            'namaPublisher' => $sourceSubmission?->journalSlot?->journalMaster?->publisher ?? '-',
+            'nomorSurat' => $sourceSubmission ? ($sourceSubmission->kode_loa ?: $sourceSubmission->kode_submit) : '-',
+        ]);
+    }
+
+    /**
+     * Render QR code jadi PNG mentah pakai GD murni (bukan lewat paket
+     * simplesoftwareio/simple-qrcode langsung) — server ini TIDAK punya ekstensi
+     * imagick terpasang, dan format('png') paket itu HANYA didukung lewat backend
+     * Imagick (dicek langsung: format('svg')/('eps') jalan, format('png') melempar
+     * "You need to install the imagick extension"). SVG tidak bisa langsung
+     * ditempel ke gambar sertifikat (JPEG raster) lewat Intervention Image (driver
+     * GD tidak bisa decode SVG). Solusinya: ambil matrix QR mentah langsung dari
+     * bacon/bacon-qr-code (dependency simple-qrcode, sudah terpasang) lalu gambar
+     * sendiri modul-per-modul pakai GD — sama sekali tidak butuh imagick.
+     */
+    private function renderQrPng(string $content, int $moduleScale = 8, int $quietZoneModules = 2): string
+    {
+        $qrCode = Encoder::encode($content, ErrorCorrectionLevel::M());
+        $matrix = $qrCode->getMatrix();
+        $moduleCount = $matrix->getWidth();
+
+        $size = ($moduleCount + $quietZoneModules * 2) * $moduleScale;
+        $im = imagecreatetruecolor($size, $size);
+        $white = imagecolorallocate($im, 255, 255, 255);
+        $black = imagecolorallocate($im, 0, 0, 0);
+        imagefill($im, 0, 0, $white);
+
+        for ($y = 0; $y < $moduleCount; $y++) {
+            for ($x = 0; $x < $moduleCount; $x++) {
+                if ($matrix->get($x, $y) === 1) {
+                    $px = ($x + $quietZoneModules) * $moduleScale;
+                    $py = ($y + $quietZoneModules) * $moduleScale;
+                    imagefilledrectangle($im, $px, $py, $px + $moduleScale - 1, $py + $moduleScale - 1, $black);
+                }
+            }
+        }
+
+        ob_start();
+        imagepng($im);
+        $png = ob_get_clean();
+        imagedestroy($im);
+
+        return $png;
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -194,6 +280,27 @@ class CertificateController extends Controller
         $image->text($infoText, $width / 2, $height - 110, function($font) use ($fontRegular) {
             $font->filename($fontRegular);
             $font->size(26);
+            $font->color('#8B6914');
+            $font->align('center');
+            $font->valign('middle');
+        });
+
+        // QR Code verifikasi — pojok kiri bawah. Siapa pun yang scan bisa memastikan
+        // sertifikat ini asli & review-nya benar sudah APPROVED, tanpa perlu login
+        // (lihat verify() di atas). CATATAN posisi: sama seperti info text di atas,
+        // koordinat ini perkiraan (file template AKTIF tidak tersedia untuk dites
+        // render langsung) — cek visual hasil asli, geser $qrX/$qrY kalau tumpang
+        // tindih dengan elemen desain lain.
+        $verifyUrl = route('reviewer-certificate.verify', ['assignment' => $assignment->id, 'reviewerId' => $reviewer->id]);
+        $qrPng = $this->renderQrPng($verifyUrl);
+        $qrImage = $manager->read($qrPng)->resize(260, 260);
+        $qrX = 150;
+        $qrY = $height - 480;
+        $image->place($qrImage, 'top-left', $qrX, $qrY);
+
+        $image->text('Scan untuk verifikasi', $qrX + 130, $qrY + 285, function($font) use ($fontRegular) {
+            $font->filename($fontRegular);
+            $font->size(20);
             $font->color('#8B6914');
             $font->align('center');
             $font->valign('middle');

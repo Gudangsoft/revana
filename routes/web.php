@@ -118,6 +118,11 @@ Route::get('/referensi-jurnal', [\App\Http\Controllers\PublicReferensiJurnalCont
 Route::get('/info-slot', [\App\Http\Controllers\PublicLoaController::class, 'index'])->name('public.slot.info');
 Route::get('/info-slot/{slot}', [\App\Http\Controllers\PublicLoaController::class, 'show'])->name('public.slot.detail');
 
+// Public Reviewer Certificate Verification — no login required, dituju oleh QR code
+// yang dicetak di sertifikat reviewer, supaya siapa pun yang scan bisa mengecek
+// keasliannya tanpa perlu login.
+Route::get('/verify/sertifikat-reviewer/{assignment}/{reviewerId}', [\App\Http\Controllers\Reviewer\CertificateController::class, 'verify'])->name('reviewer-certificate.verify');
+
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
