@@ -107,3 +107,22 @@ Sekalian dibersihkan: kode wrapping lama yang sudah tidak dipakai (`$wrappedTitl
 Test baru (2 test, 5 assertion) — PASS. Full suite `tests/Feature` — PASS, tidak ada regresi.
 
 **Deploy:** murni kode, tidak ada migration. `git pull origin master`.
+
+## 5. Pencegahan: Nama Reviewer Panjang Juga Dibungkus Berbasis Lebar Piksel
+
+**Tujuan:** Tindak lanjut proaktif (diminta user setelah fix judul artikel #3) — nama reviewer sebelumnya dirender 1 baris TANPA pengaman lebar sama sekali (beda dari judul artikel yang sudah diperbaiki di section #3), jadi nama panjang dengan banyak gelar akademik (mis. "Prof. Dr. H. ... S.Pd., M.Pd., Ph.D.") berisiko meluber keluar border sertifikat persis seperti kasus judul artikel — belum pernah dilaporkan, tapi risikonya sama persis.
+
+### Perbaikan
+Nama reviewer sekarang dibungkus pakai `wrapTextByWidth()` yang sama (lihat #3), di ukuran font nama sesungguhnya (80). Ruang vertikal sebelum judul artikel mulai dirender (Y=1500) cukup lega (~380px) untuk menampung nama sampai 2-3 baris tanpa bertabrakan — posisi Y judul artikel TIDAK ikut digeser. Variabel `$maxTitleWidthRatio` (lebar aman 70% kanvas) dipindah jadi dideklarasikan sekali di atas, dipakai bersama oleh nama maupun judul (sebelumnya cuma dideklarasikan di blok judul).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | Blok render nama reviewer: dari `$image->text()` satu baris jadi loop lewat `wrapTextByWidth()`, sama seperti judul artikel |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Test baru: nama sangat panjang ("Prof. Dr. H. Muhammad Abdurrahman Wahyu Kusuma Wardhana, S.Pd., M.Pd., Ph.D.") terbagi >1 baris, setiap baris dibuktikan tidak melebihi batas lebar |
+
+### Verifikasi
+- **Visual langsung:** nama uji di atas (yang di render sungguhan jadi 3 baris) dirender ke background dummy dengan border emas simulasi — tetap rapi di dalam border, tidak tabrakan dengan judul artikel di bawahnya (yang sengaja dibuat pendek untuk tes ini, "Judul Artikel Pendek Saja").
+- Test baru (1 test, 3 assertion) — PASS. Full suite `tests/Feature` — PASS, tidak ada regresi.
+
+**Deploy:** murni kode, tidak ada migration. `git pull origin master`.

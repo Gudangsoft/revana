@@ -212,6 +212,38 @@ class ReviewerCertificateVerifyTest extends TestCase
         $this->assertEquals('Judul Pendek', $lines[0]);
     }
 
+    /**
+     * Regresi 30 Juli 2026 (lanjutan): nama reviewer sebelumnya dirender 1 baris
+     * tanpa pengaman lebar sama sekali (beda dari judul artikel yang sudah
+     * diperbaiki) — nama panjang dengan banyak gelar akademik berisiko meluber
+     * keluar border persis seperti kasus judul artikel. Sekarang pakai
+     * wrapTextByWidth() yang sama, di ukuran font nama sesungguhnya (80).
+     */
+    public function test_wrap_text_by_width_never_exceeds_max_width_for_long_reviewer_name(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextByWidth');
+        $method->setAccessible(true);
+
+        $font = file_exists(public_path('fonts/arial-bold.ttf'))
+            ? public_path('fonts/arial-bold.ttf')
+            : public_path('fonts/arial.ttf');
+
+        $name = strtoupper('Prof. Dr. H. Muhammad Abdurrahman Wahyu Kusuma Wardhana, S.Pd., M.Pd., Ph.D.');
+        $maxWidth = 2455; // 70% dari lebar kanvas 3508px, sama seperti di generateCertificate()
+
+        $lines = $method->invoke($controller, $name, $font, 80, $maxWidth);
+
+        $this->assertGreaterThan(1, count($lines), 'Nama sepanjang ini harus terbagi lebih dari 1 baris');
+
+        foreach ($lines as $line) {
+            $bbox = imagettfbbox(80, 0, $font, $line);
+            $lineWidth = abs($bbox[4] - $bbox[0]);
+            $this->assertLessThanOrEqual($maxWidth, $lineWidth,
+                "Baris \"{$line}\" selebar {$lineWidth}px, melebihi batas {$maxWidth}px");
+        }
+    }
+
     public function test_render_qr_png_produces_a_valid_decodable_png(): void
     {
         $controller = new CertificateController();

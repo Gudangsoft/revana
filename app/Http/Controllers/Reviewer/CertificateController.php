@@ -276,14 +276,34 @@ class CertificateController extends Controller
         // Template positions (untuk template 2560x1811px atau proporsional)
         // Sesuaikan dengan desain template terbaru
         
+        // Lebar aman untuk teks yang di-center (nama reviewer & judul artikel) —
+        // 70% dari lebar kanvas, sisakan margin kiri-kanan untuk border emas.
+        // CATATAN: sama seperti posisi elemen lain di file ini, ini perkiraan (file
+        // template AKTIF tidak tersedia untuk dites render langsung) — cek visual
+        // hasil sertifikat asli, sesuaikan kalau masih terlalu lebar/kesempitan.
+        $maxTitleWidthRatio = 0.70;
+
         // Reviewer Name (center, posisi setelah "This certificate is awarded to :")
-        $image->text($reviewerName, $width / 2, 1120, function($font) use ($fontBold) {
-            $font->filename($fontBold);
-            $font->size(80);
-            $font->color('#C9A961');
-            $font->align('center');
-            $font->valign('middle');
-        });
+        //
+        // Sama seperti judul artikel di bawah — sebelumnya di-render 1 baris tanpa
+        // pengaman lebar sama sekali, jadi nama reviewer yang panjang (mis. dengan
+        // banyak gelar akademik) berisiko meluber keluar border persis seperti kasus
+        // judul artikel. Dibungkus pakai wrapTextByWidth() yang sama. Ruang vertikal
+        // sampai judul artikel mulai (Y=1500) cukup lega (~380px) untuk menampung
+        // nama 2 baris tanpa tabrakan, jadi posisi Y judul artikel TIDAK digeser.
+        $nameFontSize = 80;
+        $nameLines = $this->wrapTextByWidth($reviewerName, $fontBold, $nameFontSize, (int) ($width * $maxTitleWidthRatio));
+        $yNamePosition = 1120;
+        foreach ($nameLines as $nameLine) {
+            $image->text($nameLine, $width / 2, $yNamePosition, function($font) use ($fontBold, $nameFontSize) {
+                $font->filename($fontBold);
+                $font->size($nameFontSize);
+                $font->color('#C9A961');
+                $font->align('center');
+                $font->valign('middle');
+            });
+            $yNamePosition += 95; // Line spacing (font lebih besar dari judul, spasi sedikit lebih lebar)
+        }
         
         // Article Title (center, posisi setelah "Manuscript Entitled :")
         //
@@ -298,12 +318,6 @@ class CertificateController extends Controller
         // tambahan) lewat wrapTextByWidth(), supaya baris manapun TIDAK PERNAH
         // melebihi lebar aman yang ditentukan, berapa pun panjang teksnya.
         $articleFontSize = 60;
-        // 70% dari lebar kanvas — sisakan margin kiri-kanan untuk border emas.
-        // CATATAN: sama seperti posisi elemen lain di file ini, ini perkiraan
-        // (file template AKTIF tidak tersedia untuk dites render langsung) — cek
-        // visual hasil sertifikat asli, sesuaikan $maxTitleWidthRatio kalau masih
-        // terlalu lebar/kesempitan.
-        $maxTitleWidthRatio = 0.70;
         $articleLines = $this->wrapTextByWidth($articleTitle, $fontBold, $articleFontSize, (int) ($width * $maxTitleWidthRatio));
 
         $yArticlePosition = 1500;
