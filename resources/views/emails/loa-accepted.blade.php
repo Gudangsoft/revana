@@ -73,7 +73,7 @@
       <tr>
         <td style="background:{{ $secondary }};padding:14px 28px;color:#fff;font-size:11px;">
           <strong>{{ $journal?->editor_title ?? 'Editor in Chief' }}</strong>
-          @if($journal?->editor_name) &nbsp;·&nbsp; {{ $journal->editor_name }} @endif
+          @if(($journal?->loa_show_signature ?? true) && $journal?->editor_name) &nbsp;·&nbsp; {{ $journal->editor_name }} @endif
           <br>{{ $journal?->nama_jurnal }}
           @if($journal?->link_jurnal)
           &nbsp;·&nbsp; <a href="{{ $journal->link_jurnal }}" style="color:#fff;">{{ $journal->link_jurnal }}</a>

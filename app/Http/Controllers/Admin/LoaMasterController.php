@@ -87,6 +87,9 @@ class LoaMasterController extends Controller
         ]);
 
         $data['loa_auto_send'] = $request->boolean('loa_auto_send');
+        // Toggle opsional tampilkan TTD & nama editor di dokumen LOA — lihat
+        // catatan lengkap di migration 2026_08_01_000001_*.
+        $data['loa_show_signature'] = $request->boolean('loa_show_signature');
         if (empty($data['loa_auto_trigger'])) $data['loa_auto_trigger'] = 'manual';
 
         // Logo

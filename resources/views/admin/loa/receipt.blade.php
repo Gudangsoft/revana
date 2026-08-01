@@ -20,7 +20,10 @@
     $jurnalNama     = $journal?->nama_jurnal      ?? 'Jurnal';
     $kodeSingkat    = $journal?->kode_singkat     ?? '';
     $eIssn          = $journal?->e_issn           ?? '';
-    $editorName     = $journal?->editor_name      ?? '';
+    // Toggle opsional loa_show_signature (default true, lihat migration
+    // 2026_08_01_000001_*) — signUrl sudah digate di LoaController, editorName
+    // digate di sini karena selama ini memang dihitung langsung dari $journal.
+    $editorName     = ($journal?->loa_show_signature ?? true) ? ($journal?->editor_name ?? '') : '';
     $editorTitle    = $journal?->editor_title     ?? ($lang === 'id' ? 'Ketua Dewan Redaksi' : 'Editor in Chief');
     $kota           = $journal?->loa_kota         ?? 'Semarang';
     $volume         = $slot?->volume   ?? '—';

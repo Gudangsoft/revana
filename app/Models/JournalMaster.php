@@ -45,10 +45,12 @@ class JournalMaster extends Model
         'loa_auto_send',
         'loa_auto_trigger',
         'loa_language',
+        'loa_show_signature',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'loa_show_signature' => 'boolean',
     ];
 
     protected static function boot()

@@ -97,6 +97,58 @@
                 </div>
             </div>
 
+            {{-- ── TTD & Nama Editor ────────────────────────────────────── --}}
+            <div class="card mb-3 border-{{ $journal->loa_show_signature ?? true ? 'success' : 'secondary' }}">
+                <div class="card-header d-flex justify-content-between align-items-center
+                            {{ ($journal->loa_show_signature ?? true) ? 'bg-success bg-opacity-10' : '' }}">
+                    <span>
+                        <i class="bi bi-pen {{ ($journal->loa_show_signature ?? true) ? 'text-success' : 'text-muted' }} me-1"></i>
+                        Tanda Tangan &amp; Nama Editor
+                    </span>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               name="loa_show_signature" id="swShowSignature" value="1"
+                               {{ old('loa_show_signature', $journal->loa_show_signature ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="swShowSignature" id="swShowSignatureLabel">
+                            {{ ($journal->loa_show_signature ?? true) ? 'Ditampilkan' : 'Disembunyikan' }}
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nama Lengkap Editor</label>
+                            <input type="text" class="form-control" name="editor_name"
+                                   value="{{ old('editor_name', $journal->editor_name) }}"
+                                   placeholder="Dr. John Doe, M.T.">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tanda Tangan Editor
+                                <small class="text-muted">(PNG transparan, maks 2MB)</small>
+                            </label>
+                            @if($journal->editor_signature_path)
+                            <div class="mb-2">
+                                <img src="{{ Storage::url($journal->editor_signature_path) }}" height="50"
+                                     style="border:1px solid #eee; padding:4px; background:#fff;" alt="TTD">
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input" type="checkbox" name="remove_signature" id="remove_signature" value="1">
+                                    <label class="form-check-label text-danger small" for="remove_signature">Hapus TTD</label>
+                                </div>
+                            </div>
+                            @endif
+                            <input type="file" class="form-control @error('editor_signature') is-invalid @enderror"
+                                   name="editor_signature" accept="image/*">
+                            @error('editor_signature')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+                    <div class="alert alert-info py-2 mb-0 mt-3 small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Kalau switch di atas dinonaktifkan, nama &amp; tanda tangan tetap tersimpan di sini
+                        tapi tidak ikut tampil di dokumen LOA (kolom lain tetap seperti biasa).
+                    </div>
+                </div>
+            </div>
+
             {{-- ── Identitas LOA ─────────────────────────────────────────── --}}
             <div class="card mb-3">
                 <div class="card-header"><i class="bi bi-journal-text me-1"></i> Identitas Jurnal (untuk LOA)</div>
@@ -333,6 +385,15 @@
     if (sw && swLbl) {
         sw.addEventListener('change', function () {
             swLbl.textContent = this.checked ? 'Aktif' : 'Non-aktif';
+        });
+    }
+
+    // ── Show-signature switch label ────────────────────────────────
+    var swSig = document.getElementById('swShowSignature');
+    var swSigLbl = document.getElementById('swShowSignatureLabel');
+    if (swSig && swSigLbl) {
+        swSig.addEventListener('change', function () {
+            swSigLbl.textContent = this.checked ? 'Ditampilkan' : 'Disembunyikan';
         });
     }
 

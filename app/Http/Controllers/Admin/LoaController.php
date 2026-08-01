@@ -168,7 +168,11 @@ class LoaController extends Controller
             'loaDate'                => $this->loaDate($journal, $effectiveDate, $lang),
             'loaDateRaw'             => $effectiveDate->toDateString(),
             'logoUrl'                => $journal?->logo_path ? Storage::url($journal->logo_path) : null,
-            'signUrl'                => $journal?->editor_signature_path ? Storage::url($journal->editor_signature_path) : null,
+            // Toggle opsional loa_show_signature (default true) — lihat migration
+            // 2026_08_01_000001_*. Kalau dimatikan, TTD tetap ada di storage, cuma
+            // tidak ikut ditampilkan/dilampirkan di dokumen LOA.
+            'signUrl'                => ($journal?->loa_show_signature ?? true) && $journal?->editor_signature_path
+                                            ? Storage::url($journal->editor_signature_path) : null,
             'headerImageUrl'         => $journal?->header_image_path ? Storage::url($journal->header_image_path) : null,
             'accreditationLogoUrl'   => $this->resolveAccreditationLogoUrl($journal),
             'linkSkAkreditasi'       => $journal?->link_sk_akreditasi,
@@ -192,7 +196,8 @@ class LoaController extends Controller
         // (http/https), termasuk URL ke domain sendiri. Untuk PDF, pakai path file lokal langsung.
         $journal = $data['journal'];
         $data['logoUrl']              = $this->localStoragePath($journal?->logo_path);
-        $data['signUrl']              = $this->localStoragePath($journal?->editor_signature_path);
+        $data['signUrl']              = ($journal?->loa_show_signature ?? true)
+                                            ? $this->localStoragePath($journal?->editor_signature_path) : null;
         $data['headerImageUrl']       = $this->localStoragePath($journal?->header_image_path);
         $data['accreditationLogoUrl'] = $this->resolveAccreditationLogoLocalPath($journal);
 
