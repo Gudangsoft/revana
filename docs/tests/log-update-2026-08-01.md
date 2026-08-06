@@ -49,3 +49,32 @@ Migration baru (`2026_08_01_000001_*`) perlu `php artisan migrate --force` di pr
 
 ### Catatan Deploy
 Migration baru (`2026_08_01_000002_*`) perlu `php artisan migrate --force` di production — akan membuat 1 baris template baru (non-aktif, tidak mengubah perilaku pengiriman email apa pun sampai admin sengaja meninjau isi & menekan tombol aktifkan di `/admin/email-templates`). **Sebelum diaktifkan, admin disarankan meninjau/menyunting dulu redaksi kalimat & memastikan `username_author`/`password_author` memang relevan ditampilkan ke penulis pada momen submission baru dibuat** — kalau tidak relevan, edit templatenya lewat UI (tombol pensil) sebelum diaktifkan.
+
+---
+
+## 3. Halaman Baru: Monitoring Akreditasi Jurnal
+
+**Tujuan:** User minta "monitoring proses jurnal yang akreditasi agar team mempersiapkan" — permintaan awalnya umum, diklarifikasi lewat AskUserQuestion menjadi: peringatan jurnal yang masa berlaku akreditasinya (SINTA) mendekati kedaluwarsa, supaya tim mulai siapkan dokumen reakreditasi dari jauh-jauh hari. Sebelumnya masa berlaku akreditasi cuma tersimpan sebagai teks bebas di `loa_status` (format tidak konsisten antar jurnal, mis. "...sampai Volume 6 Nomor 1 Tahun 2027"), tidak bisa dipakai untuk hitung mundur otomatis.
+
+Keputusan yang dikonfirmasi user: (1) tanggal berakhir akreditasi disimpan sebagai tanggal kalender penuh (bukan cuma tahun), (2) ambang "Perlu Bersiap" = 12 bulan sebelum kedaluwarsa, (3) cukup halaman monitoring dulu, belum perlu notifikasi email otomatis (bisa menyusul kalau memang dibutuhkan).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_08_01_000003_add_accreditation_expires_at_to_journal_masters.php` | Baru. Kolom `accreditation_expires_at` (date, nullable) di `journal_masters`. |
+| `app/Models/JournalMaster.php` | Tambah `accreditation_expires_at` ke `$fillable` dan `$casts` (`date`). |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `update()`: validasi & simpan `accreditation_expires_at` (`nullable\|date`), pola sama seperti `loa_status`. |
+| `resources/views/admin/loa-master/edit.blade.php` | Input tanggal baru "Akreditasi Berakhir Tanggal" di card "Identitas Jurnal (untuk LOA)", dengan link ke halaman Monitoring Akreditasi. |
+| `app/Http/Controllers/Admin/MonitoringAkreditasiController.php` | Baru. `index()`: ambil jurnal aktif yang `accreditation` terisi, hitung status (`expired`/`warning`/`unknown`/`safe`) berdasarkan `accreditation_expires_at` vs hari ini + ambang 12 bulan, urutkan prioritas (kedaluwarsa → perlu bersiap [terdekat dulu] → belum diisi → aman). |
+| `resources/views/admin/monitoring-akreditasi/index.blade.php` | Baru. 4 kartu ringkasan (Kedaluwarsa/Perlu Bersiap/Belum Diisi/Aman) + tabel per jurnal dengan sisa waktu & link langsung ke form isi tanggal. |
+| `routes/web.php` | Route baru `GET /admin/monitoring-akreditasi` → `admin.monitoring-akreditasi.index`. |
+| `resources/views/admin/partials/sidebar.blade.php` | Link baru "Monitoring Akreditasi" di accordion "Data Jurnal" (setelah "Akreditasi"), plus tambahan kondisi active-state. |
+| `tests/Feature/MonitoringAkreditasiTest.php` | Baru, 7 test: status warning (≤12 bulan), status expired (tanggal lampau), status safe (>12 bulan), status unknown (tanggal kosong), jurnal tanpa akreditasi sama sekali dikecualikan dari daftar, urutan sort kedaluwarsa-sebelum-aman (walau alfabetis terbalik), form Master LOA berhasil menyimpan tanggal baru. |
+
+### Verifikasi
+- `tests/Feature/MonitoringAkreditasiTest.php` — 7/7 PASS, 20 assertions.
+- Smoke test manual `app()->handle()` dengan data lokal riil: set tanggal kedaluwarsa 4 bulan lagi untuk 1 jurnal riil (JURRIPEN), halaman `/admin/monitoring-akreditasi` HTTP 200, jurnal tersebut tampil dengan badge "Perlu Bersiap".
+- Full suite `tests/Feature` — 126 test, 339 assertions, **0 failure**.
+
+### Catatan Deploy
+Migration baru (`2026_08_01_000003_*`) perlu `php artisan migrate --force` di production. Semua jurnal existing otomatis `accreditation_expires_at = NULL` (kategori "Belum Diisi") — tidak ada yang salah tampil, admin tinggal isi tanggalnya satu-satu lewat Master LOA kapan pun siap.

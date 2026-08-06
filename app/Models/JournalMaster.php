@@ -28,6 +28,7 @@ class JournalMaster extends Model
         'footer_image_path',
         'p_issn',
         'loa_status',
+        'accreditation_expires_at',
         'accreditation_logo_path',
         'link_sk_akreditasi',
         'editor_name',
@@ -51,6 +52,7 @@ class JournalMaster extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'loa_show_signature' => 'boolean',
+        'accreditation_expires_at' => 'date',
     ];
 
     protected static function boot()

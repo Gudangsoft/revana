@@ -192,6 +192,16 @@
                             @error('loa_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <div class="form-text">Ditampilkan di baris Status pada dokumen LOA. Kosongkan jika tidak ada.</div>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Akreditasi Berakhir Tanggal</label>
+                            <input type="date" class="form-control @error('accreditation_expires_at') is-invalid @enderror"
+                                   name="accreditation_expires_at"
+                                   value="{{ old('accreditation_expires_at', $journal->accreditation_expires_at?->toDateString()) }}">
+                            @error('accreditation_expires_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">
+                                Dipakai untuk <a href="{{ route('admin.monitoring-akreditasi.index') }}">Monitoring Akreditasi</a> — peringatan otomatis kalau mendekati kedaluwarsa.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

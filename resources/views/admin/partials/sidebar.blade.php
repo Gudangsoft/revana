@@ -29,6 +29,7 @@
     $isSharedJournalRoute = str_starts_with($currentRoute, 'admin.journal-masters')
         || str_starts_with($currentRoute, 'admin.journal-slots')
         || str_starts_with($currentRoute, 'admin.accreditations')
+        || str_starts_with($currentRoute, 'admin.monitoring-akreditasi')
         || str_starts_with($currentRoute, 'admin.kategoris')
         || str_starts_with($currentRoute, 'admin.jenis-jurnals')
         || str_starts_with($currentRoute, 'admin.field-of-studies')
@@ -89,6 +90,10 @@
                 <a href="{{ route('admin.accreditations.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.accreditations') ? 'active' : '' }}">
                     <i class="bi bi-patch-check-fill" style="color:#818cf8;"></i> Akreditasi
+                </a>
+                <a href="{{ route('admin.monitoring-akreditasi.index') }}"
+                   class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.monitoring-akreditasi') ? 'active' : '' }}">
+                    <i class="bi bi-hourglass-split" style="color:#818cf8;"></i> Monitoring Akreditasi
                 </a>
                 <a href="{{ route('admin.kategoris.index') }}"
                    class="nav-link ps-5 {{ str_starts_with($currentRoute, 'admin.kategoris') ? 'active' : '' }}">

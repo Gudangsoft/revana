@@ -265,7 +265,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/accreditations/import', [\App\Http\Controllers\Admin\AccreditationController::class, 'import'])->name('accreditations.import');
         Route::get('/accreditations/template', [\App\Http\Controllers\Admin\AccreditationController::class, 'downloadTemplate'])->name('accreditations.template');
         Route::resource('accreditations', \App\Http\Controllers\Admin\AccreditationController::class);
-        
+        Route::get('/monitoring-akreditasi', [\App\Http\Controllers\Admin\MonitoringAkreditasiController::class, 'index'])->name('monitoring-akreditasi.index');
+
         // Kategori
         Route::get('/kategoris/export', [\App\Http\Controllers\Admin\KategoriController::class, 'export'])->name('kategoris.export');
         Route::post('/kategoris/import', [\App\Http\Controllers\Admin\KategoriController::class, 'import'])->name('kategoris.import');
