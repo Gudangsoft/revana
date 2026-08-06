@@ -28,7 +28,9 @@ class JournalMaster extends Model
         'footer_image_path',
         'p_issn',
         'loa_status',
-        'accreditation_expires_at',
+        'accreditation_end_volume',
+        'accreditation_end_nomor',
+        'accreditation_end_tahun',
         'accreditation_logo_path',
         'link_sk_akreditasi',
         'editor_name',
@@ -52,8 +54,17 @@ class JournalMaster extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'loa_show_signature' => 'boolean',
-        'accreditation_expires_at' => 'date',
     ];
+
+    /** Teks periode akreditasi gabungan, mis. "Volume 6 Nomor 1 Tahun 2027" — atau null kalau belum diisi lengkap. */
+    public function getAccreditationPeriodeAttribute(): ?string
+    {
+        if (!$this->accreditation_end_volume || !$this->accreditation_end_nomor || !$this->accreditation_end_tahun) {
+            return null;
+        }
+
+        return "Volume {$this->accreditation_end_volume} Nomor {$this->accreditation_end_nomor} Tahun {$this->accreditation_end_tahun}";
+    }
 
     protected static function boot()
     {

@@ -72,7 +72,9 @@ class LoaMasterController extends Controller
             'e_issn'            => 'required|string|max:20',
             'p_issn'            => 'nullable|string|max:20',
             'loa_status'        => 'nullable|string',
-            'accreditation_expires_at' => 'nullable|date',
+            'accreditation_end_volume' => 'nullable|integer|min:1',
+            'accreditation_end_nomor'  => 'nullable|integer|min:1',
+            'accreditation_end_tahun'  => 'nullable|integer|digits:4',
             'editor_name'       => 'nullable|string|max:255',
             'loa_kota'          => 'nullable|string|max:100',
             'loa_auto_trigger'  => 'nullable|string|max:30',
@@ -83,7 +85,8 @@ class LoaMasterController extends Controller
         ]);
 
         $data = $request->only([
-            'kode_singkat', 'e_issn', 'p_issn', 'loa_status', 'accreditation_expires_at', 'editor_name',
+            'kode_singkat', 'e_issn', 'p_issn', 'loa_status', 'editor_name',
+            'accreditation_end_volume', 'accreditation_end_nomor', 'accreditation_end_tahun',
             'loa_kota', 'loa_auto_trigger', 'loa_language', 'link_sk_akreditasi',
         ]);
 

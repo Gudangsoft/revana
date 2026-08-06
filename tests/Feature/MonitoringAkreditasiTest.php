@@ -9,10 +9,16 @@ use Tests\TestCase;
 
 /**
  * Fitur 1 Agustus 2026: monitoring masa berlaku akreditasi jurnal, supaya tim
- * bisa mulai siapkan dokumen reakreditasi sebelum kedaluwarsa. Sebelumnya tidak
- * ada tanggal berakhir akreditasi yang tersimpan terstruktur (cuma teks bebas
- * di loa_status) sehingga tidak bisa dipakai untuk peringatan otomatis.
- * Ambang "Perlu Bersiap" = 12 bulan sebelum kedaluwarsa (pilihan user).
+ * bisa mulai siapkan dokumen reakreditasi sebelum kedaluwarsa.
+ *
+ * Revisi (masih tanggal sama): rancangan awal pakai tanggal kalender penuh
+ * (accreditation_expires_at), tapi user mengoreksi — akreditasi jurnal (SINTA)
+ * TIDAK memakai tanggal kalender, melainkan periode "Volume X Nomor Y Tahun Z"
+ * (dikonfirmasi konsisten di 125 data loa_status yang sudah ada). Diganti ke 3
+ * kolom terpisah accreditation_end_volume/nomor/tahun (migration
+ * 2026_08_01_000004_*). Ambang "Perlu Bersiap" jadi berbasis Tahun: tahun ini
+ * atau tahun depan (padanan ~12 bulan dengan presisi tahunan, karena data
+ * sumbernya memang cuma sampai tingkat Tahun).
  */
 class MonitoringAkreditasiTest extends TestCase
 {
@@ -49,10 +55,32 @@ class MonitoringAkreditasiTest extends TestCase
         ], $overrides));
     }
 
-    public function test_journal_expiring_within_12_months_is_marked_warning(): void
+    public function test_periode_accessor_combines_volume_nomor_tahun(): void
+    {
+        $journal = $this->makeJournal([
+            'accreditation_end_volume' => 6,
+            'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => 2027,
+        ]);
+
+        $this->assertEquals('Volume 6 Nomor 1 Tahun 2027', $journal->accreditation_periode);
+    }
+
+    public function test_periode_accessor_is_null_when_incomplete(): void
+    {
+        $journal = $this->makeJournal(['accreditation_end_volume' => 6, 'accreditation_end_nomor' => null, 'accreditation_end_tahun' => 2027]);
+
+        $this->assertNull($journal->accreditation_periode);
+    }
+
+    public function test_journal_ending_this_year_is_marked_warning(): void
     {
         $this->actingAsAdmin();
-        $journal = $this->makeJournal(['nama_jurnal' => 'Jurnal Segera Habis', 'accreditation_expires_at' => now()->addMonths(6)]);
+        $this->makeJournal([
+            'nama_jurnal' => 'Jurnal Segera Habis',
+            'accreditation_end_volume' => 6, 'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => now()->year,
+        ]);
 
         $response = $this->get(route('admin.monitoring-akreditasi.index'));
 
@@ -61,10 +89,30 @@ class MonitoringAkreditasiTest extends TestCase
         $response->assertSee('Perlu Bersiap');
     }
 
-    public function test_journal_expired_in_the_past_is_marked_expired(): void
+    public function test_journal_ending_next_year_is_marked_warning(): void
     {
         $this->actingAsAdmin();
-        $journal = $this->makeJournal(['nama_jurnal' => 'Jurnal Sudah Lewat', 'accreditation_expires_at' => now()->subMonths(2)]);
+        $this->makeJournal([
+            'nama_jurnal' => 'Jurnal Habis Tahun Depan',
+            'accreditation_end_volume' => 6, 'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => now()->year + 1,
+        ]);
+
+        $response = $this->get(route('admin.monitoring-akreditasi.index'));
+
+        $response->assertOk();
+        $response->assertSee('Jurnal Habis Tahun Depan');
+        $response->assertSee('Perlu Bersiap');
+    }
+
+    public function test_journal_ended_last_year_is_marked_expired(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeJournal([
+            'nama_jurnal' => 'Jurnal Sudah Lewat',
+            'accreditation_end_volume' => 5, 'accreditation_end_nomor' => 2,
+            'accreditation_end_tahun' => now()->year - 1,
+        ]);
 
         $response = $this->get(route('admin.monitoring-akreditasi.index'));
 
@@ -73,10 +121,14 @@ class MonitoringAkreditasiTest extends TestCase
         $response->assertSee('Kedaluwarsa');
     }
 
-    public function test_journal_expiring_far_in_future_is_marked_safe(): void
+    public function test_journal_ending_far_in_future_is_marked_safe(): void
     {
         $this->actingAsAdmin();
-        $journal = $this->makeJournal(['nama_jurnal' => 'Jurnal Masih Aman', 'accreditation_expires_at' => now()->addMonths(24)]);
+        $this->makeJournal([
+            'nama_jurnal' => 'Jurnal Masih Aman',
+            'accreditation_end_volume' => 8, 'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => now()->year + 5,
+        ]);
 
         $response = $this->get(route('admin.monitoring-akreditasi.index'));
 
@@ -85,10 +137,10 @@ class MonitoringAkreditasiTest extends TestCase
         $response->assertSee('Aman');
     }
 
-    public function test_journal_without_expiry_date_is_marked_unknown(): void
+    public function test_journal_without_end_tahun_is_marked_unknown(): void
     {
         $this->actingAsAdmin();
-        $journal = $this->makeJournal(['nama_jurnal' => 'Jurnal Belum Diisi', 'accreditation_expires_at' => null]);
+        $this->makeJournal(['nama_jurnal' => 'Jurnal Belum Diisi', 'accreditation_end_tahun' => null]);
 
         $response = $this->get(route('admin.monitoring-akreditasi.index'));
 
@@ -111,8 +163,16 @@ class MonitoringAkreditasiTest extends TestCase
     public function test_expired_journals_are_sorted_before_safe_ones(): void
     {
         $this->actingAsAdmin();
-        $this->makeJournal(['nama_jurnal' => 'Zebra Aman', 'accreditation_expires_at' => now()->addMonths(24)]);
-        $this->makeJournal(['nama_jurnal' => 'Alfa Kedaluwarsa', 'accreditation_expires_at' => now()->subMonths(1)]);
+        $this->makeJournal([
+            'nama_jurnal' => 'Zebra Aman',
+            'accreditation_end_volume' => 8, 'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => now()->year + 5,
+        ]);
+        $this->makeJournal([
+            'nama_jurnal' => 'Alfa Kedaluwarsa',
+            'accreditation_end_volume' => 5, 'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => now()->year - 1,
+        ]);
 
         $response = $this->get(route('admin.monitoring-akreditasi.index'));
 
@@ -125,16 +185,36 @@ class MonitoringAkreditasiTest extends TestCase
         $this->assertLessThan($posSafe, $posExpired, 'Jurnal kedaluwarsa harus tampil sebelum jurnal aman, walau namanya alfabetis terbalik');
     }
 
-    public function test_loa_master_update_saves_accreditation_expiry_date(): void
+    public function test_monitoring_page_shows_periode_text(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeJournal([
+            'nama_jurnal' => 'Jurnal Periode Lengkap',
+            'accreditation_end_volume' => 6, 'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => now()->year + 5,
+        ]);
+
+        $response = $this->get(route('admin.monitoring-akreditasi.index'));
+
+        $response->assertOk();
+        $response->assertSee('Volume 6 Nomor 1 Tahun ' . (now()->year + 5));
+    }
+
+    public function test_loa_master_update_saves_accreditation_periode(): void
     {
         $this->actingAsAdmin();
         $journal = $this->makeJournal();
 
         $this->put(route('admin.loa-master.update', $journal), [
             'e_issn' => '1234-5678',
-            'accreditation_expires_at' => '2028-03-15',
+            'accreditation_end_volume' => 6,
+            'accreditation_end_nomor' => 1,
+            'accreditation_end_tahun' => 2028,
         ])->assertRedirect();
 
-        $this->assertEquals('2028-03-15', $journal->fresh()->accreditation_expires_at->toDateString());
+        $fresh = $journal->fresh();
+        $this->assertEquals(6, $fresh->accreditation_end_volume);
+        $this->assertEquals(1, $fresh->accreditation_end_nomor);
+        $this->assertEquals(2028, $fresh->accreditation_end_tahun);
     }
 }

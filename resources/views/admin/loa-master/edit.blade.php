@@ -192,14 +192,40 @@
                             @error('loa_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <div class="form-text">Ditampilkan di baris Status pada dokumen LOA. Kosongkan jika tidak ada.</div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Akreditasi Berakhir Tanggal</label>
-                            <input type="date" class="form-control @error('accreditation_expires_at') is-invalid @enderror"
-                                   name="accreditation_expires_at"
-                                   value="{{ old('accreditation_expires_at', $journal->accreditation_expires_at?->toDateString()) }}">
-                            @error('accreditation_expires_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Periode Akreditasi Berakhir</label>
+                            <div class="row g-2">
+                                <div class="col-4 col-md-2">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Vol.</span>
+                                        <input type="number" min="1" class="form-control @error('accreditation_end_volume') is-invalid @enderror"
+                                               name="accreditation_end_volume"
+                                               value="{{ old('accreditation_end_volume', $journal->accreditation_end_volume) }}">
+                                    </div>
+                                    @error('accreditation_end_volume')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">No.</span>
+                                        <input type="number" min="1" class="form-control @error('accreditation_end_nomor') is-invalid @enderror"
+                                               name="accreditation_end_nomor"
+                                               value="{{ old('accreditation_end_nomor', $journal->accreditation_end_nomor) }}">
+                                    </div>
+                                    @error('accreditation_end_nomor')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Thn</span>
+                                        <input type="number" min="2000" max="2100" class="form-control @error('accreditation_end_tahun') is-invalid @enderror"
+                                               name="accreditation_end_tahun"
+                                               value="{{ old('accreditation_end_tahun', $journal->accreditation_end_tahun) }}">
+                                    </div>
+                                    @error('accreditation_end_tahun')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
                             <div class="form-text">
-                                Dipakai untuk <a href="{{ route('admin.monitoring-akreditasi.index') }}">Monitoring Akreditasi</a> — peringatan otomatis kalau mendekati kedaluwarsa.
+                                Sesuai teks SK akreditasi (mis. "...sampai Volume 6 Nomor 1 Tahun 2027"). Dipakai untuk
+                                <a href="{{ route('admin.monitoring-akreditasi.index') }}">Monitoring Akreditasi</a> — peringatan otomatis kalau mendekati kedaluwarsa (berbasis Tahun).
                             </div>
                         </div>
                     </div>

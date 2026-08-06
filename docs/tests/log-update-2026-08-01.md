@@ -78,3 +78,29 @@ Keputusan yang dikonfirmasi user: (1) tanggal berakhir akreditasi disimpan sebag
 
 ### Catatan Deploy
 Migration baru (`2026_08_01_000003_*`) perlu `php artisan migrate --force` di production. Semua jurnal existing otomatis `accreditation_expires_at = NULL` (kategori "Belum Diisi") — tidak ada yang salah tampil, admin tinggal isi tanggalnya satu-satu lewat Master LOA kapan pun siap.
+
+---
+
+## 4. Revisi #3: Ganti Tanggal Kalender ke Periode Volume/Nomor/Tahun
+
+**Tujuan:** User mengoreksi section #3 di atas: "untuk akreditasi jurnal biasanya tidak menggunakan tanggal namun menggunakan periode, coba kamu cek dulu". Dicek langsung: ditarik SEMUA 125 data `loa_status` yang sudah terisi di database (bukan cuma sampel kecil) — ditemukan **100% konsisten** memakai format periode "Volume X Nomor Y Tahun Z" (26 kombinasi berbeda, mis. "sampai Volume 6 Nomor 1 Tahun 2027", "sampai Volume 7 Nomor 2 Tahun 2028", dst.), terikat ke penomoran volume/terbitan jurnal itu sendiri — BUKAN tanggal kalender pasti seperti yang saya asumsikan di section #3. Field `accreditation_expires_at` (tanggal) diganti total ke 3 kolom terpisah sesuai konfirmasi user.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_08_01_000004_replace_accreditation_expiry_date_with_periode.php` | Baru (BUKAN edit migration lama — migration `..._000003` sempat ter-commit duluan lewat proses lain sebelum revisi ini, jadi tidak diedit langsung, mengikuti prinsip "jangan ubah migration yang sudah ter-share"). `up()`: drop `accreditation_expires_at`, tambah `accreditation_end_volume`/`accreditation_end_nomor` (unsignedInteger) dan `accreditation_end_tahun` (unsignedSmallInteger), semua nullable. `down()`: kebalikannya. Ditest penuh: migrate → verifikasi → rollback → verifikasi kembali ke state sebelumnya → migrate lagi. |
+| `app/Models/JournalMaster.php` | `$fillable`: ganti `accreditation_expires_at` → 3 field baru. Tambah accessor `getAccreditationPeriodeAttribute()` yang menggabungkan jadi teks "Volume X Nomor Y Tahun Z" (null kalau salah satu kosong). |
+| `app/Http/Controllers/Admin/LoaMasterController.php` | `update()`: validasi & simpan 3 field baru (`integer\|min:1` utk volume/nomor, `integer\|digits:4` utk tahun) menggantikan validasi tanggal. |
+| `resources/views/admin/loa-master/edit.blade.php` | Input tanggal tunggal diganti 3 input angka bersebelahan (Vol./No./Thn) dengan label sesuai istilah SK asli. |
+| `app/Http/Controllers/Admin/MonitoringAkreditasiController.php` | Logika status ditulis ulang berbasis **Tahun** (bukan diff tanggal presisi hari): "Perlu Bersiap" = tahun sekarang sama dengan atau satu tahun sebelum `accreditation_end_tahun` (padanan ~12 bulan dengan presisi tahunan, karena sumber datanya memang cuma sampai tingkat Tahun — sengaja tidak berpura-pura presisi bulan/hari yang tidak ada). "Kedaluwarsa" = tahun akhir sudah lewat sepenuhnya. |
+| `resources/views/admin/monitoring-akreditasi/index.blade.php` | Kolom "Berakhir Tanggal" → "Periode Berakhir" (tampilkan teks periode via accessor), kolom "Sisa Waktu" → satuan tahun (bukan bulan), badge kartu ringkasan disesuaikan teksnya. |
+| `tests/Feature/MonitoringAkreditasiTest.php` | Ditulis ulang total (11 test): accessor periode gabung teks dengan benar, accessor null kalau data tidak lengkap, status warning utk tahun-ini & tahun-depan (2 skenario terpisah), status expired utk tahun lampau, status safe utk tahun jauh, status unknown tanpa data, jurnal tanpa akreditasi dikecualikan, urutan sort kedaluwarsa-sebelum-aman, halaman menampilkan teks periode yang benar, form Master LOA menyimpan ketiga field. |
+
+### Verifikasi
+- `tests/Feature/MonitoringAkreditasiTest.php` — 11/11 PASS, 29 assertions.
+- Migration ditest reversibel penuh: `migrate` → verifikasi kolom baru ada → `migrate:rollback` → verifikasi kolom lama kembali → `migrate` lagi untuk state final.
+- Smoke test manual `app()->handle()` dengan data lokal riil: set periode "Volume 6 Nomor 1 Tahun {tahun ini}" untuk 1 jurnal riil (JURRIPEN) → halaman monitoring menampilkan teks periode persis & badge "Perlu Bersiap"; halaman edit Master LOA menampilkan ketiga input baru.
+- Full suite `tests/Feature` — 130 test, 348 assertions, **0 failure**.
+
+### Catatan Deploy
+Migration `2026_08_01_000004_*` perlu `php artisan migrate --force` di production **setelah** `..._000003` (urutan timestamp sudah benar, dijalankan otomatis berurutan oleh `migrate`). Efek bersihnya di production: kolom `accreditation_expires_at` tidak akan pernah sempat terisi data nyata (dibuat & dihapus lagi di hari yang sama sebelum deploy), langsung berakhir di 3 kolom periode yang baru, semua NULL by default ("Belum Diisi") — aman, tidak ada data yang hilang.

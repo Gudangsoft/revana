@@ -11,9 +11,11 @@
 <div class="alert alert-info d-flex align-items-start gap-2 mb-4">
     <i class="bi bi-info-circle-fill mt-1"></i>
     <div>
-        Menampilkan jurnal yang sudah terakreditasi beserta sisa masa berlakunya, supaya tim bisa mulai
-        menyiapkan dokumen reakreditasi jauh-jauh hari. Jurnal ditandai <strong>"Perlu Bersiap"</strong> kalau
-        akreditasinya berakhir dalam 12 bulan ke depan. Isi/ubah tanggal berakhir lewat menu Master LOA per jurnal.
+        Menampilkan jurnal yang sudah terakreditasi beserta periode berakhirnya (sesuai SK: Volume/Nomor/Tahun
+        terbitan terakhir yang dicakup), supaya tim bisa mulai menyiapkan dokumen reakreditasi jauh-jauh hari.
+        Jurnal ditandai <strong>"Perlu Bersiap"</strong> kalau periode akreditasinya berakhir tahun ini atau
+        tahun depan (data cuma tercatat sampai tingkat Tahun, mengikuti format SK akreditasi). Isi/ubah periode
+        lewat menu Master LOA per jurnal.
     </div>
 </div>
 
@@ -30,7 +32,7 @@
         <div class="card bg-warning text-dark h-100">
             <div class="card-body text-center py-3">
                 <div class="fs-2 fw-bold">{{ $stats['warning'] }}</div>
-                <div class="small">Perlu Bersiap (&le;12 bln)</div>
+                <div class="small">Perlu Bersiap (thn ini/depan)</div>
             </div>
         </div>
     </div>
@@ -38,7 +40,7 @@
         <div class="card bg-secondary text-white h-100">
             <div class="card-body text-center py-3">
                 <div class="fs-2 fw-bold">{{ $stats['unknown'] }}</div>
-                <div class="small">Belum Diisi Tanggalnya</div>
+                <div class="small">Belum Diisi Periodenya</div>
             </div>
         </div>
     </div>
@@ -71,7 +73,7 @@
                         <th style="width:40px" class="text-center">No</th>
                         <th>Nama Jurnal</th>
                         <th>Level Akreditasi</th>
-                        <th>Berakhir Tanggal</th>
+                        <th>Periode Berakhir</th>
                         <th>Sisa Waktu</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Aksi</th>
@@ -97,14 +99,16 @@
                         <td class="text-center text-muted">{{ $i + 1 }}</td>
                         <td class="fw-semibold">{{ $row['journal']->nama_jurnal }}</td>
                         <td>{{ $row['journal']->accreditation }}</td>
-                        <td>{{ $row['expiresAt']?->translatedFormat('d F Y') ?? '—' }}</td>
+                        <td>{{ $row['periode'] ?? '—' }}</td>
                         <td>
-                            @if($row['monthsLeft'] === null)
+                            @if($row['yearsLeft'] === null)
                                 <span class="text-muted">—</span>
-                            @elseif($row['monthsLeft'] < 0)
-                                <span class="text-danger">{{ abs($row['monthsLeft']) }} bulan lalu</span>
+                            @elseif($row['yearsLeft'] < 0)
+                                <span class="text-danger">{{ abs($row['yearsLeft']) }} tahun lalu</span>
+                            @elseif($row['yearsLeft'] === 0)
+                                <span class="text-warning">Tahun ini</span>
                             @else
-                                {{ $row['monthsLeft'] }} bulan lagi
+                                {{ $row['yearsLeft'] }} tahun lagi
                             @endif
                         </td>
                         <td class="text-center">
@@ -112,7 +116,7 @@
                         </td>
                         <td class="text-center">
                             <a href="{{ route('admin.loa-master.edit', $row['journal']) }}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-pencil"></i> Isi/Ubah Tanggal
+                                <i class="bi bi-pencil"></i> Isi/Ubah Periode
                             </a>
                         </td>
                     </tr>
