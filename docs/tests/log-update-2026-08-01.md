@@ -27,3 +27,25 @@ Pola diambil dari fitur `loa_language` yang sudah ada (setting tetap per-jurnal 
 
 ### Catatan Deploy
 Migration baru (`2026_08_01_000001_*`) perlu `php artisan migrate --force` di production. Tidak ada perubahan pada data yang sudah ada — semua jurnal otomatis dapat `loa_show_signature = true` (default), jadi tampilan LOA tidak berubah untuk siapa pun sampai admin sengaja mematikan toggle-nya per jurnal.
+
+---
+
+## 2. Template Email ke Penulis (Author) Tidak Bisa Dibuat Lewat UI
+
+**Tujuan:** User (screenshot halaman Template Email Monitoring) melaporkan "template email yang dikirimkan ke author belum ada". Investigasi menemukan mekanismenya SUDAH ADA di kode sejak lama — `SubmissionController::sendPenulisEmail()` mencari `EmailTemplate::findActive('notify_penulis')` dan mengirim email begitu submission baru dibuat (dipanggil dari `store()` dan alur Fasttrack/BKD) — tapi trigger key `notify_penulis` **tidak pernah bisa dipilih lewat UI**: baik grid tombol "+" di halaman index maupun dropdown di halaman "Buat Template" cuma menyaring trigger berawalan `assign_`/`validate_`, jadi `notify_penulis` (dan `screening_*`, yang ternyata tidak pernah dipakai kode sama sekali — dibiarkan tidak ditampilkan) selalu tersembunyi tanpa cara untuk membuatnya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/email-templates/index.blade.php` | Tambah kelompok baru "Ke Penulis (Author)" (filter prefix `notify_`) di atas kelompok "Saat PIC Ditugaskan", pola badge/tombol "+" identik dengan dua kelompok yang sudah ada. |
+| `resources/views/admin/email-templates/form.blade.php` | Tambah `<optgroup label="Ke Penulis (Author)">` berisi trigger `notify_*` yang tersedia, di halaman "Buat Template". |
+| `database/migrations/2026_08_01_000002_seed_notify_penulis_email_template.php` | Baru. `firstOrCreate` template default untuk `notify_penulis` — subjek & isi HTML memakai semua variabel yang sudah didukung kode (`nama_penulis`, `nama_artikel`, `kode_submit`, `id_artikel`, `nama_jurnal`, `url_jurnal`, `username_author`, `password_author`, `app_name`, `tanggal`). **`is_active = false`** SENGAJA — supaya admin meninjau dulu redaksi kalimatnya sebelum sistem mulai otomatis mengirim email ke penulis asli di production. `down()` menghapus baris ini lagi. |
+| `tests/Feature/EmailTemplateNotifyPenulisTest.php` | Baru, 6 test: migration seed non-aktif, `render()` mengganti semua variabel dengan benar, index menampilkan grup "Ke Penulis" beserta badge saat template ada, index menampilkan link "+" saat template dihapus, dropdown "Buat Template" menawarkan `notify_penulis` saat tersedia, template baru benar-benar bisa dibuat lewat `store()`. |
+
+### Verifikasi
+- `tests/Feature/EmailTemplateNotifyPenulisTest.php` — 6/6 PASS, 16 assertions.
+- Smoke test manual `app()->handle()` dengan data lokal riil: `/admin/email-templates` HTTP 200, section "Ke Penulis (Author)" dan badge "Notifikasi ke Penulis" terkonfirmasi muncul; template hasil seed terkonfirmasi `is_active=false`.
+- Full suite `tests/Feature` — 119 test, 319 assertions, **0 failure**.
+
+### Catatan Deploy
+Migration baru (`2026_08_01_000002_*`) perlu `php artisan migrate --force` di production — akan membuat 1 baris template baru (non-aktif, tidak mengubah perilaku pengiriman email apa pun sampai admin sengaja meninjau isi & menekan tombol aktifkan di `/admin/email-templates`). **Sebelum diaktifkan, admin disarankan meninjau/menyunting dulu redaksi kalimat & memastikan `username_author`/`password_author` memang relevan ditampilkan ke penulis pada momen submission baru dibuat** — kalau tidak relevan, edit templatenya lewat UI (tombol pensil) sebelum diaktifkan.

@@ -73,6 +73,42 @@ class RunBulkSyncTest extends TestCase
             ->where('submission_id', $submission->id)->where('step', 'editor1')->value('points_earned'));
     }
 
+    /**
+     * Regresi 31 Juli 2026: ketika editor1_valid=1 tapi editor1_validated_at NULL
+     * (data lama/celah lain), runBulkSync() dulu pakai COALESCE(validated_at, NOW())
+     * — jatuh ke NOW() = momen sync ini kebetulan dijalankan, BUKAN tanggal asli.
+     * Ditemukan lewat pola nyata: gerombolan puluhan-ratusan submission dgn
+     * production_validated_at identik sampai ke detik di production, tersebar di
+     * banyak tanggal (satu gerombolan = satu kali runBulkSync() jalan). Diperbaiki:
+     * fallback ke submissions.created_at (tanggal submission dibuat) — bukan
+     * sempurna, tapi jauh lebih masuk akal & idempotent (tidak berubah tiap re-sync).
+     */
+    public function test_pic_bulk_sync_falls_back_to_submission_created_at_when_validated_at_missing(): void
+    {
+        $pic = $this->makePic();
+        $submission = $this->makeSubmission([
+            'petugas_editor1_id' => $pic->id,
+            'editor1_valid' => true,
+            'editor1_validated_at' => null,
+        ]);
+        DB::table('submissions')->where('id', $submission->id)
+            ->update(['created_at' => '2026-03-12 10:41:38']);
+
+        PicPointReportController::runBulkSync();
+
+        $this->assertEquals(
+            '2026-03-12 10:41:38',
+            PicPointHistory::where('pic_id', $pic->id)
+                ->where('submission_id', $submission->id)->where('step', 'editor1')->value('created_at'),
+            'Fallback validated_at kosong harus pakai submissions.created_at, bukan NOW()'
+        );
+        $this->assertEquals(
+            '2026-03-12 10:41:38',
+            DB::table('submissions')->where('id', $submission->id)->value('editor1_validated_at'),
+            'Backfill validated_at yang NULL juga harus konsisten dgn fallback yang sama'
+        );
+    }
+
     public function test_pic_bulk_sync_does_not_duplicate_existing_row_on_repeated_calls(): void
     {
         $pic = $this->makePic();

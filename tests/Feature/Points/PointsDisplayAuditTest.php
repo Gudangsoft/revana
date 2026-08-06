@@ -141,6 +141,37 @@ class PointsDisplayAuditTest extends TestCase
         $response->assertSee('6.25');
     }
 
+    /**
+     * Regresi 31 Juli 2026: `LaporanKinerjaController` memformat total_poin dengan
+     * number_format() DI CONTROLLER (jadi string, mis. "1,371.30"), lalu view
+     * memanggil number_format() LAGI di atas string itu. Untuk PIC dengan total >= 1000,
+     * hasil format pertama mengandung koma ribuan ("1,371.30"), dan number_format()
+     * PHP 8.1+ menolak string non-numerik seperti itu sebagai argumen -> 500 error.
+     * Terungkap setelah restore riwayat poin pra-reset (log-update-2026-07-31.md #4)
+     * membuat banyak PIC punya total > 1000. Diperbaiki dengan menyimpan total_poin
+     * sebagai float mentah di controller, format cuma sekali di view/PDF.
+     */
+    public function test_laporan_kinerja_does_not_crash_when_total_point_reaches_four_digits(): void
+    {
+        $this->actingAsAdmin();
+        $pic = $this->makePic(['total_points' => 0, 'is_active' => true]);
+        $submission = $this->makeSubmission(['petugas_submit_id' => $pic->id]);
+        PicPointHistory::create([
+            'pic_id' => $pic->id,
+            'submission_id' => $submission->id,
+            'step' => 'submit',
+            'points_earned' => 1371.30,
+            'description' => 'Test angka besar',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->get(route('admin.laporan-kinerja.index'));
+
+        $response->assertOk();
+        $response->assertSee('1,371.30');
+    }
+
     public function test_laporan_kinerja_pic_name_links_to_detail_page(): void
     {
         $this->actingAsAdmin();

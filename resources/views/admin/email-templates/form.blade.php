@@ -54,8 +54,16 @@
                                 @else
                                     <select name="trigger_key" class="form-select" required>
                                         <option value="">-- Pilih kapan email dikirim --</option>
+                                        @php $notifyKeys   = array_filter($allKeys, fn($k) => str_starts_with($k,'notify_'),   ARRAY_FILTER_USE_KEY); @endphp
                                         @php $assignKeys   = array_filter($allKeys, fn($k) => str_starts_with($k,'assign_'),   ARRAY_FILTER_USE_KEY); @endphp
                                         @php $validateKeys = array_filter($allKeys, fn($k) => str_starts_with($k,'validate_'), ARRAY_FILTER_USE_KEY); @endphp
+                                        <optgroup label="Ke Penulis (Author)">
+                                            @foreach($notifyKeys as $key => $label)
+                                                @if(isset($availableKeys[$key]))
+                                                    <option value="{{ $key }}" {{ (old('trigger_key', $selectedKey) === $key) ? 'selected' : '' }}>{{ $label }}</option>
+                                                @endif
+                                            @endforeach
+                                        </optgroup>
                                         <optgroup label="Saat PIC Ditugaskan">
                                             @foreach($assignKeys as $key => $label)
                                                 @if(isset($availableKeys[$key]))

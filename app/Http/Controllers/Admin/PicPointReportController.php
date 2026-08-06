@@ -261,16 +261,26 @@ class PicPointReportController extends Controller
             $points = PicPointHistory::getPointsForStep($ws['step']);
 
             if ($points > 0) {
+                // Fallback tanggal kalau validated_at kosong: pakai submissions.created_at
+                // (tanggal submission dibuat), BUKAN NOW(). NOW() membuat semua submission
+                // yang kena kondisi ini di satu eksekusi runBulkSync() dapat tanggal
+                // "selesai" identik — persis momen sync ini kebetulan dijalankan, bukan
+                // kapan tugasnya benar-benar selesai. Ditemukan 31 Juli 2026: gerombolan
+                // 22-115 submission dgn production_validated_at identik sampai ke detik,
+                // tersebar di banyak tanggal Feb-Jul 2026 (satu gerombolan = satu kali
+                // runBulkSync() jalan). submissions.created_at bukan tanggal pasti juga,
+                // tapi jauh lebih masuk akal sebagai perkiraan, dan idempotent (tidak
+                // berubah-ubah tiap sync dijalankan ulang).
                 $backfilled += \DB::affectingStatement("
                     INSERT IGNORE INTO pic_point_histories (pic_id, submission_id, step, points_earned, description, created_at, updated_at)
                     SELECT s.{$ws['field']}, s.id, '{$ws['step']}', ?,
                            CONCAT('Menyelesaikan tugas {$ws['step']} untuk: ', COALESCE(s.kode_submit,'')),
-                           COALESCE(s.{$ws['validated_at']}, NOW()), COALESCE(s.{$ws['validated_at']}, NOW())
+                           COALESCE(s.{$ws['validated_at']}, s.created_at, NOW()), COALESCE(s.{$ws['validated_at']}, s.created_at, NOW())
                     FROM submissions s
                     INNER JOIN pics p ON p.id = s.{$ws['field']}
                     WHERE s.{$ws['field']} IS NOT NULL
                       AND s.{$ws['valid']} = 1
-                      AND (p.points_reset_at IS NULL OR COALESCE(s.{$ws['validated_at']}, NOW()) >= p.points_reset_at)
+                      AND (p.points_reset_at IS NULL OR COALESCE(s.{$ws['validated_at']}, s.created_at, NOW()) >= p.points_reset_at)
                       AND NOT EXISTS (
                           SELECT 1 FROM pic_point_histories h
                           WHERE h.pic_id = s.{$ws['field']} AND h.submission_id = s.id AND h.step = '{$ws['step']}'

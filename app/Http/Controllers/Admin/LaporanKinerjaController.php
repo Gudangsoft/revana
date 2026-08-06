@@ -121,8 +121,7 @@ class LaporanKinerjaController extends Controller
                 $totalTugas      += $count;
             }
 
-            // $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
-            $totalPoin = number_format((float) ($picPointSums->get($pic->id)->total ?? 0), 2, '.', ',');
+            $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
 
             return [
                 'pic'         => $pic,
@@ -147,7 +146,7 @@ class LaporanKinerjaController extends Controller
             return [
                 'marketing'    => $mkt,
                 'total_submit' => $row ? (int) $row->task_count : 0,
-                'total_poin'   => $row ? number_format((float) $row->total_points, 2, '.', ',') : 0,
+                'total_poin'   => $row ? (float) $row->total_points : 0,
             ];
         })->filter(fn($row) => $row['total_submit'] > 0)
           ->sortByDesc('total_submit')
@@ -155,9 +154,9 @@ class LaporanKinerjaController extends Controller
 
         // --- Summary stats ---
         $totalPicTugas  = $picRekap->sum('total_tugas');
-        $totalPicPoin   = number_format((float) $picRekap->sum('total_poin'), 2, '.', ',');
+        $totalPicPoin   = (float) $picRekap->sum('total_poin');
         $totalMktSubmit = $mktRekap->sum('total_submit');
-        $totalMktPoin   = number_format((float) $mktRekap->sum('total_poin'), 2, '.', ',');
+        $totalMktPoin   = (float) $mktRekap->sum('total_poin');
 
         $steps     = self::STEPS;
         $tahunList = range(now()->year, max(now()->year - 4, 2024));
@@ -245,7 +244,7 @@ class LaporanKinerjaController extends Controller
                 $stepCounts[$key] = $count;
                 $totalTugas      += $count;
             }
-            $totalPoin = number_format((float) ($picPointSums->get($pic->id)->total ?? 0), 2, '.', ',');
+            $totalPoin = (float) ($picPointSums->get($pic->id)->total ?? 0);
             return [
                 'pic'         => $pic,
                 'step_counts' => $stepCounts,
@@ -265,7 +264,7 @@ class LaporanKinerjaController extends Controller
             return [
                 'marketing'    => $mkt,
                 'total_submit' => $histories->count(),
-                'total_poin'   => number_format((float) $histories->sum('points_earned'), 2, '.', ','),
+                'total_poin'   => (float) $histories->sum('points_earned'),
             ];
         })->filter(fn($r) => $r['total_submit'] > 0)->sortByDesc('total_submit')->values();
 

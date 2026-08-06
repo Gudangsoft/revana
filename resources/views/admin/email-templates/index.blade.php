@@ -45,11 +45,29 @@
             <div class="p-3">
                 <div class="row g-2 mb-3">
                     @php
+                        $notifyKeys   = array_filter($allKeys, fn($k) => str_starts_with($k, 'notify_'),   ARRAY_FILTER_USE_KEY);
                         $assignKeys   = array_filter($allKeys, fn($k) => str_starts_with($k, 'assign_'),   ARRAY_FILTER_USE_KEY);
                         $validateKeys = array_filter($allKeys, fn($k) => str_starts_with($k, 'validate_'), ARRAY_FILTER_USE_KEY);
                         $templateMap  = $templates->keyBy('trigger_key');
                     @endphp
                     <div class="col-12">
+                        <h6 class="text-muted fw-bold mb-2"><i class="bi bi-send-check"></i> Ke Penulis (Author)</h6>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @foreach($notifyKeys as $key => $label)
+                                @if($templateMap->has($key))
+                                    @php $t = $templateMap[$key]; @endphp
+                                    <span class="badge {{ $t->is_active ? 'bg-warning text-dark' : 'bg-secondary' }} trigger-badge" style="cursor:pointer"
+                                          onclick="openTemplate('{{ $t->id }}')">
+                                        <i class="bi bi-envelope-check"></i> {{ $label }}
+                                    </span>
+                                @else
+                                    <a href="{{ route('admin.email-templates.create', ['trigger_key' => $key]) }}"
+                                       class="badge bg-light text-secondary border trigger-badge text-decoration-none">
+                                        <i class="bi bi-plus"></i> {{ $label }}
+                                    </a>
+                                @endif
+                            @endforeach
+                        </div>
                         <h6 class="text-muted fw-bold mb-2"><i class="bi bi-person-plus"></i> Saat PIC Ditugaskan</h6>
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             @foreach($assignKeys as $key => $label)
