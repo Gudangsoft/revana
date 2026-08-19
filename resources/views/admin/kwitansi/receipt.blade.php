@@ -148,7 +148,7 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #22
 }
 .jrn-header, .page-inner { position: relative; z-index: 1; }
 
-.qr-wrap img, .qr-wrap canvas { display: block; width: 80px !important; height: 80px !important; }
+.qr-wrap img, .qr-wrap canvas { display: block; width: 160px !important; height: 160px !important; }
 </style>
 </head>
 <body>
@@ -431,7 +431,7 @@ function copyKwtLink(e) {
             <p class="sig-role" style="margin-top:4px;">{{ $editorTitle }}</p>
             <p>{{ $jurnalNama }}</p>
             @if($pdfMode && $qrDataUri)
-            <img src="{{ $qrDataUri }}" width="80" height="80" alt="QR"
+            <img src="{{ $qrDataUri }}" width="160" height="160" alt="QR"
                  style="margin-top:8px; margin-left:auto; display:block;">
             @else
             <div class="qr-wrap" id="qr1" title="Scan QR untuk verifikasi" style="margin-top:8px; margin-left:auto; display:inline-block;"></div>
@@ -483,8 +483,8 @@ function copyKwtLink(e) {
         el.innerHTML = '';
         new QRCode(el, {
             text         : verifyUrl,
-            width        : 80,
-            height       : 80,
+            width        : 160,
+            height       : 160,
             colorDark    : '#000000',
             colorLight   : '#ffffff',
             correctLevel : QRCode.CorrectLevel.L

@@ -24,7 +24,7 @@ class InvoiceController extends Controller
         $data['sendWaRoute']        = 'admin.submissions.invoice.send-wa';
         $data['updateContactRoute'] = 'admin.submissions.invoice.update-contact';
         $data['publicPdfUrl']       = $this->publicPdfUrl($submission, $params);
-        $data['verifyUrl']         = $data['publicPdfUrl'];
+        $data['verifyUrl']         = $this->qrVerifyUrl($submission, $params);
 
         return view('admin.invoice.receipt', $data);
     }
@@ -43,7 +43,7 @@ class InvoiceController extends Controller
         $data['sendWaRoute']        = 'marketing.submissions.invoice.send-wa';
         $data['updateContactRoute'] = 'marketing.submissions.invoice.update-contact';
         $data['publicPdfUrl']       = $this->publicPdfUrl($submission, $params);
-        $data['verifyUrl']         = $data['publicPdfUrl'];
+        $data['verifyUrl']         = $this->qrVerifyUrl($submission, $params);
 
         return view('admin.invoice.receipt', $data);
     }
@@ -204,6 +204,27 @@ class InvoiceController extends Controller
         return route('invoice.public.pdf', array_merge(['kode_submit' => $submission->kode_submit], $this->paramsAsQuery($params)));
     }
 
+    /**
+     * URL pendek khusus utk QR "Scan untuk verifikasi" — SENGAJA cuma membawa
+     * jumlah/metode_bayar/tanggal, BUKAN publicPdfUrl() yang dipakai link share
+     * ke author (nama_pembayar, keterangan, rekening, CP marketing dst — semua
+     * bisa panjang). Ditemukan 19 Agustus 2026 di Kwitansi (bug sama persis
+     * berlaku di sini): judul artikel jurnal akademik rutin 200+ karakter, dulu
+     * ikut ter-encode penuh ke QR lewat keterangan -> QR jadi terlalu padat utk
+     * discan kamera HP mana pun. publicPdf() (dipanggil scan ini) sudah punya
+     * fallback regenerasi field lain dari data submission/master jurnal asli
+     * kalau parameter ini tidak dikirim (lihat buildViewData()).
+     */
+    private function qrVerifyUrl(Submission $submission, array $params): string
+    {
+        return route('invoice.public.pdf', [
+            'kode_submit'  => $submission->kode_submit,
+            'jumlah'       => $params['jumlah'] ?? '0',
+            'metode_bayar' => $params['metode_bayar'] ?? 'Transfer Bank',
+            'tanggal'      => $params['tanggal'] ?? now()->toDateString(),
+        ]);
+    }
+
     /** Query params publik untuk dilampirkan ke pdfUrl (dipakai Fonnte fetch) — tanpa nilai kosong */
     private function paramsAsQuery(array $params): array
     {
@@ -298,9 +319,11 @@ class InvoiceController extends Controller
         $data['headerImageUrl']       = $this->localStoragePath($journal?->header_image_path);
         $data['accreditationLogoUrl'] = $this->resolveAccreditationLogoLocalPath($journal);
 
-        // QR verifikasi — sama seperti LOA, mengarah ke link PDF publik invoice ini.
-        $verifyUrl = $this->publicPdfUrl($submission, $params);
-        $qrSvg = QrCode::format('svg')->size(80)->margin(0)->generate($verifyUrl);
+        // QR verifikasi — URL pendek (qrVerifyUrl(), BUKAN publicPdfUrl() yang dipakai link
+        // share ke author) supaya QR tetap bisa discan utk judul artikel yang panjang.
+        // Lihat catatan lengkap di qrVerifyUrl(). Size 160 (bukan 80) — ekstra margin aman.
+        $verifyUrl = $this->qrVerifyUrl($submission, $params);
+        $qrSvg = QrCode::format('svg')->size(160)->margin(0)->generate($verifyUrl);
         $data['qrDataUri'] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
 
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.invoice.receipt', $data)

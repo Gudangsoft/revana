@@ -23,7 +23,7 @@ class KwitansiController extends Controller
         $data['sendWaRoute']       = 'admin.submissions.kwitansi.send-wa';
         $data['updateContactRoute'] = 'admin.submissions.kwitansi.update-contact';
         $data['publicPdfUrl']      = $this->publicPdfUrl($submission, $data);
-        $data['verifyUrl']         = $data['publicPdfUrl'];
+        $data['verifyUrl']         = $this->qrVerifyUrl($submission, $data);
 
         return view('admin.kwitansi.receipt', $data);
     }
@@ -41,7 +41,7 @@ class KwitansiController extends Controller
         $data['sendWaRoute']       = 'marketing.submissions.kwitansi.send-wa';
         $data['updateContactRoute'] = 'marketing.submissions.kwitansi.update-contact';
         $data['publicPdfUrl']      = $this->publicPdfUrl($submission, $data);
-        $data['verifyUrl']         = $data['publicPdfUrl'];
+        $data['verifyUrl']         = $this->qrVerifyUrl($submission, $data);
 
         return view('admin.kwitansi.receipt', $data);
     }
@@ -56,6 +56,29 @@ class KwitansiController extends Controller
             'metode_bayar'  => $data['metodeBayar'],
             'tanggal'       => $data['tanggal']->toDateString(),
         ]));
+    }
+
+    /**
+     * URL pendek khusus utk QR "Scan untuk verifikasi" — SENGAJA tidak membawa
+     * nama_pembayar/keterangan seperti publicPdfUrl() (link share ke author).
+     * Ditemukan 19 Agustus 2026: judul artikel jurnal akademik rutin 200+
+     * karakter, dulu ikut ter-encode penuh ke QR lewat keterangan -> QR jadi
+     * Version 19 (93x93 modul), cuma 0.86px/modul saat dirender 80x80 -> di
+     * bawah ambang minimum scan kamera HP mana pun, QR "ada" tapi praktis tidak
+     * bisa discan. publicPdf() (dipanggil scan ini) sudah punya fallback
+     * regenerasi keterangan & nama_pembayar dari data submission asli kalau
+     * parameter ini tidak dikirim (lihat buildViewData()), jadi aman dibuang
+     * dari sini — hasil verify tetap benar, cuma bukan salinan byte-persis
+     * kalau admin sempat mengetik keterangan/nama custom.
+     */
+    private function qrVerifyUrl(Submission $submission, array $data): string
+    {
+        return route('kwitansi.public.pdf', [
+            'kode_submit'  => $submission->kode_submit,
+            'jumlah'       => $data['jumlah'],
+            'metode_bayar' => $data['metodeBayar'],
+            'tanggal'      => $data['tanggal']->toDateString(),
+        ]);
     }
 
     // ── Public: dipakai Fonnte untuk fetch PDF lampiran WA (tanpa login) ──
@@ -306,11 +329,11 @@ class KwitansiController extends Controller
         $data['headerImageUrl']       = $this->localStoragePath($journal?->header_image_path);
         $data['accreditationLogoUrl'] = $this->resolveAccreditationLogoLocalPath($journal);
 
-        // QR verifikasi — sama seperti LOA, tapi mengarah ke link PDF publik kwitansi ini
-        // (satu-satunya cara "verifikasi" yang masuk akal untuk dokumen yang datanya tidak
-        // disimpan di DB: scan ulang akan selalu menghasilkan PDF yang identik).
-        $verifyUrl = $this->publicPdfUrl($submission, $data);
-        $qrSvg = QrCode::format('svg')->size(80)->margin(0)->generate($verifyUrl);
+        // QR verifikasi — URL pendek (qrVerifyUrl(), BUKAN publicPdfUrl() yang dipakai link
+        // share ke author) supaya QR tetap bisa discan utk judul artikel yang panjang.
+        // Lihat catatan lengkap di qrVerifyUrl(). Size 160 (bukan 80) — ekstra margin aman.
+        $verifyUrl = $this->qrVerifyUrl($submission, $data);
+        $qrSvg = QrCode::format('svg')->size(160)->margin(0)->generate($verifyUrl);
         $data['qrDataUri'] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
 
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.kwitansi.receipt', $data)
