@@ -246,6 +246,40 @@
     </div>
 </div>
 
+{{-- Monitoring Tren Submission — total submission saja, filter granularitas
+     per tahun/bulan/hari (terpisah dari chart "Tren Submission {tahun}" di atas
+     yang tetap Total+Published+Rejected khusus tahun berjalan). --}}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span class="fw-semibold"><i class="bi bi-bar-chart-steps text-primary"></i> Monitoring Tren Submission</span>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <select id="trendPeriodSelect" class="form-select form-select-sm" style="width:auto;">
+                        <option value="year">Per Tahun</option>
+                        <option value="month" selected>Per Bulan</option>
+                        <option value="day">Per Hari</option>
+                    </select>
+                    <select id="trendYearSelect" class="form-select form-select-sm" style="width:auto;">
+                        @foreach($submissionYears as $y)
+                        <option value="{{ $y }}" {{ (int) $y === (int) date('Y') ? 'selected' : '' }}>{{ $y }}</option>
+                        @endforeach
+                    </select>
+                    <select id="trendMonthSelect" class="form-select form-select-sm" style="width:auto; display:none;">
+                        @foreach(['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'] as $mi => $ml)
+                        <option value="{{ $mi + 1 }}" {{ ($mi + 1) === (int) date('n') ? 'selected' : '' }}>{{ $ml }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="trendMonitoringMeta" class="mb-2 small text-muted">&nbsp;</div>
+                <canvas id="submissionTrendChart" height="90"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -330,6 +364,69 @@
             }
         }
     });
+})();
+
+// ── Monitoring Tren Submission (total saja, filter per tahun/bulan/hari) ──
+(function () {
+    const periodSel = document.getElementById('trendPeriodSelect');
+    const yearSel   = document.getElementById('trendYearSelect');
+    const monthSel  = document.getElementById('trendMonthSelect');
+    const metaEl    = document.getElementById('trendMonitoringMeta');
+    const canvas    = document.getElementById('submissionTrendChart');
+    if (!periodSel || !canvas) return;
+
+    const trendChart2 = new Chart(canvas, {
+        type: 'bar',
+        data: { labels: [], datasets: [{
+            label: 'Total Submission',
+            data: [],
+            backgroundColor: 'rgba(99,102,241,.6)',
+            borderColor: 'rgba(99,102,241,1)',
+            borderWidth: 1.5,
+            borderRadius: 4,
+        }] },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false },
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(0,0,0,.05)' } },
+                x: { grid: { display: false } },
+            }
+        }
+    });
+
+    function toggleControls() {
+        const p = periodSel.value;
+        yearSel.style.display  = (p === 'year') ? 'none' : '';
+        monthSel.style.display = (p === 'day') ? '' : 'none';
+    }
+
+    function loadTrend() {
+        const params = new URLSearchParams({
+            period: periodSel.value,
+            year: yearSel.value,
+            month: monthSel.value,
+        });
+        fetch('{{ route("admin.dashboard.submission-trend") }}?' + params.toString())
+            .then(r => r.json())
+            .then(json => {
+                trendChart2.data.labels = json.labels;
+                trendChart2.data.datasets[0].data = json.data;
+                trendChart2.update();
+                metaEl.textContent = 'Total pada periode ini: ' + Number(json.total).toLocaleString('id-ID') + ' submission';
+            })
+            .catch(() => { metaEl.textContent = 'Gagal memuat data tren.'; });
+    }
+
+    periodSel.addEventListener('change', function () { toggleControls(); loadTrend(); });
+    yearSel.addEventListener('change', loadTrend);
+    monthSel.addEventListener('change', loadTrend);
+
+    toggleControls();
+    loadTrend();
 })();
 </script>
 @endpush

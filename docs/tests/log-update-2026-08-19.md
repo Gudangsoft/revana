@@ -31,3 +31,25 @@ Diverifikasi hasilnya lewat generate PDF nyata (dibaca sebagai gambar) untuk sub
 
 ### Catatan Deploy
 Tidak ada migration — murni perubahan kode (controller + view). Bisa langsung deploy. Dokumen kwitansi/invoice yang SUDAH terlanjur dibagikan (link lama dengan URL panjang di QR-nya) tetap akan tampil sama seperti sebelumnya kalau di-generate ulang lewat link tersebut (endpoint publik tidak berubah, cuma QR yang di-generate untuk halaman/PDF BARU yang berubah) — tidak ada breaking change untuk link yang sudah beredar.
+
+---
+
+## 2. Widget Baru: Monitoring Tren Submission di Dashboard Admin
+
+**Tujuan:** User minta grafik monitoring tren submission di `/admin/dashboard`, khusus total submission (bukan dipecah status), dengan filter granularitas per tahun/bulan/hari. Dashboard sudah punya chart "Tren Submission {tahun}" (Total+Published+Rejected, fixed ke tahun berjalan, tanpa filter) — dibiarkan tidak berubah, widget baru ini ditambahkan terpisah supaya tidak mengganggu apa yang sudah ada.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/DashboardController.php` | `index()`: tambah `$submissionYears` (daftar tahun yang benar-benar punya data submission, cache 5 menit, dipakai isi dropdown filter tahun). Method baru `submissionTrend(Request $request)`: endpoint JSON, terima `period` (year/month/day, default month kalau nilai tidak dikenal), `year`, `month`; agregasi `COUNT(*) GROUP BY` YEAR/MONTH/DAY sesuai `created_at`, kembalikan `{labels, data, total}`. |
+| `routes/web.php` | Route baru `GET /admin/dashboard/submission-trend` → `admin.dashboard.submission-trend`. |
+| `resources/views/admin/dashboard.blade.php` | Card baru "Monitoring Tren Submission" (di bawah row chart yang sudah ada): dropdown Per Tahun/Bulan/Hari + dropdown Tahun (disembunyikan kalau period=year) + dropdown Bulan (cuma tampil kalau period=day), canvas Chart.js (bar, satu dataset "Total Submission"), teks ringkasan total. JS: `fetch()` ke endpoint baru tiap filter berubah, update chart tanpa reload halaman. |
+| `tests/Feature/SubmissionTrendTest.php` | Baru, 5 test: period month mengembalikan 12 label dengan hitungan benar per bulan (dan tidak ikut menghitung data tahun lain); period day mengembalikan jumlah hari sesuai bulan terpilih (termasuk kasus Februari 28 hari) dengan hitungan benar per tanggal; period year mengelompokkan lintas semua tahun yang ada; period tidak dikenal jatuh ke default month; halaman dashboard menampilkan widget & elemen filter baru. |
+
+### Verifikasi
+- `tests/Feature/SubmissionTrendTest.php` — 5/5 PASS, 20 assertions.
+- Smoke test manual `app()->handle()` dengan data lokal riil (14.691 submission, semua tahun 2026): period=year → 1 label/total 14.691; period=month (2026) → 12 label/total 14.691 (konsisten); period=day (Juni 2026) → 30 label/total 3.201 (cuma bulan itu). Halaman dashboard HTTP 200, widget baru terkonfirmasi muncul di HTML.
+- Full suite `tests/Feature` — 140 test, 384 assertions, **0 failure**.
+
+### Catatan Deploy
+Tidak ada migration. Murni penambahan (route + controller method + view) — tidak mengubah widget/chart dashboard yang sudah ada.

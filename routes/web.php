@@ -145,6 +145,7 @@ Route::middleware('auth')->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/submission-trend', [AdminDashboard::class, 'submissionTrend'])->name('dashboard.submission-trend');
         Route::get('/pic-reviewer/dashboard', [\App\Http\Controllers\Admin\PicReviewerDashboardController::class, 'index'])->name('pic-reviewer.dashboard');
         Route::get('/pic-reviewer/monitoring', [\App\Http\Controllers\Admin\PicReviewerJournalController::class, 'monitoring'])->name('pic-reviewer.monitoring');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');

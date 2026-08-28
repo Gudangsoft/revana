@@ -162,6 +162,16 @@ class DashboardController extends Controller
         // Birthday widget
         [$todayBirthdays, $myWishes] = $this->todayBirthdayData('admin', auth()->id());
 
+        // Tahun-tahun yang benar-benar punya data submission — dipakai isi dropdown
+        // filter tahun di widget "Monitoring Tren Submission" (submissionTrend()).
+        $submissionYears = Cache::remember("dashboard.submissionYears.{$tenantKey}", 300, fn () =>
+            Submission::selectRaw('DISTINCT YEAR(created_at) as y')
+                ->orderByDesc('y')->pluck('y')->toArray()
+        );
+        if (empty($submissionYears)) {
+            $submissionYears = [(int) date('Y')];
+        }
+
         return view('admin.dashboard', compact(
             'totalJournals',
             'totalReviewers',
@@ -190,8 +200,65 @@ class DashboardController extends Controller
             'topReviewers',
             'avgCompletionDays',
             'todayBirthdays',
-            'myWishes'
+            'myWishes',
+            'submissionYears'
         ));
+    }
+
+    /**
+     * Widget "Monitoring Tren Submission" di dashboard — total submission SAJA
+     * (bukan dipecah status seperti chart "Tren Submission {tahun}" yang sudah
+     * ada), dgn filter granularitas per tahun/bulan/hari. Dipanggil via fetch()
+     * dari dashboard, mengembalikan JSON {labels, data} utk Chart.js.
+     */
+    public function submissionTrend(Request $request)
+    {
+        $period = in_array($request->get('period'), ['year', 'month', 'day'], true)
+            ? $request->get('period') : 'month';
+        $year  = (int) $request->get('year', now()->year);
+        $month = (int) $request->get('month', now()->month);
+        if ($month < 1 || $month > 12) {
+            $month = now()->month;
+        }
+
+        switch ($period) {
+            case 'year':
+                $rows = Submission::selectRaw('YEAR(created_at) as period, COUNT(*) as total')
+                    ->groupBy('period')->orderBy('period')->get();
+                $labels = $rows->pluck('period')->map(fn ($y) => (string) $y)->values()->all();
+                $data   = $rows->pluck('total')->map(fn ($v) => (int) $v)->values()->all();
+                break;
+
+            case 'day':
+                $daysInMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth;
+                $counts = array_fill_keys(range(1, $daysInMonth), 0);
+                foreach (Submission::selectRaw('DAY(created_at) as d, COUNT(*) as total')
+                    ->whereYear('created_at', $year)->whereMonth('created_at', $month)
+                    ->groupBy('d')->get() as $row) {
+                    $counts[(int) $row->d] = (int) $row->total;
+                }
+                $labels = array_map('strval', array_keys($counts));
+                $data   = array_values($counts);
+                break;
+
+            case 'month':
+            default:
+                $counts = array_fill_keys(range(1, 12), 0);
+                foreach (Submission::selectRaw('MONTH(created_at) as m, COUNT(*) as total')
+                    ->whereYear('created_at', $year)
+                    ->groupBy('m')->get() as $row) {
+                    $counts[(int) $row->m] = (int) $row->total;
+                }
+                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                $data   = array_values($counts);
+                break;
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'data'   => $data,
+            'total'  => array_sum($data),
+        ]);
     }
 
     /**
