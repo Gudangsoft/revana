@@ -67,7 +67,7 @@ class SubmissionController extends Controller
                   ->orWhere('publisher', 'like', '%' . $searchTerm . '%');
             });
         }
-        
+
         // Filter by journal master ID (legacy support)
         if ($request->filled('journal_master_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {
@@ -75,9 +75,13 @@ class SubmissionController extends Controller
             });
         }
 
+        // Cari bebas — keyword apa pun, cocok di nama penulis/ID/judul/kode
+        // submit/HP/nama jurnal sekaligus (lihat Submission::scopeSearch()).
+        $query->search($request->input('keyword'));
+
         $this->applyProgramFilter($query, $request);
 
-        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50));
+        $submissions = $query->latest('tanggal_submit')->paginate(request()->input('per_page', 50))->withQueryString();
         $journals = JournalMaster::where('is_active', true)->orderBy('nama_jurnal')->get();
         $statusOptions = Submission::getStatusOptions();
 
@@ -871,6 +875,10 @@ class SubmissionController extends Controller
                   ->orWhere('petugas_reviewer2_id', $request->reviewer_id);
             });
         }
+
+        // Cari bebas — keyword apa pun, cocok di nama penulis/ID/judul/kode
+        // submit/HP/nama jurnal sekaligus (lihat Submission::scopeSearch()).
+        $query->search($request->input('keyword'));
 
         $this->applyProgramFilter($query, $request);
 

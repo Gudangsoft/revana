@@ -549,6 +549,15 @@ code.copyable.copied {
                     @if(isset($program) && $program)
                         <input type="hidden" name="program" value="{{ $program }}">
                     @endif
+                    {{-- Baris 0: Cari bebas --}}
+                    <div class="row g-2 align-items-end mb-2">
+                        <div class="col-md-4">
+                            <label for="keyword" class="form-label small mb-1">Cari</label>
+                            <input type="text" class="form-control form-control-sm" id="keyword" name="keyword"
+                                   placeholder="🔍 Ketik nama penulis/ID/judul/kode submit/HP..."
+                                   value="{{ request('keyword') }}">
+                        </div>
+                    </div>
                     {{-- Baris 1: Filter --}}
                     <div class="row g-2 align-items-end mb-2">
                         <div class="col-md-2">

@@ -110,3 +110,28 @@ Diperbaiki murni di JS (`dashboard.blade.php`): callback `afterBody` sekarang ce
 
 ### Catatan Deploy
 Tidak ada migration, tidak ada perubahan backend — murni edit satu file view.
+
+---
+
+## 5. Pencarian Keyword Bebas di Halaman Data Submit & Monitoring
+
+**Tujuan:** User (screenshot sidebar "Data Submit"/"Monitoring") minta sistem pencarian ditambahkan, bisa diketik keyword apapun. Dicek dulu: sistem SUDAH punya pencarian global di navbar atas (`admin.search`, cari nama penulis/ID/judul/kode submit/HP/nama jurnal — 6 field), tapi itu buka halaman hasil TERPISAH. Di halaman "Data Submit" (`admin.submissions.index`) dan "Monitoring" (`admin.submissions.monitoring`) sendiri, filter yang ada cuma tanggal/status/nama jurnal — TIDAK ada kolom cari bebas berdasarkan nama penulis/ID/judul/kode submit langsung di halaman itu.
+
+Ditambahkan `Submission::scopeSearch()` (SATU sumber kebenaran, field cakupan sama persis dengan `SearchController` — nama_penulis, id_artikel, judul_artikel, kode_submit, no_hp_penulis, nama_jurnal via relasi) dipakai bareng oleh kedua halaman, supaya "keyword apa pun" konsisten dengan pencarian global yang sudah ada, bukan definisi baru yang beda-beda.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Models/Submission.php` | `scopeSearch($query, $keyword)` baru — LIKE di 5 kolom + relasi jurnal, kosongkan filter kalau keyword kosong/null. |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `index()`: panggil `$query->search($request->input('keyword'))`, tambah `->withQueryString()` ke paginate (sebelumnya TIDAK ada — filter/keyword hilang saat pindah halaman, ikut diperbaiki karena jadi prasyarat fitur ini bekerja benar lintas halaman). `monitoring()`: panggil scope yang sama (paginate di sini sudah lebih dulu pakai `withQueryString()`). |
+| `resources/views/admin/submissions/index.blade.php` | Input teks "Cari" baru di filter form (kolom pertama), placeholder menyebutkan field yang dicakup. |
+| `resources/views/admin/submissions/monitoring.blade.php` | Baris filter baru (di atas baris tanggal/status/reviewer yang sudah penuh 6 kolom) berisi input "Cari". |
+| `tests/Feature/SubmissionKeywordSearchTest.php` | Baru, 9 test: scope cocok di nama penulis/kode submit/judul artikel/nama jurnal (via relasi) masing-masing, scope mengembalikan semua baris kalau keyword kosong/null, halaman Data Submit & Monitoring benar-benar menyaring hasil sesuai keyword lewat HTTP request, kedua halaman menampilkan input field baru. |
+
+### Verifikasi
+- `tests/Feature/SubmissionKeywordSearchTest.php` — 9/9 PASS, 18 assertions.
+- Smoke test manual `app()->handle()` dengan data lokal riil: cari nama penulis asli ("Desiana") di kedua halaman, HTTP 200, hasil mengandung kode_submit yang benar.
+- Full suite `tests/Feature` — 161 test, 442 assertions, **0 failure**.
+
+### Catatan Deploy
+Tidak ada migration. Murni penambahan scope + filter + input field — filter/URL lama yang sudah dipakai (tanggal, status, journal_search, dll.) tetap berfungsi sama seperti sebelumnya, `keyword` cuma parameter tambahan yang opsional.

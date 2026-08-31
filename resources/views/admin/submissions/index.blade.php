@@ -233,6 +233,16 @@
                         <input type="hidden" name="program" value="{{ request('program') }}">
                     @endif
                     <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="keyword" class="form-label">Cari</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="keyword"
+                                   placeholder="🔍 Ketik nama penulis/ID/judul/kode submit/HP..."
+                                   value="{{ request('keyword') }}"
+                                   name="keyword">
+                            <small class="text-muted">Keyword apa pun — nama penulis, ID artikel, judul, kode submit, no HP, atau nama jurnal</small>
+                        </div>
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label">Tanggal Dari</label>
                             <input type="date" class="form-control" id="tanggal_dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}">

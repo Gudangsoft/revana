@@ -10,6 +10,33 @@ class Submission extends Model
 {
     use HasFactory;
 
+    /**
+     * Cari submission dengan SATU keyword bebas — cocok di nama penulis, ID
+     * artikel, judul artikel, kode submit, no HP penulis, ATAU nama jurnal.
+     * Field yang sama persis dgn pencarian global navbar (SearchController)
+     * supaya "keyword apa pun" konsisten di semua tempat, bukan cuma nama
+     * jurnal seperti filter journal_search yang sudah ada di halaman Data
+     * Submit/Monitoring.
+     */
+    public function scopeSearch($query, ?string $keyword)
+    {
+        $keyword = trim((string) $keyword);
+        if ($keyword === '') {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($keyword) {
+            $q->where('nama_penulis', 'like', "%{$keyword}%")
+                ->orWhere('id_artikel', 'like', "%{$keyword}%")
+                ->orWhere('judul_artikel', 'like', "%{$keyword}%")
+                ->orWhere('kode_submit', 'like', "%{$keyword}%")
+                ->orWhere('no_hp_penulis', 'like', "%{$keyword}%")
+                ->orWhereHas('journalSlot.journalMaster', function ($jq) use ($keyword) {
+                    $jq->where('nama_jurnal', 'like', "%{$keyword}%");
+                });
+        });
+    }
+
     // Process Type Constants
     const PROCESS_NORMAL = 'normal';
     const PROCESS_FASTTRACK = 'fasttrack';
