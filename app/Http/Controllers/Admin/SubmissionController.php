@@ -966,6 +966,17 @@ class SubmissionController extends Controller
      */
     public function export(Request $request)
     {
+        // Dataset submissions sudah 14.000+ baris x 44 kolom — PhpSpreadsheet
+        // menyimpan seluruh sel di memori saat menulis XLSX (WithChunkReading
+        // cuma mengurangi beban query DB, bukan memori penulisan file), jadi
+        // gampang melebihi memory_limit default (biasanya 128-512M) begitu
+        // data bertambah banyak. Dinaikkan KHUSUS utk request export ini saja
+        // (tidak memengaruhi request lain) — ini fix resmi yang direkomendasikan
+        // Laravel Excel utk error "Allowed memory size exhausted" pada export
+        // besar. Lihat log-update-2026-08-19.md untuk detail insiden 500 error.
+        ini_set('memory_limit', '2048M');
+        set_time_limit(300);
+
         $filters = [
             'tanggal_dari' => $request->tanggal_dari,
             'tanggal_sampai' => $request->tanggal_sampai,

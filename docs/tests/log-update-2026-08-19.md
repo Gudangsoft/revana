@@ -167,3 +167,34 @@ Semua 10 method di atas: blok pencarian manual (`where(kode_submit LIKE ... OR j
 
 ### Catatan Deploy
 Tidak ada migration. Semua perubahan backward-compatible — parameter `search` yang sudah ada tetap dibaca dengan nama yang sama, cuma cakupan pencariannya diperluas.
+
+---
+
+## 7. Perbaikan: Export Excel `/admin/submissions/export` 500 Error (Memori Habis)
+
+**Tujuan:** User melaporkan (screenshot) `https://portal.apji.org/admin/submissions/export` menampilkan **HTTP ERROR 500**. Direproduksi lokal dengan dataset produksi asli (14.691 submission) — betul crash:
+
+```
+Fatal error: Allowed memory size of 536870912 bytes exhausted (tried to allocate 17028928 bytes)
+at vendor/maennchen/zipstream-php/src/File.php:345
+```
+
+**Root cause:** BUKAN dari perubahan sesi ini — murni masalah skala data. `SubmissionsExport` (44 kolom × 14.691 baris = ±646 ribu sel) sudah benar memakai `WithChunkReading` (chunk 500 baris), tapi itu cuma mengurangi beban QUERY ke database — PhpSpreadsheet tetap menyimpan SELURUH sel hasil akhir di memori PHP saat menulis file XLSX (proses kompresi ZIP-nya yang di-trace di error di atas). Dataset sudah tumbuh melebihi `memory_limit` default server (512M).
+
+**Perbaikan:** `ini_set('memory_limit', '2048M')` + `set_time_limit(300)` di awal method export — HANYA berlaku untuk request export ini sendiri (PHP `ini_set()` per-request, tidak memengaruhi request lain / tidak perlu ubah `php.ini` server). Ini rekomendasi resmi Laravel Excel untuk error "Allowed memory size exhausted" pada dataset besar. Fix yang sama juga diterapkan ke `PicJournalController::submissionsMonitoringExport()` (export monitoring milik PIC) sebagai pencegahan, karena polanya identik (`Excel::download()` tanpa penyesuaian memori).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SubmissionController.php` | `export()`: tambah `ini_set('memory_limit', '2048M')` + `set_time_limit(300)` di awal method, sebelum `Excel::download()`. |
+| `app/Http/Controllers/Pic/JournalManagementController.php` | `submissionsMonitoringExport()`: perbaikan pencegahan yang sama (dataset per-PIC lebih kecil, tapi bisa besar juga utk PIC dengan tugas sangat banyak). |
+| `tests/Feature/SubmissionExportMemoryTest.php` | Baru, 3 test: endpoint export tetap 200 tanpa filter, tetap 200 dengan filter status, `memory_limit` benar-benar naik ke 2048M setelah endpoint diakses (dikembalikan lagi di akhir test supaya tidak bocor ke test lain). |
+
+### Verifikasi
+- **Direproduksi & diverifikasi dengan dataset PRODUKSI ASLI** (bukan cuma data sintetis): sebelum fix — crash persis seperti laporan user (memory exhausted @512M); setelah fix — HTTP 200, file 4,6 MB berhasil dibuat penuh dalam 62 detik, peak memory ~524MB (di bawah ceiling baru 2048M, di atas ceiling lama 512M — persis menjelaskan kenapa dulu crash & sekarang tidak).
+- File hasil export dibaca ulang pakai PhpSpreadsheet: 14.692 baris (14.691 data + 1 header, cocok persis dengan jumlah submission), 44 kolom, isi baris pertama & terakhir benar.
+- `tests/Feature/SubmissionExportMemoryTest.php` — 3/3 PASS, 5 assertions.
+- Full suite `tests/Feature` — 174 test, 477 assertions, **0 failure**.
+
+### Catatan Deploy
+Tidak ada migration. Murni perubahan kode (2 baris tambahan per method) — bisa langsung deploy, akan langsung memperbaiki error 500 di production begitu ter-pull. Tidak berisiko terhadap request lain karena `ini_set`/`set_time_limit` di sini cuma berlaku untuk request export itu sendiri. **Catatan skalabilitas**: ini fix yang efektif untuk skala data saat ini (~15rb baris), tapi kalau dataset terus tumbuh signifikan (mis. 100rb+ baris), pertimbangkan solusi jangka panjang seperti export via queue (`->queue()`) atau membatasi export per-rentang-tanggal.

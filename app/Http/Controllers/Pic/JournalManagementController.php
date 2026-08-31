@@ -1125,6 +1125,12 @@ class JournalManagementController extends Controller
      */
     public function submissionsMonitoringExport(Request $request)
     {
+        // Sama seperti SubmissionController::export() — jaga-jaga terhadap
+        // "Allowed memory size exhausted" pada PIC dengan tugas sangat banyak.
+        // Lihat log-update-2026-08-19.md untuk detail insiden aslinya.
+        ini_set('memory_limit', '2048M');
+        set_time_limit(300);
+
         $picId = auth()->guard('pic')->id();
 
         $query = Submission::with([
