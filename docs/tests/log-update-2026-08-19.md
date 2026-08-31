@@ -71,3 +71,42 @@ Frontend (`dashboard.blade.php`): tooltip Chart.js diberi `callbacks.afterBody` 
 File yang diubah: `DashboardController.php` (constant `TREND_CATEGORY_SQL`, `submissionTrend()` ditulis ulang total), `dashboard.blade.php` (tooltip callback + variabel `trendBreakdown`), `SubmissionTrendTest.php` (+1 test: response tetap mengembalikan breakdown 4 kategori lengkap & benar meski `kategori=fasttrack` diminta secara eksplisit; `data` chart tetap ikut kategori yang diminta, bukan breakdown-nya).
 
 Verifikasi: 11/11 test PASS (47 assertions). Smoke test data riil (17 Juli 2026, kategori=semua): total hari itu 75, breakdown Normal=58/Fasttrack=17/BKD=1/JAFA=0 — Normal+Fasttrack=75 (cocok persis dgn total, karena kedua kategori itu memang saling eksklusif di dimensi `process_type`). Full suite akhir `tests/Feature` — **146 test, 411 assertions, 0 failure**.
+
+---
+
+## 3. Tambah Dropdown "Tipe Proses" (Normal/Fasttrack) di Edit Submission
+
+**Tujuan:** User (screenshot dropdown "Program": Normal/BKD/JAFA di `/admin/submissions/{id}/edit`) minta "tambahkan fasttrack" ke situ. Dicek dulu: "Program" (`program_type`) dan "Fasttrack" (`process_type`) ternyata dua kolom BERBEDA dan independen di model `Submission` (dikonfirmasi ada kombinasi nyata "normal+bkd" dan "fasttrack+bkd" di database, dari investigasi widget dashboard sebelumnya) — `process_type` dipakai luas oleh dashboard, `PicController`, dan menu Fasttrack (`admin.fasttrack-management`, dll), sedangkan `program_type` cuma menentukan prefix Kode Submit (SUB/BKD/JAF).
+
+Ditanyakan ke user: tambahkan "Fasttrack" sebagai opsi ke-4 di dropdown Program yang sama (berisiko data tidak konsisten — tersimpan ke field yang salah, tidak terhitung Fasttrack di tempat lain) vs dropdown terpisah untuk `process_type`. User pilih **dropdown terpisah**.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/admin/submissions/edit.blade.php` | Dropdown baru "Tipe Proses" (Normal/Fasttrack) di sebelah dropdown "Program" yang sudah ada, `name="process_type"`. |
+| `app/Http/Controllers/Admin/SubmissionController.php` | `update()`: tambah validasi `process_type` (`nullable`, `Rule::in(['normal','fasttrack'])`) — TIDAK menyentuh logika sync prefix kode_submit (itu cuma utk `program_type`, `process_type` memang tidak memengaruhi prefix). |
+| `app/Models/ActivityLog.php` | Tambah `process_type` ke `SUBMISSION_TRACKED_FIELDS` (label "Tipe Proses") supaya perubahan tercatat di log aktivitas, konsisten dengan `program_type`. |
+| `tests/Feature/SubmissionProcessTypeEditTest.php` | Baru, 6 test: submission normal bisa ditandai Fasttrack via form edit (dan `isFasttrack()` ikut benar), bisa dikembalikan ke Normal, mengubah `process_type` TIDAK mengubah prefix `kode_submit` (beda dgn `program_type`), `process_type` dan `program_type` benar-benar independen (bisa kombinasi bkd+fasttrack), nilai tidak valid ditolak validasi, halaman edit menampilkan dropdown & field baru. |
+
+### Verifikasi
+- `tests/Feature/SubmissionProcessTypeEditTest.php` — 6/6 PASS, 13 assertions.
+- Smoke test manual `app()->handle()` dengan data lokal riil: halaman edit submission asli (`SUB202602020001`) HTTP 200, dropdown "Tipe Proses" terkonfirmasi muncul di HTML.
+- Full suite `tests/Feature` — 152 test, 424 assertions, **0 failure**.
+
+### Catatan Deploy
+Tidak ada migration (kolom `process_type` sudah ada sejak awal, cuma belum ada UI utk mengubahnya di halaman edit ini). Murni penambahan form field + validasi — tidak mengubah perilaku default (submission lama tetap `process_type` apa adanya, cuma sekarang bisa diubah manual lewat form ini juga selain lewat alur Fasttrack khusus yang sudah ada).
+
+---
+
+## 4. Sembunyikan Rincian Kategori di Tooltip Saat Kategori Spesifik Dipilih
+
+**Tujuan:** User (screenshot tooltip dgn kategori "Normal" terpilih) melaporkan baris rincian jadi redundan — tooltip menampilkan "Total Submission (Normal): 98" DAN "Normal: 98" sekaligus (angka yang sama dua kali). Rincian per kategori (section #2 revisi ke-2) cuma berguna saat melihat "Semua" — begitu kategori spesifik (Normal/Fasttrack/BKD/JAFA) sudah dipilih, baris total di atas sudah menampilkan angka itu, jadi rincian jadi tidak perlu.
+
+Diperbaiki murni di JS (`dashboard.blade.php`): callback `afterBody` sekarang cek `kategoriSel.value !== 'semua'` dan mengembalikan array kosong (tidak ada baris tambahan) kalau kategori spesifik sedang dipilih — rincian 4 kategori cuma muncul saat dropdown kategori = "Semua". Tidak ada perubahan backend (`submissionTrend()` tetap mengirim `breakdown` apa adanya; hanya tampilannya yang disaring di sisi client).
+
+### Verifikasi
+- Smoke test manual `app()->handle()` — halaman dashboard HTTP 200, logika baru terkonfirmasi ada di HTML yang dirender.
+- Full suite `tests/Feature` — 152 test, 424 assertions, **0 failure** (tidak ada test PHP baru karena ini murni perilaku tampilan tooltip JS, tidak ada logika backend yang berubah).
+
+### Catatan Deploy
+Tidak ada migration, tidak ada perubahan backend — murni edit satu file view.

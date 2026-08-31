@@ -290,6 +290,10 @@ class SubmissionController extends Controller
             'petugas_submit_id' => 'nullable|exists:pics,id',
             'notes' => 'nullable|string',
             'program_type' => ['nullable', Rule::in(['bkd', 'jafa'])],
+            // Independen dari program_type (BKD/JAFA) — lihat dropdown "Tipe Proses"
+            // di edit.blade.php. TIDAK memengaruhi prefix kode_submit (beda dgn
+            // program_type), jadi tidak perlu logika sync prefix seperti di bawah.
+            'process_type' => ['nullable', Rule::in(['normal', 'fasttrack'])],
 
             // Workflow fields - Editor, Author, Production use pics table
             'petugas_editor1_id' => 'nullable|exists:pics,id',

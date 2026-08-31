@@ -35,6 +35,7 @@ class ActivityLog extends Model
         'petugas_submit_id' => 'PIC Submit',
         'journal_slot_id'   => 'Slot Jurnal',
         'program_type'      => 'Program',
+        'process_type'      => 'Tipe Proses',
         'notes'             => 'Catatan',
     ];
 

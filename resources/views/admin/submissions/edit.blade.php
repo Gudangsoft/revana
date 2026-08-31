@@ -313,6 +313,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             </select>
                             <div class="form-text text-warning"><i class="bi bi-info-circle"></i> Mengubah program akan menyesuaikan prefix Kode Submit (SUB→BKD/JAF)</div>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tipe Proses</label>
+                            <select class="form-select" name="process_type">
+                                <option value="normal"    {{ ($submission->process_type ?? 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                <option value="fasttrack" {{ $submission->process_type == 'fasttrack' ? 'selected' : '' }}>Fasttrack</option>
+                            </select>
+                            <div class="form-text">Independen dari Program (BKD/JAFA di atas) — menentukan apakah submission ini masuk alur Fasttrack.</div>
+                        </div>
                     </div>
 
                     <hr>

@@ -405,7 +405,10 @@
                     mode: 'index', intersect: false,
                     callbacks: {
                         afterBody: function (items) {
-                            if (!items.length) return [];
+                            // Rincian cuma relevan kalau lagi lihat "Semua" — kalau kategori
+                            // spesifik (mis. Normal) sudah dipilih, baris total di atas
+                            // SUDAH menampilkan angka itu, jadi rincian jadi redundan.
+                            if (!items.length || kategoriSel.value !== 'semua') return [];
                             const idx = items[0].dataIndex;
                             return Object.keys(trendBreakdown).map(function (label) {
                                 return label + ': ' + trendBreakdown[label][idx];
