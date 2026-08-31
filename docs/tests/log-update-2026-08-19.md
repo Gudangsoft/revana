@@ -53,3 +53,11 @@ Tidak ada migration — murni perubahan kode (controller + view). Bisa langsung 
 
 ### Catatan Deploy
 Tidak ada migration. Murni penambahan (route + controller method + view) — tidak mengubah widget/chart dashboard yang sudah ada.
+
+**Revisi (masih tanggal sama): Tambah Filter Kategori (Semua/Normal/Fasttrack/BKD/JAFA)**
+
+User (screenshot widget yang sudah jalan) minta tambahan filter kategori submission: "semua - normal - bkd - ft dll". Ditambahkan dropdown kategori memakai definisi yang SAMA PERSIS dengan yang sudah dipakai stat card dashboard (`$regularSubmissions`/`$fasttrackSubmissions` berbasis `process_type`, `$bkdStats`/`$jafaStats` berbasis `program_type`) — supaya angkanya konsisten dengan bagian dashboard lain, bukan definisi baru. Kategori SENGAJA tidak saling eksklusif (mengikuti kombinasi data nyata: ada submission yang `process_type` normal TAPI `program_type` bkd, jadi ikut terhitung di kategori "Normal" maupun "BKD" sekaligus) — dikonfirmasi lewat 77 baris kombinasi "normal+bkd" yang benar-benar ada di database.
+
+File tambahan yang diubah: `DashboardController.php` (property `$trendCategoryOptions`, method `applyTrendCategory()` sebagai satu sumber kebenaran filter, param `kategori` di `submissionTrend()`, response tambah `kategori_label`; `index()` kirim `$trendCategoryOptions` ke view), `dashboard.blade.php` (dropdown kategori baru di kiri dropdown Per Tahun/Bulan/Hari, JS kirim param `kategori` + update label dataset chart sesuai kategori terpilih), `SubmissionTrendTest.php` (+5 test: filter normal/fasttrack/bkd/semua menghitung benar, kategori tidak dikenal jatuh ke "Semua", widget dashboard menampilkan dropdown & opsi kategori baru).
+
+Verifikasi tambahan: 10/10 test PASS (37 assertions). Smoke test data riil — semua (14.691), normal (11.837), fasttrack (2.854), bkd (78), jafa (11) — angka bkd/fasttrack lebih besar dari total masing-masing kategori "murni" karena overlap yang memang disengaja. Full suite akhir `tests/Feature` — **145 test, 401 assertions, 0 failure**.

@@ -31,7 +31,7 @@ class SubmissionTrendTest extends TestCase
         return $admin;
     }
 
-    private function makeSubmissionAt(string $createdAt): Submission
+    private function makeSubmissionAt(string $createdAt, array $overrides = []): Submission
     {
         $user = User::create([
             'name' => 'Creator', 'email' => 'creator-' . uniqid() . '@example.test',
@@ -47,11 +47,11 @@ class SubmissionTrendTest extends TestCase
             'volume' => '1', 'nomor' => '1', 'bulan' => 'Januari', 'tahun' => 2026,
             'jumlah_slot' => 100, 'created_by' => $user->id,
         ]);
-        $submission = Submission::create([
+        $submission = Submission::create(array_merge([
             'kode_submit' => 'SUB-' . uniqid(), 'journal_slot_id' => $slot->id,
             'id_artikel' => 'ART-' . uniqid(), 'judul_artikel' => 'Judul Test',
             'created_by' => $user->id, 'status' => 'SUBMITTED',
-        ]);
+        ], $overrides));
         $submission->forceFill(['created_at' => $createdAt, 'updated_at' => $createdAt])->save();
 
         return $submission;
@@ -119,6 +119,82 @@ class SubmissionTrendTest extends TestCase
         $this->assertCount(12, $response->json('labels'));
     }
 
+    /**
+     * "Normal" cuma menyaring process_type (normal/null), TIDAK peduli
+     * program_type — persis konvensi $regularSubmissions yang sudah dipakai di
+     * stat card dashboard (index()). Jadi submission BKD yang process_type-nya
+     * masih normal/null tetap ikut terhitung "Normal" DAN "BKD" sekaligus
+     * (kategori sengaja tidak eksklusif, sesuai data nyata: kombinasi
+     * "normal+bkd" memang ada di database).
+     */
+    public function test_kategori_filter_normal_excludes_only_fasttrack(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeSubmissionAt('2026-04-01 00:00:00'); // normal/regular (default)
+        $this->makeSubmissionAt('2026-04-02 00:00:00', ['process_type' => 'fasttrack']);
+        $this->makeSubmissionAt('2026-04-03 00:00:00', ['program_type' => 'bkd']); // process_type tetap null -> ikut "Normal"
+
+        $response = $this->getJson(route('admin.dashboard.submission-trend', ['period' => 'month', 'year' => 2026, 'kategori' => 'normal']));
+
+        $response->assertOk();
+        $json = $response->json();
+        $this->assertEquals(2, $json['data'][3]); // April = index 3
+        $this->assertEquals(2, $json['total']);
+        $this->assertEquals('Normal', $json['kategori_label']);
+    }
+
+    public function test_kategori_filter_fasttrack_only_counts_fasttrack(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeSubmissionAt('2026-04-01 00:00:00');
+        $this->makeSubmissionAt('2026-04-02 00:00:00', ['process_type' => 'fasttrack']);
+        $this->makeSubmissionAt('2026-04-03 00:00:00', ['process_type' => 'fasttrack']);
+
+        $response = $this->getJson(route('admin.dashboard.submission-trend', ['period' => 'month', 'year' => 2026, 'kategori' => 'fasttrack']));
+
+        $response->assertOk();
+        $this->assertEquals(2, $response->json('total'));
+    }
+
+    public function test_kategori_filter_bkd_only_counts_bkd(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeSubmissionAt('2026-04-01 00:00:00');
+        $this->makeSubmissionAt('2026-04-02 00:00:00', ['program_type' => 'bkd']);
+        $this->makeSubmissionAt('2026-04-03 00:00:00', ['program_type' => 'jafa']);
+
+        $response = $this->getJson(route('admin.dashboard.submission-trend', ['period' => 'month', 'year' => 2026, 'kategori' => 'bkd']));
+
+        $response->assertOk();
+        $this->assertEquals(1, $response->json('total'));
+    }
+
+    public function test_kategori_semua_includes_everything(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeSubmissionAt('2026-04-01 00:00:00');
+        $this->makeSubmissionAt('2026-04-02 00:00:00', ['process_type' => 'fasttrack']);
+        $this->makeSubmissionAt('2026-04-03 00:00:00', ['program_type' => 'bkd']);
+        $this->makeSubmissionAt('2026-04-04 00:00:00', ['program_type' => 'jafa']);
+
+        $response = $this->getJson(route('admin.dashboard.submission-trend', ['period' => 'month', 'year' => 2026, 'kategori' => 'semua']));
+
+        $response->assertOk();
+        $this->assertEquals(4, $response->json('total'));
+    }
+
+    public function test_invalid_kategori_falls_back_to_semua(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeSubmissionAt('2026-04-01 00:00:00', ['process_type' => 'fasttrack']);
+
+        $response = $this->getJson(route('admin.dashboard.submission-trend', ['period' => 'month', 'year' => 2026, 'kategori' => 'bogus']));
+
+        $response->assertOk();
+        $this->assertEquals(1, $response->json('total'));
+        $this->assertEquals('Semua', $response->json('kategori_label'));
+    }
+
     public function test_dashboard_page_renders_the_new_widget(): void
     {
         $this->actingAsAdmin();
@@ -128,5 +204,9 @@ class SubmissionTrendTest extends TestCase
         $response->assertOk();
         $response->assertSee('Monitoring Tren Submission');
         $response->assertSee('trendPeriodSelect', false);
+        $response->assertSee('trendKategoriSelect', false);
+        $response->assertSee('Fasttrack');
+        $response->assertSee('BKD');
+        $response->assertSee('JAFA');
     }
 }

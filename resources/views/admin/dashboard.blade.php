@@ -255,6 +255,11 @@
             <div class="card-header bg-white border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span class="fw-semibold"><i class="bi bi-bar-chart-steps text-primary"></i> Monitoring Tren Submission</span>
                 <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <select id="trendKategoriSelect" class="form-select form-select-sm" style="width:auto;">
+                        @foreach($trendCategoryOptions as $val => $label)
+                        <option value="{{ $val }}" {{ $val === 'semua' ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
                     <select id="trendPeriodSelect" class="form-select form-select-sm" style="width:auto;">
                         <option value="year">Per Tahun</option>
                         <option value="month" selected>Per Bulan</option>
@@ -368,6 +373,7 @@
 
 // ── Monitoring Tren Submission (total saja, filter per tahun/bulan/hari) ──
 (function () {
+    const kategoriSel = document.getElementById('trendKategoriSelect');
     const periodSel = document.getElementById('trendPeriodSelect');
     const yearSel   = document.getElementById('trendYearSelect');
     const monthSel  = document.getElementById('trendMonthSelect');
@@ -406,6 +412,7 @@
 
     function loadTrend() {
         const params = new URLSearchParams({
+            kategori: kategoriSel.value,
             period: periodSel.value,
             year: yearSel.value,
             month: monthSel.value,
@@ -415,12 +422,14 @@
             .then(json => {
                 trendChart2.data.labels = json.labels;
                 trendChart2.data.datasets[0].data = json.data;
+                trendChart2.data.datasets[0].label = 'Total Submission (' + json.kategori_label + ')';
                 trendChart2.update();
                 metaEl.textContent = 'Total pada periode ini: ' + Number(json.total).toLocaleString('id-ID') + ' submission';
             })
             .catch(() => { metaEl.textContent = 'Gagal memuat data tren.'; });
     }
 
+    kategoriSel.addEventListener('change', loadTrend);
     periodSel.addEventListener('change', function () { toggleControls(); loadTrend(); });
     yearSel.addEventListener('change', loadTrend);
     monthSel.addEventListener('change', loadTrend);

@@ -202,14 +202,43 @@ class DashboardController extends Controller
             'todayBirthdays',
             'myWishes',
             'submissionYears'
-        ));
+        ) + ['trendCategoryOptions' => self::$trendCategoryOptions]);
+    }
+
+    /** Label kategori dipakai bareng widget dashboard & filter submissionTrend(). */
+    public static array $trendCategoryOptions = [
+        'semua'     => 'Semua',
+        'normal'    => 'Normal',
+        'fasttrack' => 'Fasttrack',
+        'bkd'       => 'BKD',
+        'jafa'      => 'JAFA',
+    ];
+
+    /**
+     * Terapkan filter kategori ke query builder Submission — SATU sumber
+     * kebenaran dipakai bareng submissionTrend() supaya kategorinya konsisten
+     * dengan definisi "Regular/Fasttrack" dan "BKD/JAFA" yang sudah dipakai di
+     * stat card dashboard (index() di atas: $regularSubmissions, dst).
+     */
+    private function applyTrendCategory($query, string $kategori)
+    {
+        return match ($kategori) {
+            'normal'    => $query->where(function ($q) {
+                $q->where('process_type', 'normal')->orWhereNull('process_type');
+            }),
+            'fasttrack' => $query->where('process_type', 'fasttrack'),
+            'bkd'       => $query->where('program_type', 'bkd'),
+            'jafa'      => $query->where('program_type', 'jafa'),
+            default     => $query, // 'semua' — tanpa filter tambahan
+        };
     }
 
     /**
      * Widget "Monitoring Tren Submission" di dashboard — total submission SAJA
      * (bukan dipecah status seperti chart "Tren Submission {tahun}" yang sudah
-     * ada), dgn filter granularitas per tahun/bulan/hari. Dipanggil via fetch()
-     * dari dashboard, mengembalikan JSON {labels, data} utk Chart.js.
+     * ada), dgn filter granularitas per tahun/bulan/hari DAN filter kategori
+     * (Semua/Normal/Fasttrack/BKD/JAFA). Dipanggil via fetch() dari dashboard,
+     * mengembalikan JSON {labels, data, total} utk Chart.js.
      */
     public function submissionTrend(Request $request)
     {
@@ -220,10 +249,13 @@ class DashboardController extends Controller
         if ($month < 1 || $month > 12) {
             $month = now()->month;
         }
+        $kategori = array_key_exists($request->get('kategori'), self::$trendCategoryOptions)
+            ? $request->get('kategori') : 'semua';
 
         switch ($period) {
             case 'year':
-                $rows = Submission::selectRaw('YEAR(created_at) as period, COUNT(*) as total')
+                $query = $this->applyTrendCategory(Submission::query(), $kategori);
+                $rows = $query->selectRaw('YEAR(created_at) as period, COUNT(*) as total')
                     ->groupBy('period')->orderBy('period')->get();
                 $labels = $rows->pluck('period')->map(fn ($y) => (string) $y)->values()->all();
                 $data   = $rows->pluck('total')->map(fn ($v) => (int) $v)->values()->all();
@@ -232,7 +264,8 @@ class DashboardController extends Controller
             case 'day':
                 $daysInMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth;
                 $counts = array_fill_keys(range(1, $daysInMonth), 0);
-                foreach (Submission::selectRaw('DAY(created_at) as d, COUNT(*) as total')
+                $query = $this->applyTrendCategory(Submission::query(), $kategori);
+                foreach ($query->selectRaw('DAY(created_at) as d, COUNT(*) as total')
                     ->whereYear('created_at', $year)->whereMonth('created_at', $month)
                     ->groupBy('d')->get() as $row) {
                     $counts[(int) $row->d] = (int) $row->total;
@@ -244,7 +277,8 @@ class DashboardController extends Controller
             case 'month':
             default:
                 $counts = array_fill_keys(range(1, 12), 0);
-                foreach (Submission::selectRaw('MONTH(created_at) as m, COUNT(*) as total')
+                $query = $this->applyTrendCategory(Submission::query(), $kategori);
+                foreach ($query->selectRaw('MONTH(created_at) as m, COUNT(*) as total')
                     ->whereYear('created_at', $year)
                     ->groupBy('m')->get() as $row) {
                     $counts[(int) $row->m] = (int) $row->total;
@@ -258,6 +292,7 @@ class DashboardController extends Controller
             'labels' => $labels,
             'data'   => $data,
             'total'  => array_sum($data),
+            'kategori_label' => self::$trendCategoryOptions[$kategori],
         ]);
     }
 
