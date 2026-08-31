@@ -48,7 +48,7 @@
                     @endif
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <input type="text" class="form-control" name="search" placeholder="Cari kode submit, judul, penulis..." value="{{ request('search') }}">
+                            <input type="text" class="form-control" name="search" placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..." value="{{ request('search') }}">
                         </div>
                         <div class="col-md-3">
                             <select class="form-select" name="journal_master_id">

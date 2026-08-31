@@ -198,26 +198,21 @@ class DashboardController extends Controller
         $query = Submission::where('marketing_id', $marketing->id)
             ->with('journalSlot.journalMaster');
         
-        // Filter by search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya cuma
+        // cocok di 3 field.
+        $query->search($request->input('search'));
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Filter by date range
         if ($request->filled('start_date')) {
             $query->whereDate('tanggal_submit', '>=', $request->start_date);
         }
-        
+
         if ($request->filled('end_date')) {
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
@@ -694,22 +689,16 @@ class DashboardController extends Controller
             $query->where('journal_slot_id', $request->journal_slot_id);
         }
         
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('id_artikel', 'like', "%{$search}%")
-                  ->orWhere('no_hp_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya tidak
+        // mencakup nama_penulis & nama jurnal.
+        $query->search($request->input('search'));
+
         // Filter by date range
         if ($request->filled('start_date')) {
             $query->whereDate('tanggal_submit', '>=', $request->start_date);
         }
-        
+
         if ($request->filled('end_date')) {
             $query->whereDate('tanggal_submit', '<=', $request->end_date);
         }
@@ -822,17 +811,12 @@ class DashboardController extends Controller
             ])
             ->where('process_type', 'fasttrack')
             ->where('marketing_id', $marketing->id);
-        
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya cuma
+        // cocok di 3 field.
+        $query->search($request->input('search'));
+
         // Filter by date range
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
@@ -840,10 +824,10 @@ class DashboardController extends Controller
         if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
-        
+
         $perPage = in_array($request->input('per_page'), [20, 50, 100, 150, 1000]) ? (int) $request->input('per_page') : 20;
         $submissions = $query->latest()->paginate($perPage)->withQueryString();
-        
+
         return view('marketing.fasttrack.index', compact('marketing', 'submissions'));
     }
 
@@ -996,17 +980,12 @@ class DashboardController extends Controller
         $query = Submission::with(['journalSlot.journalMaster', 'petugasSubmit'])
             ->where('process_type', 'fasttrack')
             ->where('marketing_id', $marketing->id);
-        
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya cuma
+        // cocok di 3 field.
+        $query->search($request->input('search'));
+
         // Filter by date range
         if ($request->filled('from_date')) {
             $query->whereDate('tanggal_submit', '>=', $request->from_date);

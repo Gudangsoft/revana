@@ -135,3 +135,35 @@ Ditambahkan `Submission::scopeSearch()` (SATU sumber kebenaran, field cakupan sa
 
 ### Catatan Deploy
 Tidak ada migration. Murni penambahan scope + filter + input field — filter/URL lama yang sudah dipakai (tanggal, status, journal_search, dll.) tetap berfungsi sama seperti sebelumnya, `keyword` cuma parameter tambahan yang opsional.
+
+---
+
+## 6. Perluas Pencarian Keyword ke SEMUA Halaman Data Submit & Monitoring
+
+**Tujuan:** User minta section #5 di atas "diterapkan untuk semua submit dan monitoring" — bukan cuma halaman Normal (`admin.submissions.index`/`monitoring`) yang sudah dikerjakan. Ditelusuri seluruh sidebar (Admin, PIC, Marketing): total ada 4 pasang "Data Submit"/"Monitoring" di Admin (Normal, Fasttrack, BKD, JAFA) dan pola serupa di PIC & Marketing — Normal/BKD/JAFA semuanya sudah otomatis ikut ter-cover di section #5 karena berbagi controller & view yang sama (cuma beda query param `program`), tersisa **8 endpoint terpisah** yang masing-masing punya controller/view sendiri: Fasttrack di ketiga role (Admin/PIC/Marketing) × (Data Submit + Monitoring) = 6, plus Data Submit & Monitoring "biasa" milik PIC dan Marketing (yang ternyata pakai controller sendiri-sendiri, bukan berbagi dgn Admin) = ditambah beberapa lagi.
+
+Ditemukan: hampir semua 8 endpoint ini SUDAH punya pencarian sendiri-sendiri (param `search`, bukan `keyword`), tapi kebanyakan cuma cocok di 3 field (`kode_submit`/`judul_artikel`/`nama_penulis`) — beberapa malah tidak ada input pencarian di view-nya sama sekali walau controller-nya sudah siap membaca parameternya. Semua diseragamkan pakai `Submission::scopeSearch()` yang sama (dari section #5) — param nama `search` DIPERTAHANKAN di endpoint-endpoint ini (bukan diganti ke `keyword`) supaya URL yang sudah dipakai/dibookmark tetap jalan, cuma cakupan field pencocokannya yang diperluas jadi 6 field.
+
+### File yang Diubah
+| Area | File Controller | Endpoint | File View |
+|------|-----------------|----------|-----------|
+| Admin Fasttrack | `SubmissionController.php` | `fasttrackSubmissions()` | `admin/fasttrack-management/submissions/index.blade.php` |
+| Admin Fasttrack | `SubmissionController.php` | `fasttrackMonitoring()` | `admin/fasttrack-management/monitoring/index.blade.php` (input baru — sebelumnya tidak ada) |
+| PIC Normal/BKD/JAFA | `Pic/JournalManagementController.php` | `submissionsIndex()` | `pic/submissions/index.blade.php` |
+| PIC Normal/BKD/JAFA | `Pic/JournalManagementController.php` | `submissionsMonitoring()` | `pic/submissions/monitoring.blade.php` (input baru — sebelumnya tidak ada) |
+| PIC Fasttrack | `Pic/JournalManagementController.php` | `fasttrackIndex()` | `pic/fasttrack/index.blade.php` |
+| PIC Fasttrack | `Pic/JournalManagementController.php` | `fasttrackMonitoring()` | `pic/fasttrack/monitoring.blade.php` (input baru — sebelumnya tidak ada) |
+| Marketing Normal/BKD/JAFA | `Marketing/DashboardController.php` | `submissions()` | `marketing/submissions.blade.php` |
+| Marketing Normal/BKD/JAFA | `Marketing/DashboardController.php` | `submissionsMonitoring()` | `marketing/submissions-monitoring.blade.php` |
+| Marketing Fasttrack | `Marketing/DashboardController.php` | `fasttrackIndex()` | `marketing/fasttrack/index.blade.php` |
+| Marketing Fasttrack | `Marketing/DashboardController.php` | `fasttrackMonitoring()` | `marketing/fasttrack/monitoring.blade.php` |
+
+Semua 10 method di atas: blok pencarian manual (`where(kode_submit LIKE ... OR judul_artikel LIKE ... OR nama_penulis LIKE ...)`, 3-4 field) diganti satu baris `$query->search($request->input('search'));`. Juga ikut diperbaiki 2 bug kecil yang ditemukan di jalan: `PicJournalController::submissionsIndex()` dan `SubmissionController::index()` (section #5) tidak pakai `->withQueryString()` di `paginate()` — filter/search hilang begitu pindah halaman.
+
+### Verifikasi
+- `tests/Feature/SubmissionKeywordSearchAllPagesTest.php` — Baru, 10 test (1 per endpoint tambahan), semua PASS, 30 assertions — tiap test bikin 2 submission dgn nama beda, pastikan cari 1 nama cuma memunculkan yang cocok.
+- Smoke test manual `app()->handle()` dengan data lokal riil, login sesuai guard masing-masing (admin/pic/marketing), cari pakai `kode_submit` asli (unik) di halaman Admin Fasttrack Data Submit, PIC Data Submit, Marketing Data Submit — semua HTTP 200 dan hasil mengandung kode yang dicari.
+- Full suite `tests/Feature` — 171 test, 472 assertions, **0 failure**.
+
+### Catatan Deploy
+Tidak ada migration. Semua perubahan backward-compatible — parameter `search` yang sudah ada tetap dibaca dengan nama yang sama, cuma cakupan pencariannya diperluas.

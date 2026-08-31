@@ -69,7 +69,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small">Cari</label>
-                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Kode/Judul/Penulis..." value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control form-control-sm" placeholder="🔍 Nama penulis/ID/judul/kode submit/HP/jurnal..." value="{{ request('search') }}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small">&nbsp;</label>

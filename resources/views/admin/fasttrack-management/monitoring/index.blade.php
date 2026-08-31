@@ -428,6 +428,14 @@
                     @if(isset($program) && $program)
                         <input type="hidden" name="program" value="{{ $program }}">
                     @endif
+                    <div class="row g-2 align-items-end mb-2">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label small mb-1">Cari</label>
+                            <input type="text" class="form-control form-control-sm" id="search" name="search"
+                                   placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..."
+                                   value="{{ request('search') }}">
+                        </div>
+                    </div>
                     <div class="row g-2 align-items-end">
                         <div class="col-md-2">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>

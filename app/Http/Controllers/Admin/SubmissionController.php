@@ -1997,24 +1997,20 @@ class SubmissionController extends Controller
                 'petugasProduction'
             ])
             ->where('process_type', 'fasttrack');
-        
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya cuma cocok
+        // di 3 field (kode_submit/judul_artikel/nama_penulis) — diperluas biar
+        // konsisten dengan pencarian di halaman Data Submit/Monitoring lain.
+        $query->search($request->input('search'));
+
         // Filter by journal
         if ($request->filled('journal_master_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {
                 $q->where('journal_master_id', $request->journal_master_id);
             });
         }
-        
+
         // Filter by date range
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
@@ -2022,12 +2018,12 @@ class SubmissionController extends Controller
         if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
-        
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         $this->applyProgramFilter($query, $request);
 
         $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
@@ -2057,7 +2053,12 @@ class SubmissionController extends Controller
             'petugasAuthor2',
             'petugasProduction',
         ])->where('process_type', 'fasttrack');
-        
+
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya halaman ini
+        // sama sekali tidak punya pencarian.
+        $query->search($request->input('search'));
+
         // Filter by date range
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
@@ -2065,12 +2066,12 @@ class SubmissionController extends Controller
         if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
-        
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Filter by journal
         if ($request->filled('journal_master_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {

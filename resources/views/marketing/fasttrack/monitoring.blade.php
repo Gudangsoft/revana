@@ -31,7 +31,7 @@
             <div class="col-md-4">
                 <label class="form-label small mb-1">Cari</label>
                 <input type="text" name="search" class="form-control"
-                       placeholder="Kode, judul, penulis..."
+                       placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..."
                        value="{{ request('search') }}">
             </div>
             <div class="col-md-2">

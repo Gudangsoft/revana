@@ -461,6 +461,14 @@
                 </div>
                     <!-- Filter Form -->
                 <form action="{{ route('pic.submissions.monitoring') }}" method="GET" class="mb-3" id="filterForm">
+                    <div class="row g-2 align-items-end mb-2">
+                        <div class="col-auto" style="min-width:260px;">
+                            <label for="search" class="form-label small mb-1">Cari</label>
+                            <input type="text" class="form-control form-control-sm" id="search" name="search"
+                                   placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..."
+                                   value="{{ request('search') }}">
+                        </div>
+                    </div>
                     <div class="row g-2 align-items-end">
                         <div class="col-auto">
                             <label for="tanggal_dari" class="form-label small mb-1">Tanggal Dari</label>

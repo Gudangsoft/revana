@@ -294,7 +294,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label small mb-1">Cari</label>
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Kode/Judul/Penulis..." value="{{ request('search') }}">
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..." value="{{ request('search') }}">
             </div>
             <div class="col-md-4 d-flex align-items-end gap-2">
                 <div class="btn-group btn-group-sm" role="group">

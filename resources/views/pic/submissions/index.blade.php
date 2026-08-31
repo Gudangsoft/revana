@@ -23,7 +23,7 @@
         <form method="GET" class="row g-3">
             <input type="hidden" name="program" value="{{ request('program') }}">
             <div class="col-md-3">
-                <input type="text" name="search" class="form-control" placeholder="Cari kode/judul/penulis..." value="{{ request('search') }}">
+                <input type="text" name="search" class="form-control" placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..." value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
                 <select name="akreditasi" class="form-select">

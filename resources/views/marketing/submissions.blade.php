@@ -36,7 +36,7 @@
             <input type="hidden" name="program" value="{{ request('program') }}">
             <div class="col-md-3">
                 <input type="text" name="search" class="form-control form-control-sm"
-                       placeholder="Cari kode/judul/penulis..." value="{{ request('search') }}">
+                       placeholder="🔍 Cari nama penulis/ID/judul/kode submit/HP/jurnal..." value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
                 <select name="status" class="form-select form-select-sm">

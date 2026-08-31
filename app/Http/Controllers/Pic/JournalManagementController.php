@@ -320,15 +320,10 @@ class JournalManagementController extends Controller
             });
         }
         
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('id_artikel', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya tidak
+        // mencakup no_hp_penulis & nama jurnal.
+        $query->search($request->input('search'));
 
         // Filter program: Normal hanya null, BKD/JAFA sesuai program_type
         $program = $request->input('program');
@@ -340,7 +335,7 @@ class JournalManagementController extends Controller
             $query->whereNull('program_type');
         }
 
-        $submissions = $query->latest()->paginate(request()->input('per_page', 20));
+        $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
 
         // Get data for filters
         $accreditations = \App\Models\Accreditation::where('is_active', true)->orderBy('name')->get();
@@ -978,15 +973,9 @@ class JournalManagementController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('id_artikel', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch().
+        $query->search($request->input('search'));
 
         // Filter program: Normal hanya null, BKD/JAFA sesuai program_type
         $program = $request->input('program');
@@ -1908,17 +1897,12 @@ class JournalManagementController extends Controller
                 'petugasProduction'
             ])
             ->where('process_type', 'fasttrack');
-        
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya cuma
+        // cocok di 3 field.
+        $query->search($request->input('search'));
+
         // Filter by date range
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_submit', '>=', $request->tanggal_dari);
@@ -1926,9 +1910,9 @@ class JournalManagementController extends Controller
         if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal_submit', '<=', $request->tanggal_sampai);
         }
-        
+
         $submissions = $query->latest()->paginate(request()->input('per_page', 20))->withQueryString();
-        
+
         return view('pic.fasttrack.index', compact('submissions', 'picId'));
     }
 
@@ -2143,16 +2127,11 @@ class JournalManagementController extends Controller
             ->where('process_type', 'fasttrack')
             ->where($picFilter);
 
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_submit', 'like', "%{$search}%")
-                  ->orWhere('judul_artikel', 'like', "%{$search}%")
-                  ->orWhere('nama_penulis', 'like', "%{$search}%");
-            });
-        }
-        
+        // Cari bebas — keyword apa pun (nama penulis/ID/judul/kode submit/HP/
+        // nama jurnal), lihat Submission::scopeSearch(). Sebelumnya cuma
+        // cocok di 3 field.
+        $query->search($request->input('search'));
+
         // Filter by journal
         if ($request->filled('journal_master_id')) {
             $query->whereHas('journalSlot', function($q) use ($request) {
