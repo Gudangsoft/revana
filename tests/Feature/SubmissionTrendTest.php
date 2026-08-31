@@ -195,6 +195,38 @@ class SubmissionTrendTest extends TestCase
         $this->assertEquals('Semua', $response->json('kategori_label'));
     }
 
+    /**
+     * Fitur 19 Agustus 2026 (revisi tooltip): user minta saat hover di chart,
+     * tampil rincian Normal/Fasttrack/BKD/JAFA sekaligus — bukan cuma total
+     * kategori yang lagi dipilih. `breakdown` harus selalu berisi rincian
+     * lengkap semua kategori, TERLEPAS dari `kategori` yang dikirim di request.
+     */
+    public function test_response_always_includes_full_category_breakdown(): void
+    {
+        $this->actingAsAdmin();
+        $this->makeSubmissionAt('2026-05-01 00:00:00');
+        $this->makeSubmissionAt('2026-05-02 00:00:00', ['process_type' => 'fasttrack']);
+        $this->makeSubmissionAt('2026-05-03 00:00:00', ['program_type' => 'bkd']);
+        $this->makeSubmissionAt('2026-05-04 00:00:00', ['program_type' => 'jafa']);
+
+        // Sengaja minta kategori 'fasttrack' — breakdown TETAP harus lengkap 4 kategori.
+        $response = $this->getJson(route('admin.dashboard.submission-trend', ['period' => 'month', 'year' => 2026, 'kategori' => 'fasttrack']));
+
+        $response->assertOk();
+        $breakdown = $response->json('breakdown');
+        $this->assertArrayHasKey('Normal', $breakdown);
+        $this->assertArrayHasKey('Fasttrack', $breakdown);
+        $this->assertArrayHasKey('BKD', $breakdown);
+        $this->assertArrayHasKey('JAFA', $breakdown);
+        // Mei = index 4 — #1 (normal murni), #3 (bkd), #4 (jafa) semuanya process_type null -> ikut "Normal"
+        $this->assertEquals(3, $breakdown['Normal'][4]);
+        $this->assertEquals(1, $breakdown['Fasttrack'][4]);
+        $this->assertEquals(1, $breakdown['BKD'][4]);
+        $this->assertEquals(1, $breakdown['JAFA'][4]);
+        // Data chart yg tampil tetap sesuai kategori yg diminta (fasttrack), bukan breakdown-nya.
+        $this->assertEquals(1, $response->json('data')[4]);
+    }
+
     public function test_dashboard_page_renders_the_new_widget(): void
     {
         $this->actingAsAdmin();

@@ -381,6 +381,12 @@
     const canvas    = document.getElementById('submissionTrendChart');
     if (!periodSel || !canvas) return;
 
+    // Rincian per kategori (Normal/Fasttrack/BKD/JAFA) utk titik data yang lagi
+    // di-hover — diisi ulang tiap loadTrend(), dibaca oleh tooltip callback
+    // afterBody di bawah supaya tetap tampil rincian lengkap apa pun kategori
+    // yang sedang dipilih di dropdown.
+    let trendBreakdown = {};
+
     const trendChart2 = new Chart(canvas, {
         type: 'bar',
         data: { labels: [], datasets: [{
@@ -395,7 +401,18 @@
             responsive: true,
             plugins: {
                 legend: { display: false },
-                tooltip: { mode: 'index', intersect: false },
+                tooltip: {
+                    mode: 'index', intersect: false,
+                    callbacks: {
+                        afterBody: function (items) {
+                            if (!items.length) return [];
+                            const idx = items[0].dataIndex;
+                            return Object.keys(trendBreakdown).map(function (label) {
+                                return label + ': ' + trendBreakdown[label][idx];
+                            });
+                        }
+                    }
+                },
             },
             scales: {
                 y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(0,0,0,.05)' } },
@@ -423,6 +440,7 @@
                 trendChart2.data.labels = json.labels;
                 trendChart2.data.datasets[0].data = json.data;
                 trendChart2.data.datasets[0].label = 'Total Submission (' + json.kategori_label + ')';
+                trendBreakdown = json.breakdown || {};
                 trendChart2.update();
                 metaEl.textContent = 'Total pada periode ini: ' + Number(json.total).toLocaleString('id-ID') + ' submission';
             })

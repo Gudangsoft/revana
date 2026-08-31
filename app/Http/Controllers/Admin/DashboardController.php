@@ -215,30 +215,29 @@ class DashboardController extends Controller
     ];
 
     /**
-     * Terapkan filter kategori ke query builder Submission — SATU sumber
-     * kebenaran dipakai bareng submissionTrend() supaya kategorinya konsisten
-     * dengan definisi "Regular/Fasttrack" dan "BKD/JAFA" yang sudah dipakai di
-     * stat card dashboard (index() di atas: $regularSubmissions, dst).
+     * Ekspresi SQL conditional-SUM per kategori — SATU sumber kebenaran dipakai
+     * submissionTrend() supaya definisinya konsisten dengan "Regular/Fasttrack"
+     * dan "BKD/JAFA" yang sudah dipakai stat card dashboard (index() di atas:
+     * $regularSubmissions, dst). Dihitung SEKALIGUS utk semua kategori dalam
+     * satu query (bukan query terpisah per kategori) supaya tooltip chart bisa
+     * menampilkan rincian semua kategori tanpa peduli kategori mana yang
+     * sedang dipilih di dropdown.
      */
-    private function applyTrendCategory($query, string $kategori)
-    {
-        return match ($kategori) {
-            'normal'    => $query->where(function ($q) {
-                $q->where('process_type', 'normal')->orWhereNull('process_type');
-            }),
-            'fasttrack' => $query->where('process_type', 'fasttrack'),
-            'bkd'       => $query->where('program_type', 'bkd'),
-            'jafa'      => $query->where('program_type', 'jafa'),
-            default     => $query, // 'semua' — tanpa filter tambahan
-        };
-    }
+    private const TREND_CATEGORY_SQL = [
+        'normal'    => "SUM(CASE WHEN (process_type = 'normal' OR process_type IS NULL) THEN 1 ELSE 0 END)",
+        'fasttrack' => "SUM(CASE WHEN process_type = 'fasttrack' THEN 1 ELSE 0 END)",
+        'bkd'       => "SUM(CASE WHEN program_type = 'bkd' THEN 1 ELSE 0 END)",
+        'jafa'      => "SUM(CASE WHEN program_type = 'jafa' THEN 1 ELSE 0 END)",
+    ];
 
     /**
-     * Widget "Monitoring Tren Submission" di dashboard — total submission SAJA
-     * (bukan dipecah status seperti chart "Tren Submission {tahun}" yang sudah
-     * ada), dgn filter granularitas per tahun/bulan/hari DAN filter kategori
-     * (Semua/Normal/Fasttrack/BKD/JAFA). Dipanggil via fetch() dari dashboard,
-     * mengembalikan JSON {labels, data, total} utk Chart.js.
+     * Widget "Monitoring Tren Submission" di dashboard — bar chart total
+     * submission sesuai kategori terpilih (Semua/Normal/Fasttrack/BKD/JAFA),
+     * dgn filter granularitas per tahun/bulan/hari. Response JUGA menyertakan
+     * `breakdown` (rincian semua kategori per titik data) supaya tooltip bisa
+     * menampilkan "Normal: X, Fasttrack: Y, BKD: Z, JAFA: W" sekaligus, apa pun
+     * kategori yang sedang aktif di dropdown. Dipanggil via fetch() dari
+     * dashboard.
      */
     public function submissionTrend(Request $request)
     {
@@ -252,47 +251,55 @@ class DashboardController extends Controller
         $kategori = array_key_exists($request->get('kategori'), self::$trendCategoryOptions)
             ? $request->get('kategori') : 'semua';
 
-        switch ($period) {
-            case 'year':
-                $query = $this->applyTrendCategory(Submission::query(), $kategori);
-                $rows = $query->selectRaw('YEAR(created_at) as period, COUNT(*) as total')
-                    ->groupBy('period')->orderBy('period')->get();
-                $labels = $rows->pluck('period')->map(fn ($y) => (string) $y)->values()->all();
-                $data   = $rows->pluck('total')->map(fn ($v) => (int) $v)->values()->all();
-                break;
+        $extraSelect = implode(', ', array_map(
+            fn ($key, $expr) => "{$expr} as {$key}",
+            array_keys(self::TREND_CATEGORY_SQL), self::TREND_CATEGORY_SQL
+        ));
 
-            case 'day':
-                $daysInMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth;
-                $counts = array_fill_keys(range(1, $daysInMonth), 0);
-                $query = $this->applyTrendCategory(Submission::query(), $kategori);
-                foreach ($query->selectRaw('DAY(created_at) as d, COUNT(*) as total')
-                    ->whereYear('created_at', $year)->whereMonth('created_at', $month)
-                    ->groupBy('d')->get() as $row) {
-                    $counts[(int) $row->d] = (int) $row->total;
-                }
-                $labels = array_map('strval', array_keys($counts));
-                $data   = array_values($counts);
-                break;
-
-            case 'month':
-            default:
-                $counts = array_fill_keys(range(1, 12), 0);
-                $query = $this->applyTrendCategory(Submission::query(), $kategori);
-                foreach ($query->selectRaw('MONTH(created_at) as m, COUNT(*) as total')
-                    ->whereYear('created_at', $year)
-                    ->groupBy('m')->get() as $row) {
-                    $counts[(int) $row->m] = (int) $row->total;
-                }
-                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                $data   = array_values($counts);
-                break;
+        if ($period === 'year') {
+            $bucketExpr = 'YEAR(created_at)';
+            $rows = Submission::selectRaw("{$bucketExpr} as bucket, COUNT(*) as total, {$extraSelect}")
+                ->groupBy('bucket')->orderBy('bucket')->get()->keyBy('bucket');
+            $bucketKeys = $rows->keys()->all();
+            $labels = array_map('strval', $bucketKeys);
+        } elseif ($period === 'day') {
+            $daysInMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth;
+            $bucketKeys = range(1, $daysInMonth);
+            $labels = array_map('strval', $bucketKeys);
+            $rows = Submission::selectRaw("DAY(created_at) as bucket, COUNT(*) as total, {$extraSelect}")
+                ->whereYear('created_at', $year)->whereMonth('created_at', $month)
+                ->groupBy('bucket')->get()->keyBy('bucket');
+        } else {
+            $bucketKeys = range(1, 12);
+            $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            $rows = Submission::selectRaw("MONTH(created_at) as bucket, COUNT(*) as total, {$extraSelect}")
+                ->whereYear('created_at', $year)
+                ->groupBy('bucket')->get()->keyBy('bucket');
         }
+
+        $series = ['semua' => [], 'normal' => [], 'fasttrack' => [], 'bkd' => [], 'jafa' => []];
+        foreach ($bucketKeys as $key) {
+            $row = $rows->get($key);
+            $series['semua'][]     = (int) ($row->total ?? 0);
+            $series['normal'][]    = (int) ($row->normal ?? 0);
+            $series['fasttrack'][] = (int) ($row->fasttrack ?? 0);
+            $series['bkd'][]       = (int) ($row->bkd ?? 0);
+            $series['jafa'][]      = (int) ($row->jafa ?? 0);
+        }
+
+        $data = $series[$kategori];
 
         return response()->json([
             'labels' => $labels,
             'data'   => $data,
             'total'  => array_sum($data),
             'kategori_label' => self::$trendCategoryOptions[$kategori],
+            'breakdown' => [
+                'Normal'    => $series['normal'],
+                'Fasttrack' => $series['fasttrack'],
+                'BKD'       => $series['bkd'],
+                'JAFA'      => $series['jafa'],
+            ],
         ]);
     }
 
