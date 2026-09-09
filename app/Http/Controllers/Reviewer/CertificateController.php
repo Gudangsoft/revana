@@ -142,6 +142,35 @@ class CertificateController extends Controller
         return $lines ?: [$text];
     }
 
+    /**
+     * Sama seperti wrapTextByWidth(), tapi dengan pengaman jumlah baris: kalau
+     * hasil bungkus masih melebihi $maxLines (artinya teks akan meluber keluar
+     * zona vertikal yang tersedia di template), ukuran font DIKECILKAN
+     * bertahap (langkah 5px) lalu dibungkus ulang, sampai muat dalam
+     * $maxLines baris atau sampai $minFontSize tercapai (mana yang duluan).
+     *
+     * Ditambahkan 9 Sept 2026 sebagai perbaikan permanen dari bug nama
+     * reviewer & judul artikel yang saling tumpang tindih di sertifikat —
+     * sebelumnya posisi Y tetap (fixed) tidak peduli berapa baris teks yang
+     * dihasilkan, jadi nama/judul yang panjang (banyak baris) akan menabrak
+     * teks tetap lain di template. Dikombinasikan dengan perhitungan Y
+     * ber-center di generateCertificate(), ini mencegah kasus yang sama
+     * terulang untuk nama/judul yang lebih panjang lagi di masa depan.
+     *
+     * @return array{0: array<string>, 1: int} [$lines, $fontSizeAkhir]
+     */
+    private function wrapTextWithAutoShrink(string $text, string $fontFile, int $fontSize, int $minFontSize, int $maxWidthPx, int $maxLines): array
+    {
+        $lines = $this->wrapTextByWidth($text, $fontFile, $fontSize, $maxWidthPx);
+
+        while (count($lines) > $maxLines && $fontSize > $minFontSize) {
+            $fontSize -= 5;
+            $lines = $this->wrapTextByWidth($text, $fontFile, $fontSize, $maxWidthPx);
+        }
+
+        return [$lines, $fontSize];
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -278,22 +307,46 @@ class CertificateController extends Controller
         
         // Lebar aman untuk teks yang di-center (nama reviewer & judul artikel) —
         // 70% dari lebar kanvas, sisakan margin kiri-kanan untuk border emas.
-        // CATATAN: sama seperti posisi elemen lain di file ini, ini perkiraan (file
-        // template AKTIF tidak tersedia untuk dites render langsung) — cek visual
-        // hasil sertifikat asli, sesuaikan kalau masih terlalu lebar/kesempitan.
         $maxTitleWidthRatio = 0.70;
 
-        // Reviewer Name (center, posisi setelah "This certificate is awarded to :")
+        // --- Perbaikan 9 Sept 2026: layout tumpang tindih -----------------------
+        // Sebelumnya $yNamePosition (1120) & $yArticlePosition (1500) adalah
+        // angka TETAP yang ditebak tanpa bisa render ke file template AKTIF
+        // (waktu itu file-nya tidak tersedia). Setelah user mengirim contoh
+        // sertifikat asli beresolusi penuh (2560x1811), posisi tetap itu
+        // ternyata jauh lebih rendah dari zona kosong sesungguhnya di template
+        // (paragraf "Sertifikat ini diberikan kepada :" / "in Recognition of
+        // Contribution..." dan "Sebagai bentuk penghargaan..." / "Thank you
+        // your contribution...") — akibatnya nama reviewer & judul artikel
+        // tercetak menabrak paragraf tetap tersebut.
         //
-        // Sama seperti judul artikel di bawah — sebelumnya di-render 1 baris tanpa
-        // pengaman lebar sama sekali, jadi nama reviewer yang panjang (mis. dengan
-        // banyak gelar akademik) berisiko meluber keluar border persis seperti kasus
-        // judul artikel. Dibungkus pakai wrapTextByWidth() yang sama. Ruang vertikal
-        // sampai judul artikel mulai (Y=1500) cukup lega (~380px) untuk menampung
-        // nama 2 baris tanpa tabrakan, jadi posisi Y judul artikel TIDAK digeser.
+        // Diukur langsung dari contoh sertifikat asli itu (nilai dalam rasio
+        // terhadap tinggi kanvas, supaya tetap benar walau template diganti
+        // dengan resolusi lain yang proporsinya sama):
+        // - Zona nama   : Y 599-838  dari tinggi 1811px (antara paragraf pembuka
+        //                 dan "in Recognition of Contribution...")
+        // - Zona judul  : Y 887-1231 dari tinggi 1811px (antara "Sebagai bentuk
+        //                 penghargaan..." dan "Thank you your contribution...")
+        //
+        // Posisi Y sekarang dihitung supaya teks SELALU DI-CENTER VERTIKAL di
+        // dalam zona tsb, berapa pun jumlah barisnya (1 baris nama pendek vs 2
+        // baris nama panjang, dst) — bukan mulai dari titik tetap seperti
+        // sebelumnya. Ditambah wrapTextWithAutoShrink(): kalau nama/judul
+        // sangat panjang sampai baris yang dihasilkan tidak lagi muat dengan
+        // aman di zona (>2 baris nama, >4 baris judul), font DIKECILKAN
+        // bertahap secara otomatis supaya tidak meluber ke luar zona.
+
+        // Reviewer Name (center, di zona setelah "Sertifikat ini diberikan kepada :")
         $nameFontSize = 80;
-        $nameLines = $this->wrapTextByWidth($reviewerName, $fontBold, $nameFontSize, (int) ($width * $maxTitleWidthRatio));
-        $yNamePosition = 1120;
+        $nameMinFontSize = 50;
+        [$nameLines, $nameFontSize] = $this->wrapTextWithAutoShrink(
+            $reviewerName, $fontBold, $nameFontSize, $nameMinFontSize,
+            (int) ($width * $maxTitleWidthRatio), 2
+        );
+        $nameLineSpacing = (int) round($nameFontSize * 1.15);
+        $nameZoneTop = $height * (599 / 1811);
+        $nameZoneBottom = $height * (838 / 1811);
+        $yNamePosition = ($nameZoneTop + $nameZoneBottom) / 2 - ((count($nameLines) - 1) * $nameLineSpacing) / 2;
         foreach ($nameLines as $nameLine) {
             $image->text($nameLine, $width / 2, $yNamePosition, function($font) use ($fontBold, $nameFontSize) {
                 $font->filename($fontBold);
@@ -302,25 +355,25 @@ class CertificateController extends Controller
                 $font->align('center');
                 $font->valign('middle');
             });
-            $yNamePosition += 95; // Line spacing (font lebih besar dari judul, spasi sedikit lebih lebar)
+            $yNamePosition += $nameLineSpacing;
         }
-        
-        // Article Title (center, posisi setelah "Manuscript Entitled :")
-        //
-        // DULU dibungkus pakai wordwrap($articleTitle, 100, "\n") — membagi baris
-        // berdasar JUMLAH KARAKTER, bukan lebar piksel sesungguhnya saat dirender.
-        // Di ukuran font 60 (bold), 100 karakter bisa jadi ~3500-4500px lebar —
-        // SAMA ATAU LEBIH LEBAR dari kanvas sertifikat sendiri (3508px)! Itu sebab
-        // judul artikel yang panjang meluber keluar dari border kiri & kanan
-        // (dilaporkan user, judul "PERKEMBANGAN BUDAYA ISLAM..." terpotong di
-        // kedua sisi). Sekarang dibungkus berdasar LEBAR PIKSEL SESUNGGUHNYA
-        // (diukur pakai imagettfbbox() — fungsi GD asli, tidak butuh library
-        // tambahan) lewat wrapTextByWidth(), supaya baris manapun TIDAK PERNAH
-        // melebihi lebar aman yang ditentukan, berapa pun panjang teksnya.
-        $articleFontSize = 60;
-        $articleLines = $this->wrapTextByWidth($articleTitle, $fontBold, $articleFontSize, (int) ($width * $maxTitleWidthRatio));
 
-        $yArticlePosition = 1500;
+        // Article Title (center, di zona setelah "Sebagai bentuk penghargaan...")
+        //
+        // Dibungkus berdasar LEBAR PIKSEL SESUNGGUHNYA (diukur pakai
+        // imagettfbbox() — fungsi GD asli, tidak butuh library tambahan) lewat
+        // wrapTextByWidth(), supaya baris manapun TIDAK PERNAH melebihi lebar
+        // aman yang ditentukan, berapa pun panjang teksnya.
+        $articleFontSize = 60;
+        $articleMinFontSize = 40;
+        [$articleLines, $articleFontSize] = $this->wrapTextWithAutoShrink(
+            $articleTitle, $fontBold, $articleFontSize, $articleMinFontSize,
+            (int) ($width * $maxTitleWidthRatio), 4
+        );
+        $articleLineSpacing = (int) round($articleFontSize * 1.17);
+        $articleZoneTop = $height * (887 / 1811);
+        $articleZoneBottom = $height * (1231 / 1811);
+        $yArticlePosition = ($articleZoneTop + $articleZoneBottom) / 2 - ((count($articleLines) - 1) * $articleLineSpacing) / 2;
         foreach ($articleLines as $articleLine) {
             $image->text($articleLine, $width / 2, $yArticlePosition, function($font) use ($fontBold, $articleFontSize) {
                 $font->filename($fontBold);
@@ -329,7 +382,7 @@ class CertificateController extends Controller
                 $font->align('center');
                 $font->valign('middle');
             });
-            $yArticlePosition += 70; // Line spacing
+            $yArticlePosition += $articleLineSpacing;
         }
         
         // Tanggal di center (sesuai kotak merah di bawah)

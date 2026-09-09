@@ -295,4 +295,145 @@ class ReviewerCertificateVerifyTest extends TestCase
         @unlink($fullPath);
         @unlink($dummyPath);
     }
+
+    /**
+     * Regresi 9 Sept 2026: nama reviewer & judul artikel tumpang tindih dengan
+     * paragraf tetap di template sertifikat (dilaporkan user via screenshot) —
+     * posisi Y sebelumnya tetap (fixed: 1120 & 1500) tidak peduli berapa
+     * banyak baris yang dihasilkan wrapTextByWidth(), jadi kalau nama/judul
+     * menghasilkan lebih banyak baris dari yang diperkirakan, teks meluber ke
+     * zona paragraf tetangga. wrapTextWithAutoShrink() menambahkan pengaman:
+     * kalau baris > $maxLines, font dikecilkan bertahap sampai muat atau
+     * sampai $minFontSize tercapai.
+     */
+    private function font(): string
+    {
+        return file_exists(public_path('fonts/arial-bold.ttf'))
+            ? public_path('fonts/arial-bold.ttf')
+            : public_path('fonts/arial.ttf');
+    }
+
+    public function test_wrap_text_with_auto_shrink_keeps_original_font_size_when_lines_already_fit(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        [$lines, $fontSize] = $method->invoke($controller, 'Dr. Test Reviewer', $this->font(), 80, 50, 2455, 2);
+
+        $this->assertSame(80, $fontSize, 'Teks pendek tidak perlu mengecilkan font sama sekali');
+        $this->assertCount(1, $lines);
+    }
+
+    public function test_wrap_text_with_auto_shrink_reduces_font_size_for_reviewer_name_with_many_gelar(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        // Nama + gelar akademik sangat panjang: 3 baris di font 80 (>maxLines
+        // 2 yang aman untuk zona nama), harus mengecil sampai muat 2 baris.
+        $name = strtoupper('Prof. Dr. H. Muhammad Abdurrahman Wahyu Kusuma Wardhana Al Faruqi Nasution, S.Pd., M.Pd., M.Hum., Ph.D.');
+        $maxWidth = (int) (3508 * 0.70);
+
+        [$lines, $fontSize] = $method->invoke($controller, $name, $this->font(), 80, 50, $maxWidth, 2);
+
+        $this->assertLessThan(80, $fontSize, 'Font seharusnya dikecilkan karena nama menghasilkan >2 baris di ukuran asli');
+        $this->assertCount(2, $lines, 'Setelah dikecilkan, nama harus muat dalam 2 baris (batas aman zona nama)');
+
+        // Tidak ada kata yang hilang/dipenggal selama proses shrink+rewrap.
+        $this->assertEquals(
+            preg_replace('/\s+/', ' ', $name),
+            implode(' ', $lines)
+        );
+    }
+
+    public function test_wrap_text_with_auto_shrink_reduces_font_size_for_very_long_article_title(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        // Judul sangat panjang: 6 baris di font 60 (>maxLines 4 yang aman
+        // untuk zona judul), harus mengecil sampai muat 4 baris.
+        $title = 'Analisis Komprehensif Dampak Transformasi Digital Terhadap Perkembangan Budaya '
+            . 'Islam Kontemporer Inovasi Produksi Konten Keagamaan Ranah Digital Serta '
+            . 'Implikasinya Bagi Generasi Muda Di Era Globalisasi Modern Saat Ini Dan '
+            . 'Tantangan Depan Bagi Masyarakat';
+        $maxWidth = (int) (3508 * 0.70);
+
+        [$lines, $fontSize] = $method->invoke($controller, $title, $this->font(), 60, 40, $maxWidth, 4);
+
+        $this->assertLessThan(60, $fontSize, 'Font seharusnya dikecilkan karena judul menghasilkan >4 baris di ukuran asli');
+        $this->assertLessThanOrEqual(4, count($lines), 'Setelah dikecilkan, judul harus muat dalam 4 baris (batas aman zona judul)');
+        $this->assertGreaterThanOrEqual(40, $fontSize, 'Font tidak boleh dikecilkan melewati batas minimum');
+    }
+
+    public function test_wrap_text_with_auto_shrink_stops_at_min_font_size_even_if_still_too_many_lines(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        $name = strtoupper('Prof. Dr. H. Muhammad Abdurrahman Wahyu Kusuma Wardhana Al Faruqi Nasution, S.Pd., M.Pd., M.Hum., Ph.D.');
+        $maxWidth = (int) (3508 * 0.70);
+
+        // maxLines=1 sengaja mustahil dicapai teks ini walau font dikecilkan
+        // habis-habisan — pastikan fungsi berhenti di $minFontSize (tidak
+        // infinite loop, tidak mengecil sampai tak terbaca) walau constraint
+        // belum sepenuhnya terpenuhi.
+        [$lines, $fontSize] = $method->invoke($controller, $name, $this->font(), 80, 50, $maxWidth, 1);
+
+        $this->assertSame(50, $fontSize, 'Harus berhenti tepat di minFontSize, tidak lebih kecil lagi');
+        $this->assertGreaterThan(1, count($lines), 'Constraint maxLines=1 memang tidak realistis dicapai teks ini, best-effort saja');
+    }
+
+    /**
+     * Uji integrasi: generateCertificate() dengan nama & judul yang SANGAT
+     * panjang (skenario yang dulu memicu tumpang tindih) tetap selesai tanpa
+     * error dan menghasilkan file — membuktikan wrapTextWithAutoShrink() +
+     * perhitungan Y ber-center di generateCertificate() bekerja end-to-end,
+     * bukan cuma di unit function-nya saja.
+     */
+    public function test_generate_certificate_completes_with_very_long_name_and_title_using_dummy_background(): void
+    {
+        $reviewer = $this->makeReviewer([
+            'name' => 'Prof. Dr. H. Muhammad Abdurrahman Wahyu Kusuma Wardhana Al Faruqi Nasution, S.Pd., M.Pd., M.Hum., Ph.D.',
+        ]);
+        $assignment = $this->makeApprovedAssignment([
+            'reviewer_id' => $reviewer->id,
+            'article_title' => 'Analisis Komprehensif Dampak Transformasi Digital Terhadap Perkembangan Budaya '
+                . 'Islam Kontemporer Inovasi Produksi Konten Keagamaan Ranah Digital Serta '
+                . 'Implikasinya Bagi Generasi Muda Di Era Globalisasi Modern Saat Ini Dan '
+                . 'Tantangan Depan Bagi Masyarakat',
+        ]);
+
+        $certificate = Certificate::create([
+            'name' => 'Template Test',
+            'file_path' => 'certificates/test-' . uniqid() . '.jpg',
+            'is_active' => true,
+        ]);
+
+        $dummyPath = storage_path('app/public/' . $certificate->file_path);
+        @mkdir(dirname($dummyPath), 0755, true);
+        $im = imagecreatetruecolor(2560, 1811);
+        imagefill($im, 0, 0, imagecolorallocate($im, 255, 255, 255));
+        imagejpeg($im, $dummyPath, 80);
+        imagedestroy($im);
+
+        $this->actingAs($reviewer);
+
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'generateCertificate');
+        $method->setAccessible(true);
+        $result = $method->invoke($controller, $assignment, true);
+
+        $this->assertNotFalse($result);
+        $fullPath = public_path($result);
+        $this->assertFileExists($fullPath);
+        $this->assertGreaterThan(0, filesize($fullPath));
+
+        @unlink($fullPath);
+        @unlink($dummyPath);
+    }
 }
