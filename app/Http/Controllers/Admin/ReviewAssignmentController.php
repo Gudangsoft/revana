@@ -526,6 +526,43 @@ class ReviewAssignmentController extends Controller
         return back()->with('success', 'Deadline berhasil diperpanjang ke ' . $assignment->deadline->format('d M Y') . '.');
     }
 
+    /**
+     * Simpan/perbarui "Surat Tugas" untuk assignment ini — boleh berupa FILE
+     * yang diupload ATAU LINK eksternal (boleh salah satu, boleh dua-duanya).
+     * Reviewer bisa mengunduhnya dari halaman tugas mereka setelah ini diisi
+     * (lihat Reviewer\TaskController::show() & reviewer/tasks/show.blade.php).
+     */
+    public function uploadLetter(Request $request, ReviewAssignment $assignment)
+    {
+        $validated = $request->validate([
+            'assignment_letter_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // Max 10MB
+            'assignment_letter_link' => 'nullable|url|max:2048',
+        ]);
+
+        if (empty($validated['assignment_letter_link']) && !$request->hasFile('assignment_letter_file')) {
+            return back()->with('error', 'Isi salah satu: upload file surat tugas atau isi link-nya.');
+        }
+
+        $update = [];
+
+        if ($request->hasFile('assignment_letter_file')) {
+            $file = $request->file('assignment_letter_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('assignments/letters', $filename, 'public');
+            $update['assignment_letter_file'] = 'assignments/letters/' . $filename;
+        }
+
+        if ($request->filled('assignment_letter_link')) {
+            $update['assignment_letter_link'] = $validated['assignment_letter_link'];
+        }
+
+        $assignment->update($update);
+
+        ActivityLog::record('assignment_letter_uploaded', $assignment, [], $update);
+
+        return back()->with('success', 'Surat Tugas berhasil disimpan.');
+    }
+
     public function destroy(ReviewAssignment $assignment)
     {
         if ($assignment->status !== 'PENDING') {

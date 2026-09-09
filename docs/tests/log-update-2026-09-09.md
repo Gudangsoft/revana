@@ -387,7 +387,8 @@ reproduksi HTTP nyata (bukan cuma baca kode) ke alur `/daftar-reviewer`:
 - Direproduksi manual sebelum perbaikan: `route('admin.reviewer-registrations.index')` memang
   melempar `RouteNotFoundException` (dikonfirmasi via `php artisan route:list --name=reviewer-registrations`
   yang sebelumnya HANYA menampilkan 2 rute publik, bukan 6 rute admin).
-- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **203 passed (570 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB.
@@ -397,3 +398,51 @@ reproduksi HTTP nyata (bukan cuma baca kode) ke alur `/daftar-reviewer`:
   `/admin/reviewer-registrations` begitu perbaikan ini di-deploy. Mohon segera dicek & diproses
   (approve/reject) antrean ini setelah deploy, karena orang-orang ini sudah menunggu tanpa respons
   selama berbulan-bulan tanpa admin pernah tahu.
+
+## 10. Fitur Baru: Submit Surat Tugas (Admin) + Unduh Surat Tugas (Reviewer)
+
+**Tujuan:** User minta ditambahkan cara bagi admin untuk submit "Surat Tugas" (file atau link) per
+assignment review, dan reviewer bisa mengunduhnya dari halaman tugas mereka. Ditemukan bahwa kolom
+`assignment_letter_link` sudah ada di skema `review_assignments` sejak lama, tapi selalu di-set
+`null` saat assignment dibuat dan tidak pernah ada UI untuk mengisinya di admin maupun menampilkannya
+di reviewer — fitur ini sekarang melengkapi bagian yang hilang tersebut.
+
+Ditanyakan ke user lokasi/mekanisme yang dimaksud (karena ada beberapa kemungkinan penempatan yang
+berdampak besar ke desain); dipilih: **admin submit langsung di halaman detail Penugasan Review yang
+sudah ada** (bukan menu sidebar terpisah baru).
+
+**Perbaikan:**
+- Kolom baru `assignment_letter_file` ditambahkan (mendampingi `assignment_letter_link` yang sudah
+  ada) — mengikuti pola `proof_file`/`proof_url` yang sudah dipakai di `reward_redemptions` untuk
+  kasus serupa (dokumen boleh file ATAU link).
+- Admin: di halaman `admin.assignments.show`, ditambah baris "Surat Tugas" (menampilkan tombol
+  download/buka link kalau sudah diisi) + tombol "Submit/Ganti Surat Tugas" yang membuka modal berisi
+  input file upload DAN input link — boleh isi salah satu atau dua-duanya.
+- Reviewer: di halaman `reviewer.tasks.show`, ditambah info "Surat Tugas" di panel info artikel, DAN
+  tombol download/buka link yang lebih menonjol di panel "Aksi" (sejajar dengan tombol "Download
+  Artikel untuk Review" yang sudah ada) — berlaku untuk reviewer di slot manapun (1-5), bukan cuma
+  reviewer utama.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `database/migrations/2026_09_09_175347_add_assignment_letter_file_to_review_assignments_table.php` (baru) | Tambah kolom `assignment_letter_file` (nullable string) di `review_assignments`. |
+| `app/Models/ReviewAssignment.php` | Tambah `assignment_letter_file` ke `$fillable`. |
+| `app/Http/Controllers/Admin/ReviewAssignmentController.php` | Tambah `uploadLetter()` — validasi file (pdf/doc/docx/jpg/jpeg/png, maks 10MB) dan/atau link, tolak kalau dua-duanya kosong, simpan file ke `storage/app/public/assignments/letters/`, catat `ActivityLog`. |
+| `routes/web.php` | Tambah rute `POST /admin/assignments/{assignment}/upload-letter` → `admin.assignments.upload-letter`. |
+| `resources/views/admin/assignments/show.blade.php` | Tambah baris "Surat Tugas" (tombol download/link kalau ada) + tombol "Submit/Ganti Surat Tugas" + modal upload (file & link). |
+| `resources/views/reviewer/tasks/show.blade.php` | Tambah info "Surat Tugas" di panel Informasi Artikel, dan tombol download/buka link di panel Aksi. |
+| `tests/Feature/ReviewAssignmentLetterTest.php` (baru) | 10 test: upload file berhasil & tersimpan (`Storage::fake`), set link tanpa file, validasi menolak kalau kosong dua-duanya, validasi menolak format link tidak valid, halaman admin menampilkan tombol yang benar sesuai status, halaman reviewer menampilkan tombol download/link/pesan "belum diunggah" sesuai kondisi, dan reviewer di slot ke-2 (bukan cuma reviewer utama) tetap bisa lihat surat tugas yang sama. |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewAssignmentLetterTest.php` → **10 passed (29 assertions)**.
+- Full regression suite `php artisan test tests/Feature` → **213 passed (599 assertions)** — tidak
+  ada regresi ke fitur lain.
+- Migration dijalankan & dikonfirmasi berhasil di database lokal (`php artisan migrate`).
+
+### Catatan Deploy
+- **WAJIB jalankan migration di production**: `php artisan migrate --force` (menambah 1 kolom
+  nullable, aman untuk tabel yang sudah berisi data, tidak mengubah data yang sudah ada).
+- File surat tugas disimpan di `storage/app/public/assignments/letters/` — pastikan
+  `php artisan storage:link` sudah pernah dijalankan di production (biasanya sudah, dipakai fitur
+  file lain di sistem ini juga).

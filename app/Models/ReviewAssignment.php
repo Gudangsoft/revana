@@ -21,6 +21,7 @@ class ReviewAssignment extends Model
         'reviewer_username',
         'reviewer_password',
         'assignment_letter_link',
+        'assignment_letter_file',
         'certificate_link',
         'deadline',
         'language',

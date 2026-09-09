@@ -234,6 +234,32 @@
                         @endif
                     </div>
                 </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <strong>Surat Tugas:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        @if($assignment->assignment_letter_file || $assignment->assignment_letter_link)
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                @if($assignment->assignment_letter_file)
+                                    <a href="{{ asset('storage/' . $assignment->assignment_letter_file) }}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="bi bi-download"></i> Download File
+                                    </a>
+                                @endif
+                                @if($assignment->assignment_letter_link)
+                                    <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-link-45deg"></i> Buka Link
+                                    </a>
+                                @endif
+                            </div>
+                        @else
+                            <span class="text-muted d-block mb-2">Surat tugas belum diunggah — reviewer belum bisa mengunduhnya.</span>
+                        @endif
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadLetterModal">
+                            <i class="bi bi-upload"></i> {{ ($assignment->assignment_letter_file || $assignment->assignment_letter_link) ? 'Ganti Surat Tugas' : 'Submit Surat Tugas' }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -943,6 +969,40 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Perpanjang Deadline</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Surat Tugas Modal -->
+<div class="modal fade" id="uploadLetterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('admin.assignments.upload-letter', $assignment) }}" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-upload"></i> Submit Surat Tugas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">
+                        Isi salah satu (boleh dua-duanya) — reviewer akan bisa mengunduhnya dari halaman tugas mereka.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Upload File Surat Tugas</label>
+                        <input type="file" name="assignment_letter_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <small class="text-muted">PDF/DOC/DOCX/JPG/PNG, maks 10MB.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Atau Link Surat Tugas</label>
+                        <input type="url" name="assignment_letter_link" class="form-control"
+                               placeholder="https://..." value="{{ $assignment->assignment_letter_link }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Surat Tugas</button>
                 </div>
             </form>
         </div>

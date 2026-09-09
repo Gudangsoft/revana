@@ -297,6 +297,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/assignments/{assignment}', [AdminReviewAssignmentController::class, 'destroy'])->name('assignments.destroy');
         Route::post('/assignments/{assignment}/extend-deadline', [AdminReviewAssignmentController::class, 'extendDeadline'])->name('assignments.extend-deadline');
         Route::post('/assignments/{assignment}/change-reviewer', [AdminReviewAssignmentController::class, 'changeReviewer'])->name('assignments.change-reviewer');
+        Route::post('/assignments/{assignment}/upload-letter', [AdminReviewAssignmentController::class, 'uploadLetter'])->name('assignments.upload-letter');
         
         // Reviewers
         Route::get('/reviewers', [ReviewerController::class, 'index'])->name('reviewers.index');

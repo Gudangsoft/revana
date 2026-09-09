@@ -63,6 +63,21 @@
                     @endif
                 </div>
 
+                <div class="mb-3">
+                    <strong>Surat Tugas:</strong><br>
+                    @if($assignment->assignment_letter_file)
+                        <a href="{{ asset('storage/' . $assignment->assignment_letter_file) }}" target="_blank" class="btn btn-sm btn-success mt-1">
+                            <i class="bi bi-download"></i> Unduh Surat Tugas
+                        </a>
+                    @elseif($assignment->assignment_letter_link)
+                        <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                            <i class="bi bi-link-45deg"></i> Buka Surat Tugas
+                        </a>
+                    @else
+                        <span class="text-muted">Surat tugas belum diunggah admin</span>
+                    @endif
+                </div>
+
                 @php
                     // Determine which reviewer number this user is
                     $reviewerNumber = null;
@@ -440,6 +455,22 @@
                     <a href="{{ asset('storage/' . $assignment->article_file) }}" target="_blank" class="btn btn-success w-100 mb-2">
                         <i class="bi bi-download"></i> Download Artikel untuk Review
                     </a>
+                @endif
+
+                {{-- Download/Buka Surat Tugas — file diunggah admin diprioritaskan
+                     kalau keduanya diisi, karena file selalu bisa diakses langsung
+                     tanpa tergantung ketersediaan link eksternal --}}
+                @if($assignment->assignment_letter_file)
+                    <a href="{{ asset('storage/' . $assignment->assignment_letter_file) }}" target="_blank" class="btn btn-outline-success w-100 mb-2">
+                        <i class="bi bi-download"></i> Unduh Surat Tugas
+                    </a>
+                @elseif($assignment->assignment_letter_link)
+                    <a href="{{ $assignment->assignment_letter_link }}" target="_blank" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-link-45deg"></i> Buka Surat Tugas
+                    </a>
+                @endif
+
+                @if($assignment->article_file || $assignment->assignment_letter_file || $assignment->assignment_letter_link)
                     <hr>
                 @endif
 
