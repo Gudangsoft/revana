@@ -569,4 +569,86 @@ class ReviewerCertificateVerifyTest extends TestCase
         @unlink($fullPath);
         @unlink($dummyPath);
     }
+
+    /**
+     * Regresi 9 Sept 2026 (lanjutan ke-5): QR code sebelumnya ditaruh di
+     * pojok kiri bawah ($qrX = 150, sebaris dengan tanggal), dilaporkan user
+     * (screenshot) — diminta dipindah ke TENGAH dan diletakkan DI ATAS
+     * tanggal, dengan ukuran agak diperkecil (260px → 200px).
+     *
+     * Diverifikasi dengan cara scan piksel BENAR-BENAR HITAM (modul QR) pada
+     * background dummy putih polos — teks emas sertifikat ('#C9A961' /
+     * '#8B6914') jauh lebih terang jadi tidak ikut kejaring filter ini,
+     * sehingga bounding box yang ditemukan murni milik QR.
+     */
+    public function test_qr_code_is_horizontally_centered_and_positioned_above_the_date(): void
+    {
+        $reviewer = $this->makeReviewer(['name' => 'Dr. Qr Position Test']);
+        $assignment = $this->makeApprovedAssignment(['reviewer_id' => $reviewer->id]);
+
+        $certificate = Certificate::create([
+            'name' => 'Template Test',
+            'file_path' => 'certificates/test-' . uniqid() . '.jpg',
+            'is_active' => true,
+        ]);
+
+        $width = 2560;
+        $height = 1811;
+        $dummyPath = storage_path('app/public/' . $certificate->file_path);
+        @mkdir(dirname($dummyPath), 0755, true);
+        $im = imagecreatetruecolor($width, $height);
+        imagefill($im, 0, 0, imagecolorallocate($im, 255, 255, 255));
+        imagejpeg($im, $dummyPath, 100); // kualitas maks supaya modul QR tidak buram kompresi
+        imagedestroy($im);
+
+        $this->actingAs($reviewer);
+
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'generateCertificate');
+        $method->setAccessible(true);
+        $result = $method->invoke($controller, $assignment, true);
+
+        $fullPath = public_path($result);
+        $this->assertFileExists($fullPath);
+
+        $rendered = imagecreatefromjpeg($fullPath);
+        $renderedWidth = imagesx($rendered);
+        $renderedHeight = imagesy($rendered);
+
+        $minX = $renderedWidth;
+        $maxX = 0;
+        $maxY = 0;
+        $found = false;
+        for ($y = 0; $y < $renderedHeight; $y += 3) {
+            for ($x = 0; $x < $renderedWidth; $x += 3) {
+                $rgb = imagecolorat($rendered, $x, $y);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+                if ($r < 60 && $g < 60 && $b < 60) {
+                    $found = true;
+                    $minX = min($minX, $x);
+                    $maxX = max($maxX, $x);
+                    $maxY = max($maxY, $y);
+                }
+            }
+        }
+        imagedestroy($rendered);
+
+        $this->assertTrue($found, 'Tidak ada piksel hitam pekat ditemukan — QR seharusnya ada di gambar');
+
+        $qrCenterX = ($minX + $maxX) / 2;
+        $this->assertEqualsWithDelta($renderedWidth / 2, $qrCenterX, $renderedWidth * 0.05,
+            'QR harus di tengah secara horizontal (toleransi 5% lebar kanvas)');
+
+        // Tanggal dirender di Y = height-180 (valign middle, font 55) —
+        // bagian atasnya kira-kira height-220. QR (bounding box piksel
+        // hitam) harus berakhir jelas DI ATAS itu, tidak tumpang tindih.
+        $dateApproxTop = $renderedHeight - 220;
+        $this->assertLessThan($dateApproxTop, $maxY,
+            'QR harus berada di atas tanggal, tidak tumpang tindih dengannya');
+
+        @unlink($fullPath);
+        @unlink($dummyPath);
+    }
 }

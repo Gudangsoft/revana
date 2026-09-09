@@ -445,20 +445,27 @@ class CertificateController extends Controller
             $font->valign('middle');
         });
 
-        // QR Code verifikasi — pojok kiri bawah. Siapa pun yang scan bisa memastikan
-        // sertifikat ini asli & review-nya benar sudah APPROVED, tanpa perlu login
-        // (lihat verify() di atas). CATATAN posisi: sama seperti info text di atas,
-        // koordinat ini perkiraan (file template AKTIF tidak tersedia untuk dites
-        // render langsung) — cek visual hasil asli, geser $qrX/$qrY kalau tumpang
-        // tindih dengan elemen desain lain.
+        // QR Code verifikasi — di-center secara horizontal, di atas tanggal.
+        // Siapa pun yang scan bisa memastikan sertifikat ini asli & review-nya
+        // benar sudah APPROVED, tanpa perlu login (lihat verify() di atas).
+        //
+        // Perbaikan 9 Sept 2026 (lanjutan ke-5): sebelumnya QR ditaruh di
+        // pojok kiri bawah ($qrX = 150, ukuran 260x260) — sebaris dengan
+        // tanggal, bukan di atasnya. Sesuai permintaan user: dipindah ke
+        // TENGAH (horizontal) dan diletakkan DI ATAS tanggal, ukurannya juga
+        // agak diperkecil (260 → 200). $qrY (posisi atas) TIDAK diubah dari
+        // versi sebelumnya karena sudah terbukti aman di screenshot asli
+        // (ada jarak bersih ke paragraf tetap di atasnya) — ukuran yang lebih
+        // kecil otomatis menambah jarak ke tanggal di bawahnya juga.
         $verifyUrl = route('reviewer-certificate.verify', ['assignment' => $assignment->id, 'reviewerId' => $reviewer->id]);
         $qrPng = $this->renderQrPng($verifyUrl);
-        $qrImage = $manager->read($qrPng)->resize(260, 260);
-        $qrX = 150;
+        $qrSize = 200;
+        $qrImage = $manager->read($qrPng)->resize($qrSize, $qrSize);
+        $qrX = ($width - $qrSize) / 2;
         $qrY = $height - 480;
-        $image->place($qrImage, 'top-left', $qrX, $qrY);
+        $image->place($qrImage, 'top-left', (int) $qrX, $qrY);
 
-        $image->text('Scan untuk verifikasi', $qrX + 130, $qrY + 285, function($font) use ($fontRegular) {
+        $image->text('Scan untuk verifikasi', $qrX + ($qrSize / 2), $qrY + $qrSize + 25, function($font) use ($fontRegular) {
             $font->filename($fontRegular);
             $font->size(20);
             $font->color('#8B6914');

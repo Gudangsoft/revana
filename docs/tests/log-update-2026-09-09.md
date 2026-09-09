@@ -171,3 +171,40 @@ sebanyak sebelumnya.
 - Ini putaran ke-4 kalibrasi berbasis screenshot — mohon user cek sekali lagi hasil akhirnya di
   production untuk konfirmasi ukuran font judul sekarang sudah pas (tidak kebesaran seperti awal,
   tidak kekecilan seperti setelah perbaikan #2).
+
+## 5. Perbaikan Lanjutan: QR Code Dipindah ke Tengah, Diletakkan di Atas Tanggal, Ukuran Diperkecil
+
+**Tujuan:** Screenshot kelima menunjukkan QR code verifikasi masih di pojok kiri bawah, sebaris
+dengan tanggal ("30 Juli 2026") di sisi kanannya. User minta QR dipindah ke tengah (horizontal) dan
+diletakkan DI ATAS tanggal (bukan sebaris), ukurannya juga agak diperkecil.
+
+**Perbaikan:**
+- QR di-center secara horizontal: `$qrX` dari nilai tetap `150` (pojok kiri) menjadi
+  `($width - $qrSize) / 2`.
+- Ukuran QR diperkecil dari **260px → 200px** (variabel `$qrSize`, dipakai juga untuk `resize()`
+  supaya konsisten).
+- Posisi vertikal (`$qrY = $height - 480`) TIDAK diubah — sudah terbukti aman (ada jarak bersih ke
+  paragraf tetap di atasnya berdasarkan screenshot sebelumnya). Karena ukuran QR mengecil, otomatis
+  menambah jarak ke tanggal di bawahnya (dari ~15px jadi ~75px) — hasil akhirnya QR benar-benar
+  berada DI ATAS tanggal, bukan lagi sebaris dengannya.
+- Label "Scan untuk verifikasi" ikut disesuaikan offsetnya supaya tetap center persis di bawah QR.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `$qrX` tetap (150) → dihitung dinamis untuk center horizontal; `$qrSize` baru (200, sebelumnya hardcode 260 di `resize()`); label offset disesuaikan mengikuti `$qrSize`. |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Tambah test baru `test_qr_code_is_horizontally_centered_and_positioned_above_the_date` — men-generate sertifikat dengan background dummy putih polos, scan piksel BENAR-BENAR HITAM (modul QR, teks emas sertifikat tidak ikut kejaring), verifikasi bounding box QR center secara horizontal dan berada di atas posisi tanggal. |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **22 passed (74 assertions)**,
+  termasuk test posisi QR baru yang memverifikasi langsung dari piksel gambar hasil render (bukan
+  cuma baca angka koordinat di kode).
+- Full regression suite `php artisan test tests/Feature` dijalankan ulang setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Ukuran QR baru (200px) masih jauh di atas ambang aman-scan yang pernah ditetapkan untuk fitur QR
+  lain di sistem ini (160px, lihat `QrVerificationDensityTest.php`), jadi tidak ada risiko QR jadi
+  sulit di-scan akibat pengecilan ini.
+- Putaran ke-5 kalibrasi berbasis screenshot — mohon user cek sekali lagi hasil akhirnya di
+  production.
