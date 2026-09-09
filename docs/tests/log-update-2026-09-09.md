@@ -199,12 +199,54 @@ diletakkan DI ATAS tanggal (bukan sebaris), ukurannya juga agak diperkecil.
 - `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **22 passed (74 assertions)**,
   termasuk test posisi QR baru yang memverifikasi langsung dari piksel gambar hasil render (bukan
   cuma baca angka koordinat di kode).
+- Full regression suite `php artisan test tests/Feature` → **184 passed (512 assertions)** — tidak
+  ada regresi ke fitur lain.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Ukuran QR baru (200px, lihat juga #6 di bawah — direvisi lagi ke 150px) masih jauh di atas ambang
+  aman-scan yang pernah ditetapkan untuk fitur QR lain di sistem ini (160px, lihat
+  `QrVerificationDensityTest.php`), jadi tidak ada risiko QR jadi sulit di-scan akibat pengecilan ini.
+- Putaran ke-5 kalibrasi berbasis screenshot — mohon user cek sekali lagi hasil akhirnya di
+  production.
+
+## 6. Perbaikan Lanjutan: QR Menabrak Paragraf di Atasnya Setelah Di-center
+
+**Tujuan:** Setelah perbaikan #5 (QR di-center + dipindah ke atas tanggal), user kirim screenshot
+baru menunjukkan QR jadi MENABRAK paragraf tetap di atasnya ("...standard of academic i[ntegrity]" /
+"...integritas akademik yang tinggi da[lam]..."). Instruksi user: "turunkan, nabrak dengan yang
+atas".
+
+**Analisis akar masalah:** `$qrY = $height - 480` (≈Y1331 di referensi 1811px) ternyata SUDAH
+tumpang tindih dengan akhir paragraf tetap tersebut (berakhir ~Y1380, berdasarkan pengukuran
+screenshot pertama di awal sesi ini) — SEBELUM di-center, ini tidak kelihatan karena QR ada di pojok
+KIRI ($qrX = 150) sedangkan baris terakhir paragraf yang di-center tidak menjangkau sejauh itu ke
+kiri. Begitu QR dipindah ke tengah (#5), posisinya pas bertabrakan dengan bagian tengah paragraf itu.
+
+Ruang kosong yang tersedia antara akhir paragraf (~Y1380) dan awal tanggal (~Y1598) cuma ~218px —
+sempit untuk menampung QR + label dengan aman di kedua sisi.
+
+**Perbaikan:**
+- `$qrY` diturunkan dari `$height - 480` menjadi **`$height - 410`** (mulai ~Y1401, ~21px setelah
+  akhir paragraf).
+- Ukuran QR dikecilkan lagi dari **200px → 150px** supaya blok QR+label tetap muat dengan margin
+  aman di kedua sisi (ke paragraf di atas maupun ke tanggal di bawah) dalam ruang yang sempit itu.
+- Jarak QR-ke-label dirapatkan dari 25px → 15px untuk memadatkan tinggi blok.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `$qrY` dari `$height - 480` → `$height - 410`; `$qrSize` 200 → 150; jarak label 25 → 15. |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Test posisi QR ditambah assertion baru: QR harus mulai SETELAH ambang batas akhir paragraf (penjaga regresi supaya `$qrY` tidak sengaja digeser naik lagi). |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **22 passed (75 assertions)**.
 - Full regression suite `php artisan test tests/Feature` dijalankan ulang setelah perubahan ini.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB.
-- Ukuran QR baru (200px) masih jauh di atas ambang aman-scan yang pernah ditetapkan untuk fitur QR
-  lain di sistem ini (160px, lihat `QrVerificationDensityTest.php`), jadi tidak ada risiko QR jadi
-  sulit di-scan akibat pengecilan ini.
-- Putaran ke-5 kalibrasi berbasis screenshot — mohon user cek sekali lagi hasil akhirnya di
-  production.
+- QR 150px masih jauh di atas ambang aman-scan 160px yang jadi acuan (dari `QrVerificationDensityTest.php` untuk fitur QR Kwitansi/Invoice) — margin cukup tipis tapi verifikasi manual `imagettfbbox`/kalkulasi modul menunjukkan kepadatan piksel per modul QR sertifikat ini tetap jauh di atas ambang minimum aman-scan karena konten URL verifikasi pendek (moduleCount kecil).
+- Ini putaran ke-6 kalibrasi — ruang antara paragraf & tanggal genuinely sempit (~218px), jadi hasil
+  ini adalah upaya terbaik berdasarkan pengukuran yang ada. **Sangat disarankan user cek sekali lagi**
+  sertifikat baru di production — kalau masih ada sedikit tabrakan di salah satu sisi, beri tahu sisi
+  mana (atas ke paragraf, atau bawah ke tanggal) supaya bisa dikalibrasi lebih presisi.

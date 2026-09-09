@@ -571,10 +571,17 @@ class ReviewerCertificateVerifyTest extends TestCase
     }
 
     /**
-     * Regresi 9 Sept 2026 (lanjutan ke-5): QR code sebelumnya ditaruh di
-     * pojok kiri bawah ($qrX = 150, sebaris dengan tanggal), dilaporkan user
-     * (screenshot) — diminta dipindah ke TENGAH dan diletakkan DI ATAS
-     * tanggal, dengan ukuran agak diperkecil (260px → 200px).
+     * Regresi 9 Sept 2026 (lanjutan ke-5 & ke-6): QR code sebelumnya ditaruh
+     * di pojok kiri bawah ($qrX = 150, sebaris dengan tanggal), diminta
+     * dipindah ke TENGAH dan diletakkan DI ATAS tanggal (ukuran 260→200px).
+     * Setelah di-center, ternyata QR jadi menabrak paragraf tetap di atasnya
+     * (baris terakhir paragraf itu ternyata mencapai posisi tengah kanvas,
+     * cuma tidak kelihatan dulu karena QR ada di pojok kiri yang tidak
+     * dijangkau baris tsb). Diperbaiki dengan menurunkan $qrY (mulai lebih
+     * rendah, setelah akhir paragraf ~Y1380 di referensi 1811px) DAN
+     * mengecilkan lagi ukuran QR (200→150) supaya seluruh blok (QR+label)
+     * tetap muat dengan aman sebelum tanggal mulai (~Y1598) — ruang di
+     * antara paragraf & tanggal ini sempit.
      *
      * Diverifikasi dengan cara scan piksel BENAR-BENAR HITAM (modul QR) pada
      * background dummy putih polos — teks emas sertifikat ('#C9A961' /
@@ -617,6 +624,7 @@ class ReviewerCertificateVerifyTest extends TestCase
 
         $minX = $renderedWidth;
         $maxX = 0;
+        $minY = $renderedHeight;
         $maxY = 0;
         $found = false;
         for ($y = 0; $y < $renderedHeight; $y += 3) {
@@ -629,6 +637,7 @@ class ReviewerCertificateVerifyTest extends TestCase
                     $found = true;
                     $minX = min($minX, $x);
                     $maxX = max($maxX, $x);
+                    $minY = min($minY, $y);
                     $maxY = max($maxY, $y);
                 }
             }
@@ -640,6 +649,15 @@ class ReviewerCertificateVerifyTest extends TestCase
         $qrCenterX = ($minX + $maxX) / 2;
         $this->assertEqualsWithDelta($renderedWidth / 2, $qrCenterX, $renderedWidth * 0.05,
             'QR harus di tengah secara horizontal (toleransi 5% lebar kanvas)');
+
+        // Paragraf tetap "...integritas akademik yang tinggi dalam publikasi
+        // penelitian." di template asli berakhir ~Y1380 (referensi 1811px).
+        // QR TIDAK BOLEH mulai lebih tinggi dari itu (dengan margin) — ini
+        // penjaga regresi supaya $qrY tidak sengaja digeser naik lagi
+        // sampai menabrak paragraf seperti yang dilaporkan user.
+        $paragraphApproxBottom = $renderedHeight - 430; // ~Y1381 di referensi 1811px
+        $this->assertGreaterThan($paragraphApproxBottom, $minY,
+            'QR harus mulai SETELAH akhir paragraf tetap di atasnya, tidak lagi menabrak seperti sebelum perbaikan lanjutan ke-6');
 
         // Tanggal dirender di Y = height-180 (valign middle, font 55) —
         // bagian atasnya kira-kira height-220. QR (bounding box piksel

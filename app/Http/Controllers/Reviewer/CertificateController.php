@@ -453,19 +453,34 @@ class CertificateController extends Controller
         // pojok kiri bawah ($qrX = 150, ukuran 260x260) — sebaris dengan
         // tanggal, bukan di atasnya. Sesuai permintaan user: dipindah ke
         // TENGAH (horizontal) dan diletakkan DI ATAS tanggal, ukurannya juga
-        // agak diperkecil (260 → 200). $qrY (posisi atas) TIDAK diubah dari
-        // versi sebelumnya karena sudah terbukti aman di screenshot asli
-        // (ada jarak bersih ke paragraf tetap di atasnya) — ukuran yang lebih
-        // kecil otomatis menambah jarak ke tanggal di bawahnya juga.
+        // agak diperkecil (260 → 200).
+        //
+        // Perbaikan 9 Sept 2026 (lanjutan ke-6): setelah di-center, user
+        // laporkan (screenshot) QR jadi MENABRAK paragraf tetap di atasnya
+        // ("...standard of academic i[ntegrity]" / "...integritas akademik
+        // yang tinggi da[lam]..."). Ternyata $qrY lama ($height - 480 =
+        // Y1331 di referensi 1811px) memang tumpang tindih dengan akhir
+        // paragraf itu (berakhir ~Y1380) — sebelumnya tidak kelihatan karena
+        // QR ada di pojok KIRI sedangkan baris terakhir paragraf yang
+        // di-center tidak menjangkau sejauh itu ke kiri; begitu QR
+        // di-center, keduanya pas bertabrakan di tengah.
+        //
+        // Diperbaiki dengan: (1) turunkan $qrY supaya mulai SETELAH akhir
+        // paragraf (~Y1380 + margin), (2) kecilkan lagi ukuran QR (200→150)
+        // dan rapatkan jarak ke label supaya seluruh blok (QR + label) tetap
+        // muat sebelum tanggal mulai (~Y1598) — ruang di antara paragraf &
+        // tanggal ini sempit (~218px), jadi ukuran & jarak sengaja dipadatkan
+        // supaya ada margin aman di ATAS (ke paragraf) maupun BAWAH (ke
+        // tanggal), bukan cuma salah satu sisi.
         $verifyUrl = route('reviewer-certificate.verify', ['assignment' => $assignment->id, 'reviewerId' => $reviewer->id]);
         $qrPng = $this->renderQrPng($verifyUrl);
-        $qrSize = 200;
+        $qrSize = 150;
         $qrImage = $manager->read($qrPng)->resize($qrSize, $qrSize);
         $qrX = ($width - $qrSize) / 2;
-        $qrY = $height - 480;
+        $qrY = $height - 410;
         $image->place($qrImage, 'top-left', (int) $qrX, $qrY);
 
-        $image->text('Scan untuk verifikasi', $qrX + ($qrSize / 2), $qrY + $qrSize + 25, function($font) use ($fontRegular) {
+        $image->text('Scan untuk verifikasi', $qrX + ($qrSize / 2), $qrY + $qrSize + 15, function($font) use ($fontRegular) {
             $font->filename($fontRegular);
             $font->size(20);
             $font->color('#8B6914');
