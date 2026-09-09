@@ -341,3 +341,59 @@ sama sekali).
 - Cache leaderboard reviewer (`leaderboard.reviewers.{tenant}`, TTL 5 menit) mulai dipakai bersama
   oleh 2 halaman — kalau data terasa "belum update" setelah reviewer baru saja review/redeem reward,
   itu normal (cache 5 menit), sama seperti perilaku halaman admin yang sudah ada sebelumnya.
+
+## 9. Pendaftaran Reviewer Baru Tidak Pernah Sampai ke Admin (Rute Admin Tidak Terdaftar)
+
+**Tujuan:** User melapor "reviewer baru saat register datane belum masuk". Diinvestigasi lewat
+reproduksi HTTP nyata (bukan cuma baca kode) ke alur `/daftar-reviewer`:
+
+1. **Data sebenarnya SUDAH tersimpan dengan benar** — `ReviewerRegistrationController::store()`
+   berhasil membuat baris di tabel `reviewer_registrations` dengan `status='pending'`, dibuktikan
+   dengan test HTTP yang mereproduksi submit form publik secara utuh.
+2. **Tapi admin TIDAK PERNAH BISA MELIHATNYA** — ditemukan 2 masalah bertingkat:
+   - Sidebar admin sama sekali tidak punya menu/link ke halaman pendaftaran reviewer (menu
+     "Daftar Reviewer" yang ada mengarah ke `admin.reviewers.index`, yaitu daftar reviewer yang
+     SUDAH disetujui, bukan yang masih pending).
+   - **Lebih fatal:** ke-6 rute admin untuk fitur ini (`index`, `show`, `approve`, `reject`,
+     `destroy`, `bulk-approve` — nama rute `admin.reviewer-registrations.*`) **TIDAK PERNAH
+     didaftarkan di `routes/web.php` sama sekali**, padahal controller & view-nya sudah lengkap
+     sejak commit lama dan view itu sendiri memanggil `route('admin.reviewer-registrations.*')` —
+     kalau saja ada link ke sana, mengkliknya akan menghasilkan `RouteNotFoundException`. Jadi
+     seluruh sisi admin dari fitur pendaftaran reviewer ini sebenarnya sudah lama tidak bisa
+     diakses sama sekali, bukan cuma "tidak kelihatan".
+
+**Perbaikan:**
+- Daftarkan 6 rute yang hilang di dalam grup `admin.` (`GET /reviewer-registrations`,
+  `POST /reviewer-registrations/bulk-approve`, `GET|POST|DELETE /reviewer-registrations/{registration}[/approve|/reject]`).
+- Tambah menu sidebar baru "Pendaftaran Reviewer" (ikon `bi-person-plus-fill`) di section Reviewer,
+  dengan badge jumlah pendaftaran `pending` — mengikuti pola badge `pendingReviewRequests`/
+  `pendingExtensionRequests` yang sudah ada di `ViewServiceProvider`.
+- Cache badge (`admin.pending_reviewer_registrations.{tenant}`, TTL 5 menit) langsung dihapus setiap
+  ada perubahan status (submit baru, approve, reject, destroy, bulk-approve) — mengikuti pola
+  `DeadlineExtensionController::clearPendingCount()` yang sudah ada, supaya badge tidak nunggu 5
+  menit untuk update setelah admin memproses sesuatu.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah 6 rute `admin.reviewer-registrations.*` yang sebelumnya tidak pernah didaftarkan sama sekali. |
+| `app/Providers/ViewServiceProvider.php` | Tambah `$pendingReviewerRegistrations` (cached 5 menit, pola sama dengan 2 badge lain yang sudah ada) di composer `admin.*`. |
+| `app/Http/Controllers/Admin/ReviewerRegistrationController.php` | Tambah `clearPendingRegistrationCount()`, dipanggil di `store()`, `approve()`, `reject()`, `destroy()`, `bulkApprove()` supaya badge sidebar langsung sinkron. |
+| `resources/views/admin/partials/sidebar.blade.php` | Tambah menu "Pendaftaran Reviewer" dengan badge, di section Reviewer (setelah "Daftar Reviewer"). |
+| `tests/Feature/ReviewerRegistrationAdminAccessTest.php` (baru) | 9 test: memastikan ke-6 rute benar-benar terdaftar (sebelumnya akan `RouteNotFoundException`), admin bisa lihat index/detail, approve/reject/bulk-approve/destroy semua berfungsi, badge sidebar muncul dengan jumlah benar, dan uji end-to-end submit form publik → langsung terlihat oleh admin. |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerRegistrationAdminAccessTest.php` → **9 passed (30 assertions)**.
+- Direproduksi manual sebelum perbaikan: `route('admin.reviewer-registrations.index')` memang
+  melempar `RouteNotFoundException` (dikonfirmasi via `php artisan route:list --name=reviewer-registrations`
+  yang sebelumnya HANYA menampilkan 2 rute publik, bukan 6 rute admin).
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- **PENTING — dikonfirmasi nyata, bukan cuma dugaan:** dicek langsung ke database lokal (mirror
+  data produksi), ada **12 pendaftaran reviewer berstatus `pending`** yang sudah menumpuk sejak
+  **6 Mei 2026** sampai **26 Juli 2026** (rentang hampir 3 bulan) — semuanya akan langsung muncul di
+  `/admin/reviewer-registrations` begitu perbaikan ini di-deploy. Mohon segera dicek & diproses
+  (approve/reject) antrean ini setelah deploy, karena orang-orang ini sudah menunggu tanpa respons
+  selama berbulan-bulan tanpa admin pernah tahu.

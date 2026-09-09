@@ -307,7 +307,24 @@ Route::middleware('auth')->group(function () {
         Route::put('/reviewers/{reviewer}', [ReviewerController::class, 'update'])->name('reviewers.update');
         Route::post('/reviewers/{reviewer}/reset-password', [ReviewerController::class, 'resetPassword'])->name('reviewers.reset-password');
         Route::post('/reviewers/{reviewer}/login-as', [ReviewerController::class, 'loginAs'])->name('reviewers.login-as');
-        
+
+        // Pendaftaran Reviewer (form publik /daftar-reviewer submit ke sini) —
+        // DITAMBAHKAN 9 Sept 2026: controller & view admin (index/show/approve/
+        // reject/destroy/bulkApprove) sudah ada sejak lama, tapi rute-nya TIDAK
+        // PERNAH didaftarkan di sini — admin.reviewer-registrations.* dipanggil
+        // di view (dan baru saja di sidebar) tapi selalu akan error
+        // "RouteNotFoundException" kalau diklik/dikunjungi, dan memang belum
+        // pernah ada link/menu ke halaman ini sama sekali. Ini sebab asli
+        // laporan user: "reviewer baru saat register datane belum masuk" — data
+        // pendaftarannya sebenarnya SUDAH tersimpan benar di tabel
+        // reviewer_registrations, tapi admin tidak pernah bisa membukanya.
+        Route::get('/reviewer-registrations', [ReviewerRegistrationController::class, 'index'])->name('reviewer-registrations.index');
+        Route::post('/reviewer-registrations/bulk-approve', [ReviewerRegistrationController::class, 'bulkApprove'])->name('reviewer-registrations.bulk-approve');
+        Route::get('/reviewer-registrations/{registration}', [ReviewerRegistrationController::class, 'show'])->name('reviewer-registrations.show');
+        Route::post('/reviewer-registrations/{registration}/approve', [ReviewerRegistrationController::class, 'approve'])->name('reviewer-registrations.approve');
+        Route::post('/reviewer-registrations/{registration}/reject', [ReviewerRegistrationController::class, 'reject'])->name('reviewer-registrations.reject');
+        Route::delete('/reviewer-registrations/{registration}', [ReviewerRegistrationController::class, 'destroy'])->name('reviewer-registrations.destroy');
+
         // Redemptions (controller missing - commented out)
         // Route::get('/redemptions', [AdminRewardRedemptionController::class, 'index'])->name('redemptions.index');
         // Route::get('/redemptions/{redemption}', [AdminRewardRedemptionController::class, 'show'])->name('redemptions.show');

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\ReviewerRegistration;
 use App\Models\FieldOfStudy;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class ReviewerRegistrationController extends Controller
@@ -87,6 +88,8 @@ class ReviewerRegistrationController extends Controller
             // Silently skip WhatsApp URL generation
         }
 
+        $this->clearPendingRegistrationCount();
+
         return redirect()->route('login')
             ->with('success', __('reviewer.registration_success'))
             ->with('whatsapp_url', $whatsappUrl);
@@ -131,6 +134,7 @@ class ReviewerRegistrationController extends Controller
             'status' => 'approved',
             'notes' => 'Pendaftaran disetujui dan akun reviewer telah dibuat.'
         ]);
+        $this->clearPendingRegistrationCount();
 
         return redirect()->route('admin.reviewer-registrations.index')
             ->with('success', 'Pendaftaran reviewer berhasil disetujui dan akun telah dibuat.');
@@ -146,6 +150,7 @@ class ReviewerRegistrationController extends Controller
             'status' => 'rejected',
             'notes' => $request->notes
         ]);
+        $this->clearPendingRegistrationCount();
 
         return redirect()->route('admin.reviewer-registrations.index')
             ->with('success', 'Pendaftaran reviewer telah ditolak.');
@@ -154,7 +159,8 @@ class ReviewerRegistrationController extends Controller
     public function destroy(ReviewerRegistration $registration)
     {
         $registration->delete();
-        
+        $this->clearPendingRegistrationCount();
+
         return redirect()->route('admin.reviewer-registrations.index')
             ->with('success', 'Data pendaftaran berhasil dihapus.');
     }
@@ -227,7 +233,20 @@ class ReviewerRegistrationController extends Controller
             }
         }
 
+        $this->clearPendingRegistrationCount();
+
         return redirect()->route('admin.reviewer-registrations.index')
             ->with('success', $message);
+    }
+
+    /**
+     * Hapus cache badge sidebar "Pendaftaran Reviewer" (lihat ViewServiceProvider)
+     * supaya langsung sinkron, bukan menunggu TTL 5 menit — pola yang sama dipakai
+     * DeadlineExtensionController::clearPendingCount() untuk badge sejenis.
+     */
+    private function clearPendingRegistrationCount(): void
+    {
+        $tenantKey = app()->bound('tenant') ? app('tenant')->subdomain : 'master';
+        Cache::forget('admin.pending_reviewer_registrations.' . $tenantKey);
     }
 }

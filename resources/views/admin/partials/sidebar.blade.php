@@ -258,6 +258,13 @@
    class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewers') ? 'active' : '' }}">
     <i class="bi bi-people-fill" style="color:#67e8f9;"></i> Daftar Reviewer
 </a>
+<a href="{{ route('admin.reviewer-registrations.index') }}"
+   class="nav-link {{ str_starts_with($currentRoute, 'admin.reviewer-registrations') ? 'active' : '' }}">
+    <i class="bi bi-person-plus-fill" style="color:#4ade80;"></i> Pendaftaran Reviewer
+    @if(isset($pendingReviewerRegistrations) && $pendingReviewerRegistrations > 0)
+        <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingReviewerRegistrations }}</span>
+    @endif
+</a>
 @feature('review_requests')
 <a href="{{ route('admin.review-requests.index') }}"
    class="nav-link {{ str_starts_with($currentRoute, 'admin.review-requests') ? 'active' : '' }}">
