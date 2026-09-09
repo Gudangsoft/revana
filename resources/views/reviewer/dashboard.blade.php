@@ -37,10 +37,16 @@
                             <div>
                                 <h4 class="mb-0" style="color: white !important;">{{ $user->total_points }}</h4>
                                 <small style="color: rgba(255,255,255,0.8) !important;">{{ __('reviewer.total_points') }}</small>
+                                <small class="d-block" style="color: rgba(255,255,255,0.65) !important; font-size: 0.7rem;">
+                                    &asymp; Rp {{ number_format($user->total_points * \App\Models\Setting::get('point_value', 1000), 0, ',', '.') }}
+                                </small>
                             </div>
                             <div>
                                 <h4 class="mb-0" style="color: white !important;">{{ $user->available_points }}</h4>
                                 <small style="color: rgba(255,255,255,0.8) !important;">{{ __('reviewer.available_points') }}</small>
+                                <small class="d-block" style="color: rgba(255,255,255,0.65) !important; font-size: 0.7rem;">
+                                    &asymp; Rp {{ number_format($user->available_points * \App\Models\Setting::get('point_value', 1000), 0, ',', '.') }}
+                                </small>
                             </div>
                             <div>
                                 <h4 class="mb-0" style="color: white !important;">{{ $user->completed_reviews }}</h4>

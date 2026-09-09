@@ -241,7 +241,8 @@ sempit untuk menampung QR + label dengan aman di kedua sisi.
 
 ### Verifikasi
 - `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **22 passed (75 assertions)**.
-- Full regression suite `php artisan test tests/Feature` dijalankan ulang setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **184 passed (513 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB.
@@ -250,3 +251,29 @@ sempit untuk menampung QR + label dengan aman di kedua sisi.
   ini adalah upaya terbaik berdasarkan pengukuran yang ada. **Sangat disarankan user cek sekali lagi**
   sertifikat baru di production — kalau masih ada sedikit tabrakan di salah satu sisi, beri tahu sisi
   mana (atas ke paragraf, atau bawah ke tanggal) supaya bisa dikalibrasi lebih presisi.
+
+## 7. Dashboard Reviewer: Tampilkan Padanan Rupiah untuk Total & Available Points
+
+**Tujuan:** User minta dashboard reviewer (`/reviewer/dashboard`) juga menampilkan nilai poin dalam
+bentuk Rupiah, bukan cuma angka poin polos. Sistem sudah punya nilai tukar poin-ke-Rupiah
+(`point_value`, dikelola admin di `/admin/point-settings`, default Rp 1.000/poin) dan konvensi
+tampilan "Rp {angka}" ini sudah dipakai di 2 halaman reviewer lain (`reviewer/tasks/index.blade.php`
+dan `reviewer/rewards/index.blade.php`) — dashboard sekarang mengikuti konvensi yang sama.
+
+**Perbaikan:** Di kartu profil reviewer (bagian atas dashboard), di bawah angka "Total Points" dan
+"Available Points" ditambahkan baris kecil "≈ Rp {total_points/available_points × point_value}",
+diformat dengan pemisah ribuan titik (`number_format(..., 0, ',', '.')`) sama seperti di halaman lain.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/reviewer/dashboard.blade.php` | Tambah baris "≈ Rp ..." di bawah Total Points & Available Points, dihitung dari `Setting::get('point_value', 1000)` (konvensi yang sama dipakai di halaman reviewer lain). |
+| `tests/Feature/ReviewerDashboardPointsRupiahTest.php` | Test baru (3 test): padanan Rupiah muncul benar sesuai `point_value` yang diset admin, fallback ke default 1000 kalau setting belum diisi, dan tampil "Rp 0" yang benar untuk reviewer tanpa poin. |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerDashboardPointsRupiahTest.php` → **3 passed (7 assertions)**.
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB, tidak ada perubahan controller — murni tambahan tampilan di view yang
+  membaca `Setting` yang sudah ada.
