@@ -45,26 +45,37 @@
             </div>
             <div class="col-md-4">
                 <div class="row g-2 text-center">
-                    <div class="col-6">
+                    <div class="col-4">
+                        <div class="p-2 bg-white bg-opacity-25 rounded">
+                            <h5 class="mb-0 text-white">{{ number_format($myRank->current_points) }}</h5>
+                            <small style="opacity: 0.9;">Poin</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
                         <div class="p-2 bg-white bg-opacity-25 rounded">
                             <h5 class="mb-0 text-white">{{ $myRank->total_redemptions }}</h5>
                             <small style="opacity: 0.9;">Total Rewards</small>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="p-2 bg-white bg-opacity-25 rounded">
                             <h5 class="mb-0 text-white">{{ $myRank->total_reviews }}</h5>
                             <small style="opacity: 0.9;">Reviews</small>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="p-2 bg-white bg-opacity-25 rounded">
                             <small style="opacity: 0.9;">💎 {{ $myRank->platinum_count }}</small>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="p-2 bg-white bg-opacity-25 rounded">
                             <small style="opacity: 0.9;">🥇 {{ $myRank->gold_count }}</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-white bg-opacity-25 rounded">
+                            <small style="opacity: 0.9;">🥈🥉 {{ $myRank->silver_count + $myRank->bronze_count }}</small>
                         </div>
                     </div>
                 </div>
@@ -149,7 +160,11 @@
                         @if($top->institution)
                         <small class="text-muted d-block mb-2">{{ $top->institution }}</small>
                         @endif
-                        
+
+                        <div class="fw-bold text-primary mb-2" style="font-size: 1.25rem;">
+                            {{ number_format($top->current_points) }} Poin
+                        </div>
+
                         <div class="d-flex justify-content-center gap-2 mb-2">
                             @if($top->platinum_count > 0)
                                 <span class="badge bg-primary">💎 {{ $top->platinum_count }}</span>
@@ -158,7 +173,7 @@
                                 <span class="badge bg-warning">🥇 {{ $top->gold_count }}</span>
                             @endif
                         </div>
-                        
+
                         <div class="small">
                             <div><strong>{{ $top->total_redemptions }}</strong> total rewards</div>
                             <div><strong>{{ $top->total_reviews }}</strong> reviews</div>
@@ -181,7 +196,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-list-ol"></i> Semua Peringkat</span>
-        <span class="badge bg-info">Diurutkan berdasarkan tier reward</span>
+        <span class="badge bg-info">Diurutkan berdasarkan poin tertinggi</span>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -190,6 +205,7 @@
                     <tr>
                         <th width="80">Rank</th>
                         <th>Reviewer</th>
+                        <th class="text-center">Poin</th>
                         <th class="text-center hide-mobile">Reviews</th>
                         <th class="text-center">💎</th>
                         <th class="text-center">🥇</th>
@@ -245,6 +261,9 @@
                                     @endif
                                 </div>
                             </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark">{{ number_format($reviewer->current_points) }}</span>
                         </td>
                         <td class="text-center hide-mobile">
                             <span class="badge bg-info">{{ $reviewer->total_reviews }}</span>
@@ -306,20 +325,19 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
-                <h6><i class="bi bi-trophy"></i> Sistem Poin Tier:</h6>
+                <h6><i class="bi bi-trophy"></i> Cara Perhitungan Rank:</h6>
+                <p class="mb-2">Peringkat dihitung langsung berdasarkan <strong>Poin</strong> (total poin dari review yang disetujui, dikurangi poin yang sudah ditukar reward):</p>
                 <ul>
-                    <li>💎 <strong>Platinum</strong> = 1,000 poin</li>
-                    <li>🥇 <strong>Gold</strong> = 100 poin</li>
-                    <li>🥈 <strong>Silver</strong> = 10 poin</li>
-                    <li>🥉 <strong>Bronze</strong> = 1 poin</li>
+                    <li>Rank #1 = reviewer dengan <strong>Poin</strong> tertinggi di kolom tabel</li>
+                    <li>Badge 💎 Platinum / 🥇 Gold / 🥈 Silver / 🥉 Bronze hanya menampilkan jumlah reward yang sudah ditukar, <strong>tidak memengaruhi</strong> urutan rank</li>
                 </ul>
             </div>
             <div class="col-md-6">
                 <h6><i class="bi bi-lightbulb"></i> Tips Naik Peringkat:</h6>
                 <ul>
-                    <li>Selesaikan review dengan berkualitas untuk dapat poin</li>
-                    <li>Kumpulkan poin dan tukar dengan reward tier tinggi</li>
-                    <li>Fokus pada Platinum & Gold untuk naik peringkat cepat</li>
+                    <li>Selesaikan review dengan berkualitas untuk mendapat poin</li>
+                    <li>Semakin banyak review yang <strong>disetujui admin</strong>, semakin tinggi poin & peringkat Anda</li>
+                    <li>Menukar poin dengan reward akan <strong>mengurangi</strong> poin Anda saat ini — pertimbangkan waktu penukaran kalau ingin menjaga peringkat tetap tinggi</li>
                     <li>Konsisten mengerjakan review yang diberikan</li>
                 </ul>
             </div>

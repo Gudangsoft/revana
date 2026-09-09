@@ -3,67 +3,29 @@
 namespace App\Http\Controllers\Reviewer;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\ReviewerLeaderboardService;
 use Illuminate\Support\Facades\Auth;
 
 class LeaderboardController extends Controller
 {
+    public function __construct(private ReviewerLeaderboardService $leaderboardService)
+    {
+    }
+
+    /**
+     * Perbaikan 9 Sept 2026: halaman ini tadinya punya salinan query
+     * leaderboard sendiri yang sudah kadaluarsa/salah (cuma hitung review
+     * sebagai reviewer UTAMA, poin di-sum tanpa pisah EARNED/REDEEMED, rank
+     * berdasarkan tier reward yang selalu 0 kalau belum pernah redeem apa
+     * pun) — padahal Admin\LeaderboardController sudah punya versi yang
+     * diperbaiki. Sekarang keduanya pakai ReviewerLeaderboardService yang
+     * sama supaya datanya selalu konsisten & sesuai data real. Lihat
+     * docblock ReviewerLeaderboardService untuk detail lengkap tiap bug.
+     */
     public function index()
     {
         $currentUser = Auth::user();
-        
-        // Get all reviewers with their statistics
-        $reviewers = User::where('role', 'reviewer')
-            ->withCount([
-                'reviewAssignments as total_reviews' => function($q) {
-                    $q->where('status', 'APPROVED');
-                },
-                'reviewAssignments as pending_reviews' => function($q) {
-                    $q->whereIn('status', ['PENDING', 'ACCEPTED', 'SUBMITTED']);
-                }
-            ])
-            ->withSum('pointHistories as total_points_earned', 'points')
-            ->with(['rewardRedemptions' => function($q) {
-                $q->where('status', 'COMPLETED')
-                  ->with('reward:id,name,tier');
-            }])
-            ->get()
-            ->map(function($reviewer) {
-                // Calculate redemption stats
-                $completedRedemptions = $reviewer->rewardRedemptions;
-                
-                $reviewer->total_redemptions = $completedRedemptions->count();
-                $reviewer->total_points_spent = $completedRedemptions->sum('points_used');
-                $reviewer->total_points_earned = $reviewer->total_points_earned ?? 0;
-                $reviewer->current_points = $reviewer->points;
-                
-                // Count rewards by tier
-                $reviewer->platinum_count = $completedRedemptions->where('reward.tier', 'Platinum')->count();
-                $reviewer->gold_count = $completedRedemptions->where('reward.tier', 'Gold')->count();
-                $reviewer->silver_count = $completedRedemptions->where('reward.tier', 'Silver')->count();
-                $reviewer->bronze_count = $completedRedemptions->where('reward.tier', 'Bronze')->count();
-                
-                // Calculate tier score for ranking
-                $reviewer->tier_score = 
-                    ($reviewer->platinum_count * 1000) + 
-                    ($reviewer->gold_count * 100) + 
-                    ($reviewer->silver_count * 10) + 
-                    ($reviewer->bronze_count * 1);
-                
-                return $reviewer;
-            })
-            ->sortByDesc('tier_score')
-            ->values();
-
-        // Assign ranks
-        $rank = 1;
-        $reviewers = $reviewers->map(function($reviewer) use (&$rank) {
-            $reviewer->rank = $rank++;
-            return $reviewer;
-        });
-
-        // Get current user's rank
+        $reviewers = $this->leaderboardService->get();
         $myRank = $reviewers->firstWhere('id', $currentUser->id);
 
         return view('reviewer.leaderboard.index', compact('reviewers', 'myRank'));

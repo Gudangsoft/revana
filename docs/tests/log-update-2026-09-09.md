@@ -272,8 +272,72 @@ diformat dengan pemisah ribuan titik (`number_format(..., 0, ',', '.')`) sama se
 
 ### Verifikasi
 - `php artisan test tests/Feature/ReviewerDashboardPointsRupiahTest.php` → **3 passed (7 assertions)**.
-- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **187 passed (520 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB, tidak ada perubahan controller — murni tambahan tampilan di view yang
   membaca `Setting` yang sudah ada.
+
+## 8. Perbaiki Leaderboard Reviewer Agar Sesuai Data Real
+
+**Tujuan:** User minta `/reviewer/leaderboard` diperbaiki supaya sesuai data real. Investigasi
+menemukan `Reviewer\LeaderboardController` punya query leaderboard SENDIRI yang ternyata sudah
+kadaluarsa/salah — sementara `Admin\LeaderboardController` (`/admin/leaderboard`) SUDAH pernah
+diperbaiki untuk 3 bug yang sama persis, tapi perbaikan itu tidak pernah dibawa ke versi reviewer
+(kedua controller ternyata punya salinan query yang perlahan menyimpang). 3 bug yang ditemukan:
+
+1. **`total_reviews` cuma hitung review sebagai reviewer UTAMA** (`reviewer_id`) — padahal satu
+   `ReviewAssignment` bisa punya sampai **5 reviewer sekaligus** (`reviewer_id` s/d `reviewer_5_id`).
+   Review yang dikerjakan sebagai reviewer pendamping (slot 2-5) tidak pernah terhitung sama sekali,
+   membuat "Total Reviews" reviewer yang sering jadi reviewer pendamping tampil jauh lebih rendah dari
+   kenyataan.
+2. **Poin di-sum tanpa pisah `type`** — `point_histories.type` bisa `EARNED` atau `REDEEMED`, dan
+   baris `REDEEMED` disimpan sebagai angka **POSITIF** (bukan negatif). Query lama men-sum SEMUA
+   baris tanpa filter type, jadi poin yang sudah ditukar reward ikut terjumlah lagi sebagai "poin
+   yang dimiliki" — total poin tampil lebih besar dari yang sebenarnya untuk reviewer yang pernah
+   redeem reward. Selain itu ada bug lain: kode lama sempat mengakses `$reviewer->points` — kolom
+   yang **tidak ada** di tabel `users` (yang benar `total_points`/`available_points`), jadi selalu
+   bernilai `null`.
+3. **Ranking berdasarkan `tier_score`** (dihitung dari reward yang SUDAH DITUKAR) — karena belum ada
+   satu pun reviewer yang pernah menukar reward di database (`reward_redemptions` kosong), semua
+   reviewer tier_score-nya SELALU 0, sehingga urutan rank jadi **acak sesuai urutan baris database**,
+   sama sekali tidak mencerminkan performa review nyata siapa pun.
+
+**Perbaikan:** Dibuat `App\Services\ReviewerLeaderboardService` — logika query & ranking yang benar
+(porting dari versi admin yang sudah diperbaiki: hitung SEMUA 5 slot reviewer, poin dipisah per type
+EARNED/REDEEMED lalu `current_points = earned - redeemed`, ranking berdasarkan `current_points`
+bukan tier reward) — dipakai BERSAMA oleh `Admin\LeaderboardController` dan
+`Reviewer\LeaderboardController`, supaya kedua halaman **tidak bisa menyimpang lagi** di masa depan.
+Hasil query di-cache 5 menit (key ber-tenant, konvensi yang sama dipakai ranking lain di sistem ini)
+— karena kedua controller sekarang berbagi cache key yang sama, siapa pun yang buka halaman duluan
+otomatis mengisi cache untuk halaman satunya juga.
+
+Tampilan `reviewer/leaderboard/index.blade.php` disesuaikan: tambah kolom/kartu **Poin** (di My Rank
+card, Top 3, dan tabel utama — sebelumnya poin tidak ditampilkan sama sekali padahal sekarang jadi
+dasar ranking), badge "Diurutkan berdasarkan tier reward" diperbaiki jadi "...poin tertinggi", dan
+info box "Cara Meningkatkan Peringkat" diperbarui supaya tidak lagi menyesatkan (sebelumnya bilang
+"Fokus pada Platinum & Gold untuk naik peringkat cepat" — padahal tier reward TIDAK memengaruhi rank
+sama sekali).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Services/ReviewerLeaderboardService.php` (baru) | Query & ranking leaderboard yang benar — hitung semua 5 slot reviewer, poin dipisah EARNED/REDEEMED, ranking berdasarkan poin. Dipakai bersama admin & reviewer. |
+| `app/Http/Controllers/Admin/LeaderboardController.php` | Disederhanakan jadi wrapper tipis yang memanggil `ReviewerLeaderboardService` (logika lama dipindah ke service, perilaku tidak berubah). |
+| `app/Http/Controllers/Reviewer/LeaderboardController.php` | Ganti total logika lama yang salah dengan pemanggilan `ReviewerLeaderboardService` yang sama dengan admin. |
+| `resources/views/reviewer/leaderboard/index.blade.php` | Tambah kolom/kartu Poin (My Rank, Top 3, tabel utama); badge sortir diperbaiki; info box "Cara Meningkatkan Peringkat" diperbarui supaya akurat dengan logika ranking baru. |
+| `tests/Feature/ReviewerLeaderboardTest.php` (baru) | 7 test: total_reviews menghitung ke-5 slot reviewer, cuma assignment APPROVED yang dihitung, current_points = earned-redeemed (bukan tergabung), current_points=0 kalau belum ada riwayat, ranking berdasarkan poin (bukan tier reward), halaman reviewer render dengan rank & poin benar, halaman admin & reviewer menunjukkan data konsisten (dari service yang sama). |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerLeaderboardTest.php` → **7 passed (20 assertions)** —
+  termasuk reproduksi eksplisit dari ketiga bug di atas (dibuktikan gagal dengan logika lama, lulus
+  dengan logika baru saat dikembangkan).
+- Full regression suite `php artisan test tests/Feature` → **194 passed (540 assertions)** — tidak
+  ada regresi ke fitur lain (termasuk admin leaderboard yang di-refactor tetap berfungsi normal).
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Cache leaderboard reviewer (`leaderboard.reviewers.{tenant}`, TTL 5 menit) mulai dipakai bersama
+  oleh 2 halaman — kalau data terasa "belum update" setelah reviewer baru saja review/redeem reward,
+  itu normal (cache 5 menit), sama seperti perilaku halaman admin yang sudah ada sebelumnya.
