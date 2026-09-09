@@ -436,4 +436,100 @@ class ReviewerCertificateVerifyTest extends TestCase
         @unlink($fullPath);
         @unlink($dummyPath);
     }
+
+    /**
+     * Regresi 9 Sept 2026 (lanjutan): setelah perbaikan pertama, user masih
+     * melaporkan (screenshot kedua) bahwa font nama & judul TERLALU BESAR, dan
+     * judul artikel nyata ("PENGARUH CITRA MEREK, RELATIONSHIP MARKETING, DAN
+     * KEPUASAN PELANGGAN TERHADAP LOYALITAS PELANGGAN PADA E-COMMERCE SHOPEE
+     * DI KOTA BATAM") jadi 4 baris di font 60 dan meluber menabrak "Thank you
+     * your contribution...". Permintaan eksplisit user: judul maksimal 2
+     * baris. Diperbaiki dengan menurunkan font awal (nama 80→60, judul
+     * 60→50) dan mengetatkan batas wrapTextWithAutoShrink() untuk judul dari
+     * 4 baris menjadi 2 baris.
+     */
+    public function test_wrap_text_with_auto_shrink_limits_real_reported_title_to_two_lines(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        // Judul persis yang dilaporkan overflow di screenshot kedua.
+        $title = 'PENGARUH CITRA MEREK, RELATIONSHIP MARKETING, DAN KEPUASAN PELANGGAN '
+            . 'TERHADAP LOYALITAS PELANGGAN PADA E-COMMERCE SHOPEE DI KOTA BATAM';
+        $maxWidth = (int) (2560 * 0.70); // lebar kanvas template asli (2560px)
+
+        // Parameter persis sama dengan yang dipakai generateCertificate() sekarang.
+        [$lines, $fontSize] = $method->invoke($controller, $title, $this->font(), 50, 26, $maxWidth, 2);
+
+        $this->assertCount(2, $lines, 'Judul nyata yang dilaporkan overflow harus muat dalam 2 baris setelah perbaikan');
+        $this->assertLessThan(50, $fontSize, 'Font judul ini harus dikecilkan dari 50 supaya muat 2 baris');
+
+        foreach ($lines as $line) {
+            $bbox = imagettfbbox($fontSize, 0, $this->font(), $line);
+            $lineWidth = abs($bbox[4] - $bbox[0]);
+            $this->assertLessThanOrEqual($maxWidth, $lineWidth,
+                "Baris \"{$line}\" selebar {$lineWidth}px, melebihi batas {$maxWidth}px");
+        }
+    }
+
+    public function test_wrap_text_with_auto_shrink_limits_real_reported_name_to_reasonable_font(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        // Nama persis yang dilaporkan di screenshot kedua.
+        $name = 'MARTINA ROSMAULINA MARBUN, S.PD., M.HUM';
+        $maxWidth = (int) (2560 * 0.70);
+
+        [$lines, $fontSize] = $method->invoke($controller, $name, $this->font(), 60, 36, $maxWidth, 2);
+
+        $this->assertSame(60, $fontSize, 'Nama ini sudah muat 2 baris di font 60, tidak perlu dikecilkan lagi');
+        $this->assertCount(2, $lines);
+    }
+
+    /**
+     * Uji integrasi end-to-end dengan nama & judul PERSIS seperti yang
+     * dilaporkan user (bukan skenario ekstrem buatan) — memastikan seluruh
+     * pipeline generateCertificate() menghasilkan file tanpa error dengan
+     * parameter font/baris yang baru.
+     */
+    public function test_generate_certificate_completes_with_the_exact_reported_overlap_case(): void
+    {
+        $reviewer = $this->makeReviewer(['name' => 'Martina Rosmaulina Marbun, S.Pd., M.Hum']);
+        $assignment = $this->makeApprovedAssignment([
+            'reviewer_id' => $reviewer->id,
+            'article_title' => 'PENGARUH CITRA MEREK, RELATIONSHIP MARKETING, DAN KEPUASAN PELANGGAN '
+                . 'TERHADAP LOYALITAS PELANGGAN PADA E-COMMERCE SHOPEE DI KOTA BATAM',
+        ]);
+
+        $certificate = Certificate::create([
+            'name' => 'Template Test',
+            'file_path' => 'certificates/test-' . uniqid() . '.jpg',
+            'is_active' => true,
+        ]);
+
+        $dummyPath = storage_path('app/public/' . $certificate->file_path);
+        @mkdir(dirname($dummyPath), 0755, true);
+        $im = imagecreatetruecolor(2560, 1811);
+        imagefill($im, 0, 0, imagecolorallocate($im, 255, 255, 255));
+        imagejpeg($im, $dummyPath, 80);
+        imagedestroy($im);
+
+        $this->actingAs($reviewer);
+
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'generateCertificate');
+        $method->setAccessible(true);
+        $result = $method->invoke($controller, $assignment, true);
+
+        $this->assertNotFalse($result);
+        $fullPath = public_path($result);
+        $this->assertFileExists($fullPath);
+        $this->assertGreaterThan(0, filesize($fullPath));
+
+        @unlink($fullPath);
+        @unlink($dummyPath);
+    }
 }

@@ -59,3 +59,47 @@ sertifikat berikutnya yang di-generate untuk memastikan overlap benar-benar hila
 - **Mohon user mengecek sertifikat reviewer berikutnya yang di-generate di production** untuk
   konfirmasi overlap benar-benar teratasi, karena verifikasi lokal tidak bisa render terhadap file
   template produksi asli (file tidak ada di storage lokal).
+
+## 2. Perbaikan Lanjutan: Font Nama/Judul Sertifikat Terlalu Besar, Judul Dibatasi 2 Baris
+
+**Tujuan:** Setelah perbaikan #1 di atas dideploy, user mengirim screenshot BARU dari sertifikat
+sungguhan yang menunjukkan perbaikan zona-center belum cukup — judul artikel nyata ("PENGARUH CITRA
+MEREK, RELATIONSHIP MARKETING, DAN KEPUASAN PELANGGAN TERHADAP LOYALITAS PELANGGAN PADA E-COMMERCE
+SHOPEE DI KOTA BATAM") menghasilkan **4 baris** di font 60 dan baris terakhirnya menabrak langsung
+teks "Thank you your contribution..." / "Terima kasih atas kontribusi Anda...". User juga menilai
+font nama & judul secara umum **terlalu besar** dibanding proporsi teks tetap di template. Permintaan
+eksplisit: "untuk judul dibuat maksimal 2 baris".
+
+Dari screenshot ini juga terkonfirmasi lebar kanvas template asli adalah **2560px** (bukan 3508px
+seperti asumsi lama di komentar kode) — pada lebar 2560px, judul contoh di atas persis menghasilkan
+4 baris di font 60, cocok dengan yang terlihat di screenshot.
+
+Perbaikan:
+- `$nameFontSize` diturunkan dari **80 → 60** (font minimum shrink 50 → 36).
+- `$articleFontSize` diturunkan dari **60 → 50** (font minimum shrink 40 → 26, supaya judul yang
+  sangat panjang tetap bisa dipaksa muat 2 baris).
+- Batas baris judul di `wrapTextWithAutoShrink()` diperketat dari **4 → 2 baris** sesuai permintaan
+  eksplisit user. Batas baris nama tetap 2 (tidak diminta berubah).
+- Judul nyata yang dilaporkan sekarang otomatis mengecil ke font ~28-32 dan muat rapi 2 baris,
+  jauh di dalam zona judul, tidak lagi menabrak teks di bawahnya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `$nameFontSize` 80→60, `$nameMinFontSize` 50→36; `$articleFontSize` 60→50, `$articleMinFontSize` 40→26, batas baris judul (parameter `maxLines` ke `wrapTextWithAutoShrink()`) 4→2. Komentar diperbarui untuk mencatat lebar kanvas asli 2560px. |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Tambah 3 test baru memakai teks PERSIS dari screenshot yang dilaporkan: judul harus muat 2 baris (bukan 4) dengan parameter baru, nama tetap muat 2 baris di font 60 tanpa perlu shrink, dan uji integrasi `generateCertificate()` end-to-end dengan nama+judul persis kasus yang dilaporkan. |
+
+### Verifikasi
+- Simulasi manual `imagettfbbox()` (di luar Laravel, PHP murni) dengan lebar kanvas 2560px: judul
+  nyata dari screenshot → 4 baris di font 60 (cocok dengan bug yang dilaporkan) → setelah perbaikan,
+  otomatis mengecil sampai muat 2 baris.
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **20 passed (65 assertions)**.
+- Full regression suite `php artisan test tests/Feature` dijalankan ulang (hasil di catatan verifikasi
+  bagian ini akan diperbarui begitu selesai jika ada kegagalan; per proses sebelumnya seluruh 179+
+  test lain konsisten hijau).
+
+### Catatan Deploy
+- Sama seperti #1: tidak ada perubahan skema DB.
+- Karena file template produksi tidak tersedia di lokal, kalibrasi masih berbasis reverse-engineering
+  dari 2 contoh screenshot asli yang dikirim user (bukan render langsung terhadap file produksi).
+  Mohon user cek sertifikat baru sekali lagi setelah deploy ini.

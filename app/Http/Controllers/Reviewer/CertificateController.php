@@ -333,12 +333,18 @@ class CertificateController extends Controller
         // baris nama panjang, dst) — bukan mulai dari titik tetap seperti
         // sebelumnya. Ditambah wrapTextWithAutoShrink(): kalau nama/judul
         // sangat panjang sampai baris yang dihasilkan tidak lagi muat dengan
-        // aman di zona (>2 baris nama, >4 baris judul), font DIKECILKAN
-        // bertahap secara otomatis supaya tidak meluber ke luar zona.
+        // aman di zona (>2 baris nama, >2 baris judul — lihat update 9 Sept
+        // 2026 lanjutan di bawah), font DIKECILKAN bertahap secara otomatis
+        // supaya tidak meluber ke luar zona.
 
         // Reviewer Name (center, di zona setelah "Sertifikat ini diberikan kepada :")
-        $nameFontSize = 80;
-        $nameMinFontSize = 50;
+        //
+        // Perbaikan 9 Sept 2026 (lanjutan, setelah dicek user pada sertifikat asli):
+        // font 80 masih terlalu besar dibanding proporsi teks tetap di
+        // template (nama jadi jauh lebih dominan dari sekitarnya) — diturunkan
+        // ke 60. Batas 2 baris dipertahankan.
+        $nameFontSize = 60;
+        $nameMinFontSize = 36;
         [$nameLines, $nameFontSize] = $this->wrapTextWithAutoShrink(
             $reviewerName, $fontBold, $nameFontSize, $nameMinFontSize,
             (int) ($width * $maxTitleWidthRatio), 2
@@ -364,11 +370,21 @@ class CertificateController extends Controller
         // imagettfbbox() — fungsi GD asli, tidak butuh library tambahan) lewat
         // wrapTextByWidth(), supaya baris manapun TIDAK PERNAH melebihi lebar
         // aman yang ditentukan, berapa pun panjang teksnya.
-        $articleFontSize = 60;
-        $articleMinFontSize = 40;
+        //
+        // Perbaikan 9 Sept 2026 (lanjutan, setelah dicek user pada sertifikat
+        // asli): judul artikel nyata ("PENGARUH CITRA MEREK, RELATIONSHIP
+        // MARKETING...") ternyata jadi 4 baris di font 60 — meluber ke luar
+        // zona sampai menabrak "Thank you your contribution...". Font awal
+        // diturunkan ke 50 (sebelumnya juga dikeluhkan terlalu besar), dan
+        // batas baris diperketat dari 4 menjadi 2 SESUAI PERMINTAAN USER
+        // ("judul dibuat maksimal 2 baris") — wrapTextWithAutoShrink() akan
+        // mengecilkan font sampai muat 2 baris (turun sampai $articleMinFontSize
+        // untuk judul yang sangat panjang).
+        $articleFontSize = 50;
+        $articleMinFontSize = 26;
         [$articleLines, $articleFontSize] = $this->wrapTextWithAutoShrink(
             $articleTitle, $fontBold, $articleFontSize, $articleMinFontSize,
-            (int) ($width * $maxTitleWidthRatio), 4
+            (int) ($width * $maxTitleWidthRatio), 2
         );
         $articleLineSpacing = (int) round($articleFontSize * 1.17);
         $articleZoneTop = $height * (887 / 1811);
