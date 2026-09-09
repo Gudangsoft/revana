@@ -94,12 +94,47 @@ Perbaikan:
   nyata dari screenshot → 4 baris di font 60 (cocok dengan bug yang dilaporkan) → setelah perbaikan,
   otomatis mengecil sampai muat 2 baris.
 - `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **20 passed (65 assertions)**.
-- Full regression suite `php artisan test tests/Feature` dijalankan ulang (hasil di catatan verifikasi
-  bagian ini akan diperbarui begitu selesai jika ada kegagalan; per proses sebelumnya seluruh 179+
-  test lain konsisten hijau).
+- Full regression suite `php artisan test tests/Feature` → **182 passed (503 assertions)** — tidak
+  ada regresi ke fitur lain (poin, LOA, export, dashboard, kwitansi/invoice QR, keyword search, dll.).
 
 ### Catatan Deploy
 - Sama seperti #1: tidak ada perubahan skema DB.
 - Karena file template produksi tidak tersedia di lokal, kalibrasi masih berbasis reverse-engineering
   dari 2 contoh screenshot asli yang dikirim user (bukan render langsung terhadap file produksi).
   Mohon user cek sertifikat baru sekali lagi setelah deploy ini.
+
+## 3. Perbaikan Lanjutan: Nama Reviewer Dibuat 1 Baris
+
+**Tujuan:** Screenshot ketiga dari user menunjukkan nama reviewer ("MARTINA ROSMAULINA MARBUN,
+S.PD., M.HUM") masih terpecah jadi 2 baris ("MARTINA ROSMAULINA MARBUN, S.PD.," / "M.HUM") padahal
+diminta 1 baris. Diselidiki: lebar teks nama ini di font 60 adalah 1828px — cuma sedikit melebihi
+batas lebar 70% dari kanvas (1792px) yang sebelumnya dipakai bersama dengan judul artikel — jadi
+kepotong ke baris ke-2 walau sebenarnya cuma kurang ~36px lagi supaya muat 1 baris.
+
+**Perbaikan:** Nama reviewer sekarang punya jatah lebar sendiri yang lebih lega, terpisah dari
+lebar judul artikel:
+- `$nameMaxWidthRatio = 0.82` (naik dari 0.70 yang dipakai bersama judul) — nama nyata ini sekarang
+  muat 1 baris **tanpa perlu mengecilkan font sama sekali** (tetap di font 60, sama seperti
+  sebelumnya).
+- Batas baris nama diperketat dari 2 → **1 baris**, dengan `$nameMinFontSize` diturunkan ke 24 supaya
+  nama yang jauh lebih panjang lagi (kasus ekstrem: banyak gelar akademik) tetap bisa dipaksa muat 1
+  baris via auto-shrink, bukan berhenti di 2 baris seperti sebelumnya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | Tambah `$nameMaxWidthRatio = 0.82` (terpisah dari `$maxTitleWidthRatio` yang kini hanya dipakai judul artikel). `$nameMinFontSize` 36→24. Batas baris nama (parameter `maxLines`) 2→1. |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Test nama diganti: memverifikasi nama nyata dari screenshot sekarang muat 1 baris di font 60 tanpa shrink (bukan lagi "muat 2 baris di font 60"). Tambah test baru untuk kasus ekstrem (nama+gelar sangat panjang) memastikan tetap dipaksa 1 baris via auto-shrink. |
+
+### Verifikasi
+- Simulasi manual `imagettfbbox()`: nama nyata dari screenshot pada rasio lebar 82% (2099px) →
+  1 baris tanpa perlu shrink font; kasus ekstrem (nama+banyak gelar) → otomatis mengecil ke font 25
+  untuk tetap muat 1 baris.
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **21 passed (70 assertions)**.
+- Full regression suite `php artisan test tests/Feature` dijalankan ulang setelah perubahan ini.
+
+### Catatan Deploy
+- Sama seperti #1 & #2: tidak ada perubahan skema DB, hanya logika layout teks di controller.
+- Mohon user cek sekali lagi sertifikat baru setelah deploy — dengan 3 putaran perbaikan berbasis
+  screenshot asli, seharusnya sudah cukup presisi, tapi verifikasi langsung di production tetap yang
+  paling diandalkan karena tidak ada akses ke file template asli di lokal.

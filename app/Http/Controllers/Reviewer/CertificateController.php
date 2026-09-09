@@ -305,8 +305,9 @@ class CertificateController extends Controller
         // Template positions (untuk template 2560x1811px atau proporsional)
         // Sesuaikan dengan desain template terbaru
         
-        // Lebar aman untuk teks yang di-center (nama reviewer & judul artikel) —
-        // 70% dari lebar kanvas, sisakan margin kiri-kanan untuk border emas.
+        // Lebar aman untuk teks yang di-center (judul artikel — nama reviewer
+        // punya lebar sendiri, $nameMaxWidthRatio, lihat di bawah) — 70% dari
+        // lebar kanvas, sisakan margin kiri-kanan untuk border emas.
         $maxTitleWidthRatio = 0.70;
 
         // --- Perbaikan 9 Sept 2026: layout tumpang tindih -----------------------
@@ -329,25 +330,38 @@ class CertificateController extends Controller
         //                 penghargaan..." dan "Thank you your contribution...")
         //
         // Posisi Y sekarang dihitung supaya teks SELALU DI-CENTER VERTIKAL di
-        // dalam zona tsb, berapa pun jumlah barisnya (1 baris nama pendek vs 2
-        // baris nama panjang, dst) — bukan mulai dari titik tetap seperti
-        // sebelumnya. Ditambah wrapTextWithAutoShrink(): kalau nama/judul
-        // sangat panjang sampai baris yang dihasilkan tidak lagi muat dengan
-        // aman di zona (>2 baris nama, >2 baris judul — lihat update 9 Sept
-        // 2026 lanjutan di bawah), font DIKECILKAN bertahap secara otomatis
-        // supaya tidak meluber ke luar zona.
+        // dalam zona tsb, berapa pun jumlah barisnya — bukan mulai dari titik
+        // tetap seperti sebelumnya. Ditambah wrapTextWithAutoShrink(): kalau
+        // nama/judul sangat panjang sampai baris yang dihasilkan tidak lagi
+        // muat dengan aman di zona (>1 baris nama, >2 baris judul — lihat
+        // update 9 Sept 2026 lanjutan di bawah), font DIKECILKAN bertahap
+        // secara otomatis supaya tidak meluber ke luar zona.
 
         // Reviewer Name (center, di zona setelah "Sertifikat ini diberikan kepada :")
         //
         // Perbaikan 9 Sept 2026 (lanjutan, setelah dicek user pada sertifikat asli):
         // font 80 masih terlalu besar dibanding proporsi teks tetap di
         // template (nama jadi jauh lebih dominan dari sekitarnya) — diturunkan
-        // ke 60. Batas 2 baris dipertahankan.
+        // ke 60.
+        //
+        // Perbaikan 9 Sept 2026 (lanjutan lagi): user minta NAMA dibuat 1
+        // baris — nama nyata yang dilaporkan ("MARTINA ROSMAULINA MARBUN,
+        // S.PD., M.HUM") lebarnya di font 60 ternyata 1828px, cuma sedikit
+        // melebihi batas lebar 70% ($maxTitleWidthRatio, dipakai bersama utk
+        // judul artikel) = 1792px, jadi kepotong ke 2 baris padahal harusnya
+        // pas 1 baris. Nama dikasih lebar sendiri yang lebih lega
+        // ($nameMaxWidthRatio 82% — masih sisa margin ±9% di kiri-kanan utk
+        // border emas) supaya nama sepanjang ini muat 1 baris TANPA perlu
+        // mengecilkan font sama sekali. Batas baris juga diperketat 2→1;
+        // untuk nama yang jauh lebih panjang lagi (banyak gelar akademik),
+        // wrapTextWithAutoShrink() akan mengecilkan font secara otomatis
+        // sampai muat 1 baris.
+        $nameMaxWidthRatio = 0.82;
         $nameFontSize = 60;
-        $nameMinFontSize = 36;
+        $nameMinFontSize = 24;
         [$nameLines, $nameFontSize] = $this->wrapTextWithAutoShrink(
             $reviewerName, $fontBold, $nameFontSize, $nameMinFontSize,
-            (int) ($width * $maxTitleWidthRatio), 2
+            (int) ($width * $nameMaxWidthRatio), 1
         );
         $nameLineSpacing = (int) round($nameFontSize * 1.15);
         $nameZoneTop = $height * (599 / 1811);

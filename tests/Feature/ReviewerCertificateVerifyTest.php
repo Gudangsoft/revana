@@ -473,20 +473,52 @@ class ReviewerCertificateVerifyTest extends TestCase
         }
     }
 
-    public function test_wrap_text_with_auto_shrink_limits_real_reported_name_to_reasonable_font(): void
+    /**
+     * Regresi 9 Sept 2026 (lanjutan ke-3): screenshot ketiga user menunjukkan
+     * nama masih 2 baris ("MARTINA ROSMAULINA MARBUN, S.PD., / M.HUM")
+     * padahal user minta nama dibuat 1 baris. Penyebabnya nama ini di font 60
+     * lebarnya 1828px, cuma sedikit melebihi batas lebar lama (70% dari
+     * 2560px = 1792px). Diperbaiki dengan memberi nama lebar sendiri yang
+     * lebih lega (82%) DAN mengetatkan batas baris dari 2 menjadi 1.
+     */
+    public function test_wrap_text_with_auto_shrink_fits_real_reported_name_on_a_single_line(): void
     {
         $controller = new CertificateController();
         $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
         $method->setAccessible(true);
 
-        // Nama persis yang dilaporkan di screenshot kedua.
+        // Nama persis yang dilaporkan di screenshot kedua & ketiga.
         $name = 'MARTINA ROSMAULINA MARBUN, S.PD., M.HUM';
-        $maxWidth = (int) (2560 * 0.70);
+        $maxWidth = (int) (2560 * 0.82); // rasio lebar nama sekarang ($nameMaxWidthRatio)
 
-        [$lines, $fontSize] = $method->invoke($controller, $name, $this->font(), 60, 36, $maxWidth, 2);
+        [$lines, $fontSize] = $method->invoke($controller, $name, $this->font(), 60, 24, $maxWidth, 1);
 
-        $this->assertSame(60, $fontSize, 'Nama ini sudah muat 2 baris di font 60, tidak perlu dikecilkan lagi');
-        $this->assertCount(2, $lines);
+        $this->assertSame(60, $fontSize, 'Dengan lebar 82%, nama ini sudah muat 1 baris di font 60 tanpa perlu dikecilkan');
+        $this->assertCount(1, $lines, 'Nama harus jadi 1 baris sesuai permintaan user');
+    }
+
+    public function test_wrap_text_with_auto_shrink_still_fits_extremely_long_name_on_one_line(): void
+    {
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'wrapTextWithAutoShrink');
+        $method->setAccessible(true);
+
+        // Skenario ekstrem: nama + gelar akademik sangat panjang. Dengan
+        // parameter sekarang (rasio 82%, minFontSize 24, maxLines 1) tetap
+        // harus muat 1 baris (walau font-nya jadi cukup kecil) — bukti batas
+        // "1 baris" untuk nama tetap ditegakkan bahkan di kasus terpanjang.
+        $name = strtoupper('Prof. Dr. H. Muhammad Abdurrahman Wahyu Kusuma Wardhana Al Faruqi Nasution, S.Pd., M.Pd., M.Hum., Ph.D.');
+        $maxWidth = (int) (2560 * 0.82);
+
+        [$lines, $fontSize] = $method->invoke($controller, $name, $this->font(), 60, 24, $maxWidth, 1);
+
+        $this->assertCount(1, $lines, 'Sekalipun nama sangat panjang, harus tetap dipaksa 1 baris');
+        $this->assertGreaterThanOrEqual(24, $fontSize, 'Font tidak boleh dikecilkan melewati batas minimum 24');
+
+        $bbox = imagettfbbox($fontSize, 0, $this->font(), $lines[0]);
+        $lineWidth = abs($bbox[4] - $bbox[0]);
+        $this->assertLessThanOrEqual($maxWidth, $lineWidth,
+            "Baris nama selebar {$lineWidth}px, melebihi batas {$maxWidth}px");
     }
 
     /**
