@@ -131,10 +131,43 @@ lebar judul artikel:
   1 baris tanpa perlu shrink font; kasus ekstrem (nama+banyak gelar) → otomatis mengecil ke font 25
   untuk tetap muat 1 baris.
 - `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **21 passed (70 assertions)**.
-- Full regression suite `php artisan test tests/Feature` dijalankan ulang setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **183 passed (508 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Sama seperti #1 & #2: tidak ada perubahan skema DB, hanya logika layout teks di controller.
 - Mohon user cek sekali lagi sertifikat baru setelah deploy — dengan 3 putaran perbaikan berbasis
   screenshot asli, seharusnya sudah cukup presisi, tapi verifikasi langsung di production tetap yang
   paling diandalkan karena tidak ada akses ke file template asli di lokal.
+
+## 4. Perbaikan Lanjutan: Font Judul Kurang Besar Setelah Muat 2 Baris
+
+**Tujuan:** Screenshot keempat menunjukkan judul artikel SUDAH rapi 2 baris dan tidak lagi tumpang
+tindih (perbaikan #2 berhasil), tapi user menilai font-nya sekarang **kurang besar/kurang terbaca**.
+Diselidiki: judul nyata ("PENGARUH CITRA MEREK, RELATIONSHIP MARKETING, DAN KEPUASAN PELANGGAN
+TERHADAP LOYALITAS PELANGGAN PADA E-COMMERCE SHOPEE DI KOTA BATAM") dengan rasio lebar 70% harus
+dikecilkan sampai font **30** supaya muat 2 baris — cukup kecil karena batas lebarnya sempit.
+
+**Perbaikan:** Rasio lebar khusus judul artikel (`$maxTitleWidthRatio`) dinaikkan dari **70% → 88%**
+(masih sisa margin ±6% kiri-kanan untuk border emas, tidak sampai mepet). Dengan lebar yang lebih
+lega, judul yang sama sekarang muat 2 baris di font **40** (naik 33% dari 30) tanpa perlu dikecilkan
+sebanyak sebelumnya.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `$maxTitleWidthRatio` 0.70 → 0.88 (dipakai khusus judul artikel setelah nama dapat rasio sendiri di #3). |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Test judul nyata diperbarui: memverifikasi font hasil akhir sekarang tepat **40** (bukan lagi sekadar "< 50"), dengan rasio lebar 88%. |
+
+### Verifikasi
+- Simulasi manual `imagettfbbox()`: judul nyata pada rasio 88% (2252px) → muat 2 baris di font 40.
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **21 passed (70 assertions)**,
+  termasuk assertion baru yang memastikan font tepat 40.
+- Full regression suite `php artisan test tests/Feature` → **183 passed (508 assertions)** — tidak
+  ada regresi ke fitur lain.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Ini putaran ke-4 kalibrasi berbasis screenshot — mohon user cek sekali lagi hasil akhirnya di
+  production untuk konfirmasi ukuran font judul sekarang sudah pas (tidak kebesaran seperti awal,
+  tidak kekecilan seperti setelah perbaikan #2).

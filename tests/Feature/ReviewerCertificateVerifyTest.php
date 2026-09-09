@@ -447,6 +447,11 @@ class ReviewerCertificateVerifyTest extends TestCase
      * baris. Diperbaiki dengan menurunkan font awal (nama 80→60, judul
      * 60→50) dan mengetatkan batas wrapTextWithAutoShrink() untuk judul dari
      * 4 baris menjadi 2 baris.
+     *
+     * Lanjutan ke-4: dengan rasio lebar 70%, judul yang sama itu ternyata
+     * harus dikecilkan sampai font 30 supaya muat 2 baris — dinilai user
+     * KURANG BESAR. Rasio lebar judul dinaikkan ke 88% supaya muat 2 baris
+     * di font yang lebih besar (40) tanpa perlu mengecilkan sebanyak itu.
      */
     public function test_wrap_text_with_auto_shrink_limits_real_reported_title_to_two_lines(): void
     {
@@ -457,13 +462,13 @@ class ReviewerCertificateVerifyTest extends TestCase
         // Judul persis yang dilaporkan overflow di screenshot kedua.
         $title = 'PENGARUH CITRA MEREK, RELATIONSHIP MARKETING, DAN KEPUASAN PELANGGAN '
             . 'TERHADAP LOYALITAS PELANGGAN PADA E-COMMERCE SHOPEE DI KOTA BATAM';
-        $maxWidth = (int) (2560 * 0.70); // lebar kanvas template asli (2560px)
+        $maxWidth = (int) (2560 * 0.88); // rasio lebar judul sekarang ($maxTitleWidthRatio)
 
         // Parameter persis sama dengan yang dipakai generateCertificate() sekarang.
         [$lines, $fontSize] = $method->invoke($controller, $title, $this->font(), 50, 26, $maxWidth, 2);
 
         $this->assertCount(2, $lines, 'Judul nyata yang dilaporkan overflow harus muat dalam 2 baris setelah perbaikan');
-        $this->assertLessThan(50, $fontSize, 'Font judul ini harus dikecilkan dari 50 supaya muat 2 baris');
+        $this->assertSame(40, $fontSize, 'Dengan lebar 88%, judul ini harus muat 2 baris di font 40 (bukan lagi turun sampai 30)');
 
         foreach ($lines as $line) {
             $bbox = imagettfbbox($fontSize, 0, $this->font(), $line);

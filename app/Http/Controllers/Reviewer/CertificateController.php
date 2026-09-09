@@ -306,9 +306,15 @@ class CertificateController extends Controller
         // Sesuaikan dengan desain template terbaru
         
         // Lebar aman untuk teks yang di-center (judul artikel — nama reviewer
-        // punya lebar sendiri, $nameMaxWidthRatio, lihat di bawah) — 70% dari
-        // lebar kanvas, sisakan margin kiri-kanan untuk border emas.
-        $maxTitleWidthRatio = 0.70;
+        // punya lebar sendiri, $nameMaxWidthRatio, lihat di bawah).
+        //
+        // Perbaikan 9 Sept 2026 (lanjutan ke-4): dengan rasio lama 70%, judul
+        // nyata yang dilaporkan ("PENGARUH CITRA MEREK...") harus dikecilkan
+        // sampai font 30 supaya muat 2 baris — user menilai hasilnya jadi
+        // KURANG BESAR / kurang terbaca. Rasio dinaikkan ke 88% (masih sisa
+        // margin ±6% kiri-kanan utk border emas) supaya judul yang sama muat
+        // 2 baris di font 40 (naik dari 30) tanpa perlu font sekecil itu.
+        $maxTitleWidthRatio = 0.88;
 
         // --- Perbaikan 9 Sept 2026: layout tumpang tindih -----------------------
         // Sebelumnya $yNamePosition (1120) & $yArticlePosition (1500) adalah
