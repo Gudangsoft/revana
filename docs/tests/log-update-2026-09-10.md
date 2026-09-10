@@ -74,3 +74,52 @@ urutan konsisten antar halaman (list ini paginated, urutan wajib di sisi server)
   cache-nya langsung supaya urutan = angka yang ditampilkan di kolom yang sama; kalau suatu saat
   angka "Total Points" di halaman ini diubah jadi dihitung dari riwayat, urutannya harus ikut
   disesuaikan.
+
+## 3. Fix: 403 Saat "Kembali ke Admin" Setelah Login As Reviewer
+
+**Tujuan:** User melapor: setelah admin klik "Login As" pada reviewer, lalu klik "Kembali ke Admin",
+muncul halaman **403 Akses Ditolak** di `/admin/users/return-to-admin`.
+
+**Akar masalah:** Rute `admin.users.return-to-admin` berada di dalam grup middleware `AdminMiddleware`.
+Impersonasi reviewer/user biasa memakai `Auth::login()` di **guard web** (mengganti admin), jadi saat
+impersonasi, `auth()->user()` adalah reviewer → `hasAdminAccess()` false → `AdminMiddleware` langsung
+`abort(403)`. Jadi rute untuk KELUAR dari impersonasi justru butuh sudah jadi admin lagi — catch-22.
+(Impersonasi PIC/Marketing tidak kena masalah ini karena pakai guard terpisah `pic`/`marketing`,
+guard web tetap admin.)
+
+Masalah kedua: `ReviewerController::loginAs` menyimpan key session `admin_impersonating`, sedangkan
+`UserController::returnToAdmin` cuma membaca `admin_user_impersonating` — dan `layouts/app.blade.php`
+cuma menampilkan tombol "Kembali ke Admin" kalau `admin_user_impersonating` ada (jadi lewat pintu
+`/admin/reviewers` → Login As, tombolnya malah tidak muncul sama sekali).
+
+**Perbaikan:**
+- Rute return dipindah ke **luar grup admin** — `POST /return-to-admin` (name `impersonation.return`),
+  hanya butuh middleware `auth`. Rute lama `admin.users.return-to-admin` dihapus (satu-satunya
+  pemakainya cuma tombol di layout yang ikut diubah).
+- `UserController::returnToAdmin()` sekarang menerima **kedua** key session
+  (`admin_user_impersonating` ?? `admin_impersonating`), membersihkan keduanya, memakai
+  `hasAdminAccess()` (bukan `isAdmin()`, supaya admin ber-role `pic_reviewer` juga bisa balik), dan
+  redirect ke `admin.dashboard`.
+- `layouts/app.blade.php`: banner "Mode Login As Aktif" + tombol "Kembali ke Admin" kini tampil kalau
+  `admin_user_impersonating` ada **atau** (`admin_impersonating` ada **dan** user web saat ini bukan
+  admin — supaya tidak bentrok dengan impersonasi PIC/Marketing yang juga memakai key itu). Tombol
+  POST ke `impersonation.return`.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah `POST /return-to-admin` (`impersonation.return`) di grup `auth` (luar grup admin); hapus `admin.users.return-to-admin` dari grup admin. |
+| `app/Http/Controllers/Admin/UserController.php` | `returnToAdmin()`: terima 2 key session, bersihkan keduanya, `hasAdminAccess()` gantikan `isAdmin()`, redirect `admin.dashboard`, no-session → redirect `login`. |
+| `resources/views/layouts/app.blade.php` | Kondisi banner impersonasi + `action` tombol diarahkan ke `impersonation.return`; deteksi kedua key session. |
+| `tests/Feature/ImpersonationReturnToAdminTest.php` (baru) | 6 test: rute return tidak lagi digated AdminMiddleware, jalan lewat kedua pintu (`UserController::loginAs` & `ReviewerController::loginAs`), tombol muncul di halaman reviewer saat impersonasi & mengarah ke rute baru, tanpa session impersonasi → redirect login (tidak crash), session menunjuk ID non-admin → logout, rute lama sudah tidak ada. |
+
+### Verifikasi
+- `php artisan test tests/Feature/ImpersonationReturnToAdminTest.php` → **6 passed (25 assertions)**.
+- `php artisan route:list` — konfirmasi `impersonation.return` terdaftar sebagai `POST /return-to-admin`
+  dan `admin.users.return-to-admin` sudah hilang.
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Impersonasi PIC & Marketing (`admin.pics.return-to-admin` / `admin.marketings.return-to-admin`)
+  **tidak diubah** — sudah berfungsi karena pakai guard terpisah.

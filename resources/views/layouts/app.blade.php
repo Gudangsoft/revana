@@ -896,8 +896,17 @@
         </div>
         @endif
 
-        {{-- Login As User Banner (Admin impersonating reviewer/user) --}}
-        @if(session('admin_user_impersonating'))
+        {{-- Login As User Banner (Admin impersonating reviewer/user via guard web).
+             Dua key session karena ada 2 pintu masuk: UserController::loginAs
+             (admin_user_impersonating) & ReviewerController::loginAs
+             (admin_impersonating). Untuk key kedua, hanya tampil kalau user web
+             saat ini memang BUKAN admin — supaya tidak bentrok dengan impersonasi
+             PIC/Marketing (guard terpisah) yang juga memakai key itu. --}}
+        @php
+            $isWebImpersonation = session('admin_user_impersonating')
+                || (session('admin_impersonating') && !(Auth::user()?->hasAdminAccess() ?? false));
+        @endphp
+        @if($isWebImpersonation)
         <div class="alert alert-info d-flex align-items-center justify-content-between mb-2 py-2" role="alert"
              style="border-left: 4px solid #3b82f6; border-radius: 6px; background:#eff6ff;">
             <div>
@@ -907,7 +916,7 @@
                 <strong>{{ Auth::user()?->name }}</strong>
                 <span class="badge bg-secondary ms-1">{{ Auth::user()?->role }}</span>
             </div>
-            <form action="{{ route('admin.users.return-to-admin') }}" method="POST" class="mb-0">
+            <form action="{{ route('impersonation.return') }}" method="POST" class="mb-0">
                 @csrf
                 <button type="submit" class="btn btn-info btn-sm text-white">
                     <i class="bi bi-box-arrow-left me-1"></i>Kembali ke Admin

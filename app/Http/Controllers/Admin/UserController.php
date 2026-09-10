@@ -107,17 +107,29 @@ class UserController extends Controller
         return $redirect->with('info', 'Anda sekarang login sebagai ' . $user->name . '. Klik "Kembali ke Admin" untuk keluar.');
     }
 
+    /**
+     * Keluar dari mode "Login As" (impersonasi guard web — reviewer / user
+     * biasa) dan kembali ke akun admin asli.
+     *
+     * Rute-nya (impersonation.return) sengaja DI LUAR grup middleware admin:
+     * saat sedang impersonasi reviewer, guard web memang bukan admin lagi,
+     * jadi kalau rute ini digated AdminMiddleware hasilnya 403 dan admin
+     * terjebak tidak bisa balik (dilaporkan user 10 Sept 2026). Dua nama key
+     * session diterima karena ada 2 pintu masuk: UserController::loginAs
+     * (`admin_user_impersonating`) dan ReviewerController::loginAs
+     * (`admin_impersonating`).
+     */
     public function returnToAdmin()
     {
-        $adminId = session('admin_user_impersonating');
+        $adminId = session('admin_user_impersonating') ?? session('admin_impersonating');
 
         if (!$adminId) {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('login');
         }
 
         $admin = User::find($adminId);
 
-        if (!$admin || !$admin->isAdmin()) {
+        if (!$admin || !$admin->hasAdminAccess()) {
             Auth::logout();
             session()->flush();
             return redirect()->route('login')->with('error', 'Sesi admin tidak valid.');
@@ -125,8 +137,9 @@ class UserController extends Controller
 
         Auth::login($admin);
         session()->forget('admin_user_impersonating');
+        session()->forget('admin_impersonating');
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('admin.dashboard')
             ->with('success', 'Berhasil kembali ke akun admin.');
     }
 

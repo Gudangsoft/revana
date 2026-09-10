@@ -142,6 +142,12 @@ Route::middleware('throttle:10,1')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+    // Keluar dari mode "Login As" (impersonasi guard web: reviewer / user biasa).
+    // WAJIB di luar grup middleware admin — saat impersonasi, guard web bukan
+    // admin lagi, jadi kalau digated AdminMiddleware hasilnya 403 (admin terjebak
+    // tidak bisa balik). Lihat UserController::returnToAdmin().
+    Route::post('/return-to-admin', [\App\Http\Controllers\Admin\UserController::class, 'returnToAdmin'])->name('impersonation.return');
+
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
@@ -498,7 +504,8 @@ Route::middleware('auth')->group(function () {
         
         // Users
         Route::post('/users/broadcast-email', [\App\Http\Controllers\Admin\UserController::class, 'broadcastEmail'])->name('users.broadcast-email');
-        Route::post('/users/return-to-admin', [\App\Http\Controllers\Admin\UserController::class, 'returnToAdmin'])->name('users.return-to-admin');
+        // Catatan: rute "return-to-admin" dipindah ke luar grup admin ini
+        // (name: impersonation.return) — lihat penjelasan di sana.
         Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('/users/{user}/login-as', [\App\Http\Controllers\Admin\UserController::class, 'loginAs'])->name('users.login-as');
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);

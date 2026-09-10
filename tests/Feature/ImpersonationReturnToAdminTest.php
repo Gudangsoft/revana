@@ -1,0 +1,125 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
+use Tests\TestCase;
+
+/**
+ * Regresi 10 Sept 2026: setelah admin "Login As" reviewer, tombol "Kembali ke
+ * Admin" mengarah ke /admin/users/return-to-admin yang berada di dalam grup
+ * middleware admin — padahal saat impersonasi guard web BUKAN admin lagi, jadi
+ * AdminMiddleware menolak dengan 403 dan admin terjebak tidak bisa balik.
+ *
+ * Perbaikan: rute pindah ke luar grup admin (name: impersonation.return, cuma
+ * butuh auth), dan controller-nya menerima dua nama key session karena ada 2
+ * pintu masuk impersonasi (UserController::loginAs & ReviewerController::loginAs).
+ */
+class ImpersonationReturnToAdminTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function makeAdmin(): User
+    {
+        return User::create([
+            'name' => 'Admin Asli', 'email' => 'admin-' . uniqid() . '@example.test',
+            'password' => bcrypt('password'), 'role' => 'admin',
+        ]);
+    }
+
+    private function makeReviewer(): User
+    {
+        return User::create([
+            'name' => 'Reviewer Target', 'email' => 'rev-' . uniqid() . '@example.test',
+            'password' => bcrypt('password'), 'role' => 'reviewer',
+            'total_points' => 0, 'available_points' => 0, 'completed_reviews' => 0,
+        ]);
+    }
+
+    public function test_return_route_is_not_gated_by_admin_middleware(): void
+    {
+        // Impersonasi lewat UserController::loginAs (key: admin_user_impersonating)
+        $admin = $this->makeAdmin();
+        $reviewer = $this->makeReviewer();
+
+        $this->actingAs($admin)->post(route('admin.users.login-as', $reviewer));
+        $this->assertSame($reviewer->id, Auth::id(), 'Setelah login-as, guard web harus jadi reviewer');
+
+        $response = $this->post(route('impersonation.return'));
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertSessionMissing('errors');
+        $this->assertSame($admin->id, Auth::id(), 'Harus kembali ke admin asli');
+        $this->assertNull(session('admin_user_impersonating'));
+    }
+
+    public function test_return_works_after_reviewer_controller_login_as(): void
+    {
+        // Impersonasi lewat ReviewerController::loginAs (key: admin_impersonating)
+        $admin = $this->makeAdmin();
+        $reviewer = $this->makeReviewer();
+
+        $this->actingAs($admin)->post(route('admin.reviewers.login-as', $reviewer));
+        $this->assertSame($reviewer->id, Auth::id());
+        $this->assertSame($admin->id, session('admin_impersonating'));
+
+        $response = $this->post(route('impersonation.return'));
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertSame($admin->id, Auth::id());
+        $this->assertNull(session('admin_impersonating'));
+    }
+
+    public function test_return_button_is_shown_on_reviewer_page_while_impersonating(): void
+    {
+        $admin = $this->makeAdmin();
+        $reviewer = $this->makeReviewer();
+
+        $this->actingAs($admin)->post(route('admin.users.login-as', $reviewer));
+
+        $response = $this->get(route('reviewer.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Kembali ke Admin');
+        $response->assertSee(route('impersonation.return'), false);
+        $response->assertDontSee('admin/users/return-to-admin');
+    }
+
+    public function test_return_with_no_impersonation_session_redirects_to_login(): void
+    {
+        $reviewer = $this->makeReviewer();
+        $this->actingAs($reviewer);
+
+        $response = $this->post(route('impersonation.return'));
+
+        $response->assertRedirect(route('login'));
+        // Tetap login sebagai reviewer (tidak crash, tidak logout paksa).
+        $this->assertSame($reviewer->id, Auth::id());
+    }
+
+    public function test_return_with_stale_non_admin_id_logs_out(): void
+    {
+        $reviewer = $this->makeReviewer();
+        $someUser = $this->makeReviewer();
+
+        // Simulasikan session impersonasi yang menunjuk ke ID non-admin.
+        $this->actingAs($reviewer)->withSession(['admin_user_impersonating' => $someUser->id]);
+
+        $response = $this->post(route('impersonation.return'));
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('error');
+        $this->assertFalse(Auth::check());
+    }
+
+    public function test_old_admin_gated_route_no_longer_exists(): void
+    {
+        $this->assertFalse(
+            \Illuminate\Support\Facades\Route::has('admin.users.return-to-admin'),
+            'Rute lama yang digated AdminMiddleware harus sudah dihapus'
+        );
+        $this->assertTrue(\Illuminate\Support\Facades\Route::has('impersonation.return'));
+    }
+}
