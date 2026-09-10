@@ -171,6 +171,26 @@ class CertificateController extends Controller
         return [$lines, $fontSize];
     }
 
+    /**
+     * "Faux bold": file font bold (arial-bold.ttf) TIDAK ADA di server — cuma
+     * ada arial.ttf (regular). Supaya nama reviewer tampak TEBAL (permintaan
+     * user 10 Sept 2026), teks digambar beberapa kali dengan geseran ±1px
+     * (horizontal & vertikal) sehingga stroke-nya menebal ~2px tanpa bikin
+     * blur/blob. Align center + valign middle, sama seperti render nama biasa.
+     */
+    private function drawBoldCenteredText($image, string $line, float $x, float $y, string $fontFile, int $size, string $color): void
+    {
+        foreach ([[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]] as [$dx, $dy]) {
+            $image->text($line, $x + $dx, $y + $dy, function ($font) use ($fontFile, $size, $color) {
+                $font->filename($fontFile);
+                $font->size($size);
+                $font->color($color);
+                $font->align('center');
+                $font->valign('middle');
+            });
+        }
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -362,8 +382,11 @@ class CertificateController extends Controller
         // untuk nama yang jauh lebih panjang lagi (banyak gelar akademik),
         // wrapTextWithAutoShrink() akan mengecilkan font secara otomatis
         // sampai muat 1 baris.
+        // 10 Sept 2026: user minta nama sedikit DIKECILKAN (60 → 54) dan dibuat
+        // TEBAL. File arial-bold.ttf tidak ada di server (cuma arial.ttf), jadi
+        // "tebal"-nya pakai teknik faux-bold — lihat drawBoldCenteredText().
         $nameMaxWidthRatio = 0.82;
-        $nameFontSize = 60;
+        $nameFontSize = 54;
         $nameMinFontSize = 24;
         [$nameLines, $nameFontSize] = $this->wrapTextWithAutoShrink(
             $reviewerName, $fontBold, $nameFontSize, $nameMinFontSize,
@@ -377,9 +400,10 @@ class CertificateController extends Controller
         // warna emas tua (#8B6914 — sama dengan teks sekunder lain di sertifikat
         // ini) supaya jadi sub-label yang jelas hierarkinya. Dibungkus maksimal
         // 2 baris + auto-shrink supaya nama instansi yang panjang tetap muat.
+        // 10 Sept 2026: user minta font afiliasi dibesarkan sedikit lagi (30 → 34).
         $affiliation = trim((string) ($reviewer->institution ?? ''));
         $affiliationLines = [];
-        $affiliationFontSize = 30;
+        $affiliationFontSize = 34;
         $affiliationLineSpacing = 0;
         if ($affiliation !== '') {
             [$affiliationLines, $affiliationFontSize] = $this->wrapTextWithAutoShrink(
@@ -406,13 +430,7 @@ class CertificateController extends Controller
         $nameZoneBottom = $height * (838 / 1811);
         $yNamePosition = ($nameZoneTop + $nameZoneBottom) / 2 - $blockSpan / 2;
         foreach ($nameLines as $nameLine) {
-            $image->text($nameLine, $width / 2, $yNamePosition, function($font) use ($fontBold, $nameFontSize) {
-                $font->filename($fontBold);
-                $font->size($nameFontSize);
-                $font->color('#C9A961');
-                $font->align('center');
-                $font->valign('middle');
-            });
+            $this->drawBoldCenteredText($image, $nameLine, $width / 2, $yNamePosition, $fontBold, $nameFontSize, '#C9A961');
             $yNamePosition += $nameLineSpacing;
         }
 

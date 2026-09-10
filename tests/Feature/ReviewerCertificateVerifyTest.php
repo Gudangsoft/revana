@@ -805,4 +805,60 @@ class ReviewerCertificateVerifyTest extends TestCase
         $this->assertFileExists($path);
         $this->assertGreaterThan(0, filesize($path));
     }
+
+    /**
+     * Permintaan 10 Sept 2026: nama dibuat TEBAL. File arial-bold.ttf tidak ada
+     * di server, jadi dipakai faux-bold (drawBoldCenteredText) — teks digambar
+     * beberapa kali dengan geseran ±1px. Test membuktikan faux-bold benar-benar
+     * MENEBALKAN: jumlah piksel emas nama lebih banyak dibanding render polos
+     * 1x pada ukuran & teks yang sama.
+     */
+    public function test_faux_bold_name_renders_thicker_than_a_plain_single_pass(): void
+    {
+        $font = file_exists(public_path('fonts/arial-bold.ttf'))
+            ? public_path('fonts/arial-bold.ttf')
+            : public_path('fonts/arial.ttf');
+        $text = 'NS.SOLEHUDIN,S.KEP.,M.KES. M.KEP';
+        $size = 54;
+
+        $countGold = function ($img): int {
+            $n = 0;
+            for ($y = 0; $y < imagesy($img); $y += 1) {
+                for ($x = 0; $x < imagesx($img); $x += 1) {
+                    $c = imagecolorat($img, $x, $y);
+                    $r = ($c >> 16) & 0xFF; $g = ($c >> 8) & 0xFF; $b = $c & 0xFF;
+                    if (abs($r - 201) <= 35 && abs($g - 169) <= 35 && abs($b - 97) <= 35) {
+                        $n++;
+                    }
+                }
+            }
+            return $n;
+        };
+
+        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+
+        // Render POLOS (1x).
+        $plain = $manager->create(1400, 200)->fill('#ffffff');
+        $plain->text($text, 700, 100, function ($f) use ($font, $size) {
+            $f->filename($font); $f->size($size); $f->color('#C9A961');
+            $f->align('center'); $f->valign('middle');
+        });
+        $plainGd = imagecreatefromstring((string) $plain->toPng());
+        $plainCount = $countGold($plainGd);
+        imagedestroy($plainGd);
+
+        // Render FAUX-BOLD (lewat method privat controller).
+        $bold = $manager->create(1400, 200)->fill('#ffffff');
+        $controller = new CertificateController();
+        $m = new \ReflectionMethod($controller, 'drawBoldCenteredText');
+        $m->setAccessible(true);
+        $m->invoke($controller, $bold, $text, 700.0, 100.0, $font, $size, '#C9A961');
+        $boldGd = imagecreatefromstring((string) $bold->toPng());
+        $boldCount = $countGold($boldGd);
+        imagedestroy($boldGd);
+
+        $this->assertGreaterThan(0, $plainCount);
+        $this->assertGreaterThan($plainCount * 1.15, $boldCount,
+            "Faux-bold harus jelas lebih tebal: polos={$plainCount}px, bold={$boldCount}px");
+    }
 }

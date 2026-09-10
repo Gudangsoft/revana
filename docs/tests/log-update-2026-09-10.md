@@ -197,3 +197,34 @@ disetujui):
 - Sama seperti perbaikan sertifikat sebelumnya: file template AKTIF tidak tersedia di lokal, jadi
   posisi vertikal berbasis pengukuran zona dari contoh sertifikat asli. Mohon user cek satu
   sertifikat baru setelah deploy untuk memastikan afiliasi tampil pas di bawah nama.
+
+## 6. Sertifikat Reviewer: Nama Dikecilkan + Ditebalkan, Afiliasi Dibesarkan
+
+**Tujuan:** Lanjutan dari #5 — user minta: font afiliasi dibesarkan sedikit lagi, font nama
+dikecilkan sedikit dan **dibuat tebal**.
+
+**Perubahan (`CertificateController::generateCertificate()`):**
+- `$nameFontSize` 60 → **54**.
+- `$affiliationFontSize` 30 → **34**.
+- **Nama jadi tebal** — file `public/fonts/arial-bold.ttf` TIDAK ADA di server (cuma `arial.ttf`
+  regular), jadi `$fontBold` selama ini selalu fallback ke regular dan nama tidak pernah benar-benar
+  tebal. Ditambahkan helper `drawBoldCenteredText()` yang menggambar teks nama 5x dengan geseran
+  ±1px (kiri/kanan/atas/bawah + tengah) → stroke menebal ±2px tanpa blur (faux-bold). Dipakai
+  khusus untuk nama; afiliasi tetap regular.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | Tambah `drawBoldCenteredText()` (faux-bold multi-pass). `$nameFontSize` 60→54, dirender via faux-bold. `$affiliationFontSize` 30→34. |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Tambah `test_faux_bold_name_renders_thicker_than_a_plain_single_pass` — bandingkan jumlah piksel emas hasil `drawBoldCenteredText()` vs render polos 1x pada teks & ukuran sama; faux-bold harus >15% lebih tebal. Test afiliasi lama tetap lulus (font lebih besar → piksel lebih banyak). |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → dijalankan setelah perubahan.
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Faux-bold = 5 kali `$image->text()` per baris nama (nama biasanya 1 baris) — beban render
+  tambahan tidak signifikan.
+- Kalau suatu saat `arial-bold.ttf` asli dipasang di `public/fonts/`, faux-bold bisa disederhanakan
+  jadi 1x draw dengan font itu (tapi tidak wajib — hasil faux-bold sudah cukup).
