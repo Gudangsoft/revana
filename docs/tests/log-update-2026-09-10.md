@@ -299,3 +299,34 @@ dan tampil di **semua halaman reviewer**, bukan cuma dashboard.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB.
+
+## 9. AdminMiddleware: Halaman Admin Tetap Bisa Diakses Saat "Login As"
+
+**Tujuan:** User melapor `/admin/settings` (dan halaman admin lain) memberi **403** saat admin sedang
+dalam mode "Login As" (impersonasi reviewer) — admin terkunci dari panelnya sendiri.
+
+**Akar masalah:** `AdminMiddleware` cuma cek `auth()->user()->hasAdminAccess()`. Saat "Login As"
+reviewer / user biasa, guard web jadi reviewer (bukan admin), jadi semua `/admin/*` → 403.
+(Impersonasi PIC/Marketing tidak kena karena guard terpisah — guard web tetap admin.)
+
+**Perbaikan:** `AdminMiddleware` sekarang, kalau user aktif bukan admin, mengecek sesi impersonasi
+(`admin_user_impersonating` ?? `admin_impersonating`) — kalau ID-nya menunjuk ke user yang
+`hasAdminAccess()`, akses diizinkan. Tanpa sesi impersonasi, atau ID-nya non-admin → tetap 403 (tidak
+ada privilege escalation: yang di-unlock hanya admin asli yang memang sedang impersonasi).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Middleware/AdminMiddleware.php` | Kalau `!hasAdminAccess()`, cek `session('admin_user_impersonating' ?? 'admin_impersonating')` → izinkan kalau ID-nya admin valid. |
+| `tests/Feature/ImpersonationReturnToAdminTest.php` | +4 test: `/admin/settings` & `/admin/dashboard` tetap 200 saat impersonasi (lewat kedua pintu loginAs); reviewer biasa tanpa sesi impersonasi tetap 403; sesi impersonasi yang menunjuk ke non-admin tetap 403. |
+
+### Verifikasi
+- `php artisan test tests/Feature/ImpersonationReturnToAdminTest.php` → **11 passed (36 assertions)**.
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.
+- Catatan perilaku: selama impersonasi, `auth()->user()` di controller admin tetap mengembalikan user
+  yang di-impersonasi (reviewer). Aksi admin yang meng-attribute `auth()->id()` akan tercatat atas
+  nama reviewer itu — untuk kasus utama (lihat/ubah Setting) tidak masalah; kalau perlu aksi admin
+  "sungguhan", klik "Kembali ke Admin" dulu.

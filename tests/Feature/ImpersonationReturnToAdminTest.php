@@ -144,4 +144,48 @@ class ImpersonationReturnToAdminTest extends TestCase
         $response->assertRedirect(route('admin.dashboard'));
         $this->assertSame($admin->id, Auth::id());
     }
+
+    /**
+     * Regresi 10 Sept 2026: saat admin sedang "Login As" reviewer, halaman admin
+     * (mis. /admin/settings) memberi 403 — admin terkunci dari panel-nya sendiri.
+     * AdminMiddleware sekarang mengizinkan akses kalau ada sesi impersonasi yang
+     * ID admin-nya valid, walau user aktif (guard web) adalah reviewer.
+     */
+    public function test_admin_pages_stay_accessible_while_impersonating_via_user_login_as(): void
+    {
+        $admin = $this->makeAdmin();
+        $reviewer = $this->makeReviewer();
+        $this->actingAs($admin)->post(route('admin.users.login-as', $reviewer));
+        $this->assertSame($reviewer->id, Auth::id());
+
+        $this->get(route('admin.settings.index'))->assertOk();
+        $this->get(route('admin.dashboard'))->assertOk();
+    }
+
+    public function test_admin_pages_stay_accessible_while_impersonating_via_reviewer_login_as(): void
+    {
+        $admin = $this->makeAdmin();
+        $reviewer = $this->makeReviewer();
+        $this->actingAs($admin)->post(route('admin.reviewers.login-as', $reviewer));
+        $this->assertSame($reviewer->id, Auth::id());
+
+        $this->get(route('admin.settings.index'))->assertOk();
+    }
+
+    public function test_plain_reviewer_without_impersonation_session_is_still_403_on_admin_pages(): void
+    {
+        $this->actingAs($this->makeReviewer());
+
+        $this->get(route('admin.settings.index'))->assertForbidden();
+    }
+
+    public function test_impersonation_session_pointing_to_a_non_admin_does_not_unlock_admin_pages(): void
+    {
+        $reviewer = $this->makeReviewer();
+        $anotherReviewer = $this->makeReviewer();
+        // Sesi impersonasi yang ID-nya menunjuk ke user NON-admin → tetap 403.
+        $this->actingAs($reviewer)->withSession(['admin_user_impersonating' => $anotherReviewer->id]);
+
+        $this->get(route('admin.settings.index'))->assertForbidden();
+    }
 }
