@@ -147,6 +147,16 @@ Route::middleware('auth')->group(function () {
     // admin lagi, jadi kalau digated AdminMiddleware hasilnya 403 (admin terjebak
     // tidak bisa balik). Lihat UserController::returnToAdmin().
     Route::post('/return-to-admin', [\App\Http\Controllers\Admin\UserController::class, 'returnToAdmin'])->name('impersonation.return');
+    // Alias kompatibilitas untuk path & NAMA rute LAMA (admin.users.return-to-admin):
+    // tab browser / Blade yang ter-cache di server yang belum ke-refresh masih
+    // POST ke path ini dan/atau memanggil route('admin.users.return-to-admin').
+    // HARUS didaftarkan SEBELUM grup admin di bawah — kalau tidak, path-nya jatuh
+    // ke Route::resource('users') (pola users/{user}) yang tidak punya method
+    // POST → 405 Method Not Allowed. Tanpa AdminMiddleware, alasan sama seperti
+    // rute di atas. Nama lama dipertahankan supaya view lama tidak
+    // RouteNotFoundException saat deploy sebelum `view:clear` sempat jalan.
+    Route::post('/admin/users/return-to-admin', [\App\Http\Controllers\Admin\UserController::class, 'returnToAdmin'])
+        ->name('admin.users.return-to-admin');
 
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {

@@ -117,9 +117,47 @@ cuma menampilkan tombol "Kembali ke Admin" kalau `admin_user_impersonating` ada 
 - `php artisan test tests/Feature/ImpersonationReturnToAdminTest.php` → **6 passed (25 assertions)**.
 - `php artisan route:list` — konfirmasi `impersonation.return` terdaftar sebagai `POST /return-to-admin`
   dan `admin.users.return-to-admin` sudah hilang.
-- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **230 passed (661 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB.
 - Impersonasi PIC & Marketing (`admin.pics.return-to-admin` / `admin.marketings.return-to-admin`)
   **tidak diubah** — sudah berfungsi karena pakai guard terpisah.
+
+## 4. Fix Lanjutan: 405 Method Not Allowed di Path Return Lama
+
+**Tujuan:** Setelah section #3 dideploy, user melapor error berubah jadi **405 Method Not Allowed**
+("The POST method is not supported for route admin/users/return-to-admin. Supported methods: GET,
+HEAD, PUT, PATCH, DELETE.") — dari tab browser / Blade yang ter-cache di server yang masih submit
+form ke path lama `/admin/users/return-to-admin`.
+
+**Akar masalah:** Section #3 menghapus rute `POST /admin/users/return-to-admin` sepenuhnya. Path itu
+lalu "jatuh" ke `Route::resource('users')` (pola `users/{user}`, dengan `{user}` = "return-to-admin")
+yang punya method GET/HEAD/PUT/PATCH/DELETE tapi **tidak POST** → 405. Klien lama (tab yang belum
+di-refresh, atau compiled view di `storage/framework/views` yang belum di-`view:clear`) masih
+menembak path itu.
+
+**Perbaikan:** Tambah **alias kompatibilitas** — `POST /admin/users/return-to-admin` didaftarkan
+lagi, **di luar grup `AdminMiddleware`** dan **sebelum grup admin** (supaya menang atas
+`Route::resource('users')`), menunjuk ke `UserController::returnToAdmin` yang sama. Nama rute lama
+`admin.users.return-to-admin` juga dipertahankan supaya compiled view lama yang memanggil
+`route('admin.users.return-to-admin')` tidak `RouteNotFoundException` sebelum `view:clear` sempat
+jalan saat deploy. View baru tetap pakai rute bersih `impersonation.return` (`POST /return-to-admin`).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `routes/web.php` | Tambah alias `POST /admin/users/return-to-admin` (name `admin.users.return-to-admin`, tanpa AdminMiddleware, sebelum grup admin) di samping `impersonation.return`. |
+| `tests/Feature/ImpersonationReturnToAdminTest.php` | `test_old_admin_gated_route_no_longer_exists` diganti `test_both_new_and_legacy_route_names_exist`; tambah `test_legacy_path_still_accepts_post_without_405_or_403` (POST ke path lama persis → redirect dashboard, bukan 405/403). |
+
+### Verifikasi
+- `php artisan test tests/Feature/ImpersonationReturnToAdminTest.php` → **7 passed (29 assertions)**.
+- `php artisan route:list --path=return-to-admin` → `POST /return-to-admin` (impersonation.return) &
+  `POST /admin/users/return-to-admin` (admin.users.return-to-admin) dua-duanya terdaftar.
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tetap **disarankan** jalankan `php artisan view:clear && php artisan route:clear` di server setelah
+  deploy, tapi sekarang bukan lagi syarat wajib — path lama sudah aman menerima POST walau ada
+  klien/cache yang belum ter-refresh.

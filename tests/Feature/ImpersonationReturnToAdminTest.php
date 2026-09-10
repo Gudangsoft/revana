@@ -114,12 +114,34 @@ class ImpersonationReturnToAdminTest extends TestCase
         $this->assertFalse(Auth::check());
     }
 
-    public function test_old_admin_gated_route_no_longer_exists(): void
+    public function test_both_new_and_legacy_route_names_exist(): void
     {
-        $this->assertFalse(
-            \Illuminate\Support\Facades\Route::has('admin.users.return-to-admin'),
-            'Rute lama yang digated AdminMiddleware harus sudah dihapus'
-        );
+        // Rute bersih yang baru.
         $this->assertTrue(\Illuminate\Support\Facades\Route::has('impersonation.return'));
+        // Alias kompatibilitas (path & nama lama) dipertahankan supaya tab
+        // browser / view ter-cache yang belum ke-refresh tidak error 405.
+        $this->assertTrue(\Illuminate\Support\Facades\Route::has('admin.users.return-to-admin'));
+    }
+
+    /**
+     * Regresi lanjutan 10 Sept: setelah rute POST lama dihapus total, path
+     * /admin/users/return-to-admin jatuh ke Route::resource('users') dan
+     * mengembalikan 405 (POST tidak didukung) untuk tab browser lama yang
+     * masih submit ke sana. Alias kompatibilitas harus menerima POST di path
+     * itu TANPA 405 & TANPA 403 (tidak digated AdminMiddleware).
+     */
+    public function test_legacy_path_still_accepts_post_without_405_or_403(): void
+    {
+        $admin = $this->makeAdmin();
+        $reviewer = $this->makeReviewer();
+
+        $this->actingAs($admin)->post(route('admin.users.login-as', $reviewer));
+        $this->assertSame($reviewer->id, Auth::id());
+
+        // POST ke path LAMA persis (seperti yang dilakukan tombol di view lama).
+        $response = $this->post('/admin/users/return-to-admin');
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertSame($admin->id, Auth::id());
     }
 }
