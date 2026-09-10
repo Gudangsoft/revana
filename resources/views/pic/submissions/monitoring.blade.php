@@ -723,7 +723,7 @@
                                         <code class="text-primary">{{ $s->kode_submit }}</code>
                                     </a>
                                     @if($s->journalSlot)
-                                        <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $s->journalSlot->journalMaster?->nama_jurnal ?? '-' }} - Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}">{{ Str::limit($s->journalSlot->journalMaster?->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }}</small>
+                                        <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.3;">{{ $s->journalSlot->journalMaster?->nama_jurnal ?? '-' }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }} &middot; {{ $s->journalSlot->bulan }} {{ $s->journalSlot->tahun }}</small>
                                     @endif
                                     @if($s->kode_loa)
                                     <a href="{{ route('loa.public', $s->kode_loa) }}" target="_blank"
@@ -754,7 +754,7 @@
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td title="{{ $s->journalSlot?->display_name }}">{{ $s->journalSlot ? 'Vol.' . $s->journalSlot->volume . ' No.' . $s->journalSlot->nomor : '-' }}</td>
+                                <td>{{ $s->journalSlot ? $s->journalSlot->journalMaster?->nama_jurnal . ' — Vol.' . $s->journalSlot->volume . ' No.' . $s->journalSlot->nomor . ' · ' . $s->journalSlot->bulan . ' ' . $s->journalSlot->tahun : '-' }}</td>
                                 <td class="text-center">
                                     @if($s->link_artikel)
                                         <a href="{{ $s->link_artikel }}" target="_blank" title="Buka Link Artikel">

@@ -168,7 +168,7 @@
                         <td class="px-3">
                             <code class="badge bg-light text-dark">{{ $submission->kode_submit }}</code>
                             @if($submission->journalSlot)
-                                <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.2;" title="{{ $submission->journalSlot->journalMaster?->nama_jurnal ?? '-' }} - Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}">{{ Str::limit($submission->journalSlot->journalMaster?->nama_jurnal ?? '-', 20) }}<br>Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }}</small>
+                                <br><small class="text-muted" style="font-size: 0.65rem; line-height: 1.3;">{{ $submission->journalSlot->journalMaster?->nama_jurnal ?? '-' }}<br>Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }} &middot; {{ $submission->journalSlot->bulan }} {{ $submission->journalSlot->tahun }}</small>
                             @endif
                             @if($submission->process_type === 'fasttrack')
                                 <span class="badge bg-warning text-dark"><i class="bi bi-lightning-charge"></i> FT</span>
@@ -196,7 +196,7 @@
                                 {{ $submission->journalSlot?->journalMaster?->nama_jurnal ?? '-' }}
                             </small><br>
                             <small class="text-muted">
-                                {{ $submission->journalSlot ? $submission->journalSlot->bulan . '/' . $submission->journalSlot->tahun : '-' }}
+                                {{ $submission->journalSlot ? 'Vol.' . $submission->journalSlot->volume . ' No.' . $submission->journalSlot->nomor . ' · ' . $submission->journalSlot->bulan . ' ' . $submission->journalSlot->tahun : '-' }}
                             </small>
                         </td>
                         <td>

@@ -814,8 +814,7 @@ code.copyable.copied {
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input submission-checkbox" value="{{ $s->id }}" data-kode="{{ $s->kode_submit }}" data-title="{{ Str::limit($s->judul_artikel, 40) }}">
                                 </td>
-                                <td class="sticky-first"
-                                    title="{{ $s->journalSlot ? ($s->journalSlot->journalMaster?->nama_jurnal ?? '-').' — Vol.'.$s->journalSlot->volume.' No.'.$s->journalSlot->nomor : '' }}">
+                                <td class="sticky-first">
                                     <a href="{{ route('admin.submissions.process', $s) }}" class="text-decoration-none">
                                         <code class="text-primary" style="font-size:0.7rem;">{{ $s->kode_submit }}</code>
                                     </a>
@@ -823,8 +822,8 @@ code.copyable.copied {
                                         <span class="badge bg-success ms-1" style="font-size:0.55rem;"><i class="bi bi-check-circle-fill"></i> SELESAI</span>
                                     @endif
                                     @if($s->journalSlot)
-                                        <div style="font-size:0.6rem; color:#6b7280; line-height:1.2; margin-top:2px;">
-                                            {{ Str::limit($s->journalSlot->journalMaster?->nama_jurnal ?? '', 20) }}
+                                        <div style="font-size:0.6rem; color:#6b7280; line-height:1.3; margin-top:2px;">
+                                            {{ $s->journalSlot->journalMaster?->nama_jurnal ?? '-' }}<br>Vol.{{ $s->journalSlot->volume }} No.{{ $s->journalSlot->nomor }} &middot; {{ $s->journalSlot->bulan }} {{ $s->journalSlot->tahun }}
                                         </div>
                                     @endif
                                     <div style="margin-top:3px; background:#e5e7eb; border-radius:3px; height:3px; width:80px;">

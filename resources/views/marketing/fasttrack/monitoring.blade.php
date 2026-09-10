@@ -173,9 +173,7 @@
                             </small>
                             @if($submission->journalSlot)
                             <br><small class="text-muted">
-                                Vol.{{ $submission->journalSlot->volume }}
-                                No.{{ $submission->journalSlot->nomor }}
-                                ({{ $submission->journalSlot->bulan }}/{{ $submission->journalSlot->tahun }})
+                                Vol.{{ $submission->journalSlot->volume }} No.{{ $submission->journalSlot->nomor }} &middot; {{ $submission->journalSlot->bulan }} {{ $submission->journalSlot->tahun }}
                             </small>
                             @endif
                         </td>
