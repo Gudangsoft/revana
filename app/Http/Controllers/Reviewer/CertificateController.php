@@ -400,10 +400,12 @@ class CertificateController extends Controller
         // warna emas tua (#8B6914 — sama dengan teks sekunder lain di sertifikat
         // ini) supaya jadi sub-label yang jelas hierarkinya. Dibungkus maksimal
         // 2 baris + auto-shrink supaya nama instansi yang panjang tetap muat.
-        // 10 Sept 2026: user minta font afiliasi dibesarkan sedikit lagi (30 → 34).
+        // 10 Sept 2026: font afiliasi dibesarkan bertahap atas permintaan user
+        // (30 → 34 → 40). Tetap lebih kecil dari nama (54) supaya hierarki
+        // visual "nama > afiliasi" terjaga.
         $affiliation = trim((string) ($reviewer->institution ?? ''));
         $affiliationLines = [];
-        $affiliationFontSize = 34;
+        $affiliationFontSize = 40;
         $affiliationLineSpacing = 0;
         if ($affiliation !== '') {
             [$affiliationLines, $affiliationFontSize] = $this->wrapTextWithAutoShrink(

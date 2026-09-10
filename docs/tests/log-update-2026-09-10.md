@@ -200,12 +200,12 @@ disetujui):
 
 ## 6. Sertifikat Reviewer: Nama Dikecilkan + Ditebalkan, Afiliasi Dibesarkan
 
-**Tujuan:** Lanjutan dari #5 — user minta: font afiliasi dibesarkan sedikit lagi, font nama
-dikecilkan sedikit dan **dibuat tebal**.
+**Tujuan:** Lanjutan dari #5 — user minta (2 putaran): font afiliasi dibesarkan (30 → 34 → **40**),
+font nama dikecilkan sedikit dan **dibuat tebal**.
 
 **Perubahan (`CertificateController::generateCertificate()`):**
 - `$nameFontSize` 60 → **54**.
-- `$affiliationFontSize` 30 → **34**.
+- `$affiliationFontSize` 30 → **40** (dinaikkan bertahap; tetap < 54 supaya hierarki nama > afiliasi).
 - **Nama jadi tebal** — file `public/fonts/arial-bold.ttf` TIDAK ADA di server (cuma `arial.ttf`
   regular), jadi `$fontBold` selama ini selalu fallback ke regular dan nama tidak pernah benar-benar
   tebal. Ditambahkan helper `drawBoldCenteredText()` yang menggambar teks nama 5x dengan geseran
@@ -215,7 +215,7 @@ dikecilkan sedikit dan **dibuat tebal**.
 ### File yang Diubah
 | File | Perubahan |
 |------|-----------|
-| `app/Http/Controllers/Reviewer/CertificateController.php` | Tambah `drawBoldCenteredText()` (faux-bold multi-pass). `$nameFontSize` 60→54, dirender via faux-bold. `$affiliationFontSize` 30→34. |
+| `app/Http/Controllers/Reviewer/CertificateController.php` | Tambah `drawBoldCenteredText()` (faux-bold multi-pass). `$nameFontSize` 60→54, dirender via faux-bold. `$affiliationFontSize` 30→40. |
 | `tests/Feature/ReviewerCertificateVerifyTest.php` | Tambah `test_faux_bold_name_renders_thicker_than_a_plain_single_pass` — bandingkan jumlah piksel emas hasil `drawBoldCenteredText()` vs render polos 1x pada teks & ukuran sama; faux-bold harus >15% lebih tebal. Test afiliasi lama tetap lulus (font lebih besar → piksel lebih banyak). |
 
 ### Verifikasi
