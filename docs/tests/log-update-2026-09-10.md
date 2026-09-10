@@ -162,3 +162,38 @@ jalan saat deploy. View baru tetap pakai rute bersih `impersonation.return` (`PO
 - Tetap **disarankan** jalankan `php artisan view:clear && php artisan route:clear` di server setelah
   deploy, tapi sekarang bukan lagi syarat wajib — path lama sudah aman menerima POST walau ada
   klien/cache yang belum ter-refresh.
+
+## 5. Sertifikat Reviewer: Tambah Afiliasi / Asal Instansi di Bawah Nama
+
+**Tujuan:** User minta afiliasi (asal instansi) reviewer dicetak **di bawah nama** pada sertifikat —
+"kecil saja namun masih tetap terlihat dengan jelas".
+
+**Perubahan:** Di `CertificateController::generateCertificate()`, setelah baris nama, ditambahkan
+render `$reviewer->institution` (kolom yang diisi dari `affiliation` saat pendaftaran reviewer
+disetujui):
+- Font 30 (jauh lebih kecil dari nama yang 60), warna `#8B6914` (emas tua — sama dengan teks
+  sekunder lain di sertifikat), sehingga jelas sebagai sub-label di bawah nama.
+- Nama + afiliasi diperlakukan sebagai **satu blok** yang di-center vertikal di dalam zona nama
+  (Y 599-838, referensi 1811px) — jadi nama sedikit naik untuk memberi ruang afiliasi, afiliasi
+  tidak meluber ke luar zona / menabrak paragraf "in Recognition of Contribution...".
+- Dibungkus maksimal 2 baris + auto-shrink (via `wrapTextWithAutoShrink()` yang sudah ada) supaya
+  nama instansi yang sangat panjang tetap muat.
+- Kalau `institution` kosong/null, tidak ada yang dicetak (nama tetap di-center sendirian seperti
+  sebelumnya).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Reviewer/CertificateController.php` | `generateCertificate()`: render `$reviewer->institution` di bawah nama (font 30, `#8B6914`, max 2 baris, auto-shrink); nama+afiliasi di-center sebagai satu blok di zona nama. |
+| `tests/Feature/ReviewerCertificateVerifyTest.php` | Tambah helper `renderCertificateOnDummy()` + `scanColorBand()` + `tearDown()` cleanup. 3 test baru: afiliasi (#8B6914) muncul di zona nama & posisinya DI BAWAH nama (#C9A961) — diverifikasi dari piksel gambar hasil render; tanpa instansi → tidak ada teks emas tua di zona nama; nama instansi sangat panjang → tetap selesai tanpa error (auto-shrink). |
+
+### Verifikasi
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **25 passed (85 assertions)**.
+- Full regression suite `php artisan test tests/Feature` → **234 passed (675 assertions)** — tidak
+  ada regresi ke fitur lain.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB (`users.institution` sudah ada).
+- Sama seperti perbaikan sertifikat sebelumnya: file template AKTIF tidak tersedia di lokal, jadi
+  posisi vertikal berbasis pengukuran zona dari contoh sertifikat asli. Mohon user cek satu
+  sertifikat baru setelah deploy untuk memastikan afiliasi tampil pas di bawah nama.

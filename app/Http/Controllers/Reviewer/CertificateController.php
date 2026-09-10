@@ -370,9 +370,41 @@ class CertificateController extends Controller
             (int) ($width * $nameMaxWidthRatio), 1
         );
         $nameLineSpacing = (int) round($nameFontSize * 1.15);
+
+        // Afiliasi / asal instansi reviewer — baris kecil TEPAT DI BAWAH nama
+        // (ditambahkan 10 Sept 2026 atas permintaan user: "kecil saja namun
+        // masih tetap terlihat dengan jelas"). Font jauh lebih kecil dari nama,
+        // warna emas tua (#8B6914 — sama dengan teks sekunder lain di sertifikat
+        // ini) supaya jadi sub-label yang jelas hierarkinya. Dibungkus maksimal
+        // 2 baris + auto-shrink supaya nama instansi yang panjang tetap muat.
+        $affiliation = trim((string) ($reviewer->institution ?? ''));
+        $affiliationLines = [];
+        $affiliationFontSize = 30;
+        $affiliationLineSpacing = 0;
+        if ($affiliation !== '') {
+            [$affiliationLines, $affiliationFontSize] = $this->wrapTextWithAutoShrink(
+                $affiliation, $fontRegular, $affiliationFontSize, 20,
+                (int) ($width * $nameMaxWidthRatio), 2
+            );
+            $affiliationLineSpacing = (int) round($affiliationFontSize * 1.25);
+        }
+
+        // Nama + afiliasi diperlakukan sebagai SATU blok, di-center vertikal di
+        // dalam zona nama (Y 599-838) — jadi nama sedikit naik untuk memberi
+        // ruang afiliasi di bawahnya, bukan afiliasi meluber ke luar zona.
+        // $nameToAffiliationGap = jarak dari center baris nama terakhir ke
+        // center baris afiliasi pertama (½ tinggi baris nama + jarak visual +
+        // ½ tinggi baris afiliasi).
+        $nameToAffiliationGap = $affiliationLines
+            ? (int) round($nameFontSize * 0.5) + 18 + (int) round($affiliationFontSize * 0.5)
+            : 0;
+        $blockSpan = ((count($nameLines) - 1) * $nameLineSpacing)
+            + $nameToAffiliationGap
+            + (count($affiliationLines) > 0 ? (count($affiliationLines) - 1) * $affiliationLineSpacing : 0);
+
         $nameZoneTop = $height * (599 / 1811);
         $nameZoneBottom = $height * (838 / 1811);
-        $yNamePosition = ($nameZoneTop + $nameZoneBottom) / 2 - ((count($nameLines) - 1) * $nameLineSpacing) / 2;
+        $yNamePosition = ($nameZoneTop + $nameZoneBottom) / 2 - $blockSpan / 2;
         foreach ($nameLines as $nameLine) {
             $image->text($nameLine, $width / 2, $yNamePosition, function($font) use ($fontBold, $nameFontSize) {
                 $font->filename($fontBold);
@@ -382,6 +414,22 @@ class CertificateController extends Controller
                 $font->valign('middle');
             });
             $yNamePosition += $nameLineSpacing;
+        }
+
+        if ($affiliationLines) {
+            // $yNamePosition sudah maju 1x $nameLineSpacing setelah baris nama
+            // terakhir — mundurkan lalu tambah gap ke center baris afiliasi.
+            $yAffiliationPosition = $yNamePosition - $nameLineSpacing + $nameToAffiliationGap;
+            foreach ($affiliationLines as $affLine) {
+                $image->text($affLine, $width / 2, $yAffiliationPosition, function($font) use ($fontRegular, $affiliationFontSize) {
+                    $font->filename($fontRegular);
+                    $font->size($affiliationFontSize);
+                    $font->color('#8B6914');
+                    $font->align('center');
+                    $font->valign('middle');
+                });
+                $yAffiliationPosition += $affiliationLineSpacing;
+            }
         }
 
         // Article Title (center, di zona setelah "Sebagai bentuk penghargaan...")

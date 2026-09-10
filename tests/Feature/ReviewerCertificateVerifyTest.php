@@ -669,4 +669,140 @@ class ReviewerCertificateVerifyTest extends TestCase
         @unlink($fullPath);
         @unlink($dummyPath);
     }
+
+    /**
+     * Render sertifikat ke background dummy putih, kembalikan path file JPG.
+     */
+    private function renderCertificateOnDummy(ReviewAssignment $assignment, int $w = 2560, int $h = 1811): string
+    {
+        $certificate = Certificate::create([
+            'name' => 'Template Test',
+            'file_path' => 'certificates/test-' . uniqid() . '.jpg',
+            'is_active' => true,
+        ]);
+        $dummyPath = storage_path('app/public/' . $certificate->file_path);
+        @mkdir(dirname($dummyPath), 0755, true);
+        $im = imagecreatetruecolor($w, $h);
+        imagefill($im, 0, 0, imagecolorallocate($im, 255, 255, 255));
+        imagejpeg($im, $dummyPath, 100);
+        imagedestroy($im);
+
+        $controller = new CertificateController();
+        $method = new \ReflectionMethod($controller, 'generateCertificate');
+        $method->setAccessible(true);
+        $result = $method->invoke($controller, $assignment, true);
+
+        $this->assertNotFalse($result);
+        $this->dummyPathsToCleanup[] = $dummyPath;
+        $this->dummyPathsToCleanup[] = public_path($result);
+
+        return public_path($result);
+    }
+
+    /** @var string[] */
+    private array $dummyPathsToCleanup = [];
+
+    protected function tearDown(): void
+    {
+        foreach ($this->dummyPathsToCleanup as $p) {
+            @unlink($p);
+        }
+        parent::tearDown();
+    }
+
+    /**
+     * Hitung piksel yang cocok dengan warna target (±toleransi) di dalam pita Y
+     * [$yFrom, $yTo], plus rata-rata posisi Y-nya. Dipakai untuk memverifikasi
+     * teks emas ('#C9A961' nama) & emas tua ('#8B6914' afiliasi) di zona nama.
+     *
+     * @return array{count:int, avgY:float}
+     */
+    private function scanColorBand($img, int $yFrom, int $yTo, array $rgb, int $tol): array
+    {
+        [$tr, $tg, $tb] = $rgb;
+        $w = imagesx($img);
+        $count = 0;
+        $sumY = 0;
+        for ($y = max(0, $yFrom); $y < min(imagesy($img), $yTo); $y += 2) {
+            for ($x = 0; $x < $w; $x += 2) {
+                $c = imagecolorat($img, $x, $y);
+                $r = ($c >> 16) & 0xFF;
+                $g = ($c >> 8) & 0xFF;
+                $b = $c & 0xFF;
+                if (abs($r - $tr) <= $tol && abs($g - $tg) <= $tol && abs($b - $tb) <= $tol) {
+                    $count++;
+                    $sumY += $y;
+                }
+            }
+        }
+
+        return ['count' => $count, 'avgY' => $count ? $sumY / $count : 0.0];
+    }
+
+    /**
+     * Fitur baru 10 Sept 2026: afiliasi / asal instansi reviewer dicetak kecil
+     * TEPAT DI BAWAH nama di sertifikat. Diverifikasi langsung dari piksel:
+     * teks afiliasi (#8B6914) harus ada di zona nama DAN posisinya di bawah
+     * teks nama (#C9A961).
+     */
+    public function test_affiliation_is_rendered_below_the_name_when_institution_is_set(): void
+    {
+        $reviewer = $this->makeReviewer([
+            'name' => 'Dr. Test Reviewer',
+            'institution' => 'Universitas Contoh Nusantara',
+        ]);
+        $assignment = $this->makeApprovedAssignment(['reviewer_id' => $reviewer->id]);
+        $this->actingAs($reviewer);
+
+        $img = imagecreatefromjpeg($this->renderCertificateOnDummy($assignment));
+        $h = imagesy($img);
+        // Zona nama Y 599-838 (referensi 1811px) — beri sedikit margin.
+        $yFrom = (int) round($h * (580 / 1811));
+        $yTo   = (int) round($h * (870 / 1811));
+
+        $name = $this->scanColorBand($img, $yFrom, $yTo, [201, 169, 97], 40);   // #C9A961
+        $affil = $this->scanColorBand($img, $yFrom, $yTo, [139, 105, 20], 40);  // #8B6914
+        imagedestroy($img);
+
+        $this->assertGreaterThan(50, $name['count'], 'Teks nama (emas #C9A961) harus tetap ada di zona nama');
+        $this->assertGreaterThan(50, $affil['count'], 'Teks afiliasi (emas tua #8B6914) harus muncul di zona nama');
+        $this->assertGreaterThan($name['avgY'], $affil['avgY'],
+            'Teks afiliasi harus berada DI BAWAH teks nama (rata-rata Y lebih besar)');
+    }
+
+    public function test_no_affiliation_text_in_name_zone_when_institution_is_empty(): void
+    {
+        $reviewer = $this->makeReviewer(['name' => 'Dr. Tanpa Instansi', 'institution' => null]);
+        $assignment = $this->makeApprovedAssignment(['reviewer_id' => $reviewer->id]);
+        $this->actingAs($reviewer);
+
+        $img = imagecreatefromjpeg($this->renderCertificateOnDummy($assignment));
+        $h = imagesy($img);
+        $yFrom = (int) round($h * (580 / 1811));
+        $yTo   = (int) round($h * (870 / 1811));
+
+        $name = $this->scanColorBand($img, $yFrom, $yTo, [201, 169, 97], 40);
+        $affil = $this->scanColorBand($img, $yFrom, $yTo, [139, 105, 20], 40);
+        imagedestroy($img);
+
+        $this->assertGreaterThan(50, $name['count'], 'Nama tetap harus dirender walau tanpa instansi');
+        $this->assertLessThan(20, $affil['count'],
+            'Tanpa instansi, tidak boleh ada teks emas tua di zona nama');
+    }
+
+    public function test_generate_certificate_completes_with_a_very_long_institution_name(): void
+    {
+        $reviewer = $this->makeReviewer([
+            'name' => 'Dr. Panjang Instansi',
+            'institution' => 'Fakultas Kedokteran dan Ilmu Kesehatan Program Studi Pendidikan Dokter '
+                . 'Universitas Islam Negeri Syarif Hidayatullah Jakarta Kampus Ciputat Tangerang Selatan',
+        ]);
+        $assignment = $this->makeApprovedAssignment(['reviewer_id' => $reviewer->id]);
+        $this->actingAs($reviewer);
+
+        $path = $this->renderCertificateOnDummy($assignment);
+
+        $this->assertFileExists($path);
+        $this->assertGreaterThan(0, filesize($path));
+    }
 }
