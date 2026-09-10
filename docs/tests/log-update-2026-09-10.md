@@ -263,9 +263,39 @@ admin, dan nomor WA admin bisa diatur dari halaman admin.
 
 ### Verifikasi
 - `php artisan test tests/Feature/AdminWhatsappFloatingButtonTest.php` → **5 passed (15 assertions)**.
-- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **240 passed (692 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB (`Setting` key-value sudah ada).
 - Setelah deploy, admin isi nomornya di `/admin/settings` → tombol langsung muncul di dashboard
   reviewer (cache setting global 10 menit; sudah di-invalidate saat simpan).
+
+## 8. Tombol WA Melayang: Pindah ke Kiri + Tampil di Semua Halaman Reviewer
+
+**Tujuan:** Lanjutan dari #7 — user minta tombol WA ditaruh di **kiri** (supaya tidak mengganggu)
+dan tampil di **semua halaman reviewer**, bukan cuma dashboard.
+
+**Perubahan:**
+- Markup + CSS tombol dipindah dari `reviewer/dashboard.blade.php` ke partial baru
+  `resources/views/partials/reviewer-wa-float.blade.php`.
+- Partial di-`@include` dari `layouts/app.blade.php` (layout bersama semua halaman reviewer), dibatasi
+  `@auth` + `auth()->user()->role === 'reviewer'` — jadi TIDAK muncul di halaman admin / pic_reviewer
+  yang memakai layout yang sama.
+- Posisi `right: 22px` → **`left: 22px`** (mobile: `left: 14px`).
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `resources/views/partials/reviewer-wa-float.blade.php` (baru) | Markup + CSS tombol WA melayang, posisi kiri bawah, render kondisional + normalisasi nomor. |
+| `resources/views/layouts/app.blade.php` | `@include('partials.reviewer-wa-float')` sebelum `@stack('scripts')`, dibungkus guard role reviewer. |
+| `resources/views/reviewer/dashboard.blade.php` | Blok tombol WA dihapus dari sini (sudah pindah ke layout). |
+| `tests/Feature/AdminWhatsappFloatingButtonTest.php` | Test dashboard diperbarui: cek `left: 22px` ada & `right: 22px` tidak ada. Tambah `test_floating_button_appears_on_every_reviewer_page_not_just_dashboard` (dashboard + tasks + leaderboard + profile) & `test_floating_button_not_shown_on_admin_pages`. |
+
+### Verifikasi
+- `php artisan test tests/Feature/AdminWhatsappFloatingButtonTest.php` → **7 passed (31 assertions)**.
+- Full regression suite `php artisan test tests/Feature` → **242 passed (708 assertions)** — tidak
+  ada regresi ke fitur lain.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB.

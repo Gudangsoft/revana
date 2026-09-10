@@ -91,7 +91,7 @@ class AdminWhatsappFloatingButtonTest extends TestCase
         $this->assertSame('0812-3456-789', Setting::get('admin_whatsapp'));
     }
 
-    public function test_reviewer_dashboard_shows_floating_button_with_normalised_link(): void
+    public function test_reviewer_dashboard_shows_floating_button_with_normalised_link_on_the_left(): void
     {
         Setting::set('admin_whatsapp', '08123456789');
         Cache::flush();
@@ -104,6 +104,35 @@ class AdminWhatsappFloatingButtonTest extends TestCase
         // 08... harus dinormalisasi ke 62...
         $response->assertSee('https://wa.me/628123456789?text=', false);
         $response->assertDontSee('wa.me/08123456789', false);
+        // Ditaruh di kiri (bukan kanan) supaya tidak mengganggu.
+        $response->assertSee('left: 22px', false);
+        $response->assertDontSee('right: 22px', false);
+    }
+
+    public function test_floating_button_appears_on_every_reviewer_page_not_just_dashboard(): void
+    {
+        Setting::set('admin_whatsapp', '628123456789');
+        Cache::flush();
+        $this->actingAs($this->makeReviewer());
+
+        foreach (['reviewer.dashboard', 'reviewer.tasks.index', 'reviewer.leaderboard.index', 'reviewer.profile.edit'] as $routeName) {
+            $response = $this->get(route($routeName));
+            $response->assertOk();
+            $response->assertSee('reviewer-wa-float', false);
+            $response->assertSee('https://wa.me/628123456789?text=', false);
+        }
+    }
+
+    public function test_floating_button_not_shown_on_admin_pages(): void
+    {
+        Setting::set('admin_whatsapp', '628123456789');
+        Cache::flush();
+        $this->actingAsAdmin();
+
+        $response = $this->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertDontSee('reviewer-wa-float', false);
     }
 
     public function test_link_normalisation_keeps_existing_country_code_and_strips_symbols(): void

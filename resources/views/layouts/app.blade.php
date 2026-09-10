@@ -1113,6 +1113,16 @@
     });
     </script>
     @include('partials.drag-to-scroll')
+
+    {{-- Tombol WhatsApp melayang "Hubungi Admin" — tampil di SEMUA halaman
+         reviewer (layout ini dipakai bersama admin/pic_reviewer, jadi dibatasi
+         role). --}}
+    @auth
+        @if(auth()->user()->role === 'reviewer')
+            @include('partials.reviewer-wa-float')
+        @endif
+    @endauth
+
     @stack('scripts')
 </body>
 </html>
