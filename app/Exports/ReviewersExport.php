@@ -34,6 +34,9 @@ class ReviewersExport implements FromCollection, WithHeadings, WithMapping, With
             })
             ->with(['badges', 'fieldOfStudy'])
             ->withCount('reviewAssignments')
+            // Samakan dengan halaman /admin/reviewers: urut dari total point
+            // tertinggi, nama sebagai pemecah seri.
+            ->orderByDesc('total_points')
             ->orderBy('name')
             ->get();
 

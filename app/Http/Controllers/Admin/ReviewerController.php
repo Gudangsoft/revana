@@ -28,7 +28,11 @@ class ReviewerController extends Controller
             })
             ->with('badges')
             ->withCount('reviewAssignments')
-            ->latest()
+            // Urut dari total point tertinggi (kolom `total_points` — sama dengan
+            // yang ditampilkan di tabel), nama sebagai pemecah seri supaya urutan
+            // tetap konsisten antar halaman untuk reviewer yang poinnya sama.
+            ->orderByDesc('total_points')
+            ->orderBy('name')
             ->paginate(request()->input('per_page', 20))
             ->appends(['search' => $search]);
 
