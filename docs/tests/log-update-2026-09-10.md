@@ -219,8 +219,9 @@ font nama dikecilkan sedikit dan **dibuat tebal**.
 | `tests/Feature/ReviewerCertificateVerifyTest.php` | Tambah `test_faux_bold_name_renders_thicker_than_a_plain_single_pass` — bandingkan jumlah piksel emas hasil `drawBoldCenteredText()` vs render polos 1x pada teks & ukuran sama; faux-bold harus >15% lebih tebal. Test afiliasi lama tetap lulus (font lebih besar → piksel lebih banyak). |
 
 ### Verifikasi
-- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → dijalankan setelah perubahan.
-- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+- `php artisan test tests/Feature/ReviewerCertificateVerifyTest.php` → **26 passed (87 assertions)**.
+- Full regression suite `php artisan test tests/Feature` → **235 passed (677 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tidak ada perubahan skema DB.
@@ -228,3 +229,43 @@ font nama dikecilkan sedikit dan **dibuat tebal**.
   tambahan tidak signifikan.
 - Kalau suatu saat `arial-bold.ttf` asli dipasang di `public/fonts/`, faux-bold bisa disederhanakan
   jadi 1x draw dengan font itu (tapi tidak wajib — hasil faux-bold sudah cukup).
+
+## 7. Tombol WhatsApp Melayang di Dashboard Reviewer + Setting Nomor WA Admin
+
+**Tujuan:** User minta di `/reviewer/dashboard` ada icon WhatsApp melayang untuk menghubungi nomor
+admin, dan nomor WA admin bisa diatur dari halaman admin.
+
+**Perubahan:**
+- **Setting baru `admin_whatsapp`** — field "Nomor WhatsApp Admin" ditambahkan di
+  `/admin/settings` (section "Kontak & Alamat"), disimpan lewat `Setting` (key-value DB) yang sudah
+  ada. Boleh format lokal (`08...`) atau internasional (`62...` / `+62...`); dikosongkan =
+  sembunyikan tombol.
+- **Tombol WA melayang** di `reviewer/dashboard.blade.php` — pojok kanan bawah (`position: fixed`),
+  bulat hijau `#25D366` dengan animasi mengambang halus; hover memunculkan label "Hubungi Admin".
+  Link `https://wa.me/<nomor ternormalisasi>?text=<sapaan berisi nama reviewer>`. Nomor
+  dinormalisasi ke format internasional saat render (idiom yang sama dipakai di
+  `admin/reviewers/index.blade.php`: strip non-digit → `0` di depan jadi `62` → tambah `62` kalau
+  belum ada kode negara). Hanya dirender kalau `admin_whatsapp` terisi.
+- `admin_whatsapp` di-share global lewat `AppServiceProvider` (`$appSettings['admin_whatsapp']`,
+  cache 10 menit per-tenant) supaya bisa dibaca semua view.
+- **Bonus fix:** `SettingController::update()` sebelumnya `Cache::forget('app_settings')` — key yang
+  SALAH (key asli `app_settings_<subdomain|master>`), jadi perubahan setting baru kelihatan setelah
+  cache 10 menit kedaluwarsa. Sekarang menghapus key ber-tenant yang benar juga.
+
+### File yang Diubah
+| File | Perubahan |
+|------|-----------|
+| `app/Http/Controllers/Admin/SettingController.php` | `index()`: tambah `admin_whatsapp` ke `$generalSettings`. `update()`: validasi `admin_whatsapp` (nullable, max 20), simpan (di-trim), + perbaiki `Cache::forget` ke key ber-tenant yang benar. |
+| `app/Providers/AppServiceProvider.php` | Tambah `admin_whatsapp` ke array `$settings` global (branch normal & fallback). |
+| `resources/views/admin/settings/index.blade.php` | Input "Nomor WhatsApp Admin" (`name="admin_whatsapp"`) di section Kontak & Alamat. |
+| `resources/views/reviewer/dashboard.blade.php` | Tombol WA melayang (`.reviewer-wa-float`) + CSS-nya; render kondisional + normalisasi nomor. |
+| `tests/Feature/AdminWhatsappFloatingButtonTest.php` (baru) | 5 test: halaman setting menampilkan field, admin bisa simpan nomor (di-trim), dashboard reviewer menampilkan tombol dengan link ternormalisasi (`08...`→`62...`, `+62 ...`→`62...`, buang simbol), tombol tidak muncul kalau nomor kosong. `setUp/tearDown` snapshot+restore `.env` karena `SettingController::update()` menulis ulang file itu. |
+
+### Verifikasi
+- `php artisan test tests/Feature/AdminWhatsappFloatingButtonTest.php` → **5 passed (15 assertions)**.
+- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+
+### Catatan Deploy
+- Tidak ada perubahan skema DB (`Setting` key-value sudah ada).
+- Setelah deploy, admin isi nomornya di `/admin/settings` → tombol langsung muncul di dashboard
+  reviewer (cache setting global 10 menit; sudah di-invalidate saat simpan).

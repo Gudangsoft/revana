@@ -156,13 +156,28 @@
 
                         <div class="mb-3">
                             <label class="form-label">Kontak</label>
-                            <textarea class="form-control @error('contact') is-invalid @enderror" 
-                                      name="contact" rows="3" 
+                            <textarea class="form-control @error('contact') is-invalid @enderror"
+                                      name="contact" rows="3"
                                       placeholder="Telepon: +62 xxx&#10;Email: info@example.com&#10;WhatsApp: +62 xxx">{{ old('contact', $generalSettings['contact'] ?? '') }}</textarea>
                             @error('contact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="text-muted">Informasi kontak (telepon, email, WhatsApp, dll)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-whatsapp text-success"></i> Nomor WhatsApp Admin</label>
+                            <input type="text" class="form-control @error('admin_whatsapp') is-invalid @enderror"
+                                   name="admin_whatsapp"
+                                   value="{{ old('admin_whatsapp', $generalSettings['admin_whatsapp'] ?? '') }}"
+                                   placeholder="08123456789 atau 628123456789">
+                            @error('admin_whatsapp')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">
+                                Dipakai untuk tombol WhatsApp melayang di dashboard reviewer.
+                                Boleh format lokal (08...) maupun internasional (628...); kosongkan untuk menyembunyikan tombol.
+                            </small>
                         </div>
                     </div>
 
