@@ -155,7 +155,8 @@ jalan saat deploy. View baru tetap pakai rute bersih `impersonation.return` (`PO
 - `php artisan test tests/Feature/ImpersonationReturnToAdminTest.php` → **7 passed (29 assertions)**.
 - `php artisan route:list --path=return-to-admin` → `POST /return-to-admin` (impersonation.return) &
   `POST /admin/users/return-to-admin` (admin.users.return-to-admin) dua-duanya terdaftar.
-- Full regression suite `php artisan test tests/Feature` dijalankan setelah perubahan ini.
+- Full regression suite `php artisan test tests/Feature` → **231 passed (665 assertions)** — tidak
+  ada regresi ke fitur lain.
 
 ### Catatan Deploy
 - Tetap **disarankan** jalankan `php artisan view:clear && php artisan route:clear` di server setelah
